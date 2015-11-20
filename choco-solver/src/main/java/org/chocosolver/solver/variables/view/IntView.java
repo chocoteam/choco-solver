@@ -73,10 +73,9 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         this.var.subscribeView(this);
     }
 
+    @Deprecated
     @Override
     public final void recordMask(int mask) {
-        super.recordMask(mask);
-        var.recordMask(mask);
     }
 
     @Override

@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import org.chocosolver.memory.IStateBool;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -58,16 +57,35 @@ import org.chocosolver.util.tools.StringUtils;
  */
 public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
+    /**
+     * For serialization purpose.
+     */
     private static final long serialVersionUID = 1L;
+
+    /**
+     * The constant this variable relies on.
+     */
     protected final int constante;
-    protected IStateBool empty;
+
+    /**
+     * Reusable iterator over values.
+     */
     private DisposableValueIterator _viterator;
+
+    /**
+     * Reusable iterator over ranges.
+     */
     private DisposableRangeIterator _riterator;
 
+    /**
+     * Creates a variable whom domain is natively reduced to the singleton {<code>constante</code>}.
+     * @param name name of the variable
+     * @param constante value its domain is reduced to
+     * @param solver the declaring solver
+     */
     public FixedIntVarImpl(String name, int constante, Solver solver) {
         super(name, solver);
         this.constante = constante;
-        this.empty = solver.getEnvironment().makeBool(false);
     }
 
     @Override
@@ -221,10 +239,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public void subscribeView(IView view) {
     }
 
-    @Override//void (a constant receives no event)
-    public void recordMask(int mask) {
-    }
-
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         return IIntDeltaMonitor.Default.NONE;
@@ -253,7 +267,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
-        this.empty.set(true);
         solver.getEngine().fails(cause, this, message);
     }
 

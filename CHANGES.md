@@ -9,6 +9,13 @@ NEXT MILESTONE
 #### All:
  - remove deprecated interfaces, classes and methods.
 
+#### Solver:
+
+- update javadoc (in particular: #347)
+
+#### Bug fixes: 
+
+\#346
 
 3.3.2 - 17 Nov 2015
 -------------------

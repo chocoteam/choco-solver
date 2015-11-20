@@ -81,10 +81,9 @@ public class RealView extends AbstractVariable implements IView, RealVar {
         notifyPropagators(realevt, this);
     }
 
+    @Deprecated
     @Override
     public void recordMask(int mask) {
-        super.recordMask(mask);
-        var.recordMask(mask);
     }
 
     @Override

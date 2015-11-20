@@ -50,8 +50,19 @@ import java.util.Arrays;
  */
 public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
+    /**
+     * Set of values.
+     */
     private final int[] values;
+
+    /**
+     * Index to iterate over kernel values.
+     */
     private int kerIndex;
+
+    /**
+     * Index to iterate over envelope values.
+     */
     private int envIndex;
 
     public FixedSetVarImpl(String name, TIntSet values, Solver solver) {
@@ -176,10 +187,6 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override//void (a constant receives no event)
     public void subscribeView(IView view) {
-    }
-
-    @Override//void (a constant receives no event)
-    public void recordMask(int mask) {
     }
 
     @Override//void (a constant receives no event)

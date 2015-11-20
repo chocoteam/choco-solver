@@ -37,7 +37,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
 import org.chocosolver.solver.variables.Variable;
@@ -74,40 +73,137 @@ import java.util.List;
  */
 public class TwoBucketPropagationEngine implements IPropagationEngine {
 
+    /**
+     * Word mask used to check next queue to pop.
+     */
     private static final int WORD_MASK = 0xffffffff;
 
+    /**
+     * Reference to the solver declaring this propagation engine.
+     */
     protected final Solver solver;
-    protected final ContradictionException exception; // the exception in case of contradiction
-    protected final IEnvironment environment; // environment of backtrackable objects
-    protected Propagator[] propagators;
-    private final boolean DEBUG,COLOR;
-    
 
+    /**
+     * The singleton exception to use (and to configure) when a contradiction is detected.
+     */
+    protected final ContradictionException exception;
+
+    /**
+     * Structure which manages backtrackable objects.
+     */
+    protected final IEnvironment environment;
+
+    /**
+     * List of propagators.
+     */
+    protected Propagator[] propagators;
+
+    /**
+     * When debugging is required, set this parameter to <tt>true</tt>.
+     */
+    private final boolean DEBUG;
+
+    /**
+     * When debugging with colors is needed, set this paramater to <tt>true</tt>.
+     * Set also {@link #DEBUG} to <tt>true</tt>.
+     */
+    private final boolean COLOR;
+
+    /**
+     * Fine events priority binding.
+     */
     private final short[] match_f;
+
+    /**
+     * Coarse events priority binding.
+     */
     private final short[] match_c;
 
+    /**
+     * Number of active priorities for fine events.
+     */
     private short max_f;
+
+    /**
+     * Number of active priorities for coarse events.
+     */
     private short max_c;
 
-    protected IntMap p2i; // mapping between propagator ID and its absolute index
+    /**
+     * Mapping between propagators' ID and their index in the list of propagators.
+     */
+    protected IntMap p2i;
 
+    /**
+     * Reference to the last propagator executed, for flushing purpose.
+     */
     protected Propagator lastProp;
+
+    /**
+     * Indicates which queues are not empty.
+     */
     protected int notEmpty; // point out the no empty queues
 
+    /**
+     * Queue of propagators to execute on fine events.
+     */
     protected ArrayDeque<Propagator>[] pro_queue_f;
-    protected boolean[] schedule_f; // also maintains the index of the queue!
-    protected IntCircularQueue[] event_f;
-    protected int[][] eventmasks;// the i^th event mask stores modification events on the i^th variable, since the last propagation
 
+    /**
+     * Indicates which propagators are currently scheduled for fine event propagation.
+     * More efficient than calling <code>pro_queue_f.contains(p)</code>.
+     */
+    protected boolean[] schedule_f;
+
+    /**
+     * Stores, for each propagator, the index of modified variables until the last propagation.
+     */
+    protected IntCircularQueue[] event_f;
+
+    /**
+     * Stores, for each couple (propagator - variable), the fine event to propagate.
+     */
+    protected int[][] eventmasks;
+
+    /**
+     * Queue of propagators to execute on coarse events.
+     */
     protected ArrayDeque<Propagator>[] pro_queue_c;
+
+    /**
+     * Indicates which propagators are currently scheduled for coarse event propagation.
+     * More efficient than calling <code>pro_queue_c.contains(p)</code>.
+     */
     protected boolean[] schedule_c;
+
+    /**
+     * Stores, for each propagator, the coarse event to propagate.
+     */
     protected PropagatorEventType[] event_c;
 
+    /**
+     * Set to <tt>true</tt> when this propagation engine is initialized, thus after {@link #initialize()}.
+     */
     private boolean init; // is ready to propagate?
 
+    /**
+     * A specfic propagation engine which only deals with first propagation of propagators.
+     */
     final PropagationTrigger trigger; // an object that starts the propagation
+
+    /**
+     * For debugging purpose only.
+     * Indicates what to do when a propagator is suspected to not be idempotent, nothing by default.
+     */
     final Settings.Idem idemStrat;
 
+    /**
+     * Creates a two-bucket propagation engine.
+     * It propagates all fine events first, wrt their increasing priority, before propagating the smallest priority coarse and propagates all fine events again.
+     * Iterates like this until failure or fix-point.
+     *
+     * @param solver the declaring solver.
+     */
     public TwoBucketPropagationEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
@@ -330,14 +426,18 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         if (DEBUG) {
             IPropagationEngine.Trace.printModification(variable, type, cause, COLOR);
         }
+        Propagator[] vpropagators = variable.getPropagators();
+        int[] vindices = variable.getPIndices();
+        Propagator prop;
+        int pindice;
         EvtScheduler si = variable._schedIter();
         si.init(type);
         while (si.hasNext()) {
             int p = variable.getDindex(si.next());
             int t = variable.getDindex(si.next());
             for (; p < t; p++) {
-                Propagator prop = variable.getPropagator(p);
-                int pindice = variable.getIndexInPropagator(p);
+                prop = vpropagators[p];
+                pindice = vindices[p];
                 if (cause != prop && prop.isActive()) {
                     int aid = p2i.get(prop.getId());
                     if (prop.reactToFineEvent()) {
@@ -372,7 +472,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         if (!schedule_c[aid]) {
             PropagatorPriority prio = /*dynamic ? prop.dynPriority() :*/ propagator.getPriority();
             int q = match_c[prio.priority - 1];
-            if (q == -1) throw new SolverException("Cannot schedule coarse event for low priority propagator.");
             pro_queue_c[q].addLast(propagator);
             schedule_c[aid] = true;
             event_c[aid] = type;

@@ -30,15 +30,19 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -102,5 +106,39 @@ public class PropEngineTest {
             System.out.printf("%d -> %d \n", i, Integer.lowestOneBit(i));
             System.out.printf("%d -> %d \n", i, Integer.lowestOneBit(i>>2));
         }
+    }
+
+    @Test(groups="1s")
+    public void test3(){
+        Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+        solver.set(new SevenQueuesPropagatorEngine(solver));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
+    }
+
+    @Test(groups="1s")
+    public void test4(){
+        Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+        solver.set(new TwoBucketPropagationEngine(solver));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
+    }
+
+    @Test(groups="1s")
+    public void test5(){
+        Solver solver = ProblemMaker.makeGolombRuler(10);
+        solver.set(new SevenQueuesPropagatorEngine(solver));
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
+    }
+
+    @Test(groups="1s")
+    public void test6(){
+        Solver solver = ProblemMaker.makeGolombRuler(10);
+        solver.set(new TwoBucketPropagationEngine(solver));
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
     }
 }

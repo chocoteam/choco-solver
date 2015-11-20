@@ -575,6 +575,12 @@ public class IntLinCombTest {
     @Test(groups = "1s")
     public void testB1() {
         Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public short[] getCoarseEventPriority() {
+                return new short[]{0, 0, 0, 0, 1, 2, 3};
+            }
+        });
         int n = 23;
         BoolVar[] bs = VF.boolArray("b", n, solver);
         int[] cs = new int[n];

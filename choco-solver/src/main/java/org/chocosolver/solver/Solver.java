@@ -62,9 +62,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * The <code>Solver</code> is the header component of Constraint Programming.
@@ -233,6 +231,12 @@ public class Solver implements Serializable {
      */
     private Ibex ibex;
 
+
+    /**
+     * Enable attaching hooks to a solver.
+     */
+    private Map<String,Object> hooks;
+
     /**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
@@ -258,6 +262,7 @@ public class Solver implements Serializable {
         this.search.setObjectiveManager(ObjectiveManager.SAT());
         this.objectives = null;
         this.solutionRecorder = new LastSolutionRecorder(new Solution(), this);
+        this.hooks = new HashMap<>();
     }
 
     /**
@@ -566,6 +571,24 @@ public class Solver implements Serializable {
     public double getPrecision() {
         return precision;
     }
+
+    /**
+     * Returns the object associated with the named <code>hookName</code>
+     * @param hookName the name of the hook to return
+     * @return the object associated to the name <code>hookName</code>
+     */
+    public Object getHook(String hookName){
+        return hooks.get(hookName);
+    }
+
+    /**
+     * Returns the map containing declared hooks.
+     * This map is mutable.
+     * @return the map of hooks.
+     */
+    public Map<String, Object> getHooks(){
+        return hooks;
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -757,6 +780,31 @@ public class Solver implements Serializable {
         this.search.makeCompleteStrategy(isComplete);
     }
 
+
+    /**
+     * Adds the <code>hookObject</code> to store in this solver, associated with the name <code>hookName</code>.
+     * A hook is a simple map "hookName" <-> hookObject.
+     * @param hookName name of the hook
+     * @param hookObject hook to store
+     */
+    public void addHook(String hookName, Object hookObject){
+        this.hooks.put(hookName, hookObject);
+    }
+
+    /**
+     * Removes the hook named <code>hookName</code>
+     * @param hookName name of the hookObject to remove
+     */
+    public void removeHook(String hookName){
+        this.hooks.remove(hookName);
+    }
+
+    /**
+     * Empties the hooks attaches to this solver.
+     */
+    public void removeAllHooks(){
+        this.hooks.clear();
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

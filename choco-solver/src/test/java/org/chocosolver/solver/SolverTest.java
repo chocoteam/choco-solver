@@ -375,4 +375,20 @@ public class SolverTest {
         Assert.assertTrue(v[0].isInstantiated());
         Assert.assertTrue(v[0].isInstantiatedTo(1));
     }
+
+    @Test(groups="1s")
+    public void testHook(){
+        Solver solver = new Solver();
+        String toto = "TOTO";
+        String titi = "TITI";
+        solver.addHook("toto", toto);
+        solver.addHook("titi", titi);
+        Assert.assertEquals(solver.getHooks().size(), 2);
+        Assert.assertEquals(solver.getHook("toto"), toto);
+        solver.removeHook("toto");
+        Assert.assertEquals(solver.getHook("toto"), null);
+        Assert.assertEquals(solver.getHooks().size(), 1);
+        solver.removeAllHooks();
+        Assert.assertEquals(solver.getHooks().size(), 0);
+    }
 }

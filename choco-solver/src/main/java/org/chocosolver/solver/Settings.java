@@ -42,17 +42,30 @@ import java.io.Serializable;
  * <p>
  * Created by cprudhom on 25/11/14.
  * Project: choco.
+ * @author Charles Prud'homme
  */
 public interface Settings extends Serializable {
 
+    /**
+     * List possible reaction to lack of propagator's idempotency.
+     */
     enum Idem {
-        disabled, // does not anything
-        error, // print an error message when a propagator is not guaranteed to be idempotent -- fir debug only
-        force // extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available
+        /**
+         * Does nothing.
+         */
+        disabled,
+        /**
+         * Prints an error message when a propagator is not guaranteed to be idempotent -- for debug only
+         */
+        error,
+        /**
+         * Extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available
+         */
+        force
     }
 
     /**
-     * Return the welcome message
+     * @return the welcome message
      */
     default String getWelcomeMessage() {
         return "** Choco 3.3.2 (2015-11) : Constraint Programming Solver, Copyleft (c) 2010-2015";
@@ -65,6 +78,7 @@ public interface Settings extends Serializable {
      * <li>error: print an error message when a propagator is not guaranteed to be idempotent -- for debugging purpose only</li>
      * <li>force : extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available</li>
      * </ul>
+     * @return the idempotency strategy
      */
     default Idem getIdempotencyStrategy() {
         return Idem.disabled;
@@ -73,6 +87,7 @@ public interface Settings extends Serializable {
     /**
      * Set to 'true' to allow the creation of views in the {@link org.chocosolver.solver.variables.VariableFactory}.
      * Creates new variables with channeling constraints otherwise.
+     * @return <tt>true</tt> if views are enabled.
      */
     default boolean enableViews() {
         return false;
@@ -81,13 +96,15 @@ public interface Settings extends Serializable {
     /**
      * Define the maximum domain size threshold to force integer variable to be enumerated
      * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, Solver)}.
+     * @return maximum domain size threshold to force integer variable to be enumerated
      */
     default int getMaxDomSizeForEnumerated() {
         return 32768;
     }
 
     /**
-     * Set to true to replace intension constraints by extension constraints
+     * Set to true to replace some intension constraints by extension constraints
+     * @return <tt>true</tt> if some intension constraints can be replaced by extension constraints
      */
     default boolean enableTableSubstitution() {
         return true;
@@ -96,6 +113,7 @@ public interface Settings extends Serializable {
     /**
      * Define the maximum domain size threshold to replace intension constraints by extension constraints
      * Only checked when ENABLE_TABLE_SUBS is set to true
+     * @return maximum domain size threshold to replace intension constraints by extension constraints
      */
     default int getMaxTupleSizeForSubstitution() {
         return 10000;
@@ -103,21 +121,15 @@ public interface Settings extends Serializable {
 
     /**
      * Set to true to plug explanation engine in.
+     * @return <tt>true</tt> if explanations are plugged in
      */
     default boolean plugExplanationIn() {
         return true;
     }
 
     /**
-     * Define the rounding precision for {@link org.chocosolver.solver.constraints.IntConstraintFactory#multicost_regular(org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton)} algorithm
-     * MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
-     */
-    default double getMCRPrecision() {
-        return 4;
-    }
-
-    /**
      * Defines the smallest used double for {@link org.chocosolver.solver.constraints.IntConstraintFactory#multicost_regular(org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton)} algorithm
+     * @return the smallest used double for {@link org.chocosolver.solver.constraints.IntConstraintFactory#multicost_regular(org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton)} algorithm
      */
     default double getMCRDecimalPrecision() {
         return 0.0001d;
@@ -126,6 +138,7 @@ public interface Settings extends Serializable {
     /**
      * Defines, for fine events, for each priority, the queue in which a propagator of such a priority should be scheduled in
      * /!\ for advanced usage only
+     * @return the index of queue in which a propagator of a given priority should be scheduled in
      */
     default short[] getFineEventPriority() {
         return new short[]{0, 0, 0, 1, 2, 2, 2};
@@ -134,13 +147,16 @@ public interface Settings extends Serializable {
     /**
      * Defines, for coarse events, for each priority, the queue in which a propagator of such a priority should be scheduled in
      * /!\ for advanced usage only
+     * @return the index of queue in which a propagator of a given priority should be scheduled in
      */
     default short[] getCoarseEventPriority() {
-        return new short[]{-1, -1, -1, 0, 1, 2, 3};
+        return new short[]{0, 0, 0, 0, 1, 2, 3};
     }
 
     /**
      * Return the search binder
+     * @return the search binder
+     * @see DefaultSearchBinder
      */
     default ISearchBinder getSearchBinder() {
         return new DefaultSearchBinder();
@@ -151,6 +167,7 @@ public interface Settings extends Serializable {
      * Building "fake" history is needed when a backtrackable object is created during the search, in order to restore a correct state upon backtrack.
      * The default condition is "at least one env.worldPush() has been called since the creation of the bck object".
      * The condition can be set to {@link org.chocosolver.memory.ICondition#FALSE} if no backtrackable object is created during the search.
+     * @return the condition to satisfy when rebuilding history of backtrackable objects is needed.
      */
     default ICondition getEnvironmentHistorySimulationCondition() {
         return new Except_0();
@@ -158,6 +175,7 @@ public interface Settings extends Serializable {
 
     /**
      * Return true if one wants to be informed of warnings detected during modeling/solving (default value is false)
+     * @return <tt>true</tt> if warnings detected during modeling/solving are output.
      */
     default boolean warnUser() {
         return false;
@@ -179,6 +197,7 @@ public interface Settings extends Serializable {
      * Return true if the incrementality is enabled on boolean sum, based on the number of variables involved.
      * Default condition is : nbvars > 10
      * @param nbvars number of variables in the constraint
+     * @return <tt>true</tt>
      */
     default boolean enableIncrementalityOnBoolSum(int nbvars) {
         return nbvars > 10;
