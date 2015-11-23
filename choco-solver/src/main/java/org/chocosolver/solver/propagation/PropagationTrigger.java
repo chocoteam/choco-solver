@@ -80,6 +80,9 @@ public class PropagationTrigger implements Serializable {
         assert perm_propagators.size() == perm_world.size();
         sta_propagators.addAll(Arrays.asList(propagators));
         size += propagators.length;
+        if(solver.getSettings().sortPropagatorActivationWRTPriority()) {
+            sta_propagators.sort((p1, p2) -> p1.getPriority().priority - p2.getPriority().priority);
+        }
     }
 
     public void dynAdd(Propagator propagator, boolean permanent) {

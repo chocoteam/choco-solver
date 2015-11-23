@@ -154,6 +154,16 @@ public interface Settings extends Serializable {
     }
 
     /**
+     * Indicates if propagators can be sorted wrt their priority in {@link org.chocosolver.solver.propagation.PropagationTrigger} when
+     * dealing with propagator activation. Set to <tt>true</tt> to allow sorting static propagators.
+     * <tt>false</tt> is the default value.
+     * @return whether or not propagators are sorted wrt their priority on initial activation.
+     */
+    default boolean sortPropagatorActivationWRTPriority(){
+        return true;
+    }
+
+    /**
      * Return the search binder
      * @return the search binder
      * @see DefaultSearchBinder

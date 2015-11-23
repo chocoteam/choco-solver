@@ -529,8 +529,11 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code>
-     * and assign it to the selected value
+     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code>[1]
+     * and assign it to the selected value.
+     * <p>
+     * [1]: F. Boussemart, F. Hemery, C. Lecoutre, and L. Sais,
+     * Boosting Systematic Search by Weighting Constraints, ECAI-04.
      *
      * @param VARS         list of variables
      * @param SEED         random seed
