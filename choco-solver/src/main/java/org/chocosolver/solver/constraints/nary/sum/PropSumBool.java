@@ -30,13 +30,10 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -51,33 +48,43 @@ import org.chocosolver.util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class PropSumBool extends Propagator<IntVar> {
+public class PropSumBool extends PropSum {
 
-    final int pos; // index of the last positive coefficient
-    final int l; // number of variables
+    /**
+     * The resulting variable
+     */
     final IntVar sum;
-    final int b; // bound to respect
-    int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
-    final Operator o;
 
-
+    /**
+     * Creates a sum propagator: SUM(x_i) = sum + b, where x_i are boolean variables.
+     * Coefficients are induced by <code>pos</code>:
+     * those before <code>pos</code> (included) are equal to 1,
+     * the other ones are equal to -1.
+     * @param variables list of boolean variables
+     * @param pos position of the last positive (induced) coefficient
+     * @param o operator
+     * @param sum resulting variable
+     * @param b bound to respect
+     * @param reactOnFineEvent set to <tt>true</tt> to react on fine events
+     */
     protected PropSumBool(BoolVar[] variables, int pos, Operator o, IntVar sum, int b, boolean reactOnFineEvent) {
-        super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.BINARY, reactOnFineEvent);
-        this.pos = pos;
-        this.o = o;
-        this.b = b;
+        super(ArrayUtils.append(variables, new IntVar[]{sum}), pos, o, b, PropagatorPriority.BINARY, reactOnFineEvent);
         this.sum = sum;
-        l = variables.length;
-        super.linkVariables();
     }
 
+    /**
+     * Creates a sum propagator: SUM(x_i) = sum + b, where x_i are boolean variables.
+     * Coefficients are induced by <code>pos</code>:
+     * those before <code>pos</code> (included) are equal to 1,
+     * the other ones are equal to -1.
+     * @param variables list of boolean variables
+     * @param pos position of the last positive (induced) coefficient
+     * @param o operator
+     * @param sum resulting variable
+     * @param b bound to respect
+     */
     public PropSumBool(BoolVar[] variables, int pos, Operator o, IntVar sum, int b) {
         this(variables, pos, o, sum, b, false);
-    }
-
-    @Override
-    protected void linkVariables() {
-        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
     }
 
     @Override
@@ -86,20 +93,15 @@ public class PropSumBool extends Propagator<IntVar> {
             case NQ:
                 return IntEventType.INSTANTIATE.getMask();
             case LE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx == l ? IntEventType.DECUPP : IntEventType.VOID);
+                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx == l - 1 ? IntEventType.DECUPP : IntEventType.VOID);
             case GE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx == l ? IntEventType.INCLOW : IntEventType.VOID);
+                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx == l - 1 ? IntEventType.INCLOW : IntEventType.VOID);
             default:
                 return IntEventType.boundAndInst();
         }
     }
 
-
     @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        filter();
-    }
-
     protected void prepare() {
         int i = 0, k;
         int lb = 0, ub = 0;
@@ -112,7 +114,7 @@ public class PropSumBool extends Propagator<IntVar> {
                 ub++;
             }
         }
-        for (; i < l; i++) { // then the negative ones
+        for (; i < l - 1; i++) { // then the negative ones
             if (vars[i].isInstantiated()) {
                 k = vars[i].getLB();
                 lb -= k;
@@ -125,26 +127,8 @@ public class PropSumBool extends Propagator<IntVar> {
         sumUB = ub - sum.getLB();
     }
 
-
-    protected void filter() throws ContradictionException {
-        prepare();
-        switch (o) {
-            case LE:
-                filterOnLeq();
-                break;
-            case GE:
-                filterOnGeq();
-                break;
-            case NQ:
-                filterOnNeq();
-                break;
-            default:
-                filterOnEq();
-                break;
-        }
-    }
-
     @SuppressWarnings({"NullableProblems"})
+    @Override
     void filterOnEq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -176,7 +160,7 @@ public class PropSumBool extends Propagator<IntVar> {
                 i++;
             }
             // then negative ones
-            while (i < l) {
+            while (i < l - 1) {
                 if (F == 0 && !vars[i].isInstantiated() && vars[i].instantiateTo(1, this)) {
                     E--;
                 }
@@ -190,6 +174,7 @@ public class PropSumBool extends Propagator<IntVar> {
 
 
     @SuppressWarnings({"NullableProblems"})
+    @Override
     void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -213,7 +198,7 @@ public class PropSumBool extends Propagator<IntVar> {
                 i++;
             }
             // then negative ones
-            while (i < l) {
+            while (i < l - 1) {
                 if (!vars[i].isInstantiated() && vars[i].instantiateTo(1, this)) {
                     E--;
                 }
@@ -226,6 +211,7 @@ public class PropSumBool extends Propagator<IntVar> {
     }
 
     @SuppressWarnings({"NullableProblems"})
+    @Override
     void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -249,7 +235,7 @@ public class PropSumBool extends Propagator<IntVar> {
                 i++;
             }
             // then negative ones
-            while (i < l) {
+            while (i < l - 1) {
                 if (!vars[i].isInstantiated() && vars[i].instantiateTo(0, this)) {
                     F--;
                 }
@@ -261,31 +247,6 @@ public class PropSumBool extends Propagator<IntVar> {
         }
     }
 
-    void filterOnNeq() throws ContradictionException {
-        int F = b - sumLB;
-        int E = sumUB - b;
-        if (F < 0 || E < 0) {
-            setPassive();
-            return;
-        }
-        int w = -1;
-        int sum = 0;
-        for (int i = 0; i < l + 1; i++) {
-            if (vars[i].isInstantiated()) {
-                sum += i < pos ? vars[i].getValue() : -vars[i].getValue();
-            } else if (w == -1) {
-                w = i;
-            } else return;
-        }
-        if (w == -1) {
-            if (sum == b) {
-                this.fails();
-            }
-        } else {
-            vars[w].removeValue(w < pos ? b - sum : b + sum, this);
-        }
-    }
-
     @Override
     public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i = 0;
@@ -293,44 +254,11 @@ public class PropSumBool extends Propagator<IntVar> {
             sumLB += vars[i].getLB();
             sumUB += vars[i].getUB();
         }
-        for (; i < l + 1; i++) { // then the negative ones
+        for (; i < l; i++) { // then the negative ones
             sumLB -= vars[i].getUB();
             sumUB -= vars[i].getLB();
         }
-        switch (o) {
-            case NQ:
-                if (sumUB < b || sumLB > b) {
-                    return ESat.TRUE;
-                }
-                if (sumUB == b && sumLB == b) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-            case LE:
-                if (sumUB <= b) {
-                    return ESat.TRUE;
-                }
-                if (b < sumLB) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-            case GE:
-                if (sumLB <= b) {
-                    return ESat.TRUE;
-                }
-                if (b < sumUB) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-            default:
-                if (sumLB == b && sumUB == b) {
-                    return ESat.TRUE;
-                }
-                if (sumUB < b || sumLB > b) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-        }
+        return check(sumLB, sumUB);
     }
 
     @Override
@@ -341,86 +269,11 @@ public class PropSumBool extends Propagator<IntVar> {
         for (; i < pos; i++) {
             linComb.append(" + ").append(vars[i].getName());
         }
-        for (; i < l; i++) {
+        for (; i < l - 1; i++) {
             linComb.append(" - ").append(vars[i].getName());
         }
         linComb.append(" ").append(o).append(" ");
         linComb.append(vars[i].getName()).append(" ").append(b < 0 ? "- " : "+ ").append(Math.abs(b));
         return linComb.toString();
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        // 1. find the pos of var in vars
-        boolean ispos;
-        if(var == vars[l]){ // deal with result variable
-            ispos = false;
-        }else if (pos < ((l + 1) / 2)) {
-            int i;
-            i = 0;
-            while (i < pos && vars[i] != var) {
-                i++;
-            }
-            ispos = i < pos;
-        } else {
-            int i;
-            i = pos;
-            while (i < l + 1 && vars[i] != var) {
-                i++;
-            }
-            ispos = i == l;
-        }
-        // to deal with BoolVar: any event is automatically promoted to INSTANTIATE
-        if (IntEventType.isInstantiate(evt.getMask())) {
-            assert var.isBool() : "BoolVar excepted";
-            evt = (var.getValue() == 0 ? IntEventType.DECUPP : IntEventType.INCLOW);
-        }
-        if (IntEventType.isInclow(evt.getMask())) { // explain LB
-            int i = 0;
-            for (; i < pos; i++) { // first the positive coefficients
-                if (vars[i] != var) {
-                    if (ispos) {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    }
-                }
-            }
-            for (; i < l + 1; i++) { // then the negative ones
-                if (vars[i] != var) {
-                    if (ispos) {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    }
-                }
-            }
-        } else if (IntEventType.isDecupp(evt.getMask())) { // explain UB
-            int i = 0;
-            for (; i < pos; i++) { // first the positive coefficients
-                if (vars[i] != var) {
-                    if (ispos) {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    }
-                }
-            }
-            for (; i < l + 1; i++) { // then the negative ones
-                if (vars[i] != var) {
-                    if (ispos) {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < vars.length; i++) {
-                newrules |= ruleStore.addFullDomainRule(vars[i]);
-            }
-        }
-        return newrules;
     }
 }

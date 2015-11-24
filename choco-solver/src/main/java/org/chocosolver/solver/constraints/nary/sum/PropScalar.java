@@ -30,13 +30,8 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
@@ -49,60 +44,29 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class PropScalar extends Propagator<IntVar> {
+public class PropScalar extends PropSum {
 
-    final int[] c; // list of coefficients
-    final int pos; // index of the last positive coefficient
-    final int l; // number of variables
-    final int b; // bound to respect
-    final int[] I; // variability of each variable -- domain amplitude
-    int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
-    final Operator o;
+    /**
+     * The coefficients
+     */
+    final int[] c;
 
-
-    protected static PropagatorPriority computePriority(int nbvars) {
-        if (nbvars == 1) {
-            return PropagatorPriority.UNARY;
-        } else if (nbvars == 2) {
-            return PropagatorPriority.BINARY;
-        } else if (nbvars == 3) {
-            return PropagatorPriority.TERNARY;
-        } else {
-            return PropagatorPriority.LINEAR;
-        }
-    }
-
+    /**
+     * Create a scalar product: SUM(x_i*c_i) o b
+     * Variables and coefficients are excepted to be ordered wrt to coefficients: first positive ones then negative ones.
+     * @param variables list of integer variables
+     * @param coeffs list of coefficients
+     * @param pos position of the last positive coefficient
+     * @param o operator
+     * @param b bound to respect.
+     */
     public PropScalar(IntVar[] variables, int[] coeffs, int pos, Operator o, int b) {
-        super(variables, computePriority(variables.length), false);
+        super(variables, pos, o, b);
         this.c = coeffs;
-        this.pos = pos;
-        this.o = o;
-        this.b = b;
-        l = variables.length;
-        I = new int[l];
-        super.linkVariables();
     }
+
 
     @Override
-    protected void linkVariables() {
-        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        switch (o) {
-            case NQ:
-                return IntEventType.instantiation();
-            case LE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx < pos ? IntEventType.INCLOW : IntEventType.DECUPP);
-            case GE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx < pos ? IntEventType.DECUPP : IntEventType.INCLOW);
-            default:
-                return IntEventType.boundAndInst();
-        }
-    }
-
-
     protected void prepare() {
         sumLB = sumUB = 0;
         int i = 0, lb, ub;
@@ -124,29 +88,6 @@ public class PropScalar extends Propagator<IntVar> {
 
 
     @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        filter();
-    }
-
-    protected void filter() throws ContradictionException {
-        prepare();
-        switch (o) {
-            case LE:
-                filterOnLeq();
-                break;
-            case GE:
-                filterOnGeq();
-                break;
-            case NQ:
-                filterOnNeq();
-                break;
-            default:
-                filterOnEq();
-                break;
-        }
-    }
-
-
     void filterOnEq() throws ContradictionException {
         boolean anychange;
         int F = b - sumLB;
@@ -212,6 +153,7 @@ public class PropScalar extends Propagator<IntVar> {
         }*/
     }
 
+    @Override
     void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -250,6 +192,7 @@ public class PropScalar extends Propagator<IntVar> {
         }
     }
 
+    @Override
     void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -288,6 +231,7 @@ public class PropScalar extends Propagator<IntVar> {
         }
     }
 
+    @Override
     void filterOnNeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -324,50 +268,9 @@ public class PropScalar extends Propagator<IntVar> {
             sumLB += vars[i].getUB() * c[i];
             sumUB += vars[i].getLB() * c[i];
         }
-        switch (o) {
-            case NQ:
-                if (sumUB < b || sumLB > b) {
-                    return ESat.TRUE;
-                }
-                if (sumUB == b && sumLB == b) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-            case LE:
-                if (sumUB <= b) {
-                    return ESat.TRUE;
-                }
-                if (b < sumLB) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-            case GE:
-                if (sumLB <= b) {
-                    return ESat.TRUE;
-                }
-                if (b < sumUB) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-            default:
-                if (sumLB == b && sumUB == b) {
-                    return ESat.TRUE;
-                }
-                if (sumUB < b || sumLB > b) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-        }
+        return check(sumLB, sumUB);
     }
 
-    protected ESat compare(int sumLB, int sumUB) {
-        if (sumUB == b && sumLB == b) {
-            return ESat.TRUE;
-        } else if (sumLB > b || sumUB < b) {
-            return ESat.FALSE;
-        }
-        return ESat.UNDEFINED;
-    }
 
     @Override
     public String toString() {
@@ -385,78 +288,6 @@ public class PropScalar extends Propagator<IntVar> {
         return linComb.toString();
     }
 
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        // 1. find the pos of var in vars
-        boolean ispos;
-        if (pos < (l / 2)) {
-            int i;
-            i = 0;
-            while (i < pos && vars[i] != var) {
-                i++;
-            }
-            ispos = i < pos;
-        } else {
-            int i;
-            i = pos;
-            while (i < l && vars[i] != var) {
-                i++;
-            }
-            ispos = i == l;
-        }
-        // to deal with BoolVar: any event is automatically promoted to INSTANTIATE
-        if (IntEventType.isInstantiate(evt.getMask())) {
-            assert var.isBool() : "BoolVar excepted";
-            evt = (var.getValue() == 0 ? IntEventType.DECUPP : IntEventType.INCLOW);
-        }
-        if (IntEventType.isInclow(evt.getMask())) { // explain LB
-            int i = 0;
-            for (; i < pos; i++) { // first the positive coefficients
-                if (vars[i] != var) {
-                    if (ispos) {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    }
-                }
-            }
-            for (; i < l; i++) { // then the negative ones
-                if (vars[i] != var) {
-                    if (ispos) {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    }
-                }
-            }
-        } else if (IntEventType.isDecupp(evt.getMask())) { // explain UB
-            int i = 0;
-            for (; i < pos; i++) { // first the positive coefficients
-                if (vars[i] != var) {
-                    if (ispos) {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    }
-                }
-            }
-            for (; i < l; i++) { // then the negative ones
-                if (vars[i] != var) {
-                    if (ispos) {
-                        newrules |= ruleStore.addUpperBoundRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < vars.length; i++) {
-                newrules |= ruleStore.addFullDomainRule(vars[i]);
-            }
-        }
-        return newrules;
-    }
 
     private int divFloor(int a, int b) {
         // <!> we assume b > 0
