@@ -57,7 +57,7 @@ public class NogoodTest {
         SLF.restart(solver,
                 new BacktrackCounter(solver, 0),
                 new MonotonicRestartStrategy(30), 3);
-        SMF.limitTime(solver, 2000);
+//        SMF.limitTime(solver, 2000);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 27);
         Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 51);

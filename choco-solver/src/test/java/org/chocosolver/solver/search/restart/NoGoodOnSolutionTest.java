@@ -120,9 +120,11 @@ public class NoGoodOnSolutionTest {
         Solver s = makeProblem();
         SMF.nogoodRecordingOnSolution(s.retrieveIntVars());
         s.set(ISF.activity(s.retrieveIntVars(), 0));
+//        Chatterbox.showDecisions(s);
+        Chatterbox.showSolutions(s);
         s.findAllSolutions();
         System.out.println(s.getMeasures());
-        Assert.assertTrue(s.getMeasures().getSolutionCount() == NB_SOLS);
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), NB_SOLS);
     }
 
     @Test(groups = "1s")
