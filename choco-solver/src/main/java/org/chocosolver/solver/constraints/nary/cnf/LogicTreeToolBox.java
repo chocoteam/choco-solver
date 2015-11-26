@@ -34,26 +34,59 @@ import org.chocosolver.solver.variables.BoolVar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 
 /**
+ * A tool box to convert logical expressions into CNF.
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Xavier Lorca
  * @since 23 nov. 2010
  */
 public class LogicTreeToolBox {
+
+    /**
+     * This class is a factory, no need to create it.
+     */
     protected LogicTreeToolBox() {
     }
 
-    private static ThreadLocal<LogicComparator> comp = new ThreadLocal<LogicComparator>() {
-        @Override
-        protected LogicComparator initialValue() {
-            return new LogicComparator();
+    /**
+     * Warning: if there is a bug, please check the CNF build is like:
+     * - lit OR lit ... OR lit
+     * - (lit OR lit ... OR lit) AND (lit OR lit ... OR lit) ... AND (lit OR lit ... OR lit)
+     *
+     * @param logOp logical operator
+     * @param solver the solver in which the logical expression will be added, useful since the expression may only be made of TRUE and FALSE.
+     * @return a CNF logical expression
+     */
+    public static ILogical toCNF(LogOp logOp, Solver solver) {
+        expandNot(logOp);
+        logOp = distribute(logOp);
+        // sort children of each clause with positive literals first
+        if (logOp.is(LogOp.Operator.OR)) {
+            sort(logOp);
         }
-    };
+        ILogical[] children = logOp.getChildren();
+        for (int i = 0; i < children.length; i++) {
+            if (!children[i].isLit()) {
+                LogOp nc = (LogOp) children[i];
+                if (nc.is(LogOp.Operator.OR)) {
+                    sort(nc);
+                }
+            }
+        }
+        ILogical l = simplify(logOp, solver);
+        l = simplifySingleton(l, solver);
+        if (!l.isLit()) ((LogOp) l).cleanFlattenBoolVar();
+        return l;
+    }
 
+
+    /**
+     * Erases 'NOT' operand from the logical expression <code>n</code> by flipping the right children
+     * @param n a logical expression
+     */
     public static void expandNot(LogOp n) {
         if (n.isNot()) {
             n.flip();
@@ -66,6 +99,12 @@ public class LogicTreeToolBox {
         }
     }
 
+    /**
+     * Flattens a logical expression <code>n</code> based on operator <code>op</code>.
+     * Transform from undefined depth expression to comb expression
+     * @param op reference operator
+     * @param n the lofical expression
+     */
     public static void merge(LogOp.Operator op, LogOp n) {
         if (n.is(op)) {
             ILogical[] children = n.getChildren();
@@ -86,16 +125,22 @@ public class LogicTreeToolBox {
         }
     }
 
+    /**
+     * Moves down 'OR' operand in the logical expression <code>n</code>.
+     * @param n a logical expression
+     * @return the modified logical expression
+     */
+    @SuppressWarnings("ConstantConditions")
     public static LogOp developOr(LogOp n) {
         ILogical t1 = n.getAndChild();
         ILogical t2 = n.getChildBut(t1);
         LogOp tt = LogOp.and();
-        if (!t1.isLit()) {
+        if (!(t1 != null && t1.isLit())) {
             LogOp n1 = (LogOp) t1;
             ILogical[] t1cs = n1.getChildren();
             for (int i = 0; i < t1cs.length; i++) {
                 ILogical t1c = t1cs[i];
-                if (t2.isLit()) {
+                if (t2 != null && t2.isLit()) {
                     tt.addChild(LogOp.or(t1c, t2));
                 } else {
                     ILogical[] t2cs = ((LogOp) t2).getChildren();
@@ -116,6 +161,11 @@ public class LogicTreeToolBox {
         }
     }
 
+    /**
+     * Distributes 'OR's inwards over 'AND's in <code>n</code>
+     * @param n a logical expression
+     * @return the modified logical expression
+     */
     public static LogOp distribute(LogOp n) {
         if (n.is(LogOp.Operator.AND)) {
             ILogical[] children = n.getChildren();
@@ -136,6 +186,11 @@ public class LogicTreeToolBox {
         return n;
     }
 
+    /**
+     * Extracts the array of {@link BoolVar} from <code>node</code>
+     * @param node a logical expression
+     * @return the array of {@link BoolVar} from <code>node</code>
+     */
     private static BoolVar[] extract(ILogical node) {
         if (node.isLit()) {
             return new BoolVar[]{(BoolVar) node};
@@ -145,6 +200,12 @@ public class LogicTreeToolBox {
     }
 
 
+    /**
+     * Detects tautologies and contradictions from <code>t</code>
+     * @param t a logical expression
+     * @param solver to get {@link Solver#ONE} and {@link Solver#ZERO}.
+     * @return simplified logical expression
+     */
     public static ILogical simplify(ILogical t, Solver solver) {
         if (t.isLit()) return t;
         // else
@@ -165,6 +226,7 @@ public class LogicTreeToolBox {
                     lits.put(var, children[i]);
                 }
             }
+            return LogOp.or(lits.values().toArray(new ILogical[lits.size()]));
         } else if (!n.hasOrChild()) {
             // AND with only LITS
             ILogical[] children = n.getChildren();
@@ -181,6 +243,7 @@ public class LogicTreeToolBox {
                     lits.put(var, children[i]);
                 }
             }
+            return LogOp.and(lits.values().toArray(new ILogical[lits.size()]));
         } else {
             ILogical[] children = n.getChildren();
             for (int i = 0; i < children.length; i++) {
@@ -193,6 +256,12 @@ public class LogicTreeToolBox {
     }
 
 
+    /**
+     * Remove tautologies from <code>l</code>
+     * @param l logical expression
+     * @param solver to get {@link Solver#ONE} and {@link Solver#ZERO}.
+     * @return simplified logical expression
+     */
     public static ILogical simplifySingleton(ILogical l, Solver solver) {
         if (l.isLit()) return l;
         LogOp t = (LogOp) l;
@@ -210,48 +279,19 @@ public class LogicTreeToolBox {
         return t;
     }
 
+
     /**
-     * Warning: if there is a bug, please check the CNF build is like:
-     * - lit OR lit ... OR lit
-     * - (lit OR lit ... OR lit) AND (lit OR lit ... OR lit) ... AND (lit OR lit ... OR lit)
-     *
-     * @param logOp logical operator
-     * @return an ILogical
+     * Sort a logical expression wrt to NOT
+     * @param logOp logical expression to sort
      */
-    public static ILogical toCNF(LogOp logOp, Solver solver) {
-        expandNot(logOp);
-        logOp = distribute(logOp);
-        // sort children of each clause with positive literals first
-        if (logOp.is(LogOp.Operator.OR)) {
-            Arrays.sort(logOp.getChildren(), comp.get());
-        }
-        ILogical[] children = logOp.getChildren();
-        for (int i = 0; i < children.length; i++) {
-            if (!children[i].isLit()) {
-                LogOp nc = (LogOp) children[i];
-                if (nc.is(LogOp.Operator.OR)) {
-                    Arrays.sort(nc.getChildren(), comp.get());
-                }
-            }
-        }
-        ILogical l = simplify(logOp, solver);
-        l = simplifySingleton(l, solver);
-        if (!l.isLit()) ((LogOp) l).cleanFlattenBoolVar();
-        return l;
-    }
-
-
-    private static class LogicComparator implements Comparator<ILogical> {
-
-        @Override
-        public int compare(ILogical o1, ILogical o2) {
+    private static void sort(LogOp logOp){
+        Arrays.sort(logOp.getChildren(), (o1, o2) -> {
             if (o1.isNot() == o2.isNot()) {
                 return 0;
             } else if (o2.isNot()) {
                 return -1;
             }
             return 1;
-        }
+        });
     }
-
 }
