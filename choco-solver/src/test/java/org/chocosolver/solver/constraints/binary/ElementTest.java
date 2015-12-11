@@ -232,4 +232,17 @@ public class ElementTest {
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 14);
         }
     }
+
+    @Test(groups="1s")
+    public void testTAR1(){
+        for (int i = 1; i < 20; i++) {
+            Solver solver = new Solver();
+            IntVar I = VF.bounded("I", 0, 3, solver);
+            IntVar R = VF.enumerated("R", -1, 0, solver);
+            solver.post(ICF.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1, "detect"));
+            solver.set(ISF.random_bound(new IntVar[]{I, R}, i));
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        }
+    }
 }

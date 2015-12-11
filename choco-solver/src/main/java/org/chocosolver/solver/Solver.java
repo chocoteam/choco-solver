@@ -271,7 +271,7 @@ public class Solver implements Serializable {
         this.searchMonitors = new ArrayList<>();
         this.stopCriteria = new ArrayList<>();
         this.search.setObjectiveManager(ObjectiveManager.SAT());
-        this.objectives = null;
+        this.objectives = new Variable[0];
         this.solutionRecorder = new LastSolutionRecorder(new Solution(), this);
         this.hooks = new HashMap<>();
     }
@@ -571,6 +571,7 @@ public class Solver implements Serializable {
      * @return a variable
      */
     public Variable[] getObjectives() {
+        assert objectives!=null;
         return objectives;
     }
 
@@ -757,7 +758,11 @@ public class Solver implements Serializable {
      * @param objectives one or more variables
      */
     public void setObjectives(Variable... objectives) {
-        this.objectives = objectives;
+        if(objectives == null){
+            this.objectives = new Variable[0];
+        }else {
+            this.objectives = objectives;
+        }
     }
 
     /**

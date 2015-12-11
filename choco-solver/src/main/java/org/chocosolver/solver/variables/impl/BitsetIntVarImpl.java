@@ -116,9 +116,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         this.OFFSET = min;
         int capacity = max - min + 1;
         this.VALUES = env.makeBitSet(capacity);
-        for (int i = 0; i <= max - min; i++) {
-            this.VALUES.set(i);
-        }
+        this.VALUES.set(0, max - min + 1);
         this.LB = env.makeInt(0);
         this.UB = env.makeInt(max - min);
         this.SIZE = env.makeInt(capacity);

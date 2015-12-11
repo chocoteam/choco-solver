@@ -97,7 +97,7 @@ public class PropElement extends Propagator<IntVar> {
             min = result.getLB();
             max = result.getUB();
         } while (result.hasEnumeratedDomain() && (nmin > min || max < nmax));
-        if (result.isInstantiated() && !index.isInstantiated()) {
+        if (result.isInstantiated() && index.hasEnumeratedDomain() && !index.isInstantiated()) {
             setPassive();
         }
     }
