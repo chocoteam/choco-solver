@@ -38,6 +38,7 @@ import org.chocosolver.util.ESat;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
+import org.chocosolver.util.tools.MathUtils;
 
 /**
  * Scale propagator : ensures x * y = z
@@ -69,13 +70,14 @@ public class PropScale extends Propagator<IntVar> {
         this.X = vars[0];
         this.Z = vars[1];
         this.Y = y;
+        assert y > 1;
         this.enumerated = X.hasEnumeratedDomain() && Z.hasEnumeratedDomain();
         this.values = enumerated?new IntIterableBitSet():null;
     }
 
     @Override
     public final void propagate(int evtmask) throws ContradictionException {
-        X.updateBounds((int) ceil((double) Z.getLB() / (double) Y - 0.0001), (int) floor((double) Z.getUB() / (double) Y + 0.0001), this);
+        X.updateBounds(MathUtils.divCeil(Z.getLB(), Y), MathUtils.divFloor(Z.getUB(), Y), this);
         boolean hasChanged;
         hasChanged = Z.updateBounds(X.getLB() *  Y, X.getUB() *  Y, this);
         if (enumerated) {
