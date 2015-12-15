@@ -69,7 +69,7 @@ public class LogicTreeTest {
 
         ILogical l = LogicTreeToolBox.toCNF(root, solver);
 
-        Assert.assertEquals(l.toString(), "((b or a or not(c)) and (b or a or not(d)))");
+        Assert.assertEquals(l.toString(), "((a or b or not(c)) and (a or b or not(d)))");
     }
 
     @Test(groups = "1s")
@@ -87,7 +87,7 @@ public class LogicTreeTest {
 
         ILogical l = LogicTreeToolBox.toCNF(root, solver);
 
-        Assert.assertEquals(l.toString(), "(e and (b or a or not(c)) and (b or a or not(d)))");
+        Assert.assertEquals(l.toString(), "(e and (a or b or not(c)) and (a or b or not(d)))");
     }
 
 
@@ -182,7 +182,7 @@ public class LogicTreeTest {
 
         ILogical l = LogicTreeToolBox.toCNF(root, solver);
 
-        Assert.assertEquals(l.toString(), "((a or c) and (b or not(a)) and (b or c))");
+        Assert.assertEquals(l.toString(), "((a or c) and (b or c) and (b or not(a)))");
     }
 
     @Test(groups = "1s")

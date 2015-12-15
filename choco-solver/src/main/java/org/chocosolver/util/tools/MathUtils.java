@@ -35,26 +35,28 @@ import java.awt.*;
 /**
  * various mathematics utilities. The functions do not exist in the basic math package Math.*
  *
- * @author Arnaud Malapert</br>
+ * @author Charles Prud'homme, Arnaud Malapert
  * @version 2.0.1
  * @since 8 dec. 2008 version 2.0.1</br>
  */
 public final class MathUtils {
 
+    /**
+     * Precision for rounded logarithm.
+     */
     public final static double ROUNDED_LOG_PRECISION = 10000;
 
-    /**
-     *
-     */
     private MathUtils() {
         //do nothing
     }
 
     /**
-     * simple recursive version of factorielle
+     * simple recursive version of factorial
+     * @param n size of the suite
+     * @return n!
      */
-    public static long factoriel(int n) {
-        return n < 2 ? 1 : n * factoriel(n - 1);
+    public static long factorial(int n) {
+        return n < 2 ? 1 : n * factorial(n - 1);
     }
 
     /**
@@ -77,10 +79,21 @@ public final class MathUtils {
         }
     }
 
+    /**
+     * @param x a value
+     * @return <tt>true</tt> if <i>x</i> is power of 2.
+     */
     public static boolean isPowerOfTwo(int x) {
         return (x & (x - 1)) == 0;
     }
 
+    /**
+     * Returns the value of the first argument raised to the power of the
+     * second argument. See {@link Math#pow(double, double)} for special cases.
+     * @param value
+     * @param exp
+     * @return
+     */
     public static int pow(int value, int exp) {
         return value == 2 ? 1 << exp : (int) Math.pow(value, exp);
     }
@@ -96,6 +109,13 @@ public final class MathUtils {
         return Math.round(log(value, exponent) * ROUNDED_LOG_PRECISION) / ROUNDED_LOG_PRECISION;
     }
 
+    /**
+     * Returns the sum of elements in <i>values</i> from position <i>begin</i> (inclusive) to position <i>end</i> (exclusive).
+     * @param values array of ints
+     * @param begin starting position (inclusive)
+     * @param end ending position (exclusive)
+     * @return the sum of elements in <i>values</i> from position <i>begin</i> (inclusive) to position <i>end</i> (exclusive).
+     */
     public static int sum(int[] values, int begin, int end) {
         int s = 0;
         for (int i = begin; i < end; i++) {
@@ -104,18 +124,40 @@ public final class MathUtils {
         return s;
     }
 
+    /**
+     * Returns the sum of elements in <i>values</i> from position <i>begin</i> (inclusive) to values.length.
+     * @param values array of ints
+     * @param begin starting position (inclusive)
+     * @return the sum of elements in <i>values</i> from position <i>begin</i> (inclusive) to values.length.
+     */
     public static int sumFrom(int[] values, int begin) {
         return sum(values, begin, values.length);
     }
 
+    /**
+     * Returns the sum of elements in <i>values</i> from position <i>0</i> (inclusive) to position <i>end</i> (exclusive).
+     * @param values array of ints
+     * @param end ending position (exclusive)
+     * @return the sum of elements in <i>values</i> from position <i>0</i> (inclusive) to position <i>end</i> (exclusive).
+     */
     public static int sumTo(int[] values, int end) {
         return sum(values, 0, end);
     }
 
+    /**
+     * Returns the sum of elements in <i>values</i>.
+     * @param values array of ints
+     * @return the sum of elements in <i>values</i>.
+     */
     public static int sum(int[] values) {
         return sum(values, 0, values.length);
     }
 
+    /**
+     * Retuns the sum of elements in <i>values</i>.
+     * @param values matrix of ints
+     * @return the sum of elements in <i>values</i>.
+     */
     public static int sum(int[][] values) {
         int s = 0;
         for (int i = 0; i < values.length; i++) {
@@ -126,6 +168,11 @@ public final class MathUtils {
         return s;
     }
 
+    /**
+     * Returns the element with the greatest value in <i>values</i>.
+     * @param values array of ints
+     * @return the element with the greatest value in <i>values</i>.
+     */
     public static int max(int[] values) {
         int max = Integer.MIN_VALUE;
         for (int i = 0; i < values.length; i++) {
@@ -136,6 +183,11 @@ public final class MathUtils {
         return max;
     }
 
+    /**
+     * Returns the element with the greatest value in <i>values</i>.
+     * @param values array of ints
+     * @return the element with the greatest value in <i>values</i>.
+     */
     public static int max(int[][] values) {
         int max = Integer.MIN_VALUE;
         for (int i = 0; i < values.length; i++) {
@@ -148,6 +200,11 @@ public final class MathUtils {
         return max;
     }
 
+    /**
+     * Returns the element with the smallest value in <i>values</i>.
+     * @param values array of ints
+     * @return the element with the smallest value in <i>values</i>.
+     */
     public static int min(int[] values) {
         int min = Integer.MAX_VALUE;
         for (int i = 0; i < values.length; i++) {
@@ -158,6 +215,11 @@ public final class MathUtils {
         return min;
     }
 
+    /**
+     * Returns the element with the smallest value in <i>values</i>.
+     * @param values array of ints
+     * @return the element with the smallest value in <i>values</i>.
+     */
     public static int min(int[][] values) {
         int min = Integer.MAX_VALUE;
         for (int i = 0; i < values.length; i++) {
@@ -186,33 +248,88 @@ public final class MathUtils {
         }
     }
 
+    /**
+     * Returns the largest (closest to positive infinity) {@code int} value that is less than or equal to a/b.
+     * @param a the dividend
+     * @param b the divisor
+     * @return the largest (closest to positive infinity) {@code int} value that is less than or equal to a/b.
+     */
     public static int divFloor(int a, int b) {
-        if (b < 0) {
-            return divFloor(-a, -b);
-        } else if (b > 0) {
-            if (a >= 0) {
-                return (a / b);
-            } else {
-                return (a - b + 1) / b;
-            }
-        } else {
-            assert (b == 0);
+        if(b==0){
+            return Integer.MAX_VALUE;
+        }else{
+            return Math.floorDiv(a,b);
         }
-        return Integer.MAX_VALUE;
     }
 
+    /**
+     * Returns the smallest (closest to positive infinity) {@code int} value that is greater or equal to a/b.
+     * @param a the dividend
+     * @param b the divisor
+     * @return the smallest (closest to positive infinity) {@code int} value that is greater or equal to a/b.
+     */
     public static int divCeil(int a, int b) {
-        if (b < 0) {
-            return divCeil(-a, -b);
-        } else if (b > 0) {
-            if (a >= 0) {
-                return ((a + b - 1) / b);
-            } else {
-                return a / b;
-            }
-        } else {
-            assert (b == 0);
+        if(b==0){
+            return Integer.MIN_VALUE;
+        }else{
+            return Math.floorDiv(a,b) + 1;
         }
-        return Integer.MIN_VALUE;
     }
+
+    /**
+     * Returns the sum of its arguments,
+     * returning either {@link Integer#MAX_VALUE} if the result overflows an {@code int},
+     * or {@link Integer#MIN_VALUE} if the result underflows an {@code int}, .
+     *
+     * @param x the first value
+     * @param y the second value
+     * @return the result
+     */
+    public static int safeAdd(int x, int y){
+        int r = x + y;
+        // HD 2-12 Overflow iff both arguments have the opposite sign of the result
+        if (((x ^ r) & (y ^ r)) < 0) {
+            long rr = (long)x + y;
+            return rr > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
+        }
+        return r;
+    }
+
+    /**
+     * Returns the difference of its arguments,
+     * returning either {@link Integer#MAX_VALUE} if the result overflows an {@code int},
+     * or {@link Integer#MIN_VALUE} if the result underflows an {@code int}, .
+     *
+     * @param x the first value
+     * @param y the second value
+     * @return the result
+     */
+    public static int safeSubstract(int x, int y){
+        int r = x - y;
+        // HD 2-12 Overflow iff both arguments have the opposite sign of the result
+        if (((x ^ y) & (x ^ r)) < 0) {
+            long rr = (long)x - y;
+            return rr > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
+        }
+        return r;
+    }
+
+    /**
+     * Returns the product of its arguments,
+     * returning either {@link Integer#MAX_VALUE} if the result overflows an {@code int},
+     * or {@link Integer#MIN_VALUE} if the result underflows an {@code int}, .
+     *
+     * @param x the first value
+     * @param y the second value
+     * @return the result
+     */
+    public static int safeMultiply(int x, int y){
+        long r = (long)x * (long)y;
+        // HD 2-12 Overflow iff both arguments have the opposite sign of the result
+        if ((int)r != r) {
+            return r > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
+        }
+        return (int)r;
+    }
+
 }

@@ -78,10 +78,10 @@ public class LogicTreeToolBox {
         }
         ILogical l = simplify(logOp, solver);
         l = simplifySingleton(l, solver);
+        l = orderAndReduce(l);
         if (!l.isLit()) ((LogOp) l).cleanFlattenBoolVar();
         return l;
     }
-
 
     /**
      * Erases 'NOT' operand from the logical expression <code>n</code> by flipping the right children
@@ -98,6 +98,7 @@ public class LogicTreeToolBox {
             }
         }
     }
+
 
     /**
      * Flattens a logical expression <code>n</code> based on operator <code>op</code>.
@@ -199,7 +200,6 @@ public class LogicTreeToolBox {
         }
     }
 
-
     /**
      * Detects tautologies and contradictions from <code>t</code>
      * @param t a logical expression
@@ -210,9 +210,9 @@ public class LogicTreeToolBox {
         if (t.isLit()) return t;
         // else
         LogOp n = (LogOp) t;
+        ILogical[] children = n.getChildren();
         if (n.is(LogOp.Operator.OR)) {
             // OR with only LITS
-            ILogical[] children = n.getChildren();
             HashMap<BoolVar, ILogical> lits = new HashMap<>();
             for (int i = 0; i < children.length; i++) {
                 BoolVar var = extract(children[i])[0];
@@ -226,10 +226,11 @@ public class LogicTreeToolBox {
                     lits.put(var, children[i]);
                 }
             }
-            return LogOp.or(lits.values().toArray(new ILogical[lits.size()]));
+            ILogical[] ts = lits.values().toArray(new ILogical[lits.size()]);
+//            Arrays.sort(ts);
+            return LogOp.or(ts);
         } else if (!n.hasOrChild()) {
             // AND with only LITS
-            ILogical[] children = n.getChildren();
             HashMap<BoolVar, ILogical> lits = new HashMap<>();
             for (int i = 0; i < children.length; i++) {
                 BoolVar var = extract(children[i])[0];
@@ -243,9 +244,10 @@ public class LogicTreeToolBox {
                     lits.put(var, children[i]);
                 }
             }
-            return LogOp.and(lits.values().toArray(new ILogical[lits.size()]));
+            ILogical[] ts = lits.values().toArray(new ILogical[lits.size()]);
+//            Arrays.sort(ts);
+            return LogOp.and(ts);
         } else {
-            ILogical[] children = n.getChildren();
             for (int i = 0; i < children.length; i++) {
                 if (!children[i].isLit()) {
                     children[i] = simplify(children[i], solver);
@@ -281,6 +283,39 @@ public class LogicTreeToolBox {
 
 
     /**
+     * Reorder <code>l</code> in order to eliminate duplicates
+     * @param t the logical expression to order and reduce
+     * @return reordered logical expression
+     */
+    private static ILogical orderAndReduce(ILogical t) {
+        if (t.isLit()) return t;
+        LogOp n = (LogOp) t;
+        ILogical[] children = n.getChildren();
+        for (int i = 0; i < children.length; i++) {
+            if (!children[i].isLit()) {
+                Arrays.sort(((LogOp)children[i]).getChildren(), LogicTreeToolBox::sameLogical);
+            }
+        }
+        Arrays.sort(children, LogicTreeToolBox::sameLogical);
+        int i  = 0;
+        int k  = children.length-1;
+        while(i < k ){
+            if(sameLogical(children[i], children[i+1]) == 0){
+                System.arraycopy(children, i+1, children, i+1, children.length - i - 1);
+                k--;
+            }else {
+                i++;
+            }
+        }
+        if(k == 0){
+            return children[0];
+        }else {
+            return new LogOp(n.operator, n.type, Arrays.copyOf(children, k + 1));
+        }
+    }
+
+
+    /**
      * Sort a logical expression wrt to NOT
      * @param logOp logical expression to sort
      */
@@ -294,4 +329,58 @@ public class LogicTreeToolBox {
             return 1;
         });
     }
+
+    private static int sameLogical(ILogical o1, ILogical o2){
+        if (o1.isLit()) {
+            if (o2.isLit()) {
+                return sameLit(o1, o2);
+            } else {
+                return -1;
+            }
+        } else {
+            if (o2.isLit()) {
+                return 1;
+            } else {
+                LogOp l1 = (LogOp)o1;
+                LogOp l2 = (LogOp)o2;
+                return sameChild(l1, l2);
+            }
+        }
+    }
+
+    private static int sameLit(ILogical o1, ILogical o2){
+        int diff = ((BoolVar) o1).getId() - ((BoolVar) o2).getId();
+        if(diff == 0){
+            if (o1.isNot() == o2.isNot()) {
+                return 0;
+            } else if (o2.isNot()) {
+                return -1;
+            }
+            return 1;
+        }else {
+            return diff;
+        }
+    }
+
+    private static int sameChild(LogOp l1, LogOp l2){
+        if(l1.getNbChildren() == l2.getNbChildren()){
+            // assume l1 and l2 are already sorted
+            int i = 0;
+            int same = 0;
+            ILogical ll1, ll2;
+            while(i < l1.getNbChildren() && same == 0){
+                ll1 = l1.getChildren()[i];
+                ll2 = l2.getChildren()[i];
+                assert ll1.isLit();
+                assert ll2.isLit();
+                same = sameLit(ll1, ll2);
+                i++;
+            }
+            return same;
+        }else{
+            return l1.getNbChildren() - l2.getNbChildren();
+        }
+    }
+
+
 }

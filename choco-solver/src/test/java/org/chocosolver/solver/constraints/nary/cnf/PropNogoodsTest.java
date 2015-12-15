@@ -58,7 +58,7 @@ public class PropNogoodsTest {
     PropNogoods PNG;
     int[] lits;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void setUp() throws Exception {
         Solver solver = new Solver("nogoods");
         vars = VF.enumeratedArray("X", 4, -1, 1, solver);
