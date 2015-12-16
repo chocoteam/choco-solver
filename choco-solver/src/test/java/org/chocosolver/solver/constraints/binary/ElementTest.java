@@ -34,9 +34,12 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.LCF;
+import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -245,4 +248,32 @@ public class ElementTest {
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
         }
     }
+    @Test
+    public void testSolverOrMin() {
+        Solver s = new Solver();
+        IntVar val = VF.bounded("v", 0, 9, s);
+        // b=> val={5,6,7,8}[2]
+        Constraint el = ElementFactory.detect(val, new int[] { 5, 6, 7, 8 }, VF.fixed(2, s), 0);
+        s.post(LCF.or(el.reif()));
+        // s.post(el);// works instead of previous post
+        s.findAllSolutions();
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1L);
+    }
+
+
+    @Test
+    public void testSolverOrFull() {
+        Solver s = new Solver();
+        BoolVar b = VF.bool("b", s);
+        IntVar val = VF.bounded("v", 0, 9, s);
+        // b=> val={5,6,7,8}[2]
+        Constraint el = ElementFactory.detect(val, new int[] { 5, 6, 7, 8 }, VF.fixed(2, s), 0);
+        s.post(LCF.or(b.not(), el.reif()));
+        // !b=> val=2
+        Constraint affect = ICF.arithm(val, "=", 2);
+        s.post(LCF.or(b, affect.reif()));
+        s.findAllSolutions();
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2L);
+    }
+
 }
