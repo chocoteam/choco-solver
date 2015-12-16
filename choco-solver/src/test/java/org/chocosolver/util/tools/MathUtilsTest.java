@@ -43,20 +43,26 @@ public class MathUtilsTest {
 
     @Test(groups = "1s")
     public void testDivFloor() throws Exception {
-        Assert.assertEquals(Math.floorDiv(3,5), MathUtils.divFloor(3,5));
-        Assert.assertEquals(Math.floorDiv(-3,5), MathUtils.divFloor(-3,5));
-        Assert.assertEquals(Math.floorDiv(3,-5), MathUtils.divFloor(3,-5));
-        Assert.assertEquals(Math.floorDiv(-3,-5), MathUtils.divFloor(-3,-5));
+        Assert.assertEquals(0, MathUtils.divFloor(3,5));
+        Assert.assertEquals(-1, MathUtils.divFloor(-3,5));
+        Assert.assertEquals(-1, MathUtils.divFloor(3,-5));
+        Assert.assertEquals(0, MathUtils.divFloor(-3,-5));
+        Assert.assertEquals(-1, MathUtils.divFloor(-3,3));
+        Assert.assertEquals(-1, MathUtils.divFloor(-1,3));
+        Assert.assertEquals(1, MathUtils.divFloor(3,3));
         Assert.assertEquals(Integer.MAX_VALUE, MathUtils.divFloor(10,0));
     }
 
     @Test(groups = "1s")
     public void testDivCeil() throws Exception {
-        Assert.assertEquals(Math.floorDiv(3,5) + 1, MathUtils.divCeil(3,5));
-        Assert.assertEquals(Math.floorDiv(-3,5) +1, MathUtils.divCeil(-3,5));
-        Assert.assertEquals(Math.floorDiv(3,-5) +1 , MathUtils.divCeil(3,-5));
-        Assert.assertEquals(Math.floorDiv(-3,-5)+1, MathUtils.divCeil(-3,-5));
-        Assert.assertEquals(MathUtils.divFloor(10,0)+1, MathUtils.divCeil(10,0));
+        Assert.assertEquals(1, MathUtils.divCeil(3,5));
+        Assert.assertEquals(0, MathUtils.divCeil(-3,5));
+        Assert.assertEquals(0, MathUtils.divCeil(3,-5));
+        Assert.assertEquals(1, MathUtils.divCeil(-3,-5));
+        Assert.assertEquals(-1, MathUtils.divCeil(-3,3));
+        Assert.assertEquals(0, MathUtils.divCeil(-1,3));
+        Assert.assertEquals(1, MathUtils.divCeil(3,3));
+        Assert.assertEquals(Integer.MIN_VALUE, MathUtils.divCeil(10,0));
     }
 
 

@@ -50,7 +50,7 @@ public class ArrayUtilsTest {
         Assert.assertArrayEquals(a, new int[]{0,1,2,3,4});
     }
 
-    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    @Test(groups = "1s", expectedExceptions = NegativeArraySizeException.class)
     public void testZeroToN2() throws Exception {
         ArrayUtils.zeroToN(-2);
     }
@@ -61,7 +61,7 @@ public class ArrayUtilsTest {
         Assert.assertArrayEquals(a, new int[]{1,2,3,4, 5});
     }
 
-    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    @Test(groups = "1s", expectedExceptions = NegativeArraySizeException.class)
     public void testOneToN2() throws Exception {
         int[] a = ArrayUtils.oneToN(-5);
     }
@@ -72,7 +72,7 @@ public class ArrayUtilsTest {
         Assert.assertArrayEquals(a, new int[]{2,3,4,5,6});
     }
 
-    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    @Test(groups = "1s", expectedExceptions = NegativeArraySizeException.class)
     public void testLinspace2() throws Exception {
         int[] a = ArrayUtils.linspace(2,1);
     }
@@ -236,7 +236,6 @@ public class ArrayUtilsTest {
 
     @Test(groups = "1s")
     public void testSwallowCopy1() throws Exception {
-        int[] t = new int[-2];
     }
 
     @Test(groups = "1s")

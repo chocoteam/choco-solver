@@ -35,9 +35,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
 import org.chocosolver.util.ESat;
-
-import static java.lang.Math.ceil;
-import static java.lang.Math.floor;
 import org.chocosolver.util.tools.MathUtils;
 
 /**

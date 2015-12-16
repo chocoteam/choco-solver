@@ -250,29 +250,41 @@ public final class MathUtils {
 
     /**
      * Returns the largest (closest to positive infinity) {@code int} value that is less than or equal to a/b.
-     * @param a the dividend
-     * @param b the divisor
+     * Adapted from {@link Math#floorDiv(int, int)}.
+     * @param x the dividend
+     * @param y the divisor
      * @return the largest (closest to positive infinity) {@code int} value that is less than or equal to a/b.
      */
-    public static int divFloor(int a, int b) {
-        if(b==0){
+    public static int divFloor(int x, int y) {
+        if (y == 0) {
             return Integer.MAX_VALUE;
-        }else{
-            return Math.floorDiv(a,b);
+        } else {
+            int r = x / y;
+            // if the signs are different and modulo not zero, round down
+            if ((x ^ y) < 0 && (r * y != x)) {
+                r--;
+            }
+            return r;
         }
     }
 
     /**
      * Returns the smallest (closest to positive infinity) {@code int} value that is greater or equal to a/b.
-     * @param a the dividend
-     * @param b the divisor
+     * Adapted from {@link Math#floorDiv(int, int)}.
+     * @param x the dividend
+     * @param y the divisor
      * @return the smallest (closest to positive infinity) {@code int} value that is greater or equal to a/b.
      */
-    public static int divCeil(int a, int b) {
-        if(b==0){
+    public static int divCeil(int x, int y) {
+        if (y == 0) {
             return Integer.MIN_VALUE;
-        }else{
-            return Math.floorDiv(a,b) + 1;
+        } else {
+            int r = x / y;
+//            // if the signs are the same and modulo not zero, round up
+            if ((x ^ y) > 0 && (r * y != x)) {
+                r++;
+            }
+            return r;
         }
     }
 
