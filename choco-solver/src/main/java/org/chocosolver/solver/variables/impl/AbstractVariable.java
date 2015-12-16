@@ -219,7 +219,10 @@ public abstract class AbstractVariable implements Variable {
 
         }
         // 2. put it in the right place
-        subscribe(propagator, idxInProp, scheduler.select(propagator.getPropagationConditions(idxInProp)));
+        int pc = propagator.getPropagationConditions(idxInProp);
+        if(pc > 0) { // deal with VOID, when the propagator should not be aware of this variable's modifications
+            subscribe(propagator, idxInProp, scheduler.select(pc));
+        }
         return nbPropagators++;
     }
 

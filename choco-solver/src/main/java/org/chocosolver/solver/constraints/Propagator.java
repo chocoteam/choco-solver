@@ -41,6 +41,7 @@ import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 
@@ -90,6 +91,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * @see org.chocosolver.solver.variables.Variable
  * @see Constraint
  * @since 0.01
+ * @param <V> type of variables involved in this propagator
  */
 public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
 
@@ -288,11 +290,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * For example, consider a propagator that can deduce filtering based on the lower bound of the integer variable X.
      * Then, for this variable, the mask should be equal to :
      * <pre>
-     *     int mask = IntEvtType.INCLOW.getMask() | IntEvtType.INSTANTIATE.getMask();
+     *     int mask = IntEventType.INCLOW.getMask() | IntEventType.INSTANTIATE.getMask();
      * </pre>
      * or, in a more convenient way:
      * <pre>
-     *     int mask = IntEvtType.combine(IntEvtType.INCLOW,IntEvtType.INSTANTIATE);
+     *     int mask = IntEvtType.combine(IntEventType.INCLOW,IntEventType.INSTANTIATE);
      * </pre>
      *
      * That indicates the following behavior:
@@ -312,6 +314,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * The same goes with events of other variable types, but most of the time, there are only few combinations.
      *
      * Reacts to any kind of event by default.
+     *
+     * Alternatively, this method can return {@link IntEventType#VOID} which states
+     * that this propagator should not be aware of modifications applied to the variable in position <i>vIdx</i>.
      *
      * @param vIdx index of the variable within the propagator
      * @return an int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
