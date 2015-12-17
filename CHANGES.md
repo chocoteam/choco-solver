@@ -11,6 +11,9 @@ NEXT MILESTONE
 
 #### Solver:
 
+- add new APIs with an argument named `restoreLastSolution` which allow to indicate
+whether or not the last solution found, if any, should be restored on exit;
+Previous APIs (without the argument) restore the last solution by default (#354)
 - update javadoc (in particular: #347)
 - add default name to Solver + setter, modify measures printing to include the name.
 

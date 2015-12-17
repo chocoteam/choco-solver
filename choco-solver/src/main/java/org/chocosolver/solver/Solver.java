@@ -48,7 +48,8 @@ import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.search.loop.*;
+import org.chocosolver.solver.search.loop.SLF;
+import org.chocosolver.solver.search.loop.SearchLoop;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
@@ -1104,12 +1105,16 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Restores the best solution found so far (if any)
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
      *
      * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
      */
-    public void findOptimalSolution(ResolutionPolicy policy) {
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
         if (objectives == null || objectives.length == 0) {
             throw new SolverException("No objective variable has been defined");
         }
@@ -1134,24 +1139,74 @@ public class Solver implements Serializable {
             }
         }
         solve(false);
+        if (restoreLastSolution) {
+            try {
+                restoreLastSolution();
+            } catch (ContradictionException e) {
+                throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+            } finally {
+                getEngine().flush();
+            }
+        }
     }
 
     /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Restores the best solution found so far (if any)
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean)} where <i>boolean</i> is set to <tt>true</tt>.
+     *
+     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy) {
+        findOptimalSolution(policy, true);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
+     * <p>
+     * Indeed, it calls in sequence:
+     * <pre>
+     *     <code>setObjectives(objectives);
+     *     findOptimalSolution(policy, restoreLastSolution);
+     *     </code>
+     * </pre>
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
+     * @param objective the variable to optimize
+     * @see #setObjectives(Variable...)
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
+        setObjectives(objective);
+        findOptimalSolution(policy, restoreLastSolution);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean, IntVar)} where <i>boolean</i> is set to <tt>true</tt>.
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
+     * @see #findOptimalSolution(ResolutionPolicy, boolean, IntVar)
      */
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
-        setObjectives(objective);
-        findOptimalSolution(policy);
+        findOptimalSolution(policy, true, objective);
     }
 
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Finds and stores all optimal solution
-     * Restores the best solution found so far (if any)
+     * Finds and stores all optimal solution.
+     * Calling this method does not restore solution on exit
+     * since multiple equivalent (wrt objective value) solutions may exist.
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
@@ -1189,30 +1244,91 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Finds and stores all optimal solution
-     * Restores the best solution found so far (if any)
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * Finds and stores all optimal solution.
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
+     * <p>
+     * Indeed, it calls in sequence:
+     * <pre>
+     *     <code>setObjectives(objectives);
+     *     findOptimalSolution(policy, restoreLastSolution);
+     *     </code>
+     * </pre>
+     *
+     * @param policy     optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
+     * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
+     * @see #setObjectives(Variable...)
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
+        setObjectives(objectives);
+        findOptimalSolution(policy, restoreLastSolution);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * It finds and stores all optimal solution
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findParetoFront(ResolutionPolicy, boolean, IntVar...)} where <i>boolean</i> is set to <tt>true</tt>.
      *
      * @param policy     optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
+     * @see #findParetoFront(ResolutionPolicy, boolean, IntVar...)
      */
     public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
-        setObjectives(objectives);
-        findOptimalSolution(policy);
+        findParetoFront(policy, true, objectives);
     }
 
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Restores the last solution found so far (if any)
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
+     * <p>
+     * Indeed, it calls in sequence:
+     * <pre>
+     *     <code>setObjectives(objectives);
+     *     setPrecision(precision);
+     *     findOptimalSolution(policy, restoreLastSolution);
+     *     </code>
+     * </pre>
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
+     * @param objective the variable to optimize
+     * @param precision to consider that <code>objective</code> is instantiated.
+     * @see #setObjectives(Variable...)
+     * @see #setPrecision(double)
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
+        setObjectives(objective);
+        setPrecision(precision);
+        findOptimalSolution(policy, restoreLastSolution);
+    }
+
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean, RealVar, double)}
+     * where <i>boolean</i> is set to <tt>true</tt>.
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
      * @param precision to consider that <code>objective</code> is instantiated.
+     * @see #findOptimalSolution(ResolutionPolicy, boolean, RealVar, double)
      */
     public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
         setObjectives(objective);
         setPrecision(precision);
-        findOptimalSolution(policy);
+        findOptimalSolution(policy, true);
     }
 
     /**
@@ -1313,7 +1429,7 @@ public class Solver implements Serializable {
      * <li>each variable is then instantiated to its value in the solution.</li>
      * </ol>
      *
-     * The input state can be rollbacked by calling :  {@code this.getEnvironment().worldPop();}.
+     * The input state can be rolled-back by calling :  {@code this.getEnvironment().worldPop();}.
      * @param solution the solution to restore
      * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
      * @throws ContradictionException when inconsistency is detected while restoring the solution.
