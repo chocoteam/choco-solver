@@ -33,7 +33,7 @@ git ls-remote --exit-code --tags origin ${TAG} && quit "tag ${TAG} already exist
 
 #Working version ?
 # Well, we assume the tests have been run before, and everything is OK for the release
-mvn clean test ||exit 1
+#mvn clean test ||exit 1
 
 git fetch origin master:refs/remotes/origin/master||quit "Unable to fetch master"
 #Integrate with master and tag

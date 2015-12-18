@@ -125,15 +125,18 @@ public abstract class RegParser implements IParser {
     protected static void makeComplementarySearch(Solver solver) {
         //TODO deal with no strategy
         IntVar[] ovars = new IntVar[solver.getNbVars()];
-        THashSet<Variable> dvars = new THashSet<>(Arrays.asList(solver.getStrategy().getVariables()));
-        int k = 0;
-        for (int i = 0; i < solver.getNbVars(); i++) {
-            Variable ivar = solver.getVar(i);
-            if (!dvars.contains(ivar) && (ivar.getTypeAndKind() & Variable.INT) != 0) {
-                ovars[k++] = (IntVar) ivar;
+        THashSet<Variable> dvars = new THashSet<>();
+        if(solver.getStrategy() != null) {
+            dvars.addAll(Arrays.asList(solver.getStrategy().getVariables()));
+            int k = 0;
+            for (int i = 0; i < solver.getNbVars(); i++) {
+                Variable ivar = solver.getVar(i);
+                if (!dvars.contains(ivar) && (ivar.getTypeAndKind() & Variable.INT) != 0) {
+                    ovars[k++] = (IntVar) ivar;
+                }
             }
+            solver.set(solver.getStrategy(), new Once(Arrays.copyOf(ovars, k), ISF.lexico_var_selector(), ISF.min_value_selector()));
         }
-        solver.set(solver.getStrategy(), new Once(Arrays.copyOf(ovars, k), ISF.lexico_var_selector(), ISF.min_value_selector()));
     }
 
     @Override

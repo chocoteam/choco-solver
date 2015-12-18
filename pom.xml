@@ -77,13 +77,13 @@
         <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>choco-solver</artifactId>
-            <version>3.3.2-SNAPSHOT</version>
+            <version>3.3.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>choco-geost</artifactId>
-            <version>3.3.2-SNAPSHOT</version>
+            <version>3.3.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
