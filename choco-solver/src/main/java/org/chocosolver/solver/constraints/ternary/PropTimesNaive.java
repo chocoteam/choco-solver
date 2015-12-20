@@ -123,11 +123,14 @@ public class PropTimesNaive extends Propagator<IntVar> {
     public static int multiply(int a, int b) {
         if (a == 0 || b == 0)
             return 0;
-        int product = a * b;
-        int a2 = product / b;
-        if (a != a2)
-            throw new ArithmeticException("Overflow occurred from int " + a + " * " + b);
-        return product;
+        long product = (long) a * b;
+        if (product >= Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        if (product <= Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return (int) product;
     }
 
     @Override
