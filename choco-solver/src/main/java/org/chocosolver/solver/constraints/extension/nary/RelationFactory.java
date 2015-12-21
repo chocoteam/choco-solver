@@ -50,10 +50,10 @@ class RelationFactory {
      */
     public static LargeRelation makeLargeRelation(Tuples tuples, IntVar[] vars) {
         long totalSize = 1;
-        for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
+        for (int i = 0; i < vars.length && (int)totalSize == totalSize; i++) { // to prevent from long overflow
             totalSize *= vars[i].getRange();
         }
-        if ((int) totalSize < 0) {
+        if ((int)totalSize != totalSize) {
             return new TuplesVeryLargeTable(tuples, vars);
         }
         if (totalSize / 8 > 50 * 1024 * 1024) {
