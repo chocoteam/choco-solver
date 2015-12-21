@@ -687,6 +687,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     }
 
     @Override
+    public int getRange() {
+        return getUB() - getLB() + 1;
+    }
+
+    @Override
     public int nextValue(int aValue) {
         int lb = LB.get();
         if (aValue < VALUES[lb]) return VALUES[lb];

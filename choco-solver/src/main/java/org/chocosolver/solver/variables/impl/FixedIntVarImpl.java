@@ -199,6 +199,11 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
+    public int getRange() {
+        return 1;
+    }
+
+    @Override
     public int nextValue(int v) {
         if (v < constante) {
             return constante;

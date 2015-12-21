@@ -244,11 +244,18 @@ public interface IntVar extends Variable {
     int getUB();
 
     /**
-     * Returns the size of the domain of <code>this</code>
+     * Returns the size of this domain, that is the number of elements in this domain.
      *
      * @return size of the domain
      */
     int getDomainSize();
+
+
+    /**
+     * Returns the range of this domain, that is, the difference between the upper bound and the lower bound.
+     * @return the range of this domain
+     */
+    int getRange();
 
     /**
      * Returns the next value just after v in <code>this</code>.

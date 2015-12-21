@@ -105,11 +105,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
     }
 
     public PropLargeGAC3rmPositive(IntVar[] vars, Tuples tuples) {
-        this(vars, makeRelation(tuples, vars));
-    }
-
-    private static IterTuplesTable makeRelation(Tuples tuples, IntVar[] vars) {
-        return new IterTuplesTable(tuples, vars);
+        this(vars, RelationFactory.makeIterableRelation(tuples, vars));
     }
 
     @Override

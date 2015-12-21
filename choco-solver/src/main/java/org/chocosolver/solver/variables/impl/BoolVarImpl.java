@@ -371,6 +371,11 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
+    public int getRange() {
+        return getDomainSize();
+    }
+
+    @Override
     public int nextValue(int v) {
         if (!notInstanciated.contains(offset)) {
             final int val = mValue;

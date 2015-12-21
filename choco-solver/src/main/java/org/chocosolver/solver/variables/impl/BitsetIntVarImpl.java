@@ -626,6 +626,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
+    public int getRange() {
+        return getUB() - getLB() + 1;
+    }
+
+    @Override
     public int nextValue(int aValue) {
         aValue -= OFFSET;
         int lb = LB.get();

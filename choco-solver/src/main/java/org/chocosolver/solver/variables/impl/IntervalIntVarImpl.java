@@ -464,6 +464,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
+    public int getRange() {
+        return getDomainSize();
+    }
+
+    @Override
     public int nextValue(int aValue) {
         int lb = LB.get();
         if (aValue < lb) {
