@@ -24,7 +24,7 @@ Previous APIs (without the argument) restore the last solution by default (#354)
 
 #### Bug fixes: 
 
-\#346, #348, #349, #350, #351, #353, #354, #357
+\#346, #348, #349, #350, #351, #353, #354, #357, #359
 
 3.3.2 - 17 Nov 2015
 -------------------

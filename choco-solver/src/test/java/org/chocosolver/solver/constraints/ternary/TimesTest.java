@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
@@ -125,5 +126,35 @@ public class TimesTest extends AbstractTernaryTest {
 		s.findAllSolutions();
 		Assert.assertEquals(s.getMeasures().getSolutionCount(), Integer.MAX_VALUE/100000 * 2 + 1);
 	}
+
+	@Test(groups="1s")
+	public void testJL6(){
+		Solver s = new Solver();
+		s.set(new Settings() {
+			@Override
+			public boolean enableTableSubstitution() {
+				return false;
+			}
+		});
+		IntVar i1 = VF.enumerated("i1", new int[]{1, 55000}, s);
+		IntVar i2 = VF.enumerated("i2", new int[]{1, 55000}, s);
+		IntVar i3 = VF.enumerated("i3", new int[]{1, 55000}, s);
+		s.post(ICF.times(i1, i2, i3));
+	}
+
+    @Test(groups="1s")
+    public void testJL7(){
+        Solver s = new Solver();
+        s.set(new Settings() {
+            @Override
+            public boolean enableTableSubstitution() {
+                return true;
+            }
+        });
+        IntVar i1 = VF.enumerated("i1", new int[]{1, 10000}, s);
+        IntVar i2 = VF.enumerated("i2", new int[]{1, 10000}, s);
+        IntVar i3 = VF.enumerated("i3", new int[]{1, 10000}, s);
+        s.post(ICF.times(i1, i2, i3));
+    }
 
 }
