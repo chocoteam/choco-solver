@@ -76,6 +76,23 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
         this(name, new TIntHashSet(values), solver);
     }
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getName());
+		sb.append(" = {");
+		int s = values.length;
+		for (int v:values) {
+			sb.append(v);
+			s--;
+			if (s > 0) {
+				sb.append(",");
+			}
+		}
+		sb.append("}");
+		return sb.toString();
+	}
+
     @Override
     public int getKernelFirst() {
         return values.length == 0

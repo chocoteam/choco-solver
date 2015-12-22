@@ -11,6 +11,7 @@ NEXT MILESTONE
 
 #### Solver:
 
+- `SetVar` toString implementation has changed
 - add new APIs with an argument named `restoreLastSolution` which allow to indicate
 whether or not the last solution found, if any, should be restored on exit;
 Previous APIs (without the argument) restore the last solution by default (#354)
@@ -30,7 +31,6 @@ Previous APIs (without the argument) restore the last solution by default (#354)
 -------------------
 
 #### Solver: 
-
 - `ISolutionRecorder` implementations do not restore automatically the last/best solution found on exit.
 This now has to be done calling either `solver.restoreLastSolution()` or `solver.restoreSolution(Solution)`.
 - remove `MasterSolver` and `SlaveSolver` (#293)
