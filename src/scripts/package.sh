@@ -27,6 +27,7 @@ zip choco-${VERSION}.zip ./choco-${VERSION}/*
 rm -r /Volumes/htdocs/apidocs/*
 cp -r ./target/site/apidocs/* /Volumes/htdocs/apidocs/
 rm -r /Volumes/htdocs/user_guide/*
+rm -r ../Choco3-docs/html/*
 cd ./docs/ && make html && cd ..
 cp -r ../Choco3-docs/html/ /Volumes/htdocs/user_guide/
 
