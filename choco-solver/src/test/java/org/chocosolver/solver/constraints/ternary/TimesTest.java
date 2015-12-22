@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
@@ -80,4 +81,80 @@ public class TimesTest extends AbstractTernaryTest {
 			Assert.assertFalse(true);
 		}
 	}
+
+	@Test(groups="1s")
+	public void testJL2(){
+		for(int i = 1 ; i < 100001; i*=10) {
+			System.out.printf("%d\n", 465 * i);
+			Solver s = new Solver();
+			IntVar i1 = VF.enumerated("i1", 0, 465 * i, s);
+			IntVar i2 = VF.enumerated("i2", 0, 465 * i, s);
+			s.post(ICF.times(i1, 465 * i, i2));
+			s.findAllSolutions();
+			Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+		}
+	}
+
+	@Test(groups="1s")
+	public void testJL3(){
+		for(int i = 1 ; i < 1000001; i*=10) {
+			System.out.printf("%d\n", 465 * i);
+			Solver s = new Solver();
+			IntVar i1 = VF.bounded("i1", 0, 465 * i, s);
+			IntVar i2 = VF.bounded("i2", 0, 465 * i, s);
+			s.post(ICF.times(i1, 465 * i, i2));
+			s.findAllSolutions();
+			Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+		}
+	}
+
+	@Test(groups="1s")
+	public void testJL4() {
+		Solver s = new Solver();
+		IntVar i1 = VF.enumerated("i1", 0, 465, s);
+		IntVar i2 = VF.enumerated("i2", 0, 465 * 10000, s);
+		s.post(ICF.times(i1, 10000, i2));
+		s.findAllSolutions();
+		Assert.assertEquals(s.getMeasures().getSolutionCount(), 466);
+	}
+	@Test(groups="1s")
+	public void testJL5(){
+		Solver s = new Solver();
+		IntVar i1 = VF.bounded("i1", Integer.MIN_VALUE /10, Integer.MAX_VALUE /10, s);
+		IntVar i2 = VF.bounded("i2", Integer.MIN_VALUE/10, Integer.MAX_VALUE/10, s);
+		s.post(ICF.times(i1, 10000, i2));
+		s.findAllSolutions();
+		Assert.assertEquals(s.getMeasures().getSolutionCount(), Integer.MAX_VALUE/100000 * 2 + 1);
+	}
+
+	@Test(groups="1s")
+	public void testJL6(){
+		Solver s = new Solver();
+		s.set(new Settings() {
+			@Override
+			public boolean enableTableSubstitution() {
+				return false;
+			}
+		});
+		IntVar i1 = VF.enumerated("i1", new int[]{1, 55000}, s);
+		IntVar i2 = VF.enumerated("i2", new int[]{1, 55000}, s);
+		IntVar i3 = VF.enumerated("i3", new int[]{1, 55000}, s);
+		s.post(ICF.times(i1, i2, i3));
+	}
+
+    @Test(groups="1s")
+    public void testJL7(){
+        Solver s = new Solver();
+        s.set(new Settings() {
+            @Override
+            public boolean enableTableSubstitution() {
+                return true;
+            }
+        });
+        IntVar i1 = VF.enumerated("i1", new int[]{1, 10000}, s);
+        IntVar i2 = VF.enumerated("i2", new int[]{1, 10000}, s);
+        IntVar i3 = VF.enumerated("i3", new int[]{1, 10000}, s);
+        s.post(ICF.times(i1, i2, i3));
+    }
+
 }

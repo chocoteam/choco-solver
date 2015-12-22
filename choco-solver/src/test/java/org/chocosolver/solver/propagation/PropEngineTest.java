@@ -30,15 +30,20 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -101,6 +106,79 @@ public class PropEngineTest {
         for(int i =1; i < 15; i++) {
             System.out.printf("%d -> %d \n", i, Integer.lowestOneBit(i));
             System.out.printf("%d -> %d \n", i, Integer.lowestOneBit(i>>2));
+        }
+    }
+
+    @Test(groups="1s")
+    public void test3(){
+        Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+        solver.set(new SevenQueuesPropagatorEngine(solver));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
+    }
+
+    @Test(groups="1s")
+    public void test4(){
+        Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+        solver.set(new TwoBucketPropagationEngine(solver));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
+    }
+
+    @Test(groups="1s")
+    public void test5(){
+        Solver solver = ProblemMaker.makeGolombRuler(10);
+        solver.set(new SevenQueuesPropagatorEngine(solver));
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
+    }
+
+    @Test(groups="1s")
+    public void test6(){
+        Solver solver = ProblemMaker.makeGolombRuler(10);
+        solver.set(new TwoBucketPropagationEngine(solver));
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
+    }
+    
+    @Test(groups="1s")
+    public void testGregy41(){
+        for(int i = 0 ; i < 20; i++) {
+            Solver solver = new Solver("Propagation condition");
+            IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+            solver.post(new Constraint("test", new Propagator(X, PropagatorPriority.UNARY, true) {
+
+                @Override
+                public int getPropagationConditions(int vIdx) {
+                    if(vIdx == 0) {
+                        return IntEventType.VOID.getMask();
+                    }else{
+                        return IntEventType.ALL_EVENTS;
+                    }
+                }
+
+                @Override
+                public void propagate(int evtmask) throws ContradictionException {
+                    // initial propagation
+                }
+
+                @Override
+                public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+                    if(idxVarInProp == 0){
+                        Assert.fail();
+                    }
+                }
+
+                @Override
+                public ESat isEntailed() {
+                    return ESat.TRUE;
+                }
+            }));
+            solver.set(ISF.random(X, i));
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
         }
     }
 }

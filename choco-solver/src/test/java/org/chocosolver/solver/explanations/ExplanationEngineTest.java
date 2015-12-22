@@ -42,8 +42,11 @@ import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
+import org.chocosolver.solver.search.strategy.strategy.OnDemandIntStrategy;
 import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
@@ -882,6 +885,58 @@ public class ExplanationEngineTest {
         Chatterbox.showDecisions(solver);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
+    }
+
+    @Test(groups="1s")
+    public void testIntSat() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("x", -2, 3, solver);
+        IntVar y = VF.bounded("y", 1, 4, solver);
+        IntVar z = VF.bounded("z", -2, 2, solver);
+
+        solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{1, -3, -3}, "<=", VF.fixed(1, solver)));
+        solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{-2, 3, 2}, "<=", VF.fixed(-2, solver)));
+        solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{3, -3, 2}, "<=", VF.fixed(-1, solver)));
+
+        ExplanationEngine ee = new ExplanationEngine(solver, false, false);
+
+        solver.getEnvironment().worldPush();
+        solver.propagate();
+        Assert.assertEquals(x.getLB(), 1);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(z.getUB(), 0);
+        solver.getEnvironment().worldPush();
+        OnDemandIntStrategy strategy = new OnDemandIntStrategy();
+        IntDecision d1 = strategy.makeIntDecision(x, DecisionOperator.int_split, 2);
+        d1.buildNext();
+        d1.apply();
+        solver.propagate();
+        Assert.assertEquals(z.getUB(), -1);
+        solver.getEnvironment().worldPush();
+        IntDecision d2 = strategy.makeIntDecision(x, DecisionOperator.int_split, 1);
+        d2.buildNext();
+        d2.apply();
+        ContradictionException c = null;
+        try {
+            solver.propagate();
+            Assert.fail();
+        } catch (ContradictionException ce) {
+            c = ce;
+        }
+        ee.explain(c);
+    }
+
+    @Test(groups="1s")
+    public void test111() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.bounded("x", 0, 1, solver);
+        IntVar y = VF.bounded("y", 0, 1, solver);
+        IntVar z = VF.bounded("z", 0, 1, solver);
+
+        solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", VF.fixed(2, solver)));
+
+        solver.propagate();
+        System.out.printf("%s\n", solver);
     }
 
 }

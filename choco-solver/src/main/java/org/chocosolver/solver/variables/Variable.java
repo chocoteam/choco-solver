@@ -52,18 +52,49 @@ import java.io.Serializable;
  */
 public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
-    // **** DEFINE THE TYPE OF A VARIABLE **** //
-    // MUST BE A COMBINATION OF TYPE AND KIND
-    // TYPE (exclusive)
+    /**
+     * Type of variable: variable (unique).
+     */
     int VAR = 1;
+
+    /**
+     * Type of variable: fixed (unique).
+     */
     int CSTE = 1 << 1;
+
+    /**
+     * Type of variable: view (unique).
+     */
     int VIEW = 1 << 2;
+
+    /**
+     * Mask to get the type of a variable.
+     */
     int TYPE = (1 << 3) - 1;
-    // KIND (exclusive)
+
+    /**
+     * Kind of variable: integer (unique).
+     */
     int INT = 1 << 3;
+
+    /**
+     * Kind of variable: boolean and integer too (unique).
+     */
     int BOOL = INT | (1 << 4);
+
+    /**
+     * Kind of variable: set.
+     */
     int SET = 1 << 5;
+
+    /**
+     * Kind of variable: real.
+     */
     int REAL = 1 << 6;
+
+    /**
+     * Mask to get the kind of a variable.
+     */
     int KIND = (1 << 10) - 1 - TYPE;
 
     /**
@@ -93,6 +124,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @param idx position of the propagator
      * @return a propagator
      */
+    @SuppressWarnings("unused")
     Propagator getPropagator(int idx);
 
     /**
@@ -102,8 +134,18 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      */
     int getNbProps();
 
+    /**
+     * @return the array of indices of this variable in its propagators.
+     */
     int[] getPIndices();
 
+    /**
+     * This variable's propagators are stored in specific way which ease iteration based on propagation conditions.
+     * Any event indicates, through the <i>dependency list</i> which propagators should be executed.
+     * Thus, an event indicates a list of <code>i</code>s, passed as parameter, which help returning the right propagators.
+     * @param i dependency index
+     * @return index of the first propagator associated with that dependency.
+     */
     int getDindex(int i);
 
     /**
@@ -112,6 +154,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @param pidx index of the propagator within the list of propagators of this
      * @return position of this in the propagator pidx
      */
+    @SuppressWarnings("unused")
     int getIndexInPropagator(int pidx);
 
     /**
@@ -122,9 +165,17 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      */
     void addMonitor(IVariableMonitor monitor);
 
-    //todo : to complete
+    /**
+     * Removes <code>monitor</code> form the list of this variable's monitors.
+     * @param monitor the monitor to remove.
+     */
+    @SuppressWarnings("unused")
     void removeMonitor(IVariableMonitor monitor);
 
+    /**
+     * Attaches a view to this variable.
+     * @param view a view to add to this variable.
+     */
     void subscribeView(IView view);
 
     /**
@@ -153,7 +204,10 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * Analysis propagator event reaction on this, and adapt this
      *
      * @param mask event mask
+     * @deprecated not used anymore in the code. No substitute. To be removed in version > 3.3.2
      */
+    @SuppressWarnings("unused")
+    @Deprecated
     void recordMask(int mask);
 
     /**
@@ -180,7 +234,8 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * Notify views of observed variable modifications
      *
      * @param event the event which occurred on the variable
-     * @throws ContradictionException
+     * @param cause the cause of the notification
+     * @throws ContradictionException if the notification detects contradiction.
      */
     void notifyViews(IEventType event, ICause cause) throws ContradictionException;
 
@@ -194,7 +249,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * Notify monitors of observed variable modifications
      *
      * @param event the event which occurred on the variable
-     * @throws ContradictionException
+     * @throws ContradictionException if the monitor detects contradiction.
      */
     void notifyMonitors(IEventType event) throws ContradictionException;
 
@@ -202,6 +257,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * Throws a contradiction exception based on <cause, message>
      * @param cause   ICause causing the exception
      * @param message the detailed message  @throws ContradictionException expected behavior
+     * @throws ContradictionException the build contradiction.
      */
     void contradiction(ICause cause, String message) throws ContradictionException;
 
@@ -248,6 +304,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
 
     /**
      * For scheduling purpose only
+     * @return the scheduler
      */
-    EvtScheduler _schedIter();
+    <E extends IEventType> EvtScheduler<E> _schedIter();
 }

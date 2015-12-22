@@ -51,27 +51,80 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_P
  * <p>
  * Created by cprudhom on 09/12/14.
  * Project: choco.
+ * @author Charles Prud'homme
  */
 public class RuleStore {
 
+    /**
+     * No entry value for variable mask
+     */
     private static final int NO_ENTRY = Integer.MIN_VALUE;
+    /**
+     * Mask for integer variable modification
+     */
     static final int DM = 15;
+    /**
+     * Mask for integer variable bounds modification
+     */
     static final int BD = 7;
+    /**
+     * Mask for integer variable upper bound modification
+     */
     static final int UB = 5;
+    /**
+     * Mask for integer variable lower bound modification
+     */
     static final int LB = 3;
+    /**
+     * Mask for integer variable value removal
+     */
     static final int RM = 1;
 
+    /**
+     * Set of modification rules
+     */
     private Rules cRules;
-    private Explanation[] decRefut; // store refuted decisions
-    private final boolean saveCauses; // does user require feedback, ie, keep trace of the constraints in conflict ?
-    private final boolean enablePartialExplanation; //do explanations need to be complete (for DBT or nogood extraction) ?
-    private boolean preemptedStop; // when conditions are favorable, a preempted stop can be considered
-    private int swi; // search world index
+    /**
+     * Stores explanation of refuted decisions
+     */
+    private Explanation[] decRefut;
+    /**
+     * Set to <tt>true</tt> when user feedback is needed, ie to keep trace of the propagator (in conflict)
+     */
+    private final boolean saveCauses;
+    /**
+     * Set to <tt>true</tt> to enable stopping the explanation computation to the first involved decision.
+     * Faster but weaker.
+     */
+    private final boolean enablePartialExplanation;
+    /**
+     * When conditions are favorable, early iteration stop can be considered
+     */
+    private boolean preemptedStop;
+    /**
+     * Stores the index of the world from which search has begun
+     */
+    private int swi;
+    /**
+     * The observed solver
+     */
     private final Solver mSolver;
 
-
+    /**
+     * Local-like parameter.
+     * Reference to the last variable popped from the event store.
+     */
     private IntVar lastVar;
+
+    /**
+     * Local-like parameter.
+     * Reference to the last event popped from the event store.
+     */
     private IEventType lastEvt;
+    /**
+     * Local-like parameter.
+     * Reference to the last value popped from the event store.
+     */
     private int lastValue;
 
     /**
@@ -90,6 +143,7 @@ public class RuleStore {
 
     /**
      * Initialize the rulestore for a new explanation
+     * @param expl an explanation
      */
     public void init(Explanation expl) {
         this.cRules = expl.getRules();
@@ -99,6 +153,7 @@ public class RuleStore {
 
     /**
      * when conditions are favorable, a preempted stop can be considered: not all events have to be analyzed.
+     * @return return <tt>true</tt> if early stop occurs.
      */
     public boolean isPreemptedStop() {
         return preemptedStop;
@@ -110,6 +165,7 @@ public class RuleStore {
      * @param idx        index in <code>eventStore</code> of the event to evaluate
      * @param eventStore set of events
      * @throws org.chocosolver.solver.exception.SolverException when the type of the variable is neither {@link Variable#BOOL} or {@link Variable#INT}.
+     * @return <tt>true</tt> if the event in position <code>idx</code> in <code>eventStore</code> matches a rule
      */
     public boolean match(final int idx, final IEventStore eventStore) {
         lastVar = eventStore.getVariable(idx);
@@ -143,6 +199,7 @@ public class RuleStore {
      * @param i1       either instantiated value (IN) or new lb (LB) or new ub (UB) or removed value (RM)
      * @param i2       either old lb (IN, LB) or old ub (UB) or -1 (RM)
      * @param i3       either old ub (IN), or -1 (LB, UB, RM)
+     * @return <tt>true</tt> the variable state matches a rule
      */
     public boolean matchDomain(int ruleMask, IntVar ivar, IntEventType evt, int i1, int i2, int i3) {
         int vid = ivar.getId();

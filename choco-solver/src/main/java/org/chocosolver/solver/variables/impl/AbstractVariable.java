@@ -57,39 +57,118 @@ import java.util.Arrays;
  */
 public abstract class AbstractVariable implements Variable {
 
+    /**
+     * For serialization purpose.
+     */
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Message associated with last value removals exception.
+     */
     public static final String MSG_REMOVE = "remove last value";
+
+    /**
+     * Message associated with domain wipe out exception.
+     */
     public static final String MSG_EMPTY = "empty domain";
+
+    /**
+     * Message associated with double instantiation exception.
+     */
     public static final String MSG_INST = "already instantiated";
+
+    /**
+     * Default exception message.
+     */
     public static final String MSG_UNKNOWN = "unknown value";
+
+    /**
+     * Message associated with wrong upper bound exception.
+     */
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
+
+    /**
+     * Message associated with wrong lower bound exception.
+     */
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
+
+    /**
+     * Message associated with wrong bounds exception.
+     */
     public static final String MSG_BOUND = "new bounds are incorrect";
 
-    private final int ID; // unique id of this
-    protected final Solver solver; // Reference to the solver containing this variable.
+    /**
+     * Unique ID of this variable.
+     */
+    private final int ID;
 
+    /**
+     * Reference to the solver containing this variable (unique).
+     */
+    protected final Solver solver;
+
+    /**
+     * Name of the variable.
+     */
     protected final String name;
 
-    private Propagator[] propagators; // list of propagators of the variable
-    private int[] pindices;    // index of the variable in the i^th propagator
-    private int[] dindices; // dependency indices -- for scheduling
+    /**
+     * Number of propagators of this variable.
+     */
     private int nbPropagators;
+    /**
+     * List of propagators of this variable.
+     */
+    private Propagator[] propagators;
 
-    private IView[] views; // views to inform of domain modification
-    private int vIdx; // index of the last view not null in views -- not backtrable
+    /**
+     * Store the index of this variable in each of its propagators.
+     */
+    private int[] pindices;
 
-    protected IVariableMonitor[] monitors; // monitors to inform of domain modification
-    protected int mIdx; // index of the last view not null in views -- not backtrable
+    /**
+     * Dependency indices, for efficient scheduling purpose.
+     */
+    private int[] dindices;
 
-    protected int modificationEvents;
+    /**
+     * List of views based on this variable.
+     */
+    private IView[] views;
 
+    /**
+     * Index of the last not null view in <code>views</code>.
+     */
+    private int vIdx;
+
+    /**
+     * List of monitors observing this variable.
+     */
+    protected IVariableMonitor[] monitors;
+
+    /**
+     * Index of the last not null monitor in <code>monitors</code>.
+     */
+    protected int mIdx;
+
+    /**
+     * Indicates whether an explanation engine can be plugged (almost always set to <tt>true</tt>).
+     */
     protected final boolean _plugexpl;
 
+    /**
+     * The event scheduler of this variable, for efficient scheduling purpose.
+     * It stores propagators wrt the propagation conditions.
+     */
     private EvtScheduler scheduler;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Create the shared data of any type of variable.
+     * @param name name of the variable
+     * @param solver solver which declares this variable
+     */
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
@@ -134,10 +213,16 @@ public abstract class AbstractVariable implements Variable {
             int[] itmp = pindices;
             pindices = new int[itmp.length * 3 / 2 + 1];
             System.arraycopy(itmp, 0, pindices, 0, nbPropagators);
+            if(pindices.length != propagators.length){
+                System.exit(-1);
+            }
 
         }
         // 2. put it in the right place
-        subscribe(propagator, idxInProp, scheduler.select(propagator.getPropagationConditions(idxInProp)));
+        int pc = propagator.getPropagationConditions(idxInProp);
+        if(pc > 0) { // deal with VOID, when the propagator should not be aware of this variable's modifications
+            subscribe(propagator, idxInProp, scheduler.select(pc));
+        }
         return nbPropagators++;
     }
 
@@ -153,9 +238,10 @@ public abstract class AbstractVariable implements Variable {
     }
 
 
+    @Deprecated
     @Override
     public void recordMask(int mask) {
-        modificationEvents |= mask;
+        // to be removed in version > 3.3.2
     }
 
     @Override
@@ -186,7 +272,7 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public Propagator[] getPropagators() {
         if (propagators.length > nbPropagators) {
-            propagators = Arrays.copyOf(propagators, nbPropagators);
+            adaptSize();
         }
         return propagators;
     }
@@ -204,9 +290,15 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public int[] getPIndices() {
         if (pindices.length > nbPropagators) {
-            pindices = Arrays.copyOf(pindices, nbPropagators);
+            adaptSize();
         }
         return pindices;
+    }
+
+    private void adaptSize(){
+        assert pindices.length == propagators.length;
+        propagators = Arrays.copyOf(propagators, nbPropagators);
+        pindices = Arrays.copyOf(pindices, nbPropagators);
     }
 
     @Override
@@ -232,9 +324,7 @@ public abstract class AbstractVariable implements Variable {
     public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
-        if ((modificationEvents & event.getMask()) != 0) {
-            solver.getEngine().onVariableUpdate(this, event, cause);
-        }
+        solver.getEngine().onVariableUpdate(this, event, cause);
         notifyViews(event, cause);
     }
 
@@ -304,16 +394,19 @@ public abstract class AbstractVariable implements Variable {
         return getName();
     }
 
+    /**
+     * @return <tt>true</tt> if this variable has a domain included in [0,1].
+     */
     public boolean isBool() {
         return (getTypeAndKind() & KIND) == BOOL;
     }
 
+    /**
+     * @return the event scheduler
+     */
+    @SuppressWarnings("unchecked")
     public EvtScheduler _schedIter() {
         return scheduler;
-    }
-
-    public void _setschedIter(EvtScheduler siter) {
-        this.scheduler = siter;
     }
 
 }

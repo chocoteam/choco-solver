@@ -29,15 +29,20 @@
  */
 package org.chocosolver.choco;
 
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -64,7 +69,7 @@ public class LogicTreeTest {
 
         ILogical l = LogicTreeToolBox.toCNF(root, solver);
 
-        Assert.assertEquals(l.toString(), "((b or a or not(c)) and (b or a or not(d)))");
+        Assert.assertEquals(l.toString(), "((a or b or not(c)) and (a or b or not(d)))");
     }
 
     @Test(groups = "1s")
@@ -82,7 +87,7 @@ public class LogicTreeTest {
 
         ILogical l = LogicTreeToolBox.toCNF(root, solver);
 
-        Assert.assertEquals(l.toString(), "(e and (b or a or not(c)) and (b or a or not(d)))");
+        Assert.assertEquals(l.toString(), "(e and (a or b or not(c)) and (a or b or not(d)))");
     }
 
 
@@ -177,7 +182,7 @@ public class LogicTreeTest {
 
         ILogical l = LogicTreeToolBox.toCNF(root, solver);
 
-        Assert.assertEquals(l.toString(), "((a or c) and (b or not(a)) and (b or c))");
+        Assert.assertEquals(l.toString(), "((a or c) and (b or c) and (b or not(a)))");
     }
 
     @Test(groups = "1s")
@@ -247,4 +252,109 @@ public class LogicTreeTest {
         }
     }
 
+    @Test(groups="1s")
+    public void test11(){
+        Solver solver = new Solver();
+        BoolVar a = VF.bool("a", solver);
+        BoolVar b = VF.bool("b", solver);
+        LogOp l = LogOp.or(
+                LogOp.and(a, b.not()),
+                LogOp.and(a.not(), b),
+                LogOp.and(a.not(), b.not())
+        );
+        ILogical ll = LogicTreeToolBox.toCNF(l, solver);
+        Assert.assertEquals(ll.toString(), "(not(b) or not(a))");
+    }
+
+    @Test(groups="1s")
+    public void test13(){
+        Solver solver = new Solver();
+        BoolVar a = VF.bool("a", solver);
+        BoolVar b = VF.bool("b", solver);
+        LogOp l = LogOp.or(a, b, a.not());
+        ILogical ll = LogicTreeToolBox.toCNF(l, solver);
+        Assert.assertEquals(ll.toString(), "cste -- 1 = 1");
+    }
+
+
+    @Test(groups="1s")
+    public void test14(){
+        Solver solver = new Solver();
+        BoolVar a = VF.bool("a", solver);
+        BoolVar b = VF.bool("b", solver);
+        LogOp l = LogOp.or(a, b, a.not(), a.not());
+        ILogical ll = LogicTreeToolBox.toCNF(l, solver);
+        Assert.assertEquals(ll.toString(), "cste -- 1 = 1");
+    }
+
+    @Test(groups="1s")
+    public void test15(){
+        Solver solver = new Solver();
+        IntVar a = VF.enumerated("a", -1, 1, solver);
+        BoolVar b1 = VF.bool("b1", solver);
+        BoolVar b2 = VF.bool("b2", solver);
+        ICF.arithm(a,"=",0).reifyWith(b1);
+        ICF.arithm(a,">",0).reifyWith(b2);
+
+        LogOp l = LogOp.or(
+                LogOp.and(b1, b2.not()),
+                LogOp.and(b1.not(), b2),
+                LogOp.and(b1.not(), b2.not())
+        );
+        SatFactory.addClauses(l, solver);
+        try {
+            solver.propagate();
+            b1.instantiateTo(1, Cause.Null);
+            solver.propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        Assert.assertTrue(b1.isInstantiatedTo(1));
+        Assert.assertTrue(b2.isInstantiatedTo(0));
+    }
+
+    @Test(groups="1s")
+    public void test16(){
+        Solver solver = new Solver();
+        IntVar a = VF.enumerated("a", -1, 1, solver);
+        BoolVar b1 = VF.bool("b1", solver);
+        BoolVar b2 = VF.bool("b2", solver);
+        ICF.arithm(a,"=",0).reifyWith(b1);
+        ICF.arithm(a,">",0).reifyWith(b2);
+
+        LogOp l = LogOp.or(b1.not(), b2.not());
+        SatFactory.addClauses(l, solver);
+        try {
+            solver.propagate();
+            b1.instantiateTo(1, Cause.Null);
+            solver.propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        Assert.assertTrue(b1.isInstantiatedTo(1));
+        Assert.assertTrue(b2.isInstantiatedTo(0));
+        Assert.assertTrue(a.isInstantiatedTo(0));
+    }
+
+    @Test(groups="1s")
+    public void test17(){
+        Solver solver = new Solver();
+        IntVar a = VF.enumerated("a", -1, 1, solver);
+        BoolVar b1 = VF.bool("b1", solver);
+        BoolVar b2 = VF.bool("b2", solver);
+        ICF.arithm(a,"=",0).reifyWith(b1);
+        ICF.arithm(a,">",0).reifyWith(b2);
+
+        SatFactory.addClauses(new BoolVar[0], new BoolVar[]{b1, b2});
+        try {
+            solver.propagate();
+            b1.instantiateTo(1, Cause.Null);
+            solver.propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        Assert.assertTrue(b1.isInstantiatedTo(1));
+        Assert.assertTrue(b2.isInstantiatedTo(0));
+        Assert.assertTrue(a.isInstantiatedTo(0));
+    }
 }

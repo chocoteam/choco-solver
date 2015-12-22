@@ -293,25 +293,38 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getName());
-        sb.append(" Envelope : {");
-        int s = envelope.getSize();
-        for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
-            sb.append(i + min);
-            s--;
-            if (s > 0) {
-                sb.append(",");
-            }
-        }
-        sb.append("} Kernel : {");
-        s = kernel.getSize();
-        for (int i = kernel.getFirstElement(); i >= 0; i = kernel.getNextElement()) {
-            sb.append(i + min);
-            s--;
-            if (s > 0) {
-                sb.append(",");
-            }
-        }
-        sb.append("}");
+		if(isInstantiated()){
+			sb.append(" = {");
+			int s = kernel.getSize();
+			for (int i = kernel.getFirstElement(); i >= 0; i = kernel.getNextElement()) {
+				sb.append(i + min);
+				s--;
+				if (s > 0) {
+					sb.append(",");
+				}
+			}
+			sb.append("}");
+		}else {
+			sb.append(" = [{");
+			int s = kernel.getSize();
+			for (int i = kernel.getFirstElement(); i >= 0; i = kernel.getNextElement()) {
+				sb.append(i + min);
+				s--;
+				if (s > 0) {
+					sb.append(",");
+				}
+			}
+			sb.append("}, {");
+			s = envelope.getSize();
+			for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
+				sb.append(i + min);
+				s--;
+				if (s > 0) {
+					sb.append(",");
+				}
+			}
+			sb.append("}]");
+		}
         return sb.toString();
     }
 

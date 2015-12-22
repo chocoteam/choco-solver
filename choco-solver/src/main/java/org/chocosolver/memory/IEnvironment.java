@@ -35,6 +35,11 @@ import org.chocosolver.memory.structure.Operation;
 import java.io.Serializable;
 
 
+/**
+ * An interface to ease declaration of backtrackable objects (mostly primitives).
+ *
+ * @author Charles Prud'homme, Hadrien Cambazard, Guillaume Rochart
+ */
 public interface IEnvironment extends Serializable {
 
     /**
@@ -65,7 +70,7 @@ public interface IEnvironment extends Serializable {
 
     /**
      * Comitting the current world: merging it with the previous one.
-     * <p/>
+     * <p>
      * Not used yet.
      */
     void worldCommit();
@@ -73,6 +78,7 @@ public interface IEnvironment extends Serializable {
     /**
      * Force to build fake history when a stored object on a particular condition.
      * The default condition is {@link ICondition#FALSE}.
+     * @param condition to satisfy to build fake history
      */
     void buildFakeHistoryOn(ICondition condition);
 
@@ -113,6 +119,7 @@ public interface IEnvironment extends Serializable {
     /**
      * Factory pattern: new StoredFloat objects are created by the environment
      * (no initial value is assigned to the backtrackable search)
+     * @return new IStateDouble computed by the environment
      */
 
     IStateDouble makeFloat();
@@ -121,18 +128,27 @@ public interface IEnvironment extends Serializable {
      * Factory pattern: new StoredFloat objects are created by the environment
      *
      * @param initialValue the initial value of the backtrackable search
+     * @return new IStateDouble computed by the environment
      */
-
     IStateDouble makeFloat(double initialValue);
 
+    /**
+     * Factory pattern: new backtrackable long attached to this environment.
+     * @return a backtrackable long
+     */
     IStateLong makeLong();
 
+    /**
+     * Factory pattern: new backtrackable long attached to this environment.
+     * @param init its initial value
+     * @return a backtrackable long
+     */
     IStateLong makeLong(long init);
 
     /**
      * Factory pattern: new IStateBitSet objects are created by the environment
      *
-     * @param size initail size of the IStateBitSet
+     * @param size initial size of the IStateBitSet
      * @return IStateBitSet
      */
     IStateBitSet makeBitSet(int size);
@@ -142,6 +158,7 @@ public interface IEnvironment extends Serializable {
      *
      * @param size         the number of entries in the vector
      * @param initialValue the common initial value for all entries (backtrackable integers)
+     * @return a backtrackable vector
      */
     IStateIntVector makeIntVector(int size, int initialValue);
 
@@ -155,13 +172,17 @@ public interface IEnvironment extends Serializable {
      */
     IStateDoubleVector makeDoubleVector(int size, double initialValue);
 
-        /**
+    /**
      * Factory pattern : shared IndexedBipartiteSet object is return by the environment
      *
      * @return IndexedBipartiteSet
      */
     BasicIndexedBipartiteSet getSharedBipartiteSetForBooleanVars();
 
+    /**
+     * Save this operation onto the stack of operations to undo on backtrack.
+     * @param operation operation to undo
+     */
     void save(Operation operation);
 
     /**

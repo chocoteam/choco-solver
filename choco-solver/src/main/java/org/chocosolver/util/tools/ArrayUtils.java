@@ -31,9 +31,11 @@ package org.chocosolver.util.tools;
 
 import gnu.trove.list.array.TIntArrayList;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
+ * This class contains various methods for manipulating arrays.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -42,7 +44,17 @@ import java.util.*;
 public enum ArrayUtils {
     ;
 
+    /**
+     * Creates an array of ints of size  <i>n</i>,
+     * then assigns values from 0 (inclusive) to <code>n</code> (exclusive) the elements.
+     * @param n size of the array and greatest exclusvie value, must be greater or equal to 0.
+     * @return an array of ints
+     * @throws NegativeArraySizeException if n is negative
+     */
     public static int[] zeroToN(int n) {
+        if (n < 0) {
+            throw new NegativeArraySizeException("Cannot create negative size array");
+        }
         final int[] r = new int[n];
         for (int i = 0; i < n; i++) {
             r[i] = i;
@@ -50,7 +62,18 @@ public enum ArrayUtils {
         return r;
     }
 
+    /**
+     * Creates an array of ints of size <i>n</i>,
+     * then assigns values from 1 (inclusive) to <code>n</code> (inclusive) the elements.
+     * @param n size of the array and greatest inclusive value, must be greater or equal to 0.
+     * @return an array of ints
+     * @throws NegativeArraySizeException if n is negative
+     */
     public static int[] oneToN(int n) {
+        if (n < 0) {
+            throw new NegativeArraySizeException("Cannot create negative size array");
+        }
+        assert n > -1;
         final int[] r = new int[n];
         for (int i = 1; i <= n; i++) {
             r[i - 1] = i;
@@ -58,42 +81,70 @@ public enum ArrayUtils {
         return r;
     }
 
+    /**
+     * Create an array of size (<i>end</i> - <i>begin</i>)
+     * and assigns to the element <i>i</i> the value (<i>i</i> + <i>begin</i>).
+     *  <i>begin</i> must be greater or equal to  <i>end</i>.
+     * @param begin first value
+     * @param end last value
+     * @return null if  <i>begin</i> >  <i>end</i>, an array of ints otherwise.
+     * @throws NegativeArraySizeException if begin > end is negative
+     */
     public static int[] linspace(int begin, int end) {
-        if (end > begin) {
+        if (end >= begin) {
             int[] r = new int[end - begin];
             for (int i = begin; i < end; i++) {
                 r[i - begin] = i;
             }
             return r;
-        } else return null;
+        } else {
+            throw new NegativeArraySizeException("Cannot create negative size array");
+        }
     }
 
+    /**
+     * Returns the column <i>c</i> extracted from matrix <i>array</i>.
+     * @param array double entry matrix
+     * @param c index of the column to get
+     * @param <T> the class of the objects in the input matrix
+     * @return the column <i>c</i> from <i>array</i>, or null if array is null or array.length is null,
+     * or if c is negative or if array.length < c
+     */
     @SuppressWarnings({"unchecked", "RedundantCast"})
-    public static <T> T[] getColumn(final T[][] array, final int column) {
+    public static <T> T[] getColumn(final T[][] array, final int c) {
+        return getColumn(array, c, (Class<? extends T[]>) array[0].getClass());
+    }
+
+    /**
+     * Returns the column <i>c</i> extracted from matrix <i>array</i>.
+     * @param array double entry matrix
+     * @param c index of the column to get
+     * @param newType the class of the copy to be returned
+     * @param <T> the class of the objects in the input matrix
+     * @return the column <i>c</i> from <i>array</i>, or null if array is null or array.length is null,
+     * or if c is negative or if array.length < c
+     */
+    @SuppressWarnings({"unchecked", "RedundantCast"})
+    public static <T> T[] getColumn(final T[][] array, final int c, Class<? extends T[]> newType) {
         if (array != null && array.length > 0
-                && column >= 0 && array[0].length > column) {
-            T[] res = (T[]) java.lang.reflect.Array.newInstance(array[0][column].getClass(), array.length);
+                && c >= 0 && array[0].length > c) {
+            T[] res = ((Object) newType == (Object) Object[].class)
+                    ? (T[]) new Object[array.length]
+                    : (T[]) Array.newInstance(newType.getComponentType(), array.length);
             for (int i = 0; i < array.length; i++) {
-                res[i] = (T) array[i][column];
+                res[i] = (T) array[i][c];
             }
             return res;
         }
         return null;
     }
 
-    @SuppressWarnings({"unchecked", "RedundantCast"})
-    public static <T> T[] getColumn(final T[][] array, final int column, Class clazz) {
-        if (array != null && array.length > 0
-                && column >= 0 && array[0].length > column) {
-            T[] res = (T[]) java.lang.reflect.Array.newInstance(clazz, array.length);
-            for (int i = 0; i < array.length; i++) {
-                res[i] = (T) array[i][column];
-            }
-            return res;
-        }
-        return null;
-    }
-
+    /**
+     * Sum the lengths of <i>arrays</i>
+     * @param arrays list of arrays
+     * @param <T> the class of the objects in the input array
+     * @return the sum of lengths of <i>arrays</i>
+     */
     @SafeVarargs
     public static <T> int length(final T[]... arrays) {
         int length = 0;
@@ -103,6 +154,13 @@ public enum ArrayUtils {
         return length;
     }
 
+    /**
+     *
+     * @param array array of elements
+     * @param obj element to find
+     * @param <T> the class of the objects in the input array
+     * @return <tt>true</tt> if <i>array</i> contains <i>obj</i>
+     */
     public static <T> boolean contains(T[] array, T obj) {
         for (T elem : array) {
             if (elem.equals(obj)) return true;
@@ -110,6 +168,13 @@ public enum ArrayUtils {
         return false;
     }
 
+    /**
+     * Returns the element in position <i>index</i> when considering all <i>arrays</i> appended altogether.
+     * @param index position of the element to return
+     * @param arrays list of arrays
+     * @param <T> the class of the objects in the input arrays
+     * @return the element in position <i>index</i> when considering all <i>arrays</i> appended altogether.
+     */
     @SafeVarargs
     public static <T> T get(int index, final T[]... arrays) {
         int shift = index;
@@ -124,6 +189,13 @@ public enum ArrayUtils {
     }
 
 
+    /**
+     * Returns the element in position <i>index</i> when considering all <i>arrays</i> appended altogether.
+     * @param index position of the element to return
+     * @param arrays list of arrays
+     * @param <T> the class of the objects in the input lists
+     * @return the element in position <i>index</i> when considering all <i>arrays</i> appended altogether.
+     */
     @SafeVarargs
     public static <T> T get(int index, final List<T>... arrays) {
         int shift = index;
@@ -193,6 +265,10 @@ public enum ArrayUtils {
         }
     }
 
+    /**
+     * Turns back to from the elements of <i>tab</i> from the middle position.
+     * @param tab array to reverse
+     */
     public static void reverse(int[] tab) {
         int tmp;
         final int n = tab.length;
@@ -203,6 +279,11 @@ public enum ArrayUtils {
         }
     }
 
+    /**
+     * Turns back to from the elements of <i>tab</i> from the middle position.
+     * @param tab array to reverse
+     * @param <T> the class of the objects in the input array
+     */
     public static <T> void reverse(T[] tab) {
         T tmp;
         final int n = tab.length - 1;
@@ -214,21 +295,36 @@ public enum ArrayUtils {
     }
 
     /**
-     * apply a permuation on an array
+     * Permutes elements from <i>tab</i> wrt to <i>permutuation</i>: tab[i] = tab[permutation[i]].
+     * @param permutation permutation
+     * @param tab array of ints
+     * @param <T> the class of the objects in the input array
      */
     @SuppressWarnings("unchecked")
     public static <T> void permutation(int[] permutation, T[] tab) {
-        T[] tmp = (T[]) java.lang.reflect.Array.newInstance(tab[0].getClass(), tab.length);
-        System.arraycopy(tab, 0, tmp, 0, tab.length);
+        T[] tmp = tab.clone();
         for (int i = 0; i < tab.length; i++) {
             tab[i] = tmp[permutation[i]];
         }
     }
 
+    /**
+     * Returns a list composed of elements from <i>array</i>.
+     * @param array array of elements
+     * @param <T> the class of the objects in the input array
+     * @return a list composed of elements from <i>array</i>.
+     */
     public static <T> List<T> toList(T[] array) {
         return Arrays.asList(array);
     }
 
+    /**
+     * Returns an array composed of elements from <i>list</i>.
+     * @param c the class of the copy to be returned
+     * @param list list of elements
+     * @param <T> the class of the objects in the input array
+     * @return an array composed of elements from <i>list</i>.
+     */
     @SuppressWarnings("unchecked")
     public static <T> T[] toArray(Class c, List<T> list) {
         //        T[] array = (T[])Array.newInstance(c, list.size());
@@ -236,15 +332,33 @@ public enum ArrayUtils {
         return list.toArray((T[]) java.lang.reflect.Array.newInstance(c, list.size()));
     }
 
+    /**
+     * Creates an array from vargs <i>elt</i>.
+     * @param elt elements to put in an array
+     * @param <T> the class of the objects in the returned array
+     * @return an array from vargs <i>elt</i>
+     */
     @SafeVarargs
     public static <T> T[] toArray(T... elt) {
         return elt;
     }
 
+    /**
+     * Creates an array from elements in <i>list</i>.
+     * @param list elements to put in an array
+     * @param <T> the class of the objects in the returned array
+     * @return an array from element in <i>list</i>
+     */
     public static <T> T[] toArray(ArrayList<T> list) {
         return toArray(list.get(0).getClass(), list);
     }
 
+    /**
+     * Transposes a matrix M[n][m] in a matrix M<sup>T</sup>[m][n] such that M<sup>T</sup>[i][j] = M[j][i]
+     * @param matrix matrix to transpose
+     * @param <T> the class of the objects in the input matrix
+     * @return a matrix
+     */
     @SuppressWarnings("unchecked")
     public static <T> T[][] transpose(T[][] matrix) {
         T[][] ret = (T[][]) java.lang.reflect.Array.newInstance(matrix.getClass().getComponentType(), matrix[0].length);
@@ -260,6 +374,11 @@ public enum ArrayUtils {
 
     }
 
+    /**
+     * Transposes a matrix M[n][m] in a matrix M<sup>T</sup>[m][n] such that M<sup>T</sup>[i][j] = M[j][i]
+     * @param matrix matrix to transpose
+     * @return a matrix
+     */
     public static int[][] transpose(int[][] matrix) {
         int[][] ret = (int[][]) java.lang.reflect.Array.newInstance(matrix.getClass().getComponentType(), matrix[0].length);
         for (int i = 0; i < ret.length; i++) {
@@ -274,6 +393,12 @@ public enum ArrayUtils {
 
     }
 
+    /**
+     * Flattens a matrix M[n][m] in an array F[n*m] such that F[i*n+j] = M[i][j].
+     * @param matrix matrix to flatten
+     * @param <T> the class of the objects in the input matrix
+     * @return a matrix
+     */
     @SuppressWarnings("unchecked")
     public static <T> T[] flatten(T[][] matrix) {
         int sz = 0;
@@ -287,6 +412,12 @@ public enum ArrayUtils {
         return ret;
     }
 
+    /**
+     * Flattens a matrix M[n][m][p] in an array F[n*m*p] such that F[(i*n*m) + (j*m) + k] = M[i][j][k].
+     * @param matrix matrix to flatten
+     * @param <T> the class of the objects in the input matrix
+     * @return a matrix
+     */
     @SuppressWarnings("unchecked")
     public static <T> T[] flatten(T[][][] matrix) {
         List<T> elt = new ArrayList<>();
@@ -307,6 +438,11 @@ public enum ArrayUtils {
         return ret;
     }
 
+    /**
+     * Flattens a matrix M[n][m] in an array F[n*m] such that F[i*n+j] = M[i][j].
+     * @param matrix matrix to flatten
+     * @return a matrix
+     */
     public static int[] flatten(int[][] matrix) {
         int sz = 0;
         for (int[] t : matrix) sz += t.length;
@@ -336,6 +472,12 @@ public enum ArrayUtils {
     }
 
 
+    /**
+     * Create an array of elements in <i>set</i> and sort them using {@link Arrays#sort(Object[])}
+     * @param set set of elements
+     * @param <T> the class of the objects in the input set.
+     * @return an array of sorted elements from <i>set</i>
+     */
     @SuppressWarnings("unchecked")
     public static <T extends Comparable<T>> T[] sort(Set<T> set) {
         final LinkedList<T> tmpl = new LinkedList<>(set);
@@ -349,6 +491,11 @@ public enum ArrayUtils {
         }
     }
 
+    /**
+     * Duplicates <i>arr</i> and returns the new copy
+     * @param arr matrix to duplicate
+     * @return a copy of <i>arr</i>
+     */
     public static int[][][][] swallowCopy(int[][][][] arr) {
         int s0 = arr.length;
         int[][][][] copy = new int[s0][][][];
@@ -369,6 +516,11 @@ public enum ArrayUtils {
 
     }
 
+    /**
+     * Duplicates <i>arr</i> and returns the new copy
+     * @param arr matrix to duplicate
+     * @return a copy of <i>arr</i>
+     */
     public static int[][][] swallowCopy(int[][][] arr) {
         int s0 = arr.length;
         int[][][] copy = new int[s0][][];
@@ -386,10 +538,21 @@ public enum ArrayUtils {
 
     }
 
+    /**
+     * Creates and returns an array of ints composed of unique values from 0 (inclusive) to nb (exclusive), in random order.
+     * @param nb upper value (exclusive)
+     * @return an array of ints composed of unique values from 0 (inclusive) to nb (exclusive), in random order.
+     */
     public static int[] zeroToNShuffle(int nb) {
         return zeroToNShuffle(nb, System.nanoTime());
     }
 
+    /**
+     * Creates and returns an array of ints composed of unique values from 0 (inclusive) to nb (exclusive), in random order.
+     * @param nb upper value (exclusive)
+     * @param seed seed for randomness
+     * @return an array of ints composed of unique values from 0 (inclusive) to nb (exclusive), in random order.
+     */
     public static int[] zeroToNShuffle(int nb, long seed) {
         Random r = new Random(seed);
         int[] ret = new int[nb];
@@ -399,15 +562,18 @@ public enum ArrayUtils {
         for (int i = 0; i < nb; i++) {
             int idx = r.nextInt(tmp.size());
             ret[i] = tmp.get(idx);
-            System.err.println(ret[i]);
-            System.err.println(tmp.remove(idx));
         }
 
         return ret;
 
     }
 
-    public static int[] randomPermutations(int[] tab, Random r) {
+    /**
+     * Permutes randomly elements from <i>tab</i>
+     * @param tab array of ints
+     * @param r randomness generator
+     */
+    public static void randomPermutations(int[] tab, Random r) {
         int l = tab.length;
         for (int i = 0; i < l; i++) {
             int j = r.nextInt(l);
@@ -415,14 +581,24 @@ public enum ArrayUtils {
             tab[i] = tab[j];
             tab[j] = tmp;
         }
-        return tab;
     }
 
-    public static int[] randomPermutations(int[] tab, long seed) {
-        return randomPermutations(tab, new Random(seed));
+    /**
+     * Permutes randomly elements from <i>tab</i>
+     * @param tab array of ints
+     * @param seed seed for randomness
+     */
+    public static void randomPermutations(int[] tab, long seed) {
+        randomPermutations(tab, new Random(seed));
     }
 
-    public static <E> E[] randomPermutations(E[] tab, Random r) {
+    /**
+     * Permutes randomly elements from <i>tab</i>
+     * @param tab array of ints
+     * @param r randomness generator
+     * @param <E> the class of the objects in the input array
+     */
+    public static <E> void randomPermutations(E[] tab, Random r) {
         int l = tab.length;
         for (int i = 0; i < l; i++) {
             int j = r.nextInt(l);
@@ -430,11 +606,16 @@ public enum ArrayUtils {
             tab[i] = tab[j];
             tab[j] = tmp;
         }
-        return tab;
     }
 
-    public static <E> E[] randomPermutations(E[] tab, long seed) {
-        return randomPermutations(tab, new Random(seed));
+    /**
+     * Permutes randomly elements from <i>tab</i>
+     * @param tab array of ints
+     * @param seed seed for randomness
+     * @param <E> the class of the objects in the input array
+     */
+    public static <E> void randomPermutations(E[] tab, long seed) {
+        randomPermutations(tab, new Random(seed));
     }
 
     /**
@@ -445,73 +626,19 @@ public enum ArrayUtils {
      *
      * @param a         the values, increasingly ordered
      * @param fromIndex starting index (inclusive)
-     * @param toIndex   ending index (inclusive)
+     * @param toIndex   ending index (exclusive)
      * @param key       value to look for
      * @param gq        set to true to look for the value greater or equal to key,
      *                  false to look for the value smaller or equal to the key
      */
     public static int binarySearchInc(int[] a, int fromIndex, int toIndex, int key, boolean gq) {
-        int low = fromIndex;
-        int high = toIndex;
-
-        while (low <= high) {
-            int mid = (low + high) >>> 1;
-            int midVal = a[mid];
-
-            if (midVal < key)
-                low = mid + 1;
-            else if (midVal > key)
-                high = mid - 1;
-            else
-                return mid; // key found
-        }
-        // a is in increasing order, then we look for closest value
-        // greater than key
-        if (gq) {
-            return low;
-        }
-        // smaller than key
-        else {
-            return high;
-        }
-    }
-
-    /**
-     * Adapted from java.util.Arrays#binarySearch0, it returns the value greater or equal to key in a decreasing order value array.
-     * If the key exists in a, it returns the index of key in a,
-     * otherwise it returns the index of the closest value greater than key when gq is set to true,
-     * or the index of the closest value smaller than key when gq is set to false.
-     *
-     * @param a         the values, decreasingly ordered
-     * @param fromIndex starting index (inclusive)
-     * @param toIndex   ending index (inclusive)
-     * @param key       value to look for
-     * @param gq        set to true to look for the value greater or equal to key,
-     *                  false to look for the value smaller or equal to the key
-     */
-    public static int binarySearchDec(int[] a, int fromIndex, int toIndex, int key, boolean gq) {
-        int low = fromIndex;
-        int high = toIndex;
-
-        while (low <= high) {
-            int mid = (low + high) >>> 1;
-            int midVal = a[mid];
-
-            if (midVal < key)
-                high = mid - 1;
-            else if (midVal > key) {
-                low = mid + 1;
-            } else
-                return mid; // key found
-        }
-        // a is in decreasing order, then we look for closest value
-        // greater than key
-        if (gq) {
-            return high;
-        }
-        // smaller than key
-        else {
-            return low;
+        int p = Arrays.binarySearch(a, fromIndex, toIndex, key);
+        if (p >= 0) {
+            return p;
+        } else {
+            p = -(p + 1);
+            p -= (gq ? 0 : 1);
+            return p;
         }
     }
 }

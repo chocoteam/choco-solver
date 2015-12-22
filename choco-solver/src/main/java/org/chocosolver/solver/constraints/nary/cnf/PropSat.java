@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import static org.chocosolver.solver.constraints.nary.cnf.SatSolver.*;
 
 /**
+ * A propagator to deal with clauses and interface a {@link SatSolver}.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -57,16 +58,36 @@ import static org.chocosolver.solver.constraints.nary.cnf.SatSolver.*;
  */
 public class PropSat extends Propagator<BoolVar> {
 
+    /**
+     * The SAT solver
+     */
     SatSolver sat_;
+
+    /**
+     * Map between BoolVar and its literal
+     */
     TObjectIntHashMap<BoolVar> indices_;
 
+    /**
+     * For comparison with SAT solver trail, to deal properly with backtrack
+     */
     IStateInt sat_trail_;
 
+    /**
+     *  List of early deduction literals
+     */
     TIntList early_deductions_;
 
-    // For #why() method only, lazily initialized
+    /**
+     * Local-like parameter, for #why() method only, lazily initialized.
+     */
     TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
 
+    /**
+     * Create a (unique) propagator for clauses recording and propagation.
+     *
+     * @param solver the solver that declares the propagator
+     */
     public PropSat(Solver solver) {
         // this propagator initially has no variable
         super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
@@ -105,9 +126,8 @@ public class PropSat extends Propagator<BoolVar> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            int lit, var, val;
+            int var, val;
             boolean sign;
-
             for (int k : sat_.implies_.keys()) {
                 sign = sign(negated(k));
                 var = var(k);
@@ -118,39 +138,45 @@ public class PropSat extends Propagator<BoolVar> {
                         sign = sign(l);
                         var = var(l);
                         val = vars[var].getValue();
-                        if (val == (sign ? 0 : 1)) return ESat.FALSE;
+                        if (val == (sign ? 0 : 1)) {
+                            return ESat.FALSE;
+                        }
                     }
                 }
             }
-            for (SatSolver.Clause c : sat_.clauses) {
-                int cnt = 0;
-                for (int i = 0; i < c.size(); i++) {
-                    lit = c._g(i);
-                    sign = sign(lit);
-                    var = var(lit);
-                    val = vars[var].getValue();
-                    if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
-                    else break;
-                }
-                if (cnt == c.size()) return ESat.FALSE;
-            }
-            for (SatSolver.Clause c : sat_.learnts) {
-                int cnt = 0;
-                for (int i = 0; i < c.size(); i++) {
-                    lit = c._g(i);
-                    sign = sign(lit);
-                    var = var(lit);
-                    val = vars[var].getValue();
-                    if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
-                    else break;
-                }
-                if (cnt == c.size()) return ESat.FALSE;
-            }
-            return ESat.TRUE;
+            boolean OK = clauseEntailed(sat_.clauses);
+            OK &= clauseEntailed(sat_.learnts);
+            return ESat.eval(OK);
         }
         return ESat.UNDEFINED;
     }
 
+    /**
+     * Checks if all clauses from <code>clauses</code> are satisfied
+     * @param clauses list of clause
+     * @return <tt>true</tt> if all clauses are satisfied, <tt>false</tt> otherwise
+     */
+    private boolean clauseEntailed(ArrayList<SatSolver.Clause> clauses) {
+        int lit, var, val;
+        boolean sign;
+        for (SatSolver.Clause c : clauses) {
+            int cnt = 0;
+            for (int i = 0; i < c.size(); i++) {
+                lit = c._g(i);
+                sign = sign(lit);
+                var = var(lit);
+                val = vars[var].getValue();
+                if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
+                else break;
+            }
+            if (cnt == c.size()) return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return the underlying SAT solver
+     */
     public SatSolver getSatSolver() {
         return sat_;
     }
@@ -159,6 +185,16 @@ public class PropSat extends Propagator<BoolVar> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Creates, or returns if already existing, the literal corresponding to :
+     * <p>
+     * <code>expr</code> is <tt>true</tt>
+     * <p>
+     * The negation of the literal is managed outside.
+     *
+     * @param expr a boolean variable
+     * @return its literal
+     */
     public int Literal(BoolVar expr) {
         if (indices_.containsKey(expr)) {
             return makeLiteral(indices_.get(expr), true);
@@ -171,6 +207,12 @@ public class PropSat extends Propagator<BoolVar> {
         }
     }
 
+    /**
+     * The value of the <code>index</code>^th literal is known.
+     *
+     * @param index position of the literal
+     * @throws ContradictionException if inconsistency is detected
+     */
     void VariableBound(int index) throws ContradictionException {
         try {
             if (sat_trail_.get() < sat_.trailMarker()) {
@@ -178,8 +220,8 @@ public class PropSat extends Propagator<BoolVar> {
                 assert (sat_trail_.get() == sat_.trailMarker());
             }
             int var = index;
-            boolean new_value = vars[index].getValue() != 0;
-            int lit = makeLiteral(var, new_value);
+            boolean sign = vars[index].getValue() != 0;
+            int lit = makeLiteral(var, sign);
             boolean fail = !sat_.propagateOneLiteral(lit);
             // Remark: explanations require to instantiated variables even if fail is set to true
             sat_trail_.set(sat_.trailMarker());
@@ -199,40 +241,71 @@ public class PropSat extends Propagator<BoolVar> {
     }
 
 
-    // Add a clause to the solver, clears the vector.
+    /**
+     * Add a clause to SAT solver
+     *
+     * @param lits clause
+     * @return <tt>false</tt> if failure is detected
+     */
     public boolean addClause(TIntList lits) {
         boolean result = sat_.addClause(lits);
         storeEarlyDeductions();
         return result;
     }
 
-    // Add the empty clause, making the solver contradictory.
+    /**
+     * Add empty clause, make SAT solver fails
+     *
+     * @return <tt>false</tt>
+     */
     public boolean addEmptyClause() {
         return sat_.addEmptyClause();
     }
 
-    // Add a unit clause to the solver.
+    /**
+     * Add unit clause to SAT solver
+     *
+     * @param p unit clause
+     * @return <tt>false</tt> if failure is detected
+     */
     public boolean addClause(int p) {
         boolean result = sat_.addClause(p);
         storeEarlyDeductions();
         return result;
     }
 
-    // Add a binary clause to the solver.
+    /**
+     * Add binary clause to SAT solver
+     *
+     * @param p literal
+     * @param q literal
+     * @return <tt>false</tt> if failure is detected
+     */
     public boolean addClause(int p, int q) {
         boolean result = sat_.addClause(p, q);
         storeEarlyDeductions();
         return result;
     }
 
-    // Add a ternary clause to the solver.
+    /**
+     * Add ternary clause to SAT solver
+     *
+     * @param p literal
+     * @param q literal
+    * @param r literal
+     * @return <tt>false</tt> if failure is detected
+     */
     public boolean addClause(int p, int q, int r) {
         boolean result = sat_.addClause(p, q, r);
         storeEarlyDeductions();
         return result;
     }
 
-    // Add a learnt clause
+    /**
+     * Add learnt clause to SAT solver
+     *
+     * @param lits clause
+     */
     public void addLearnt(int... lits) {
         sat_.learnClause(lits);
         this.getSolver().getEngine().propagateOnBacktrack(this); // issue#327

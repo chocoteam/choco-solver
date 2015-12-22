@@ -36,6 +36,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.util.objects.IntMap;
 
 /**
+ * A counter which maintains the number of times a propagator fails during the resolution.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -43,9 +44,17 @@ import org.chocosolver.util.objects.IntMap;
  */
 public class FailPerPropagator implements IMonitorContradiction {
 
+    /**
+     * Map (propagator - weight), where weight is the number of times the propagator fails.
+     */
     protected IntMap p2w;
 
 
+    /**
+     * Create an observer on propagators failures, based on the constraints in input
+     * @param constraints set of constraints to observe
+     * @param solver the target solver
+     */
     public FailPerPropagator(Constraint[] constraints, Solver solver) {
         p2w = new IntMap(10, 0);
         init(constraints);
@@ -68,8 +77,13 @@ public class FailPerPropagator implements IMonitorContradiction {
         }
     }
 
+    /**
+     * Gets, for a given propagator, the number of times it has failed during the resolution
+     * @param p the propagator to evaluate
+     * @return the number of times <code>p</code> has failed from the beginning of the resolution
+     */
     public int getFails(Propagator p) {
         int f = p2w.get(p.getId());
-        return f == -1 ? 0 : f;
+        return f < 0 ? 0 : f;
     }
 }

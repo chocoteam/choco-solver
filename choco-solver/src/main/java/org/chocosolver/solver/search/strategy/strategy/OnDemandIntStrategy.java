@@ -27,22 +27,45 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.search.strategy.strategy;
+
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.PoolManager;
 
 /**
- * An interface to monitor the initial propagation of the search loop
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 13/12/12
- * @deprecated see {@code org.chocosolver.solver.search.loop.monitors.IMonitorInitialize} instead
+ * A factory which eases unit decision creation (for debugging mainly).
+ * Created by cprudhom on 27/11/2015.
+ * Project: choco.
  */
-@Deprecated
-public interface IMonitorInitPropagation extends ISearchMonitor {
+public class OnDemandIntStrategy{
 
-    @Deprecated
-    default void beforeInitialPropagation(){}
+    /**
+     * object recycling management
+     */
+    PoolManager<IntDecision> decisionPool;
 
-    @Deprecated
-    default void afterInitialPropagation(){}
+    /**
+     * Create an instance of this decision creator
+     */
+    public OnDemandIntStrategy() {
+        this.decisionPool = new PoolManager<>();
+    }
+
+    /**
+     * Creates and returns an {@link IntDecision}: "<code>var</code> <code>dop</code> <code>value</code>".
+     * @param var a integer variable
+     * @param dop a decision operator
+     * @param value a value
+     * @return an IntDecision
+     */
+    public IntDecision makeIntDecision(IntVar var, DecisionOperator dop, int value) {
+        IntDecision d = decisionPool.getE();
+        if (d == null) {
+            d = new IntDecision(decisionPool);
+        }
+        d.set(var, value, dop);
+        return d;
+    }
 }

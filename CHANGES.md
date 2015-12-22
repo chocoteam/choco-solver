@@ -7,11 +7,32 @@ NEXT MILESTONE
 -------------------
 
 
+3.3.3 - 22 Dec 2015
+-------------------
+
+#### All:
+ - remove deprecated interfaces, classes and methods.
+
+#### Solver:
+- add new APIs with an argument named `restoreLastSolution` which allow to indicate
+whether or not the last solution found, if any, should be restored on exit;
+Previous APIs (without the argument) restore the last solution by default (#354)
+- update javadoc (in particular: #347)
+- add default name to Solver + setter, modify measures printing to include the name.
+- `SetVar` toString implementation has changed
+
+
+#### Explanations
+- refactor `PropNogoods` to deal with generalized no-goods
+
+#### Bug fixes: 
+
+\#346, #348, #349, #350, #351, #352, #353, #354, #355, #356, #357, #358, #359
+
 3.3.2 - 17 Nov 2015
 -------------------
 
 #### Solver: 
-
 - `ISolutionRecorder` implementations do not restore automatically the last/best solution found on exit.
 This now has to be done calling either `solver.restoreLastSolution()` or `solver.restoreSolution(Solution)`.
 - remove `MasterSolver` and `SlaveSolver` (#293)

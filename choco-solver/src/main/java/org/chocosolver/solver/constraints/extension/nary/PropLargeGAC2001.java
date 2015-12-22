@@ -97,21 +97,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
     }
 
     public PropLargeGAC2001(IntVar[] vs, Tuples tuples) {
-        this(vs, makeRelation(tuples, vs));
-    }
-
-    private static LargeRelation makeRelation(Tuples tuples, IntVar[] vars) {
-        long totalSize = 1;
-        for (int i = 0; i < vars.length && totalSize > 0; i++) { // to prevent from long overflow
-            totalSize *= vars[i].getDomainSize();
-        }
-        if (totalSize < 0) {
-            return new TuplesVeryLargeTable(tuples, vars);
-        }
-        if (totalSize / 8 > 50 * 1024 * 1024) {
-            return new TuplesLargeTable(tuples, vars);
-        }
-        return new TuplesTable(tuples, vars);
+        this(vs, RelationFactory.makeLargeRelation(tuples, vs));
     }
 
     @Override

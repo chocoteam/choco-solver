@@ -5,7 +5,7 @@
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>3.3.2</version>
+    <version>3.3.3</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://choco-solver.org/</url>
     <description>Choco is a Free and Open-Source Software dedicated to Constraint Programming.
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.9.9</version>
+            <version>6.9.10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -210,6 +210,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.3</version>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
             </plugin>
         </plugins>
     </build>

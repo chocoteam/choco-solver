@@ -62,9 +62,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * The <code>Solver</code> is the header component of Constraint Programming.
@@ -82,27 +80,50 @@ import java.util.List;
  */
 public class Solver implements Serializable {
 
+    /**
+     * For serialization purpose
+     */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Settings to use with this solver
+     */
     private Settings settings = new Settings() {
     };
 
+    /**
+     * An explanation engine
+     */
     private ExplanationEngine explainer;
 
+    /**
+     * A list of filtering monitors to be informed on any variable events
+     */
     private FilteringMonitorList eoList;
 
     /**
      * Variables of the solver
      */
     Variable[] vars;
+
+    /**
+     * Index of the last added variable
+     */
     int vIdx;
 
     /**
      * Constraints of the solver
      */
     Constraint[] cstrs;
+
+    /**
+     * Index of the last added constraint
+     */
     int cIdx;
 
+    /**
+     * A map to cache constants (considered as fixed variables)
+     */
     public TIntObjectHashMap<IntVar> cachedConstants;
 
     /**
@@ -126,6 +147,9 @@ public class Solver implements Serializable {
      */
     protected List<Criterion> stopCriteria;
 
+    /**
+     * The propagation engine to use
+     */
     protected IPropagationEngine engine;
 
     /**
@@ -133,10 +157,19 @@ public class Solver implements Serializable {
      */
     protected final IMeasures measures;
 
+    /**
+     * Array of variable to optimize.
+     */
     protected Variable[] objectives;
 
+    /**
+     * Precision to consider when optimizing a RealVariable
+     */
     protected double precision = 0.00D;
 
+    /**
+     * A solution recorder
+     */
     protected ISolutionRecorder solutionRecorder;
 
     /**
@@ -152,19 +185,36 @@ public class Solver implements Serializable {
      */
     ESat feasible = ESat.UNDEFINED;
 
+    /**
+     * Stores this solver's creation time
+     */
     protected long creationTime;
 
+    /**
+     * Counter used to set ids to variables and propagators
+     */
     protected int id = 1;
 
     /**
-     * Two basic constraints TRUE and FALSE, cached to avoid multiple useless occurrences
+     * Basic TRUE constraint, cached to avoid multiple useless occurrences
      */
-    private Constraint TRUE, FALSE;
+    private Constraint TRUE;
 
     /**
-     * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
+     * Basic FALSE constraint, cached to avoid multiple useless occurrences
      */
-    private BoolVar ZERO, ONE;
+    private Constraint FALSE;
+
+    /**
+     * Basic ZERO constant, cached to avoid multiple useless occurrences.
+     */
+    private BoolVar ZERO;
+
+    /**
+     * Basic ONE constant, cached to avoid multiple useless occurrences.
+     */
+    private BoolVar ONE;
+
 
     /**
      * A MiniSat instance, useful to deal with clauses
@@ -180,6 +230,24 @@ public class Solver implements Serializable {
      * An Ibex (continuous constraint solver) instance
      */
     private Ibex ibex;
+
+
+    /**
+     * Enable attaching hooks to a solver.
+     */
+    private Map<String,Object> hooks;
+
+    /**
+     * For autonumbering anonymous solvers.
+     */
+    private static int solverInitNumber;
+
+    /**
+     * @return next solver's number, for anonymous solvers.
+     */
+    private static synchronized int nextSolverNum() {
+        return solverInitNumber++;
+    }
 
     /**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
@@ -204,8 +272,9 @@ public class Solver implements Serializable {
         this.searchMonitors = new ArrayList<>();
         this.stopCriteria = new ArrayList<>();
         this.search.setObjectiveManager(ObjectiveManager.SAT());
-        this.objectives = null;
+        this.objectives = new Variable[0];
         this.solutionRecorder = new LastSolutionRecorder(new Solution(), this);
+        this.hooks = new HashMap<>();
     }
 
     /**
@@ -214,12 +283,13 @@ public class Solver implements Serializable {
      * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
      */
     public Solver() {
-        this(Environments.DEFAULT.make(), "");
+        this(Environments.DEFAULT.make(), "Solver-" + nextSolverNum());
     }
 
     /**
      * Create a solver object with default parameters, named <code>name</code>.
      *
+     * @param name name attributed to this solver
      * @see org.chocosolver.solver.Solver#Solver(org.chocosolver.memory.IEnvironment, String)
      */
     public Solver(String name) {
@@ -439,6 +509,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the name, if any, of <code>this</code>.
+     * @return this solver's name
      */
     public String getName() {
         return name;
@@ -446,6 +517,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the backtracking environment of <code>this</code>.
+     * @return the backtracking environment of this solver
      */
     public IEnvironment getEnvironment() {
         return environment;
@@ -454,6 +526,7 @@ public class Solver implements Serializable {
     /**
      * Return a reference to the measures recorder.
      * This enables to get, for instance, the number of solutions found, time count, etc.
+     * @return this solver's measure recorder
      */
     public IMeasures getMeasures() {
         return measures;
@@ -461,6 +534,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the explanation engine plugged into <code>this</code>.
+     * @return this solver's explanation engine
      */
     public ExplanationEngine getExplainer() {
         return explainer;
@@ -468,6 +542,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the solution recorder
+     * @return this solver's solution recorder
      */
     public ISolutionRecorder getSolutionRecorder() {
         return solutionRecorder;
@@ -485,6 +560,7 @@ public class Solver implements Serializable {
 
     /**
      * Return the current event observer list
+     * @return this solver's events observer
      */
     public FilteringMonitor getEventObserver() {
         return this.eoList;
@@ -496,6 +572,7 @@ public class Solver implements Serializable {
      * @return a variable
      */
     public Variable[] getObjectives() {
+        assert objectives!=null;
         return objectives;
     }
 
@@ -506,6 +583,24 @@ public class Solver implements Serializable {
      */
     public double getPrecision() {
         return precision;
+    }
+
+    /**
+     * Returns the object associated with the named <code>hookName</code>
+     * @param hookName the name of the hook to return
+     * @return the object associated to the name <code>hookName</code>
+     */
+    public Object getHook(String hookName){
+        return hooks.get(hookName);
+    }
+
+    /**
+     * Returns the map containing declared hooks.
+     * This map is mutable.
+     * @return the map of hooks.
+     */
+    public Map<String, Object> getHooks(){
+        return hooks;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
@@ -553,6 +648,7 @@ public class Solver implements Serializable {
 
     /**
      * Override the explanation engine.
+     * @param explainer the explanation to use
      */
     public void set(ExplanationEngine explainer) {
         this.explainer = explainer;
@@ -561,6 +657,7 @@ public class Solver implements Serializable {
 
     /**
      * Override the objective manager
+     * @param om the objective manager to use
      */
     public void set(ObjectiveManager om) {
         this.search.setObjectiveManager(om);
@@ -569,6 +666,7 @@ public class Solver implements Serializable {
     /**
      * Override the solution recorder.
      * Beware : multiple recorders which restore a solution might create a conflict.
+     * @param sr the solution recorder to use
      */
     public void set(ISolutionRecorder sr) {
         this.solutionRecorder = sr;
@@ -661,7 +759,11 @@ public class Solver implements Serializable {
      * @param objectives one or more variables
      */
     public void setObjectives(Variable... objectives) {
-        this.objectives = objectives;
+        if(objectives == null){
+            this.objectives = new Variable[0];
+        }else {
+            this.objectives = objectives;
+        }
     }
 
     /**
@@ -695,6 +797,39 @@ public class Solver implements Serializable {
         this.search.makeCompleteStrategy(isComplete);
     }
 
+
+    /**
+     * Adds the <code>hookObject</code> to store in this solver, associated with the name <code>hookName</code>.
+     * A hook is a simple map "hookName" <-> hookObject.
+     * @param hookName name of the hook
+     * @param hookObject hook to store
+     */
+    public void addHook(String hookName, Object hookObject){
+        this.hooks.put(hookName, hookObject);
+    }
+
+    /**
+     * Removes the hook named <code>hookName</code>
+     * @param hookName name of the hookObject to remove
+     */
+    public void removeHook(String hookName){
+        this.hooks.remove(hookName);
+    }
+
+    /**
+     * Empties the hooks attaches to this solver.
+     */
+    public void removeAllHooks(){
+        this.hooks.clear();
+    }
+
+    /**
+     * Changes the name of this solver to be equal to the argument <code>name</code>.
+     * @param name the new name of this solver.
+     */
+    public void setName(String name){
+        this.name = name;
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -760,6 +895,7 @@ public class Solver implements Serializable {
      * Post a constraint temporary, that is, it will be unposted upon backtrack.
      *
      * @param c constraint to add
+     * @throws ContradictionException if the addition of the constraint <code>c</code> detects inconsistency.
      */
     public void postTemp(Constraint c) throws ContradictionException {
         _post(false, c);
@@ -923,6 +1059,7 @@ public class Solver implements Serializable {
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, org.chocosolver.solver.variables.IntVar)}: the optimal solution has been found and
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
+     * @return <tt>true</tt> if the resolution stops before having explored the entire search space, <tt>false</tt> otherwise
      */
     public boolean hasReachedLimit() {
         return search.hasReachedLimit();
@@ -968,12 +1105,16 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Restores the best solution found so far (if any)
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
      *
      * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
      */
-    public void findOptimalSolution(ResolutionPolicy policy) {
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
         if (objectives == null || objectives.length == 0) {
             throw new SolverException("No objective variable has been defined");
         }
@@ -998,24 +1139,74 @@ public class Solver implements Serializable {
             }
         }
         solve(false);
+        if (restoreLastSolution) {
+            try {
+                restoreLastSolution();
+            } catch (ContradictionException e) {
+                throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+            } finally {
+                getEngine().flush();
+            }
+        }
     }
 
     /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Restores the best solution found so far (if any)
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean)} where <i>boolean</i> is set to <tt>true</tt>.
+     *
+     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy) {
+        findOptimalSolution(policy, true);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
+     * <p>
+     * Indeed, it calls in sequence:
+     * <pre>
+     *     <code>setObjectives(objectives);
+     *     findOptimalSolution(policy, restoreLastSolution);
+     *     </code>
+     * </pre>
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
+     * @param objective the variable to optimize
+     * @see #setObjectives(Variable...)
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
+        setObjectives(objective);
+        findOptimalSolution(policy, restoreLastSolution);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean, IntVar)} where <i>boolean</i> is set to <tt>true</tt>.
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
+     * @see #findOptimalSolution(ResolutionPolicy, boolean, IntVar)
      */
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
-        setObjectives(objective);
-        findOptimalSolution(policy);
+        findOptimalSolution(policy, true, objective);
     }
 
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Finds and stores all optimal solution
-     * Restores the best solution found so far (if any)
+     * Finds and stores all optimal solution.
+     * Calling this method does not restore solution on exit
+     * since multiple equivalent (wrt objective value) solutions may exist.
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
@@ -1053,33 +1244,96 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Finds and stores all optimal solution
-     * Restores the best solution found so far (if any)
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * Finds and stores all optimal solution.
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
+     * <p>
+     * Indeed, it calls in sequence:
+     * <pre>
+     *     <code>setObjectives(objectives);
+     *     findOptimalSolution(policy, restoreLastSolution);
+     *     </code>
+     * </pre>
+     *
+     * @param policy     optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
+     * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
+     * @see #setObjectives(Variable...)
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
+        setObjectives(objectives);
+        findOptimalSolution(policy, restoreLastSolution);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * It finds and stores all optimal solution
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findParetoFront(ResolutionPolicy, boolean, IntVar...)} where <i>boolean</i> is set to <tt>true</tt>.
      *
      * @param policy     optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
+     * @see #findParetoFront(ResolutionPolicy, boolean, IntVar...)
      */
     public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
-        setObjectives(objectives);
-        findOptimalSolution(policy);
+        findParetoFront(policy, true, objectives);
     }
 
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Restores the last solution found so far (if any)
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
+     * <p>
+     * Indeed, it calls in sequence:
+     * <pre>
+     *     <code>setObjectives(objectives);
+     *     setPrecision(precision);
+     *     findOptimalSolution(policy, restoreLastSolution);
+     *     </code>
+     * </pre>
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
+     * @param objective the variable to optimize
+     * @param precision to consider that <code>objective</code> is instantiated.
+     * @see #setObjectives(Variable...)
+     * @see #setPrecision(double)
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
+        setObjectives(objective);
+        setPrecision(precision);
+        findOptimalSolution(policy, restoreLastSolution);
+    }
+
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean, RealVar, double)}
+     * where <i>boolean</i> is set to <tt>true</tt>.
      *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
+     * @param precision to consider that <code>objective</code> is instantiated.
+     * @see #findOptimalSolution(ResolutionPolicy, boolean, RealVar, double)
      */
     public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
         setObjectives(objective);
         setPrecision(precision);
-        findOptimalSolution(policy);
+        findOptimalSolution(policy, true);
     }
 
     /**
      * This method should not be called externally. It launches the resolution process.
+     * @param stopAtFirst set to <tt>true</tt> to stop the search when the first solution is found, <tt>false</tt> otherwise.
      */
     protected void solve(boolean stopAtFirst) {
         if (engine == NoPropagationEngine.SINGLETON) {
@@ -1103,7 +1357,7 @@ public class Solver implements Serializable {
      * Propagate constraints and related events through the constraint network until a fix point is find, or a contradiction
      * is detected.
      *
-     * @throws ContradictionException
+     * @throws ContradictionException inconsistency is detected, the problem has no solution with the current set of domains and constraints.
      */
     public void propagate() throws ContradictionException {
         if (engine == NoPropagationEngine.SINGLETON) {
@@ -1124,6 +1378,9 @@ public class Solver implements Serializable {
      * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
      * <p>
      * Presumably, not all variables are instantiated.
+     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
+     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
+     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
      */
     public ESat isSatisfied() {
         if (isFeasible() != ESat.FALSE) {
@@ -1172,7 +1429,8 @@ public class Solver implements Serializable {
      * <li>each variable is then instantiated to its value in the solution.</li>
      * </ol>
      *
-     * The input state can be rollbacked by calling :  {@code this.getEnvironment().worldPop();}.
+     * The input state can be rolled-back by calling :  {@code this.getEnvironment().worldPop();}.
+     * @param solution the solution to restore
      * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
      * @throws ContradictionException when inconsistency is detected while restoring the solution.
      */
@@ -1183,6 +1441,7 @@ public class Solver implements Serializable {
                 search.restoreRootNode();
                 environment.worldPush();
                 solution.restore(this);
+                restore = true;
             }catch (ContradictionException e){
                 throw new UnsupportedOperationException("restoring the solution ended in a failure");
             }
@@ -1201,7 +1460,7 @@ public class Solver implements Serializable {
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder(256);
-        st.append(String.format("\n Solver %s\n", name));
+        st.append(String.format("\n Solver[%s]\n", name));
         st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
         st.append(String.format("Feasability: %s\n", feasible));
         st.append("== variables ==\n");
@@ -1264,6 +1523,7 @@ public class Solver implements Serializable {
      * @throws IOException            if an I/O exception occurs.
      * @throws ClassNotFoundException if wrong flattened object.
      */
+    @SuppressWarnings("unused")
     public static Solver readFromFile(final String file) throws IOException, ClassNotFoundException {
         FileInputStream fis;
         ObjectInputStream in;
@@ -1274,38 +1534,12 @@ public class Solver implements Serializable {
         return model;
     }
 
-
-    /**
-     * @deprecated To duplicate a model, the variables addition and constraints declaration must be done in a specific
-     * method called with a solver as parameter:
-     * <pre> {@code
-     * <p>
-     *              public void modelIt(Solver solver){
-     *                  // declare variables, for example:
-     *                  IntVar a = VF.enumerated("A", 0, 10, solver);
-     *                  // post constraints, for example:
-     *                  solver.post(ICF.arithm(a, ">=", 3));
-     *              }
-     * <p>
-     *              public void main(){
-     *                  Solver s = new Solver();
-     *                  modelIt(s);
-     *                  Solver clone = new Solver();
-     *                  modelIt(clone);
-     *              }
-     *              }</pre>
-     */
-    @Deprecated
-    public Solver duplicateModel() {
-        throw new SolverException("To duplicate a model, the variables addition and constraints declaration must be done in a specific\n" +
-                "method called with a solver as parameter.");
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * <b>This methods should not be called by the user.</b>
+     * @return a free id to use
      */
     public int nextId() {
         return id++;

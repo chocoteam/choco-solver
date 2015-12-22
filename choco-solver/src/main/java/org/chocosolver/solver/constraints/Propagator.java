@@ -41,6 +41,7 @@ import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 
@@ -90,33 +91,88 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * @see org.chocosolver.solver.variables.Variable
  * @see Constraint
  * @since 0.01
+ * @param <V> type of variables involved in this propagator
  */
 public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
+    /**
+     * For serialization purpose.
+     */
     private static final long serialVersionUID = 2L;
-    protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
 
-    // propagator attributes
-    private final int ID; // unique id of this
-    private short state;  // 0 : new -- 1 : active -- 2 : passive
-    private Operation[] operations; // propagator state operations
-    private int nbPendingEvt = 0;   // counter of enqued records -- usable as trigger for complex algorithm
+    /**
+     * Status of this propagator on creation.
+     */
+    protected static final short NEW = 0;
+
+    /**
+     * Status of this propagagator when reified.
+     */
+    protected static final short REIFIED = 1;
+
+    /**
+     * Status of the propagator when activated (ie, after initial propagation).
+     */
+    protected static final short ACTIVE = 2;
+
+    /**
+     * Status of the propagator when entailed.
+     */
+    protected static final short PASSIVE = 3;
+
+    /**
+     * Unique ID of this propagator.
+     */
+    private final int ID;
+
+    /**
+     * Current status of this propagator.
+     * In: {@link #NEW}, {@link #REIFIED}, {@link #ACTIVE} and {@link #PASSIVE}.
+     */
+    private short state;
+
+    /**
+     * Backtrackable operations to maintain the status on backtrack.
+     */
+    private Operation[] operations;
+
+    /**
+     * Counter of events to be propagated by this propagator.
+     */
+    private int nbPendingEvt = 0;
+
+    /**
+     * Priority of this propagator.
+     * Mix between arity and compexity.
+     */
     protected final PropagatorPriority priority;
-    protected final boolean reactToFineEvt;
-    // references
-    protected Constraint constraint; // declaring constraint
-    protected final Solver solver;   // solver of this propagator
-    // variable related information
-    protected V[] vars;// List of <code>variable</code> objects -- a variable can occur more than once, but it could not have the same index
-    private int[] vindices;// index of this within the list of propagator of the i^th variable
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+    /**
+     * Set to <tt>true</tt> to indidates that this propagator reacts to fine event.
+     * If set to <tt>false</tt>, the method {@link #propagate(int, int)} will never be called.
+     */
+    protected final boolean reactToFineEvt;
+
+    /**
+     * Encapsuling constraint.
+     */
+    protected Constraint constraint;
+
+    /**
+     * Reference to the solver declaring this propagator.
+     */
+    protected final Solver solver;
+
+    /**
+     * List of variables this propagators deal with.
+     * A variable can occur more than once, but it is considered then as n distinct variables.
+     */
+    protected V[] vars;
+
+    /**
+     * Index of this propagator within each variable's propagators.
+     */
+    private int[] vindices;
 
     /**
      * Creates a new propagator to filter the domains of vars.
@@ -204,13 +260,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         if (solver.getEngine() != NoPropagationEngine.SINGLETON && solver.getEngine().isInitialized()) {
             solver.getEngine().updateInvolvedVariables(this);
         }
-        if (isActive()) {
-            for (int v = tmp.length; v < vars.length; v++) {
-                vars[v].recordMask(getPropagationConditions(v));
-            }
-        }
     }
 
+    /**
+     * Creates links between this propagator and its variables.
+     * The propagator will then be referenced in each of its variables.
+     */
     protected void linkVariables() {
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
@@ -235,11 +290,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * For example, consider a propagator that can deduce filtering based on the lower bound of the integer variable X.
      * Then, for this variable, the mask should be equal to :
      * <pre>
-     *     int mask = IntEvtType.INCLOW.getMask() | IntEvtType.INSTANTIATE.getMask();
+     *     int mask = IntEventType.INCLOW.getMask() | IntEventType.INSTANTIATE.getMask();
      * </pre>
      * or, in a more convenient way:
      * <pre>
-     *     int mask = IntEvtType.combine(IntEvtType.INCLOW,IntEvtType.INSTANTIATE);
+     *     int mask = IntEvtType.combine(IntEventType.INCLOW,IntEventType.INSTANTIATE);
      * </pre>
      *
      * That indicates the following behavior:
@@ -259,6 +314,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * The same goes with events of other variable types, but most of the time, there are only few combinations.
      *
      * Reacts to any kind of event by default.
+     *
+     * Alternatively, this method can return {@link IntEventType#VOID} which states
+     * that this propagator should not be aware of modifications applied to the variable in position <i>vIdx</i>.
      *
      * @param vIdx index of the variable within the propagator
      * @return an int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
@@ -311,6 +369,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * Add the coarse event recorder into the engine
      *
      * @param evt event type
+     * @throws ContradictionException if the propagation encounters inconsistency.
      */
     public final void forcePropagate(PropagatorEventType evt) throws ContradictionException {
         solver.getEngine().delayedPropagation(this, evt);
@@ -323,10 +382,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
         solver.getEnvironment().save(operations[NEW]);
-        // update activity mask of variables
-        for (int v = 0; v < vars.length; v++) {
-            vars[v].recordMask(getPropagationConditions(v));
-        }
     }
 
     /**
@@ -336,10 +391,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         assert isReifiedAndSilent() : "the propagator was not in a silent reified state";
         state = ACTIVE;
         solver.getEnvironment().save(operations[REIFIED]);
-        // update activity mask of variables
-        for (int v = 0; v < vars.length; v++) {
-            vars[v].recordMask(getPropagationConditions(v));
-        }
     }
 
     /**
@@ -425,6 +476,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return arity;
     }
 
+    /**
+     * Return the dynamic priority of this propagator.
+     * It excludes from the arity variables instantiated.
+     * But may be time consuming.
+     * @return a more accurate priority excluding instantiated variables.
+     */
+    @SuppressWarnings("unused")
     public int dynPriority() {
         int arity = 0;
         for (int i = 0; i < vars.length && arity <= 3; i++) {
@@ -510,6 +568,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * @return the index of the propagator within its variables
      */
+    @SuppressWarnings("unused")
     public int[] getVIndices() {
         return vindices;
     }
@@ -521,6 +580,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param idx old index
      * @param val new index
      */
+    @SuppressWarnings("unused")
     public void setVIndices(int idx, int val) {
         vindices[idx] = val;
     }

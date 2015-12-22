@@ -130,11 +130,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     }
 
     public PropLargeGACSTRPos(IntVar[] vs, Tuples tuples) {
-        this(vs, makeRelation(tuples, vs));
-    }
-
-    private static TuplesList makeRelation(Tuples tuples, IntVar[] vars) {
-        return new TuplesList(tuples, vars);
+        this(vs, RelationFactory.makeListBasedRelation(tuples, vs));
     }
 
     @Override

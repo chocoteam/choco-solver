@@ -29,15 +29,9 @@
  */
 package org.chocosolver.solver.explanations;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.set.hash.THashSet;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
-import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.RootDecision;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 
 import java.util.Arrays;
@@ -50,16 +44,49 @@ import java.util.Set;
  * It is related to the explanation engine (replacement of Explanation)
  * Created by cprudhom on 09/12/14.
  * Project: choco.
+ * @author Charles Prud'homme, Narendra Jussien
  */
 public class Explanation {
 
+    /**
+     * Set to <tt>true</tt> to save causes (ie propagator) into this explanation
+     */
     private final boolean saveCauses;
+
+    /**
+     * The rules inferring this explanation.
+     * This is null when the explanation is complete, valuated otherwise.
+     */
     private Rules rules;
+
+    /**
+     * Possibly empty (see {@link #saveCauses}) set of causes related to this explanation
+     */
     private final THashSet<ICause> causes;
+
+    /**
+     * Set of decisions related to this explanation.
+     * BitSet is selected because of efficient operations provided.
+     * However, in some cases, this may be a restriction (for instance, when dealing with {@link org.chocosolver.solver.search.strategy.decision.IntMetaDecision}.
+     */
     private final BitSet decisions;
-    private int evtstrIdx;  // event store index of the last analysis
+
+    /**
+     * Index of the last analyzed event in the event store.
+     * For partial explanation only.
+     */
+    private int evtstrIdx;
+
+    /**
+     * A pool manager to avoid requesting too much the GC.
+     */
     private final PoolManager<Explanation> explanationPool;
 
+    /**
+     * Create an explanation of a state (most of the time, a failure but not restricted to that).
+     * @param explanationPool explanations pool manager, to limit GC
+     * @param saveCauses set to <tt>true</tt> to store causes in this explanation
+     */
     Explanation(PoolManager<Explanation> explanationPool, boolean saveCauses) {
         this.causes = new THashSet<>();
         this.decisions = new BitSet();
@@ -150,23 +177,25 @@ public class Explanation {
 
 
     /**
-     * Return a unmodifiable copy of the set of decisions
+     * @return a unmodifiable copy of the set of decisions
      */
     public BitSet getDecisions() {
         return decisions;
     }
 
     /**
-     * Return a unmodifiable copy of the set of causes
+     * @return a unmodifiable copy of the set of causes
      */
+    @SuppressWarnings("unused")
     public Set<ICause> getCauses() {
         return Collections.unmodifiableSet(causes);
     }
 
     /**
-     * Indicates whether or not the explanation is complete
+     * @return <tt>true</tt> if the explanation is complete
      */
     public boolean isComplete() {
+        // since rules is valuated only when the explanation is not complete, this test is correct
         return rules == null;
     }
 
@@ -225,23 +254,9 @@ public class Explanation {
         return st.toString();
     }
 
-    @SuppressWarnings("unchecked")
-    public void postNogood(PropNogoods ngstore, TIntList ps) {
-        if (rules == null) {
-            Solver mSolver = ngstore.getSolver();
-            Decision<IntVar> decision = mSolver.getSearchLoop().getLastDecision();
-            ps.clear();
-            while (decision != RootDecision.ROOT) {
-                if (decisions.get(decision.getWorldIndex())) {
-                    assert decision.hasNext();
-                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariables(), (Integer) decision.getDecisionValue())));
-                }
-                decision = decision.getPrevious();
-            }
-            ngstore.addLearnt(ps.toArray());
-        }
-    }
-
+    /**
+     * Recycle this explanation when it is not used anymore.
+     */
     public void recycle() {
         evtstrIdx = 0;
         causes.clear();

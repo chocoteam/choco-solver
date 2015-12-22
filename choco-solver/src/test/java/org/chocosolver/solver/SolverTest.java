@@ -31,11 +31,15 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.criteria.Criterion;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -284,5 +288,115 @@ public class SolverTest {
 
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 11);
+    }
+
+    @Test(groups="1s")
+    public void testMonitors(){
+        Solver solver = new Solver();
+        IntVar v = VF.bool("b", solver);
+        final int[] c = {0};
+        final int[] d = {0};
+        IMonitorSolution sm1 = () -> c[0]++;
+        IMonitorSolution sm2 = () -> d[0]++;
+        solver.plugMonitor(sm1);
+        solver.plugMonitor(sm2);
+        solver.findAllSolutions();
+        Assert.assertEquals(2, c[0]);
+        Assert.assertEquals(2, d[0]);
+        // unplug
+        solver.unplugMonitor(sm1);
+        solver.search.reset();
+        solver.findAllSolutions();
+        Assert.assertEquals(2, c[0]);
+        Assert.assertEquals(4, d[0]);
+        // plug
+        solver.unplugAllMonitors();
+        solver.search.reset();
+        solver.findAllSolutions();
+        Assert.assertEquals(2, c[0]);
+        Assert.assertEquals(4, d[0]);
+    }
+
+    @Test(groups="1s")
+    public void testCriteria(){
+        Solver solver = new Solver();
+        IntVar v = VF.bool("b", solver);
+        Criterion c1 = () -> solver.getMeasures().getNodeCount() == 1;
+        Criterion c2 = () -> solver.getMeasures().getSolutionCount() == 1;
+        solver.addStopCriterion(c1);
+        solver.addStopCriterion(c2);
+        solver.findAllSolutions();
+        Assert.assertEquals(0, solver.getMeasures().getSolutionCount());
+        // unplug
+        solver.removeStopCriterion(c1);
+        solver.search.reset();
+        solver.findAllSolutions();
+        Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
+        // plug
+        solver.removeAllStopCriteria();
+        solver.search.reset();
+        solver.findAllSolutions();
+        Assert.assertEquals(2, solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups="1s")
+    public void testCompSearch(){
+        Solver solver = new Solver();
+        IntVar[] v = VF.boolArray("v", 2, solver);
+        IntVar[] w = VF.boolArray("w", 2, solver);
+        solver.post(ICF.arithm(v[0], "!=", v[1]));
+        solver.post(ICF.arithm(w[0], "!=", w[1]));
+        solver.set(ISF.lexico_LB(v));
+        solver.makeCompleteSearch(true);
+        solver.findSolution();
+        Assert.assertEquals(solver.isSatisfied(),ESat.TRUE);
+    }
+
+    @Test(groups="1s")
+    public void testAssociates(){
+        Solver s = new Solver();
+        BoolVar v = VF.bool("V", s);
+        Assert.assertEquals(s.getNbVars(), 1);
+        s.associates(v);
+        Assert.assertEquals(s.getNbVars(), 2);
+        s.unassociates(v);
+        Assert.assertEquals(s.getNbVars(), 1);
+        s.unassociates(v);
+        Assert.assertEquals(s.getNbVars(), 0);
+    }
+
+    @Test(groups="1s")
+    public void testRestore() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar[] v = VF.boolArray("v", 2, solver);
+        solver.post(ICF.arithm(v[0], "!=", v[1]));
+        solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, v[0]);
+        solver.restoreLastSolution();
+        Assert.assertTrue(v[0].isInstantiated());
+        Assert.assertTrue(v[0].isInstantiatedTo(1));
+    }
+
+    @Test(groups="1s")
+    public void testHook(){
+        Solver solver = new Solver();
+        String toto = "TOTO";
+        String titi = "TITI";
+        solver.addHook("toto", toto);
+        solver.addHook("titi", titi);
+        Assert.assertEquals(solver.getHooks().size(), 2);
+        Assert.assertEquals(solver.getHook("toto"), toto);
+        solver.removeHook("toto");
+        Assert.assertEquals(solver.getHook("toto"), null);
+        Assert.assertEquals(solver.getHooks().size(), 1);
+        solver.removeAllHooks();
+        Assert.assertEquals(solver.getHooks().size(), 0);
+    }
+
+    @Test(groups="1s")
+    public void testName(){
+        Solver solver = new Solver();
+        Assert.assertTrue(solver.getName().startsWith("Solver-"));
+        solver.setName("Revlos");
+        Assert.assertEquals(solver.getName(), "Revlos");
     }
 }

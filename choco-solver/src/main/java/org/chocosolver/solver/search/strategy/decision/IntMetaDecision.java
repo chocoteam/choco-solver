@@ -157,6 +157,11 @@ public class IntMetaDecision extends Decision<IntVar[]> {
         System.arraycopy(var, 0, varBigger, 0, oldCapacity);
         var = varBigger;
 
+        //noinspection unchecked
+        DecisionOperator<IntVar>[] dopBigger = new DecisionOperator[newCapacity];
+        System.arraycopy(dop, 0, dopBigger, 0, oldCapacity);
+        dop = dopBigger;
+
         int[] valBigger = new int[newCapacity];
         System.arraycopy(val, 0, valBigger, 0, oldCapacity);
         val = valBigger;

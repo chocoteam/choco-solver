@@ -58,31 +58,71 @@ import org.chocosolver.util.tools.StringUtils;
  */
 public final class BitsetArrayIntVarImpl extends AbstractVariable implements IntVar {
 
+    /**
+     * For serialization purpose.
+     */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Valuated to <tt>true</tt> when removed values are stored.
+     */
     protected boolean reactOnRemoval = false;
 
-    //  VALUES
+    /**
+     * Array of domain values
+     */
     private final int[] VALUES;
+
+    /**
+     * Value to index in {@link #VALUES} mapping
+     */
     private final TIntIntHashMap V2I;
-    //  Bitset of indexes
+    /**
+     * Indices of valid values
+     */
     private final IStateBitSet INDICES;
-    // Lower bound of the current domain
+    /**
+     * Lower bound of the current domain
+     */
     private final IStateInt LB;
-    // Upper bound of the current domain
+    /**
+     * Upper bound of the current domain
+     */
     private final IStateInt UB;
-    // Size of the current domain
+    /**
+     * Size of the current domain
+     */
     private final IStateInt SIZE;
-    //offset of the lower bound and the first value in the domain
+
+    /**
+     * offset of the lower bound and the first value in the domain
+     */
     private final int LENGTH;
 
+    /**
+     * Delta object to store removed values
+     */
     private IEnumDelta delta = NoDelta.singleton;
 
+    /**
+     * Disposable values iterator
+     */
     private DisposableValueIterator _viterator;
+
+    /**
+     * Disposable ranges iterator
+     */
     private DisposableRangeIterator _riterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Creates an {@link IntVar} based on an array of non-consecutive but ordered values.
+     * Non-consecutive condition is the main reason which motivates this class.
+     * @param name name of the variable
+     * @param sortedValues domain values
+     * @param solver the solver to declare this variable in
+     */
     public BitsetArrayIntVarImpl(String name, int[] sortedValues, Solver solver) {
         super(name, solver);
         IEnvironment env = this.solver.getEnvironment();
@@ -565,7 +605,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int index = V2I.get(aLB); // if aValue is known
         if (index == -1 || !INDICES.get(index)) {
             //otherwise, a dichotomic search of the closest value greater than key
-            index = ArrayUtils.binarySearchInc(VALUES, lb, ub, aLB, true);
+            index = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aLB, true);
             if (index < lb || index > ub) {
                 index = -1;
             } else {
@@ -579,7 +619,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int index = V2I.get(value);// if aValue is known
         if (index == -1 || !INDICES.get(index)) {
             //otherwise, a dichotomic search of the closest value smaller than key
-            index = ArrayUtils.binarySearchInc(VALUES, lb, ub, value, false);
+            index = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, value, false);
             if (index < lb || index > ub) {
                 index = -1;
             } else {
@@ -647,6 +687,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     }
 
     @Override
+    public int getRange() {
+        return getUB() - getLB() + 1;
+    }
+
+    @Override
     public int nextValue(int aValue) {
         int lb = LB.get();
         if (aValue < VALUES[lb]) return VALUES[lb];
@@ -657,7 +702,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             i = INDICES.nextSetBit(i + 1);
         } else {
             //otherwise, a dichotomic search of the closest value greater than key
-            i = ArrayUtils.binarySearchInc(VALUES, lb, ub, aValue, true);
+            i = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aValue, true);
             if (i < lb || i > ub) {
                 i = -1;
             } else {
@@ -678,7 +723,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             i = INDICES.prevSetBit(i - 1);
         } else {
             //otherwise, a dichotomic search of the closest value smaller than key
-            i = ArrayUtils.binarySearchInc(VALUES, lb, ub, aValue, false);
+            i = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aValue, false);
             if (i < lb || i > ub) {
                 i = -1;
             } else {
@@ -732,12 +777,14 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new EnumDeltaMonitor(delta, propagator);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
@@ -760,6 +807,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         return VAR | INT;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IntVar duplicate() {
         return new BitsetArrayIntVarImpl(StringUtils.randomName(this.name), this.VALUES.clone(), solver);
@@ -772,6 +820,9 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {
 
+                /**
+                 * Current position of the iterator
+                 */
                 int index;
 
                 @Override
@@ -824,7 +875,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeIterator() {
 
+                /**
+                 * Current range starting point
+                 */
                 int from;
+                /**
+                 * Current range ending point
+                 */
                 int to;
 
                 @Override

@@ -52,11 +52,38 @@ import org.chocosolver.util.tools.ArrayUtils;
 //2015OCT - cprudhom : simplify the code, without changing the consistency, no Sort anymore
 public class PropElement extends Propagator<IntVar> {
 
+    /**
+     * Table of values
+     */
     final int[] values;
-    final int offset;
-    final IntVar index, result;
-    final IntIterableSet fidx; // forbidden indices
 
+    /**
+     * To match indices in {@link #values} and {@link #index}
+     */
+    final int offset;
+
+    /**
+     * Index variable
+     */
+    final IntVar index;
+
+    /**
+     * Resulting variable
+     */
+    final IntVar result;
+
+    /**
+     * Set of forbidden indices
+     */
+    final IntIterableSet fidx;
+
+    /**
+     * Create a propagator which ensures that VALUE = TABLE[INDEX-OFFSET] holds.
+     * @param value integer variable
+     * @param values array of ints
+     * @param index integer variable
+     * @param offset int
+     */
     public PropElement(IntVar value, int[] values, IntVar index, int offset) {
         super(ArrayUtils.toArray(value, index), PropagatorPriority.BINARY, false);
         this.values = values;
@@ -97,16 +124,16 @@ public class PropElement extends Propagator<IntVar> {
             min = result.getLB();
             max = result.getUB();
         } while (result.hasEnumeratedDomain() && (nmin > min || max < nmax));
-        if (result.isInstantiated() && !index.isInstantiated()) {
+        if (result.isInstantiated() && index.hasEnumeratedDomain() && !index.isInstantiated()) {
             setPassive();
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if (index.isInstantiated()) { // if INDEX is known
-            return ESat.eval(result.isInstantiatedTo(values[index.getValue() - offset]));
-        } else if (result.isInstantiated()) { // if RESULT
+        if (isCompletelyInstantiated()) {
+            return ESat.eval(result.contains(values[index.getValue() - offset]));
+        } else if (result.isInstantiated() && index.hasEnumeratedDomain()) { // if RESULT
             int res = result.getLB();
             int ub = index.getUB();
             int i = index.getLB();

@@ -38,6 +38,8 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
+import static org.chocosolver.util.tools.MathUtils.safeMultiply;
+
 /**
  * V0 * V1 = V2
  * <br/>
@@ -115,20 +117,11 @@ public class PropTimesNaive extends Propagator<IntVar> {
     }
 
     private boolean mul(IntVar var, int a, int b, int c, int d) throws ContradictionException {
-        int min = Math.min(Math.min(multiply(a, c), multiply(a, d)), Math.min(multiply(b, c), multiply(b, d)));
-        int max = Math.max(Math.max(multiply(a, c), multiply(a, d)), Math.max(multiply(b, c), multiply(b, d)));
+        int min = Math.min(Math.min(safeMultiply(a, c), safeMultiply(a, d)), Math.min(safeMultiply(b, c), safeMultiply(b, d)));
+        int max = Math.max(Math.max(safeMultiply(a, c), safeMultiply(a, d)), Math.max(safeMultiply(b, c), safeMultiply(b, d)));
         return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
     }
 
-    public static int multiply(int a, int b) {
-        if (a == 0 || b == 0)
-            return 0;
-        int product = a * b;
-        int a2 = product / b;
-        if (a != a2)
-            throw new ArithmeticException("Overflow occurred from int " + a + " * " + b);
-        return product;
-    }
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {

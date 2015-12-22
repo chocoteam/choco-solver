@@ -31,9 +31,6 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
@@ -42,60 +39,73 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.objects.IntMap;
 
 /**
+ * Implementation of DowOverWDeg[1].
+ *
+ * [1]: F. Boussemart, F. Hemery, C. Lecoutre, and L. Sais, Boosting Systematic Search by Weighting Constraints, ECAI-04.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 12/07/12
  */
-public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMonitor<IntVar> {
+public class DomOverWDeg extends AbstractStrategy<IntVar>{
 
-    /* list of variables */
+    /**
+     * List of decision variables
+     */
     IntVar[] variables;
 
+    /**
+     * Failure per propagators counter
+     */
     FailPerPropagator counter;
 
-    TIntObjectHashMap<IStateInt> pid2ari;
+    /**
+     * Kind of duplicate of pid2ari to limit calls of backtrackable objects
+     */
     IntMap pid2arity;
+
+    /**
+     * Temporary. Stores index of variables with the same (best) score
+     */
     TIntList bests;
 
+    /**
+     * Randomness to break ties
+     */
     java.util.Random random;
 
+    /**
+     * Decisions pool, to limit memory footprint
+     */
     PoolManager<IntDecision> decisionPool;
 
+    /**
+     * The way value is selected for a given variable
+     */
     IntValueSelector valueSelector;
 
+    /**
+     * Creates a DomOverWDeg variable selector
+     *
+     * @param variables     decision variables
+     * @param seed          seed for breaking ties randomly
+     * @param valueSelector a value selector
+     */
     public DomOverWDeg(IntVar[] variables, long seed, IntValueSelector valueSelector) {
         super(variables);
         this.variables = variables.clone();
         Solver solver = variables[0].getSolver();
         counter = new FailPerPropagator(solver.getCstrs(), solver);
-        pid2ari = new TIntObjectHashMap<>();
-        pid2arity = new IntMap();
+        pid2arity = new IntMap(solver.getCstrs().length * 3 / 2 + 1, -1);
         bests = new TIntArrayList();
         this.valueSelector = valueSelector;
         decisionPool = new PoolManager<>();
         random = new java.util.Random(seed);
-    }
-
-    @Override
-    public boolean init(){
-        IEnvironment env = vars[0].getSolver().getEnvironment();
-        for (int i = 0; i < variables.length; i++) {
-            variables[i].addMonitor(this);
-            Propagator[] props = variables[i].getPropagators();
-            for (int j = 0; j < props.length; j++) {
-                pid2ari.putIfAbsent(props[j].getId(), env.makeInt(props[j].arity()));
-            }
-        }
-        return true;
     }
 
 
@@ -105,12 +115,12 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
             return null;
         }
         int currentVal = valueSelector.selectValue(variable);
-        IntDecision currrent = decisionPool.getE();
-        if (currrent == null) {
-            currrent = new IntDecision(decisionPool);
+        IntDecision current = decisionPool.getE();
+        if (current == null) {
+            current = new IntDecision(decisionPool);
         }
-        currrent.set(variable, currentVal, DecisionOperator.int_eq);
-        return currrent;
+        current.set(variable, currentVal, DecisionOperator.int_eq);
+        return current;
     }
 
     @Override
@@ -149,34 +159,19 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IVariableMo
         for (int p = 0; p < propagators.length; p++) {
             Propagator prop = propagators[p];
             int pid = prop.getId();
-            if (pid2arity.get(pid) > 1) {
+            // if the propagator has been already evaluated
+            if (pid2arity.get(pid) > -1) {
                 w += counter.getFails(prop);
             } else {
-                if (pid2ari.get(pid) == null) {
-                    pid2ari.putIfAbsent(prop.getId(), v.getSolver().getEnvironment().makeInt(prop.arity()));
-                }
-                int a = pid2ari.get(pid).get();
-                pid2arity.put(pid, a);
-                if (a > 1) {
+                // the arity of this propagator is not yet known
+                int futVars = prop.arity();
+                assert futVars > -1;
+                pid2arity.put(pid, futVars);
+                if (futVars > 1) {
                     w += counter.getFails(prop);
                 }
             }
         }
         return w;
     }
-
-    @Override
-    public void onUpdate(IntVar var, IEventType evt) {
-        if (evt == IntEventType.INSTANTIATE) {
-            Propagator[] props = var.getPropagators();
-            for (int i = 0; i < props.length; i++) {
-                int pid = props[i].getId();
-				if (pid2ari.get(pid) == null) {
-					pid2ari.putIfAbsent(pid, var.getSolver().getEnvironment().makeInt(props[i].arity()));
-				}
-                pid2ari.get(pid).add(-1);
-            }
-        }
-    }
-
 }

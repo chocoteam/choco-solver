@@ -608,7 +608,7 @@ On a call to ``Chatterbox.printVersion()``, the following message will be printe
 
 .. code-block:: none
 
-    ** Choco 3.3.2 (2015-11) : Constraint Programming Solver, Copyleft (c) 2010-2015
+    ** Choco 3.3.3 (2015-12) : Constraint Programming Solver, Copyleft (c) 2010-2015
 
 On a call to ``Chatterbox.printVersion()``, the following message will be printed:
 

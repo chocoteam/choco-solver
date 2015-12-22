@@ -27,16 +27,60 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.constraints.extension.nary;
+
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
- * An interface to monitor interruption of the search loop
- * <br/>
  *
+ * <p>
+ * Project: choco.
  * @author Charles Prud'homme
- * @since 13/12/12
- * @deprecated
+ * @since 21/12/2015.
  */
-public interface IMonitorInterruption extends ISearchMonitor {
-    void afterInterrupt();
+class RelationFactory {
+
+
+    /**
+     * Make a large relation from <i>tuples</i> and an array of IntVar.
+     * @param tuples list of tuples
+     * @param vars array of IntVar
+     * @return a large relation
+     */
+    public static LargeRelation makeLargeRelation(Tuples tuples, IntVar[] vars) {
+        long totalSize = 1;
+        for (int i = 0; i < vars.length && (int)totalSize == totalSize; i++) { // to prevent from long overflow
+            totalSize *= vars[i].getRange();
+        }
+        if ((int)totalSize != totalSize) {
+            return new TuplesVeryLargeTable(tuples, vars);
+        }
+        if (totalSize / 8 > 50 * 1024 * 1024) {
+            return new TuplesLargeTable(tuples, vars);
+        }
+        return new TuplesTable(tuples, vars);
+    }
+
+
+    /**
+     * Make iterable relation from <i>tuples</i> and an array of IntVar.
+     * @param tuples list of tuples
+     * @param vars array of IntVar
+     * @return an iterable relation
+     */
+    public static IterTuplesTable makeIterableRelation(Tuples tuples, IntVar[] vars) {
+        return new IterTuplesTable(tuples, vars);
+    }
+
+    /**
+     * Make list-based relation from <i>tuples</i> and an array of IntVar.
+     * @param tuples list of tuples
+     * @param vars array of IntVar
+     * @return a lsit-based relation
+     */
+    public static TuplesList makeListBasedRelation(Tuples tuples, IntVar[] vars) {
+        return new TuplesList(tuples, vars);
+    }
+
 }

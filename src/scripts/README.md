@@ -31,13 +31,13 @@ And run license check:
 
     $ git log master..develop | grep "#[0-9]"
 
-5. Run the command :
+5. Make sure the website is mounted to /Volume/htdocs/ and run the command :
 
     $ ./src/scripts/release.sh
 
     $ ./src/scripts/build.sh
 
-    However, deployment and zip file (jar files, user guide, logback configuration file and javadoc) need to be done locally:
+    However, deployment and zip file (jar files, user guide and javadoc) need to be done locally:
 
     ./src/scripts/package.sh X.Y.Z
 

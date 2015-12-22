@@ -71,16 +71,12 @@ public class CostasArrays extends AbstractProblem {
 	public void buildModel() {
 		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
 		vectors = new IntVar[(n*(n-1))/2];
-		IntVar[][] diff = new IntVar[n][n];
-		int idx = 0;
-		for (int i = 0; i < n; i++) {
-			for (int j = i+1; j < n; j++) {
-				IntVar k = VariableFactory.enumerated(StringUtils.randomName(), -n, n, solver);
-				solver.post(ICF.arithm(k,"!=",0));
-				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
-				vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
-				diff[i][j] = k;
-				idx++;
+		for (int i = 0, k = 0; i < n; i++) {
+			for (int j = i+1; j < n; j++, k++) {
+				IntVar d = VariableFactory.enumerated(StringUtils.randomName(), -n, n, solver);
+				solver.post(ICF.arithm(d,"!=",0));
+				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],d},vars[j]));
+				vectors[k] = VariableFactory.offset(d, 2 * n * (j - i));
 			}
 		}
 		solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
@@ -103,17 +99,17 @@ public class CostasArrays extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for (int i = 0; i < n; i++) {
-            s += "|";
+            s.append("|");
             for (int j = 0; j < n; j++) {
                 if (j == vars[i].getValue()) {
-                    s += "x|";
+                    s.append("x|");
                 } else {
-                    s += "-|";
+                    s.append("-|");
                 }
             }
-            s += "\n";
+            s.append("\n");
         }
         System.out.println(s);
     }

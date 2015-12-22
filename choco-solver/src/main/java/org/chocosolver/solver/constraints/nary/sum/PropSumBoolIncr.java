@@ -37,7 +37,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 
 /**
- * A propagator for SUM(x_i) = y + b, where x_i are boolean variables
+ * A propagator for SUM(x_i) = y + b, where x_i are boolean variables, maintained incrementally.
  * <br/>
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
@@ -48,9 +48,35 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
  */
 public class PropSumBoolIncr extends PropSumBool {
 
-    IStateInt bLB, bUB;
+    /**
+     * Sum of lower bounds maintained incrementally.
+     * Main reason this version exists.
+     */
+    IStateInt bLB;
+    /**
+     * Sum of upper bounds maintained incrementally.
+     * Main reason this version exists.
+     */
+    IStateInt bUB;
+
+    /**
+     * The filtering algorithm is triggered on some particular events.
+     * This boolean indicates when the propagation should be executed.
+     *
+     */
     boolean doFilter;
 
+    /**
+     * Creates a sum propagator: SUM(x_i) = sum + b, where x_i are boolean variables, maintained incrementally.
+     * Coefficients are induced by <code>pos</code>:
+     * those before <code>pos</code> (included) are equal to 1,
+     * the other ones are equal to -1.
+     * @param variables list of boolean variables
+     * @param pos position of the last positive (induced) coefficient
+     * @param o operator
+     * @param sum resulting variable
+     * @param b bound to respect
+     */
     public PropSumBoolIncr(BoolVar[] variables, int pos, Operator o, IntVar sum, int b) {
         super(variables, pos, o, sum, b, true);
         this.bLB = solver.getEnvironment().makeInt();
@@ -71,7 +97,7 @@ public class PropSumBoolIncr extends PropSumBool {
                     ub++;
                 }
             }
-            for (; i < l; i++) { // then the negative ones
+            for (; i < l -1; i++) { // then the negative ones
                 if (vars[i].isInstantiated()) {
                     k = vars[i].getLB();
                     lb -= k;
@@ -98,7 +124,7 @@ public class PropSumBoolIncr extends PropSumBool {
                 bUB.add(-1);
                 doFilter |= o != Operator.LE;
             }
-        } else if (idxVarInProp < l) {
+        } else if (idxVarInProp < l -1) {
             int k = vars[idxVarInProp].getLB();
             if (k == 0) {
                 bLB.add(1);

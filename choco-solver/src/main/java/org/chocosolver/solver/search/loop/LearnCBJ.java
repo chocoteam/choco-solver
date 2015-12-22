@@ -33,7 +33,10 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
+import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.variables.IntVar;
 
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 
@@ -45,6 +48,7 @@ import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
  * <p>
  * Created by cprudhom on 02/09/15.
  * Project: choco.
+ * @author Charles Prud'homme, Narendra Jussien
  */
 public class LearnCBJ extends LearnExplained {
 
@@ -103,13 +107,36 @@ public class LearnCBJ extends LearnExplained {
     void onFailure(SearchLoop searchLoop) {
        super.onFailure(searchLoop);
         if (this.nogoodFromConflict) {
-            lastExplanation.postNogood(ngstore, ps);
+            postNogood();
         }
         int upto = compute(mSolver.getEnvironment().getWorldIndex());
         assert upto > 0;
         searchLoop.jumpTo = upto;
         identifyRefutedDecision(upto);
     }
+
+    /**
+     * Extracts a nogod from this explanation (which needs to be complete) and add it to the no-good store.
+     * If this explanation is not complete, it does nothing.
+     */
+    @SuppressWarnings("unchecked")
+    private void postNogood() {
+        if (lastExplanation.isComplete()) {
+            Solver mSolver = ngstore.getSolver();
+            Decision<IntVar> decision = mSolver.getSearchLoop().getLastDecision();
+            ps.clear();
+            while (decision != RootDecision.ROOT) {
+                if (lastExplanation.getDecisions().get(decision.getWorldIndex())) {
+                    assert decision.hasNext();
+                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariables(),
+                            (Integer) decision.getDecisionValue(), true)));
+                }
+                decision = decision.getPrevious();
+            }
+            ngstore.addLearnt(ps.toArray());
+        }
+    }
+
 
     /**
      * Compute the world to backtrack to
@@ -120,5 +147,10 @@ public class LearnCBJ extends LearnExplained {
     int compute(int currentWorldIndex) {
         assert currentWorldIndex >= lastExplanation.getDecisions().length();
         return currentWorldIndex - lastExplanation.getDecisions().previousSetBit(lastExplanation.getDecisions().length());
+    }
+
+    @Override
+    public void forget(SearchLoop searchLoop) {
+        mExplainer.getRuleStore();
     }
 }

@@ -40,7 +40,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
- * A propagator for SUM(x_i) = b
+ * A propagator for SUM(x_i) o b
  * <br/>
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
@@ -51,14 +51,73 @@ import org.chocosolver.util.ESat;
  */
 public class PropSum extends Propagator<IntVar> {
 
-    final int pos; // index of the last positive coefficient
-    final int l; // number of variables
-    final int b; // bound to respect
-    final int[] I; // variability of each variable -- domain amplitude
-    int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
+    /**
+     * The position of the last positive coefficient
+     */
+    final int pos;
+
+    /**
+     * Number of variables
+     */
+    final int l;
+
+    /**
+     * Bound to respect
+     */
+    final int b;
+
+    /**
+     * Variability of each variable (ie domain amplitude)
+     */
+    final int[] I;
+
+    /**
+     * SUm of lower bounds
+     */
+    int sumLB;
+
+    /**
+     * Sum of upper bounds
+     */
+    int sumUB;
+
+    /**
+     * The operator among EQ, LE, GE and NE
+     */
     final Operator o;
 
 
+    /**
+     * Creates a sum propagator: SUM(x_i) o b
+     * Coefficients are induced by <code>pos</code>:
+     * those before <code>pos</code> (included) are equal to 1,
+     * the other ones are equal to -1.
+     *
+     * @param variables list of integer variables
+     * @param pos position of the last positive coefficient
+     * @param o operator amng EQ, LE, GE and NE
+     * @param b bound to respect
+     */
+    public PropSum(IntVar[] variables, int pos, Operator o, int b) {
+        this(variables, pos, o, b, computePriority(variables.length), false);
+    }
+
+
+    PropSum(IntVar[] variables, int pos, Operator o, int b, PropagatorPriority priority, boolean reactOnFineEvent){
+        super(variables, priority, reactOnFineEvent);
+        this.pos = pos;
+        this.o = o;
+        this.b = b;
+        l = variables.length;
+        I = new int[l];
+        super.linkVariables();
+    }
+
+    /**
+     * Compute the priority of the propagator wrt the number of involved variables
+     * @param nbvars number of variables
+     * @return the priority
+     */
     protected static PropagatorPriority computePriority(int nbvars) {
         if (nbvars == 1) {
             return PropagatorPriority.UNARY;
@@ -69,16 +128,6 @@ public class PropSum extends Propagator<IntVar> {
         } else {
             return PropagatorPriority.LINEAR;
         }
-    }
-
-    public PropSum(IntVar[] variables, int pos, Operator o, int b) {
-        super(variables, computePriority(variables.length), false);
-        this.pos = pos;
-        this.o = o;
-        this.b = b;
-        l = variables.length;
-        I = new int[l];
-        super.linkVariables();
     }
 
     @Override
@@ -101,6 +150,9 @@ public class PropSum extends Propagator<IntVar> {
     }
 
 
+    /**
+     * Prepare the propagation: compute sumLB, sumUB and I
+     */
     protected void prepare() {
         sumLB = sumUB = 0;
         int i = 0;
@@ -127,6 +179,10 @@ public class PropSum extends Propagator<IntVar> {
         filter();
     }
 
+    /**
+     * Execute filtering wrt the operator
+     * @throws ContradictionException if contradiction is detected
+     */
     protected void filter() throws ContradictionException {
         prepare();
         switch (o) {
@@ -145,6 +201,10 @@ public class PropSum extends Propagator<IntVar> {
         }
     }
 
+    /**
+     * Apply filtering when operator is EQ
+     * @throws ContradictionException if contradiction is detected
+     */
     void filterOnEq() throws ContradictionException {
         boolean anychange;
         int F = b - sumLB;
@@ -210,6 +270,10 @@ public class PropSum extends Propagator<IntVar> {
         }*/
     }
 
+    /**
+     * Apply filtering when operator is LE
+     * @throws ContradictionException if contradiction is detected
+     */
     void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -248,6 +312,10 @@ public class PropSum extends Propagator<IntVar> {
         }
     }
 
+    /**
+     * Apply filtering when operator is GE
+     * @throws ContradictionException if contradiction is detected
+     */
     void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -286,6 +354,10 @@ public class PropSum extends Propagator<IntVar> {
         }
     }
 
+    /**
+     * Apply filtering when operator is NE
+     * @throws ContradictionException if contradiction is detected
+     */
     void filterOnNeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
@@ -322,6 +394,16 @@ public class PropSum extends Propagator<IntVar> {
             sumLB -= vars[i].getUB();
             sumUB -= vars[i].getLB();
         }
+        return check(sumLB, sumUB);
+    }
+
+    /**
+     * Whether the current state of the scalar product is entailed
+     * @param sumLB sum of lower bounds
+     * @param sumUB sum of upper bounds
+     * @return the entailment check
+     */
+    ESat check(int sumLB, int sumUB){
         switch (o) {
             case NQ:
                 if (sumUB < b || sumLB > b) {
@@ -335,15 +417,15 @@ public class PropSum extends Propagator<IntVar> {
                 if (sumUB <= b) {
                     return ESat.TRUE;
                 }
-                if (b < sumLB) {
+                if (sumLB > b) {
                     return ESat.FALSE;
                 }
                 return ESat.UNDEFINED;
             case GE:
-                if (sumLB <= b) {
+                if (sumLB >= b) {
                     return ESat.TRUE;
                 }
-                if (b < sumUB) {
+                if (sumUB < b) {
                     return ESat.FALSE;
                 }
                 return ESat.UNDEFINED;

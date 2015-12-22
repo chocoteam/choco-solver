@@ -36,11 +36,16 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 
 /**
+ * List of attributes that can be extracted from a Solver.
  * Created by cprudhom on 16/03/15.
  * Project: choco.
+ * @author Charles Prud'homme
  */
 public enum Attribute {
 
+    /**
+     * Normalized mean constraints per variable
+     */
     NMCPV {
         @Override
         public double evaluate(Solver solver) {
@@ -61,6 +66,9 @@ public enum Attribute {
             return "Normalized mean constraints per variable";
         }
     },
+    /**
+     * Normalized mean unary constraints above all
+     */
     NMUCAA {
         @Override
         public double evaluate(Solver solver) {
@@ -82,6 +90,9 @@ public enum Attribute {
             return "Normalized mean unary constraints above all";
         }
     },
+    /**
+     * Normalized mean binary constraints above all
+     */
     NMBCAA {
         @Override
         public double evaluate(Solver solver) {
@@ -103,6 +114,9 @@ public enum Attribute {
             return "Normalized mean binary constraints above all";
         }
     },
+    /**
+     * Normalized mean ternary constraints above all
+     */
     NMTCAA {
         @Override
         public double evaluate(Solver solver) {
@@ -124,6 +138,9 @@ public enum Attribute {
             return "Normalized mean ternary constraints above all";
         }
     },
+    /**
+     * Normalized mean nary constraints above all
+     */
     NMNCAA {
         @Override
         public double evaluate(Solver solver) {
@@ -145,6 +162,9 @@ public enum Attribute {
             return "Normalized mean nary constraints above all";
         }
     },
+    /**
+     * Normalized mean variables per constraint
+     */
     NMVPC {
         @Override
         public double evaluate(Solver solver) {
@@ -163,6 +183,9 @@ public enum Attribute {
             return "Normalized mean variables per constraint";
         }
     },
+    /**
+     * Normalized mean decisions variables
+     */
     NMDV {
         @Override
         public double evaluate(Solver solver) {
@@ -180,10 +203,22 @@ public enum Attribute {
     };
 
 
+    /**
+     * Method to evaluate a specific attribute over a solver
+     * @param solver to evaluate
+     * @return the value of the attribute
+     */
     public abstract double evaluate(Solver solver);
 
+    /**
+     * @return a short description of the attribute
+     */
     public abstract String description();
 
+    /**
+     * Print all declared attributes and their values
+     * @param solver solver to evaluate
+     */
     public static void printAll(Solver solver) {
         printSuccint(solver);
         for (Attribute a : Attribute.values()) {
@@ -191,8 +226,12 @@ public enum Attribute {
         }
     }
 
+    /**
+     * Print basic features of a solver
+     * @param solver to evaluate
+     */
     public static void printSuccint(Solver solver) {
-        Chatterbox.out.printf("- Solver features:\n");
+        Chatterbox.out.printf("- Solver[%s] features:\n", solver.getName());
         Chatterbox.out.printf("\tVariables : %d\n", solver.getNbVars());
         Chatterbox.out.printf("\tConstraints : %d\n", solver.getNbCstrs());
         Chatterbox.out.printf("\tDefault search strategy : %s\n", solver.getSearchLoop().isDefaultSearchUsed()?"yes":"no");

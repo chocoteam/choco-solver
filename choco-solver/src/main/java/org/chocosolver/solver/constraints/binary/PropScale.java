@@ -31,14 +31,11 @@ package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
-import org.chocosolver.solver.constraints.ternary.Times;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
 import org.chocosolver.util.ESat;
-
-import static java.lang.Math.ceil;
-import static java.lang.Math.floor;
+import org.chocosolver.util.tools.MathUtils;
 
 /**
  * Scale propagator : ensures x * y = z
@@ -56,6 +53,7 @@ public class PropScale extends Propagator<IntVar> {
     final IntVar X, Z;
     final int Y;
     final boolean enumerated;
+    final IntIterableBitSet values;
 
     /**
      * Scale propagator : ensures x * y = z
@@ -70,18 +68,15 @@ public class PropScale extends Propagator<IntVar> {
         this.Z = vars[1];
         this.Y = y;
         assert y > 1;
-        if (!(Times.inIntBounds((long) X.getLB() * Y) && Times.inIntBounds((long) X.getUB() * Y))) {
-            throw new SolverException("Integer overflow.\nConsider reducing the variable domains.");
-        }
         this.enumerated = X.hasEnumeratedDomain() && Z.hasEnumeratedDomain();
+        this.values = enumerated?new IntIterableBitSet():null;
     }
 
     @Override
     public final void propagate(int evtmask) throws ContradictionException {
-        X.updateBounds((int) ceil((double) Z.getLB() / (double) Y - 0.0001), (int) floor((double) Z.getUB() / (double) Y + 0.0001), this);
+        X.updateBounds(MathUtils.divCeil(Z.getLB(), Y), MathUtils.divFloor(Z.getUB(), Y), this);
         boolean hasChanged;
-        hasChanged = Z.updateLowerBound(X.getLB() * Y, this);
-        hasChanged |= Z.updateUpperBound(X.getUB() * Y, this);
+        hasChanged = Z.updateBounds(X.getLB() *  Y, X.getUB() *  Y, this);
         if (enumerated) {
             int ub = X.getUB();
             for (int v = X.getLB(); v <= ub; v = X.nextValue(v)) {
@@ -89,12 +84,16 @@ public class PropScale extends Propagator<IntVar> {
                     X.removeValue(v, this);
                 }
             }
+            int v = Z.getLB();
+            this.values.clear();
+            this.values.setOffset(v);
             ub = Z.getUB();
-            for (int v = Z.getLB(); v <= ub; v = Z.nextValue(v)) {
+            for (; v <= ub; v = Z.nextValue(v)) {
                 if ((v / Y) * Y != v || !X.contains(v / Y)) {
-                    Z.removeValue(v, this);
+                    this.values.add(v);
                 }
             }
+            Z.removeValues(values, this);
         } else if (hasChanged && Z.hasEnumeratedDomain()) {
             if (Z.getLB() > X.getLB() * Y || Z.getUB() < X.getUB() * Y) {
                 propagate(evtmask);

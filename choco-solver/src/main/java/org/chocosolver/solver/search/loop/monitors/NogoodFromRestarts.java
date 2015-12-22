@@ -56,7 +56,14 @@ import java.util.Arrays;
  */
 public class NogoodFromRestarts implements IMonitorRestart {
 
+    /**
+     * Stores the decision path before
+     */
     CircularQueue<Decision<IntVar>> decisions;
+
+    /**
+     * The (unique) no-good store
+     */
     final PropNogoods png;
 
     /**
@@ -79,6 +86,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
         extractNogoodFromPath();
     }
 
+    @SuppressWarnings("unchecked")
     private void extractNogoodFromPath() {
         int d = (int) png.getSolver().getMeasures().getNodeCount();
         Decision<IntVar> decision = png.getSolver().getSearchLoop().getLastDecision();
@@ -94,25 +102,25 @@ public class NogoodFromRestarts implements IMonitorRestart {
                 IntDecision id = (IntDecision) decision;
                 if (id.getDecOp() == DecisionOperator.int_eq) {
                     if (id.hasNext()) {
-                        lits[i++] = SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue()));
+                        lits[i++] = SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true));
                     } else {
                         if (i == 0) {
                             // value can be removed permanently from var!
-                            png.addLearnt(SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue())));
+                            png.addLearnt(SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true)));
                         } else {
-                            lits[i] = SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue()));
+                            lits[i] = SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true));
                             png.addLearnt(Arrays.copyOf(lits, i + 1));
                         }
                     }
                 } else if (id.getDecOp() == DecisionOperator.int_neq) {
                     if (id.hasNext()) {
-                        lits[i++] = png.Literal(id.getDecisionVariables(), id.getDecisionValue());
+                        lits[i++] = png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true);
                     } else {
                         if (i == 0) {
                             // value can be removed permanently from var!
-                            png.addLearnt(png.Literal(id.getDecisionVariables(), id.getDecisionValue()));
+                            png.addLearnt(png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true));
                         } else {
-                            lits[i] = png.Literal(id.getDecisionVariables(), id.getDecisionValue());
+                            lits[i] = png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true);
                             png.addLearnt(Arrays.copyOf(lits, i + 1));
                         }
                     }

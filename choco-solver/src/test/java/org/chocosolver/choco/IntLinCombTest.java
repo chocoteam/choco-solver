@@ -575,6 +575,12 @@ public class IntLinCombTest {
     @Test(groups = "1s")
     public void testB1() {
         Solver solver = new Solver();
+        solver.set(new Settings() {
+            @Override
+            public short[] getCoarseEventPriority() {
+                return new short[]{0, 0, 0, 0, 1, 2, 3};
+            }
+        });
         int n = 23;
         BoolVar[] bs = VF.boolArray("b", n, solver);
         int[] cs = new int[n];
@@ -728,4 +734,25 @@ public class IntLinCombTest {
         Assert.assertTrue(solver.findSolution());
     }
 
+    @Test(groups="1s")
+    public void testJG1(){
+        Solver solver = new Solver("TestChoco 3.3.2 Briot");
+        IntVar[] var  = VF.enumeratedArray("var", 3, new int[] {30,60}, solver);
+        solver.post(ICF.sum(new IntVar[] { var[0], var[1], var[2] }, ">=", VF.fixed(60, solver)));
+        solver.set(ISF.lexico_LB(var));
+        Chatterbox.showStatistics(solver);
+        Chatterbox.showSolutions(solver);
+        solver.findSolution();
+    }
+
+    @Test(groups="1s")
+    public void testJG2(){
+        Solver solver = new Solver("TestChoco 3.3.2 Briot");
+        IntVar[] var  = VF.enumeratedArray("var", 3, new int[] {30,60}, solver);
+        solver.post(ICF.sum(new IntVar[] { var[0], var[1], var[2] }, "<=", VF.fixed(120, solver)));
+        solver.set(ISF.lexico_LB(var));
+        Chatterbox.showStatistics(solver);
+        Chatterbox.showSolutions(solver);
+        solver.findSolution();
+    }
 }
