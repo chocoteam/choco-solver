@@ -42,7 +42,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -293,10 +293,8 @@ public class PropNogoodsTest {
         for(int value: values) {
             long eqvalue = value;
             long ltvalue = PropNogoods.leq(value);
-            Assert.assertEquals("ivalue eq: " + value + ", " + eqvalue + "",
-                    PropNogoods.ivalue(eqvalue), value);
-            Assert.assertEquals("ivalue leq: " + value + ", " + eqvalue + "",
-                    PropNogoods.ivalue(ltvalue), value);
+            Assert.assertEquals(PropNogoods.ivalue(eqvalue), value, "ivalue eq: " + value + ", " + eqvalue + "");
+            Assert.assertEquals(PropNogoods.ivalue(ltvalue), value, "ivalue leq: " + value + ", " + eqvalue + "");
         }
     }
 
