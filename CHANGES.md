@@ -6,6 +6,10 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+
+3.3.3 - 22 Dec 2015
+-------------------
+
 #### All:
  - remove deprecated interfaces, classes and methods.
 

@@ -68,7 +68,7 @@ public interface Settings extends Serializable {
      * @return the welcome message
      */
     default String getWelcomeMessage() {
-        return "** Choco 3.3.2 (2015-11) : Constraint Programming Solver, Copyleft (c) 2010-2015";
+        return "** Choco 3.3.3 (2015-12) : Constraint Programming Solver, Copyleft (c) 2010-2015";
     }
 
     /**
