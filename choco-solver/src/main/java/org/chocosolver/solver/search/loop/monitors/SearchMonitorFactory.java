@@ -317,43 +317,27 @@ public class SearchMonitorFactory {
     }
 
     /**
-     * A method which prepares the solvers in the list to be run in parallel.
-     * It plugs tools to share between solvers the best known bound when dealing with an optimization problem.
-     * It also plugs a flag which
-     * <p>
-     * The expected use is the following:
-     * <pre> {@code
-     * <p>
-     * int n =4; // number of solvers to use
-     * List<Solver> solvers = new ArrayList<>();
-     * for(int i = 0 ; i < n; i++){
-     *     Solver solver = new Solver();
-     *     solvers.add(solver);
-     *     readModel(solver); // a dedicated method that declares variables and constraints
-     *     // the search should also be declared here
-     * }
-     * SMF.prepareForParallelResolution(solvers);
-     * solvers.parallelStream().forEach(Solver::findSolution);
-     * // or solvers.parallelStream().forEach(s -> s.findOptimalSolution(ResolutionPolicy.MAXIMIZE));
-     * }
-     *
-     * @param solvers a list of {@code Solver}
+     * @deprecated Use instead {@link org.chocosolver.solver.ParallelResolution} which centralizes parallel resolution process
+     * and offers more services.
      */
+    @Deprecated
     public static void prepareForParallelResolution(List<Solver> solvers) {
         if (solvers.get(0).getObjectives() != null &&
                 solvers.get(0).getObjectives().length == 1) {
             // share the best known bound
             solvers.stream().forEach(s -> s.plugMonitor(
                     (IMonitorSolution) () -> {
-                        switch (s.getObjectiveManager().getPolicy()) {
-                            case MAXIMIZE:
-                                int lb = s.getObjectiveManager().getBestSolutionValue().intValue();
-                                solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestLB(lb));
-                                break;
-                            case MINIMIZE:
-                                int ub = s.getObjectiveManager().getBestSolutionValue().intValue();
-                                solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestUB(ub));
-                                break;
+                        synchronized (s.getObjectiveManager()) {
+                            switch (s.getObjectiveManager().getPolicy()) {
+                                case MAXIMIZE:
+                                    int lb = s.getObjectiveManager().getBestSolutionValue().intValue();
+                                    solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestLB(lb));
+                                    break;
+                                case MINIMIZE:
+                                    int ub = s.getObjectiveManager().getBestSolutionValue().intValue();
+                                    solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestUB(ub));
+                                    break;
+                            }
                         }
                     }
             ));

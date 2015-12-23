@@ -34,9 +34,9 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
@@ -44,8 +44,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <br/>
@@ -255,24 +253,26 @@ public class SolverTest {
 
     @Test(groups = "1s")
     public void testP1() {
+        ParallelResolution pares = new ParallelResolution();
         int n = 4; // number of solvers to use
-        List<Solver> solvers = new ArrayList<>();
         for (int i = 0; i < n; i++) {
-            solvers.add(knapsack());
+            pares.addSolver(knapsack());
         }
-        SMF.prepareForParallelResolution(solvers);
-        solvers.parallelStream().forEach(Solver::findSolution);
+        pares.findSolution();
+        Chatterbox.printSolutions(pares.getFinder());
+        Assert.assertEquals(pares.getFinder().getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups = "1s")
     public void testP2() {
         int n = 10; // number of solvers to use
-        List<Solver> solvers = new ArrayList<>();
+        ParallelResolution pares = new ParallelResolution();
         for (int i = 0; i < n; i++) {
-            solvers.add(knapsack());
+            pares.addSolver(knapsack());
         }
-        SMF.prepareForParallelResolution(solvers);
-        solvers.parallelStream().forEach(s -> s.findOptimalSolution(ResolutionPolicy.MAXIMIZE));
+        pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+        Chatterbox.printSolutions(pares.getFinder());
+        Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
     }
 
     @Test(groups="1s")

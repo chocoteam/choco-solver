@@ -6,6 +6,14 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+### Solver:
+
+- `ParallelResolution` replaces `SMF.prepareForParallelResolution(List<Solver>)` (depreacted); it offers more services 
+like getting a solver which a solution -- or the best one (#362)
+
+#### Bug fixes: 
+
+\#361
 
 3.3.3 - 22 Dec 2015
 -------------------
