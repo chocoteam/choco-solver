@@ -639,6 +639,7 @@ public final class SearchLoop implements Serializable {
      * Replaces the downmost taken decision by <code>cobdec</code>.
      * @param cobdec the new downmost decision
      */
+    @SuppressWarnings("unused")
     public void setLastDecision(Decision cobdec) {
         this.decision = cobdec;
     }
@@ -693,4 +694,11 @@ public final class SearchLoop implements Serializable {
         return searchWorldIndex;
     }
 
+
+    /**
+     * @return <tt>true</tt> if the resolution already began, <tt>false</tt> otherwise
+     */
+    public boolean hasResolutionBegun(){
+        return action != initialize;
+    }
 }

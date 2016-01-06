@@ -39,6 +39,7 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.ProblemMaker;
 import org.chocosolver.util.criteria.Criterion;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -398,5 +399,11 @@ public class SolverTest {
         Assert.assertTrue(solver.getName().startsWith("Solver-"));
         solver.setName("Revlos");
         Assert.assertEquals(solver.getName(), "Revlos");
+    }
+
+    @Test(groups="1s")
+    public void testNextSolution(){
+        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+        s.nextSolution(); //  should not throw exception
     }
 }

@@ -1083,15 +1083,18 @@ public class Solver implements Serializable {
      * <p>
      * The search is then resume to the last found solution point.
      *
+     * If {@link Solver#findSolution()} has not been called yet, call it instead.
+     *
      * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
      */
     public boolean nextSolution() {
-        if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
-            throw new SolverException("Solver.findSolution() must be called once before calling Solver.nextSolution()");
+        if(search != null && search.hasResolutionBegun()){
+            long nbsol = measures.getSolutionCount();
+            search.launch(true);
+            return (measures.getSolutionCount() - nbsol) > 0;
+        }else{
+            return findSolution();
         }
-        long nbsol = measures.getSolutionCount();
-        search.launch(true);
-        return (measures.getSolutionCount() - nbsol) > 0;
     }
 
     /**
