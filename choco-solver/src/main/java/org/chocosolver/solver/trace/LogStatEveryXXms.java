@@ -42,9 +42,21 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
  */
 public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
 
+    /**
+     * A thread which prints short line statistics to {@link Chatterbox#out}.
+     */
     Thread printer;
-    boolean alive;
 
+    /**
+     * A boolean to kill the printer when the resolution ends.
+     */
+    volatile boolean alive;
+
+    /**
+     * Create a monitor which outputs shot-line statistics every <i>duration</i> milliseconds
+     * @param solver the solver to instrument
+     * @param duration delay between two outputs, in milliseconds
+     */
     public LogStatEveryXXms(final Solver solver, final long duration) {
 
         printer = new Thread() {
@@ -75,5 +87,6 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
     @Override
     public void afterClose() {
         alive = false;
+        printer.interrupt();
     }
 }

@@ -13,7 +13,7 @@ like getting a solver which a solution -- or the best one (#362)
 
 #### Bug fixes: 
 
-\#361
+\#361, #365
 
 3.3.3 - 22 Dec 2015
 -------------------
