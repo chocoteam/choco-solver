@@ -46,10 +46,10 @@ import java.util.List;
  */
 public class MoveLNS implements Move {
 
-    Move move; // the strategy required to complete the generated fragment
-    INeighbor neighbor;
+    protected Move move; // the strategy required to complete the generated fragment
+    protected INeighbor neighbor;
 
-    long solutions; // nb solutions found so far
+    protected long solutions; // nb solutions found so far
     boolean freshRestart;
     ICounter counter;
     long frequency;

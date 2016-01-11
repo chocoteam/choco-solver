@@ -30,12 +30,16 @@
 package org.chocosolver.choco;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.limits.NodeCounter;
+import org.chocosolver.solver.search.loop.Move;
+import org.chocosolver.solver.search.loop.MoveLNS;
+import org.chocosolver.solver.search.loop.SearchLoop;
+import org.chocosolver.solver.search.loop.lns.LNSFactory;
+import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -47,51 +51,29 @@ import org.testng.annotations.Test;
  */
 public class LimitsTest {
 
-    protected static Solver modelit() {
-        Solver solver = new Solver();
-        int n = 12;
-        IntVar[] vars = new IntVar[n];
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-        }
-
-
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
-                solver.post(neq);
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
-            }
-        }
-        return solver;
-    }
-
-
     @Test(groups = "1s")
     public void testTime() {
-        Solver s = modelit();
+        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long tl = 500;
         SearchMonitorFactory.limitTime(s, tl);
         s.findAllSolutions();
-		int tc = (int)(s.getMeasures().getTimeCount()*1000);
+        int tc = (int) (s.getMeasures().getTimeCount() * 1000);
         Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
 
     @Test(groups = "1s")
     public void testThreadTime() {
-        Solver s = modelit();
+        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long tl = 500;
         SearchMonitorFactory.limitTime(s, tl);
         s.findAllSolutions();
-        int tc = (int)(s.getMeasures().getTimeCount()*1000);
+        int tc = (int) (s.getMeasures().getTimeCount() * 1000);
         Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
     }
 
     @Test(groups = "1s")
     public void testNode() {
-        Solver s = modelit();
+        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long nl = 50;
         SearchMonitorFactory.limitNode(s, nl);
         s.findAllSolutions();
@@ -101,7 +83,7 @@ public class LimitsTest {
 
     @Test(groups = "1s")
     public void testBacktrack() {
-        Solver s = modelit();
+        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long bl = 50;
         SearchMonitorFactory.limitBacktrack(s, bl);
         s.findAllSolutions();
@@ -111,7 +93,7 @@ public class LimitsTest {
 
     @Test(groups = "1s")
     public void testFail() {
-        Solver s = modelit();
+        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long fl = 50;
         SearchMonitorFactory.limitFail(s, fl);
         s.findAllSolutions();
@@ -121,7 +103,7 @@ public class LimitsTest {
 
     @Test(groups = "1s")
     public void testSolution() {
-        Solver s = modelit();
+        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long sl = 50;
         SearchMonitorFactory.limitSolution(s, sl);
         s.findAllSolutions();
@@ -149,4 +131,41 @@ public class LimitsTest {
         Assert.assertEquals(d, 71000);
     }
 
+
+    @Test(groups = "1s")
+    public void testGregy4() {
+        Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        NodeCounter nodeCounter = new NodeCounter(solver, 100);
+        INeighbor rnd = LNSFactory.random(solver, solver.retrieveIntVars(), 30, 0);
+        Move currentMove = solver.getSearchLoop().getMove();
+        solver.getSearchLoop().setMove(new MoveLNS(currentMove, rnd, new FailCounter(solver, 100)) {
+            @Override
+            public boolean extend(SearchLoop searchLoop) {
+                if (nodeCounter.isMet()) {
+                    super.extend(searchLoop);
+                }
+                return currentMove.extend(searchLoop);
+            }
+
+            @Override
+            public boolean repair(SearchLoop searchLoop) {
+                if (nodeCounter.isMet()) {
+                    super.repair(searchLoop);
+                } else if (this.solutions > 0
+                        // the second condition is only here for intiale calls, when solutions is not already up to date
+                        || solver.getMeasures().getSolutionCount() > 0) {
+                    // the detection of a new solution can only be met here
+                    if (solutions < solver.getMeasures().getSolutionCount()) {
+                        assert solutions == solver.getMeasures().getSolutionCount() - 1;
+                        solutions++;
+                        neighbor.recordSolution();
+                    }
+                }
+                return currentMove.repair(searchLoop);
+            }
+        });
+        solver.findAllSolutions();
+        long sc = solver.getMeasures().getSolutionCount();
+        Assert.assertEquals(sc, 11);
+    }
 }
