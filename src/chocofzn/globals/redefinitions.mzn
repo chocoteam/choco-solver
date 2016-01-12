@@ -36,6 +36,10 @@ predicate lex2Choco(array[int, int] of var int: x, bool: strict);
 predicate lex_lessChoco(array[int] of var bool: x, array[int] of var bool: y, bool: strict);
 predicate lex_lessChoco(array[int] of var int: x, array[int] of var int: y, bool: strict);
 predicate maximumChoco(var int: m, array[int] of var int: x);
+predicate memberChoco(array[int] of int: x, var int: y);
+predicate memberVarChoco(array[int] of var int: x, var int: y);
+predicate memberReifChoco(array[int] of int: x, var int: y, var bool: b);
+predicate memberVarReifChoco(array[int] of var int: x, var int: y, var bool: b);
 predicate minimumChoco(var int: m, array[int] of var int: x);
 predicate nvalueChoco(var int: n, array[int] of var int: x);
 predicate regularChoco(array[int] of var int: x, int: Q, int: S,
