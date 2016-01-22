@@ -21,17 +21,23 @@ public class SetCstrsTest {
 
 	@Test(groups = "1s")
 	public static void testEq() {
-		IntVar[] v1 = eqModel("offset");
-		IntVar[] v2 = eqModel("all_equal");
+		IntVar[] v1 = eqFilter("offset");
+		IntVar[] v2 = eqFilter("all_equal");
 		for(int i=0;i<v1.length;i++) {
 			Assert.assertEquals(v1[i].getDomainSize(), v2[i].getDomainSize());
 			for(int v=v1[i].getLB();v<=v1[i].getUB();v=v1[i].nextValue(v)){
 				Assert.assertTrue(v2[i].contains(v));
 			}
 		}
+		v1[0].getSolver().findAllSolutions();
+		v2[0].getSolver().findAllSolutions();
+		Assert.assertEquals(
+				v1[0].getSolver().getMeasures().getSolutionCount(),
+				v2[0].getSolver().getMeasures().getSolutionCount()
+		);
 	}
 
-	public static IntVar[] eqModel(String mode){
+	public static IntVar[] eqFilter(String mode){
 		Solver s = new Solver();
 		IntVar x = VF.enumerated("x", 0, 10, s);
 		IntVar y = VF.enumerated("y", 0, 10, s);
