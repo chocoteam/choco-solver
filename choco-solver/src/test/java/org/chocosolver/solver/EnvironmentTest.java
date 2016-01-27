@@ -56,9 +56,9 @@ public class EnvironmentTest {
 			for (int j = 0; j < n; j++) {
 				if (i != j) {
 					IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
-					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
+					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
 					// just to create many variables
-					IntConstraintFactory.sum(new IntVar[]{vars[i], k}, vars[j]).reif();
+					IntConstraintFactory.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reif();
 					vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
 					idx++;
 				}

@@ -82,14 +82,14 @@ public class Photo extends AbstractProblem {
 
 
 			IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
-			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, positions[pa]));
+			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]));
 			dist[i] = VariableFactory.abs(k);
 
             ifThenElse(viols[i],
                             arithm(dist[i], ">", 1),
                             arithm(dist[i], "<=", 1));
         }
-        solver.post(sum(viols, violations));
+        solver.post(sum(viols, "=", violations));
         solver.post(alldifferent(positions, "BC"));
         solver.post(arithm(positions[1], ">", positions[0]));
     }

@@ -65,8 +65,8 @@ public class LNSTest {
         }
         final IntVar power = VariableFactory.bounded("power", 0, 99999, solver);
         IntVar scalar = VariableFactory.bounded("weight", capacities[0], capacities[1], solver);
-        solver.post(IntConstraintFactory.scalar(objects, volumes, scalar));
-        solver.post(IntConstraintFactory.scalar(objects, energies, power));
+        solver.post(IntConstraintFactory.scalar(objects, volumes, "=", scalar));
+        solver.post(IntConstraintFactory.scalar(objects, energies, "=", power));
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
         solver.set(IntStrategyFactory.lexico_LB(objects));
 //        SearchMonitorFactory.log(solver, true, false);

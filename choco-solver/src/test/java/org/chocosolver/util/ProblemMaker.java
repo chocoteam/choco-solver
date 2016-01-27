@@ -87,7 +87,7 @@ public class ProblemMaker {
             for (int j = i+1; j < n; j++) {
                 IntVar k = VariableFactory.enumerated(StringUtils.randomName(), -n, n, solver);
                 solver.post(ICF.arithm(k,"!=",0));
-                solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},vars[j]));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
                 vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
@@ -128,7 +128,7 @@ public class ProblemMaker {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
                 // <cpru 04/03/12> it is worth adding a constraint instead of a view
-                solver.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k]));
+                solver.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]));
                 solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
                 solver.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
                 solver.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));

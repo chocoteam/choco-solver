@@ -59,7 +59,7 @@ public class DistanceTest {
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
 				IntVar diff = VariableFactory.bounded("X-Y",-9,9,solver);
-				solver.post(IntConstraintFactory.sum(new IntVar[]{Y,diff},X));
+				solver.post(IntConstraintFactory.sum(new IntVar[]{Y,diff}, "=", X));
                 IntVar Z = VariableFactory.abs(diff);
                 solver.post(IntConstraintFactory.arithm(Z, "=", 5));
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));

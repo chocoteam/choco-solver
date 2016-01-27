@@ -61,14 +61,14 @@ public class CountTest {
         for (int i = 0; i < n; i++) {
             solver.post(IntConstraintFactory.count(i, vars, VariableFactory.eq(vars[i])));
         }
-        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(n, solver))); // cstr redundant 1
+        solver.post(IntConstraintFactory.sum(vars, "=", n)); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.post(IntConstraintFactory.scalar(vs2, coeff2, VariableFactory.fixed(n, solver))); // cstr redundant 1
+        solver.post(IntConstraintFactory.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
         return solver;
     }
 
@@ -154,7 +154,7 @@ public class CountTest {
                     solver.post(IntConstraintFactory.count(val, vs, ivc));
                 }
             }
-            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, VariableFactory.fixed(0, solver)));
+            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
 
             //s.setValIntSelector(new RandomIntValSelector(interseed));
             //s.setVarIntSelector(new RandomIntVarSelector(s, interseed + 10));
@@ -229,7 +229,7 @@ public class CountTest {
         for (int i = 0; i < vs.length; i++) {
             LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval));
         }
-        return IntConstraintFactory.sum(bs, occ);
+        return IntConstraintFactory.sum(bs, "=", occ);
     }
 
 }

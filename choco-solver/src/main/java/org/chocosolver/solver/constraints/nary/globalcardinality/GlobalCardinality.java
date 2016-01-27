@@ -77,7 +77,7 @@ public class GlobalCardinality extends Constraint {
             for (int j = 0; j < vars.length; j++) {
                 LCF.ifThenElse(bs[j], ICF.arithm(vars[j], "=", cste), ICF.arithm(vars[j], "!=", cste));
             }
-            cstrs.add(ICF.sum(bs, card[i]));
+            cstrs.add(ICF.sum(bs, "=", card[i]));
         }
         return cstrs.toArray(new Constraint[cstrs.size()]);
     }

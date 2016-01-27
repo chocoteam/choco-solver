@@ -246,14 +246,14 @@ public class MarioKart extends AbstractProblem {
 	/** Post all the constraints of the problem */
 	private void constraints() {
 		/* The scalar constraint to compute global consumption of the kart to perform the path */
-		solver.post(ICF.scalar(ArrayUtils.flatten(edges), ArrayUtils.flatten(consumptions), fuelConsumed));
+		solver.post(ICF.scalar(ArrayUtils.flatten(edges), ArrayUtils.flatten(consumptions), "=", fuelConsumed));
 
 		/* The scalar constraint to compute the amount of gold founded by Mario in the path. With our model if a
 		 * node isn't used then his next value is equals to his id. Then the boolean edges[i][i] is equals to true */
 		BoolVar[] used = new BoolVar[n];
 		for (int i = 0; i < used.length; i++)
 			used[i] = edges[i][i].not();
-		solver.post(ICF.scalar(used, gold, goldFound));
+		solver.post(ICF.scalar(used, gold, "=", goldFound));
 
 		/* The subcircuit constraint. This forces all the next value to form a circuit which the overall size is equals
 		 * to the size variable. This constraint check if the path contains any sub circles. */
@@ -279,7 +279,7 @@ public class MarioKart extends AbstractProblem {
 			fuelHouse[i] = VariableFactory.enumerated("fuelHouse",0,FUEL,solver);
 			solver.post(ICF.element(fuelHouse[i],consumptions[i],next[i],0,"none"));
 		}
-		solver.post(ICF.sum(fuelHouse,fuelConsumed));
+		solver.post(ICF.sum(fuelHouse,"=",fuelConsumed));
 
 		/* GOLD RELATED FILTERING
 		* This problem can be seen has a knapsack problem where are trying to found the set of edges that contains the

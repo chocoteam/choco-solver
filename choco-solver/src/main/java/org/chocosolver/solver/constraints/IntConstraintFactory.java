@@ -423,7 +423,7 @@ public class IntConstraintFactory {
         IntVar t2 = VF.bounded(StringUtils.randomName(), -b, b, solver);
         solver.post(eucl_div(X, Y, t1));
         solver.post(times(t1, Y, t2));
-        return sum(new IntVar[]{Z, t2}, X);
+        return sum(new IntVar[]{Z, t2}, "=", X);
     }
 
     /**
@@ -631,9 +631,9 @@ public class IntConstraintFactory {
             bpcons[i] = ICF.boolean_channeling(ArrayUtils.getColumn(xbi, i), ITEM_BIN[i], OFFSET);
         }
         for (int b = 0; b < nbBins; b++) {
-            bpcons[nbItems + b] = ICF.scalar(xbi[b], ITEM_SIZE, BIN_LOAD[b]);
+            bpcons[nbItems + b] = ICF.scalar(xbi[b], ITEM_SIZE, "=", BIN_LOAD[b]);
         }
-        bpcons[nbItems + nbBins] = ICF.sum(BIN_LOAD, sumView);
+        bpcons[nbItems + nbBins] = ICF.sum(BIN_LOAD, "=", sumView);
         return bpcons;
     }
 
@@ -896,9 +896,9 @@ public class IntConstraintFactory {
             IntVar diffY = VF.bounded(StringUtils.randomName("diffn"), 0, maxy - miny, solver);
             return new Constraint[]{
                     diffNCons,
-                    minimum(minX, X), maximum(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, diffX),
+                    minimum(minX, X), maximum(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
                     cumulative(TX, HEIGHT, diffY, true),
-                    minimum(minY, Y), maximum(maxY, EY), scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, diffY),
+                    minimum(minY, Y), maximum(maxY, EY), scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, "=", diffY),
                     cumulative(TY, WIDTH, diffX, true)
             };
         }
@@ -1297,6 +1297,22 @@ public class IntConstraintFactory {
      * @param VARS     a collection of IntVar
      * @param COEFFS   a collection of int, for which |VARS|=|COEFFS|
      * @param OPERATOR an operator in {"=", "!=", ">","<",">=","<="}
+     * @param SCALAR   an integer
+     * @return a scalar constraint
+     */
+    public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, int SCALAR) {
+        assert VARS.length>0;
+        Solver s = VARS[0].getSolver();
+        IntVar scalarVar = VF.fixed(SCALAR,s);
+        return scalar(VARS,COEFFS,OPERATOR,scalarVar);
+    }
+
+    /**
+     * A scalar constraint which ensures that Sum(VARS[i]*COEFFS[i]) OPERATOR SCALAR
+     *
+     * @param VARS     a collection of IntVar
+     * @param COEFFS   a collection of int, for which |VARS|=|COEFFS|
+     * @param OPERATOR an operator in {"=", "!=", ">","<",">=","<="}
      * @param SCALAR   an IntVar
      * @return a scalar constraint
      */
@@ -1327,7 +1343,6 @@ public class IntConstraintFactory {
         }
         return keysorting(X, null, Y, 1);
     }
-
 
     /**
      * Creates a subcircuit constraint which ensures that
@@ -1418,6 +1433,21 @@ public class IntConstraintFactory {
      *
      * @param VARS     a collection of IntVar
      * @param OPERATOR operator in {"=", "!=", ">","<",">=","<="}
+     * @param SUM      an integer
+     * @return a sum constraint
+     */
+    public static Constraint sum(IntVar[] VARS, String OPERATOR, int SUM) {
+        assert VARS.length>0;
+        Solver s = VARS[0].getSolver();
+        IntVar sumVar = VF.fixed(SUM,s);
+        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), sumVar, sumVar.getSolver());
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+     *
+     * @param VARS     a collection of IntVar
+     * @param OPERATOR operator in {"=", "!=", ">","<",">=","<="}
      * @param SUM      an IntVar
      * @return a sum constraint
      */
@@ -1433,7 +1463,21 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
-        return IntLinCombFactory.reduce(VARS, Operator.EQ, SUM, SUM.getSolver());
+        return sum(VARS,"=",SUM);
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+     * This constraint is much faster than the one over integer variables
+     *
+     * @param VARS a vector of boolean variables
+     * @param SUM  an integer
+     */
+    public static Constraint sum(BoolVar[] VARS, String OPERATOR, int SUM) {
+        assert VARS.length>0;
+        Solver s = VARS[0].getSolver();
+        IntVar sumVar = VF.fixed(SUM,s);
+        return sum(VARS,OPERATOR,sumVar);
     }
 
     /**
@@ -1445,7 +1489,7 @@ public class IntConstraintFactory {
      */
     public static Constraint sum(BoolVar[] VARS, String OPERATOR, IntVar SUM) {
         if (OPERATOR.equals("=")) {
-            return sum(VARS, SUM);
+            return IntLinCombFactory.reduce(VARS, Operator.EQ, SUM, SUM.getSolver());
         }
         int lb = 0;
         int ub = 0;
@@ -1454,7 +1498,7 @@ public class IntConstraintFactory {
             ub += v.getUB();
         }
         IntVar p = VF.bounded(StringUtils.randomName(), lb, ub, SUM.getSolver());
-        SUM.getSolver().post(sum(VARS, p));
+        SUM.getSolver().post(sum(VARS, "=", p));
         return arithm(p, OPERATOR, SUM);
     }
 
@@ -1566,7 +1610,7 @@ public class IntConstraintFactory {
         for (int i = 0; i < n; i++) {
             model[i] = element(costOf[i], COST_MATRIX[i], SUCCS[i]);
         }
-        model[n] = sum(costOf, COST);
+        model[n] = sum(costOf, "=", COST);
         model[n + 1] = circuit(SUCCS, 0);
         return model;
     }

@@ -236,7 +236,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeCoverCounterCoupling(Solver solver, int a) {
         description += "coupling[" + a + "] ";
-        solver.post(IntConstraintFactory.sum(ArrayUtils.getColumn(occurrences, a), VariableFactory.fixed(data.getTotalCover(a), solver)));
+        solver.post(IntConstraintFactory.sum(ArrayUtils.getColumn(occurrences, a), "=", data.getTotalCover(a)));
     }
 
     private void makeCoverCounterCouplingAndEquity(Solver solver) {
@@ -270,7 +270,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             g++;
         }
         description += "couplingEquality[" + a + "] ";
-        solver.post(IntConstraintFactory.scalar(occ, sizes, VariableFactory.fixed(data.getTotalCover(a), solver)));
+        solver.post(IntConstraintFactory.scalar(occ, sizes, "=", data.getTotalCover(a)));
     }
 
 

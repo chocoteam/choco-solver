@@ -67,8 +67,8 @@ public class SolverTest {
         for (int i = 0; i < n; i++) {
             objects[i] = VariableFactory.enumerated("v_" + i, 0, nbOmax[i], s);
         }
-        s.post(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa", capacites[0], capacites[1], s)));
-        s.post(IntConstraintFactory.scalar(objects, energies, power));
+        s.post(IntConstraintFactory.scalar(objects, volumes, "=", VariableFactory.bounded("capa", capacites[0], capacites[1], s)));
+        s.post(IntConstraintFactory.scalar(objects, energies, "=", power));
         s.setObjectives(power);
         s.set(IntStrategyFactory.lexico_LB(objects));
         return s;

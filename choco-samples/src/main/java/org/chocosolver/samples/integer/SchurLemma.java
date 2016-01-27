@@ -74,7 +74,7 @@ public class SchurLemma extends AbstractProblem {
         M = VariableFactory.boolMatrix("b", n, k, solver); // M_ij is true iff ball i is in box j
 
         for (int i = 0; i < n; i++) {
-            solver.post(IntConstraintFactory.sum(M[i], VariableFactory.fixed(1, solver)));
+            solver.post(IntConstraintFactory.sum(M[i], "=", 1));
         }
 
         for (int i = 0; i < k; i++) {
@@ -82,7 +82,7 @@ public class SchurLemma extends AbstractProblem {
                 for (int y = 1; y <= n; y++) {
                     for (int z = 1; z <= n; z++) {
                         if (x + y == z)
-                            solver.post(IntConstraintFactory.sum(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, VariableFactory.bounded("sum", 0, 2, solver)));
+                            solver.post(IntConstraintFactory.sum(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, "=", VariableFactory.bounded("sum", 0, 2, solver)));
                     }
                 }
             }

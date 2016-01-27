@@ -84,7 +84,7 @@ public class SmallSantaClaude {
             solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i]));
         }
         // compute total cost
-        solver.post(IntConstraintFactory.sum(kid_price, total_cost));
+        solver.post(IntConstraintFactory.sum(kid_price, "=", total_cost));
 
         // compute average cost (i.e. average gift cost per kid)
         RealVar[] allRV = ArrayUtils.append(realViews, new RealVar[]{average, average_deviation});

@@ -102,25 +102,22 @@ public class BIBD extends AbstractProblem {
 
         }
         // r ones per row
-        IntVar R = VariableFactory.fixed(r, solver);
         for (int i = 0; i < v; i++) {
-            solver.post(IntConstraintFactory.sum(vars[i], R));
+            solver.post(IntConstraintFactory.sum(vars[i], "=", r));
         }
         // k ones per column
-        IntVar K = VariableFactory.fixed(k, solver);
         for (int j = 0; j < b; j++) {
-            solver.post(IntConstraintFactory.sum(_vars[j], K));
+            solver.post(IntConstraintFactory.sum(_vars[j], "=", k));
         }
 
         // Exactly l ones in scalar product between two different rows
-        IntVar L = VariableFactory.fixed(l, solver);
         for (int i1 = 0; i1 < v; i1++) {
             for (int i2 = i1 + 1; i2 < v; i2++) {
                 BoolVar[] score = VariableFactory.boolArray(String.format("row(%d,%d)", i1, i2), b, solver);
                 for (int j = 0; j < b; j++) {
                     solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }
-                solver.post(IntConstraintFactory.sum(score, L));
+                solver.post(IntConstraintFactory.sum(score, "=", l));
             }
         }
         // Symmetry breaking

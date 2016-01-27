@@ -176,7 +176,7 @@ public class TableTest {
             Constraint c = IntConstraintFactory.table(vars[i], reified[i], tuples, type);
             solver.post(c);
         }
-        solver.post(IntConstraintFactory.sum(reified, sum));
+        solver.post(IntConstraintFactory.sum(reified, "=", sum));
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
         if (solver.getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {

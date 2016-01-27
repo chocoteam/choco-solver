@@ -73,8 +73,7 @@ public class Grocery extends AbstractProblem {
     @Override
     public void buildModel() {
         itemCost = VariableFactory.enumeratedArray("item", 4, 1, 711, solver);
-        IntVar _711 = VariableFactory.fixed(711, solver);
-        solver.post(IntConstraintFactory.sum(itemCost, _711));
+        solver.post(IntConstraintFactory.sum(itemCost, "=", 711));
 
         // intermediary products
         IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 71100, solver);

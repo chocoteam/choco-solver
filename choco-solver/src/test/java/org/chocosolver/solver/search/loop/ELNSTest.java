@@ -57,7 +57,7 @@ public class ELNSTest {
         final IntVar[] vars = VariableFactory.boundedArray("var", 6, 0, 4, solver);
         final IntVar obj = VariableFactory.bounded("obj", 0, 6, solver);
 
-        solver.post(ICF.sum(vars, obj));
+        solver.post(ICF.sum(vars, "=", obj));
         solver.post(ICF.arithm(vars[0], "+", vars[1], "<", 2));
         solver.post(ICF.arithm(vars[4], "+", vars[5], ">", 3));
 

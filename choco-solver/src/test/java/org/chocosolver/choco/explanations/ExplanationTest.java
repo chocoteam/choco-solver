@@ -148,13 +148,12 @@ public class ExplanationTest {
 
                         int[] coeffs = new int[n];
                         Arrays.fill(coeffs, 1);
-                        IntVar msv = VariableFactory.fixed(ms, solver);
                         for (int i = 0; i < n; i++) {
-                            solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, msv));
-                            solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, msv));
+                            solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, "=", ms));
+                            solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, "=", ms));
                         }
-                        solver.post(IntConstraintFactory.scalar(diag1, coeffs, msv));
-                        solver.post(IntConstraintFactory.scalar(diag2, coeffs, msv));
+                        solver.post(IntConstraintFactory.scalar(diag1, coeffs, "=", ms));
+                        solver.post(IntConstraintFactory.scalar(diag2, coeffs, "=", ms));
 
                         // Symetries breaking
                         solver.post(IntConstraintFactory.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
@@ -183,7 +182,7 @@ public class ExplanationTest {
                     ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
                     solver.post(ICF.arithm(bs[0], "=", bs[1]));
 
-                    solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), VF.fixed(5, solver)));
+                    solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
                     solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
                     solver.set(ISF.random_value(p, seed));
                     engines[e].plugin(solver, ng == 1, false);
@@ -205,7 +204,7 @@ public class ExplanationTest {
                 ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
                 solver.post(ICF.arithm(bs[0], "=", bs[1]));
 
-                solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), VF.fixed(5, solver)));
+                solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
                 solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
                 // p[0], p[1] are just for fun
                 solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
@@ -229,7 +228,7 @@ public class ExplanationTest {
                 ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
                 solver.post(ICF.arithm(bs[0], "=", bs[1]));
 
-                solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), VF.fixed(5, solver)));
+                solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
                 solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
                 // p[0], p[1] are just for fun
                 solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
@@ -249,7 +248,7 @@ public class ExplanationTest {
             // The set of variables
             IntVar[] p = VF.enumeratedArray("p", 5, 0, 4, solver);
             // The initial constraints
-            solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 3), ">=", VF.fixed(3, solver)));
+            solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 3), ">=", 3));
             solver.post(ICF.arithm(p[2], "+", p[3], ">=", 1));
             solver.post(ICF.arithm(p[3], "+", p[4], ">", 4));
 

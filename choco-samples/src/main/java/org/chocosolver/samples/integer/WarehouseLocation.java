@@ -125,7 +125,7 @@ public class WarehouseLocation extends AbstractProblem {
         int[] coeffs = new int[nWH + nS];
         Arrays.fill(coeffs, 0, nWH, cost);
         Arrays.fill(coeffs, nWH, nWH + nS, 1);
-        solver.post(IntConstraintFactory.scalar(ArrayUtils.append(open, costPerStore), coeffs, totCost));
+        solver.post(IntConstraintFactory.scalar(ArrayUtils.append(open, costPerStore), coeffs, "=", totCost));
     }
 
     @Override

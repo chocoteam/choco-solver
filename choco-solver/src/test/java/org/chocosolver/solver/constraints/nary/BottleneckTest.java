@@ -59,11 +59,11 @@ public class BottleneckTest {
                 nexts[i] = VariableFactory.enumerated("n_" + i, 0, 200, solver);
                 exps[i] = VariableFactory.enumerated("e_" + i, 0, 200, solver);
                 bws[i] = VariableFactory.enumerated("b_" + i, 0, 2000, solver);
-                solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, nexts[i]));
+                solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
             }
 
             IntVar sum = VariableFactory.bounded("sum", 0, 2000 * n, solver);
-			solver.post(IntConstraintFactory.sum(bws, sum));
+			solver.post(IntConstraintFactory.sum(bws, "=", sum));
 
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
@@ -86,11 +86,11 @@ public class BottleneckTest {
                 nexts[i] = VariableFactory.enumerated("n_" + i, 0, 200, solver);
                 exps[i] = VariableFactory.enumerated("e_" + i, 0, 200, solver);
                 bws[i] = VariableFactory.enumerated("b_" + i, 0, 2000, solver);
-				solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, nexts[i]));
+				solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
             }
 
             IntVar sum = VariableFactory.bounded("sum", 0, 2000 * n, solver);
-			solver.post(IntConstraintFactory.sum(bws, sum));
+			solver.post(IntConstraintFactory.sum(bws, "=", sum));
 
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
