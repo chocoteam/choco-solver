@@ -972,6 +972,22 @@ public class IntConstraintFactory {
 
     /**
      * Make an inverse channeling between VARS1 and VARS2:
+     * VARS1[i] = j <=> VARS2[j] = i
+     * Performs AC if domains are enumerated.
+     * If not, then it works on bounds without guaranteeing BC
+     * (enumerated domains are strongly recommended)
+     * <p>
+     * Beware you should have |VARS1| = |VARS2|
+     *
+     * @param VARS1   vector of variables which take their value in [0,|VARS2|-1]
+     * @param VARS2   vector of variables which take their value in [0,|VARS1|-1]
+     */
+    public static Constraint inverse_channeling(IntVar[] VARS1, IntVar[] VARS2) {
+        return inverse_channeling(VARS1,VARS2,0,0);
+    }
+
+    /**
+     * Make an inverse channeling between VARS1 and VARS2:
      * VARS1[i-OFFSET2] = j <=> VARS2[j-OFFSET1] = i
      * Performs AC if domains are enumerated.
      * If not, then it works on bounds without guaranteeing BC
@@ -1225,6 +1241,24 @@ public class IntConstraintFactory {
      */
     public static Constraint[] nvalues(IntVar[] VARS, IntVar NVALUES) {
         return new Constraint[]{atleast_nvalues(VARS, NVALUES, false), atmost_nvalues(VARS, NVALUES, true)};
+    }
+
+    /**
+     * Creates a path constraint which ensures that
+     * <p/> the elements of VARS define a covering path from START to END
+     * <p/> where VARS[i] = j means that j is the successor of i.
+     * <p/> Moreover, VARS[END] = |VARS|
+     * <p/> Requires : |VARS|>0
+     * <p>
+     * Filtering algorithms: see circuit constraint
+     *
+     * @param VARS   vector of variables which take their value in [0,|VARS|]
+     * @param START  variable indicating the index of the first variable in the path
+     * @param END    variable indicating the index of the last variable in the path
+     * @return a path constraint
+     */
+    public static Constraint[] path(IntVar[] VARS, IntVar START, IntVar END) {
+        return path(VARS,START,END,0);
     }
 
     /**
@@ -1570,13 +1604,29 @@ public class IntConstraintFactory {
 
     /**
      * Partition SUCCS variables into NBTREES (anti) arborescences
+     * <p/> SUCCS[i] = j means that j is the successor of i.
+     * <p/> and SUCCS[i] = i means that i is a root
+     * <p>
+     * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+     * <p/> However, the filtering over NBTREES is quite light here
+     *
+     * @param SUCCS   successors variables, taking their domain in [0,|SUCCS|-1]
+     * @param NBTREES number of arborescences (=number of loops)
+     * @return a tree constraint
+     */
+    public static Constraint tree(IntVar[] SUCCS, IntVar NBTREES) {
+        return tree(SUCCS, NBTREES, 0);
+    }
+
+    /**
+     * Partition SUCCS variables into NBTREES (anti) arborescences
      * <p/> SUCCS[i] = OFFSET+j means that j is the successor of i.
      * <p/> and SUCCS[i] = OFFSET+i means that i is a root
      * <p>
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      * <p/> However, the filtering over NBTREES is quite light here
      *
-     * @param SUCCS   successors variables
+     * @param SUCCS   successors variables, taking their domain in [OFFSET,|SUCCS|-1+OFFSET]
      * @param NBTREES number of arborescences (=number of loops)
      * @param OFFSET  0 by default but 1 if used within MiniZinc
      *                (which counts from 1 to n instead of from 0 to n-1)
