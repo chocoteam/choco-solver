@@ -212,7 +212,7 @@ public class CountTest {
         System.arraycopy(vs, 0, newvs, 0, vs.length);
         newvs[vs.length] = occ;
 
-        return IntConstraintFactory.table(newvs, tuples, "AC3rm");
+        return IntConstraintFactory.table(newvs, tuples);
     }
 
     /**

@@ -305,6 +305,18 @@ public class IntConstraintFactory {
     }
 
     /**
+     * Create a table constraint over a couple of variables VAR1 and VAR2
+     *
+     * Uses AC3rm algorithm by default
+     *
+     * @param VAR1   first variable
+     * @param VAR2   second variable
+     */
+    public static Constraint table(IntVar VAR1, IntVar VAR2, Tuples TUPLES) {
+        return table(VAR1,VAR2,TUPLES,"AC3rm");
+    }
+
+    /**
      * Create a table constraint over a couple of variables VAR1 and VAR2:<br/>
      * - <b>AC2001</b>: table constraint which applies the AC2001 algorithm,<br/>
      * - <b>AC3</b>: table constraint which applies the AC3 algorithm,<br/>
@@ -319,22 +331,17 @@ public class IntConstraintFactory {
     public static Constraint table(IntVar VAR1, IntVar VAR2, Tuples TUPLES, String ALGORITHM) {
         Propagator p;
         switch (ALGORITHM) {
-            case "AC2001":
-                p = new PropBinAC2001(VAR1, VAR2, TUPLES);
+            case "AC2001": p = new PropBinAC2001(VAR1, VAR2, TUPLES);
                 break;
-            case "FC":
-                p = new PropBinFC(VAR1, VAR2, TUPLES);
+            case "FC": p = new PropBinFC(VAR1, VAR2, TUPLES);
                 break;
-            case "AC3":
-                p = new PropBinAC3(VAR1, VAR2, TUPLES);
+            case "AC3": p = new PropBinAC3(VAR1, VAR2, TUPLES);
                 break;
-            case "AC3rm":
-                p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
+            case "AC3rm": p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
                 break;
-            default:
-            case "AC3bit+rm":
-                p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
+            case "AC3bit+rm": p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
                 break;
+            default: throw new SolverException("Table algorithm "+ALGORITHM+" is unkown");
         }
         return new Constraint("TableBin(" + ALGORITHM + ")", p);
     }
@@ -433,7 +440,7 @@ public class IntConstraintFactory {
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);
         } else if (tupleIt(X, Y, Z)) {
-            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z), "GAC3rm");
+            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
         } else {
             return new Times(X, Y, Z);
         }
@@ -1452,6 +1459,19 @@ public class IntConstraintFactory {
     }
 
     /**
+     * Create a table constraint specifying that the sequence of variables VARS must belong to the list of tuples
+     * (or must NOT belong in case of infeasible tuples)
+     *
+     * Default configuration with GACSTR+ algorithm for feasible tuples and GAC3rm otherwise
+     *
+     * @param VARS      variables forming the tuples
+     * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
+     */
+    public static Constraint table(IntVar[] VARS, Tuples TUPLES) {
+        return table(VARS,TUPLES,TUPLES.isFeasible()?"GACSTR+":"GAC3rm");
+    }
+
+    /**
      * Create a table constraint, with the specified algorithm defined ALGORITHM
      * <p>
      * - <b>GAC2001</b>: Arc Consistency version 2001 for tuples,
@@ -1468,49 +1488,36 @@ public class IntConstraintFactory {
      * <br/>
      * - <b>FC</b>: Forward Checking.
      *
-     * @param VARS      first variable
+     * @param VARS      variables forming the tuples
      * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
      * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
         if (VARS.length == 2) {
-            table(VARS[0], VARS[1], TUPLES, "");
+            table(VARS[0], VARS[1], TUPLES);
+        }
+        if(ALGORITHM.contains("+") && !TUPLES.isFeasible()){
+            throw new SolverException(ALGORITHM+" table algorithm cannot be used with forbidden tuples.");
         }
         Propagator p;
         switch (ALGORITHM) {
-            case "FC":
-                p = new PropLargeFC(VARS, TUPLES);
+            case "MDD": p = new PropLargeMDDC(new MultivaluedDecisionDiagram(VARS, TUPLES), VARS);
                 break;
-            case "GAC3rm":
-                p = new PropLargeGAC3rm(VARS, TUPLES);
+            case "FC": p = new PropLargeFC(VARS, TUPLES);
                 break;
-            case "GAC2001":
-                p = new PropLargeGAC2001(VARS, TUPLES);
+            case "GAC3rm": p = new PropLargeGAC3rm(VARS, TUPLES);
                 break;
-            default:
-            case "GACSTR+":
-                if (!TUPLES.isFeasible()) {
-                    throw new SolverException("GACSTR+ cannot be used with forbidden tuples.");
-                }
-                p = new PropLargeGACSTRPos(VARS, TUPLES);
+            case "GAC2001": p = new PropLargeGAC2001(VARS, TUPLES);
                 break;
-            case "GAC2001+":
-                if (!TUPLES.isFeasible()) {
-                    throw new SolverException("GAC2001+ cannot be used with forbidden tuples.");
-                }
-                p = new PropLargeGAC2001Positive(VARS, TUPLES);
+            case "GACSTR+": p = new PropLargeGACSTRPos(VARS, TUPLES);
                 break;
-            case "GAC3rm+":
-                if (!TUPLES.isFeasible()) {
-                    throw new SolverException("GAC3rm+ cannot be used with forbidden tuples.");
-                }
-                p = new PropLargeGAC3rmPositive(VARS, TUPLES);
+            case "GAC2001+": p = new PropLargeGAC2001Positive(VARS, TUPLES);
                 break;
-            case "STR2+":
-                if (!TUPLES.isFeasible()) {
-                    throw new SolverException("STR2+ cannot be used with forbidden tuples.");
-                }
-                p = new PropTableStr2(VARS, TUPLES.toMatrix());
+            case "GAC3rm+": p = new PropLargeGAC3rmPositive(VARS, TUPLES);
+                break;
+            case "STR2+": p = new PropTableStr2(VARS, TUPLES.toMatrix());
+                break;
+            default: throw new SolverException("Table algorithm "+ALGORITHM+" is unkown");
         }
         return new Constraint("Table(" + ALGORITHM + ")", p);
     }

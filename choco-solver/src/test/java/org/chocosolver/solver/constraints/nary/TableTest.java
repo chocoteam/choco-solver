@@ -57,7 +57,8 @@ import java.util.Random;
 
 public class TableTest {
 
-    private static String[] ALGOS = {"FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+"};
+    private static String[] ALGOS = {"FC", "MDD", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+"};
+    private static String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
 
     @Test(groups = "1s")
     public void test1() {
@@ -192,7 +193,7 @@ public class TableTest {
 
     @Test(groups = "1s")
     public void testtpetit() {
-        for(String s : ALGOS) {
+        for(String s : BIN_ALGOS) {
             test(s);
         }
     }
@@ -413,5 +414,4 @@ public class TableTest {
             Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
         }
     }
-
 }

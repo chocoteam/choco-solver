@@ -10,6 +10,7 @@ NEXT MILESTONE
 
 - `ParallelResolution` replaces `SMF.prepareForParallelResolution(List<Solver>)` (depreacted); it offers more services 
 like getting a solver which a solution -- or the best one (#362)
+- Use MDD as a table constraint #366
 
 #### Bug fixes: 
 
