@@ -1487,6 +1487,8 @@ public class IntConstraintFactory {
      * - <b>STR2+</b>: Arc Consistency version STR2 for allowed tuples,
      * <br/>
      * - <b>FC</b>: Forward Checking.
+     * <br/>
+     * - <b>MDD</b>: uses a multi-valued decision diagram (see mddc constraint),
      *
      * @param VARS      variables forming the tuples
      * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
