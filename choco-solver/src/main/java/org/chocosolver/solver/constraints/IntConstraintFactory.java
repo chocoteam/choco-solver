@@ -1568,7 +1568,7 @@ public class IntConstraintFactory {
      * <br/>
      * - <b>FC</b>: Forward Checking.
      * <br/>
-     * - <b>MDD</b>: uses a multi-valued decision diagram (see mddc constraint),
+     * - <b>MDD+</b>: uses a multi-valued decision diagram for allowed tuples (see mddc constraint),
      *
      * @param VARS      variables forming the tuples
      * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
@@ -1583,7 +1583,7 @@ public class IntConstraintFactory {
         }
         Propagator p;
         switch (ALGORITHM) {
-            case "MDD": p = new PropLargeMDDC(new MultivaluedDecisionDiagram(VARS, TUPLES), VARS);
+            case "MDD+": p = new PropLargeMDDC(new MultivaluedDecisionDiagram(VARS, TUPLES), VARS);
                 break;
             case "FC": p = new PropLargeFC(VARS, TUPLES);
                 break;
