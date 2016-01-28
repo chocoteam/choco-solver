@@ -65,13 +65,12 @@ public class IntLinCombFactory {
      * @param VARS     array of integer variables
      * @param OPERATOR an operator among "=", "!=", ">", "<", ">=",>" and "<="
      * @param SUM      the resulting variable
-     * @param SOLVER   declaring solver
      * @return a constraint to post or reify
      */
-    public static Constraint reduce(IntVar[] VARS, Operator OPERATOR, IntVar SUM, Solver SOLVER) {
+    public static Constraint reduce(IntVar[] VARS, Operator OPERATOR, IntVar SUM) {
         int[] COEFFS = new int[VARS.length];
         Arrays.fill(COEFFS, 1);
-        return reduce(VARS, COEFFS, OPERATOR, SUM, SOLVER);
+        return reduce(VARS, COEFFS, OPERATOR, SUM);
     }
 
 
@@ -82,11 +81,11 @@ public class IntLinCombFactory {
      * @param COEFFS   array of integers
      * @param OPERATOR an operator among "=", "!=", ">", "<", ">=",>" and "<="
      * @param SCALAR   the resulting variable
-     * @param SOLVER    declaring solver
      * @return a constraint to post or reify
      */
-    public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR, Solver SOLVER) {
+    public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR) {
         // 0. normalize data
+        Solver SOLVER = SCALAR.getSolver();
         IntVar[] NVARS;
         int[] NCOEFFS;
         int RESULT = 0;
@@ -166,9 +165,9 @@ public class IntLinCombFactory {
             NCOEFFS[lidx] = i;
         }
         if (nones + nmones == NVARS.length) {
-            return selectSum(NVARS, NCOEFFS, OPERATOR, RESULT, SOLVER, nbools);
+            return selectSum(NVARS, NCOEFFS, OPERATOR, RESULT, nbools);
         } else {
-            return selectScalar(NVARS, NCOEFFS, OPERATOR, RESULT, SOLVER);
+            return selectScalar(NVARS, NCOEFFS, OPERATOR, RESULT);
         }
     }
 
@@ -180,11 +179,10 @@ public class IntLinCombFactory {
      * @param COEFFS   array of integers
      * @param OPERATOR on operator
      * @param RESULT   an integer
-     * @param SOLVER   the solver
      * @param nbools   number of boolean variables
      * @return a constraint
      */
-    public static Constraint selectSum(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT, Solver SOLVER, int nbools) {
+    public static Constraint selectSum(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT, int nbools) {
         // if the operator is "="
         // 4. detect and return small arity constraints
         switch (VARS.length) {
@@ -226,6 +224,7 @@ public class IntLinCombFactory {
                     RESULT--;
                 }
                 //TODO: deal with clauses and reification
+                Solver SOLVER = VARS[0].getSolver();
                 if (nbools == VARS.length) {
                     if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
                         return new Constraint("BoolSum", new PropSumBoolIncr(VF.toBoolVar(tmpV), b, OPERATOR,
@@ -259,10 +258,10 @@ public class IntLinCombFactory {
      * @param COEFFS   array of integers
      * @param OPERATOR on operator
      * @param RESULT   an integer
-     * @param SOLVER   the solver
      * @return a constraint
      */
-    public static Constraint selectScalar(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT, Solver SOLVER) {
+    public static Constraint selectScalar(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT) {
+        Solver SOLVER = VARS[0].getSolver();
         if (VARS.length == 1 && OPERATOR == Operator.EQ) {
             return times(VARS[0], COEFFS[0], VF.fixed(RESULT, SOLVER));
         }

@@ -1352,7 +1352,7 @@ public class IntConstraintFactory {
      * @return a scalar constraint
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, IntVar SCALAR) {
-        return IntLinCombFactory.reduce(VARS, COEFFS, Operator.get(OPERATOR), SCALAR, SCALAR.getSolver());
+        return IntLinCombFactory.reduce(VARS, COEFFS, Operator.get(OPERATOR), SCALAR);
     }
 
     /**
@@ -1476,7 +1476,7 @@ public class IntConstraintFactory {
         assert VARS.length>0;
         Solver s = VARS[0].getSolver();
         IntVar sumVar = VF.fixed(SUM,s);
-        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), sumVar, sumVar.getSolver());
+        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), sumVar);
     }
 
     /**
@@ -1488,7 +1488,7 @@ public class IntConstraintFactory {
      * @return a sum constraint
      */
     public static Constraint sum(IntVar[] VARS, String OPERATOR, IntVar SUM) {
-        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), SUM, SUM.getSolver());
+        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), SUM);
     }
 
     /**
@@ -1525,7 +1525,7 @@ public class IntConstraintFactory {
      */
     public static Constraint sum(BoolVar[] VARS, String OPERATOR, IntVar SUM) {
         if (OPERATOR.equals("=")) {
-            return IntLinCombFactory.reduce(VARS, Operator.EQ, SUM, SUM.getSolver());
+            return IntLinCombFactory.reduce(VARS, Operator.EQ, SUM);
         }
         int lb = 0;
         int ub = 0;
