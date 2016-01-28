@@ -36,6 +36,7 @@
 
 package org.chocosolver.solver.constraints.set;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -97,13 +98,26 @@ public class PropAllEqual extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
+			TIntArrayList toRemove = new TIntArrayList();
+			for (int j = vars[0].getEnvelopeFirst(); j != SetVar.END; j = vars[0].getEnvelopeNext()) {
+				for (int i = 1; i < n; i++) {
+					if(!vars[i].envelopeContains(j)){
+						toRemove.add(j);
+						break;
+					}
+				}
+			}
             for (int i = 0; i < n; i++) {
+				for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext()) {
+					if((i>0 && !vars[0].envelopeContains(j)) || toRemove.contains(j)){
+						vars[i].removeFromEnvelope(j, this);
+					}
+				}
                 for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
                     for (int i2 = 0; i2 < n; i2++) {
                         vars[i2].addToKernel(j, this);
                     }
                 }
-                // removing elements that are not in all set envelope would be a waste of time
             }
         }
         for (int i = 0; i < n; i++) {

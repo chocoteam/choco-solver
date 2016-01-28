@@ -108,7 +108,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int j = 0; j < g; j++) {
                     player[j] = P[i][j][k];
                 }
-                solver.post(IntConstraintFactory.sum(player, VariableFactory.fixed(1, solver)));
+                solver.post(IntConstraintFactory.sum(player, "=", 1));
             }
         }
 
@@ -119,7 +119,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int i = 0; i < p; i++) {
                     group[i] = P[i][j][k];
                 }
-                solver.post(IntConstraintFactory.sum(group, VariableFactory.fixed(s, solver)));
+                solver.post(IntConstraintFactory.sum(group, "=", s));
             }
         }
 
@@ -142,7 +142,7 @@ public class SocialGolfer extends AbstractProblem {
 						group[k] = LogicalConstraintFactory.and(P[i][k][l], P[j][k][l]).reif();
 						solver.post(IntConstraintFactory.arithm(group[k], "<=", M[i][j][l]));
                     }
-					solver.post(IntConstraintFactory.sum(group,M[i][j][l]));
+					solver.post(IntConstraintFactory.sum(group, "=", M[i][j][l]));
                 }
             }
         }
@@ -150,7 +150,7 @@ public class SocialGolfer extends AbstractProblem {
         // each pair of players only meets once
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
-                solver.post(IntConstraintFactory.sum(M[i][j], VariableFactory.bool("sum", solver)));
+                solver.post(IntConstraintFactory.sum(M[i][j], "=", VariableFactory.bool("sum", solver)));
             }
         }
 

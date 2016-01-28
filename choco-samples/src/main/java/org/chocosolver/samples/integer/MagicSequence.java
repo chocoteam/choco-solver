@@ -75,7 +75,7 @@ public class MagicSequence extends AbstractProblem {
         solver.post(IntConstraintFactory.global_cardinality(x, values, x, closed));
 
         // Redundant constraint
-        solver.post(IntConstraintFactory.sum(x, VariableFactory.fixed(n, solver)));
+        solver.post(IntConstraintFactory.sum(x, "=", n));
 
     }
 

@@ -83,7 +83,7 @@ public class Eq20 extends AbstractProblem {
     public void buildModel() {
         vars = VariableFactory.boundedArray("v", n, 0, 10, solver);
         for (int i = 0; i < coeffs.length; i++) {
-            solver.post(IntConstraintFactory.scalar(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), VariableFactory.fixed(coeffs[i][0], solver)));
+            solver.post(IntConstraintFactory.scalar(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), "=", coeffs[i][0]));
         }
     }
 

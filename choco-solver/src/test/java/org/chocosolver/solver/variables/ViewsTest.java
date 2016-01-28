@@ -100,7 +100,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = VariableFactory.enumerated("Z", 0, 200, solver);
-                solver.post(IntConstraintFactory.sum(new IntVar[]{x, y}, z));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{x, y}, "=", z));
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
@@ -126,7 +126,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.bounded("x", 0, 2, solver);
                 IntVar y = VariableFactory.bounded("y", 0, 2, solver);
                 IntVar z = VariableFactory.enumerated("Z", 0, 200, solver);
-                solver.post(IntConstraintFactory.sum(new IntVar[]{x, y}, z));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{x, y}, "=", z));
                 solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
 
             }
@@ -260,7 +260,7 @@ public class ViewsTest {
             int n = seed * 2;
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, ref);
-                ref.post(IntConstraintFactory.sum(x, VariableFactory.fixed(n, ref)));
+                ref.post(IntConstraintFactory.sum(x, "=", n));
                 ref.set(IntStrategyFactory.minDom_LB(x));
             }
             {
@@ -268,9 +268,9 @@ public class ViewsTest {
                 IntVar[] y = new IntVar[seed];
                 for (int i = 0; i < seed; i++) {
                     y[i] = VariableFactory.enumerated("Z", 0, 200, solver);
-                    solver.post(IntConstraintFactory.sum(new IntVar[]{x[i], x[i + seed]}, y[i]));
+                    solver.post(IntConstraintFactory.sum(new IntVar[]{x[i], x[i + seed]}, "=", y[i]));
                 }
-                solver.post(IntConstraintFactory.sum(y, VariableFactory.fixed(n, solver)));
+                solver.post(IntConstraintFactory.sum(y, "=", n));
 
                 solver.set(IntStrategyFactory.minDom_LB(x));
 
@@ -322,7 +322,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = VariableFactory.enumerated("Z", -200, 200, solver);
-                Constraint cstr = IntConstraintFactory.sum(new IntVar[]{z, y}, x);
+                Constraint cstr = IntConstraintFactory.sum(new IntVar[]{z, y}, "=", x);
                 solver.post(cstr);
 //				System.out.println(cstr);
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
@@ -352,7 +352,7 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = VariableFactory.enumerated("Z", -2, 2, solver);
                 IntVar az = VariableFactory.abs(z);
-                solver.post(IntConstraintFactory.sum(new IntVar[]{z, y}, x));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{z, y}, "=", x));
                 solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
             }
             check(ref, solver, seed, true, true);
@@ -379,7 +379,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar diff = VariableFactory.enumerated("diff", -2, 2, solver);
-                solver.post(IntConstraintFactory.sum(new IntVar[]{diff, y}, x));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{diff, y}, "=", x));
                 IntVar z = VariableFactory.abs(diff);
                 solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, z}, "BC"));
                 solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
@@ -414,7 +414,7 @@ public class ViewsTest {
                 IntVar[] t = new IntVar[k - 1];
                 for (int i = 0; i < k - 1; i++) {
                     IntVar z = VariableFactory.enumerated("Z", -200, 200, solver);
-                    solver.post(IntConstraintFactory.sum(new IntVar[]{z, x[i]}, x[i + 1]));
+                    solver.post(IntConstraintFactory.sum(new IntVar[]{z, x[i]}, "=", x[i + 1]));
                     t[i] = VariableFactory.abs(z);
                 }
                 solver.post(IntConstraintFactory.alldifferent(x, "BC"));
@@ -509,7 +509,7 @@ public class ViewsTest {
         BoolVar bool = VF.bool("bool", s);
         BoolVar view = VF.eq(bool);
         IntVar sum = VF.bounded("sum", 0, 6, s);
-        s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, sum));
+        s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
         s.propagate();
         Assert.assertEquals(sum.isInstantiated(), true);
@@ -521,7 +521,7 @@ public class ViewsTest {
         BoolVar bool = VF.bool("bool", s);
         BoolVar view = VF.not(bool);
         IntVar sum = VF.bounded("sum", 0, 6, s);
-        s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, sum));
+        s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
         s.propagate();
         Assert.assertEquals(sum.isInstantiated(), true);
@@ -533,7 +533,7 @@ public class ViewsTest {
         IntVar var = VF.bounded("int", 0, 2, s);
         IntVar view = VF.eq(var);
         IntVar sum = VF.bounded("sum", 0, 6, s);
-        s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, sum));
+        s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
         s.propagate();
         Assert.assertEquals(sum.isInstantiated(), true);
@@ -545,7 +545,7 @@ public class ViewsTest {
         IntVar var = VF.bounded("int", 0, 2, s);
         IntVar view = VF.minus(var);
         IntVar sum = VF.bounded("sum", 0, 6, s);
-        s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, sum));
+        s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
         s.propagate();
         Assert.assertEquals(sum.isInstantiated(), true);
@@ -559,8 +559,7 @@ public class ViewsTest {
         BoolVar x3 = VariableFactory.bool("x3", solver);
         IntVar[] av = new IntVar[]{x1, x2, x3};
         int[] coef = new int[]{5, 3, 2};
-        IntVar rhs = VariableFactory.fixed(7, solver);
-        solver.post(IntConstraintFactory.scalar(av, coef, ">=", rhs));
+        solver.post(IntConstraintFactory.scalar(av, coef, ">=", 7));
         try {
             solver.propagate();
         } catch (Exception ignored) {

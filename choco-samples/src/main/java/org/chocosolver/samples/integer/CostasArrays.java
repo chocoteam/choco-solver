@@ -75,7 +75,7 @@ public class CostasArrays extends AbstractProblem {
 			for (int j = i+1; j < n; j++, k++) {
 				IntVar d = VariableFactory.enumerated(StringUtils.randomName(), -n, n, solver);
 				solver.post(ICF.arithm(d,"!=",0));
-				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],d},vars[j]));
+				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],d},"=",vars[j]));
 				vectors[k] = VariableFactory.offset(d, 2 * n * (j - i));
 			}
 		}

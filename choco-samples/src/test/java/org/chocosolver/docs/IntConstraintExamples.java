@@ -540,7 +540,7 @@ public class IntConstraintExamples {
         IntVar[] CS = VF.enumeratedArray("CS", 4, 1, 4, solver);
         int[] coeffs = new int[]{1, 2, 3, 4};
         IntVar R = VF.bounded("R", 0, 20, solver);
-        solver.post(ICF.scalar(CS, coeffs, R));
+        solver.post(ICF.scalar(CS, coeffs, "=", R));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }

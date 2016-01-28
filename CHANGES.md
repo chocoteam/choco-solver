@@ -15,6 +15,8 @@ like getting a solver which a solution -- or the best one (#362)
 
 ### Constraint
 
+- Use MDD as a table constraint (#366)
+- Can use ints in the right hand side of sum and scalar constraints instead of an IntVar
 - add constructive disjunction (see `SatFactory`) (#367)
 
 ### Propagation:
@@ -23,7 +25,7 @@ like getting a solver which a solution -- or the best one (#362)
 
 #### Bug fixes: 
 
-\#361, #364, #365, #369370
+\#361, #364, #365, #368, #369, #370
 
 3.3.3 - 22 Dec 2015
 -------------------

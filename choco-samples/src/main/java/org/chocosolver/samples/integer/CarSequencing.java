@@ -103,7 +103,7 @@ public class CarSequencing extends AbstractProblem {
 
                 // all others configurations may be chosen
                 IntVar sum = VariableFactory.bounded("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, solver);
-                solver.post(IntConstraintFactory.sum(atLeast, sum));
+                solver.post(IntConstraintFactory.sum(atLeast, "=", sum));
             }
         }
 

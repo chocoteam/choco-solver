@@ -91,13 +91,12 @@ public class MagicSquare extends AbstractProblem {
 
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);
-        IntVar msv = VariableFactory.fixed(ms, solver);
         for (int i = 0; i < n; i++) {
-            solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, msv));
-            solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, msv));
+            solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, "=", ms));
+            solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, "=", ms));
         }
-        solver.post(IntConstraintFactory.scalar(diag1, coeffs, msv));
-        solver.post(IntConstraintFactory.scalar(diag2, coeffs, msv));
+        solver.post(IntConstraintFactory.scalar(diag1, coeffs, "=", ms));
+        solver.post(IntConstraintFactory.scalar(diag2, coeffs, "=", ms));
 
         // Symetries breaking
         solver.post(IntConstraintFactory.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));

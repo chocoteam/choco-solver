@@ -77,7 +77,7 @@ public class Table extends AbstractProblem {
 			tuples.add(tuple);
 			System.out.println();
 		}
-		solver.post(ICF.table(vars,tuples,"STR2+"));
+		solver.post(ICF.table(vars,tuples));
 	}
 
 	@Override

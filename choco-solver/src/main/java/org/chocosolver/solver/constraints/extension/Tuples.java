@@ -38,6 +38,7 @@ import java.util.List;
 
 /**
  * A unique interface to declare tuples for table constraints.
+ * Handles both feasible tuples and forbidden tuples.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -58,12 +59,20 @@ public class Tuples {
     // CONSTRUCTOR
     //***********************************************************************************
 
+	/**
+     * Create a list of tuples which represents all allowed tuples if feasible=true
+     * or a set of forbidden tuples if feasible=false
+     *
+     * @param feasible indicates whether the tuples are allowed or forbidden
+     */
     public Tuples(boolean feasible) {
         this.feasible = feasible;
         tuples = new ArrayList<>();
     }
 
-    // TODO: enable unfeasible tuples
+	/**
+     * Create a list of tuples which represents all allowed tuples, i.e. other tuples are forbidden
+     */
     public Tuples() {
         this(true);
     }

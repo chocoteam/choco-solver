@@ -168,11 +168,11 @@ public class AirPlaneLanding extends AbstractProblem {
 
 //        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
         IntVar obj_e = VariableFactory.bounded("obj_e", 0, obj_ub, solver);
-        solver.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), obj_e));
+        solver.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), "=", obj_e));
 
         IntVar obj_t = VariableFactory.bounded("obj_t", 0, obj_ub, solver);
-        solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), obj_t));
-        solver.post(IntConstraintFactory.sum(new IntVar[]{obj_e, obj_t}, objective));
+        solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t));
+        solver.post(IntConstraintFactory.sum(new IntVar[]{obj_e, obj_t}, "=", objective));
 
         solver.post(IntConstraintFactory.alldifferent(planes, "BC"));
         solver.setObjectives(objective);

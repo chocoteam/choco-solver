@@ -126,7 +126,7 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 15, ref);
                 xs[1] = VariableFactory.bounded("y", -15, -1, ref);
-                ref.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, ref)));
+                ref.post(IntConstraintFactory.sum(xs, "=", 0));
                 ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
@@ -134,7 +134,7 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 15, solver);
                 xs[1] = VariableFactory.minus(xs[0]);
-                solver.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, solver)));
+                solver.post(IntConstraintFactory.sum(xs, "=", 0));
                 solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
             ref.findAllSolutions();
@@ -154,7 +154,7 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 15, ref);
                 xs[1] = VariableFactory.enumerated("y", -15, -1, ref);
-                ref.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, ref)));
+                ref.post(IntConstraintFactory.sum(xs, "=", 0));
                 ref.set(IntStrategyFactory.random_value(xs, seed));
             }
             Solver solver = new Solver();
@@ -162,7 +162,7 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 15, solver);
                 xs[1] = VariableFactory.minus(xs[0]);
-                solver.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, solver)));
+                solver.post(IntConstraintFactory.sum(xs, "=", 0));
                 solver.set(IntStrategyFactory.random_value(xs, seed));
             }
             ref.findAllSolutions();

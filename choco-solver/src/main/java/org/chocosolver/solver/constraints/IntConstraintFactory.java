@@ -305,6 +305,18 @@ public class IntConstraintFactory {
     }
 
     /**
+     * Create a table constraint over a couple of variables VAR1 and VAR2
+     *
+     * Uses AC3rm algorithm by default
+     *
+     * @param VAR1   first variable
+     * @param VAR2   second variable
+     */
+    public static Constraint table(IntVar VAR1, IntVar VAR2, Tuples TUPLES) {
+        return table(VAR1,VAR2,TUPLES,"AC3rm");
+    }
+
+    /**
      * Create a table constraint over a couple of variables VAR1 and VAR2:<br/>
      * - <b>AC2001</b>: table constraint which applies the AC2001 algorithm,<br/>
      * - <b>AC3</b>: table constraint which applies the AC3 algorithm,<br/>
@@ -319,22 +331,17 @@ public class IntConstraintFactory {
     public static Constraint table(IntVar VAR1, IntVar VAR2, Tuples TUPLES, String ALGORITHM) {
         Propagator p;
         switch (ALGORITHM) {
-            case "AC2001":
-                p = new PropBinAC2001(VAR1, VAR2, TUPLES);
+            case "AC2001": p = new PropBinAC2001(VAR1, VAR2, TUPLES);
                 break;
-            case "FC":
-                p = new PropBinFC(VAR1, VAR2, TUPLES);
+            case "FC": p = new PropBinFC(VAR1, VAR2, TUPLES);
                 break;
-            case "AC3":
-                p = new PropBinAC3(VAR1, VAR2, TUPLES);
+            case "AC3": p = new PropBinAC3(VAR1, VAR2, TUPLES);
                 break;
-            case "AC3rm":
-                p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
+            case "AC3rm": p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
                 break;
-            default:
-            case "AC3bit+rm":
-                p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
+            case "AC3bit+rm": p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
                 break;
+            default: throw new SolverException("Table algorithm "+ALGORITHM+" is unkown");
         }
         return new Constraint("TableBin(" + ALGORITHM + ")", p);
     }
@@ -416,7 +423,7 @@ public class IntConstraintFactory {
         IntVar t2 = VF.bounded(StringUtils.randomName(), -b, b, solver);
         solver.post(eucl_div(X, Y, t1));
         solver.post(times(t1, Y, t2));
-        return sum(new IntVar[]{Z, t2}, X);
+        return sum(new IntVar[]{Z, t2}, "=", X);
     }
 
     /**
@@ -433,7 +440,7 @@ public class IntConstraintFactory {
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);
         } else if (tupleIt(X, Y, Z)) {
-            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z), "GAC3rm");
+            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
         } else {
             return new Times(X, Y, Z);
         }
@@ -624,9 +631,9 @@ public class IntConstraintFactory {
             bpcons[i] = ICF.boolean_channeling(ArrayUtils.getColumn(xbi, i), ITEM_BIN[i], OFFSET);
         }
         for (int b = 0; b < nbBins; b++) {
-            bpcons[nbItems + b] = ICF.scalar(xbi[b], ITEM_SIZE, BIN_LOAD[b]);
+            bpcons[nbItems + b] = ICF.scalar(xbi[b], ITEM_SIZE, "=", BIN_LOAD[b]);
         }
-        bpcons[nbItems + nbBins] = ICF.sum(BIN_LOAD, sumView);
+        bpcons[nbItems + nbBins] = ICF.sum(BIN_LOAD, "=", sumView);
         return bpcons;
     }
 
@@ -889,9 +896,9 @@ public class IntConstraintFactory {
             IntVar diffY = VF.bounded(StringUtils.randomName("diffn"), 0, maxy - miny, solver);
             return new Constraint[]{
                     diffNCons,
-                    minimum(minX, X), maximum(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, diffX),
+                    minimum(minX, X), maximum(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
                     cumulative(TX, HEIGHT, diffY, true),
-                    minimum(minY, Y), maximum(maxY, EY), scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, diffY),
+                    minimum(minY, Y), maximum(maxY, EY), scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, "=", diffY),
                     cumulative(TY, WIDTH, diffX, true)
             };
         }
@@ -961,6 +968,22 @@ public class IntConstraintFactory {
                 return new GlobalCardinality(VARS, VALUES, OCCURRENCES);
             }
         }
+    }
+
+    /**
+     * Make an inverse channeling between VARS1 and VARS2:
+     * VARS1[i] = j <=> VARS2[j] = i
+     * Performs AC if domains are enumerated.
+     * If not, then it works on bounds without guaranteeing BC
+     * (enumerated domains are strongly recommended)
+     * <p>
+     * Beware you should have |VARS1| = |VARS2|
+     *
+     * @param VARS1   vector of variables which take their value in [0,|VARS2|-1]
+     * @param VARS2   vector of variables which take their value in [0,|VARS1|-1]
+     */
+    public static Constraint inverse_channeling(IntVar[] VARS1, IntVar[] VARS2) {
+        return inverse_channeling(VARS1,VARS2,0,0);
     }
 
     /**
@@ -1223,6 +1246,24 @@ public class IntConstraintFactory {
     /**
      * Creates a path constraint which ensures that
      * <p/> the elements of VARS define a covering path from START to END
+     * <p/> where VARS[i] = j means that j is the successor of i.
+     * <p/> Moreover, VARS[END] = |VARS|
+     * <p/> Requires : |VARS|>0
+     * <p>
+     * Filtering algorithms: see circuit constraint
+     *
+     * @param VARS   vector of variables which take their value in [0,|VARS|]
+     * @param START  variable indicating the index of the first variable in the path
+     * @param END    variable indicating the index of the last variable in the path
+     * @return a path constraint
+     */
+    public static Constraint[] path(IntVar[] VARS, IntVar START, IntVar END) {
+        return path(VARS,START,END,0);
+    }
+
+    /**
+     * Creates a path constraint which ensures that
+     * <p/> the elements of VARS define a covering path from START to END
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
      * <p/> Moreover, VARS[END-OFFSET] = |VARS|+OFFSET
      * <p/> Requires : |VARS|>0
@@ -1290,6 +1331,22 @@ public class IntConstraintFactory {
      * @param VARS     a collection of IntVar
      * @param COEFFS   a collection of int, for which |VARS|=|COEFFS|
      * @param OPERATOR an operator in {"=", "!=", ">","<",">=","<="}
+     * @param SCALAR   an integer
+     * @return a scalar constraint
+     */
+    public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, int SCALAR) {
+        assert VARS.length>0;
+        Solver s = VARS[0].getSolver();
+        IntVar scalarVar = VF.fixed(SCALAR,s);
+        return scalar(VARS,COEFFS,OPERATOR,scalarVar);
+    }
+
+    /**
+     * A scalar constraint which ensures that Sum(VARS[i]*COEFFS[i]) OPERATOR SCALAR
+     *
+     * @param VARS     a collection of IntVar
+     * @param COEFFS   a collection of int, for which |VARS|=|COEFFS|
+     * @param OPERATOR an operator in {"=", "!=", ">","<",">=","<="}
      * @param SCALAR   an IntVar
      * @return a scalar constraint
      */
@@ -1320,7 +1377,6 @@ public class IntConstraintFactory {
         }
         return keysorting(X, null, Y, 1);
     }
-
 
     /**
      * Creates a subcircuit constraint which ensures that
@@ -1411,6 +1467,21 @@ public class IntConstraintFactory {
      *
      * @param VARS     a collection of IntVar
      * @param OPERATOR operator in {"=", "!=", ">","<",">=","<="}
+     * @param SUM      an integer
+     * @return a sum constraint
+     */
+    public static Constraint sum(IntVar[] VARS, String OPERATOR, int SUM) {
+        assert VARS.length>0;
+        Solver s = VARS[0].getSolver();
+        IntVar sumVar = VF.fixed(SUM,s);
+        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), sumVar, sumVar.getSolver());
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+     *
+     * @param VARS     a collection of IntVar
+     * @param OPERATOR operator in {"=", "!=", ">","<",">=","<="}
      * @param SUM      an IntVar
      * @return a sum constraint
      */
@@ -1426,7 +1497,21 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
-        return IntLinCombFactory.reduce(VARS, Operator.EQ, SUM, SUM.getSolver());
+        return sum(VARS,"=",SUM);
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+     * This constraint is much faster than the one over integer variables
+     *
+     * @param VARS a vector of boolean variables
+     * @param SUM  an integer
+     */
+    public static Constraint sum(BoolVar[] VARS, String OPERATOR, int SUM) {
+        assert VARS.length>0;
+        Solver s = VARS[0].getSolver();
+        IntVar sumVar = VF.fixed(SUM,s);
+        return sum(VARS,OPERATOR,sumVar);
     }
 
     /**
@@ -1438,7 +1523,7 @@ public class IntConstraintFactory {
      */
     public static Constraint sum(BoolVar[] VARS, String OPERATOR, IntVar SUM) {
         if (OPERATOR.equals("=")) {
-            return sum(VARS, SUM);
+            return IntLinCombFactory.reduce(VARS, Operator.EQ, SUM, SUM.getSolver());
         }
         int lb = 0;
         int ub = 0;
@@ -1447,8 +1532,21 @@ public class IntConstraintFactory {
             ub += v.getUB();
         }
         IntVar p = VF.bounded(StringUtils.randomName(), lb, ub, SUM.getSolver());
-        SUM.getSolver().post(sum(VARS, p));
+        SUM.getSolver().post(sum(VARS, "=", p));
         return arithm(p, OPERATOR, SUM);
+    }
+
+    /**
+     * Create a table constraint specifying that the sequence of variables VARS must belong to the list of tuples
+     * (or must NOT belong in case of infeasible tuples)
+     *
+     * Default configuration with GACSTR+ algorithm for feasible tuples and GAC3rm otherwise
+     *
+     * @param VARS      variables forming the tuples
+     * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
+     */
+    public static Constraint table(IntVar[] VARS, Tuples TUPLES) {
+        return table(VARS,TUPLES,TUPLES.isFeasible()?"GACSTR+":"GAC3rm");
     }
 
     /**
@@ -1467,52 +1565,57 @@ public class IntConstraintFactory {
      * - <b>STR2+</b>: Arc Consistency version STR2 for allowed tuples,
      * <br/>
      * - <b>FC</b>: Forward Checking.
+     * <br/>
+     * - <b>MDD</b>: uses a multi-valued decision diagram (see mddc constraint),
      *
-     * @param VARS      first variable
+     * @param VARS      variables forming the tuples
      * @param TUPLES    the relation between the variables (list of allowed/forbidden tuples)
      * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
         if (VARS.length == 2) {
-            table(VARS[0], VARS[1], TUPLES, "");
+            table(VARS[0], VARS[1], TUPLES);
+        }
+        if(ALGORITHM.contains("+") && !TUPLES.isFeasible()){
+            throw new SolverException(ALGORITHM+" table algorithm cannot be used with forbidden tuples.");
         }
         Propagator p;
         switch (ALGORITHM) {
-            case "FC":
-                p = new PropLargeFC(VARS, TUPLES);
+            case "MDD": p = new PropLargeMDDC(new MultivaluedDecisionDiagram(VARS, TUPLES), VARS);
                 break;
-            case "GAC3rm":
-                p = new PropLargeGAC3rm(VARS, TUPLES);
+            case "FC": p = new PropLargeFC(VARS, TUPLES);
                 break;
-            case "GAC2001":
-                p = new PropLargeGAC2001(VARS, TUPLES);
+            case "GAC3rm": p = new PropLargeGAC3rm(VARS, TUPLES);
                 break;
-            default:
-            case "GACSTR+":
-                if (!TUPLES.isFeasible()) {
-                    throw new SolverException("GACSTR+ cannot be used with forbidden tuples.");
-                }
-                p = new PropLargeGACSTRPos(VARS, TUPLES);
+            case "GAC2001": p = new PropLargeGAC2001(VARS, TUPLES);
                 break;
-            case "GAC2001+":
-                if (!TUPLES.isFeasible()) {
-                    throw new SolverException("GAC2001+ cannot be used with forbidden tuples.");
-                }
-                p = new PropLargeGAC2001Positive(VARS, TUPLES);
+            case "GACSTR+": p = new PropLargeGACSTRPos(VARS, TUPLES);
                 break;
-            case "GAC3rm+":
-                if (!TUPLES.isFeasible()) {
-                    throw new SolverException("GAC3rm+ cannot be used with forbidden tuples.");
-                }
-                p = new PropLargeGAC3rmPositive(VARS, TUPLES);
+            case "GAC2001+": p = new PropLargeGAC2001Positive(VARS, TUPLES);
                 break;
-            case "STR2+":
-                if (!TUPLES.isFeasible()) {
-                    throw new SolverException("STR2+ cannot be used with forbidden tuples.");
-                }
-                p = new PropTableStr2(VARS, TUPLES.toMatrix());
+            case "GAC3rm+": p = new PropLargeGAC3rmPositive(VARS, TUPLES);
+                break;
+            case "STR2+": p = new PropTableStr2(VARS, TUPLES.toMatrix());
+                break;
+            default: throw new SolverException("Table algorithm "+ALGORITHM+" is unkown");
         }
         return new Constraint("Table(" + ALGORITHM + ")", p);
+    }
+
+    /**
+     * Partition SUCCS variables into NBTREES (anti) arborescences
+     * <p/> SUCCS[i] = j means that j is the successor of i.
+     * <p/> and SUCCS[i] = i means that i is a root
+     * <p>
+     * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+     * <p/> However, the filtering over NBTREES is quite light here
+     *
+     * @param SUCCS   successors variables, taking their domain in [0,|SUCCS|-1]
+     * @param NBTREES number of arborescences (=number of loops)
+     * @return a tree constraint
+     */
+    public static Constraint tree(IntVar[] SUCCS, IntVar NBTREES) {
+        return tree(SUCCS, NBTREES, 0);
     }
 
     /**
@@ -1523,7 +1626,7 @@ public class IntConstraintFactory {
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      * <p/> However, the filtering over NBTREES is quite light here
      *
-     * @param SUCCS   successors variables
+     * @param SUCCS   successors variables, taking their domain in [OFFSET,|SUCCS|-1+OFFSET]
      * @param NBTREES number of arborescences (=number of loops)
      * @param OFFSET  0 by default but 1 if used within MiniZinc
      *                (which counts from 1 to n instead of from 0 to n-1)
@@ -1557,7 +1660,7 @@ public class IntConstraintFactory {
         for (int i = 0; i < n; i++) {
             model[i] = element(costOf[i], COST_MATRIX[i], SUCCS[i]);
         }
-        model[n] = sum(costOf, COST);
+        model[n] = sum(costOf, "=", COST);
         model[n + 1] = circuit(SUCCS, 0);
         return model;
     }

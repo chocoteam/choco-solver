@@ -56,11 +56,6 @@ import static org.chocosolver.solver.constraints.ICF.*;
  */
 public class IntLinCombFactory {
 
-    /**
-     * Default algorithm for extension transformation
-     */
-    private static final String AC = "";
-
     private IntLinCombFactory() {
     }
 
@@ -287,7 +282,7 @@ public class IntLinCombFactory {
         }
         if (Operator.EQ == OPERATOR && VARS[VARS.length - 1].hasEnumeratedDomain() && tupleIt(Arrays.copyOf(VARS, VARS.length - 1))) {
             return table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
-                    OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT), AC);
+                    OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT));
         }
         int b = 0, e = VARS.length;
         IntVar[] tmpV = new IntVar[e];

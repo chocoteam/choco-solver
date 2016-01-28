@@ -78,7 +78,7 @@ public class SetConstraintsFactory {
      * @param SETS set variables
      * @return A constraint which ensures that i<j <=> SET_VARS[i] subseteq SET_VARS[j]
      */
-    public static Constraint subsetEq(SetVar[] SETS) {
+    public static Constraint subsetEq(SetVar... SETS) {
         Propagator[] props = new Propagator[SETS.length - 1];
         for (int i = 0; i < SETS.length - 1; i++) {
             props[i] = new PropSubsetEq(SETS[i], SETS[i + 1]);
@@ -313,7 +313,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that set1 and set2 are disjoint
      */
     public static Constraint disjoint(SetVar SET_1, SetVar SET_2) {
-        return all_disjoint(new SetVar[]{SET_1, SET_2});
+        return all_disjoint(SET_1, SET_2);
     }
 
     /**
@@ -323,7 +323,7 @@ public class SetConstraintsFactory {
      * @param SETS disjoint set variables
      * @return a constraint ensuring that non-empty sets are all disjoint
      */
-    public static Constraint all_disjoint(SetVar[] SETS) {
+    public static Constraint all_disjoint(SetVar... SETS) {
         return new Constraint("SetAllDisjoint", new PropAllDisjoint(SETS));
     }
 
@@ -334,7 +334,7 @@ public class SetConstraintsFactory {
      * @param SETS different set variables
      * @return a constraint ensuring that SETS are all different
      */
-    public static Constraint all_different(SetVar[] SETS) {
+    public static Constraint all_different(SetVar... SETS) {
         return new Constraint("SetAllDifferent", new PropAllDiff(SETS),
                 new PropAllDiff(SETS), new PropAtMost1Empty(SETS)
         );
@@ -346,7 +346,7 @@ public class SetConstraintsFactory {
      * @param SETS set variables to be equals
      * @return a constraint ensuring that all sets in SETS are equal
      */
-    public static Constraint all_equal(SetVar[] SETS) {
+    public static Constraint all_equal(SetVar... SETS) {
         return new Constraint("SetAllEqual", new PropAllEqual(SETS));
     }
 

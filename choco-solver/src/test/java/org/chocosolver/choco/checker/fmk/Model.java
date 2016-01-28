@@ -208,7 +208,7 @@ public interface Model {
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = ICF.sum(bools, vars[n - 1]);
+            Constraint ctr = ICF.sum(bools, "=", vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
             s.post(ctrs);
