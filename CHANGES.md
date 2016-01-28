@@ -28,6 +28,8 @@ like getting a solver which a solution -- or the best one (#362)
 
 \#361, #364, #365, #368, #369, #370
 
+Fix array out of bound exception in `PropLargeMDDC`
+
 3.3.3 - 22 Dec 2015
 -------------------
 

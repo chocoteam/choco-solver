@@ -294,6 +294,9 @@ public class MultivaluedDecisionDiagram implements Serializable {
                     mdd[node + i] = nodeChild[i] = detectIsomorphism(mdd[node + i], layer + 1);
             }
         }
+        if(nbChild == -1){
+            return node;
+        }
         boolean known = false;
         if (_identicalNodes[layer][nbChild] == null) {
             _identicalNodes[layer][nbChild] = new ArrayList<>();
