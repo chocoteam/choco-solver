@@ -29,10 +29,10 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.objects.IntList;
 
 /**
  * <b>Random</b> variable selector.
@@ -41,15 +41,26 @@ import org.chocosolver.solver.variables.Variable;
  *
  * @author Charles Prud'homme
  * @since 2 juil. 2010
+ * @param <T> type of variable
  */
 public class Random<T extends Variable> implements VariableSelector<T>, VariableEvaluator<T> {
 
-    TIntArrayList sets;
+    /**
+     * To store index of variable to select randomly
+     */
+    IntList sets;
 
+    /**
+     * Random number generator.
+     */
     java.util.Random random;
 
+    /**
+     * Random variable selector
+     * @param seed seed for random number generator.
+     */
     public Random(long seed) {
-        sets = new TIntArrayList();
+        sets = new IntList();
         random = new java.util.Random(seed);
     }
 

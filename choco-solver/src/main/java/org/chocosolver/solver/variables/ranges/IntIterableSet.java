@@ -35,13 +35,92 @@ package org.chocosolver.solver.variables.ranges;
  * {@link org.chocosolver.solver.variables.IntVar#removeAllValuesBut(IntIterableSet, org.chocosolver.solver.ICause)}
  * Created by cprudhom on 09/07/15.
  * Project: choco.
+ * @author Charles Prud'homme
  */
-public interface IntIterableSet {
+public interface IntIterableSet{
 
+    /**
+     * For memory consumption purpose, an offset is needed to indicate the lowest value stored in this set.
+     * @param offset lowest value stored in this set
+     */
     void setOffset(int offset);
 
-    void add(int... values);
-    
+    /**
+     * @return the first (lowest) element currently in this set,
+     * or {@link Integer#MIN_VALUE} if there is no element in the set.
+     */
+    int first();
+
+    /**
+     * @return the last (highest) element currently in this set,
+     * or {@link Integer#MAX_VALUE} if there is no element in the set.
+     */
+    int last();
+
+    /**
+     * Ensures that this set contains the specified element.
+     * Returns <tt>true</tt> if this set changed as a
+     * result of the call.  (Returns <tt>false</tt> if this set
+     * already contains the specified element.)<p>
+     *
+     * @param e element whose presence in this set is to be ensured
+     * @return <tt>true</tt> if this set changed as a result of the
+     *         call
+     */
+    boolean add(int e);
+
+    /**
+     * Adds all of the elements in the array to this set.
+     * @param values array containing elements to be added to this set
+     * @return {@code true} if this set changed as a result of the call
+     */
+    boolean addAll(int... values);
+
+    /**
+     * Adds all of the elements in the specified set to this set.
+     * @param set set containing elements to be added to this set
+     * @return {@code true} if this set changed as a result of the call
+     */
+    boolean addAll(IntIterableSet set);
+
+    /**
+     * Retains only the elements in this set that are contained in the
+     * specified set.  In other words, removes from
+     * this set all of its elements that are not contained in the
+     * specified set.
+     *
+     * @param set set containing elements to be retained in this set
+     * @return <tt>true</tt> if this set changed as a result of the call
+     */
+    boolean retainAll(IntIterableSet set);
+
+    /**
+     * Removes a single instance of the specified element from this
+     * set, if it is present. Returns
+     * <tt>true</tt> if this set contained the specified element (or
+     * equivalently, if this set changed as a result of the call).
+     *
+     * @param e element to be removed from this set, if present
+     * @return <tt>true</tt> if an element was removed as a result of this call
+     */
+    boolean remove(int e);
+
+    /**
+     * Removes all of this set's elements that are also contained in the
+     * specified set.  After this call returns,
+     * this set will contain no elements in common with the specified
+     * set.
+     *
+     * @param set set containing elements to be removed from this set
+     * @return <tt>true</tt> if this set changed as a result of the
+     *         call
+     */
+    boolean removeAll(IntIterableSet set);
+
+    /**
+     * Removes all of the elements from this set.
+     * The set will be empty after this method returns.
+     */
     void clear();
 
     /**
@@ -56,8 +135,19 @@ public interface IntIterableSet {
      */
     int previousValue(int aValue);
 
-    boolean contains(int aValue);
+    /**
+     * Returns <tt>true</tt> if this set contains the specified element.
+     *
+     * @param o element whose presence in this set is to be tested
+     * @return <tt>true</tt> if this set contains the specified
+     *         element
+     */
+    boolean contains(int o);
 
+    /**
+     * Returns a carbon-copy of this set
+     * @return a carbon-copy of this set
+     */
     IntIterableSet duplicate();
 
     /**

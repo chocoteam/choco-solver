@@ -52,9 +52,13 @@ import static org.chocosolver.solver.constraints.ICF.*;
  * <p>
  * Created by cprudhom on 13/11/14.
  * Project: choco.
+ * @author Charles Prud'homme
  */
 public class IntLinCombFactory {
 
+    /**
+     * Default algorithm for extension transformation
+     */
     private static final String AC = "";
 
     private IntLinCombFactory() {
@@ -66,6 +70,7 @@ public class IntLinCombFactory {
      * @param VARS     array of integer variables
      * @param OPERATOR an operator among "=", "!=", ">", "<", ">=",>" and "<="
      * @param SUM      the resulting variable
+     * @param SOLVER   declaring solver
      * @return a constraint to post or reify
      */
     public static Constraint reduce(IntVar[] VARS, Operator OPERATOR, IntVar SUM, Solver SOLVER) {
@@ -82,6 +87,7 @@ public class IntLinCombFactory {
      * @param COEFFS   array of integers
      * @param OPERATOR an operator among "=", "!=", ">", "<", ">=",>" and "<="
      * @param SCALAR   the resulting variable
+     * @param SOLVER    declaring solver
      * @return a constraint to post or reify
      */
     public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR, Solver SOLVER) {
@@ -219,10 +225,10 @@ public class IntLinCombFactory {
                 }
                 if (OPERATOR == Operator.GT) {
                     OPERATOR = Operator.GE;
-                    RESULT--;
+                    RESULT++;
                 } else if (OPERATOR == Operator.LT) {
                     OPERATOR = Operator.LE;
-                    RESULT++;
+                    RESULT--;
                 }
                 //TODO: deal with clauses and reification
                 if (nbools == VARS.length) {
@@ -308,6 +314,11 @@ public class IntLinCombFactory {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * @param vars array of integer variables
+     * @param coefs array of ints
+     * @return compute the bounds of the result of scalar product vars*coefs.
+     */
     public static int[] getScalarBounds(IntVar[] vars, int[] coefs) {
         int[] ext = new int[2];
         for (int i = 0; i < vars.length; i++) {

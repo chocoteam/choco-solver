@@ -10,10 +10,20 @@ NEXT MILESTONE
 
 - `ParallelResolution` replaces `SMF.prepareForParallelResolution(List<Solver>)` (depreacted); it offers more services 
 like getting a solver which a solution -- or the best one (#362)
+- reduce memory footprint : `Solution.record(Solver)` (#370) and `Random` search strategy
+- add impl of `IntIterableSet`: `IntIterableRangeSet`, (and a factory `IntIterableSetFactory` to be completed in the future)
+
+### Constraint
+
+- add constructive disjunction (see `SatFactory`) (#367)
+
+### Propagation:
+
+- Move pending event counter from `Propagator` to `SevenQueuePropagationEngine` (required for #367)
 
 #### Bug fixes: 
 
-\#361, #364, #365
+\#361, #364, #365, #369370
 
 3.3.3 - 22 Dec 2015
 -------------------

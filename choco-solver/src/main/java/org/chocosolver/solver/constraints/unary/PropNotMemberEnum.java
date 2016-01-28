@@ -49,9 +49,20 @@ import java.util.Arrays;
  */
 public class PropNotMemberEnum extends Propagator<IntVar> {
 
+    /**
+     * Forbidden values
+     */
     final TIntHashSet values;
+    /**
+     * Set of values to remove (needed for domain operations)
+     */
     final IntIterableBitSet vrms;
 
+    /**
+     * A propagator which forbids <i>values</i> from <i>var</i> domain
+     * @param var a variable
+     * @param values some values
+     */
     public PropNotMemberEnum(IntVar var, int[] values) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.values = new TIntHashSet(values);
@@ -63,7 +74,7 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
             }
         }
         vrms.setOffset(of);
-        vrms.add(values);
+        vrms.addAll(values);
     }
 
     @Override

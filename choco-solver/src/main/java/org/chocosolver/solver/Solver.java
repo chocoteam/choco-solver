@@ -40,6 +40,7 @@ import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
+import org.chocosolver.solver.constraints.reification.CondisConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -225,6 +226,11 @@ public class Solver implements Serializable {
      * A MiniSat instance adapted to nogood management
      */
     protected NogoodConstraint nogoods;
+
+    /**
+     * A CondisConstraint instance adapted to constructive disjunction management
+     */
+    protected CondisConstraint condis;
 
     /**
      * An Ibex (continuous constraint solver) instance
@@ -1013,6 +1019,19 @@ public class Solver implements Serializable {
             this.post(nogoods);
         }
         return nogoods;
+    }
+
+    /**
+     * Return a constraint embedding a constructive disjunction store.
+     * There can be only on instance of such a constraint in a solver to avoid undesirable side effects.
+     * @return the condis constraint
+     */
+    public CondisConstraint getCondisStore(){
+        if (condis == null) {
+            condis = new CondisConstraint(this);
+            this.post(condis);
+        }
+        return condis;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,382 @@
+/**
+ * Copyright (c) 2015, Ecole des Mines de Nantes
+ * All rights reserved.
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
+ * 4. Neither the name of the <organization> nor the
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package org.chocosolver.solver.constraints.reification;
+
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.propagation.IPropagationEngine;
+import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.ranges.IntIterableRangeSet;
+import org.chocosolver.solver.variables.ranges.IntIterableSetFactory;
+import org.chocosolver.util.ESat;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
+
+/**
+ * A propagator for constructive disjunction.
+ * The propagator forces reifying variables, in sequence, and maintains the domain union of each variable modified by all
+ * reified constraint.
+ * This propagator declares an internal propagation engine which run propagation triggered by forcing a reifying variable.
+ * <p>
+ * <p>
+ * There can be only one instance of this propagator in a {@link Solver} to avoid unexpected side-effects, this is maintained
+ * by the factory
+ * <p>
+ * <p>
+ * Project: choco.
+ * <p>
+ *
+ * todo: deal with variable addition / constraint addition in internalEngine
+ * todo: store for each boolvar the disjunctions it belongs (may be helpful to react on fine event and/or reaching fix point smartly
+ *
+ * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
+ * @since 25/01/2016.
+ */
+public class PropCondis extends Propagator<BoolVar> {
+
+    /**
+     * List of known boolvars
+     */
+    TIntHashSet declared;
+
+    /**
+     * List of disjunctions to deal with
+     * todo: link boolvar to index in this
+     */
+    List<BoolVar[]> disjunctions;
+    /**
+     * An internal propagation engine to try each boolean variables
+     */
+    IPropagationEngine internalEngine;
+    /**
+     * Original propagation engine, set temporary off while this builds deductions
+     */
+    IPropagationEngine masterEngine;
+    /**
+     * Set to <tt>true</tt> to indicate that this builds deductions
+     */
+    boolean isworking;
+    /**
+     * Set to <tt>false</tt> before the first propagation of this, <tt>true</tt> then.
+     */
+    boolean firstAwake;
+    /**
+     * All integer variables (INT and BOOL) extract from this solver.
+     */
+    IntVar[] allvars;
+    /**
+     * Store cardinality of variables before a try
+     */
+    int[] cardinalities;
+    /**
+     * Store the union of domain of modified variables
+     */
+    TIntObjectHashMap<IntIterableRangeSet> domains;
+    /**
+     * Cardinality of domains (external to limit GC)
+     */
+    BitSet toUnion;
+    /**
+     * To get boolean variables to set to false
+     */
+    BitSet toZero;
+
+    /**
+     * A propagator to deal with constructive disjunction
+     * @param solver a solver
+     */
+    public PropCondis(Solver solver) {
+        super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds solver.ONE to fit to the super constructor
+        this.vars = new BoolVar[0];    // erase solver.ONE from the variable scope
+        domains = new TIntObjectHashMap<>();
+        toUnion = new BitSet();
+        toZero = new BitSet();
+        declared = new TIntHashSet();
+        disjunctions = new ArrayList<>();
+    }
+
+    /**
+     * Add a new disjunctions to the list of disjunctions
+     *
+     * @param bvars boolvars in disjunction
+     */
+    public void addDisjunction(BoolVar... bvars) {
+        for (BoolVar bv : bvars) {
+            if (!declared.contains(bv.getId())) {
+                this.addVariable(bv);
+                declared.add(bv.getId());
+            }
+        }
+        disjunctions.add(bvars);
+    }
+
+
+    @Override
+    public boolean isActive() {
+        return !isworking && super.isActive();
+    }
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        try {
+            if (!isworking) {
+                isworking = true;
+                if (!firstAwake && !firstPropagation()) {
+                    fails();
+                }
+                boolean change = true;
+                while (change) {
+                    change = false;
+                    // a fix point needs to be reached
+                    // indeed, some deductions from disjunction j may impact disjunction i, i < j.
+                    for (int i = 0; i < allvars.length; i++) {
+                        cardinalities[i] = allvars[i].getDomainSize();
+                        if (domains.get(i) != null) {
+                            domains.get(i).clear();
+                        }
+                    }
+                    for (int i = 0; i < disjunctions.size(); i++) {
+                        BoolVar[] boolVars = disjunctions.get(i);
+                        // change the propagation engine
+                        solver.set(internalEngine);
+                        toZero.clear();
+                        toUnion.clear();
+                        for (int b = 0; b < boolVars.length; b++) {
+                            if (!boolVars[b].isInstantiated()) {
+                                forceReification(boolVars[b], b);
+                                // if no variable is modified, or intersection of modified variable is empty
+                                if (toUnion.cardinality() == 0) {
+                                    break;
+                                }
+                            } else if (boolVars[b].isInstantiatedTo(1)) {
+                                if (b > 0) { // swap it with the first element, for next iterations
+                                    BoolVar tmp = boolVars[b];
+                                    boolVars[b] = boolVars[0];
+                                    boolVars[0] = tmp;
+                                }
+                                break;
+                            }
+                        }
+                        // restore the propagation before applying the deductions
+                        solver.set(masterEngine);
+                        change |= applyDeductions(boolVars);
+                    }
+                }
+            } // else: nothing to do, to avoid undesirable side effects or too-depth propagation
+        } finally {
+            isworking = false;
+        }
+    }
+
+    private boolean zeros(BoolVar[] disjunction) {
+        int zero = 0;
+        for (int b = 0; b < disjunction.length; b++) {
+            if (disjunction[b].isInstantiatedTo(0)) {
+                zero++;
+            }
+        }
+        return zero < disjunction.length;
+    }
+
+    /**
+     * Based on deductions made before, filters domain of variables.
+     *
+     * @param disjunction list of boolvars in disjunction
+     * @throws ContradictionException domain wiper out
+     */
+    private boolean applyDeductions(BoolVar[] disjunction) throws ContradictionException {
+        boolean change = false;
+        // push domains
+        for (int p = toUnion.nextSetBit(0); p >= 0; p = toUnion.nextSetBit(p + 1)) {
+            change |= allvars[p].removeAllValuesBut(domains.get(p), this);
+        }
+        int one = 0, zero = 0, last = -1;
+        for (int b = 0; b < disjunction.length; b++) {
+            if (disjunction[b].isInstantiated()) {
+                if (disjunction[b].getValue() == 0) {
+                    zero++;
+                } else {
+                    one++;
+                }
+            } else if (toZero.get(b)) {
+                change |= disjunction[b].setToFalse(this);
+                zero++;
+            } else {
+                last = b;
+            }
+        }
+        // then force boolean variables, if needed
+        if (one == 0 && zero >= disjunction.length - 1) {
+            if (last > -1) {
+                change |= disjunction[last].instantiateTo(1, this);
+                // failure is expected if disjunction[last] was not free
+            } else {
+                this.fails(); // not very helpful for explanations ...
+            }
+        }// if at least one boolean is set to true
+        if (one > 0) {
+            //todo: deal with entailed disjunctions
+        }
+        return change;
+    }
+
+    /**
+     * Force boolean variable <i>b</i> to <<tt>true</tt> and collect modified domains.
+     *
+     * @param bvar    boolean variable to force
+     * @param idxDisj index of bvar in the current disjunction
+     */
+    private void forceReification(BoolVar bvar, int idxDisj) {
+        // make a backup world
+        solver.getEnvironment().worldPush();
+//        System.out.printf("%sTry %s for %s\n", pad("", solver.getEnvironment().getWorldIndex(), "."), vars[b].getName(), this);
+        try {
+            bvar.instantiateTo(1, this);
+            internalEngine.propagate();
+            // find modified variables and copy their domain
+            readDomains();
+        } catch (ContradictionException cex) {
+            // if failure occurs, then we consider all domains as empty
+            // and union is maintained as is
+            internalEngine.flush();
+            toZero.set(idxDisj);
+        }
+        // restore backup world
+        solver.getEnvironment().worldPop();
+    }
+
+    /**
+     * Set up data structures
+     *
+     * @return <tt>true</tt> if the initial propagation is ok, <tt>false</tt> otherwise
+     */
+    private boolean firstPropagation() {
+        firstAwake = true;
+        // initialize this
+        allvars = new IntVar[solver.getNbVars()];
+        int k = 0;
+        for (int i = 0; i < solver.getNbVars(); i++) {
+            if (((solver.getVar(i).getTypeAndKind() & Variable.KIND) == Variable.INT
+                    || (solver.getVar(i).getTypeAndKind() & Variable.KIND) == Variable.BOOL)
+                    && (solver.getVar(i).getTypeAndKind() & Variable.TYPE) == Variable.VAR) {
+                allvars[k++] = (IntVar) solver.getVar(i);
+            }
+        }
+        allvars = Arrays.copyOf(allvars, k);
+        cardinalities = new int[k];
+        // get a copy of the current propagation engine
+        masterEngine = solver.getEngine();
+        // create internalEngine
+        internalEngine = new SevenQueuesPropagatorEngine(solver);
+        internalEngine.initialize();
+
+        solver.set(internalEngine);
+        boolean ok = true;
+        try {
+            internalEngine.propagate();
+        } catch (ContradictionException c) {
+            internalEngine.flush();
+            ok = false;
+        }
+        solver.set(masterEngine);
+        return ok;
+    }
+
+
+    /**
+     * Find modified domains and compute unions from one propagation to the other.
+     */
+    private void readDomains() {
+        if (toUnion.cardinality() == 0) {
+            for (int i = 0; i < allvars.length; i++) {
+                if (cardinalities[i] > allvars[i].getDomainSize()) {
+                    IntIterableRangeSet rs = domains.get(i);
+                    if (rs == null) {
+                        rs = new IntIterableRangeSet();
+                        domains.put(i, rs);
+                    }
+                    IntIterableSetFactory.dvar_set(allvars[i], rs);
+                    toUnion.set(i);
+                }
+            }
+        } else { // only iterate over previously modified variables
+            for (int p = toUnion.nextSetBit(0); p >= 0; p = toUnion.nextSetBit(p + 1)) {
+                // check if domain has changed
+                if (cardinalities[p] > allvars[p].getDomainSize()) {
+                    IntIterableSetFactory.fd_union(domains.get(p), allvars[p]);
+                    if (domains.get(p).size() == cardinalities[p]) {
+                        toUnion.clear(p);
+                    }
+                } else {
+                    toUnion.clear(p);
+                }
+            }
+        }
+    }
+
+    @Override
+    public ESat isEntailed() {
+        for (int i = 0; i < disjunctions.size(); i++) {
+            BoolVar[] boolVars = disjunctions.get(i);
+            int zero = 0, one = 0;
+            for (int b = 0; b < boolVars.length; b++) {
+                if (boolVars[b].isInstantiated()) {
+                    if (vars[b].isInstantiatedTo(0)) {
+                        zero++;
+                    } else {
+                        one++;
+                    }
+                }
+            }
+            if (zero == boolVars.length) {
+                return ESat.FALSE;
+            } else if (one == 0) {
+                return ESat.UNDEFINED;
+            }
+        }
+        return ESat.TRUE;
+    }
+
+    @Override
+    public String toString() {
+        return "ConstructiveDisjunction";
+    }
+}

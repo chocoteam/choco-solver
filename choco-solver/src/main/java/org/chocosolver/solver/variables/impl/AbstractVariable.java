@@ -160,7 +160,7 @@ public abstract class AbstractVariable implements Variable {
      * The event scheduler of this variable, for efficient scheduling purpose.
      * It stores propagators wrt the propagation conditions.
      */
-    private EvtScheduler scheduler;
+    protected EvtScheduler scheduler;
 
     //////////////////////////////////////////////////////////////////////////////////////
 

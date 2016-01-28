@@ -225,7 +225,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-3, -1, 1, 2, 4);
+        rems.addAll(-3, -1, 1, 2, 4);
         x.removeValues(rems, Cause.Null);
     }
 
@@ -235,7 +235,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(2, 5, 8, 9);
+        rems.addAll(2, 5, 8, 9);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
         Assert.assertTrue(x.isInstantiatedTo(6));
     }
@@ -246,7 +246,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(2, 5, 6, 8);
+        rems.addAll(2, 5, 6, 8);
         x.removeValues(rems, Cause.Null);
         Assert.assertTrue(x.isInstantiatedTo(9));
     }
@@ -257,7 +257,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(2, 6, 9);
+        rems.addAll(2, 6, 9);
         x.removeValues(rems, Cause.Null);
         Assert.assertTrue(x.getDomainSize() == 2);
     }
@@ -268,7 +268,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(5, 6, 8, 9);
+        rems.addAll(5, 6, 8, 9);
         x.removeValues(rems, Cause.Null);
         Assert.assertTrue(x.isInstantiatedTo(2));
     }
@@ -279,7 +279,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(1, 2, 5, 6, 8, 9);
+        rems.addAll(1, 2, 5, 6, 8, 9);
         x.removeValues(rems, Cause.Null);
     }
 
@@ -289,7 +289,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-3, -2);
+        rems.addAll(-3, -2);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
         Assert.assertEquals(x.getLB(), -1);
     }
@@ -311,7 +311,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(1, 2, 3);
+        rems.addAll(1, 2, 3);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
         Assert.assertEquals(x.getUB(), 0);
     }
@@ -334,7 +334,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-1, 0, 1);
+        rems.addAll(-1, 0, 1);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
     }
 
@@ -354,7 +354,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-1, 0, 1}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-1);
-        rems.add(-1, 0, 1);
+        rems.addAll(-1, 0, 1);
         x.removeValues(rems, Cause.Null);
         Assert.fail();
     }
@@ -365,7 +365,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{0, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(0, 1, 2);
+        rems.addAll(0, 1, 2);
         x.removeValues(rems, Cause.Null);
         Assert.assertEquals(x.getLB(), 3);
     }
@@ -376,7 +376,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{0, 1, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(1, 2, 3);
+        rems.addAll(1, 2, 3);
         x.removeValues(rems, Cause.Null);
         Assert.assertEquals(x.getUB(), 0);
     }
@@ -507,7 +507,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-3, -1, 1, 2, 4);
+        rems.addAll(-3, -1, 1, 2, 4);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
         Assert.assertEquals(x.getDomainSize(), 4);
         Assert.assertTrue(x.contains(-3));
@@ -527,7 +527,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(1, 6, 10, 11);
+        rems.addAll(1, 6, 10, 11);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
         Assert.assertTrue(x.isInstantiatedTo(6));
     }
@@ -538,7 +538,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(9, 10, 11);
+        rems.addAll(9, 10, 11);
         x.removeAllValuesBut(rems, Cause.Null);
         Assert.assertTrue(x.isInstantiatedTo(9));
     }
@@ -549,7 +549,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(2, 6, 9);
+        rems.addAll(2, 6, 9);
         x.removeAllValuesBut(rems, Cause.Null);
         Assert.assertEquals(x.getDomainSize(), 3);
     }
@@ -560,7 +560,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(2);
+        rems.addAll(2);
         x.removeAllValuesBut(rems, Cause.Null);
         Assert.assertTrue(x.isInstantiatedTo(2));
     }
@@ -571,7 +571,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{2, 5, 6, 8, 9}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(1, 3, 4);
+        rems.addAll(1, 3, 4);
         x.removeAllValuesBut(rems, Cause.Null);
     }
 
@@ -581,7 +581,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-1, 0, 1);
+        rems.addAll(-1, 0, 1);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
         Assert.assertEquals(x.getLB(), -1);
     }
@@ -592,7 +592,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
-        rems.add(-3, -2, -1, 0, 1, 2, 3);
+        rems.addAll(-3, -2, -1, 0, 1, 2, 3);
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
         Assert.assertEquals(x.getLB(), -3);
         Assert.assertEquals(x.getUB(), 3);
@@ -604,7 +604,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(1, 2, 3);
+        rems.addAll(1, 2, 3);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
         Assert.assertEquals(x.getLB(), 1);
     }
@@ -615,7 +615,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, -2, -1, 0, 1, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-3, -2, 2, 3);
+        rems.addAll(-3, -2, 2, 3);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
     }
 
@@ -625,7 +625,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-3, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-3, 3);
+        rems.addAll(-3, 3);
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
     }
 
@@ -635,7 +635,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-1, 0, 1}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-1);
-        rems.add(2, 3);
+        rems.addAll(2, 3);
         x.removeAllValuesBut(rems, Cause.Null);
     }
 
@@ -645,7 +645,7 @@ public class BitsetArrayIntVarImplTest {
         IntVar x = new BitsetArrayIntVarImpl("X", new int[]{0, 2, 3}, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
-        rems.add(1, 2, 4);
+        rems.addAll(1, 2, 4);
         x.removeAllValuesBut(rems, Cause.Null);
         Assert.assertEquals(x.getLB(), 2);
         Assert.assertEquals(x.getUB(), 2);

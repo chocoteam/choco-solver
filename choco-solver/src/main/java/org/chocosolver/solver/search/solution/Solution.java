@@ -56,14 +56,35 @@ import java.util.Arrays;
  */
 public class Solution implements Serializable, ICause {
 
+    /**
+     * No entry value for maps
+     */
     private static final int NO_ENTRY = Integer.MAX_VALUE;
 
+    /**
+     * Maps of value for integer variable (id - value)
+     */
     TIntIntHashMap intmap;
+    /**
+     * Maps of value for real variable (id - value)
+     */
     TIntObjectHashMap<double[]> realmap;
+    /**
+     * Maps of value for set variable (id - values)
+     */
     TIntObjectHashMap<int[]> setmap;
+    /**
+     * Set of decisions variables (key: id)
+     */
     TIntHashSet dvars;
+    /**
+     * Set to <tt>true</tt> when this object is empty
+     */
     boolean empty;
 
+    /**
+     * A solutio - complete instantiation
+     */
     @SuppressWarnings("unchecked")
     public Solution() {
         intmap = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
@@ -91,13 +112,15 @@ public class Solution implements Serializable, ICause {
         intmap.clear();
         realmap.clear();
         setmap.clear();
-        Variable[] vars = solver.getVars();
-        for (int i = 0; i < vars.length; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
-                int kind = vars[i].getTypeAndKind() & Variable.KIND;
-                if (!vars[i].isInstantiated()) {
-                    if (dvars.contains(vars[i].getId())) {
-                        throw new SolverException(vars[i] + " is not instantiated when recording a solution.");
+        // solver.getVars() is not called anymore, to reduce memory footprint
+        // indeed, it makes a copy of the array.
+        for (int i = 0; i < solver.getNbVars(); i++) {
+            Variable var = solver.getVar(i);
+            if ((var.getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = var.getTypeAndKind() & Variable.KIND;
+                if (!var.isInstantiated()) {
+                    if (dvars.contains(var.getId())) {
+                        throw new SolverException(var + " is not instantiated when recording a solution.");
                     } else {
                         warn = true;
                     }
@@ -105,15 +128,15 @@ public class Solution implements Serializable, ICause {
                     switch (kind) {
                         case Variable.INT:
                         case Variable.BOOL:
-                            IntVar v = (IntVar) vars[i];
+                            IntVar v = (IntVar) var;
                             intmap.put(v.getId(), v.getValue());
                             break;
                         case Variable.REAL:
-                            RealVar r = (RealVar) vars[i];
+                            RealVar r = (RealVar) var;
                             realmap.put(r.getId(), new double[]{r.getLB(), r.getUB()});
                             break;
                         case Variable.SET:
-                            SetVar s = (SetVar) vars[i];
+                            SetVar s = (SetVar) var;
                             setmap.put(s.getId(), s.getValues());
                             break;
                     }
@@ -131,6 +154,8 @@ public class Solution implements Serializable, ICause {
      * the solution value)
      * <p>
      * BEWARE: A restart might be required so that domains contain the solution values
+     * @param solver solver to restore solution in
+     * @throws ContradictionException if solution is not correct with current domain states
      */
     public void restore(Solver solver) throws ContradictionException {
         if (empty) {
@@ -168,6 +193,10 @@ public class Solution implements Serializable, ICause {
         }
     }
 
+    /**
+     * @param solver a solver
+     * @return a string which represent this solution input in the <i>solver</i>
+     */
     public String toString(Solver solver) {
         Variable[] vars = solver.getVars();
         StringBuilder st = new StringBuilder("Solution: ");
@@ -222,6 +251,7 @@ public class Solution implements Serializable, ICause {
      * @param s SetVar
      * @return the value of variable s in this solution, or null if the variable is not instantiated in the solution
      */
+    @SuppressWarnings("unused")
     public int[] getSetVal(SetVar s) {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
@@ -241,6 +271,7 @@ public class Solution implements Serializable, ICause {
      * @param r RealVar
      * @return the bounds of r in this solution, or null if the variable is not instantiated in the solution
      */
+    @SuppressWarnings("unused")
     public double[] getRealBounds(RealVar r) {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");

@@ -61,35 +61,99 @@ import java.util.List;
  */
 public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
+    /**
+     * Mask to deal with emptiness (see {@link #notEmpty})
+     */
     private static final int WORD_MASK = 0xffffffff;
-
-    protected final ContradictionException exception; // the exception in case of contradiction
-    protected final IEnvironment environment; // environment of backtrackable objects
-    private final Solver solver;
-    protected Propagator[] propagators;
-    private final boolean DEBUG,COLOR;
-
-    protected final CircularQueue<Propagator>[] pro_queue;
-    protected Propagator lastProp;
-    protected IntMap p2i; // mapping between propagator ID and its absolute index
-    protected int notEmpty; // point out the no empty queues
-    protected short[] scheduled; // also maintains the index of the queue!
-    protected IntCircularQueue[] eventsets;
-    private boolean init;
-    protected int[][] eventmasks;// the i^th event mask stores modification events on the i^th variable, since the last propagation
-
-    final PropagationTrigger trigger; // an object that starts the propagation
-
+    /**
+     * For debugging purpose: set to <tt>true</tt> to output debugging information
+     */
+    private final boolean DEBUG;
+    /**
+     * For debugging purpose: set to <tt>true</tt> to use color on console when debugging
+     */
+    private final boolean COLOR;
+    /**
+     * The strategy to use for idempotency (for debugging purpose)
+     */
     final Settings.Idem idemStrat;
 
+    /**
+     * Internal unique contradiction exception, used on propagation failures
+     */
+    protected final ContradictionException exception;
+    /**
+     * The solver declaring this engine
+     */
+    private final Solver solver;
+    /**
+     * Backtrackable environment attached to this solver
+     */
+    protected final IEnvironment environment;
+    /**
+     * The array of propagators to execute
+     */
+    protected Propagator[] propagators;
+    /**
+     * The main structure of this engine: seven circular queues,
+     * each of them is dedicated to store propagator to execute wrt their priority.
+     */
+    protected final CircularQueue<Propagator>[] pro_queue;
+    /**
+     * The last propagator executed
+     */
+    protected Propagator lastProp;
+    /**
+     * Mapping between propagator ID and its absolute index
+     */
+    protected IntMap p2i; //
+    /**
+     * One bit per queue: true if the queue is not empty.
+     */
+    protected int notEmpty;
+    /**
+     * Per propagator: indicates whether it is scheduled (and in which queue) or not.
+     */
+    protected short[] scheduled;
+    /**
+     * Per propagator: set of (variable) events to propagate
+     */
+    protected IntCircularQueue[] eventsets;
+    /**
+     * Set to <tt>true</tt> once {@link #initialize()} has been called.
+     */
+    private boolean init;
+    /**
+     * Per propagator (i) and per variable of the propagator (j): modification event mask of variable j from propagator i
+     * since the last propagation of propagator j.
+     */
+    protected int[][] eventmasks;
+    /**
+     * Per propagator: counter of events to be propagated
+     */
+    protected int[] pendingEvt;
 
+    /**
+     * A specific object to deal with first propagation
+     */
+    final PropagationTrigger trigger; // an object that starts the propagation
+
+
+    /**
+     * A seven-queue propagation engine.
+     * Each of the seven queues deals with on priority.
+     * When a propagator needs to be executed, it is scheduled in the queue corresponding to its priority.
+     * The lowest priority queue is emptied before one element of the second lowest queue is popped, etc.
+     * @param solver the declaring solver
+     */
     public SevenQueuesPropagatorEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
         this.idemStrat = solver.getSettings().getIdempotencyStrategy();
         this.solver = solver;
-        pro_queue = new CircularQueue[8];
+        //noinspection unchecked
+        this.pro_queue = new CircularQueue[8];
         this.DEBUG = solver.getSettings().debugPropagation();
         this.COLOR = solver.getSettings().outputWithANSIColors();
 
@@ -129,6 +193,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             }
 
             scheduled = new short[nbProp];
+            pendingEvt = new int[nbProp];
             eventsets = new IntCircularQueue[nbProp];
             eventmasks = new int[nbProp][];
             for (int i = 0; i < nbProp; i++) {
@@ -173,7 +238,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         // clear event
                         mask = eventmasks[aid][v];
                         eventmasks[aid][v] = 0;
-                        lastProp.decNbPendingEvt();
+                        assert (pendingEvt[aid] > 0) : "number of enqueued records is <= 0 " + this;
+                        pendingEvt[aid]--;
                         // run propagation on the specific event
                         lastProp.propagate(v, mask);
                     }
@@ -226,7 +292,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                 eventmasks[aid][v] = 0;
             }
             evtset.clear();
-            lastProp.flushPendingEvt();
+            pendingEvt[aid] = 0;
         }
         scheduled[aid] = 0;
     }
@@ -241,6 +307,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         Propagator prop;
         int pindice;
         EvtScheduler si = variable._schedIter();
+        //noinspection unchecked
         si.init(type);
         while (si.hasNext()) {
             int p = variable.getDindex(si.next());
@@ -257,7 +324,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                             if (DEBUG) {
                                 IPropagationEngine.Trace.printFineSchedule(prop, COLOR);
                             }
-                            prop.incNbPendingEvt();
+                            assert (pendingEvt[aid] >= 0) : "number of enqueued records is < 0 " + this;
+                            pendingEvt[aid]++;
                             eventsets[aid].addLast(pindice);
                         }
                     }
@@ -278,7 +346,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
-        if (propagator.getNbPendingEvt() == 0) {
+        if (pendingEvt[p2i.get(propagator.getId())] == 0) {
             if (DEBUG) {
                 IPropagationEngine.Trace.printPropagation(null, propagator, COLOR);
             }
@@ -305,7 +373,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     eventmasks[aid][v] = 0;
                 }
                 evtset.clear();
-                propagator.flushPendingEvt();
+                pendingEvt[aid] = 0;
             }
         }
     }

@@ -32,8 +32,11 @@ package org.chocosolver.solver.variables.ranges;
 import java.util.BitSet;
 
 /**
+ * An IntIterableBitSet based on a BitSet
+ *
  * Created by cprudhom on 09/07/15.
  * Project: choco.
+ * @author Charles Prud'homme
  */
 public class IntIterableBitSet implements IntIterableSet {
 
@@ -49,10 +52,78 @@ public class IntIterableBitSet implements IntIterableSet {
     }
 
     @Override
-    public void add(int... values) {
-        for (int i = 0; i < values.length; i++) {
+    public int first(){
+        if(VALUES.cardinality() == 0){
+            return Integer.MIN_VALUE;
+        }
+        return VALUES.nextSetBit(0) + OFFSET;
+    }
+
+
+    @Override
+    public int last() {
+        if(VALUES.cardinality() == 0){
+            return Integer.MAX_VALUE;
+        }
+        return VALUES.previousSetBit(VALUES.size()) + OFFSET;
+    }
+
+    @Override
+    public boolean add(int e) {
+        int card = VALUES.cardinality();
+        VALUES.set(e - OFFSET);
+        return VALUES.cardinality() - card > 0;
+    }
+
+    @Override
+    public boolean addAll(int... values) {
+        int card = VALUES.cardinality();
+        for(int i = 0; i < values.length; i++){
             VALUES.set(values[i] - OFFSET);
         }
+        return VALUES.cardinality() - card > 0;
+    }
+
+    @Override
+    public boolean addAll(IntIterableSet set) {
+        int card = VALUES.cardinality();
+        int v = set.first();
+        while(v < Integer.MAX_VALUE){
+            add(v);
+            v = set.nextValue(v);
+        }
+        return VALUES.cardinality() - card > 0;
+    }
+
+    @Override
+    public boolean retainAll(IntIterableSet set) {
+        boolean modified = false;
+        for (int i = VALUES.nextSetBit(0); i >= 0; i = VALUES.nextSetBit(i + 1)) {
+            if (!set.contains(i + OFFSET)) {
+                VALUES.clear(i);
+                modified = true;
+            }
+        }
+        return modified;
+    }
+
+    @Override
+    public boolean remove(int e) {
+        int card = VALUES.cardinality();
+        VALUES.clear(e - OFFSET);
+        return VALUES.cardinality() - card > 0;
+    }
+
+    @Override
+    public boolean removeAll(IntIterableSet set) {
+        boolean modified = false;
+        for (int i = VALUES.nextSetBit(0); i >= 0; i = VALUES.nextSetBit(i + 1)) {
+            if (set.contains(i + OFFSET)) {
+                VALUES.clear(i);
+                modified = true;
+            }
+        }
+        return modified;
     }
 
     @Override

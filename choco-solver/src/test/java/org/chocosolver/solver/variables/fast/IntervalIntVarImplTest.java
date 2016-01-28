@@ -201,7 +201,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -3, 3, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-3, -1, 1, 2, 4);
+        rems.addAll(-3, -1, 1, 2, 4);
         x.removeValues(rems, Cause.Null);
         Assert.assertEquals(x.getLB(), -2);
         Assert.assertEquals(x.getUB(), 3);
@@ -213,7 +213,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -3, 3, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-3, -2);
+        rems.addAll(-3, -2);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
         Assert.assertEquals(x.getLB(), -1);
     }
@@ -235,7 +235,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -3, 3, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(1, 2, 3);
+        rems.addAll(1, 2, 3);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
         Assert.assertEquals(x.getUB(), 0);
     }
@@ -258,7 +258,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -3, 3, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-1, 0, 1);
+        rems.addAll(-1, 0, 1);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
     }
 
@@ -278,7 +278,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -1, 1, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-1);
-        rems.add(-1, 0, 1);
+        rems.addAll(-1, 0, 1);
         x.removeValues(rems, Cause.Null);
         Assert.fail();
     }
@@ -331,7 +331,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -3, 3, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-1, 1, 2, 4);
+        rems.addAll(-1, 1, 2, 4);
         x.removeAllValuesBut(rems, Cause.Null);
         Assert.assertEquals(x.getLB(), -1);
         Assert.assertEquals(x.getUB(), 2);
@@ -344,7 +344,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -3, 3, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-3, -2);
+        rems.addAll(-3, -2);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
         Assert.assertEquals(x.getLB(), -3);
         Assert.assertEquals(x.getUB(), -2);
@@ -366,7 +366,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -3, 3, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(1, 2, 3);
+        rems.addAll(1, 2, 3);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
         Assert.assertEquals(x.getLB(), 1);
         Assert.assertEquals(x.getUB(), 3);
@@ -389,7 +389,7 @@ public class IntervalIntVarImplTest {
         IntVar x = VF.bounded("X", -1, 1, solver);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
-        rems.add(-1, 0, 1);
+        rems.addAll(-1, 0, 1);
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
     }
 

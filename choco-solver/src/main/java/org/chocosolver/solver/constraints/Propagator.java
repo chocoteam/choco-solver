@@ -137,11 +137,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private Operation[] operations;
 
     /**
-     * Counter of events to be propagated by this propagator.
-     */
-    private int nbPendingEvt = 0;
-
-    /**
      * Priority of this propagator.
      * Mix between arity and compexity.
      */
@@ -437,35 +432,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
-     * informs that a new fine event has to be treated. Should not be called by the user.
-     */
-    public void incNbPendingEvt() {
-        assert (nbPendingEvt >= 0) : "number of enqued records is < 0 " + this;
-        nbPendingEvt++;
-        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
-        //    LoggerFactory.getLogger("solver").debug("[I]{}:{}", nbPendingEvt, this);
-    }
-
-    /**
-     * informs that a fine event has been treated. Should not be called by the user.
-     */
-    public void decNbPendingEvt() {
-        assert (nbPendingEvt > 0) : "number of enqued records is < 0 " + this;
-        nbPendingEvt--;
-        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
-        //    LoggerFactory.getLogger("solver").debug("[D]{}:{}", nbPendingEvt, this);
-    }
-
-    /**
-     * informs that all fine events have been treated. Should not be called by the user.
-     */
-    public void flushPendingEvt() {
-        nbPendingEvt = 0;
-        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
-        //    LoggerFactory.getLogger("solver").debug("[F]{}:{}", nbPendingEvt, this);
-    }
-
-    /**
      * @return the number of uninstantiated variables
      */
     public int arity() {
@@ -537,13 +503,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     @Override
     public int hashCode() {
         return ID;
-    }
-
-    /**
-     * @return the number of fine events which have not been treated yet
-     */
-    public int getNbPendingEvt() {
-        return nbPendingEvt;
     }
 
     /**

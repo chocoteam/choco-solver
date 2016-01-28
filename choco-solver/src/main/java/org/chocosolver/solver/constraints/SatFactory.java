@@ -33,6 +33,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.*;
+import org.chocosolver.solver.constraints.reification.PropCondis;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.util.tools.StringUtils;
@@ -465,6 +466,7 @@ public class SatFactory {
      * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &ge; TARGET
      *
      * @param BOOLVARS a list of boolean variables
+     * @param TARGET a boolean variable
      * @return true if the clause has been added to the clause store
      */
     public static boolean addSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
@@ -483,6 +485,7 @@ public class SatFactory {
      * Add a clause stating that: max(BOOLVARS<sub>i</sub>) &le; TARGET
      *
      * @param BOOLVARS a list of boolean variables
+     * @param TARGET a boolean variable
      * @return true if the clause has been added to the clause store
      */
     public static boolean addMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
@@ -499,6 +502,7 @@ public class SatFactory {
      * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &le; TARGET
      *
      * @param BOOLVARS a list of boolean variables
+     * @param TARGET a boolean variable
      * @return true if the clause has been added to the clause store
      */
     public static boolean addSumBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
@@ -522,6 +526,19 @@ public class SatFactory {
             sat.addClause(elit, SatSolver.negated(sat.Literal(BOOLVARS[i])));
         }
         sat.addClause(SatSolver.negated(elit), tlit);
+        return true;
+    }
+
+    /**
+     * Make an constructive disjunction constraint
+     *
+     * @param BOOLS an array of boolean variable
+     * @return <tt>true</tt> if the disjunction has been added to the constructive disjunction store.
+     */
+    public static boolean addConstructiveDisjunction(BoolVar... BOOLS) {
+        Solver solver = BOOLS[0].getSolver();
+        PropCondis condis = solver.getCondisStore().getPropCondis();
+        condis.addDisjunction(BOOLS);
         return true;
     }
 
