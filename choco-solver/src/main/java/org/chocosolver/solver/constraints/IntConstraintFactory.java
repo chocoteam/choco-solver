@@ -1321,6 +1321,7 @@ public class IntConstraintFactory {
      * @param COEFFS a vector of int
      * @param SCALAR a variable
      */
+    @Deprecated
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
         return scalar(VARS, COEFFS, "=", SCALAR);
     }
@@ -1458,6 +1459,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of variables
      * @param SUM  a variable
      */
+    @Deprecated
     public static Constraint sum(IntVar[] VARS, IntVar SUM) {
         return sum(VARS, "=", SUM);
     }

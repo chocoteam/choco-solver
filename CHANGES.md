@@ -17,6 +17,7 @@ like getting a solver which a solution -- or the best one (#362)
 
 - Use MDD as a table constraint (#366)
 - Can use ints in the right hand side of sum and scalar constraints instead of an IntVar
+- Deprecate constraint signatures to force specifying an operator for sum and scalar (#371)
 - add constructive disjunction (see `SatFactory`) (#367)
 
 ### Propagation:
