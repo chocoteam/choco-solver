@@ -219,6 +219,10 @@ public class MultivaluedDecisionDiagram implements Serializable {
      */
     public void addTuple(int[] TUPLE) {
         for (int i = 0; i < nbLayers; i++) {
+            // if the tuple is out of declared domain
+            if(TUPLE[i] < offsets[i] || TUPLE[i] >= offsets[i] + sizes[i]){
+                return;
+            }
             // get the position of the value relatively to the offset of each variable
             _pos[i] = TUPLE[i] - offsets[i];
         }
@@ -293,9 +297,6 @@ public class MultivaluedDecisionDiagram implements Serializable {
                     nbChild++;
                     mdd[node + i] = nodeChild[i] = detectIsomorphism(mdd[node + i], layer + 1);
             }
-        }
-        if(nbChild == -1){
-            return node;
         }
         boolean known = false;
         if (_identicalNodes[layer][nbChild] == null) {

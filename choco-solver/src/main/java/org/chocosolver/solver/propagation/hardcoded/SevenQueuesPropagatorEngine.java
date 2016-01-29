@@ -412,6 +412,10 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         System.arraycopy(_scheduled, 0, scheduled, 0, osize);
 
 
+        int[] _pendingEvt = pendingEvt;
+        pendingEvt = new int[nsize];
+        System.arraycopy(_pendingEvt, 0, pendingEvt, 0, osize);
+
         IntCircularQueue[] _eventsets = eventsets;
         eventsets = new IntCircularQueue[nsize];
         System.arraycopy(_eventsets, 0, eventsets, 0, osize);
@@ -468,25 +472,33 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             System.arraycopy(_scheduled, 0, scheduled, 0, nsize);
 
 
-            // 3. remove eventsets
+            // 3. resize scheduled
+            int ptm = pendingEvt[idtm];
+            assert pendingEvt[idtd] == 0 : "try to delete a propagator which is scheduled (fine)";
+            int[] _pendingEvt = pendingEvt;
+            pendingEvt = new int[nsize];
+            System.arraycopy(_pendingEvt, 0, pendingEvt, 0, nsize);
+
+            // 4. remove eventsets
             IntCircularQueue estm = eventsets[idtm];
             assert !toDelete.reactToFineEvent() || eventsets[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
             IntCircularQueue[] _eventsets = eventsets;
             eventsets = new IntCircularQueue[nsize];
             System.arraycopy(_eventsets, 0, eventsets, 0, nsize);
 
-            // 4. remove eventmasks
+            // 5. remove eventmasks
             int[] emtm = eventmasks[idtm];
 //            assert eventmasks[idtd]. : "try to delete a propagator which has events to propagate (fine)";
             int[][] _eventmasks = eventmasks;
             eventmasks = new int[nsize][];
             System.arraycopy(_eventmasks, 0, eventmasks, 0, nsize);
 
-            // 4. copy data
+            // 6. copy data
             if (idtd < nsize) {
                 propagators[idtd] = toMove;
                 p2i.put(toMove.getId(), idtd);
                 scheduled[idtd] = stm;
+                pendingEvt[idtd] = ptm;
                 eventsets[idtd] = estm;
                 eventmasks[idtd] = emtm;
             }

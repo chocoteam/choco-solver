@@ -70,9 +70,9 @@ public class IntIterableBitSet implements IntIterableSet {
 
     @Override
     public boolean add(int e) {
-        int card = VALUES.cardinality();
+        boolean add = !VALUES.get(e - OFFSET);
         VALUES.set(e - OFFSET);
-        return VALUES.cardinality() - card > 0;
+        return add;
     }
 
     @Override
@@ -109,9 +109,9 @@ public class IntIterableBitSet implements IntIterableSet {
 
     @Override
     public boolean remove(int e) {
-        int card = VALUES.cardinality();
+        boolean rem  = VALUES.get(e - OFFSET);
         VALUES.clear(e - OFFSET);
-        return VALUES.cardinality() - card > 0;
+        return rem;
     }
 
     @Override

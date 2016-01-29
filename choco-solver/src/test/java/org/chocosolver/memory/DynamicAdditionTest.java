@@ -130,26 +130,27 @@ public class DynamicAdditionTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 1000)
     public void test2() {
         IEnvironment environment = new EnvironmentTrailing();
         environment.buildFakeHistoryOn(new Except_0());
-        int n = 40000;
-        int m = 4000;
+        int n = 100;
+        int m = 100;
         int k = 100;
         IStateInt[] si = new IStateInt[n];
         for (int i = 0; i < n; i++) {
             si[i] = environment.makeInt(i);
-        }
-        IStateInt[] si2 = new IStateInt[m];
-        for (int i = 0; i < m; i++) {
-            si2[i] = environment.makeInt(-i);
         }
         for (int w = 0; w < k; w++) {
             environment.worldPush();
             for (int i = 0; i < n; i++) {
                 si[i].add(1);
             }
+        }
+        IStateInt[] si2 = new IStateInt[m];
+        for (int i = 0; i < m; i++) {
+            si2[i] = environment.makeInt(-i);
+            si2[i].set(100);
         }
         for (int w = 0; w < k; w++) {
             environment.worldPop();
@@ -159,13 +160,13 @@ public class DynamicAdditionTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1m")
     public void test3() {
         IEnvironment environment = new EnvironmentTrailing();
         environment.buildFakeHistoryOn(new Except_0());
-        int n = 400;
-        int m = 40;
-        int k = 10;
+        int n = 50000;
+        int m = 10000;
+        int k = 100;
         IStateInt[] si = new IStateInt[n];
         for (int i = 0; i < n; i++) {
             si[i] = environment.makeInt(i);
@@ -179,6 +180,7 @@ public class DynamicAdditionTest {
         IStateInt[] si2 = new IStateInt[m];
         for (int i = 0; i < m; i++) {
             si2[i] = environment.makeInt(-i);
+            si2[i].set(100);
         }
         for (int w = 0; w < k; w++) {
             environment.worldPop();

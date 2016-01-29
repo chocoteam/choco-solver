@@ -67,9 +67,10 @@ public class TableTest {
             tuples.add(0, 0, 0);
             tuples.add(1, 1, 1);
             tuples.add(2, 2, 2);
+            tuples.add(3, 3, 3);
 
             Solver solver = new Solver();
-            IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
+            IntVar[] vars = VF.enumeratedArray("X", 3, 1, 2, solver);
             Constraint tableConstraint = ICF.table(vars, tuples, a);
             solver.post(tableConstraint);
 

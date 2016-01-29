@@ -62,7 +62,7 @@ public class SolverTest {
 
     public static Solver knapsack() {
         Solver s = new Solver();
-        IntVar power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
+        IntVar power = VariableFactory.bounded("v_" + n, 0, 9999, s);
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
             objects[i] = VariableFactory.enumerated("v_" + i, 0, nbOmax[i], s);
@@ -71,6 +71,7 @@ public class SolverTest {
         s.post(IntConstraintFactory.scalar(objects, energies, "=", power));
         s.setObjectives(power);
         s.set(IntStrategyFactory.lexico_LB(objects));
+        Chatterbox.showShortStatistics(s);
         return s;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,6 +158,9 @@ public class SolverTest {
                     case 16:
                         conf(s, OPT, NEXT);
                         break;
+                    case 17:
+                        conf(s, NEXT);
+                        break;
                     default:
                         alive = false;
 
@@ -164,32 +168,6 @@ public class SolverTest {
             } catch (SolverException ingored) {
                 Assert.fail(MessageFormat.format("Fail on {0}", cas));
             }
-
-        }
-    }
-
-    @Test(groups = "1s")
-    public void testWrong() {
-        boolean alive = true;
-        int cas = 2;
-        while (alive) {
-            cas++;
-            Solver s = knapsack();
-            try {
-                switch (cas) {
-                    case 1:
-                        conf(s, NEXT);
-                        break;
-                    default:
-                        alive = false;
-                        throw new SolverException("to stop ^^");
-
-                }
-                Assert.fail("Fail on " + cas);
-
-            } catch (SolverException ignored) {
-            }
-
         }
     }
 

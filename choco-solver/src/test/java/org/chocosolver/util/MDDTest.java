@@ -130,9 +130,9 @@ public class MDDTest {
         tuples.add(1, -1);
         tuples.add(0, 1);
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples);
-        Assert.assertEquals(mdd.getDiagram(), new int[]{2, 5, -1, 0, -1, -1, 0, 0});
+        Assert.assertEquals(mdd.getDiagram(), new int[]{2, 2, -1, 0, -1});
         mdd = mdd.duplicate();
-        Assert.assertEquals(mdd.getDiagram(), new int[]{2, 5, -1, 0, -1, -1, 0, 0});
+        Assert.assertEquals(mdd.getDiagram(), new int[]{2, 2, -1, 0, -1});
         for (int t = 0; t < tuples.nbTuples(); t++) {
             Assert.assertTrue(mdd.exists(tuples.get(t)));
         }
