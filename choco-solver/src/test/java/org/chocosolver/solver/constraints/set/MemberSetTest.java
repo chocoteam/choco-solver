@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;

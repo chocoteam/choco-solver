@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
