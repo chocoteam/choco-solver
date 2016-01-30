@@ -81,7 +81,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test1() {
         // Z = X + Y
 //        int seed = 5;
@@ -108,7 +108,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test1a() {
         // Z = X + Y (bounded)
         for (int seed = 0; seed < 9999; seed++) {
@@ -134,7 +134,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testa() {
         // Z = max(X + Y)
         for (int seed = 0; seed < 9999; seed += 1) {
@@ -159,7 +159,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test1b() {
         // Z = |X|
         for (int seed = 0; seed < 9999; seed++) {
@@ -182,7 +182,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test1bb() {
         // Z = X + c
         for (int seed = 0; seed < 9999; seed++) {
@@ -205,7 +205,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test1bbb() {
         // Z = X * c
         for (int seed = 0; seed < 9999; seed++) {
@@ -228,7 +228,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1c() {
         // Z = -X
         for (int seed = 0; seed < 9999; seed++) {
@@ -251,7 +251,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut=60000)
     public void test1d() {
         // Z = X + Y + ...
         for (int seed = 2; seed < 9; seed += 1) {
@@ -280,7 +280,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1f() {
         // Z = MAX(X,Y)
         Solver ref = new Solver();
@@ -303,7 +303,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test2() {
         // Z = X - Y
         for (int seed = 0; seed < 9999; seed++) {
@@ -332,7 +332,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test3() {
         // Z = |X - Y|
         for (int seed = 0; seed < 9999; seed++) {
@@ -359,7 +359,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test4() {
         // Z = |X - Y| + AllDiff
         for (int seed = 0; seed < 9999; seed++) {
@@ -388,7 +388,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test5() {
         // ~all-interval series
         int k = 5;
@@ -428,7 +428,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test6() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("x", 0, 10, solver);
@@ -455,7 +455,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJL1() throws ContradictionException {
         Solver s = new Solver();
         IntVar v1 = VF.enumerated("v1", -2, 2, s);
@@ -468,7 +468,7 @@ public class ViewsTest {
         Assert.assertFalse(v1.contains(1));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJL2() {
         Solver solver = new Solver();
         SetVar v1 = VF.fixed("{0,1}", new int[]{0, 1}, solver);
@@ -479,7 +479,7 @@ public class ViewsTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJL3() {
         Solver solver = new Solver();
         solver.post(ICF.arithm(
@@ -490,7 +490,7 @@ public class ViewsTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJL4() throws ContradictionException {
         Solver s = new Solver();
         BoolVar bool = VF.bool("bool", s);
@@ -503,7 +503,7 @@ public class ViewsTest {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJG() throws ContradictionException {
         Solver s = new Solver();
         BoolVar bool = VF.bool("bool", s);
@@ -515,7 +515,7 @@ public class ViewsTest {
         Assert.assertEquals(sum.isInstantiated(), true);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJG2() throws ContradictionException {
         Solver s = new Solver();
         BoolVar bool = VF.bool("bool", s);
@@ -527,7 +527,7 @@ public class ViewsTest {
         Assert.assertEquals(sum.isInstantiated(), true);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJG3() throws ContradictionException {
         Solver s = new Solver();
         IntVar var = VF.bounded("int", 0, 2, s);
@@ -539,7 +539,7 @@ public class ViewsTest {
         Assert.assertEquals(sum.isInstantiated(), true);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJG4() throws ContradictionException {
         Solver s = new Solver();
         IntVar var = VF.bounded("int", 0, 2, s);
@@ -551,7 +551,7 @@ public class ViewsTest {
         Assert.assertEquals(sum.isInstantiated(), true);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testvanH() {
         Solver solver = new Solver();
         BoolVar x1 = VariableFactory.bool("x1", solver);

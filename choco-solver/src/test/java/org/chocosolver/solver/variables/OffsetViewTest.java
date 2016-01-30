@@ -50,7 +50,7 @@ import java.util.Random;
  */
 public class OffsetViewTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         Solver s = new Solver();
 
@@ -72,7 +72,7 @@ public class OffsetViewTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         Solver s = new Solver();
 
@@ -134,7 +134,7 @@ public class OffsetViewTest {
         return s;
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testRandom1() {
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {
@@ -153,7 +153,7 @@ public class OffsetViewTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRandom2() {
         Solver sb = bijective(1, 1999, 3);
         Solver sc = contraint(1, 1999, 3);
@@ -164,7 +164,7 @@ public class OffsetViewTest {
 
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testRandom3() {
         int N = 9999;
         for (int i = 1; i < 10; i++) {
@@ -178,7 +178,7 @@ public class OffsetViewTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testIt1() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -212,7 +212,7 @@ public class OffsetViewTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testIt2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {

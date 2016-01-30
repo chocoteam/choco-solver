@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
  */
 public class SortTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         Solver solver = new Solver();
         IntVar[] X, Y;
@@ -83,7 +83,7 @@ public class SortTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         Solver solver = new Solver();
         IntVar[] X, Y;
@@ -106,7 +106,7 @@ public class SortTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test3() {
         Solver solver = new Solver();
         IntVar[] X, Y;
@@ -129,7 +129,7 @@ public class SortTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test4() {
         Solver solver = new Solver();
         IntVar[] X, Y;

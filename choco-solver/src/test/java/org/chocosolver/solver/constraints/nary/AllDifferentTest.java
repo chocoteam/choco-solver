@@ -97,18 +97,18 @@ public class AllDifferentTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         model(true, 8, 92);
         model(false, 8, 92);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         model(true, 8, 92);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test3() {
 
         Solver s = new Solver();
@@ -148,7 +148,7 @@ public class AllDifferentTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test4() {
 
         Solver s = new Solver();
@@ -177,7 +177,7 @@ public class AllDifferentTest {
     }
 
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test6() {
         Random rand;
         for (int seed = 0; seed < 10; seed++) {
@@ -254,7 +254,7 @@ public class AllDifferentTest {
         return s;
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testXX() {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[4];
@@ -282,7 +282,7 @@ public class AllDifferentTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testXXX() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[3];
@@ -297,7 +297,7 @@ public class AllDifferentTest {
         Assert.assertEquals(ts[2].getDomainSize(), 2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testB() {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[3];
@@ -312,7 +312,7 @@ public class AllDifferentTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 23);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testE() {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[3];
@@ -327,7 +327,7 @@ public class AllDifferentTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testB1() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[32];

@@ -46,7 +46,7 @@ import java.util.BitSet;
 
 public class NValueTest {
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void testAtLeast() {
         Solver solver = new Solver();
         final IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
@@ -73,7 +73,7 @@ public class NValueTest {
         solver.findAllSolutions();
     }
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void testAtMost() {
         Solver solver = new Solver();
         final IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);

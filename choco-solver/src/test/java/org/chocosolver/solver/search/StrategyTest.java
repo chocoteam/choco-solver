@@ -63,7 +63,7 @@ import org.testng.annotations.Test;
  */
 public class StrategyTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void AssignmentTest() {
         int n = 100;
 
@@ -113,7 +113,7 @@ public class StrategyTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void AssignmentTest2() {
         int n = 100;
 
@@ -170,7 +170,7 @@ public class StrategyTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testOnce() {
         Solver solver = new Solver("OnceTest");
         IntVar x = VariableFactory.enumerated("x", 1, 2, solver);
@@ -183,7 +183,7 @@ public class StrategyTest {
         Assert.assertTrue(x.getValue() == 1);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testNoScope() {
         Solver solver = new Solver("OnceTest");
         IntVar[] x = VariableFactory.enumeratedArray("x", 5, 1, 6, solver);
@@ -195,7 +195,7 @@ public class StrategyTest {
         Assert.assertTrue(strat instanceof LastConflict);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFirstFail1() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -206,7 +206,7 @@ public class StrategyTest {
         Assert.assertEquals(v2, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testAntiFirstFail1() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -217,7 +217,7 @@ public class StrategyTest {
         Assert.assertEquals(v1, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testLargest1() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -228,7 +228,7 @@ public class StrategyTest {
         Assert.assertEquals(v1, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testSmallest1() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -239,7 +239,7 @@ public class StrategyTest {
         Assert.assertEquals(v1, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testOccurrence1() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -252,7 +252,7 @@ public class StrategyTest {
         Assert.assertEquals(v1, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testMaxRegret1() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", new int[]{1, 5}, solver);
@@ -263,7 +263,7 @@ public class StrategyTest {
         Assert.assertEquals(v1, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testInputOrder() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", new int[]{1, 5}, solver);
@@ -274,7 +274,7 @@ public class StrategyTest {
         Assert.assertEquals(v1, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testMinDelta1() {
         Solver solver = new Solver();
         SetVar v1 = VF.set("v1", 1, 5, solver);
@@ -283,7 +283,7 @@ public class StrategyTest {
         Assert.assertEquals(5.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testMaxDelta1() {
         Solver solver = new Solver();
         SetVar v1 = VF.set("v1", 1, 5, solver);
@@ -292,7 +292,7 @@ public class StrategyTest {
         Assert.assertEquals(-5.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFirstFail2() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -301,7 +301,7 @@ public class StrategyTest {
         Assert.assertEquals(5.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testAntiFirstFail2() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -310,7 +310,7 @@ public class StrategyTest {
         Assert.assertEquals(-5.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testLargest2() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -319,7 +319,7 @@ public class StrategyTest {
         Assert.assertEquals(-5.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testSmallest2() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -328,7 +328,7 @@ public class StrategyTest {
         Assert.assertEquals(1.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testOccurrence2() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", 1, 5, solver);
@@ -339,7 +339,7 @@ public class StrategyTest {
         Assert.assertEquals(-2.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testMaxRegret2() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", new int[]{1, 5}, solver);
@@ -348,7 +348,7 @@ public class StrategyTest {
         Assert.assertEquals(-4.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testMinDelta2() {
         Solver solver = new Solver();
         SetVar v1 = VF.set("v1", 1, 5, solver);
@@ -357,7 +357,7 @@ public class StrategyTest {
         Assert.assertEquals(5.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testMaxDelta2() {
         Solver solver = new Solver();
         SetVar v1 = VF.set("v1", 1, 5, solver);
@@ -366,7 +366,7 @@ public class StrategyTest {
         Assert.assertEquals(-5.0, va);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFH3321() {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
@@ -376,7 +376,7 @@ public class StrategyTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFH3322() {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
@@ -387,7 +387,7 @@ public class StrategyTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFH33232() {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
@@ -397,7 +397,7 @@ public class StrategyTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFH3324() {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);

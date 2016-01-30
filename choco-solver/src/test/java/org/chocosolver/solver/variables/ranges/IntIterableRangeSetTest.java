@@ -43,7 +43,7 @@ import java.util.Arrays;
  */
 public class IntIterableRangeSetTest {
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testrangeOf1(){
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,3,5,5,7,10};
@@ -72,7 +72,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.rangeOf(12), -4);
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testrangeOf2(){
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,2,4,4,6,7,9,13,15,15};
@@ -103,7 +103,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.rangeOf(16), -6);
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testAdd() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         Assert.assertTrue(is.add(2));
@@ -132,7 +132,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{1, 10});
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testAdd2(){
         IntIterableRangeSet sLi = new IntIterableRangeSet();
         sLi.ELEMENTS = new int[]{2,7,9,10,0,10,0,0,0,0};
@@ -146,7 +146,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(sLi.CARDINALITY, 2);
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemove() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,3,5,5,7,10};
@@ -174,7 +174,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{});
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemove2(){
         IntIterableRangeSet sLi = new IntIterableRangeSet();
         sLi.ELEMENTS = new int[]{2,2,4,4,6,6,8,15,0,0};
@@ -186,7 +186,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(sLi.CARDINALITY, 10);
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testNextValue() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,3,5,5,7,10};
@@ -209,7 +209,7 @@ public class IntIterableRangeSetTest {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testNextValue2() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,2,4,4,6,7,9,13,15,15};
@@ -222,7 +222,7 @@ public class IntIterableRangeSetTest {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testNextValue3() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,2,4,4,6,7,9,13,15,15};
@@ -232,7 +232,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.nextValue(8), 9);
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testPrevValue() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,3,5,5,7,10};
@@ -256,7 +256,7 @@ public class IntIterableRangeSetTest {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testPrevValue2() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,2,4,4,6,7,9,13,15,15};
@@ -267,7 +267,7 @@ public class IntIterableRangeSetTest {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testPrevValue3() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,2,4,4,6,7,9,13,15,15};
@@ -280,7 +280,7 @@ public class IntIterableRangeSetTest {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFirst() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,3,5,5,7,10};
@@ -289,7 +289,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.first(), 1);
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testLast() {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,3,5,5,7,10};
@@ -298,7 +298,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.last(), 10);
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testComplement(){
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1,3,5,5,7,10};

@@ -60,7 +60,7 @@ public class TimesTest extends AbstractTernaryTest {
         return IntConstraintFactory.times(vars[0], vars[1], vars[2]);
     }
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void testJL() {
 	    Solver s = new Solver();
 	    IntVar a = VF.enumerated("a", 0, 3, s);
@@ -82,7 +82,7 @@ public class TimesTest extends AbstractTernaryTest {
 		}
 	}
 
-	@Test(groups="1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void testJL2(){
 		for(int i = 1 ; i < 100001; i*=10) {
 			System.out.printf("%d\n", 465 * i);
@@ -95,7 +95,7 @@ public class TimesTest extends AbstractTernaryTest {
 		}
 	}
 
-	@Test(groups="1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void testJL3(){
 		for(int i = 1 ; i < 1000001; i*=10) {
 			System.out.printf("%d\n", 465 * i);
@@ -108,7 +108,7 @@ public class TimesTest extends AbstractTernaryTest {
 		}
 	}
 
-	@Test(groups="1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void testJL4() {
 		Solver s = new Solver();
 		IntVar i1 = VF.enumerated("i1", 0, 465, s);
@@ -117,7 +117,7 @@ public class TimesTest extends AbstractTernaryTest {
 		s.findAllSolutions();
 		Assert.assertEquals(s.getMeasures().getSolutionCount(), 466);
 	}
-	@Test(groups="1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void testJL5(){
 		Solver s = new Solver();
 		IntVar i1 = VF.bounded("i1", Integer.MIN_VALUE /10, Integer.MAX_VALUE /10, s);
@@ -127,7 +127,7 @@ public class TimesTest extends AbstractTernaryTest {
 		Assert.assertEquals(s.getMeasures().getSolutionCount(), Integer.MAX_VALUE/100000 * 2 + 1);
 	}
 
-	@Test(groups="1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void testJL6(){
 		Solver s = new Solver();
 		s.set(new Settings() {
@@ -142,7 +142,7 @@ public class TimesTest extends AbstractTernaryTest {
 		s.post(ICF.times(i1, i2, i3));
 	}
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testJL7(){
         Solver s = new Solver();
         s.set(new Settings() {

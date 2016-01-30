@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
  * Since: Choco 2.1.1
  */
 public class NotEqualX_YCTest {
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         int n = 2;
 
@@ -65,7 +65,7 @@ public class NotEqualX_YCTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         int n = 2;
 
@@ -83,7 +83,7 @@ public class NotEqualX_YCTest {
         Assert.assertEquals(sol, 6, "nb sol incorrect");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test3() {
         int n = 2;
 

@@ -45,7 +45,7 @@ import org.testng.annotations.Test;
  */
 public class ClauseChannelingTest {
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut=60000)
     public void test1E() {
         for (int i = 1; i < 200; i++) {
             for (int seed = 1; seed < 200; seed++) {
@@ -63,7 +63,7 @@ public class ClauseChannelingTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut=60000)
     public void test1B() {
         for (int i = 1; i < 200; i++) {
             for (int seed = 1; seed < 200; seed++) {
@@ -81,7 +81,7 @@ public class ClauseChannelingTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s", timeOut=10000)
     public void test2E() {
         for (int i = 1; i < 200; i++) {
             for (int seed = 0; seed < 20; seed++) {
@@ -120,7 +120,7 @@ public class ClauseChannelingTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s", timeOut=10000)
     public void test2B() {
         for (int i = 1; i < 200; i++) {
             for (int seed = 3; seed < 20; seed++) {

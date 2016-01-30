@@ -51,7 +51,7 @@ import java.util.Random;
  */
 public class BoundGlobalCardinlityTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test0() throws ContradictionException {
         Solver solver = new Solver();
 
@@ -76,7 +76,7 @@ public class BoundGlobalCardinlityTest {
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testRandom() {
         Random random = new Random();
 //        int seed= 108;{
@@ -114,7 +114,7 @@ public class BoundGlobalCardinlityTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testRandom2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {

@@ -77,7 +77,7 @@ public class SerializableTest {
         return o;
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testEmptySolver() {
         Solver solver = new Solver();
         File file = null;
@@ -95,7 +95,7 @@ public class SerializableTest {
         Assert.assertNotNull(solver);
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testEngine1() {
         IPropagationEngine eng = new TwoBucketPropagationEngine(new Solver());
         File file = null;
@@ -113,7 +113,7 @@ public class SerializableTest {
         Assert.assertNotNull(eng);
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testEngine2() {
         IPropagationEngine eng = new SevenQueuesPropagatorEngine(new Solver());
         File file = null;
@@ -131,7 +131,7 @@ public class SerializableTest {
         Assert.assertNotNull(eng);
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testIntegerVariable() {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("v", 1, 10, s);
@@ -150,7 +150,7 @@ public class SerializableTest {
         Assert.assertNotNull(var);
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testConstraint() {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("v", 1, 10, s);
@@ -170,7 +170,7 @@ public class SerializableTest {
         Assert.assertNotNull(c);
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testNQueen() {
         Solver s = new Solver();
         int n = 8;

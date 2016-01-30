@@ -79,7 +79,7 @@ public class NotMemberTest {
         return ub - lb +1 - u;
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         for (int i = 1; i < 99; i++) {
             Random r = new Random(i);
@@ -105,7 +105,7 @@ public class NotMemberTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         for (int i = 1; i < 99; i++) {
             Random r = new Random(i);
@@ -133,7 +133,7 @@ public class NotMemberTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test_alxpgr() {
         Solver s = new Solver();
         IntVar vars = VariableFactory.bounded("v", 0, 10, s);

@@ -48,7 +48,7 @@ import org.testng.annotations.Test;
  */
 public class KeysortingTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test01() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -96,7 +96,7 @@ public class KeysortingTest {
         Assert.assertEquals(Y[3][2].getValue(), 1002);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test02() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -145,7 +145,7 @@ public class KeysortingTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test03() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -193,7 +193,7 @@ public class KeysortingTest {
         Assert.assertEquals(Y[3][2].getValue(), 1004);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test04() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -223,7 +223,7 @@ public class KeysortingTest {
         Assert.assertEquals(Y[2][1].getValue(), 19);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -246,7 +246,7 @@ public class KeysortingTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -269,7 +269,7 @@ public class KeysortingTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test3() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -292,7 +292,7 @@ public class KeysortingTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test4() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -315,7 +315,7 @@ public class KeysortingTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test5() {
         Solver solver = new Solver();
         IntVar[][] X, Y;
@@ -348,7 +348,7 @@ public class KeysortingTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test6() {
         Solver solver = new Solver();
         IntVar[][] X, Y;

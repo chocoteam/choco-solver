@@ -43,7 +43,7 @@ public class Test_Bools_Sets {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testBOOL_SUM() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -53,7 +53,7 @@ public class Test_Bools_Sets {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut=60000)
     public void testSETS() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();

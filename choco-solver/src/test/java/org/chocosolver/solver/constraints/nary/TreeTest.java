@@ -43,7 +43,7 @@ import org.testng.annotations.Test;
 
 public class TreeTest {
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void test1() {
         Solver solver = new Solver();
         IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);

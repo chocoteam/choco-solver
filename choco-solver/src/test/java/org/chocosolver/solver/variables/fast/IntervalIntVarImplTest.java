@@ -58,7 +58,7 @@ public class IntervalIntVarImplTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemoveValue() throws Exception {
         setUp();
         Assert.assertFalse(var.removeValue(7, Cause.Null));
@@ -67,7 +67,7 @@ public class IntervalIntVarImplTest {
         Assert.assertFalse(var.contains(-2));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemoveInterval() throws Exception {
         setUp();
         Assert.assertFalse(var.removeInterval(7, 8, Cause.Null));
@@ -76,7 +76,7 @@ public class IntervalIntVarImplTest {
         Assert.assertFalse(var.contains(2));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testUpdateLowerBound() throws Exception {
         setUp();
         Assert.assertFalse(var.updateLowerBound(-6, Cause.Null));
@@ -86,7 +86,7 @@ public class IntervalIntVarImplTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testUpdateUpperBound() throws Exception {
         setUp();
         Assert.assertFalse(var.updateUpperBound(6, Cause.Null));
@@ -96,26 +96,26 @@ public class IntervalIntVarImplTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testGetLB() throws Exception {
 
         setUp();
         Assert.assertEquals(-2, var.getLB());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testGetUB() throws Exception {
         setUp();
         Assert.assertEquals(2, var.getUB());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testGetDomainSize() throws Exception {
         setUp();
         Assert.assertEquals(5, var.getDomainSize());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testNextValue() throws Exception {
         setUp();
         Assert.assertEquals(-2, var.nextValue(-3));
@@ -123,7 +123,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(Integer.MAX_VALUE, var.nextValue(2));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testPreviousValue() throws Exception {
         setUp();
         Assert.assertEquals(2, var.previousValue(6));
@@ -131,21 +131,21 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(Integer.MIN_VALUE, var.previousValue(-2));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testHasEnumeratedDomain() throws Exception {
 
         setUp();
         Assert.assertFalse(var.hasEnumeratedDomain());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testGetTypeAndKind() throws Exception {
         setUp();
         Assert.assertTrue((Variable.INT & var.getTypeAndKind()) != 0);
         Assert.assertTrue((Variable.VAR & var.getTypeAndKind()) != 0);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testGetValueIterator() throws Exception {
         setUp();
         DisposableValueIterator vit = var.getValueIterator(true);
@@ -177,7 +177,7 @@ public class IntervalIntVarImplTest {
         vit.dispose();
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testGetRangeIterator() throws Exception {
         setUp();
         DisposableRangeIterator rit = var.getRangeIterator(true);
@@ -195,7 +195,7 @@ public class IntervalIntVarImplTest {
         Assert.assertFalse(rit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemVals1() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -207,7 +207,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getUB(), 3);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemVals21() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -218,7 +218,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getLB(), -1);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemVals22() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -229,7 +229,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getLB(), -3);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemVals3() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -240,7 +240,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getUB(), 0);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemVals31() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -252,7 +252,7 @@ public class IntervalIntVarImplTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemVals41() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -262,7 +262,7 @@ public class IntervalIntVarImplTest {
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemVals42() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -272,7 +272,7 @@ public class IntervalIntVarImplTest {
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
     }
 
-    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut=1000, expectedExceptions = ContradictionException.class)
     public void testRemVals5() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -1, 1, solver);
@@ -283,7 +283,7 @@ public class IntervalIntVarImplTest {
         Assert.fail();
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testUpdBounds1() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -292,7 +292,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getUB(), 2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testUpdBounds2() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -301,7 +301,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getUB(), 3);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testUpdBounds3() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -310,7 +310,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getUB(), 2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testUpdBounds4() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -318,14 +318,14 @@ public class IntervalIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(0));
     }
 
-    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut=1000, expectedExceptions = ContradictionException.class)
     public void testUpdBounds5() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
         x.updateBounds(4, -2, Cause.Null);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemValsBut1() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -338,7 +338,7 @@ public class IntervalIntVarImplTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemValsBut21() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -350,7 +350,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getUB(), -2);
     }
 
-    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut=1000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut22() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -360,7 +360,7 @@ public class IntervalIntVarImplTest {
         x.removeAllValuesBut(rems, Cause.Null);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemValsBut3() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -372,7 +372,7 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.getUB(), 3);
     }
 
-    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut=1000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut31() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);
@@ -383,7 +383,7 @@ public class IntervalIntVarImplTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemValsBut41() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -1, 1, solver);
@@ -393,7 +393,7 @@ public class IntervalIntVarImplTest {
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRemValsBut42() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("X", -3, 3, solver);

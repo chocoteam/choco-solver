@@ -51,7 +51,7 @@ import org.testng.annotations.Test;
  */
 public class LimitsTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testTime() {
         Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long tl = 500;
@@ -61,7 +61,7 @@ public class LimitsTest {
         Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testThreadTime() {
         Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long tl = 500;
@@ -71,7 +71,7 @@ public class LimitsTest {
         Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testNode() {
         Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long nl = 50;
@@ -81,7 +81,7 @@ public class LimitsTest {
         Assert.assertEquals(nc, nl);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBacktrack() {
         Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long bl = 50;
@@ -91,7 +91,7 @@ public class LimitsTest {
         Assert.assertEquals(bc, bl);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFail() {
         Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long fl = 50;
@@ -101,7 +101,7 @@ public class LimitsTest {
         Assert.assertEquals(fc, fl);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testSolution() {
         Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long sl = 50;
@@ -111,7 +111,7 @@ public class LimitsTest {
         Assert.assertEquals(sc, sl);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void durationTest() {
         long d = SMF.convertInMilliseconds("0.50s");
         Assert.assertEquals(d, 500);
@@ -132,7 +132,7 @@ public class LimitsTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testGregy4() {
         Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         NodeCounter nodeCounter = new NodeCounter(solver, 100);

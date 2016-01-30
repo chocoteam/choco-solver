@@ -82,7 +82,7 @@ public class BinTableTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testFeas1() {
         setUp();
         for (String a : ALGOS) {
@@ -98,7 +98,7 @@ public class BinTableTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testInfeas1() {
         setUp();
         for (String a : ALGOS) {
@@ -122,7 +122,7 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testAbsolute() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", -10, 10, solver);
@@ -151,7 +151,7 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testArithmLT() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", -10, 10, solver);
@@ -180,7 +180,7 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testArithmNQ() {
         Solver solver = new Solver();
         IntVar v1 = VF.enumerated("v1", -10, 10, solver);
@@ -201,7 +201,7 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         for (String a : ALGOS) {
             for (int i = 0; i < 10; i++) {
@@ -221,7 +221,7 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test3() {
         for (String a : ALGOS) {
             for (int i = 0; i < 10; i++) {

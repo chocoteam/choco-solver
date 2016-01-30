@@ -54,7 +54,7 @@ import java.util.Random;
  */
 public class ClauseTest {
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut=60000)
     public void test1() {
         int nSol = 1;
         for (int n = 1; n < 16; n++) {
@@ -88,7 +88,7 @@ public class ClauseTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBothAnd() {
         Solver s = new Solver();
 
@@ -104,7 +104,7 @@ public class ClauseTest {
         Assert.assertEquals(sol, 0);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBothOr() {
         Solver s = new Solver();
 
@@ -123,7 +123,7 @@ public class ClauseTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
@@ -140,7 +140,7 @@ public class ClauseTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test30() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
@@ -157,7 +157,7 @@ public class ClauseTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test31() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
@@ -174,7 +174,7 @@ public class ClauseTest {
         Assert.assertTrue(bvars[1].isInstantiatedTo(0));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test32() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
@@ -191,7 +191,7 @@ public class ClauseTest {
         Assert.assertTrue(bvars[0].isInstantiatedTo(1));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test33() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
@@ -209,7 +209,7 @@ public class ClauseTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test4() {
         for (int seed = 0; seed < 2000; seed++) {
             long n1, n2;
@@ -239,7 +239,7 @@ public class ClauseTest {
 
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void test5() {
         Random rand = new Random();
         for (int seed = 0; seed < 20000; seed++) {
@@ -286,7 +286,7 @@ public class ClauseTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test6() throws ContradictionException {
         int n = 10;
         Solver s = new Solver();

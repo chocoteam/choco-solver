@@ -56,7 +56,7 @@ import java.util.Random;
  */
 public class PropCondisTest {
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testCD1() throws ContradictionException {
         Solver s = new Solver();
         IntVar a = VF.enumerated("A", 0, 10, s);
@@ -71,7 +71,7 @@ public class PropCondisTest {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testCD2() throws ContradictionException {
         Solver s = new Solver();
         IntVar X = VF.enumerated("X", 0, 10, s);
@@ -96,7 +96,7 @@ public class PropCondisTest {
     }
 
 
-    @Test(groups="1m")
+    @Test(groups = "1m", timeOut=60000)
     public void test3() {
         Random rnd = new Random();
         for (int n = 1; n < 20; n += 1) {
@@ -114,7 +114,7 @@ public class PropCondisTest {
         }
     }
 
-    @Test(groups="30m")
+    @Test(groups = "30m", timeOut = 1000)// TODO change test, too long
     public void test4() {
         Random rnd = new Random();
         for (int n = 1; n < 5; n += 1) {
@@ -131,7 +131,6 @@ public class PropCondisTest {
             }
         }
     }
-
 
     private Solver modelPb(int size, long seed, Random rnd, boolean cd){
         rnd.setSeed(seed);

@@ -48,7 +48,7 @@ import java.util.Random;
  */
 public class BoolNotViewTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -76,7 +76,7 @@ public class BoolNotViewTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testIt() {
         Solver ref = new Solver();
         BoolVar o = VariableFactory.bool("b", ref);
@@ -105,7 +105,7 @@ public class BoolNotViewTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testPrevNext() {
         Solver solver = new Solver();
         BoolVar a = VF.bool("a", solver);

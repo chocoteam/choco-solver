@@ -55,7 +55,7 @@ import java.util.List;
  */
 public class RegularTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testSimpleAuto() {
         Solver solver = new Solver();
 
@@ -86,7 +86,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 59049);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void ccostregular2() {
         Solver solver = new Solver();
 
@@ -128,7 +128,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 25980);
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void isCorrect() {
         Solver solver = new Solver();
 
@@ -160,7 +160,7 @@ public class RegularTest {
 
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void isCorrect2() {
         Solver solver = new Solver();
 
@@ -189,7 +189,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1594323);
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void compareVersionSpeedNew() {
         int n = 14;
         FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");
@@ -206,7 +206,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4371696);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void compareVersionSpeedNew2() {
         int n = 5;
         FiniteAutomaton auto = new FiniteAutomaton("(0|<10>|<20>)*(0|<10>)");
@@ -224,7 +224,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 162);
     }
 
-    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut=1000, expectedExceptions = SolverException.class)
     public void testNeg() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 4, -10, 10, solver);
@@ -243,7 +243,7 @@ public class RegularTest {
         Assert.assertEquals(-5, (int) solutions.get(0).getIntVal(CS[3]));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testregExp1() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
@@ -252,7 +252,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testregExp2() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
@@ -261,7 +261,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testregExp3() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
@@ -272,7 +272,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testregExp4() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
@@ -281,7 +281,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testregExp5() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 2, 0, 3, solver);
@@ -292,7 +292,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testregExp6() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 4, 0, 3, solver);
@@ -303,7 +303,7 @@ public class RegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testregExp7() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 10, 0, 2, solver);
@@ -322,7 +322,7 @@ public class RegularTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testregExp8() {
         Solver solver = new Solver();
         IntVar[] CS = VF.enumeratedArray("CS", 3, new int[]{43, 59, 117}, solver);

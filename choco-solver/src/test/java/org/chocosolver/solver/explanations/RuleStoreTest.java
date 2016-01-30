@@ -60,7 +60,7 @@ public class RuleStoreTest {
         B = VF.bool("B", solver);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testEnumFullDom() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -81,7 +81,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testEnumLow() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -110,7 +110,7 @@ public class RuleStoreTest {
         Assert.assertTrue(rs.matchDomain(rmask, E, IntEventType.REMOVE, -1, -1, -1));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testEnumUpp() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -139,7 +139,7 @@ public class RuleStoreTest {
         Assert.assertTrue(rs.matchDomain(rmask, E, IntEventType.REMOVE, 7, -1, -1));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testEnumBound() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -170,7 +170,7 @@ public class RuleStoreTest {
         Assert.assertTrue(rs.matchDomain(rmask, E, IntEventType.REMOVE, 7, -1, -1));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testEnumRem() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -209,7 +209,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBoundFullDom() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -231,7 +231,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBoundLow() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -259,7 +259,7 @@ public class RuleStoreTest {
         Assert.assertTrue(rs.matchDomain(rmask, I, IntEventType.REMOVE, -1, -1, -1));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBoundUpp() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -288,7 +288,7 @@ public class RuleStoreTest {
         Assert.assertTrue(rs.matchDomain(rmask, I, IntEventType.REMOVE, 7, -1, -1));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBoundBound() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -318,7 +318,7 @@ public class RuleStoreTest {
         Assert.assertTrue(rs.matchDomain(rmask, I, IntEventType.REMOVE, 7, -1, -1));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBoundRem() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -344,7 +344,7 @@ public class RuleStoreTest {
 
     }
 
-    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut=1000, expectedExceptions = SolverException.class)
     public void testBoundRem2() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -352,7 +352,7 @@ public class RuleStoreTest {
         rs.matchDomain(RuleStore.RM, I, IntEventType.REMOVE, 7, -1, -1);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testBoolFullDom() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);
@@ -366,7 +366,7 @@ public class RuleStoreTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testDecRefutation() {
         setUp();
         RuleStore rs = new RuleStore(solver, true, true);

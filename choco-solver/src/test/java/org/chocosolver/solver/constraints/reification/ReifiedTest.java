@@ -61,7 +61,7 @@ import static org.chocosolver.solver.constraints.IntConstraintFactory.not_member
 public class ReifiedTest {
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRandomEq() {
         for (int seed = 0; seed < 200; seed++) {
             Random r = new Random(seed);
@@ -85,7 +85,7 @@ public class ReifiedTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRandomMember() {
         Solver s = new Solver();
 
@@ -108,7 +108,7 @@ public class ReifiedTest {
         Assert.assertEquals(sol, 2, "nb sol incorrect");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testRandomNeq() {
         for (int seed = 0; seed < 200; seed++) {
             Random r = new Random(seed);
@@ -229,7 +229,7 @@ public class ReifiedTest {
      * C. Bessiere, G. Katsirelos, N. Narodytska, C.G. Quimper, T. Walsh.
      * Proceedings IJCAI'09, Pasadena CA, pages 419-424.
      */
-    @Test(groups = {"1m"})
+    @Test(groups = "1m", timeOut=60000)
     public void testAllDifferentDecomp() {
 
         for (int i = 1; i < 12; i++) {
@@ -256,7 +256,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testAllDifferentDecompSpe1() {
 
         int[][] values; //= DomainBuilder.buildFullDomains(i, 1, i, r, d, false);
@@ -277,7 +277,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testBACP() {
         Solver solver = new Solver();
         IntVar cp = VariableFactory.enumerated("cp", 1, 10, solver);
@@ -310,7 +310,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test_wellaweg1() {
         Solver s = new Solver();
 
@@ -346,7 +346,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test_wellaweg3() {
         Solver s = new Solver();
 
@@ -382,7 +382,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test_wellaweg4() {
         Solver s = new Solver();
 
@@ -419,7 +419,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test_wellaweg5() {
         Solver s = new Solver();
 
@@ -456,7 +456,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test_boussard1() {
         Solver solver = new Solver();
         BoolVar a = VariableFactory.bool("a", solver);

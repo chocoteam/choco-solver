@@ -55,7 +55,7 @@ import org.testng.annotations.Test;
  */
 public class LogicTreeTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         Solver solver = new Solver();
 
@@ -72,7 +72,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "((a or b or not(c)) and (a or b or not(d)))");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test12() {
         Solver solver = new Solver();
 
@@ -91,7 +91,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         Solver solver = new Solver();
 
@@ -107,7 +107,7 @@ public class LogicTreeTest {
         Assert.assertEquals(root.toString(), "(d or c or not(a) or b)");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test3() {
         Solver solver = new Solver();
 
@@ -121,7 +121,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test4() {
         Solver solver = new Solver();
 
@@ -138,7 +138,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test5() {
         Solver solver = new Solver();
 
@@ -155,7 +155,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test6() {
         Solver solver = new Solver();
 
@@ -169,7 +169,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "(b or not(a))");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test7() {
         Solver solver = new Solver();
 
@@ -185,7 +185,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "((a or c) and (b or c) and (b or not(a)))");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test8() {
         Solver solver = new Solver();
 
@@ -203,7 +203,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "(c or d)");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test9() {
         Solver solver = new Solver();
 
@@ -220,7 +220,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "cste -- 0 = 0");
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test10() {
 
         Solver solver = new Solver();
@@ -252,7 +252,7 @@ public class LogicTreeTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test11(){
         Solver solver = new Solver();
         BoolVar a = VF.bool("a", solver);
@@ -266,7 +266,7 @@ public class LogicTreeTest {
         Assert.assertEquals(ll.toString(), "(not(b) or not(a))");
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test13(){
         Solver solver = new Solver();
         BoolVar a = VF.bool("a", solver);
@@ -277,7 +277,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test14(){
         Solver solver = new Solver();
         BoolVar a = VF.bool("a", solver);
@@ -287,7 +287,7 @@ public class LogicTreeTest {
         Assert.assertEquals(ll.toString(), "cste -- 1 = 1");
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test15(){
         Solver solver = new Solver();
         IntVar a = VF.enumerated("a", -1, 1, solver);
@@ -313,7 +313,7 @@ public class LogicTreeTest {
         Assert.assertTrue(b2.isInstantiatedTo(0));
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test16(){
         Solver solver = new Solver();
         IntVar a = VF.enumerated("a", -1, 1, solver);
@@ -336,7 +336,7 @@ public class LogicTreeTest {
         Assert.assertTrue(a.isInstantiatedTo(0));
     }
 
-    @Test(groups="1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test17(){
         Solver solver = new Solver();
         IntVar a = VF.enumerated("a", -1, 1, solver);

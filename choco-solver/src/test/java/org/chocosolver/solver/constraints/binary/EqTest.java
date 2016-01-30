@@ -45,7 +45,7 @@ import org.testng.annotations.Test;
  */
 public class EqTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         Solver s = new Solver();
         IntVar two1 = VF.fixed(2, s);
@@ -56,7 +56,7 @@ public class EqTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test2() {
         Solver s = new Solver();
         IntVar three = VF.fixed(3, s);
@@ -66,7 +66,7 @@ public class EqTest {
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test3() {
         Solver s = new Solver();
         IntVar three = VF.fixed(3, s);

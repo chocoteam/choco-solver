@@ -60,7 +60,7 @@ public class TableTest {
     private static String[] ALGOS = {"FC", "MDD+", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+"};
     private static String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void test1() {
         for (String a : ALGOS) {
             Tuples tuples = new Tuples(true);
@@ -89,7 +89,7 @@ public class TableTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut=60000)
     public void testAllEquals() {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {10, 2, 4}, {5, 0, 20}};
         for (int p = 0; p < params.length; p++) {
@@ -121,7 +121,7 @@ public class TableTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut=60000)
     public void testAllDifferent() {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {7, 0, 7}};
 
@@ -192,14 +192,14 @@ public class TableTest {
         Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testtpetit() {
         for(String s : BIN_ALGOS) {
             test(s);
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public static void testThierry1() {
         String[] ALGOS = {"FC", "GAC2001", "GAC3rm"};
         for(String s : ALGOS){
@@ -213,7 +213,7 @@ public class TableTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testMDD1() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
@@ -225,7 +225,7 @@ public class TableTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testMDD2() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("X", 3, 0, 2, solver);
@@ -238,7 +238,7 @@ public class TableTest {
     }
 
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut=60000)
     public void testRandom() {
         int[][] params = {{3, 1, 3}, {5, 2, 9}, {5, -2, 3}, {7, 2, 4}};
         final Random rnd = new Random();
@@ -266,7 +266,7 @@ public class TableTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testTuplesTable1() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
@@ -285,7 +285,7 @@ public class TableTest {
         Assert.assertFalse(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testTuplesTable2() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
@@ -304,7 +304,7 @@ public class TableTest {
         Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testTuplesLargeTable1() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
@@ -323,7 +323,7 @@ public class TableTest {
         Assert.assertFalse(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testTuplesLargeTable2() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
@@ -342,7 +342,7 @@ public class TableTest {
         Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testTuplesVeryLargeTable1() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
@@ -361,7 +361,7 @@ public class TableTest {
         Assert.assertFalse(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testTuplesVeryLargeTable2() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
@@ -380,7 +380,7 @@ public class TableTest {
         Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testTuplesVeryLargeTableDuplicate() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
@@ -401,7 +401,7 @@ public class TableTest {
         Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testPDav() {
         for (String a : ALGOS) {
             Solver solver = new Solver();

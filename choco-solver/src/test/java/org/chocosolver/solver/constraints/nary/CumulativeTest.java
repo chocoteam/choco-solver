@@ -64,7 +64,7 @@ public class CumulativeTest {
 			}
 	}
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void test1(){
 		test(4,5,0,2,0,0);
 		test(4,5,0,2,0,1);
@@ -74,27 +74,27 @@ public class CumulativeTest {
 		test(4,5,2,2,0,1);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void test2(){
 		test(4,9,2,4,2,1);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void test3(){
 		test(32,3,0,2,3,0);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void test4(){
 		test(16,6,2,4,9,0);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups = "1s", timeOut=1000)
 	public void test5(){
 		test(32,3,2,4,1,0);
 	}
 
-	@Test(groups = "10s")
+	@Test(groups = "10s", timeOut=10000)
 	public void test6(){
 		// this tests raises an exception which is in fact due to the time limit
 		// and unlucky random heuristic (fixed by adding last conflict)
@@ -102,7 +102,7 @@ public class CumulativeTest {
 		test(32,3,2,2,3,0);
 	}
 
-	@Test(groups = "1m")
+	@Test(groups = "1m", timeOut=60000)
 	public void testMed(){
 		for(int mode:new int[]{0,1})
 			for(int n=1;n<20;n*=2){

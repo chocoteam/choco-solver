@@ -45,7 +45,7 @@ import org.testng.annotations.Test;
  */
 public class TestSolveur {
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testBinaryCliqueNeq() {
         int nbSol = 1;
         for (int kk = 2; kk <= 9; kk++) {
@@ -75,7 +75,7 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testOneAllDiff() {
         int nbSol = 1;
         for (int k = 2; k <= 9; k++) {
@@ -124,7 +124,7 @@ public class TestSolveur {
         Assert.assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
     }
 
-    @Test(groups = {"10s"})
+    @Test(groups = "10s", timeOut=10000)
     public void testCN3to8() {
         int[] nbSol = {0, 0, 0, 0, 18, 240, 4100, 78120, 1679622};
         int[] nbNod = {0, 0, 0, 1, 35, 479, 8199, 156239, 3359243};
@@ -133,12 +133,12 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups = {"10m"})
-    public void testCN9() {
+    @Test(groups = "10m", timeOut=600000)
+    public void testCN9() {//TODO too long, change test
         testCycleNeq(9, 40353600, 80707199);
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void testCycleLt() {
         for (int k = 5; k <= 12; k++) {
             int m = k - 1;
@@ -198,7 +198,7 @@ public class TestSolveur {
         Assert.assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
     }
 
-    @Test(groups = {"10s"})
+    @Test(groups = "10s", timeOut=10000)
     public void testD3to6() {
         int[] nbSol = {0, 0, 0, 0, 1, 768, 354294};
         int[] nbNod = {0, 0, 0, 0, 1, 1535, 708587};
@@ -207,7 +207,7 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups = {"30m"})
+    @Test(groups = "30m", timeOut=1000)// TODO change test, too long
     public void testD7() {
         testDecomp(7, 167772160, 335544319);
     }
@@ -238,7 +238,7 @@ public class TestSolveur {
     }
 
 
-    @Test(groups = {"10s"})
+    @Test(groups = "10s", timeOut=10000)
     public void testDO3to6() {
         int[] nbSol = {0, 0, 0, 0, 1, 768, 354294};
         int[] nbNod = {0, 0, 0, 0, 1, 1535, 708587};
@@ -247,12 +247,12 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups = {"30m"})
+    @Test(groups = "30m", timeOut=1000)// TODO change test, too long
     public void testDO7() {
         testDecompOpt(7, 167772160, 335544319);
     }
 
-    @Test(groups = {"1s"})
+    @Test(groups = "1s", timeOut=1000)
     public void fakePigeonHolesTest() {
         int n = 5;
         Solver solver = new Solver();

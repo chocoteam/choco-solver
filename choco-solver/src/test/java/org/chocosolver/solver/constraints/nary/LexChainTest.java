@@ -56,7 +56,7 @@ import java.util.Random;
 
 public class LexChainTest {
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void lexChainTest1() {
         Solver s = new Solver();
 
@@ -127,7 +127,7 @@ public class LexChainTest {
         return solver;
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testE() {
         Random random = new Random();
         for (int seed = 0; seed < 1000; seed++) {
@@ -146,7 +146,7 @@ public class LexChainTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "10s", timeOut=10000)
     public void testB() {
         Random random = new Random();
         for (int seed = 0; seed < 1000; seed++) {
@@ -165,7 +165,7 @@ public class LexChainTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testB1() {
         int n = 3, m = 2, k = 2, seed = 47;
         Solver refor = reformulate(n, m, k, seed, true);
@@ -175,7 +175,7 @@ public class LexChainTest {
         Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut=1000)
     public void testB2() {
         Solver solver = new Solver();
         IntVar[][] X = new IntVar[3][2];
