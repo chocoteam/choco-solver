@@ -164,7 +164,7 @@ public class OffsetViewTest {
 
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups = "1m", timeOut=60000)
     public void testRandom3() {
         int N = 9999;
         for (int i = 1; i < 10; i++) {

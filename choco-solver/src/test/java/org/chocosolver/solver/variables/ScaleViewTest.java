@@ -153,7 +153,7 @@ public class ScaleViewTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void testRandom2() {
         Solver sb = bijective(1, 9999, 3);
         Solver sc = contraint(1, 9999, 3);

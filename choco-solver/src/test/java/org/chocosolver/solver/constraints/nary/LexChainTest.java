@@ -127,7 +127,7 @@ public class LexChainTest {
         return solver;
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups = "1m", timeOut=60000)
     public void testE() {
         Random random = new Random();
         for (int seed = 0; seed < 1000; seed++) {
@@ -146,7 +146,7 @@ public class LexChainTest {
         }
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups = "1m", timeOut=60000)
     public void testB() {
         Random random = new Random();
         for (int seed = 0; seed < 1000; seed++) {

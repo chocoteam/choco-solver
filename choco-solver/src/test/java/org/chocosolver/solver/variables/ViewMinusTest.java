@@ -144,7 +144,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void test3() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {

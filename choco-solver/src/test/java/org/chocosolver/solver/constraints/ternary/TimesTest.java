@@ -82,7 +82,7 @@ public class TimesTest extends AbstractTernaryTest {
 		}
 	}
 
-	@Test(groups = "1s", timeOut=1000)
+	@Test(groups = "10s", timeOut=10000)
 	public void testJL2(){
 		for(int i = 1 ; i < 100001; i*=10) {
 			System.out.printf("%d\n", 465 * i);
@@ -108,7 +108,7 @@ public class TimesTest extends AbstractTernaryTest {
 		}
 	}
 
-	@Test(groups = "1s", timeOut=1000)
+	@Test(groups = "10s", timeOut=10000)
 	public void testJL4() {
 		Solver s = new Solver();
 		IntVar i1 = VF.enumerated("i1", 0, 465, s);

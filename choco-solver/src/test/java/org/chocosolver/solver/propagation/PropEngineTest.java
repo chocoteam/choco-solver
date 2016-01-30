@@ -125,7 +125,7 @@ public class PropEngineTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void test5(){
         Solver solver = ProblemMaker.makeGolombRuler(10);
         solver.set(new SevenQueuesPropagatorEngine(solver));
@@ -134,7 +134,7 @@ public class PropEngineTest {
         Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void test6(){
         Solver solver = ProblemMaker.makeGolombRuler(10);
         solver.set(new TwoBucketPropagationEngine(solver));

@@ -59,7 +59,7 @@ public class IntValuePrecedeChainTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void test1() {
         for (int i = 0; i < 200; i++) {
             long s1, s2;

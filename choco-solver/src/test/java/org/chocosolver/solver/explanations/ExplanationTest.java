@@ -58,7 +58,7 @@ public class ExplanationTest {
 
     private final ExplanationFactory[] engines = {ExplanationFactory.NONE, ExplanationFactory.CBJ, ExplanationFactory.DBT};
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups = "1m", timeOut=60000)
     public void testNosol0() {
         for (int n = 500; n < 4501; n += 500) {
             for (int e = 1; e < engines.length; e++) {
@@ -96,7 +96,7 @@ public class ExplanationTest {
         Assert.assertEquals(2, exp.nbCauses());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void testPigeons() {
         for (int n = 5; n < 9; n++) {
             for (long seed = 0; seed < 25; seed++) {

@@ -558,7 +558,7 @@ public class IntLinCombTest {
         Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "1m", timeOut=60000)
     public void testB1() {
         Solver solver = new Solver();
         solver.set(new Settings() {
