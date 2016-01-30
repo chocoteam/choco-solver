@@ -133,8 +133,8 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups = "10m", timeOut=600000)
-    public void testCN9() {//TODO too long, change test
+    @Test(groups = "1m", timeOut=60000)
+    public void testCN9() {
         testCycleNeq(9, 40353600, 80707199);
     }
 

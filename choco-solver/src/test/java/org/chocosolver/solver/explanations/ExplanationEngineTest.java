@@ -672,7 +672,7 @@ public class ExplanationEngineTest {
         Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
     }
 
-    @Test(groups = "10m", timeOut=600000)
+    @Test(groups = "10m", timeOut=1000)// TODO change test, too long
     public void testPAsmall() {
         for (int N = 32; N < 57; N += 4) {
             System.out.printf("Pa(%d)\n", N);
