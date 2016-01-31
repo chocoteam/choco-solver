@@ -164,7 +164,7 @@ public class ParetoTest {
     // MAIN
     //******************************************************************
 
-    @Test
+    @Test(groups = "1s", timeOut=1000)
     public static void main() {
         ParetoTest instance = new ParetoTest(30, "10;1;2;5", "5;3;7;4", "2;5;11;3");
         instance.createSolver();
