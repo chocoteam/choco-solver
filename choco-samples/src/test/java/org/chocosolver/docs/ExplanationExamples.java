@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
  */
 public class ExplanationExamples {
 
-    @Test
+    @Test(groups = "1s", timeOut = 1000)
     public void dummy() {
         Solver solver = new Solver();
         BoolVar[] bvars = VF.boolArray("B", 4, solver);
@@ -59,7 +59,7 @@ public class ExplanationExamples {
         solver.findAllSolutions();
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 1000)
     public void pigeon() {
         Solver solver = new Solver();
         IntVar[] pigeon = VF.enumeratedArray("p", 5, 1, 4, solver);

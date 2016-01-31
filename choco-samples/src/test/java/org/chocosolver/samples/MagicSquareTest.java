@@ -57,7 +57,7 @@ public class MagicSquareTest {
         return pb.getSolver();
     }
 
-    @Test(groups = "verylong")
+    @Test(groups = "30m", timeOut = 1000) // TODO too long, change test
     public void testAll() {
         Solver sol;
         for (int j = 3; j < 7; j++) {
@@ -77,7 +77,7 @@ public class MagicSquareTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 1000)
     public void testBug1() throws ContradictionException {
         // square0,0=3 square0,1=6 square0,2={12,13} square0,3={12,13}
         // square1,0={1,2,5,7,8,9...,15} square1,1=16 square1,2={1,2} square1,3={2,5,7,8,9,10...,15}
@@ -104,7 +104,7 @@ public class MagicSquareTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 1000)
     public void testBug2() throws ContradictionException {
         //square0,0=2 square0,1=13 square0,2=16 square0,3=3
         // square1,0={4,5,6,7,8,9...,14} square1,1={7,8,9,10,11,12...,14} square1,2={4,5,6,7,8,9...,10} square1,3={1,4,5,6,7,8...,15}

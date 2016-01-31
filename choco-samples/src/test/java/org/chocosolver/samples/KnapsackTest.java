@@ -85,7 +85,7 @@ public class KnapsackTest {
         times.add(s.getMeasures().getTimeCount());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 1000)
     public void testMain() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         ks.solveIt(ks.modelIt("k10", 10), true);

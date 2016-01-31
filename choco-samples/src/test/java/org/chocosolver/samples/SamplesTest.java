@@ -66,7 +66,7 @@ public class SamplesTest {
     };
 
 
-    @Test(groups = "verylong")
+    @Test(groups = "30m", timeOut = 1000) // TODO too long, change test
     public void testAll() {
         for (AbstractProblem pb : problems) {
             pb.execute();

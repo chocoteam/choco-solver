@@ -88,14 +88,14 @@ public class NQueenTest {
     }
 
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void testBinary() {
         Solver s = modeler(new NQueenBinary(), size);
         s.findAllSolutions();
         assertIt(s);
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void testLinBinary() {
         Solver s = modeler(new NQueenLinearBinary(), size);
         s.findAllSolutions();
@@ -103,21 +103,21 @@ public class NQueenTest {
         //s.findSolution();
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void testGlobalBinary() {
         Solver s = modeler(new NQueenBinaryGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void testGlobal() throws ContradictionException {
         Solver s = modeler(new NQueenGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void testDualBinary() {
         Solver s = modeler(new NQueenDualBinary(), size);
         s.findAllSolutions();
@@ -125,14 +125,14 @@ public class NQueenTest {
     }
 
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void testDualGlobal() {
         Solver s = modeler(new NQueenDualGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
     }
 
-    @Test(groups = "verylong")
+    @Test(groups = "30m", timeOut = 1000) // TODO too long, change test
     public void testAll1() {
         Solver sol;
         for (int j = 4; j < 23; j++) {
@@ -151,7 +151,7 @@ public class NQueenTest {
         }
     }
 
-    @Test(groups = "verylong")
+    @Test(groups = "30m", timeOut = 1000) // TODO too long, change test
     public void testAll2() {
         Solver sol;
         for (int j = 4; j < 23; j++) {
@@ -172,7 +172,7 @@ public class NQueenTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 1000)
     public void testBug1() throws ContradictionException {
 //        "a corriger!!!, ca doit etre du a prop cond des propagators";
         Solver solver = modeler(new NQueenBinaryGlobal(), 16);

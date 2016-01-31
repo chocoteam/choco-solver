@@ -58,7 +58,7 @@ public class GolombRulerTest {
         return pb.getSolver();
     }
 
-    @Test(groups = "verylong")
+    @Test(groups = "30m", timeOut = 1000) // TODO too long, change test
     public void testSmall() {
         Solver sol;
         for (int j = 0; j < 4; j++) {
@@ -77,7 +77,7 @@ public class GolombRulerTest {
         }
     }
 
-    @Test(groups = "verylong")
+    @Test(groups = "30m", timeOut = 1000) // TODO too long, change test
     public void testAll() {
         Solver sol;
         for (int j = 0; j < OPTIMAL_RULER.length; j++) {

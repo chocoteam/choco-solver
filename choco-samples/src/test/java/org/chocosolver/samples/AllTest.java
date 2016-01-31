@@ -81,7 +81,7 @@ public class AllTest {
         this.efact = e;
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void mainTest() {
         prob.readArgs(args);
         prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties

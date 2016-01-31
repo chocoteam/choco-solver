@@ -52,7 +52,7 @@ public class PartitionTest {
         return pb.getSolver();
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void test4to14() {
         int[] size = {8, 12, 16, 20, 24, 28};
         int[] sols = {1, 1, 7, 24, 296, 1443};
@@ -66,7 +66,7 @@ public class PartitionTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "1m", timeOut = 60000)
     public void test16to32() {
         int[] size = {32, 36, 40, 44, 48, 52, 56, 60, 64};
         int[] sols = {1, 1, 1, 1, 1, 1, 1, 1, 1};
