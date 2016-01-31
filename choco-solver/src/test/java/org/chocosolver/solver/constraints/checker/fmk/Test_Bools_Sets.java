@@ -54,15 +54,60 @@ public class Test_Bools_Sets {
     }
 
     @Test(groups = "1m", timeOut=60000)
-    public void testSETS() {
-        for (int i = 0; i < 10; i++) {
+    public void setUnion() {
+        for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 Correctness.checkCorrectness(Model.setUnion, n, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
+
+    @Test(groups = "1m", timeOut=60000)
+    public void setInter() {
+        for (int i = 0; i < 5; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 Correctness.checkCorrectness(Model.setInter, n, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
+
+    @Test(groups = "1m", timeOut=60000)
+    public void setDisj() {
+        for (int i = 0; i < 5; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 Correctness.checkCorrectness(Model.setDisj, n, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
+
+    @Test(groups = "1m", timeOut=60000)
+    public void setDiff() {
+        for (int i = 0; i < 5; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 Correctness.checkCorrectness(Model.setDiff, n, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
+
+    @Test(groups = "1m", timeOut=60000)
+    public void setSubSet() {
+        for (int i = 0; i < 5; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 Correctness.checkCorrectness(Model.setSubSet, n, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
+
+    @Test(groups = "1m", timeOut=60000)
+    public void setAllEq() {
+        for (int i = 0; i < 5; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 Correctness.checkCorrectness(Model.setAllEq, n, -n / 2, 2 * n, seed, null);
             }
         }

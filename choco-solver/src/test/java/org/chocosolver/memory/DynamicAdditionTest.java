@@ -162,10 +162,11 @@ public class DynamicAdditionTest {
 
     @Test(groups = "1m", timeOut=60000)
     public void test3() {
+        long time = System.currentTimeMillis();
         IEnvironment environment = new EnvironmentTrailing();
         environment.buildFakeHistoryOn(new Except_0());
         int n = 50000;
-        int m = 10000;
+        int m = 3000;
         int k = 100;
         IStateInt[] si = new IStateInt[n];
         for (int i = 0; i < n; i++) {
@@ -188,5 +189,7 @@ public class DynamicAdditionTest {
         for (int i = 0; i < m; i++) {
             Assert.assertEquals(si2[i].get(), -i);
         }
+        long duration = System.currentTimeMillis() - time;
+        Assert.assertTrue(duration>5000);
     }
 }

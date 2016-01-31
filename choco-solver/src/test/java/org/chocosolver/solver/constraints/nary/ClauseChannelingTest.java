@@ -48,7 +48,7 @@ public class ClauseChannelingTest {
     @Test(groups = "1m", timeOut=60000)
     public void test1E() {
         for (int i = 1; i < 200; i++) {
-            for (int seed = 1; seed < 200; seed++) {
+            for (int seed = 1; seed < 100; seed++) {
                 Solver solver = new Solver();
                 IntVar iv = VF.enumerated("iv", 1, i, solver);
                 BoolVar[] eqs = VF.boolArray("eq", i, solver);
@@ -65,7 +65,7 @@ public class ClauseChannelingTest {
 
     @Test(groups = "1m", timeOut=60000)
     public void test1B() {
-        for (int i = 1; i < 200; i++) {
+        for (int i = 1; i < 100; i++) {
             for (int seed = 1; seed < 200; seed++) {
                 Solver solver = new Solver();
                 IntVar iv = VF.bounded("iv", 1, i, solver);
@@ -83,7 +83,7 @@ public class ClauseChannelingTest {
 
     @Test(groups = "1m", timeOut=60000)
     public void test2E() {
-        for (int i = 1; i < 200; i++) {
+        for (int i = 1; i < 100; i++) {
             for (int seed = 0; seed < 20; seed++) {
                 Solver sr = new Solver();
                 Solver sc = new Solver();
@@ -122,7 +122,7 @@ public class ClauseChannelingTest {
 
     @Test(groups = "1m", timeOut=60000)
     public void test2B() {
-        for (int i = 1; i < 200; i++) {
+        for (int i = 1; i < 100; i++) {
             for (int seed = 3; seed < 20; seed++) {
                 Solver sr = new Solver();
                 Solver sc = new Solver();

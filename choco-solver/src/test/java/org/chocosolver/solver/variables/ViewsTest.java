@@ -228,7 +228,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void test1c() {
         // Z = -X
         for (int seed = 0; seed < 9999; seed++) {
@@ -388,7 +388,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void test5() {
         // ~all-interval series
         int k = 5;

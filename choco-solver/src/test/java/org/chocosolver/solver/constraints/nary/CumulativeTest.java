@@ -109,10 +109,7 @@ public class CumulativeTest {
 				for(int dmin = 0; dmin<5;dmin+=2){
 					for(int hmax = 0; hmax<5;hmax+=2){
 						for(int capamax = 0; capamax<10;capamax+=3){
-							for(long seed = 0; seed<10;seed++){
-//								long seed = System.currentTimeMillis();
-								test(n,capamax,dmin,hmax,seed,mode);
-							}
+							test(n,capamax,dmin,hmax,0,mode);
 						}
 					}
 				}

@@ -86,36 +86,29 @@ public class TestConsistency {
     @Test(groups = "consistency.1s", timeOut=1000)
     public void testALLDIFFERENT1() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 10; i++)
             checkConsistency(Modeler.modelAllDiffAC, 1, 0, 10, null, seed + i, "ac");
     }
 
     @Test(groups = "consistency.1s", timeOut=1000)
     public void testALLDIFFERENT2() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 10; i++)
             checkConsistency(Modeler.modelAllDiffAC, 2, 0, 2, null, seed + i, "ac");
     }
 
     @Test(groups = "consistency.1m", timeOut=60000)
     public void testALLDIFFERENT3() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 10; i++) {
             checkConsistency(Modeler.modelAllDiffAC, 5, 2, 50, null, seed + i, "ac");
+        }
     }
 
     @Test(groups = "ignored", timeOut = 60000)
     public void testALLDIFFERENT4() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelAllDiffAC, 10, 0, 100, null, seed + i, "ac");
-    }
-
-    @Test(groups = "consistency.1m", timeOut=60000)
-    public void testALLDIFFERENTGRAPHAC() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelAllDiffGraph, 5, 2, 50, null, seed + i, "ac");
+        checkConsistency(Modeler.modelAllDiffAC, 10, 0, 100, null, seed, "ac");
     }
 
     // InverseChanneling AC*******************************************************

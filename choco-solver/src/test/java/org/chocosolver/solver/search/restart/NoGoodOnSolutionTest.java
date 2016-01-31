@@ -114,7 +114,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertTrue(s.getMeasures().getSolutionCount() == MAX_NB_SOLS);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void testANG() {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver s = makeProblem();

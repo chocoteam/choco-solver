@@ -134,7 +134,7 @@ public class OffsetViewTest {
         return s;
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups = "1m", timeOut=60000)
     public void testRandom1() {
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {
@@ -153,7 +153,7 @@ public class OffsetViewTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups = "10s", timeOut=10000)
     public void testRandom2() {
         Solver sb = bijective(1, 1999, 3);
         Solver sc = contraint(1, 1999, 3);
