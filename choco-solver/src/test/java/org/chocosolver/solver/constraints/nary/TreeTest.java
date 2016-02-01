@@ -35,22 +35,43 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class TreeTest {
 
-	@Test(groups="1s", timeOut=60000)
+	@Test(groups="10s", timeOut=60000)
 	public void test1() {
-        Solver solver = new Solver();
-        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
-        IntVar NT = VF.enumerated("NT", 2, 3, solver);
-        solver.post(ICF.tree(VS, NT, 0));
-        Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
-        solver.findAllSolutions();
+        Solver s1 = model(true);
+		Solver s2 = model(false);
+		s1.findAllSolutions();
+		s2.findAllSolutions();
+		Assert.assertEquals(s1.getMeasures().getSolutionCount(),s2.getMeasures().getSolutionCount());
+		Assert.assertEquals(s1.getMeasures().getNodeCount(),s2.getMeasures().getNodeCount());
     }
+
+	private Solver model(boolean defaultCstr) {
+		Solver solver = new Solver();
+		IntVar[] VS = VF.enumeratedArray("VS", 6, -1, 6, solver);
+		IntVar NT = VF.enumerated("NT", 2, 3, solver);
+		if(defaultCstr) {
+			solver.post(ICF.tree(VS, NT, 0));
+		}else{
+			solver.post(new Constraint("tree",
+					new PropAntiArborescences(VS, 0, false),
+					new PropKLoops(VS, 0, NT)
+			));
+		}
+		solver.set(ISF.random(VS,0));
+		Chatterbox.showStatistics(solver);
+		Chatterbox.showSolutions(solver);
+		return solver;
+	}
 }
