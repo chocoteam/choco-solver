@@ -258,16 +258,20 @@ public class SolverTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testP2() {
-        // this test fails presumably because a solver stops before another finishes initialisation
-        for(int iter=0;iter<50;iter++) {
-            ParallelResolution pares = new ParallelResolution();
-            for (int i = 0; i < 10; i++) {
-                pares.addSolver(knapsack(true));
-                pares.addSolver(knapsack(false));
+        try {
+            // this test fails presumably because a solver stops before another finishes initialisation
+            for (int iter = 0; iter < 50; iter++) {
+                ParallelResolution pares = new ParallelResolution();
+                for (int i = 0; i < 10; i++) {
+                    pares.addSolver(knapsack(true));
+                    pares.addSolver(knapsack(false));
+                }
+                pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+                Chatterbox.printSolutions(pares.getFinder());
+                Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
             }
-            pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
-            Chatterbox.printSolutions(pares.getFinder());
-            Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
+        }catch (Exception e){// hack for surefire maven pluggin, which does not support all exceptions
+            Assert.assertTrue(false);
         }
     }
 
