@@ -79,9 +79,6 @@ public abstract class AbstractProblem {
 
     private boolean userInterruption = true;
 
-    public void printDescription() {
-    }
-
     public Solver getSolver() {
         return solver;
     }
@@ -122,7 +119,6 @@ public abstract class AbstractProblem {
 
     public final void execute(String... args) {
         if (this.readArgs(args)) {
-            this.printDescription();
             this.createSolver();
             this.buildModel();
             this.configureSearch();

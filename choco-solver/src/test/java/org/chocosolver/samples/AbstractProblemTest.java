@@ -55,13 +55,14 @@ public class AbstractProblemTest {
 		search = false;
 		solve = false;
 		pretty = false;
+		Solver stest = new Solver("test");
 		AbstractProblem ap = new AbstractProblem() {
 			@Override
 			public void createSolver() {
 				if(silent){
 					level = Level.SILENT;
 				}
-				solver = new Solver("test");
+				solver = stest;
 			}
 			@Override
 			public void buildModel() {
@@ -90,6 +91,13 @@ public class AbstractProblemTest {
 		};
 		ap.execute();
 		Assert.assertTrue(model && search && solve);
+		Assert.assertEquals(ap.level.level, ap.level.getLevel());
 		Assert.assertEquals(pretty, !silent);
+		Assert.assertEquals(stest,ap.getSolver());
+		Assert.assertEquals(ap.level,silent?AbstractProblem.Level.SILENT:AbstractProblem.Level.SOLUTION);
+		Assert.assertTrue(AbstractProblem.Level.SILENT.getLevel()<AbstractProblem.Level.QUIET.getLevel());
+		Assert.assertTrue(AbstractProblem.Level.QUIET.getLevel()<AbstractProblem.Level.VERBOSE.getLevel());
+		Assert.assertTrue(AbstractProblem.Level.VERBOSE.getLevel()<AbstractProblem.Level.SOLUTION.getLevel());
+		Assert.assertTrue(AbstractProblem.Level.SOLUTION.getLevel()<AbstractProblem.Level.SEARCH.getLevel());
 	}
 }
