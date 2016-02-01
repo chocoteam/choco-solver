@@ -258,15 +258,17 @@ public class SolverTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testP2() {
-        int n = 10; // number of solvers to use
-        ParallelResolution pares = new ParallelResolution();
-        for (int i = 0; i < n; i++) {
-            pares.addSolver(knapsack(true));
-            pares.addSolver(knapsack(false));
+        // this test fails presumably because a solver stops before another finishes initialisation
+        for(int iter=0;iter<50;iter++) {
+            ParallelResolution pares = new ParallelResolution();
+            for (int i = 0; i < 10; i++) {
+                pares.addSolver(knapsack(true));
+                pares.addSolver(knapsack(false));
+            }
+            pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            Chatterbox.printSolutions(pares.getFinder());
+            Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
         }
-        pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
-        Chatterbox.printSolutions(pares.getFinder());
-        Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
     }
 
     @Test(groups="1s", timeOut=60000)
