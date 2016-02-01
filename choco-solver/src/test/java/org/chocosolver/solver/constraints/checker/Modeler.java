@@ -198,26 +198,6 @@ public interface Modeler {
         }
     };
 
-    Modeler modelAllDiffGraphBc = new Modeler() {
-        @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("AllDiffGRAPH_" + n);
-            IntVar[] vars = new IntVar[n];
-            for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
-                if (map != null) map.put(domains[i], vars[i]);
-            }
-            s.post(ICF.alldifferent(vars, "AC"));
-            s.set(ISF.random_bound(vars));
-            return s;
-        }
-
-        @Override
-        public String name() {
-            return "modelAllDiffGraphBc";
-        }
-    };
-
     Modeler modelGCC = new Modeler() {
         @Override
         public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
