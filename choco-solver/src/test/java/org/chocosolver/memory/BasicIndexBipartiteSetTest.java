@@ -71,13 +71,9 @@ public class BasicIndexBipartiteSetTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBasicIndexedBipartiteSet(){
-        try{
-            testBasicIndexedBipartiteSet(Environments.TRAIL.make());
-            testBasicIndexedBipartiteSet(Environments.COPY.make());
-            testBasicIndexedBipartiteSet(Environments.DEFAULT.make());
-        }catch (Exception e){// hack for surefire maven pluggin, which does not support all exceptions
-            Assert.assertTrue(false);
-        }
+        testBasicIndexedBipartiteSet(Environments.TRAIL.make());
+        testBasicIndexedBipartiteSet(Environments.COPY.make());
+        testBasicIndexedBipartiteSet(Environments.DEFAULT.make());
     }
 
     public void testBasicIndexedBipartiteSet(IEnvironment env) {
