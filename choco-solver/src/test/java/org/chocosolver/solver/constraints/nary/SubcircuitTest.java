@@ -78,7 +78,7 @@ public class SubcircuitTest {
             vars[6].removeValue(6, Cause.Null);
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(0);
+            Assert.assertTrue(false);
         }
         solver.post(IntConstraintFactory.subcircuit(vars, 0, VariableFactory.bounded("length", 0, vars.length - 1, solver)));
         solver.findSolution();

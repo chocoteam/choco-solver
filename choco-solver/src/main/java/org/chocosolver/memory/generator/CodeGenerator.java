@@ -114,9 +114,7 @@ public class CodeGenerator {
         File input_directory = new File(args[arg_index++]);
         File output_directory = new File(args[arg_index]);
         if (!input_directory.exists()) {
-            System.err.println("Directory \"" + input_directory + "\" not found.");
-            System.exit(-1);
-            return;
+            throw new UnsupportedOperationException("Directory \"" + input_directory + "\" not found.");
         }
         if (!output_directory.exists()) {
             makeDirs(output_directory);
