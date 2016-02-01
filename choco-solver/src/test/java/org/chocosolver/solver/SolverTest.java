@@ -182,7 +182,7 @@ public class SolverTest {
         BoolVar[] bvars = solver.retrieveBoolVars();
         Assert.assertEquals(bvars, new BoolVar[]{b});
 
-        IntVar[] ivars = solver.retrieveIntVars();
+        IntVar[] ivars = solver.retrieveIntVars(false);
         Assert.assertEquals(ivars, new IntVar[]{i});
 
         SetVar[] svars = solver.retrieveSetVars();
@@ -199,8 +199,10 @@ public class SolverTest {
         Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
         IntVar i = VF.enumerated("i", 1, 3, solver);
-        IntVar[] is = solver.retrieveIntVars();
+        IntVar[] is = solver.retrieveIntVars(false);
         Assert.assertEquals(1, is.length);
+        IntVar[] is2 = solver.retrieveIntVars(true);
+        Assert.assertEquals(2, is2.length);
     }
 
     @Test(groups="1s", timeOut=60000)

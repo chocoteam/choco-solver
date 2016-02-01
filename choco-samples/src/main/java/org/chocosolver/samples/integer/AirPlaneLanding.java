@@ -193,7 +193,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void solve() {
-        IntVar[] ivars = solver.retrieveIntVars();
+        IntVar[] ivars = solver.retrieveIntVars(true);
         LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(solver, 100));
         SMF.limitTime(solver, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);

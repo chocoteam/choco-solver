@@ -97,7 +97,7 @@ public class NoGoodOnSolutionTest {
     public void testRoSNG() {
         // restarts on solutions with no goods on solutions (ok)
         Solver s = makeProblem();
-        SMF.nogoodRecordingOnSolution(s.retrieveIntVars());
+        SMF.nogoodRecordingOnSolution(s.retrieveIntVars(true));
         SLF.restartOnSolutions(s);
         s.findAllSolutions();
         System.out.println(s.getMeasures());
@@ -108,7 +108,7 @@ public class NoGoodOnSolutionTest {
     public void testA() {
         // restarts on solutions and on fails (at activity presolve only) (loop infinitely)
         Solver s = makeProblem();
-        s.set(ISF.activity(s.retrieveIntVars(), 0));
+        s.set(ISF.activity(s.retrieveIntVars(true), 0));
         s.findAllSolutions();
         System.out.println(s.getMeasures());
         Assert.assertTrue(s.getMeasures().getSolutionCount() == MAX_NB_SOLS);
@@ -118,8 +118,8 @@ public class NoGoodOnSolutionTest {
     public void testANG() {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver s = makeProblem();
-        SMF.nogoodRecordingOnSolution(s.retrieveIntVars());
-        s.set(ISF.activity(s.retrieveIntVars(), 0));
+        SMF.nogoodRecordingOnSolution(s.retrieveIntVars(true));
+        s.set(ISF.activity(s.retrieveIntVars(true), 0));
 //        Chatterbox.showDecisions(s);
         Chatterbox.showSolutions(s);
         s.findAllSolutions();
@@ -142,7 +142,7 @@ public class NoGoodOnSolutionTest {
                 solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
-        SMF.nogoodRecordingOnSolution(solver.retrieveIntVars());
+        SMF.nogoodRecordingOnSolution(solver.retrieveIntVars(true));
         solver.set(ISF.random_value(vars, 0));
 
         SLF.restartOnSolutions(solver);
@@ -166,7 +166,7 @@ public class NoGoodOnSolutionTest {
                 solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
-        SMF.nogoodRecordingOnSolution(solver.retrieveIntVars());
+        SMF.nogoodRecordingOnSolution(solver.retrieveIntVars(false));
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 0));
         SLF.restartOnSolutions(solver);

@@ -29,43 +29,28 @@
  */
 package org.chocosolver.util;
 
-/*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 17 feb. 2009
-* Since : Choco 2.0.1
-* Update : Choco 2.0.1
-*
-* Compute a unique index for object
-*/
-public class IndexFactory {
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
-    public long index = 33;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 01/02/2016
+ * Time: 14:28
+ */
+public class ESatTest {
 
-    /**
-     * Return a unique index
-     *
-     * @return an index, based on 33
-     */
-    public final long getIndex() {
-        return ++index;
-    }
+	@Test(groups="1s", timeOut=1000)
+	public void testESat(){
+		Assert.assertNotEquals(ESat.TRUE,ESat.FALSE);
+		Assert.assertNotEquals(ESat.UNDEFINED,ESat.FALSE);
+		Assert.assertNotEquals(ESat.UNDEFINED,ESat.TRUE);
 
+		Assert.assertEquals(ESat.not(ESat.TRUE),ESat.FALSE);
+		Assert.assertEquals(ESat.not(ESat.FALSE),ESat.TRUE);
+		Assert.assertEquals(ESat.not(ESat.UNDEFINED),ESat.UNDEFINED);
 
-    public static long base = System.currentTimeMillis();
-
-    /**
-     * STATIC = STRONGLY JVM DEPENDANT!!
-     * Be sure you are using the correct method!!
-     * Must not be used as hashCode!
-     * <p/>
-     * Return a unique id
-     *
-     * @return a unique id, based on current time (ms)
-     */
-    public static synchronized long getId() {
-        return ++base;
-    }
-
-
+		Assert.assertEquals(ESat.eval(false),ESat.FALSE);
+		Assert.assertEquals(ESat.eval(true),ESat.TRUE);
+	}
 }

@@ -102,10 +102,10 @@ public class CumulativeTest {
 		test(32,3,2,2,3,0);
 	}
 
-	@Test(groups="5m", timeOut=300000)
+	@Test(groups="10s", timeOut=60000)
 	public void testMed(){
 		for(int mode:new int[]{0,1})
-			for(int n=1;n<20;n*=2){
+			for(int n=1;n<15;n*=2){
 				for(int dmin = 0; dmin<5;dmin+=2){
 					for(int hmax = 0; hmax<5;hmax+=2){
 						for(int capamax = 0; capamax<10;capamax+=3){
@@ -155,7 +155,7 @@ public class CumulativeTest {
 		}
 		Constraint c = ICF.cumulative(t,h,capa,graph);
 		solver.post(c);
-		solver.set(ISF.random_bound(solver.retrieveIntVars(), seed));
+		solver.set(ISF.random_bound(solver.retrieveIntVars(false), seed));
 		solver.set(ISF.lastConflict(solver,solver.getStrategy()));
 		SMF.limitTime(solver,5000);
 		switch (mode){
@@ -171,5 +171,4 @@ public class CumulativeTest {
 			default:throw new UnsupportedOperationException();
 		}
 	}
-
 }

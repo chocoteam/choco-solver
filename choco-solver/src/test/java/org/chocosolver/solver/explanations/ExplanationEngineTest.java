@@ -149,7 +149,7 @@ public class ExplanationEngineTest {
             Solver expl = new Solver();
             model3(expl, n);
 
-            IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars());
+            IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars(false));
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {

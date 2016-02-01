@@ -136,7 +136,7 @@ public class LimitsTest {
     public void testGregy4() {
         Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         NodeCounter nodeCounter = new NodeCounter(solver, 100);
-        INeighbor rnd = LNSFactory.random(solver, solver.retrieveIntVars(), 30, 0);
+        INeighbor rnd = LNSFactory.random(solver, solver.retrieveIntVars(true), 30, 0);
         Move currentMove = solver.getSearchLoop().getMove();
         solver.getSearchLoop().setMove(new MoveLNS(currentMove, rnd, new FailCounter(solver, 100)) {
             @Override

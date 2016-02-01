@@ -96,7 +96,7 @@ public class SearchLoopTest {
     public void test1DFS() {
         Solver solver = new Solver();
         queen(solver, 8);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars()));
+        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(true)));
         Chatterbox.showSolutions(solver);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
@@ -107,7 +107,7 @@ public class SearchLoopTest {
     public void test1LDS() {
         Solver solver = new Solver();
         queen(solver, 8);
-        lds(solver, ISF.lexico_LB(solver.retrieveIntVars()), 4);
+        lds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 4);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 144);
@@ -117,7 +117,7 @@ public class SearchLoopTest {
     public void test1DDS() {
         Solver solver = new Solver();
         queen(solver, 8);
-        dds(solver, ISF.lexico_LB(solver.retrieveIntVars()), 4);
+        dds(solver, ISF.lexico_LB(solver.retrieveIntVars(true)), 4);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 70);
@@ -127,7 +127,7 @@ public class SearchLoopTest {
     public void test1HBFS() {
         Solver solver = new Solver();
         golomb(solver, 8);
-        hbfs(solver, ISF.lexico_LB(solver.retrieveIntVars()), .05, .1, 11);
+        hbfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), .05, .1, 11);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 271231);
@@ -137,7 +137,7 @@ public class SearchLoopTest {
     public void test2DFS() {
         Solver solver = new Solver();
         queen(solver, 8);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars()));
+        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(true)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 480);
@@ -147,7 +147,7 @@ public class SearchLoopTest {
     public void test2LDS() {
         Solver solver = new Solver();
         queen(solver, 8);
-        lds(solver, ISF.lexico_LB(solver.retrieveIntVars()), 4);
+        lds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 4);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 205);
@@ -157,7 +157,7 @@ public class SearchLoopTest {
     public void test2DDS() {
         Solver solver = new Solver();
         queen(solver, 8);
-        dds(solver, ISF.lexico_LB(solver.retrieveIntVars()), 5);
+        dds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 5);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 130);
@@ -176,7 +176,7 @@ public class SearchLoopTest {
     public void test3() {
         Solver solver = new Solver();
         golomb(solver, 6);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars()));
+        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
         Chatterbox.printShortStatistics(solver);
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
@@ -187,7 +187,7 @@ public class SearchLoopTest {
     public void test4() {
         Solver solver = new Solver();
         queen(solver, 8);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars()));
+        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
         restart(solver,
                 limit -> solver.getMeasures().getNodeCount() >= limit,
                 new LubyRestartStrategy(2, 2), 2);
@@ -200,8 +200,8 @@ public class SearchLoopTest {
     public void test5() {
         Solver solver = new Solver();
         golomb(solver, 5);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars()));
-        lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(), 15, 0),
+        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
+        lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(false), 15, 0),
                 new NodeCounter(solver, 10));
         SMF.limitSearch(solver, () -> solver.getMeasures().getNodeCount() >= 1000);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
@@ -213,8 +213,8 @@ public class SearchLoopTest {
     public void test6() {
         Solver solver = new Solver();
         golomb(solver, 6);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars()));
-        lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(), 15, 0),
+        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
+        lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(false), 15, 0),
                 new NodeCounter(solver, 10));
         solver.addStopCriterion(() -> solver.getMeasures().getNodeCount() >= 1000);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
