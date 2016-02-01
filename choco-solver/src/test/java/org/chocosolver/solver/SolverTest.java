@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.memory.Environments;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -60,8 +61,13 @@ public class SolverTest {
     final static int[] nbOmax = {4, 6, 17};
     final static int n = 3;
 
-    public static Solver knapsack() {
-        Solver s = new Solver();
+    public static Solver knapsack(boolean copy) {
+        Solver s;
+        if(copy){
+            s = new Solver(Environments.COPY.make(), "test");
+        }else{
+            s = new Solver();
+        }
         IntVar power = VariableFactory.bounded("v_" + n, 0, 9999, s);
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -103,11 +109,16 @@ public class SolverTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testRight() {
+        tr2(true);
+        tr2(false);
+    }
+
+    private void tr2(boolean copy){
         boolean alive = true;
         int cas = 0;
         while (alive) {
             cas++;
-            Solver s = knapsack();
+            Solver s = knapsack(copy);
             try {
                 switch (cas) {
                     case 1:
@@ -237,7 +248,8 @@ public class SolverTest {
         ParallelResolution pares = new ParallelResolution();
         int n = 4; // number of solvers to use
         for (int i = 0; i < n; i++) {
-            pares.addSolver(knapsack());
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(false));
         }
         pares.findSolution();
         Chatterbox.printSolutions(pares.getFinder());
@@ -249,7 +261,8 @@ public class SolverTest {
         int n = 10; // number of solvers to use
         ParallelResolution pares = new ParallelResolution();
         for (int i = 0; i < n; i++) {
-            pares.addSolver(knapsack());
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(false));
         }
         pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
         Chatterbox.printSolutions(pares.getFinder());

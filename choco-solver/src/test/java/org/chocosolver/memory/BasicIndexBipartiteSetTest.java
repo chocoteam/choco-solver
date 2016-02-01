@@ -54,6 +54,7 @@ package org.chocosolver.memory; /**
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
@@ -69,8 +70,13 @@ public class BasicIndexBipartiteSetTest {
 
 
     @Test(groups="1s", timeOut=60000)
-    public void test1() {
-        IEnvironment env = new EnvironmentTrailing();
+    public void testBasicIndexedBipartiteSet(){
+        testBasicIndexedBipartiteSet(Environments.TRAIL.make());
+        testBasicIndexedBipartiteSet(Environments.COPY.make());
+        testBasicIndexedBipartiteSet(Environments.DEFAULT.make());
+    }
+
+    public void testBasicIndexedBipartiteSet(IEnvironment env) {
         BasicIndexedBipartiteSet set = new BasicIndexedBipartiteSet(env, 2);
 
         int b1 = set.add();
@@ -133,6 +139,5 @@ public class BasicIndexBipartiteSetTest {
         Assert.assertTrue(set.bundle(b4));
         Assert.assertTrue(set.bundle(b5));
         Assert.assertTrue(set.bundle(b6));
-
     }
 }

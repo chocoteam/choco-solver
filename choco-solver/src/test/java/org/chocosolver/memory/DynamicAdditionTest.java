@@ -54,6 +54,7 @@ package org.chocosolver.memory; /**
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -68,7 +69,10 @@ public class DynamicAdditionTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        IEnvironment environment = new EnvironmentTrailing();
+        test1(new EnvironmentTrailing());
+        test1(new EnvironmentCopying());
+    }
+    public void test1(IEnvironment environment) {
         environment.buildFakeHistoryOn(new Except_0());
         IStateInt a = environment.makeInt(10);
         a.set(11);
@@ -127,12 +131,14 @@ public class DynamicAdditionTest {
         Assert.assertEquals(b.get(), 21);
         Assert.assertEquals(c.get(), 32);
         Assert.assertEquals(d.get(), 43);
-
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void test2() {
-        IEnvironment environment = new EnvironmentTrailing();
+    public void test2(){
+        test2(new EnvironmentTrailing());
+        test2(new EnvironmentCopying());
+    }
+    public void test2(IEnvironment environment) {
         environment.buildFakeHistoryOn(new Except_0());
         int n = 100;
         int m = 100;
@@ -162,8 +168,11 @@ public class DynamicAdditionTest {
 
     @Test(groups="5m", timeOut=300000)
     public void test3() {
+        test3(new EnvironmentTrailing());
+        test3(new EnvironmentCopying());
+    }
+    public void test3(IEnvironment environment) {
         long time = System.currentTimeMillis();
-        IEnvironment environment = new EnvironmentTrailing();
         environment.buildFakeHistoryOn(new Except_0());
         int n = 50000;
         int m = 3000;
