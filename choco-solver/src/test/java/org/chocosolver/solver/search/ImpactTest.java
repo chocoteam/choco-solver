@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
  */
 public class ImpactTest {
 
-	@Test(groups = "10s", timeOut=10000)
+	@Test(groups="10s", timeOut=60000)
 	public void testCostas() {
 		Solver s1 = costasArray(7,false);
 		Solver s2 = costasArray(7,true);

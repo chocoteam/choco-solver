@@ -116,7 +116,7 @@ public class EqualXYCExplTest {
         Assert.assertTrue(sol.getMeasures().getBackTrackCount() <= ref.getMeasures().getBackTrackCount());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         model(125, 4);
         model(125, 10);

@@ -73,21 +73,21 @@ public class CountTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testMS4() {
         Solver solver = modelit(4);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testMS8() {
         Solver solver = modelit(8);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -102,7 +102,7 @@ public class CountTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         int n = 2;
         for (int i = 0; i < 200; i++) {

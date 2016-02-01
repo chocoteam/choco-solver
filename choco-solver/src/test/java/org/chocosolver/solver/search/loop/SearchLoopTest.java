@@ -92,7 +92,7 @@ public class SearchLoopTest {
         solver.setObjectives(ticks[m - 1]);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1DFS() {
         Solver solver = new Solver();
         queen(solver, 8);
@@ -103,7 +103,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 24);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1LDS() {
         Solver solver = new Solver();
         queen(solver, 8);
@@ -113,7 +113,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 144);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1DDS() {
         Solver solver = new Solver();
         queen(solver, 8);
@@ -123,7 +123,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 70);
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void test1HBFS() {
         Solver solver = new Solver();
         golomb(solver, 8);
@@ -133,7 +133,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 271231);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2DFS() {
         Solver solver = new Solver();
         queen(solver, 8);
@@ -143,7 +143,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 480);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2LDS() {
         Solver solver = new Solver();
         queen(solver, 8);
@@ -153,7 +153,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 205);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2DDS() {
         Solver solver = new Solver();
         queen(solver, 8);
@@ -163,7 +163,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 130);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2DDS2() {
         Solver solver = new Solver();
         IntVar[] bs = VF.boolArray("b", 4, solver);
@@ -172,7 +172,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         Solver solver = new Solver();
         golomb(solver, 6);
@@ -183,7 +183,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 17);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
         queen(solver, 8);
@@ -196,7 +196,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getRestartCount(), 2);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test5() {
         Solver solver = new Solver();
         golomb(solver, 5);
@@ -209,7 +209,7 @@ public class SearchLoopTest {
         Assert.assertEquals(solver.getMeasures().getRestartCount(), 314);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test6() {
         Solver solver = new Solver();
         golomb(solver, 6);
@@ -223,7 +223,7 @@ public class SearchLoopTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test7() {
         Solver solver = new Solver();
         int n = 3;
@@ -236,7 +236,7 @@ public class SearchLoopTest {
 
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test8() {
         Solver solver = new Solver();
         int n = 3;
@@ -254,7 +254,7 @@ public class SearchLoopTest {
 
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test9() {
         Solver solver = new Solver();
         int n = 3;

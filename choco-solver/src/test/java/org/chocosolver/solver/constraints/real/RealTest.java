@@ -55,7 +55,7 @@ public class RealTest {
     }
 
 
-    @Test(groups = "ignored", timeOut = 60000)
+    @Test(groups="ignored", timeOut=60000)
     public void test1() {
 
         Ibex ibex = new Ibex();
@@ -79,7 +79,7 @@ public class RealTest {
         ibex.release();
     }
 
-    @Test(groups = "ignored", timeOut = 60000)
+    @Test(groups="ignored", timeOut=60000)
     public void test2() {
         Ibex ibex = new Ibex();
         ibex.add_contractor(2, "{0}^2+{1}^2<=1", Ibex.COMPO);
@@ -115,7 +115,7 @@ public class RealTest {
         ibex.release();
     }
 
-    @Test(groups = "ignored", timeOut = 60000)
+    @Test(groups="ignored", timeOut=60000)
     public void test3() {
         Ibex ibex = new Ibex();
         ibex.add_contractor(2, "{0}^2+{1}^2<=1", Ibex.COMPO);
@@ -141,7 +141,7 @@ public class RealTest {
         ibex.release();
     }
 
-    @Test(groups = "ignored", timeOut = 60000)
+    @Test(groups="ignored", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
 
@@ -161,7 +161,7 @@ public class RealTest {
         Assert.assertEquals(y.getValue(), 4);
     }
 
-    @Test(groups = "ignored", timeOut = 60000)
+    @Test(groups="ignored", timeOut=60000)
     public void testFreemajb1() {
         Solver solver = new Solver();
 
@@ -189,7 +189,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups = "ignored", timeOut = 60000)
+    @Test(groups="ignored", timeOut=60000)
     public void testFreemajb2() {
         Solver solver = new Solver();
 

@@ -66,12 +66,10 @@ public class SamplesTest {
     };
 
 
-    @Test(groups = "30m", timeOut = 1000) // TODO too long, change test
+    @Test(groups="5m", timeOut=300000)
     public void testAll() {
         for (AbstractProblem pb : problems) {
             pb.execute();
         }
     }
-
-
 }

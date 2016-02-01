@@ -43,7 +43,7 @@ public class Test_Bools_Sets {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void testBOOL_SUM() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -53,7 +53,7 @@ public class Test_Bools_Sets {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void setUnion() {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
@@ -63,7 +63,7 @@ public class Test_Bools_Sets {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void setInter() {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
@@ -73,7 +73,7 @@ public class Test_Bools_Sets {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void setDisj() {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
@@ -83,7 +83,7 @@ public class Test_Bools_Sets {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void setDiff() {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
@@ -93,7 +93,7 @@ public class Test_Bools_Sets {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void setSubSet() {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
@@ -103,7 +103,7 @@ public class Test_Bools_Sets {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void setAllEq() {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();

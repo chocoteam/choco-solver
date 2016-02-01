@@ -34,6 +34,7 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.testng.Assert;
@@ -47,7 +48,6 @@ import org.testng.annotations.Test;
  */
 public class MagicSquareTest {
 
-
     protected Solver modeler(int n) {
         MagicSquare pb = new MagicSquare();
         pb.readArgs("-n", Integer.toString(n));
@@ -57,10 +57,29 @@ public class MagicSquareTest {
         return pb.getSolver();
     }
 
-    @Test(groups = "30m", timeOut = 1000) // TODO too long, change test
+    @Test(groups="1s", timeOut=60000)
+    public void testImpact() {
+        Solver sol;
+        int j = 3;
+        sol = modeler(j);
+        sol.set(new ImpactBased((IntVar[])sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
+        sol.findAllSolutions();
+        long nbsol = sol.getMeasures().getSolutionCount();
+        long node = sol.getMeasures().getNodeCount();
+        for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
+            sol = modeler(j);
+            sol.set(new ImpactBased((IntVar[])sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
+            PropagationEngineFactory.values()[t].make(sol);
+            sol.findAllSolutions();
+            Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
+            Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
+        }
+    }
+
+    @Test(groups="5m", timeOut=300000)
     public void testAll() {
         Solver sol;
-        for (int j = 3; j < 7; j++) {
+        for (int j = 3; j < 5; j++) {
             sol = modeler(j);
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
@@ -72,12 +91,10 @@ public class MagicSquareTest {
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
             }
-
         }
     }
 
-
-    @Test(groups = "1s", timeOut = 1000)
+    @Test(groups="1s", timeOut=60000)
     public void testBug1() throws ContradictionException {
         // square0,0=3 square0,1=6 square0,2={12,13} square0,3={12,13}
         // square1,0={1,2,5,7,8,9...,15} square1,1=16 square1,2={1,2} square1,3={2,5,7,8,9,10...,15}
@@ -100,11 +117,10 @@ public class MagicSquareTest {
         try {
             solver.propagate();
             Assert.fail("should fail");
-        } catch (ContradictionException ignored) {
-        }
+        } catch (ContradictionException ignored) {}
     }
 
-    @Test(groups = "1s", timeOut = 1000)
+    @Test(groups="1s", timeOut=60000)
     public void testBug2() throws ContradictionException {
         //square0,0=2 square0,1=13 square0,2=16 square0,3=3
         // square1,0={4,5,6,7,8,9...,14} square1,1={7,8,9,10,11,12...,14} square1,2={4,5,6,7,8,9...,10} square1,3={1,4,5,6,7,8...,15}
@@ -129,6 +145,5 @@ public class MagicSquareTest {
         ((IntVar) vars[12+offset]).removeInterval(9, 14, Cause.Null);
         solver.propagate();
         Assert.assertTrue(((IntVar) vars[13+offset]).isInstantiatedTo(1));
-
     }
 }

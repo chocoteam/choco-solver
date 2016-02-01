@@ -77,12 +77,12 @@ public class SimpleExplanationTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         test(true);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         test(false);
     }

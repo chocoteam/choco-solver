@@ -122,7 +122,7 @@ public class LNSTest {
     }
 
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void
     test1() {
         // opt: 8372

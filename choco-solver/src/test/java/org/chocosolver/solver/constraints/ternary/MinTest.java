@@ -57,7 +57,7 @@ public class MinTest extends AbstractTernaryTest {
         return IntConstraintFactory.minimum(vars[0], vars[1], vars[2]);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[4];

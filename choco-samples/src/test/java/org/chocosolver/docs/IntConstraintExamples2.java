@@ -48,7 +48,7 @@ import org.testng.annotations.Test;
  */
 public class IntConstraintExamples2 {
 
-    @Test(groups = "1s", timeOut = 1000)
+    @Test(groups="1s", timeOut=60000)
     public void mddc() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("X", 2, -2, 2, solver);
@@ -61,7 +61,7 @@ public class IntConstraintExamples2 {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s", timeOut = 1000)
+    @Test(groups="1s", timeOut=60000)
     public void clause_channeling() {
         Solver solver = new Solver();
         IntVar iv = VF.enumerated("iv", 1, 3, solver);
@@ -72,7 +72,7 @@ public class IntConstraintExamples2 {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s", timeOut = 1000)
+    @Test(groups="1s", timeOut=60000)
     public void int_value_precede_chain() {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 3, 1, 3, solver);
@@ -81,7 +81,7 @@ public class IntConstraintExamples2 {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s", timeOut = 1000)
+    @Test(groups="1s", timeOut=60000)
     public void int_value_precede_chain2() {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 3, 1, 3, solver);

@@ -56,7 +56,7 @@ public class HamiltonianPathTest {
 
 	private final static long TIME_LIMIT = 1000;
 
-	@Test(groups = "1m", timeOut = 60000)
+	@Test(groups="5m", timeOut=300000)
 	public static void test() {
 		int[] sizes = new int[]{20, 40};
 		long s;

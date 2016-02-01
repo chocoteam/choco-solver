@@ -58,7 +58,7 @@ public class DivTest extends AbstractTernaryTest {
         return IntConstraintFactory.eucl_div(vars[0], vars[1], vars[2]);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL() {
         Solver solver = new Solver();
         IntVar i = VF.enumerated("i", 0, 2, solver);
@@ -67,7 +67,7 @@ public class DivTest extends AbstractTernaryTest {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void testJL2() {
         for (int i = 0; i < 100000; i++) {
             final Solver s = new Solver();

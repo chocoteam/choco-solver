@@ -66,7 +66,7 @@ import org.testng.annotations.Test;
  */
 public class DynamicAdditionTest {
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         IEnvironment environment = new EnvironmentTrailing();
         environment.buildFakeHistoryOn(new Except_0());
@@ -130,7 +130,7 @@ public class DynamicAdditionTest {
 
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         IEnvironment environment = new EnvironmentTrailing();
         environment.buildFakeHistoryOn(new Except_0());
@@ -160,7 +160,7 @@ public class DynamicAdditionTest {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void test3() {
         long time = System.currentTimeMillis();
         IEnvironment environment = new EnvironmentTrailing();

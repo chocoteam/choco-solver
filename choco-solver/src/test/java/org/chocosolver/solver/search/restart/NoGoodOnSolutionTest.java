@@ -74,7 +74,7 @@ public class NoGoodOnSolutionTest {
         return s;
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testNormal() {
         // no restarts (ok)
         Solver s = makeProblem();
@@ -83,7 +83,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertTrue(s.getMeasures().getSolutionCount() == NB_SOLS);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testRoS() {
         // restarts on solutions (infinite loop)
         Solver s = makeProblem();
@@ -93,7 +93,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertTrue(s.getMeasures().getSolutionCount() == MAX_NB_SOLS);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testRoSNG() {
         // restarts on solutions with no goods on solutions (ok)
         Solver s = makeProblem();
@@ -104,7 +104,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertTrue(s.getMeasures().getSolutionCount() == NB_SOLS);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testA() {
         // restarts on solutions and on fails (at activity presolve only) (loop infinitely)
         Solver s = makeProblem();
@@ -114,7 +114,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertTrue(s.getMeasures().getSolutionCount() == MAX_NB_SOLS);
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void testANG() {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver s = makeProblem();
@@ -127,7 +127,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), NB_SOLS);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testNQ() {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
@@ -151,7 +151,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testNQ2() {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
@@ -175,7 +175,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testNQ3() { //issue 327
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
@@ -198,7 +198,7 @@ public class NoGoodOnSolutionTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testNQ4() { //issue 327
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();

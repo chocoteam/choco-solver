@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
  */
 public class ConstraintTest {
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testBooleanChannelingJL() {
         //#issue 190
         Solver solver = new Solver();
@@ -59,7 +59,7 @@ public class ConstraintTest {
         Assert.assertEquals(2040, solver.getMeasures().getSolutionCount());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions() {
         Solver solver = new Solver();
         IntVar[] ivs = VF.enumeratedArray("X", 4, 0, 10, solver);
@@ -74,7 +74,7 @@ public class ConstraintTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 100);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions2() {
         Solver solver = new Solver();
         IntVar[] ivs = VF.enumeratedArray("X", 4, 0, 10, solver);

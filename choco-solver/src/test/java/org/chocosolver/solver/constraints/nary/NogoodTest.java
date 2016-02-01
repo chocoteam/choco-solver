@@ -48,7 +48,7 @@ import org.testng.annotations.Test;
  */
 public class NogoodTest {
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 2, solver);
@@ -63,7 +63,7 @@ public class NogoodTest {
         Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 51);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         final Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 3, solver);

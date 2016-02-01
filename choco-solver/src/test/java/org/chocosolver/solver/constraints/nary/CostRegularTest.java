@@ -53,7 +53,7 @@ import java.util.List;
  */
 public class CostRegularTest {
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testSimpleAuto() {
         Solver solver = new Solver();
 
@@ -90,7 +90,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9280);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testSimpleAutoCostAutomaton() {
         Solver solver = new Solver();
 
@@ -131,7 +131,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9280);
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void ccostregular2() {
         Solver solver = new Solver();
 
@@ -180,7 +180,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 229376);
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void ccostregular2WithCostAutomaton() {
         Solver solver = new Solver();
 
@@ -232,7 +232,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 229376);
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void isCorrect() {
         Solver solver = new Solver();
 
@@ -274,7 +274,7 @@ public class CostRegularTest {
 
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void isCorrectWithCostAutomaton() {
         Solver solver = new Solver();
 
@@ -317,7 +317,7 @@ public class CostRegularTest {
 //        assertEquals(124927, s.getNodeCount());
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void isCorrect2() {
         Solver solver = new Solver();
 
@@ -354,7 +354,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 149456);
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void isCorrect2WithCostAutomaton() {
 
         Solver solver = new Solver();
@@ -394,7 +394,7 @@ public class CostRegularTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 149456);
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void compareVersionSpeedNew() {
         int n = 14;
         FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");

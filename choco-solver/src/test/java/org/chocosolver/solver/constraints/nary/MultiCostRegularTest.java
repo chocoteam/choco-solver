@@ -105,7 +105,7 @@ public class MultiCostRegularTest {
     }
 
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void test1() {
         long seed = 0;
         for (int i = 0; i < 2000; i++) {
@@ -115,7 +115,7 @@ public class MultiCostRegularTest {
         }
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void test2() {
         long seed = 0;
         for (int i = 0; i < 2000; i++) {
@@ -125,7 +125,7 @@ public class MultiCostRegularTest {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void test3() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
@@ -135,7 +135,7 @@ public class MultiCostRegularTest {
         }
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void test4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {

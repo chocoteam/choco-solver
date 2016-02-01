@@ -68,7 +68,7 @@ import org.testng.annotations.Test;
 public class BasicIndexBipartiteSetTest {
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         IEnvironment env = new EnvironmentTrailing();
         BasicIndexedBipartiteSet set = new BasicIndexedBipartiteSet(env, 2);

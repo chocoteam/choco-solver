@@ -96,7 +96,7 @@ public class PertTest {
         return IntConstraintFactory.arithm(VariableFactory.offset(x, duration), "<", y);
     }
 
-    @Test(groups = "1s", timeOut = 1000)
+    @Test(groups="1s", timeOut=60000)
     public void testAll() {
         Solver sol;
         sol = modeler();

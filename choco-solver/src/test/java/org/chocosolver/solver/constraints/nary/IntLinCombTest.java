@@ -109,22 +109,22 @@ public class IntLinCombTest {
         s.findAllSolutions();
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testEq() {
         testOp(2, 0, 5, 5, 29091982, Operator.EQ);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testGeq() {
         testOp(2, 0, 5, 5, 29091981, Operator.GE);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testLeq() {
         testOp(2, 0, 5, 5, 29091981, Operator.LE);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testNeq() {
         testOp(2, 0, 5, 5, 29091981, Operator.NQ);
     }
@@ -178,7 +178,7 @@ public class IntLinCombTest {
         return solver;
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testSumvsIntLinCombTest() {
         Random rand = new Random();
         for (int seed = 0; seed < 400; seed++) {
@@ -204,7 +204,7 @@ public class IntLinCombTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testUSum1() {
         Solver sumleq = sum(new int[][]{{-2, 3}}, new int[]{-2}, -6, -1);
         sumleq.findAllSolutions();
@@ -215,7 +215,7 @@ public class IntLinCombTest {
      * When an opposite var is declared, the lower (resp. upper) bound modification
      * should be transposed in upper (resp. lower) bound event...
      */
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testUSum2() throws ContradictionException {
         Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
         PropagationEngineFactory.DEFAULT.make(sum);
@@ -229,7 +229,7 @@ public class IntLinCombTest {
         Assert.assertTrue(vars[2].isInstantiated());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testIss237_1() {
         Solver solver = new Solver();
         BoolVar[] bs = VF.boolArray("b", 3, solver);
@@ -238,7 +238,7 @@ public class IntLinCombTest {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testS1_coeff_null() {
         Solver solver = new Solver();
         solver.set(new Settings() {
@@ -257,7 +257,7 @@ public class IntLinCombTest {
         Assert.assertEquals(3, p.getNbVars());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testS2_coeff_null() {
         Solver solver = new Solver();
         solver.set(new Settings() {
@@ -277,7 +277,7 @@ public class IntLinCombTest {
         Assert.assertEquals(3, p.getNbVars());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD1() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 5, solver);
@@ -289,7 +289,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSum);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD2() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.boolArray("V", 4, solver);
@@ -300,7 +300,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSumBool);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD3() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.boolArray("V", 4, solver);
@@ -311,7 +311,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSumBool);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD4() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.boolArray("V", 4, solver);
@@ -322,7 +322,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSumBool);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD5() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.boolArray("V", 4, solver);
@@ -333,7 +333,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSumBool);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD6() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
@@ -345,7 +345,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSumBool);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD7() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
@@ -357,7 +357,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSum);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD8() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
@@ -369,7 +369,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSum);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD9() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 4, 0, 1, solver);
@@ -381,7 +381,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropSumBool);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD10() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
@@ -390,7 +390,7 @@ public class IntLinCombTest {
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD11() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
@@ -399,7 +399,7 @@ public class IntLinCombTest {
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD12() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
@@ -408,7 +408,7 @@ public class IntLinCombTest {
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD13() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 2, 0, 2, solver);
@@ -417,7 +417,7 @@ public class IntLinCombTest {
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD14() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
@@ -426,7 +426,7 @@ public class IntLinCombTest {
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD15() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
@@ -435,7 +435,7 @@ public class IntLinCombTest {
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD16() {
         Solver solver = new Solver();
         IntVar[] ivars = VF.enumeratedArray("V", 1, 0, 2, solver);
@@ -446,7 +446,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropTrue);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testD20() {
         Solver solver = new Solver();
         solver.set(new Settings() {
@@ -464,7 +464,7 @@ public class IntLinCombTest {
         Assert.assertTrue(p instanceof PropScalar);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testExt1() {
         Solver s1 = new Solver();
         s1.set(new Settings() {
@@ -494,7 +494,7 @@ public class IntLinCombTest {
         Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testExt2() {
         Solver s1 = new Solver();
         s1.set(new Settings() {
@@ -524,7 +524,7 @@ public class IntLinCombTest {
         Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testExt3() {
         Solver s1 = new Solver();
         s1.set(new Settings() {
@@ -558,7 +558,7 @@ public class IntLinCombTest {
         Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
-    @Test(groups = "1m", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testB1() {
         Solver solver = new Solver();
         solver.set(new Settings() {
@@ -581,7 +581,7 @@ public class IntLinCombTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testB2() throws ContradictionException {
         Solver solver = new Solver();
         int n = 3;
@@ -597,7 +597,7 @@ public class IntLinCombTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testB3() {
         Solver solver = new Solver();
         solver.post(ICF.scalar(new IntVar[]{VF.fixed(1, solver), VF.fixed(3, solver)}, new int[]{1, -1}, "!=", 0));
@@ -608,7 +608,7 @@ public class IntLinCombTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testB4() {
         Solver solver = new Solver();
         IntVar[] X = VF.enumeratedArray("X", 1, 1, 3, solver);
@@ -618,7 +618,7 @@ public class IntLinCombTest {
 
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testB5() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[3];
@@ -635,7 +635,7 @@ public class IntLinCombTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testB6() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[2];
@@ -649,7 +649,7 @@ public class IntLinCombTest {
         Assert.assertEquals(X[1].getUB(), 2);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testB61() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[2];
@@ -663,7 +663,7 @@ public class IntLinCombTest {
         Assert.assertEquals(X[1].getUB(), 2);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testB7() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[2];
@@ -677,7 +677,7 @@ public class IntLinCombTest {
         Assert.assertEquals(X[1].getUB(), 5);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testB71() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[2];
@@ -691,35 +691,35 @@ public class IntLinCombTest {
         Assert.assertEquals(X[1].getUB(), 3);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL1(){
         Solver solver = new Solver();
         solver.post(ICF.sum(new IntVar[]{VF.fixed(3, solver), VF.fixed(-4, solver)}, "<", 0));
         Assert.assertTrue(solver.findSolution());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL2(){
         Solver solver = new Solver();
         solver.post(ICF.sum(new IntVar[]{VF.fixed(3, solver), VF.fixed(-4, solver)}, "<=", 0));
         Assert.assertTrue(solver.findSolution());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL3(){
         Solver solver = new Solver();
         solver.post(ICF.sum(new IntVar[]{VF.fixed(-3, solver), VF.fixed(4, solver)}, ">", 0));
         Assert.assertTrue(solver.findSolution());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL4(){
         Solver solver = new Solver();
         solver.post(ICF.sum(new IntVar[]{VF.fixed(-3, solver), VF.fixed(4, solver)}, ">=", 0));
         Assert.assertTrue(solver.findSolution());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJG1(){
         Solver solver = new Solver("TestChoco 3.3.2 Briot");
         IntVar[] var  = VF.enumeratedArray("var", 3, new int[] {30,60}, solver);
@@ -730,7 +730,7 @@ public class IntLinCombTest {
         solver.findSolution();
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJG2(){
         Solver solver = new Solver("TestChoco 3.3.2 Briot");
         IntVar[] var  = VF.enumeratedArray("var", 3, new int[] {30,60}, solver);

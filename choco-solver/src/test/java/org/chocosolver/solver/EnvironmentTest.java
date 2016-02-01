@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
 
 public class EnvironmentTest {
 
-	@Test(groups = "10s", timeOut=10000)
+	@Test(groups="10s", timeOut=60000)
 	public void testSize(){
 		int n = 14;
 		IntVar[] vars, vectors;

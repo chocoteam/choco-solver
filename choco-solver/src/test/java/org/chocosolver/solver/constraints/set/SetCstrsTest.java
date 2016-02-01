@@ -48,7 +48,7 @@ import org.testng.annotations.Test;
  */
 public class SetCstrsTest {
 
-	@Test(groups = "1s", timeOut=1000)
+	@Test(groups="1s", timeOut=60000)
 	public static void testEq() {
 		IntVar[] v1 = eqFilter("offset");
 		IntVar[] v2 = eqFilter("all_equal");

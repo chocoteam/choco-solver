@@ -71,7 +71,7 @@ public class CycleLtTest {
     }
 
 
-    @Test(groups = "1s", timeOut = 1000)
+    @Test(groups="1s", timeOut=60000)
     public void testAll() {
         StringBuilder st = new StringBuilder("\nCycle LT \n");
 

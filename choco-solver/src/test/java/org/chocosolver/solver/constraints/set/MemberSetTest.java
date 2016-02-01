@@ -76,7 +76,7 @@ public class MemberSetTest {
         return count * comb;
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL253_enum() throws NoSuchFieldException, ContradictionException, IllegalAccessException {
         // Issue #253
         Random random = new Random();
@@ -98,7 +98,7 @@ public class MemberSetTest {
         }
     }
 
-    @Test(groups = "10s", timeOut=10000)
+    @Test(groups="10s", timeOut=60000)
     public void testJL253_bound() throws NoSuchFieldException, ContradictionException, IllegalAccessException {
         // Issue #253
         Random random = new Random();

@@ -51,7 +51,7 @@ import org.testng.annotations.Test;
  */
 public class SatTest {
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver();
         BoolVar b1, b2;
@@ -62,7 +62,7 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
         BoolVar b1, b2;
@@ -73,7 +73,7 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         Solver solver = new Solver();
         BoolVar b1, b2;
@@ -85,7 +85,7 @@ public class SatTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
@@ -97,7 +97,7 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test5() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
@@ -109,7 +109,7 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test6() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
@@ -121,7 +121,7 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test7() {
         Solver solver = new Solver();
         BoolVar b1, b2;
@@ -132,7 +132,7 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test8() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
@@ -145,7 +145,7 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test9() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
@@ -159,7 +159,7 @@ public class SatTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test10() {
         Solver solver = new Solver();
         BoolVar b1;
@@ -171,7 +171,7 @@ public class SatTest {
         Assert.assertEquals(b1.getBooleanValue(), ESat.TRUE);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test11() {
         Solver solver = new Solver();
         BoolVar b1;
@@ -183,7 +183,7 @@ public class SatTest {
         Assert.assertEquals(b1.getBooleanValue(), ESat.FALSE);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test12() {
         Solver solver = new Solver();
         BoolVar[] bs = VF.boolArray("b", 3, solver);
@@ -196,7 +196,7 @@ public class SatTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testAlexLoboda() throws ContradictionException {
         Solver solver = new Solver();
         // VARS

@@ -84,7 +84,7 @@ public class ELNSTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         small(8);
     }

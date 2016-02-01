@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
  */
 public class DeltaTest {
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testAdd() {
         Solver sol = new Solver();
         EnumDelta d = new EnumDelta(sol.getEnvironment());
@@ -64,7 +64,7 @@ public class DeltaTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testEq() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("X", 1, 6, solver);
@@ -82,7 +82,7 @@ public class DeltaTest {
 
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL() {
         Solver solver = new Solver();
         final SetVar s0 = VF.set("s0", 0, 1, solver);
@@ -99,7 +99,7 @@ public class DeltaTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL2() {
         for (int k = 0; k < 50; k++) {
             Solver s = new Solver();
@@ -113,7 +113,7 @@ public class DeltaTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL3() {
         for (int k = 0; k < 10; k++) {
             Solver s = new Solver();
@@ -127,7 +127,7 @@ public class DeltaTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testJL4() {
         for (int k = 0; k < 10; k++) {
             Solver s = new Solver();

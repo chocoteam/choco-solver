@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
 
 public class SubcircuitTest {
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public static void test1() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.boundedArray("x", 10, 0, 20, solver);
@@ -56,7 +56,7 @@ public class SubcircuitTest {
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public static void test2() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.boundedArray("x", 5, 0, 4, solver);
@@ -67,7 +67,7 @@ public class SubcircuitTest {
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public static void test3() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.enumeratedArray("x", 5, 0, 4, solver);
@@ -85,7 +85,7 @@ public class SubcircuitTest {
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 0);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public static void test4() {
         Solver solver = new Solver();
         int n = 6;

@@ -52,7 +52,7 @@ import org.testng.annotations.Test;
 public class LexTest {
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testLessLexq() {
         for (int seed = 0; seed < 5; seed++) {
             Solver solver = new Solver();
@@ -72,7 +72,7 @@ public class LexTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testLex() {
         for (int seed = 0; seed < 5; seed++) {
             Solver solver = new Solver();
@@ -92,7 +92,7 @@ public class LexTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testLexiSatisfied() {
         Solver solver = new Solver();
         IntVar v1 = VariableFactory.bounded("v1", 1, 1, solver);
@@ -114,7 +114,7 @@ public class LexTest {
     }
 
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testAshish() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -139,7 +139,7 @@ public class LexTest {
         Assert.assertEquals(6, solver.getMeasures().getSolutionCount());
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testBug1() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -164,7 +164,7 @@ public class LexTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testBug2() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -188,7 +188,7 @@ public class LexTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testBug3() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -210,7 +210,7 @@ public class LexTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testBug4() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[5];
@@ -238,7 +238,7 @@ public class LexTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 216);
     }
 
-    @Test(groups = "1s", timeOut=1000)
+    @Test(groups="1s", timeOut=60000)
     public void testBug5() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[3];
