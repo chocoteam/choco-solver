@@ -39,7 +39,7 @@ public class PopTest {
         try {
             Environments.TRAIL.make().worldPop();
             Assert.fail("poping above 0 is forbidden");
-        }catch (Exception e){}
+        }catch (AssertionError e){}
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -47,7 +47,7 @@ public class PopTest {
         try {
             Environments.COPY.make().worldPop();
             Assert.fail("poping above 0 is forbidden");
-        }catch (Exception e){}
+        }catch (AssertionError e){}
     }
 
     @Test(groups="1s", timeOut=60000)
