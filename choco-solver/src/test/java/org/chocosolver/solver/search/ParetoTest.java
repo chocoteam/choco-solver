@@ -45,120 +45,7 @@ import org.testng.annotations.Test;
  */
 public class ParetoTest {
 
-    //******************************************************************
-    // CP VARIABLES
-    //******************************************************************
-
-    // --- CP Solver
-    private Solver s;
-
-    // --- Decision variables
-    private IntVar[] occurrences;
-
-    // --- Cumulated profit_1 of selected items
-    private IntVar totalProfit_1;
-
-    // --- Cumulated profit_2 of selected items
-    private IntVar totalProfit_2;
-
-    // --- Cumulated weight of selected items
-    private IntVar totalWeight;
-
-    //******************************************************************
-    // DATA
-    //******************************************************************
-
-    // --- Capacity of the knapsack
-    private final int capacity;
-
-    // --- Maximal profit_1 of the knapsack
-    private int maxProfit_1;
-
-    // --- Maximal profit_2 of the knapsack
-    private int maxProfit_2;
-
-    // --- Number of items in each category
-    private final int[] nbItems;
-
-    // --- Weight of items in each category
-    private final int[] weights;
-
-    // --- Profit_1 of items in each category
-    private final int[] profits_1;
-
-    // --- Profit_2 of items in each category
-    private final int[] profits_2;
-
-    //******************************************************************
-    // CONSTRUCTOR
-    //******************************************************************
-
-    public ParetoTest(final int capacity, final String... items) {
-        this.capacity = capacity;
-        this.nbItems = new int[items.length];
-        this.weights = new int[items.length];
-        this.profits_1 = new int[items.length];
-        this.profits_2 = new int[items.length];
-
-        this.maxProfit_1 = 0;
-        this.maxProfit_2 = 0;
-        for (int it = 0; it < items.length; it++) {
-            String item = items[it];
-            item = item.trim();
-            final String[] itemData = item.split(";");
-            this.nbItems[it] = Integer.parseInt(itemData[0]);
-            this.weights[it] = Integer.parseInt(itemData[1]);
-            this.profits_1[it] = Integer.parseInt(itemData[2]);
-            this.profits_2[it] = Integer.parseInt(itemData[3]);
-            this.maxProfit_1 += this.nbItems[it] * this.profits_1[it];
-            this.maxProfit_2 += this.nbItems[it] * this.profits_2[it];
-        }
-    }
-
-    //******************************************************************
-    // METHODS
-    //******************************************************************
-
-    private void createSolver() {
-        // --- Creates a solver
-        s = new Solver(new EnvironmentCopying(), "Knapsack");
-    }
-
-    private void buildModel() {
-        createVariables();
-        postConstraints();
-    }
-
-    private void createVariables() {
-
-        // --- Creates decision variables
-        occurrences = new IntVar[nbItems.length];
-        for (int i = 0; i < nbItems.length; i++) {
-            occurrences[i] = VariableFactory.bounded("occurrences_" + i, 0, nbItems[i], s);
-        }
-        totalWeight = VariableFactory.bounded("totalWeight", 0, capacity, s);
-        totalProfit_1 = VariableFactory.bounded("totalProfit_1", 0, maxProfit_1, s);
-        totalProfit_2 = VariableFactory.bounded("totalProfit_2", 0, maxProfit_2, s);
-    }
-
-    private void postConstraints() {
-        // --- Posts a knapsack constraint on profit_1
-        s.post(IntConstraintFactory.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1));
-
-        // --- Posts a knapsack constraint on profit_2
-        s.post(IntConstraintFactory.knapsack(occurrences, totalWeight, totalProfit_2, weights, profits_2));
-    }
-
-    static int bestProfit1 = 0;
-
-    private void solve() {
-        // --- Solves the problem
-
-        s.plugMonitor((IMonitorSolution) () -> bestProfit1 = Math.max(bestProfit1, totalProfit_1.getValue()));
-//        Chatterbox.showSolutions(s);
-        s.findParetoFront(ResolutionPolicy.MAXIMIZE, totalProfit_1, totalProfit_2);
-    }
-
+    int bestProfit1 = 0;
 
     //******************************************************************
     // MAIN
@@ -166,11 +53,46 @@ public class ParetoTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testPareto() {
-        ParetoTest instance = new ParetoTest(30, "10;1;2;5", "5;3;7;4", "2;5;11;3");
-        instance.createSolver();
-        instance.buildModel();
-        instance.solve();
+        runKnapsackPareto(30, "10;1;2;5", "5;3;7;4", "2;5;11;3");
         Assert.assertTrue(bestProfit1 > 60);
+    }
 
+    private void runKnapsackPareto(final int capacity, final String... items) {
+        int[] nbItems = new int[items.length];
+        int[] weights = new int[items.length];
+        int[] profits_1 = new int[items.length];
+        int[] profits_2 = new int[items.length];
+
+        int maxProfit_1 = 0;
+        int maxProfit_2 = 0;
+        for (int it = 0; it < items.length; it++) {
+            String item = items[it];
+            item = item.trim();
+            final String[] itemData = item.split(";");
+            nbItems[it] = Integer.parseInt(itemData[0]);
+            weights[it] = Integer.parseInt(itemData[1]);
+            profits_1[it] = Integer.parseInt(itemData[2]);
+            profits_2[it] = Integer.parseInt(itemData[3]);
+            maxProfit_1 += nbItems[it] * profits_1[it];
+            maxProfit_2 += nbItems[it] * profits_2[it];
+        }
+
+        Solver s = new Solver(new EnvironmentCopying(), "Knapsack");
+        // --- Creates decision variables
+        IntVar[] occurrences = new IntVar[nbItems.length];
+        for (int i = 0; i < nbItems.length; i++) {
+            occurrences[i] = VariableFactory.bounded("occurrences_" + i, 0, nbItems[i], s);
+        }
+        IntVar totalWeight = VariableFactory.bounded("totalWeight", 0, capacity, s);
+        IntVar totalProfit_1 = VariableFactory.bounded("totalProfit_1", 0, maxProfit_1, s);
+        IntVar totalProfit_2 = VariableFactory.bounded("totalProfit_2", 0, maxProfit_2, s);
+
+        // --- Posts constraints
+        s.post(IntConstraintFactory.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1));
+        s.post(IntConstraintFactory.knapsack(occurrences, totalWeight, totalProfit_2, weights, profits_2));
+        // --- Monitor
+        s.plugMonitor((IMonitorSolution) () -> bestProfit1 = Math.max(bestProfit1, totalProfit_1.getValue()));
+        // --- solve
+        s.findParetoFront(ResolutionPolicy.MAXIMIZE, totalProfit_1, totalProfit_2);
     }
 }
