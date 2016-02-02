@@ -452,7 +452,7 @@ public class IntIterableRangeSetTest {
     }
 
 
-    @Test(groups="10s")
+    @Test(groups="10s", timeOut=60000)
     public void testPlus() {
         Random rnd = new Random();
         for(int i = 0; i < 200; i++){
@@ -488,7 +488,7 @@ public class IntIterableRangeSetTest {
         return t;
     }
 
-    @Test(groups="10s")
+    @Test(groups="10s", timeOut=60000)
     public void testMinus() {
         Random rnd = new Random();
         for(int i = 0; i < 200; i++){
