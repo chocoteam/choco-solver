@@ -33,6 +33,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * <p>
@@ -434,5 +435,92 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(-1), 0);
         Assert.assertEquals(is1.nextValue(0), Integer.MAX_VALUE);
 
+    }
+
+
+    private IntIterableRangeSet makeItv(Random rnd, int g){
+        IntIterableRangeSet t1 = new IntIterableRangeSet();
+        t1.SIZE = (1 + rnd.nextInt(g)) * 2;
+        t1.ELEMENTS = new int[t1.SIZE];
+        int k = 0;
+        for(int j = 0; j < t1.SIZE; j+=2){
+            k = t1.ELEMENTS[j] = k + 1 + rnd.nextInt(g);
+            k = t1.ELEMENTS[j + 1] = k + rnd.nextInt(g);
+            t1.CARDINALITY += t1.ELEMENTS[j + 1] - t1.ELEMENTS[j] + 1;
+        }
+        return t1;
+    }
+
+
+    @Test(groups="10s")
+    public void testPlus() {
+        Random rnd = new Random();
+        for(int i = 0; i < 200; i++){
+            rnd.setSeed(i);
+            // build t1
+            IntIterableRangeSet t1 = makeItv(rnd, 50);
+            IntIterableRangeSet t2 = makeItv(rnd, 50);
+
+            System.out.printf("%s + %s\n", Arrays.toString(Arrays.copyOf(t1.ELEMENTS, t1.SIZE)), Arrays.toString(Arrays.copyOf(t2.ELEMENTS, t2.SIZE)));
+
+
+            long c = -System.nanoTime();
+            IntIterableRangeSet s1 = plus1(t1, t2);
+            c += System.nanoTime();
+            System.out.printf("(%.3f)\t%s\n", c/1000/1000d, Arrays.toString(Arrays.copyOf(s1.ELEMENTS, s1.SIZE)));
+            c = -System.nanoTime();
+            IntIterableRangeSet s2 = IntIterableSetFactory.plus(t1, t2);
+            c += System.nanoTime();
+            System.out.printf("(%.3f)\t%s\n", c/1000/1000d, Arrays.toString(Arrays.copyOf(s2.ELEMENTS, s2.SIZE)));
+            Assert.assertEquals(s2.SIZE, s1.SIZE);
+            Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
+            Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
+        }
+    }
+
+    public static IntIterableRangeSet plus1(IntIterableRangeSet set1, IntIterableRangeSet set2){
+        IntIterableRangeSet t = new IntIterableRangeSet();
+        for(int i = set1.first(); i <= set1.last(); i = set1.nextValue(i)){
+            for(int j = set2.first(); j <= set2.last(); j = set2.nextValue(j)){
+                t.add(i+j);
+            }
+        }
+        return t;
+    }
+
+    @Test(groups="10s")
+    public void testMinus() {
+        Random rnd = new Random();
+        for(int i = 0; i < 200; i++){
+            rnd.setSeed(i);
+            // build t1
+            IntIterableRangeSet t1 = makeItv(rnd, 50);
+            IntIterableRangeSet t2 = makeItv(rnd, 50);
+
+            System.out.printf("%s - %s\n", Arrays.toString(Arrays.copyOf(t1.ELEMENTS, t1.SIZE)), Arrays.toString(Arrays.copyOf(t2.ELEMENTS, t2.SIZE)));
+
+
+            long c = -System.nanoTime();
+            IntIterableRangeSet s1 = minus1(t1, t2);
+            c += System.nanoTime();
+            System.out.printf("(%.3f)\t%s\n", c/1000/1000d, Arrays.toString(Arrays.copyOf(s1.ELEMENTS, s1.SIZE)));
+            c = -System.nanoTime();
+            IntIterableRangeSet s2 = IntIterableSetFactory.minus(t1, t2);
+            c += System.nanoTime();
+            System.out.printf("(%.3f)\t%s\n", c/1000/1000d, Arrays.toString(Arrays.copyOf(s2.ELEMENTS, s2.SIZE)));
+            Assert.assertEquals(s2.SIZE, s1.SIZE);
+            Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
+            Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
+        }
+    }
+
+    public static IntIterableRangeSet minus1(IntIterableRangeSet set1, IntIterableRangeSet set2){
+        IntIterableRangeSet t = new IntIterableRangeSet();
+        for(int i = set1.first(); i <= set1.last(); i = set1.nextValue(i)){
+            for(int j = set2.first(); j <= set2.last(); j = set2.nextValue(j)){
+                t.add(i - j);
+            }
+        }
+        return t;
     }
 }

@@ -31,6 +31,8 @@ package org.chocosolver.solver.variables.ranges;
 
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.Arrays;
+
 /**
  *
  * <p>
@@ -87,7 +89,7 @@ public class IntIterableSetFactory {
     /**
      * @param set1 a set of ints
      * @param set2 a set of ints
-     * @return return the intersection of set1 and set2
+     * @return return a set which is the intersection of set1 and set2
      */
     public static IntIterableRangeSet fd_intersection(IntIterableRangeSet set1, IntIterableRangeSet set2) {
         IntIterableRangeSet t;
@@ -100,4 +102,124 @@ public class IntIterableSetFactory {
         }
         return t;
     }
+
+
+    /**
+     * @param set1 a set of ints
+     * @param set2 a set of ints
+     * @return return a set {a + b | a in set1, b in set2}
+     */
+    public static IntIterableRangeSet plus(IntIterableRangeSet set1, IntIterableRangeSet set2) {
+        IntIterableRangeSet t = new IntIterableRangeSet();
+        int s1 = set1.SIZE >> 1;
+        int s2 = set2.SIZE >> 1;
+        t.ELEMENTS = new int[set1.SIZE * set2.SIZE];
+        int i = 0, j = 0;
+        int[] is = new int[s2];
+        Arrays.fill(is, -1);
+        is[0] = 0;
+        int lb = set1.ELEMENTS[0] + set2.ELEMENTS[0];
+        int ub = set1.ELEMENTS[1] + set2.ELEMENTS[1];
+        do {
+            boolean extend = false;
+            for (int k = i; k <= j; k++) {
+                int _lb = set1.ELEMENTS[is[k] << 1] + set2.ELEMENTS[k << 1];
+                if (lb <= _lb && _lb <= ub + 1) {
+                    ub = Math.max(set1.ELEMENTS[(is[k] << 1) + 1] + set2.ELEMENTS[(k << 1) + 1], ub);
+                    extend = true;
+                    // add neighbors to evaluate
+                    // 1. left neighbor
+                    if (k < s2 - 1 && k == j) {
+                        is[k + 1]++;
+                        if (is[k + 1] == 0) {
+                            j++;
+                        }
+                    }
+                    // 2. bottom neighbor
+                    is[k]++;
+                    if (is[k] == s1) {
+                        i++;
+                    }
+                }
+            }
+            if (!extend) {
+                t.ELEMENTS[t.SIZE++] = lb;
+                t.ELEMENTS[t.SIZE++] = ub;
+                t.CARDINALITY += ub - lb + 1;
+                lb = Integer.MAX_VALUE;
+                for (int k = i; k <= j; k++) {
+                    int _lb = set1.ELEMENTS[is[k] << 1] + set2.ELEMENTS[k << 1];
+                    if (lb > _lb) {
+                        lb = _lb;
+                        ub = set1.ELEMENTS[(is[k] << 1) + 1] + set2.ELEMENTS[(k << 1) + 1];
+                    }
+                }
+            }
+        } while (is[s2 - 1] < s1);
+        t.ELEMENTS[t.SIZE++] = lb;
+        t.ELEMENTS[t.SIZE++] = ub;
+        t.CARDINALITY += ub - lb + 1;
+        return t;
+    }
+
+
+    /**
+     * @param set1 a set of ints
+     * @param set2 a set of ints
+     * @return return a set {a - b | a in set1, b in set2}
+     */
+    public static IntIterableRangeSet minus(IntIterableRangeSet set1, IntIterableRangeSet set2) {
+        IntIterableRangeSet t = new IntIterableRangeSet();
+        int s1 = set1.SIZE >> 1;
+        int s2 = set2.SIZE >> 1;
+        t.ELEMENTS = new int[set1.SIZE * set2.SIZE];
+        int i = s2 - 1, j = s2 - 1;
+        int[] is = new int[s2];
+        Arrays.fill(is, -1);
+        is[s2 - 1] = 0;
+        int lb = set1.ELEMENTS[0] - set2.ELEMENTS[((s2 - 1) << 1) + 1];
+        int ub = set1.ELEMENTS[1] - set2.ELEMENTS[(s2 - 1) << 1];
+        do {
+            boolean extend = false;
+            for (int k = j; k >= i; k--) {
+                int _lb = set1.ELEMENTS[is[k] << 1] - set2.ELEMENTS[(k << 1) + 1];
+                if (lb <= _lb && _lb <= ub + 1) {
+                    ub = Math.max(set1.ELEMENTS[(is[k] << 1) + 1] - set2.ELEMENTS[(k << 1)], ub);
+                    extend = true;
+                    // add neighbors to evaluate
+                    // 1. left neighbor
+                    if (k > 0 && k == i) {
+                        is[k - 1]++;
+                        if (is[k - 1] == 0) {
+                            i--;
+                        }
+                    }
+                    // 2. bottom neighbor
+                    is[k]++;
+                    if (is[k] == s1) {
+                        j--;
+                    }
+                }
+            }
+            if (!extend) {
+                t.ELEMENTS[t.SIZE++] = lb;
+                t.ELEMENTS[t.SIZE++] = ub;
+                t.CARDINALITY += ub - lb + 1;
+                lb = Integer.MAX_VALUE;
+                for (int k = i; k <= j; k++) {
+                    int _lb = set1.ELEMENTS[is[k] << 1] - set2.ELEMENTS[(k << 1) + 1];
+                    if (lb > _lb) {
+                        lb = _lb;
+                        ub = set1.ELEMENTS[(is[k] << 1) + 1] - set2.ELEMENTS[k << 1];
+                    }
+                }
+            }
+        } while (is[0] < s1);
+        t.ELEMENTS[t.SIZE++] = lb;
+        t.ELEMENTS[t.SIZE++] = ub;
+        t.CARDINALITY += ub - lb + 1;
+        return t;
+    }
+
+
 }
