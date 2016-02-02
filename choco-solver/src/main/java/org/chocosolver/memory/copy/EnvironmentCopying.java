@@ -78,6 +78,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
             copies[i].worldPop(wi);
         }
         currentWorld--;
+        assert currentWorld>=0;
     }
 
     @Override
