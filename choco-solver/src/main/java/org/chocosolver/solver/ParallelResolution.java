@@ -231,7 +231,7 @@ public class ParallelResolution {
      * The fist solver which finds a solution (or hit a limit), sends a message to the other ones for stop searching.
      * </p>
      * <p>
-     * A call to {@link #indexOfFinder()} returns a solver which finds a solution.
+     * A call to {@link #getFinder()} returns a solver which finds a solution.
      * </p>
      * <p>
      *     Each solver is set up with a stop {@link org.chocosolver.util.criteria.Criterion},
@@ -241,9 +241,7 @@ public class ParallelResolution {
      * @throws SolverException if no solver or only solver has been added.
      */
     public boolean findSolution() {
-        if (solvers.size() <= 1) {
-            throw new SolverException("Try to run " + solvers.size() + " solver in parallel.");
-        }
+        check(ResolutionPolicy.SATISFACTION);
         setUpResolution(ResolutionPolicy.SATISFACTION);
         solvers.parallelStream().forEach(Solver::findSolution);
         long nsol = 0;
@@ -270,7 +268,7 @@ public class ParallelResolution {
      * Note that, for a given solver, the last solution restored MAY NOT be the best one wrt other solvers.
      * </p>
      * <p>
-     * A call to {@link #indexOfFinder()} returns a solver which finds the best solution.
+     * A call to {@link #getFinder()} returns a solver which finds the best solution.
      * </p>
      * <p>
      *     Each solver is set up with a stop {@link org.chocosolver.util.criteria.Criterion},
@@ -283,14 +281,7 @@ public class ParallelResolution {
      *                          if multi-objective optimization problem is declared.
      */
     public void findOptimalSolution(ResolutionPolicy policy) {
-        if (solvers.size() <= 1) {
-            throw new SolverException("Try to run " + solvers.size() + " solver in parallel.");
-        }
-        if (solvers.get(0).getObjectives() == null
-                || solvers.get(0).getObjectives().length != 1
-                || (solvers.get(0).getObjectives()[0].getTypeAndKind() & Variable.INT) == 0) {
-            throw new SolverException("Attemp to solve a problem which is not a mono-objective integer variable optimization problem.");
-        }
+        check(policy);
         setUpResolution(policy);
         solvers.parallelStream().forEach(s -> s.findOptimalSolution(policy, true));
     }
@@ -318,87 +309,46 @@ public class ParallelResolution {
      * @return the first solver which finds a solution (or the best one) or <tt>null</tt> if no such solver exists.
      */
     public Solver getFinder(){
-        int idx = indexOfFinder();
-        if(idx == -1){
+        ResolutionPolicy policy = solvers.get(0).getObjectiveManager().getPolicy();
+        check(policy);
+        if (policy == ResolutionPolicy.SATISFACTION) {
+            for (Solver s : solvers) {
+                if (s.getMeasures().getSolutionCount() > 0) {
+                    return s;
+                }
+            }
             return null;
         }else{
-            return solvers.get(idx);
-        }
-    }
-
-    /**
-     * Returns the index of the first solver from the list which, either :
-     * <ul>
-     *     <li>
-     *         finds a solution when dealing with a satisfaction problem,
-     *     </li>
-     *     <li>
-     *         or finds (and possibly proves) the best solution when dealing with an optimization problem.
-     *     </li>
-     * </ul>
-     * or -1 if no such solver exists.
-     * Note that there can be more than one "finder" in the list, yet, this method returns the index of the first one.
-     *
-     * @return the index of the first solver which finds a solution (or the best one) or -1 if such solver does not exist.
-     */
-    public int indexOfFinder() {
-        int idx = -1;
-        switch (solvers.get(0).getObjectiveManager().getPolicy()) {
-            case SATISFACTION: {
-                int i = 0;
-                boolean found = false;
-                while (i < solvers.size() && !found) {
-                    if (solvers.get(i).getMeasures().getSolutionCount() > 0) {
-                        found = true;
-                    } else {
-                        i++;
+            boolean min = solvers.get(0).getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
+            Solver best = null;
+            int cost = 0;
+            for (Solver s : solvers) {
+                if (s.getMeasures().getSolutionCount() > 0) {
+                    if (best == null
+                            || (cost > (int) s.getObjectiveManager().getBestSolutionValue() && min)
+                            || (cost < (int) s.getObjectiveManager().getBestSolutionValue() && !min)) {
+                        best = s;
+                        cost = (int) s.getObjectiveManager().getBestSolutionValue();
                     }
                 }
-                if (found) {
-                    idx = i;
-                }
             }
-            break;
-            case MINIMIZE:
-            case MAXIMIZE:
-                Variable[] os = solvers.get(0).getObjectives();
-                // 1. One integer objective
-                if (os.length == 1 && (os[0].getTypeAndKind() & Variable.INT) != 0) {
-                    idx = getFindMonoIntegerObjective();
-                } else {
-                    throw new UnsupportedOperationException("ParallelResolution cannot deal with multi-objective or " +
-                            "real variable objective optimization problems");
-                }
-                break;
-            default:
-                break;
-        }
-        return idx;
-    }
-
-    /**
-     * @return the index of the first solver which finds the best solution when dealing with mono-objective integer optimization problem,
-     *          or -1 if no such solver exists.
-     */
-    private int getFindMonoIntegerObjective(){
-        Integer best = (Integer)solvers.get(0).getObjectiveManager().getBestSolutionValue();
-        int i = 0;
-        boolean found = false;
-        while (i < solvers.size() && !found) {
-            Solver s = solvers.get(i);
-            IntVar obj = (IntVar)s.getObjectives()[0];
-            if(s.getMeasures().getSolutionCount() > 0 && s.getSolutionRecorder().getLastSolution().getIntVal(obj).intValue() == best){
-                found = true;
-            }else{
-                i++;
-            }
-        }
-        if(found){
-            return i;
-        }else{
-            return -1;
+            return best;
         }
     }
 
-
+    private void check(ResolutionPolicy policy){
+        if (solvers.size() <= 1) {
+            throw new SolverException("Try to run " + solvers.size() + " solver in parallel (should be >1).");
+        }
+        if(policy != ResolutionPolicy.SATISFACTION) {
+            Variable[] os = solvers.get(0).getObjectives();
+            if (os == null) {
+                throw new UnsupportedOperationException("No objective has been defined");
+            }
+            if (!(os.length == 1 && (os[0].getTypeAndKind() & Variable.INT) != 0)) {
+                throw new UnsupportedOperationException("ParallelResolution cannot deal with multi-objective or " +
+                        "real variable objective optimization problems");
+            }
+        }
+    }
 }

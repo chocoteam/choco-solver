@@ -1152,7 +1152,8 @@ public class Solver implements Serializable {
                 }
             } else {
                 // BEWARE the usual optimization manager is only defined for mono-objective optimization
-                // so we use a satisfaction manager by default (it does nothing)
+                // so we use a satisfaction manager by default (which does nothing)
+                // with a pareto solution recorder that dynamically adds constraints to skip dominated solutions
                 if (!getObjectiveManager().isOptimization()) {
                     set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
                 }

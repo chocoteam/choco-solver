@@ -257,8 +257,33 @@ public class SolverTest {
     }
 
     @Test(groups="1s", timeOut=60000)
+    public void testParBug() {
+        for (int iter = 0; iter < 50; iter++) {
+            ParallelResolution pares = new ParallelResolution();
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(true));
+            pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            Assert.assertTrue(pares.getFinder()!=null);
+            Chatterbox.printSolutions(pares.getFinder());
+            Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testParBug2() {
+        for (int iter = 0; iter < 50; iter++) {
+            Solver s = knapsack(true);
+            s.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            Chatterbox.printSolutions(s);
+            Assert.assertEquals(s.getObjectiveManager().getBestSolutionValue(), 51);
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testP2() {
-        // this test fails presumably because a solver stops before another finishes initialisation
         for (int iter = 0; iter < 50; iter++) {
             ParallelResolution pares = new ParallelResolution();
             for (int i = 0; i < 10; i++) {
