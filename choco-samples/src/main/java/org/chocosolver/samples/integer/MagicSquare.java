@@ -32,7 +32,7 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
+import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
@@ -107,7 +107,7 @@ public class MagicSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(new ImpactBased(vars, 2, 3, 10, 29091981L, false));
+        solver.set(ISF.lexico_LB(vars));
     }
 
     @Override

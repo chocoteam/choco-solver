@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.memory.Environments;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -60,8 +61,13 @@ public class SolverTest {
     final static int[] nbOmax = {4, 6, 17};
     final static int n = 3;
 
-    public static Solver knapsack() {
-        Solver s = new Solver();
+    public static Solver knapsack(boolean copy) {
+        Solver s;
+        if(copy){
+            s = new Solver(Environments.COPY.make(), "test");
+        }else{
+            s = new Solver();
+        }
         IntVar power = VariableFactory.bounded("v_" + n, 0, 9999, s);
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -101,13 +107,18 @@ public class SolverTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testRight() {
+        tr2(true);
+        tr2(false);
+    }
+
+    private void tr2(boolean copy){
         boolean alive = true;
         int cas = 0;
         while (alive) {
             cas++;
-            Solver s = knapsack();
+            Solver s = knapsack(copy);
             try {
                 switch (cas) {
                     case 1:
@@ -171,7 +182,7 @@ public class SolverTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testFH1() {
         Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
@@ -182,7 +193,7 @@ public class SolverTest {
         BoolVar[] bvars = solver.retrieveBoolVars();
         Assert.assertEquals(bvars, new BoolVar[]{b});
 
-        IntVar[] ivars = solver.retrieveIntVars();
+        IntVar[] ivars = solver.retrieveIntVars(false);
         Assert.assertEquals(ivars, new IntVar[]{i});
 
         SetVar[] svars = solver.retrieveSetVars();
@@ -194,16 +205,18 @@ public class SolverTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testRetrieveInt() {
         Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
         IntVar i = VF.enumerated("i", 1, 3, solver);
-        IntVar[] is = solver.retrieveIntVars();
+        IntVar[] is = solver.retrieveIntVars(false);
         Assert.assertEquals(1, is.length);
+        IntVar[] is2 = solver.retrieveIntVars(true);
+        Assert.assertEquals(2, is2.length);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testRetrieveBool() {
         Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
@@ -212,7 +225,7 @@ public class SolverTest {
         Assert.assertEquals(1, bs.length);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testFH2() {
         Solver solver = new Solver();
         BoolVar b = VF.bool("b", solver);
@@ -221,7 +234,7 @@ public class SolverTest {
         Assert.assertEquals(solver.isFeasible(), ESat.FALSE);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testJL1() {
         Solver s = new Solver();
         s.post(ICF.arithm(s.ONE(), "!=", s.ZERO()));
@@ -230,31 +243,60 @@ public class SolverTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testP1() {
         ParallelResolution pares = new ParallelResolution();
         int n = 4; // number of solvers to use
         for (int i = 0; i < n; i++) {
-            pares.addSolver(knapsack());
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(false));
         }
         pares.findSolution();
         Chatterbox.printSolutions(pares.getFinder());
         Assert.assertEquals(pares.getFinder().getMeasures().getSolutionCount(), 1);
     }
 
-    @Test(groups = "1s")
-    public void testP2() {
-        int n = 10; // number of solvers to use
-        ParallelResolution pares = new ParallelResolution();
-        for (int i = 0; i < n; i++) {
-            pares.addSolver(knapsack());
+    @Test(groups="1s", timeOut=60000)
+    public void testParBug() {
+        for (int iter = 0; iter < 50; iter++) {
+            ParallelResolution pares = new ParallelResolution();
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(true));
+            pares.addSolver(knapsack(true));
+            pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            Assert.assertTrue(pares.getFinder()!=null);
+            Chatterbox.printSolutions(pares.getFinder());
+            Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
         }
-        pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
-        Chatterbox.printSolutions(pares.getFinder());
-        Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
+    public void testParBug2() {
+        for (int iter = 0; iter < 50; iter++) {
+            Solver s = knapsack(true);
+            s.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            Chatterbox.printSolutions(s);
+            Assert.assertEquals(s.getObjectiveManager().getBestSolutionValue(), 51);
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testP2() {
+        for (int iter = 0; iter < 50; iter++) {
+            ParallelResolution pares = new ParallelResolution();
+            for (int i = 0; i < 10; i++) {
+                pares.addSolver(knapsack(true));
+                pares.addSolver(knapsack(false));
+            }
+            pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            Chatterbox.printSolutions(pares.getFinder());
+            Assert.assertEquals(pares.getFinder().getObjectiveManager().getBestSolutionValue(), 51);
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testJL300(){
         Solver s = new Solver();
         IntVar i = VF.enumerated("i", -5, 5, s);
@@ -269,7 +311,7 @@ public class SolverTest {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 11);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMonitors(){
         Solver solver = new Solver();
         IntVar v = VF.bool("b", solver);
@@ -296,7 +338,7 @@ public class SolverTest {
         Assert.assertEquals(4, d[0]);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testCriteria(){
         Solver solver = new Solver();
         IntVar v = VF.bool("b", solver);
@@ -318,7 +360,7 @@ public class SolverTest {
         Assert.assertEquals(2, solver.getMeasures().getSolutionCount());
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testCompSearch(){
         Solver solver = new Solver();
         IntVar[] v = VF.boolArray("v", 2, solver);
@@ -331,7 +373,7 @@ public class SolverTest {
         Assert.assertEquals(solver.isSatisfied(),ESat.TRUE);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testAssociates(){
         Solver s = new Solver();
         BoolVar v = VF.bool("V", s);
@@ -344,7 +386,7 @@ public class SolverTest {
         Assert.assertEquals(s.getNbVars(), 0);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testRestore() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] v = VF.boolArray("v", 2, solver);
@@ -355,7 +397,7 @@ public class SolverTest {
         Assert.assertTrue(v[0].isInstantiatedTo(1));
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testHook(){
         Solver solver = new Solver();
         String toto = "TOTO";
@@ -371,7 +413,7 @@ public class SolverTest {
         Assert.assertEquals(solver.getHooks().size(), 0);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testName(){
         Solver solver = new Solver();
         Assert.assertTrue(solver.getName().startsWith("Solver-"));
@@ -379,7 +421,7 @@ public class SolverTest {
         Assert.assertEquals(solver.getName(), "Revlos");
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testNextSolution(){
         Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(8);
         s.nextSolution(); //  should not throw exception

@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
 
 public class CircuitTest {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public static void test1() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.boundedArray("x", 10, 0, 20, solver);
@@ -55,7 +55,7 @@ public class CircuitTest {
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public static void test2() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.enumeratedArray("x", 10, 0, 10, solver);
@@ -64,7 +64,7 @@ public class CircuitTest {
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public static void test3() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.boundedArray("x", 5, 0, 4, solver);
@@ -75,7 +75,7 @@ public class CircuitTest {
         Assert.assertEquals(0, solver.getMeasures().getSolutionCount());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public static void test4() {
         for (int n = 2; n < 8; n++) {
             Solver solver = new Solver();

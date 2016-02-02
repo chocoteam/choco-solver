@@ -77,7 +77,7 @@ public class ExplanationEngineTest {
      * This test evaluates the case where half of the generated events are useless.
      * Only one branch is evaluated.
      */
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         for (int n = 6; n < 1001; n *= 2) {
             System.out.printf("n = %d : ", n);
@@ -108,7 +108,7 @@ public class ExplanationEngineTest {
     /**
      * This test evaluates the case where only two constraints are in conflict, the remaining ones are useless.
      */
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         for (int n = 100; n < 12801; n *= 2) {
             System.out.printf("n = %d : ", n);
@@ -140,7 +140,7 @@ public class ExplanationEngineTest {
     /**
      * This test evaluates the case where a subset of the constraints are in conflict
      */
-    @Test(groups = "1s")
+    @Test(groups="5m", timeOut=300000)
     public void test3() {
         for (int n = 3; n < 64000; n *= 2) {
             System.out.printf("n = %d : ", n);
@@ -149,7 +149,7 @@ public class ExplanationEngineTest {
             Solver expl = new Solver();
             model3(expl, n);
 
-            IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars());
+            IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars(false));
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {
@@ -173,7 +173,7 @@ public class ExplanationEngineTest {
     /**
      * This test evaluates the case where a subset of the constraints are in conflict
      */
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         int n = 3;
         System.out.printf("n = %d : ", n);
@@ -200,7 +200,7 @@ public class ExplanationEngineTest {
         Assert.assertEquals(r.nbCauses(), 2);
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void testNosol0E() {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
@@ -217,7 +217,7 @@ public class ExplanationEngineTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void testNosol0B() {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
@@ -234,7 +234,7 @@ public class ExplanationEngineTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void testNosol1E() {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
@@ -251,7 +251,7 @@ public class ExplanationEngineTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void testNosol1B() {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
@@ -270,7 +270,7 @@ public class ExplanationEngineTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testReif() {
         for (long seed = 0; seed < 10; seed++) {
 
@@ -292,7 +292,7 @@ public class ExplanationEngineTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testReif2() { // to test PropagatorActivation, from bs to p
 
         final Solver solver = new Solver();
@@ -316,7 +316,7 @@ public class ExplanationEngineTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testReif3() { // to test PropagatorActivation, from bs to p
 
         final Solver solver = new Solver();
@@ -396,20 +396,9 @@ public class ExplanationEngineTest {
         Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
     }
 
-    @Test(groups = "1m")
+    @Test(groups="5m", timeOut=300000)
     public void testLSsmall() {
         for (int m = 4; m < 18; m++) {
-            System.out.printf("LS(%d)\n", m);
-            for (int a = 0; a < 5; a++) {
-                testLS(m, a);
-            }
-        }
-    }
-
-
-    @Test(groups = "verylong")
-    public void testLSbig() {
-        for (int m = 18; m < 24; m++) {
             System.out.printf("LS(%d)\n", m);
             for (int a = 0; a < 5; a++) {
                 testLS(m, a);
@@ -447,7 +436,7 @@ public class ExplanationEngineTest {
         Assert.assertTrue(solver.findSolution());
     }
 
-    @Test(groups = "1m")
+    @Test(groups="5m", timeOut=300000)
     public void testCA() {
         for (int n = 6; n < 16; n++) {
             System.out.printf("CA(%d):\n", n);
@@ -495,7 +484,7 @@ public class ExplanationEngineTest {
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test(groups = "1m")
+    @Test(groups="10s", timeOut=60000)
     public void testGR() {
         for (int m = 6; m < 10; m++) {
             System.out.printf("GR(%d):\n", m);
@@ -522,7 +511,7 @@ public class ExplanationEngineTest {
         Assert.assertTrue(solver.findSolution());
     }
 
-    @Test(groups = "1m")
+    @Test(groups="10s", timeOut=60000)
     public void testLN() {
         int[][] params = new int[][]{{2, 3}, {2, 4}, {3, 9}, {3, 17}};
         for (int m = 0; m < params.length; m++) {
@@ -583,19 +572,9 @@ public class ExplanationEngineTest {
         Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
     }
 
-    @Test(groups = "1m")
+    @Test(groups="10s", timeOut=60000)
     public void testMSsmall() {
         for (int n = 5; n < 7; n++) {
-            System.out.printf("MS(%d):\n", n);
-            for (int a = 0; a < 5; a++) {
-                testMS(n, a);
-            }
-        }
-    }
-
-    @Test(groups = "30m")
-    public void testMSbig() {
-        for (int n = 7; n < 12; n++) {
             System.out.printf("MS(%d):\n", n);
             for (int a = 0; a < 5; a++) {
                 testMS(n, a);
@@ -672,27 +651,16 @@ public class ExplanationEngineTest {
         Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
     }
 
-    @Test(groups = "1m")
+    @Test(groups="5m", timeOut=300000)
     public void testPAsmall() {
-        for (int N = 32; N < 57; N += 4) {
-            System.out.printf("Pa(%d)\n", N);
-            for (int a = 0; a < 5; a++) {
-                testPA(N, a);
-            }
+        int N = 32;
+        System.out.printf("Pa(%d)\n", N);
+        for (int a = 0; a < 5; a++) {
+            testPA(N, a);
         }
     }
 
-    @Test(groups = "30m")
-    public void testPAbig() {
-        for (int N = 56; N < 73; N += 4) {
-            System.out.printf("Pa(%d)\n", N);
-            for (int a = 0; a < 5; a++) {
-                testPA(N, a);
-            }
-        }
-    }
-
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testClauses() {
         int n = 4;
         Solver solver = new Solver();
@@ -717,7 +685,7 @@ public class ExplanationEngineTest {
         Assert.assertNotNull(r);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testClauses2() {
         int n = 5;
         Solver solver = new Solver();
@@ -742,7 +710,7 @@ public class ExplanationEngineTest {
         Assert.assertNotNull(r);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testClauses3() {
         int n = 12;
         Solver solver = new Solver();
@@ -773,7 +741,7 @@ public class ExplanationEngineTest {
         Assert.assertNotNull(r);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testClauses4() {
         int n = 12;
         Solver solver = new Solver();
@@ -800,7 +768,7 @@ public class ExplanationEngineTest {
         Assert.assertNotNull(r);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test01() {
         int n = 6;
         int m = 10;
@@ -832,7 +800,7 @@ public class ExplanationEngineTest {
         return s;
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void aTest() {
 
         Solver s = new Solver();
@@ -870,7 +838,7 @@ public class ExplanationEngineTest {
     }
 
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testOnce1(){
         Solver solver = new Solver();
         int n = 4;
@@ -886,7 +854,7 @@ public class ExplanationEngineTest {
         solver.findAllSolutions();
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIntSat() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("x", -2, 3, solver);
@@ -925,7 +893,7 @@ public class ExplanationEngineTest {
         ee.explain(c);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void test111() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VF.bounded("x", 0, 1, solver);

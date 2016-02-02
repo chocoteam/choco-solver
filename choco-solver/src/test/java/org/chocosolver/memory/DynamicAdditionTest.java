@@ -27,33 +27,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.memory; /**
- *  Copyright (c) 1999-2014, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
- *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+package org.chocosolver.memory;
 
+import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -66,9 +42,12 @@ import org.testng.annotations.Test;
  */
 public class DynamicAdditionTest {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
-        IEnvironment environment = new EnvironmentTrailing();
+        test1(new EnvironmentTrailing());
+        test1(new EnvironmentCopying());
+    }
+    public void test1(IEnvironment environment) {
         environment.buildFakeHistoryOn(new Except_0());
         IStateInt a = environment.makeInt(10);
         a.set(11);
@@ -127,12 +106,14 @@ public class DynamicAdditionTest {
         Assert.assertEquals(b.get(), 21);
         Assert.assertEquals(c.get(), 32);
         Assert.assertEquals(d.get(), 43);
-
     }
 
-    @Test(groups = "1s", timeOut = 1000)
-    public void test2() {
-        IEnvironment environment = new EnvironmentTrailing();
+    @Test(groups="1s", timeOut=60000)
+    public void test2(){
+        test2(new EnvironmentTrailing());
+        test2(new EnvironmentCopying());
+    }
+    public void test2(IEnvironment environment) {
         environment.buildFakeHistoryOn(new Except_0());
         int n = 100;
         int m = 100;
@@ -160,12 +141,16 @@ public class DynamicAdditionTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups="5m", timeOut=300000)
     public void test3() {
-        IEnvironment environment = new EnvironmentTrailing();
+        test3(new EnvironmentTrailing());
+        test3(new EnvironmentCopying());
+    }
+    public void test3(IEnvironment environment) {
+        long time = System.currentTimeMillis();
         environment.buildFakeHistoryOn(new Except_0());
         int n = 50000;
-        int m = 10000;
+        int m = 3000;
         int k = 100;
         IStateInt[] si = new IStateInt[n];
         for (int i = 0; i < n; i++) {
@@ -188,5 +173,7 @@ public class DynamicAdditionTest {
         for (int i = 0; i < m; i++) {
             Assert.assertEquals(si2[i].get(), -i);
         }
+        long duration = System.currentTimeMillis() - time;
+        Assert.assertTrue(duration>5000);
     }
 }

@@ -214,7 +214,7 @@ public abstract class AbstractVariable implements Variable {
             pindices = new int[itmp.length * 3 / 2 + 1];
             System.arraycopy(itmp, 0, pindices, 0, nbPropagators);
             if(pindices.length != propagators.length){
-                System.exit(-1);
+                throw new UnsupportedOperationException("error: pindices.length != propagators.length in "+this);
             }
 
         }

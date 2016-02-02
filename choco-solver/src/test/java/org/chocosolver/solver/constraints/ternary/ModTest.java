@@ -59,7 +59,7 @@ public class ModTest extends AbstractTernaryTest {
 		return IntConstraintFactory.mod(vars[0], vars[1], vars[2]);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test2() {
 		Solver solver = new Solver();
 		IntVar res = VariableFactory.bounded("r", 1, 2, solver);
@@ -72,7 +72,7 @@ public class ModTest extends AbstractTernaryTest {
 		}
 	}
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void testJL() {
 		Solver s = new Solver();
 		IntVar dividend = VF.enumerated("dividend", 2, 3, s);

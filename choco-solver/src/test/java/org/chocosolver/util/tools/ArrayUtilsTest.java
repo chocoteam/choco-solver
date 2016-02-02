@@ -44,40 +44,40 @@ import org.testng.annotations.Test;
  */
 public class ArrayUtilsTest {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testZeroToN() throws Exception {
         int[] a = ArrayUtils.zeroToN(5);
         Assert.assertEquals(a, new int[]{0,1,2,3,4});
     }
 
-    @Test(groups = "1s", expectedExceptions = NegativeArraySizeException.class)
+    @Test(groups="1s", timeOut=60000, expectedExceptions = NegativeArraySizeException.class)
     public void testZeroToN2() throws Exception {
         ArrayUtils.zeroToN(-2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testOneToN() throws Exception {
         int[] a = ArrayUtils.oneToN(5);
         Assert.assertEquals(a, new int[]{1,2,3,4, 5});
     }
 
-    @Test(groups = "1s", expectedExceptions = NegativeArraySizeException.class)
+    @Test(groups="1s", timeOut=60000, expectedExceptions = NegativeArraySizeException.class)
     public void testOneToN2() throws Exception {
         int[] a = ArrayUtils.oneToN(-5);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testLinspace() throws Exception {
         int[] a = ArrayUtils.linspace(2,7);
         Assert.assertEquals(a, new int[]{2,3,4,5,6});
     }
 
-    @Test(groups = "1s", expectedExceptions = NegativeArraySizeException.class)
+    @Test(groups="1s", timeOut=60000, expectedExceptions = NegativeArraySizeException.class)
     public void testLinspace2() throws Exception {
         int[] a = ArrayUtils.linspace(2,1);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testGetColumn() throws Exception {
         Number[][] n = new Number[2][3];
         n[0][0] = 0.D;
@@ -91,7 +91,7 @@ public class ArrayUtilsTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testGetColumn1() throws Exception {
         Solver solver = new Solver();
         IntVar[][] n = new IntVar[2][2];
@@ -103,7 +103,7 @@ public class ArrayUtilsTest {
         Assert.assertEquals(nn, new IntVar[]{n[0][1], n[1][1]});
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testLength() throws Exception {
         Integer[] a = {1,2,3};
         Integer[] b = {4,5};
@@ -111,13 +111,13 @@ public class ArrayUtilsTest {
         Assert.assertEquals(ArrayUtils.length(a,b,c), 6);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testContains() throws Exception {
         Integer[] a = {1,2,3};
         Assert.assertTrue(ArrayUtils.contains(a,2));
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testGet() throws Exception {
         Integer[] a = {1,2,3};
         Integer[] b = {4,5};
@@ -125,7 +125,7 @@ public class ArrayUtilsTest {
         Assert.assertEquals(ArrayUtils.get(4, a,b,c), b[1]);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testGet1() throws Exception {
         Integer[] a = {1,2,3};
         Integer[] b = {4,5};
@@ -133,7 +133,7 @@ public class ArrayUtilsTest {
         Assert.assertEquals(ArrayUtils.get(4, a,b,c), b[1]);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testAppend() throws Exception {
         Number[] n1 = new Number[2];
         n1[0] = 0.D;
@@ -144,7 +144,7 @@ public class ArrayUtilsTest {
         Assert.assertEquals(ArrayUtils.append(n1, n2), new Number[]{n1[0], n1[1], n2[0], n2[1]});
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testAppend1() throws Exception {
         int[] n1 = new int[2];
         n1[0] = 0;
@@ -155,21 +155,21 @@ public class ArrayUtilsTest {
         Assert.assertEquals(ArrayUtils.append(n1, n2), new int[]{n1[0], n1[1], n2[0], n2[1]});
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testInverseSign() throws Exception {
         int[] a = {1,2,3};
         ArrayUtils.inverseSign(a);
         Assert.assertEquals(a, new int[]{-1,-2,-3});
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testReverse() throws Exception {
         int[] a = {1,2,3};
         ArrayUtils.reverse(a);
         Assert.assertEquals(a, new int[]{3,2,1});
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testReverse1() throws Exception {
         Number[] n1 = new Number[3];
         n1[0] = 0.D;
@@ -179,7 +179,7 @@ public class ArrayUtilsTest {
         Assert.assertEquals(n1, new Number[]{2.D,1.D,0.D});
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testPermutation() throws Exception {
         Number[] n1 = new Number[3];
         n1[0] = 0.D;
@@ -189,56 +189,56 @@ public class ArrayUtilsTest {
         Assert.assertEquals(n1, new Number[]{1.D,2.D,0.D});
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testTranspose() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testTranspose1() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testFlatten() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testFlatten1() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testFlattenSubMatrix() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testFlatten2() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testCreateNonRedundantSortedValues() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testSort() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testSwallowCopy() throws Exception {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testSwallowCopy1() throws Exception {
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBinarySearchInc1() throws Exception {
         int[] a = {1, 3, 5, 7, 9, 11};
         Assert.assertEquals(ArrayUtils.binarySearchInc(a, 1, 5, 7, true), 3);

@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
  */
 public class RealConstraintExamples {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testreal() {
         Solver solver = new Solver();
         double PREC = 0.01d; // precision

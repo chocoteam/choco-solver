@@ -121,6 +121,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
             trails[i].worldPop(wi);
         }
         currentWorld--;
+        assert currentWorld>=0;
     }
 
     /**

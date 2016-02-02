@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
 
 public class SetIntUnion {
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test1() {
         Solver s = new Solver();
         IntVar[] x = VF.enumeratedArray("ints", 4, 0, 5, s);
@@ -58,7 +58,7 @@ public class SetIntUnion {
         s.findAllSolutions();
     }
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test2() {
         Solver s = new Solver();
         IntVar[] x = new IntVar[]{
@@ -77,7 +77,7 @@ public class SetIntUnion {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 0);
     }
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test3() {
         Solver s = new Solver();
         IntVar[] x = new IntVar[]{

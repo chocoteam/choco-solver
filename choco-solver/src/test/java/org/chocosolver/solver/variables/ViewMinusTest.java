@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -51,7 +51,7 @@ import java.util.Random;
 public class ViewMinusTest {
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver();
 
@@ -116,7 +116,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="10s", timeOut=60000)
     public void test2() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -144,7 +144,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="10s", timeOut=60000)
     public void test3() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -172,7 +172,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIt1() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -206,7 +206,7 @@ public class ViewMinusTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIt2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {

@@ -62,6 +62,5 @@ if [ ${BRANCH} = "release" ]; then
     #Clean
     git push origin --delete release ||quit "Unable to delete release"
 else
-    mvn clean install -DtestFailureIgnore=true -Dgroups="1s,10s,1m,10m"
-    mvn test -DtestFailureIgnore=true -Dgroups="30m"
+    mvn clean install
 fi

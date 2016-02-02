@@ -45,7 +45,7 @@ import org.testng.annotations.Test;
  */
 public class SatConstraintExamples {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testattmostnminusone() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
@@ -54,7 +54,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testattmostone() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
@@ -63,7 +63,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolandarrayequalfalse() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
@@ -72,7 +72,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolorarrayequaltrue() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
@@ -81,7 +81,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolandeqvar() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -92,7 +92,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testbooleq() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -102,7 +102,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testbooliseqvar() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -113,7 +113,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolislevar() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -124,7 +124,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolisltvar() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -135,7 +135,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolisneqvar() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -146,7 +146,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolle() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -156,7 +156,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboollt() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -166,7 +166,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolnot() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -176,7 +176,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolandarrayequalvar() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
@@ -186,7 +186,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolorarrayequalvar() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 4, solver);
@@ -196,7 +196,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testbooloreqvar() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -207,7 +207,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolxoreqvar() {
         Solver solver = new Solver();
         BoolVar L = VF.bool("L", solver);
@@ -218,7 +218,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolclauseslop() {
         Solver solver = new Solver();
         BoolVar C1 = VF.bool("C1", solver);
@@ -232,7 +232,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolclauses() {
         Solver solver = new Solver();
         BoolVar P1 = VF.bool("P1", solver);
@@ -244,7 +244,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testboolfalse() {
         Solver solver = new Solver();
         BoolVar B = VF.bool("B", solver);
@@ -253,7 +253,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testmaxboolarraylesseqvar() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 3, solver);
@@ -263,7 +263,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testsumboolarraygreatereqvar() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 3, solver);
@@ -273,7 +273,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testsumboolarraylesseqvar() {
         Solver solver = new Solver();
         BoolVar[] BVARS = VF.boolArray("BS", 3, solver);
@@ -283,7 +283,7 @@ public class SatConstraintExamples {
         solver.findAllSolutions();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testbooltrue() {
         Solver solver = new Solver();
         BoolVar B = VF.bool("B", solver);

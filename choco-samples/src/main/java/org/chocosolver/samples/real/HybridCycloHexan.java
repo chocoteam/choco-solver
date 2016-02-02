@@ -55,7 +55,12 @@ public class HybridCycloHexan extends AbstractProblem {
 	IntVar intx;
 
 	@Override
-	public void printDescription() {
+	public void createSolver() {
+		solver = new Solver("HybridCycloHexan");
+	}
+
+	@Override
+	public void buildModel() {
 		System.out.println("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n"
 				+ "It is decribed with a system of three non linear equations : \n"
 				+ " y^2 * (1 + z^2) + z * (z - 24 * y) = -13 \n" +
@@ -64,15 +69,7 @@ public class HybridCycloHexan extends AbstractProblem {
 				"This example comes from the Elisa project (LINA) examples. \n" +
 				"This example restricts x to be integer, as an illustration to hybrid finite/continuous problems. \n" +
 				"It has no solution. \n");
-	}
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("HybridCycloHexan");
-	}
-
-	@Override
-	public void buildModel() {
 		double precision = 1.0e-3;
 		// finite domain
 		intx = VariableFactory.enumerated("x", new int[]{-10,-9,0,2,42}, solver);

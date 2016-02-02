@@ -45,7 +45,7 @@ import java.util.Arrays;
  */
 public class MDDTest {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test0() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("X", 4, 0, 2, solver);
@@ -56,7 +56,7 @@ public class MDDTest {
         Assert.assertEquals(mdd.getDiagram(), new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("X", 4, 0, 2, solver);
@@ -79,7 +79,7 @@ public class MDDTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
         IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
@@ -101,7 +101,7 @@ public class MDDTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[2];
@@ -119,7 +119,7 @@ public class MDDTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[2];
@@ -138,7 +138,7 @@ public class MDDTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test5() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[3];

@@ -12,6 +12,7 @@ NEXT MILESTONE
 like getting a solver which a solution -- or the best one (#362)
 - reduce memory footprint : `Solution.record(Solver)` (#370) and `Random` search strategy
 - add impl of `IntIterableSet`: `IntIterableRangeSet`, (and a factory `IntIterableSetFactory` to be completed in the future)
+- method `retrieveIntVars` in `Solver` must specify whether or not to include BoolVar in the result
 
 ### Constraint
 
@@ -28,7 +29,7 @@ like getting a solver which a solution -- or the best one (#362)
 
 \#361, #364, #365, #368, #369, #370
 
-Fix array out of bound exception in `PropLargeMDDC`
+Fix array out of bound exception in `PropLargeMDDC`.
 
 3.3.3 - 22 Dec 2015
 -------------------

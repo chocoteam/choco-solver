@@ -30,7 +30,6 @@
 package org.chocosolver.memory.structure;
 
 import java.util.Arrays;
-import org.chocosolver.memory.EnvironmentException;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.IStateIntVector;
@@ -198,7 +197,7 @@ public class IndexedBipartiteSet extends IStateIntVector {
     }
 
     public final int set(final int index, final int val) {
-        throw new EnvironmentException("setting an element is not permitted on this structure");
+        throw new UnsupportedOperationException("setting an element is not permitted on "+getClass().getSimpleName());
     }
 
     @Override

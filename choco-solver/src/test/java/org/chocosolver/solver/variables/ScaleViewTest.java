@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -50,7 +50,7 @@ import java.util.Random;
  */
 public class ScaleViewTest {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver s = new Solver();
 
@@ -72,7 +72,7 @@ public class ScaleViewTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver s = new Solver();
 
@@ -135,7 +135,7 @@ public class ScaleViewTest {
         return s;
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void testRandom1() {
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {
@@ -153,7 +153,7 @@ public class ScaleViewTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="10s", timeOut=60000)
     public void testRandom2() {
         Solver sb = bijective(1, 9999, 3);
         Solver sc = contraint(1, 9999, 3);
@@ -163,7 +163,7 @@ public class ScaleViewTest {
         //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIt1() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -197,7 +197,7 @@ public class ScaleViewTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIt2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {

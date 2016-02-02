@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -94,7 +94,7 @@ public abstract class AbstractBinaryTest {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void test1() {
         boolean bounded; // true if domains are bounded, false if they are enumerated
         Random rand = new Random(0);

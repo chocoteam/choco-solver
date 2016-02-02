@@ -76,7 +76,7 @@ public class ElementTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver s = new Solver();
         int[] values = new int[]{1, 2, 0, 4, 3};
@@ -85,7 +85,7 @@ public class ElementTest {
         model(s, index, values, var, 0, 5);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver s = new Solver();
         int[] values = new int[]{1, 2, 0, 4, 3};
@@ -94,7 +94,7 @@ public class ElementTest {
         model(s, index, values, var, 0, 3);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         for (int j = 0; j < 100; j++) {
             Random r = new Random(j);
@@ -109,7 +109,7 @@ public class ElementTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver s = new Solver();
         int[] values = new int[]{0, 0, 1};
@@ -118,7 +118,7 @@ public class ElementTest {
         model(s, index, values, var, 1, 3);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test5() {
         Solver s = new Solver();
         s.set(new Settings() {
@@ -191,13 +191,13 @@ public class ElementTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBUG() {
         nasty(153, 15, 192);
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testInc1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
@@ -210,7 +210,7 @@ public class ElementTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testDec1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
@@ -223,7 +223,7 @@ public class ElementTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testReg1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
@@ -236,7 +236,7 @@ public class ElementTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testTAR1(){
         for (int i = 1; i < 20; i++) {
             Solver solver = new Solver();

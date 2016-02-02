@@ -60,7 +60,7 @@ import java.util.Random;
  */
 public class ObjectiveTest {
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver();
 
@@ -126,7 +126,7 @@ public class ObjectiveTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
         IntVar iv = VF.enumerated("iv", 0, 10, solver);
@@ -141,7 +141,7 @@ public class ObjectiveTest {
         Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         final Solver solver = new Solver();
         final IntVar iv = VF.enumerated("iv", 0, 10, solver);
@@ -179,7 +179,7 @@ public class ObjectiveTest {
         Assert.assertEquals(iv.getValue(), 6);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
         IntVar iv = VF.enumerated("iv", 0, 10, solver);
@@ -193,7 +193,7 @@ public class ObjectiveTest {
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testJL1() {
         Solver solver = new Solver();
         BoolVar b1 = VF.bool("b1", solver);
@@ -222,7 +222,7 @@ public class ObjectiveTest {
         Assert.assertEquals(count, 2);
     }
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void testJL2() {
 		Solver solver = new Solver();
 		IntVar a = VF.enumerated("a", -2, 2, solver);

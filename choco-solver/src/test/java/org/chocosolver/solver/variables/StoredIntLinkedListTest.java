@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
  */
 public class StoredIntLinkedListTest {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         EnvironmentTrailing environment = new EnvironmentTrailing();
         Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);
@@ -95,7 +95,7 @@ public class StoredIntLinkedListTest {
 
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         EnvironmentTrailing environment = new EnvironmentTrailing();
         Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);
@@ -128,7 +128,7 @@ public class StoredIntLinkedListTest {
 
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void test3() {
         EnvironmentTrailing environment = new EnvironmentTrailing();
         Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);

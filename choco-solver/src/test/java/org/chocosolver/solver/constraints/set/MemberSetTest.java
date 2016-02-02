@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -76,7 +76,7 @@ public class MemberSetTest {
         return count * comb;
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testJL253_enum() throws NoSuchFieldException, ContradictionException, IllegalAccessException {
         // Issue #253
         Random random = new Random();
@@ -98,7 +98,7 @@ public class MemberSetTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="10s", timeOut=60000)
     public void testJL253_bound() throws NoSuchFieldException, ContradictionException, IllegalAccessException {
         // Issue #253
         Random random = new Random();

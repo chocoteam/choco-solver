@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
  */
 public class CNFTest {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testJGF() {
         for (int i = 0; i < 2; i++) {
 

@@ -56,7 +56,7 @@ import java.util.Random;
  */
 public class AmongTest {
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -71,7 +71,7 @@ public class AmongTest {
         }
     }
 
-    @Test(groups = "1m")
+    @Test(groups="5m", timeOut=300000)
     public void testRandomProblems2() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -86,7 +86,7 @@ public class AmongTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         int n = 2;
         for (int i = 0; i < 500; i++) {
@@ -103,7 +103,7 @@ public class AmongTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         int n = 2;
         for (int i = 0; i < 500; i++) {
@@ -121,7 +121,7 @@ public class AmongTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
         IntVar[] vars = VariableFactory.enumeratedArray("o", 4, new int[]{0, 1, 2, 5}, solver);

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
-import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
@@ -79,7 +79,7 @@ public class MemberTest {
         return u;
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         for (int i = 1; i < 99; i++) {
             Random r = new Random(i);
@@ -105,7 +105,7 @@ public class MemberTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         for (int i = 1; i < 99; i++) {
             Random r = new Random(i);
@@ -133,7 +133,7 @@ public class MemberTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test_alxpgr() {
         Solver s = new Solver();
         IntVar vars = VariableFactory.enumerated("v", 0, 10, s);

@@ -121,9 +121,8 @@ public class TSP_Utils {
             return dist;
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(0);
+            throw new UnsupportedOperationException("error while reading instance in "+url);
         }
-        return null;
     }
 
     public static int getOptimum(String s, String url) {
@@ -137,9 +136,8 @@ public class TSP_Utils {
             return Integer.parseInt(line.split(";")[1]);
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(0);
+            throw new UnsupportedOperationException("error while reading optimum in "+url);
         }
-        throw new UnsupportedOperationException("could not load optimum");
     }
 
     private static void coordinates(int[][] dist, BufferedReader buf, String type) throws IOException {

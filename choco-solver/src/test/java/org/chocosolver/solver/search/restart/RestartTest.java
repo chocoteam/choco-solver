@@ -75,7 +75,7 @@ public class RestartTest {
         return solver;
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testGeometricalRestart1() {
         Solver solver = buildQ(4);
         SearchMonitorFactory.geometrical(solver, 2, 1.1, new NodeCounter(solver, 2), 2);
@@ -86,7 +86,7 @@ public class RestartTest {
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 12);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testLubyRestart1() {
         Solver solver = buildQ(4);
         SearchMonitorFactory.luby(solver, 2, 2, new NodeCounter(solver, 2), 2);
@@ -118,7 +118,7 @@ public class RestartTest {
         Assert.assertEquals(computed, expected);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testRestartStrategy() {
         AbstractRestartStrategy r = new LubyRestartStrategy(1, 2);
         checkRestart(r, 2, LUBY_2);
@@ -128,7 +128,7 @@ public class RestartTest {
         checkRestart(r, 1.3, GEOMETRIC_1_3);
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void test1() {
 
         for (int j = 1; j < 5; j++) {
@@ -149,7 +149,7 @@ public class RestartTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testGeometricalRestart2() {
         Solver solver = buildQ(8);
         SearchMonitorFactory.geometrical(solver, 10, 1.2, new FailCounter(solver, 10), 2);

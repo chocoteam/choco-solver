@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
 public class IteratorTest {
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBool1() {
         Solver solver = new Solver();
         BoolVar var = VariableFactory.bool("b", solver);
@@ -59,7 +59,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBool2() {
         Solver solver = new Solver();
         BoolVar var = VariableFactory.bool("b", solver);
@@ -71,7 +71,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBool3() {
         Solver solver = new Solver();
         BoolVar var = VariableFactory.bool("b", solver);
@@ -83,7 +83,7 @@ public class IteratorTest {
         Assert.assertFalse(rit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBool4() {
         Solver solver = new Solver();
         BoolVar var = VariableFactory.bool("b", solver);
@@ -95,7 +95,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBound1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.bounded("b", 1, 3, solver);
@@ -109,7 +109,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBound2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.bounded("b", 1, 3, solver);
@@ -123,7 +123,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBound3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.bounded("b", 1, 3, solver);
@@ -135,7 +135,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testBound4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.bounded("b", 1, 3, solver);
@@ -147,7 +147,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testEnum1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver);
@@ -161,7 +161,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testEnum2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver);
@@ -175,7 +175,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testEnum3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver);
@@ -191,7 +191,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testEnum4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver);
@@ -207,7 +207,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testCste1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.fixed(8, solver);
@@ -217,7 +217,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testCste2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.fixed(8, solver);
@@ -227,7 +227,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testCste3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.fixed(8, solver);
@@ -239,7 +239,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testCste4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.fixed(8, solver);
@@ -251,7 +251,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testOffset1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
@@ -273,7 +273,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testOffset2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
@@ -295,7 +295,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testOffset3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
@@ -319,7 +319,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testOffset4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
@@ -343,7 +343,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testScale1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.scale(VariableFactory.bounded("b", 1, 4, solver), 2);
@@ -359,7 +359,7 @@ public class IteratorTest {
         Assert.assertEquals(8, var.getUB());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testScale2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
@@ -383,7 +383,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testScale3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
@@ -413,7 +413,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testScale4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
@@ -443,7 +443,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMinus1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
@@ -465,7 +465,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMinus2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
@@ -487,7 +487,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMinus3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
@@ -511,7 +511,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMinus4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
@@ -535,7 +535,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testAbs1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
@@ -554,7 +554,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testAbs2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
@@ -573,7 +573,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testAbs3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
@@ -594,7 +594,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testAbs4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
@@ -615,7 +615,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMax1() {
         Solver solver = new Solver();
         IntVar var = Max.var(VariableFactory.enumerated("a", new int[]{3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
@@ -629,7 +629,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMax2() {
         Solver solver = new Solver();
         IntVar var = Max.var(VariableFactory.enumerated("a", new int[]{3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
@@ -643,7 +643,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMax3() {
         Solver solver = new Solver();
         IntVar var = Max.var(VariableFactory.enumerated("a", new int[]{3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
@@ -655,7 +655,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasNext());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testMax4() {
         Solver solver = new Solver();
         IntVar var = Max.var(VariableFactory.enumerated("a", new int[]{3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
@@ -667,7 +667,7 @@ public class IteratorTest {
         Assert.assertFalse(vit.hasPrevious());
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void JLiangWaterlooTest() throws ContradictionException {
         Solver s = new Solver();
         IntVar ivar = VF.enumerated("ivar", new int[]{1, 2, 3, 888, 1000, 2000}, s);

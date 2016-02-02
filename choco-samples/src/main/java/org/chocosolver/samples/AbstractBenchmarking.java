@@ -70,7 +70,7 @@ public abstract class AbstractBenchmarking {
             System.err.println("java " + this.getClass() + " [options...]");
             parser.printUsage(System.err);
             System.err.println();
-            System.exit(-1);
+            throw new UnsupportedOperationException("error while reading arguments in "+getClass().getSimpleName());
         }
     }
 

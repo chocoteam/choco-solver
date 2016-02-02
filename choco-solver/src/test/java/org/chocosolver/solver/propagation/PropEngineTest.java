@@ -57,7 +57,7 @@ import java.util.Arrays;
  */
 public class PropEngineTest {
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver("t1");
         IntVar x = VariableFactory.bounded("X", 1, 3, solver);
@@ -68,7 +68,7 @@ public class PropEngineTest {
         solver.findSolution();
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
         IntVar[] VARS = VF.enumeratedArray("X", 2, 0, 2, solver);
@@ -83,7 +83,7 @@ public class PropEngineTest {
     }
 
     // test clone in propagators
-    @Test(groups = "1s", expectedExceptions = AssertionError.class)
+    @Test(groups="1s", timeOut=60000, expectedExceptions = AssertionError.class)
     public void testClone() throws ContradictionException {
         Solver solver = new Solver();
         solver.set(new Settings() {
@@ -109,7 +109,7 @@ public class PropEngineTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void test3(){
         Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(8);
         solver.set(new SevenQueuesPropagatorEngine(solver));
@@ -117,7 +117,7 @@ public class PropEngineTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void test4(){
         Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(8);
         solver.set(new TwoBucketPropagationEngine(solver));
@@ -125,7 +125,7 @@ public class PropEngineTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
     }
 
-    @Test(groups="1s")
+    @Test(groups="10s", timeOut=60000)
     public void test5(){
         Solver solver = ProblemMaker.makeGolombRuler(10);
         solver.set(new SevenQueuesPropagatorEngine(solver));
@@ -134,7 +134,7 @@ public class PropEngineTest {
         Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
     }
 
-    @Test(groups="1s")
+    @Test(groups="10s", timeOut=60000)
     public void test6(){
         Solver solver = ProblemMaker.makeGolombRuler(10);
         solver.set(new TwoBucketPropagationEngine(solver));
@@ -143,7 +143,7 @@ public class PropEngineTest {
         Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
     }
     
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testGregy41(){
         for(int i = 0 ; i < 20; i++) {
             Solver solver = new Solver("Propagation condition");

@@ -66,12 +66,10 @@ public class SamplesTest {
     };
 
 
-    @Test(groups = "verylong")
+    @Test(groups="5m", timeOut=300000)
     public void testAll() {
         for (AbstractProblem pb : problems) {
             pb.execute();
         }
     }
-
-
 }

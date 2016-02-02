@@ -428,16 +428,19 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains the IntVar only (<b>excluding</b> BoolVar).
+     * Iterate over the variable of <code>this</code> and build an array that contains all the IntVar of the solver.
+     * <b>excludes</b> BoolVar if includeBoolVar=false.
      * It also contains FIXED variables and VIEWS, if any.
      *
+     * @param includeBoolVar indicates whether or not to include BoolVar
      * @return array of IntVars of <code>this</code>
      */
-    public IntVar[] retrieveIntVars() {
+    public IntVar[] retrieveIntVars(boolean includeBoolVar) {
         IntVar[] ivars = new IntVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.INT) {
+            int kind = (vars[i].getTypeAndKind() & Variable.KIND);
+            if (kind == Variable.INT || (includeBoolVar && kind == Variable.BOOL)) {
                 ivars[k++] = (IntVar) vars[i];
             }
         }
@@ -1149,7 +1152,8 @@ public class Solver implements Serializable {
                 }
             } else {
                 // BEWARE the usual optimization manager is only defined for mono-objective optimization
-                // so we use a satisfaction manager by default (it does nothing)
+                // so we use a satisfaction manager by default (which does nothing)
+                // with a pareto solution recorder that dynamically adds constraints to skip dominated solutions
                 if (!getObjectiveManager().isOptimization()) {
                     set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
                 }

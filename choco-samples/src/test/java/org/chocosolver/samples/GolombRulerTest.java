@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
 public class GolombRulerTest {
 
     public final static int[][] OPTIMAL_RULER = {
-            {5, 11}, {6, 17}, {7, 25}, {8, 34}, {9, 44}, {10, 55}, {11, 72}
+            {5, 11}, {6, 17}, {7, 25}, {8, 34}, {9, 44}, {10, 55}//, {11, 72}
     };
 
     protected Solver modeler(int m) {
@@ -58,26 +58,7 @@ public class GolombRulerTest {
         return pb.getSolver();
     }
 
-    @Test(groups = "verylong")
-    public void testSmall() {
-        Solver sol;
-        for (int j = 0; j < 4; j++) {
-            sol = modeler(OPTIMAL_RULER[j][0]);
-            sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
-            long sols = sol.getMeasures().getSolutionCount();
-            long nodes = sol.getMeasures().getNodeCount();
-            for (int k = 1; k < PropagationEngineFactory.values().length; k++) {
-                sol = modeler(OPTIMAL_RULER[j][0]);
-                PropagationEngineFactory.values()[k].make(sol);
-                sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
-                Assert.assertEquals(sol.getMeasures().getSolutionCount(), sols);
-                Assert.assertEquals(sol.getMeasures().getNodeCount(), nodes);
-
-            }
-        }
-    }
-
-    @Test(groups = "verylong")
+    @Test(groups="10s", timeOut=60000)
     public void testAll() {
         Solver sol;
         for (int j = 0; j < OPTIMAL_RULER.length; j++) {

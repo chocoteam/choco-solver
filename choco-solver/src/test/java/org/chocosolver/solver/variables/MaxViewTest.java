@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.choco.checker.DomainBuilder;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.LogicalConstraintFactory;
@@ -62,7 +62,7 @@ public class MaxViewTest {
         solver.post(IntConstraintFactory.maximum(z, x, y));
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void testMax1() {
         Random random = new Random();
         for (int seed = 1; seed < 9999; seed++) {
@@ -95,7 +95,7 @@ public class MaxViewTest {
         }
     }
 
-    @Test(groups = "10s")
+    @Test(groups="10s", timeOut=60000)
     public void testMax2() {
         Random random = new Random();
         for (int seed = 169; seed < 9999; seed++) {

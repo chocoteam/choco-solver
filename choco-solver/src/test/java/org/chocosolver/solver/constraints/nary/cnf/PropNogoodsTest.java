@@ -90,7 +90,7 @@ public class PropNogoodsTest {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testPropagate() throws Exception {
         try {
             PNG.propagate(2);
@@ -120,7 +120,7 @@ public class PropNogoodsTest {
         Assert.assertTrue(vars[2].isInstantiatedTo(0));
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testPropagate1() throws Exception {
         PNG.propagate(2);
         TIntList list = new TIntArrayList();
@@ -142,7 +142,7 @@ public class PropNogoodsTest {
         Assert.assertTrue(vars[2].isInstantiatedTo(0));
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIsEntailed1() throws Exception {
         vars[0].instantiateTo(0, Cause.Null);
         vars[1].instantiateTo(1, Cause.Null);
@@ -150,12 +150,12 @@ public class PropNogoodsTest {
         Assert.assertEquals(PNG.isEntailed(), ESat.TRUE);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIsEntailed2() throws Exception {
         Assert.assertEquals(PNG.isEntailed(), ESat.UNDEFINED);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testLiteral1() throws Exception {
         Assert.assertTrue(lits[0] == 1);
         Assert.assertTrue(lits[1] == 3);
@@ -165,7 +165,7 @@ public class PropNogoodsTest {
         Assert.assertTrue(lits[5] == 11);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testLiteral2() throws Exception {
         BoolVar[] b = VF.boolArray("B", 100, vars[0].getSolver());
         for(int i = 0 ; i < 100; i++){
@@ -174,7 +174,7 @@ public class PropNogoodsTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testVariableBound1(){
         try {
             vars[0].instantiateTo(0, Cause.Null);
@@ -195,7 +195,7 @@ public class PropNogoodsTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testVariableBound2() throws Exception{
         vars[0].instantiateTo(0, Cause.Null);
         try {
@@ -206,7 +206,7 @@ public class PropNogoodsTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testVariableBound3() throws Exception{
         vars[0].instantiateTo(1, Cause.Null);
         try {
@@ -216,7 +216,7 @@ public class PropNogoodsTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testVariableBound4(){
         try {
             vars[0].instantiateTo(1, Cause.Null);
@@ -227,12 +227,12 @@ public class PropNogoodsTest {
     }
 
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testApplyEarlyDeductions() throws Exception {
 
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testWhy() throws Exception {
         ExplanationEngine ee = new ExplanationEngine(vars[0].getSolver(), true, false);
 
@@ -263,31 +263,31 @@ public class PropNogoodsTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testDoReduce1() throws Exception {
         PNG.doReduce(1);
         Assert.assertTrue(vars[0].isInstantiatedTo(0));
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testDoReduce2() throws Exception {
         PNG.doReduce(0);
         Assert.assertFalse(vars[0].contains(0));
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testDoReduce3() throws Exception {
         PNG.doReduce(3);
         Assert.assertEquals(vars[0].getUB(),0);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testDoReduce4() throws Exception {
         PNG.doReduce(2);
         Assert.assertEquals(vars[0].getLB(),1);
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIvalue(){
         int[] values = {0, 1, -1, 10, -10, 181, -181, 210, -210};
         for(int value: values) {
@@ -298,7 +298,7 @@ public class PropNogoodsTest {
         }
     }
 
-    @Test(groups="1s")
+    @Test(groups="1s", timeOut=60000)
     public void testDeclareDomainNogood(){
         IntVar var = VF.enumerated("X4", -1, 1, vars[0].getSolver());
         PNG.declareDomainNogood(var);

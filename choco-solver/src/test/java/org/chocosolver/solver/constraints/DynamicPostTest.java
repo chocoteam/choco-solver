@@ -67,7 +67,7 @@ public class DynamicPostTest {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test0() {
         final Solver solver = new Solver();
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
@@ -79,7 +79,7 @@ public class DynamicPostTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         final Solver solver = new Solver();
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
@@ -110,7 +110,7 @@ public class DynamicPostTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         final Solver solver = new Solver();
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
@@ -136,7 +136,7 @@ public class DynamicPostTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         final Solver solver = new Solver();
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
@@ -154,7 +154,7 @@ public class DynamicPostTest {
         Assert.assertEquals(solver.getNbCstrs(), 0);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         final Solver solver = new Solver();
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
@@ -184,7 +184,7 @@ public class DynamicPostTest {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testJLpareto() {
         // Objectives are to maximize "a" and maximize "b".
         Solver solver = new Solver();
@@ -253,7 +253,7 @@ public class DynamicPostTest {
         Assert.assertEquals(9, nbSolution);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="1s", timeOut=60000)
     public void testIssue214() {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("x", 1, 2, solver);
@@ -267,7 +267,7 @@ public class DynamicPostTest {
         solver.unpost(c);
     }
 
-    @Test(groups = "1s")
+    @Test(groups="10s", timeOut=60000)
     public void testCostas() {
         Solver s1 = costasArray(7, false);
         Solver s2 = costasArray(7, true);

@@ -64,7 +64,7 @@ public class CumulativeTest {
 			}
 	}
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test1(){
 		test(4,5,0,2,0,0);
 		test(4,5,0,2,0,1);
@@ -74,27 +74,27 @@ public class CumulativeTest {
 		test(4,5,2,2,0,1);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test2(){
 		test(4,9,2,4,2,1);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test3(){
 		test(32,3,0,2,3,0);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test4(){
 		test(16,6,2,4,9,0);
 	}
 
-	@Test(groups = "1s")
+	@Test(groups="1s", timeOut=60000)
 	public void test5(){
 		test(32,3,2,4,1,0);
 	}
 
-	@Test(groups = "10s")
+	@Test(groups="10s", timeOut=60000)
 	public void test6(){
 		// this tests raises an exception which is in fact due to the time limit
 		// and unlucky random heuristic (fixed by adding last conflict)
@@ -102,17 +102,14 @@ public class CumulativeTest {
 		test(32,3,2,2,3,0);
 	}
 
-	@Test(groups = "1m")
+	@Test(groups="10s", timeOut=60000)
 	public void testMed(){
 		for(int mode:new int[]{0,1})
-			for(int n=1;n<20;n*=2){
+			for(int n=1;n<15;n*=2){
 				for(int dmin = 0; dmin<5;dmin+=2){
 					for(int hmax = 0; hmax<5;hmax+=2){
 						for(int capamax = 0; capamax<10;capamax+=3){
-							for(long seed = 0; seed<10;seed++){
-//								long seed = System.currentTimeMillis();
-								test(n,capamax,dmin,hmax,seed,mode);
-							}
+							test(n,capamax,dmin,hmax,0,mode);
 						}
 					}
 				}
@@ -158,7 +155,7 @@ public class CumulativeTest {
 		}
 		Constraint c = ICF.cumulative(t,h,capa,graph);
 		solver.post(c);
-		solver.set(ISF.random_bound(solver.retrieveIntVars(), seed));
+		solver.set(ISF.random_bound(solver.retrieveIntVars(false), seed));
 		solver.set(ISF.lastConflict(solver,solver.getStrategy()));
 		SMF.limitTime(solver,5000);
 		switch (mode){
@@ -174,5 +171,4 @@ public class CumulativeTest {
 			default:throw new UnsupportedOperationException();
 		}
 	}
-
 }
