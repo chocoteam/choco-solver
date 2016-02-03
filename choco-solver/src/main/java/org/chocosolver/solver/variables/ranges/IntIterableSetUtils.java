@@ -40,27 +40,30 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 25/01/2016.
  */
-public class IntIterableSetFactory {
+public class IntIterableSetUtils {
 
     /**
+     * Copy the domain of <i>var</i> in <i>set</i>.
+     * First, clear <i>set</i> then call {@link #union(IntIterableRangeSet, IntVar)}
      * TODO: more efficient operation
      *
      * @param var an integer variable
      * @param set set to transfer values to
      */
-    public static void dvar_set(IntVar var, IntIterableRangeSet set) {
+    public static void copyIn(IntVar var, IntIterableRangeSet set) {
         set.clear();
-        fd_union(set, var);
+        union(set, var);
     }
 
     /**
+     * Make union of <i>set1</i> and <i>set2</i> into a new IntIterableRangeSet.
      * TODO: more efficient operation
      *
      * @param set1 a set of ints
      * @param set2 a set of ints
-     * @return return the union of set and set2
+     * @return the union of set and set2
      */
-    public static IntIterableRangeSet fd_union(IntIterableRangeSet set1, IntIterableRangeSet set2) {
+    public static IntIterableRangeSet union(IntIterableRangeSet set1, IntIterableRangeSet set2) {
         IntIterableRangeSet t;
         if (set1.size() < set2.size()) {
             t = (IntIterableRangeSet) set1.duplicate();
@@ -73,12 +76,13 @@ public class IntIterableSetFactory {
     }
 
     /**
+     * Put all value of <i>var</i> into <i>set</i>.
      * TODO: more efficient operation
      *
      * @param set a set of ints
      * @param var a integer variable
      */
-    public static void fd_union(IntIterableRangeSet set, IntVar var) {
+    public static void union(IntIterableRangeSet set, IntVar var) {
         int ub = var.getUB();
         for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
             set.add(v);
@@ -91,7 +95,7 @@ public class IntIterableSetFactory {
      * @param set2 a set of ints
      * @return return a set which is the intersection of set1 and set2
      */
-    public static IntIterableRangeSet fd_intersection(IntIterableRangeSet set1, IntIterableRangeSet set2) {
+    public static IntIterableRangeSet intersection(IntIterableRangeSet set1, IntIterableRangeSet set2) {
         IntIterableRangeSet t;
         if (set1.size() < set2.size()) {
             t = (IntIterableRangeSet) set1.duplicate();
@@ -103,6 +107,51 @@ public class IntIterableSetFactory {
         return t;
     }
 
+
+    /**
+     * @param lbu lower bound (inclusive) of the universe
+     * @param ubu upper bound (inclusive) of the universe
+     * @return the complement of this set wrt to universe set [<i>lbu</i>, <i>ubu</i>].
+     * Values smaller than <i>lbu</i> and greater than <i>ubu</i> are ignored.
+     */
+    public static IntIterableRangeSet complement(IntIterableRangeSet set, int lbu, int ubu) {
+        assert lbu <= ubu;
+        IntIterableRangeSet t = new IntIterableRangeSet();
+        t.ELEMENTS = new int[set.SIZE + 2];
+        int i = 0, j = 0;
+        int lb = lbu;
+        while (i < set.SIZE && set.ELEMENTS[i] <= lbu) {
+            i += 2;
+            lb = set.ELEMENTS[i - 1]+1;
+        }
+        if(i == set.SIZE){
+            if(lb < ubu) {
+                t.ELEMENTS[j++] = lb;
+                t.ELEMENTS[j++] = ubu;
+                t.CARDINALITY += t.ELEMENTS[j - 1] - t.ELEMENTS[j - 2] + 1;
+                t.SIZE += 2;
+            }// else: empty set
+        }else{
+            assert set.ELEMENTS[i] > lb;
+            t.ELEMENTS[j++] = lb;
+            t.ELEMENTS[j++] = set.ELEMENTS[i++] - 1;
+            t.CARDINALITY += t.ELEMENTS[j - 1] - t.ELEMENTS[j - 2] + 1;
+            t.SIZE += 2;
+            while (i < set.SIZE - 2 && set.ELEMENTS[i] < ubu) {
+                t.ELEMENTS[j++] = set.ELEMENTS[i++] + 1;
+                t.ELEMENTS[j++] = set.ELEMENTS[i++] - 1;
+                t.CARDINALITY += t.ELEMENTS[j - 1] - t.ELEMENTS[j - 2] + 1;
+                t.SIZE += 2;
+            }
+            if (set.ELEMENTS[i] < ubu) {
+                t.ELEMENTS[j++] = set.ELEMENTS[i++] + 1;
+                t.ELEMENTS[j++] = ubu;
+                t.CARDINALITY += t.ELEMENTS[j - 1] - t.ELEMENTS[j - 2] + 1;
+                t.SIZE += 2;
+            }
+        }
+        return t;
+    }
 
     /**
      * @param set1 a set of ints

@@ -461,7 +461,7 @@ public class IntIterableRangeSetTest {
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
             IntIterableRangeSet s1 = plus1(t1, t2);
-            IntIterableRangeSet s2 = IntIterableSetFactory.plus(t1, t2);
+            IntIterableRangeSet s2 = IntIterableSetUtils.plus(t1, t2);
             Assert.assertEquals(s2.SIZE, s1.SIZE);
             Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
             Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
@@ -487,7 +487,7 @@ public class IntIterableRangeSetTest {
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
             IntIterableRangeSet s1 = minus1(t1, t2);
-            IntIterableRangeSet s2 = IntIterableSetFactory.minus(t1, t2);
+            IntIterableRangeSet s2 = IntIterableSetUtils.minus(t1, t2);
             Assert.assertEquals(s2.SIZE, s1.SIZE);
             Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
             Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));

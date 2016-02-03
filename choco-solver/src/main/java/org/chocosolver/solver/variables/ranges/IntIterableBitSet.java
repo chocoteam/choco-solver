@@ -204,4 +204,14 @@ public class IntIterableBitSet implements IntIterableSet {
     public int size() {
         return VALUES.cardinality();
     }
+
+    @Override
+    public void plus(int x) {
+        this.OFFSET += x;
+    }
+
+    @Override
+    public void minus(int x) {
+        this.OFFSET -= x;
+    }
 }
