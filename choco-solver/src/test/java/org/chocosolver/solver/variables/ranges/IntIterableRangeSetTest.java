@@ -460,18 +460,8 @@ public class IntIterableRangeSetTest {
             // build t1
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
-
-            System.out.printf("%s + %s\n", Arrays.toString(Arrays.copyOf(t1.ELEMENTS, t1.SIZE)), Arrays.toString(Arrays.copyOf(t2.ELEMENTS, t2.SIZE)));
-
-
-            long c = -System.nanoTime();
             IntIterableRangeSet s1 = plus1(t1, t2);
-            c += System.nanoTime();
-            System.out.printf("(%.3f)\t%s\n", c/1000/1000d, Arrays.toString(Arrays.copyOf(s1.ELEMENTS, s1.SIZE)));
-            c = -System.nanoTime();
             IntIterableRangeSet s2 = IntIterableSetFactory.plus(t1, t2);
-            c += System.nanoTime();
-            System.out.printf("(%.3f)\t%s\n", c/1000/1000d, Arrays.toString(Arrays.copyOf(s2.ELEMENTS, s2.SIZE)));
             Assert.assertEquals(s2.SIZE, s1.SIZE);
             Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
             Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
@@ -496,18 +486,8 @@ public class IntIterableRangeSetTest {
             // build t1
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
-
-            System.out.printf("%s - %s\n", Arrays.toString(Arrays.copyOf(t1.ELEMENTS, t1.SIZE)), Arrays.toString(Arrays.copyOf(t2.ELEMENTS, t2.SIZE)));
-
-
-            long c = -System.nanoTime();
             IntIterableRangeSet s1 = minus1(t1, t2);
-            c += System.nanoTime();
-            System.out.printf("(%.3f)\t%s\n", c/1000/1000d, Arrays.toString(Arrays.copyOf(s1.ELEMENTS, s1.SIZE)));
-            c = -System.nanoTime();
             IntIterableRangeSet s2 = IntIterableSetFactory.minus(t1, t2);
-            c += System.nanoTime();
-            System.out.printf("(%.3f)\t%s\n", c/1000/1000d, Arrays.toString(Arrays.copyOf(s2.ELEMENTS, s2.SIZE)));
             Assert.assertEquals(s2.SIZE, s1.SIZE);
             Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
             Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));

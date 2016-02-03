@@ -70,8 +70,7 @@ public class TreeTest {
 			));
 		}
 		solver.set(ISF.random(VS,0));
-		Chatterbox.showStatistics(solver);
-		Chatterbox.showSolutions(solver);
+		Chatterbox.showShortStatistics(solver);
 		return solver;
 	}
 }
