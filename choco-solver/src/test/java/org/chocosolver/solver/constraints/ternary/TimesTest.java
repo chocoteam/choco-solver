@@ -37,10 +37,12 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
 
 /**
  * <br/>
@@ -63,10 +65,10 @@ public class TimesTest extends AbstractTernaryTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testJL() {
 	    Solver s = new Solver();
-	    IntVar a = VariableFactory.enumerated("a", 0, 3, s);
-	    IntVar b = VariableFactory.enumerated("b", -3, 3, s);
+		IntVar a = s.makeIntVar("a", 0, 3, false);
+		IntVar b = s.makeIntVar("b", -3, 3, false);
 
-	    IntVar z = VariableFactory.enumerated("z", 3, 4, s);
+		IntVar z = s.makeIntVar("z", 3, 4, false);
 	    s.post(ICF.arithm(z, "=", 3));
 	    Constraint c = ICF.times(a, b, z);
 	    s.post(c);
@@ -87,8 +89,8 @@ public class TimesTest extends AbstractTernaryTest {
 		for(int i = 1 ; i < 100001; i*=10) {
 			System.out.printf("%d\n", 465 * i);
 			Solver s = new Solver();
-			IntVar i1 = VariableFactory.enumerated("i1", 0, 465 * i, s);
-			IntVar i2 = VariableFactory.enumerated("i2", 0, 465 * i, s);
+			IntVar i1 = s.makeIntVar("i1", 0, 465 * i, false);
+			IntVar i2 = s.makeIntVar("i2", 0, 465 * i, false);
 			s.post(ICF.times(i1, 465 * i, i2));
 			s.findAllSolutions();
 			Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
@@ -100,8 +102,8 @@ public class TimesTest extends AbstractTernaryTest {
 		for(int i = 1 ; i < 1000001; i*=10) {
 			System.out.printf("%d\n", 465 * i);
 			Solver s = new Solver();
-			IntVar i1 = VariableFactory.bounded("i1", 0, 465 * i, s);
-			IntVar i2 = VariableFactory.bounded("i2", 0, 465 * i, s);
+			IntVar i1 = s.makeIntVar("i1", 0, 465 * i, true);
+			IntVar i2 = s.makeIntVar("i2", 0, 465 * i, true);
 			s.post(ICF.times(i1, 465 * i, i2));
 			s.findAllSolutions();
 			Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
@@ -111,8 +113,8 @@ public class TimesTest extends AbstractTernaryTest {
 	@Test(groups="10s", timeOut=60000)
 	public void testJL4() {
 		Solver s = new Solver();
-		IntVar i1 = VariableFactory.enumerated("i1", 0, 465, s);
-		IntVar i2 = VariableFactory.enumerated("i2", 0, 465 * 10000, s);
+		IntVar i1 = s.makeIntVar("i1", 0, 465, false);
+		IntVar i2 = s.makeIntVar("i2", 0, 465 * 10000, false);
 		s.post(ICF.times(i1, 10000, i2));
 		s.findAllSolutions();
 		Assert.assertEquals(s.getMeasures().getSolutionCount(), 466);
@@ -120,8 +122,8 @@ public class TimesTest extends AbstractTernaryTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testJL5(){
 		Solver s = new Solver();
-		IntVar i1 = VariableFactory.bounded("i1", Integer.MIN_VALUE /10, Integer.MAX_VALUE /10, s);
-		IntVar i2 = VariableFactory.bounded("i2", Integer.MIN_VALUE/10, Integer.MAX_VALUE/10, s);
+		IntVar i1 = s.makeIntVar("i1", MIN_VALUE / 10, MAX_VALUE / 10, true);
+		IntVar i2 = s.makeIntVar("i2", MIN_VALUE / 10, MAX_VALUE / 10, true);
 		s.post(ICF.times(i1, 10000, i2));
 		s.findAllSolutions();
 		Assert.assertEquals(s.getMeasures().getSolutionCount(), Integer.MAX_VALUE/100000 * 2 + 1);
@@ -136,9 +138,9 @@ public class TimesTest extends AbstractTernaryTest {
 				return false;
 			}
 		});
-		IntVar i1 = VariableFactory.enumerated("i1", new int[]{1, 55000}, s);
-		IntVar i2 = VariableFactory.enumerated("i2", new int[]{1, 55000}, s);
-		IntVar i3 = VariableFactory.enumerated("i3", new int[]{1, 55000}, s);
+		IntVar i1 = s.makeIntVar("i1", new int[]{1, 55000});
+		IntVar i2 = s.makeIntVar("i2", new int[]{1, 55000});
+		IntVar i3 = s.makeIntVar("i3", new int[]{1, 55000});
 		s.post(ICF.times(i1, i2, i3));
 	}
 
@@ -151,9 +153,9 @@ public class TimesTest extends AbstractTernaryTest {
                 return true;
             }
         });
-        IntVar i1 = VariableFactory.enumerated("i1", new int[]{1, 10000}, s);
-        IntVar i2 = VariableFactory.enumerated("i2", new int[]{1, 10000}, s);
-        IntVar i3 = VariableFactory.enumerated("i3", new int[]{1, 10000}, s);
+		IntVar i1 = s.makeIntVar("i1", new int[]{1, 10000});
+		IntVar i2 = s.makeIntVar("i2", new int[]{1, 10000});
+		IntVar i3 = s.makeIntVar("i3", new int[]{1, 10000});
         s.post(ICF.times(i1, i2, i3));
     }
 

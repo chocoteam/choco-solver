@@ -38,8 +38,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
@@ -70,9 +68,9 @@ public class DynamicPostTest {
     @Test(groups="1s", timeOut=60000)
     public void test0() {
         final Solver solver = new Solver();
-        final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
-        final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
-        final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
+        final IntVar X = solver.makeIntVar("X", 1, 2, false);
+        final IntVar Y = solver.makeIntVar("Y", 1, 2, false);
+        final IntVar Z = solver.makeIntVar("Z", 1, 2, false);
         solver.set(engine.make(solver));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
@@ -82,9 +80,9 @@ public class DynamicPostTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         final Solver solver = new Solver();
-        final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
-        final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
-        final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
+        final IntVar X = solver.makeIntVar("X", 1, 2, false);
+        final IntVar Y = solver.makeIntVar("Y", 1, 2, false);
+        final IntVar Z = solver.makeIntVar("Z", 1, 2, false);
 
         solver.post(new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{X, Y, Z},
@@ -113,9 +111,9 @@ public class DynamicPostTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         final Solver solver = new Solver();
-        final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
-        final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
-        final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
+        final IntVar X = solver.makeIntVar("X", 1, 2, false);
+        final IntVar Y = solver.makeIntVar("Y", 1, 2, false);
+        final IntVar Z = solver.makeIntVar("Z", 1, 2, false);
         solver.plugMonitor(new IMonitorOpenNode() {
             @Override
             public void beforeOpenNode() {
@@ -139,9 +137,9 @@ public class DynamicPostTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         final Solver solver = new Solver();
-        final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
-        final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
-        final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
+        final IntVar X = solver.makeIntVar("X", 1, 2, false);
+        final IntVar Y = solver.makeIntVar("Y", 1, 2, false);
+        final IntVar Z = solver.makeIntVar("Z", 1, 2, false);
         Constraint c1 = IntConstraintFactory.arithm(X, "=", Y);
         Constraint c2 = IntConstraintFactory.arithm(X, "=", Z);
         solver.post(c1);
@@ -157,9 +155,9 @@ public class DynamicPostTest {
     @Test(groups="1s", timeOut=60000)
     public void test4() {
         final Solver solver = new Solver();
-        final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
-        final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
-        final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
+        final IntVar X = solver.makeIntVar("X", 1, 2, false);
+        final IntVar Y = solver.makeIntVar("Y", 1, 2, false);
+        final IntVar Z = solver.makeIntVar("Z", 1, 2, false);
         final Constraint c1 = IntConstraintFactory.arithm(X, "=", Y);
         final Constraint c2 = IntConstraintFactory.arithm(X, "=", Z);
         solver.post(c1);
@@ -188,16 +186,16 @@ public class DynamicPostTest {
     public void testJLpareto() {
         // Objectives are to maximize "a" and maximize "b".
         Solver solver = new Solver();
-        IntVar a = VariableFactory.enumerated("a", 0, 2, solver);
-        IntVar b = VariableFactory.enumerated("b", 0, 2, solver);
-        IntVar c = VariableFactory.enumerated("c", 0, 2, solver);
+        IntVar a = solver.makeIntVar("a", 0, 2, false);
+        IntVar b = solver.makeIntVar("b", 0, 2, false);
+        IntVar c = solver.makeIntVar("c", 0, 2, false);
 
         solver.post(ICF.arithm(a, "+", b, "<", 3));
 
         // START extra variables/constraints for guided improvement algorithm
         List<Constraint> stack = new ArrayList<>();
-        IntVar lbA = VariableFactory.enumerated("lbA", 0, 2, solver);
-        IntVar lbB = VariableFactory.enumerated("lbB", 0, 2, solver);
+        IntVar lbA = solver.makeIntVar("lbA", 0, 2, false);
+        IntVar lbB = solver.makeIntVar("lbB", 0, 2, false);
         BoolVar aSBetter = ICF.arithm(a, ">", lbA).reif();
         BoolVar bSBetter = ICF.arithm(b, ">", lbB).reif();
         BoolVar aBetter = ICF.arithm(a, ">=", lbA).reif();
@@ -256,9 +254,9 @@ public class DynamicPostTest {
     @Test(groups="1s", timeOut=60000)
     public void testIssue214() {
         Solver solver = new Solver();
-        IntVar x = VariableFactory.enumerated("x", 1, 2, solver);
-        IntVar y = VariableFactory.enumerated("y", 1, 2, solver);
-        IntVar z = VariableFactory.enumerated("z", 1, 2, solver);
+        IntVar x = solver.makeIntVar("x", 1, 2, false);
+        IntVar y = solver.makeIntVar("y", 1, 2, false);
+        IntVar z = solver.makeIntVar("z", 1, 2, false);
         Constraint c = LCF.or(
                 ICF.arithm(x, "<", y),
                 ICF.arithm(x, "<", z));

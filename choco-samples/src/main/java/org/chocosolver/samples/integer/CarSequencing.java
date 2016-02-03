@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 import java.util.Scanner;
@@ -82,7 +81,7 @@ public class CarSequencing extends AbstractProblem {
         parse(data.source());
         prepare();
         int max = nClasses - 1;
-        cars = VariableFactory.enumeratedArray("cars", nCars, 0, max, solver);
+        cars = solver.makeIntVarArray("cars", nCars, 0, max, false);
 
         IntVar[] expArray = new IntVar[nClasses];
 
@@ -95,21 +94,21 @@ public class CarSequencing extends AbstractProblem {
                 IntVar[] atMost = new IntVar[nbConf];
                 for (int i = 0; i < nbConf; i++) {
                     // optfreq[optNum][0] times AT MOST
-                    atMost[i] = VariableFactory.bounded("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], solver);
+                    atMost[i] = solver.makeIntVar("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], true);
                 }
                 solver.post(IntConstraintFactory.global_cardinality(carSequence, options[optNum], atMost, false));
-                IntVar[] atLeast = VariableFactory.boundedArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, solver);
+                IntVar[] atLeast = solver.makeIntVarArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, true);
                 solver.post(IntConstraintFactory.global_cardinality(carSequence, idleConfs[optNum], atLeast, false));
 
                 // all others configurations may be chosen
-                IntVar sum = VariableFactory.bounded("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, solver);
+                IntVar sum = solver.makeIntVar("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, true);
                 solver.post(IntConstraintFactory.sum(atLeast, "=", sum));
             }
         }
 
         int[] values = new int[expArray.length];
         for (int i = 0; i < expArray.length; i++) {
-            expArray[i] = VariableFactory.enumerated("var_" + i, 0, demands[i], solver);
+            expArray[i] = solver.makeIntVar("var_" + i, 0, demands[i], false);
             values[i] = i;
         }
         solver.post(IntConstraintFactory.global_cardinality(cars, values, expArray, false));

@@ -49,7 +49,7 @@ public class NQueenGlobal extends AbstractNQueen {
         IntVar[] diag2 = new IntVar[n];
 
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
+            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
             diag1[i] = VariableFactory.offset(vars[i], i);
             diag2[i] = VariableFactory.offset(vars[i], -i);
         }

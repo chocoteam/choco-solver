@@ -33,7 +33,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -421,7 +423,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that SET belongs to SETS
      */
     public static Constraint member(SetVar[] SETS, SetVar SET) {
-        IntVar index = VariableFactory.enumerated("idx_tmp", 0, SETS.length - 1, SET.getSolver());
+        IntVar index = SET.getSolver().makeIntVar("idx_tmp", 0, SETS.length - 1, false);
         return element(index, SETS, 0, SET);
     }
 
@@ -457,7 +459,7 @@ public class SetConstraintsFactory {
         IntVar integer = INTEGER;
         if (!INTEGER.hasEnumeratedDomain()) {
             Solver s = INTEGER.getSolver();
-            integer = VariableFactory.enumerated("enumViewOf(" + INTEGER.getName() + ")", INTEGER.getLB(), INTEGER.getUB(), s);
+            integer = s.makeIntVar("enumViewOf(" + INTEGER.getName() + ")", INTEGER.getLB(), INTEGER.getUB(), false);
             s.post(ICF.arithm(integer, "=", INTEGER));
         }
         return new Constraint("SetNotMember",

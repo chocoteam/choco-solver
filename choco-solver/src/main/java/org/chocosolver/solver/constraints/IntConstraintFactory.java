@@ -84,12 +84,16 @@ import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.util.tools.StringUtils;
 
 import java.util.Arrays;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -419,8 +423,8 @@ public class IntConstraintFactory {
         int xu = Math.abs(X.getUB());
         int b = Math.max(xl, xu);
         Solver solver = X.getSolver();
-        IntVar t1 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
-        IntVar t2 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
+        IntVar t1 = solver.makeIntVar(randomName(), -b, b, true);
+        IntVar t2 = solver.makeIntVar(randomName(), -b, b, true);
         solver.post(eucl_div(X, Y, t1));
         solver.post(times(t1, Y, t2));
         return sum(new IntVar[]{Z, t2}, "=", X);
@@ -619,12 +623,12 @@ public class IntConstraintFactory {
         int nbBins = BIN_LOAD.length;
         int nbItems = ITEM_BIN.length;
         Solver s = ITEM_BIN[0].getSolver();
-        BoolVar[][] xbi = VariableFactory.boolMatrix("xbi", nbBins, nbItems, s);
+        BoolVar[][] xbi = s.makeBoolVarMatrix("xbi", nbBins, nbItems);
         int sum = 0;
         for (int is : ITEM_SIZE) {
             sum += is;
         }
-        IntVar sumView = VariableFactory.fixed(sum, s);
+        IntVar sumView = s.makeIntVar(sum);
         // constraints
         Constraint[] bpcons = new Constraint[nbItems + nbBins + 1];
         for (int i = 0; i < nbItems; i++) {
@@ -650,7 +654,7 @@ public class IntConstraintFactory {
         if (VAR.hasEnumeratedDomain()) {
             return new Constraint("DomainChanneling", new PropEnumDomainChanneling(BVARS, VAR, OFFSET));
         } else {
-            IntVar enumV = VariableFactory.enumerated(VAR.getName() + "_enumImage", VAR.getLB(), VAR.getUB(), VAR.getSolver());
+            IntVar enumV = VAR.getSolver().makeIntVar(VAR.getName() + "_enumImage", VAR.getLB(), VAR.getUB(), false);
             return new Constraint("BoolChanneling",
                     new PropEnumDomainChanneling(BVARS, enumV, OFFSET),
                     new PropEqualX_Y(VAR, enumV)
@@ -784,7 +788,7 @@ public class IntConstraintFactory {
         } else if (VALUE.hasEnumeratedDomain()) {
             return new Constraint("Count", new PropCountVar(VARS, VALUE, LIMIT));
         } else {
-            IntVar EVALUE = VariableFactory.enumerated(StringUtils.randomName(), VALUE.getLB(), VALUE.getUB(), VALUE.getSolver());
+            IntVar EVALUE = VALUE.getSolver().makeIntVar(randomName(), VALUE.getLB(), VALUE.getUB(), false);
             return new Constraint("Count",
                     new PropEqualX_Y(EVALUE, VALUE),
                     new PropCountVar(VARS, EVALUE, LIMIT));
@@ -879,8 +883,8 @@ public class IntConstraintFactory {
             int miny = Integer.MAX_VALUE / 2;
             int maxy = Integer.MIN_VALUE / 2;
             for (int i = 0; i < X.length; i++) {
-                EX[i] = VariableFactory.bounded(StringUtils.randomName("diffn"), X[i].getLB() + WIDTH[i].getLB(), X[i].getUB() + WIDTH[i].getUB(), solver);
-                EY[i] = VariableFactory.bounded(StringUtils.randomName("diffn"), Y[i].getLB() + HEIGHT[i].getLB(), Y[i].getUB() + HEIGHT[i].getUB(), solver);
+                EX[i] = solver.makeIntVar(randomName("diffn"), X[i].getLB() + WIDTH[i].getLB(), X[i].getUB() + WIDTH[i].getUB(), true);
+                EY[i] = solver.makeIntVar(randomName("diffn"), Y[i].getLB() + HEIGHT[i].getLB(), Y[i].getUB() + HEIGHT[i].getUB(), true);
                 TX[i] = VariableFactory.task(X[i], WIDTH[i], EX[i]);
                 TY[i] = VariableFactory.task(Y[i], HEIGHT[i], EY[i]);
                 minx = Math.min(minx, X[i].getLB());
@@ -888,12 +892,12 @@ public class IntConstraintFactory {
                 maxx = Math.max(maxx, X[i].getUB() + WIDTH[i].getUB());
                 maxy = Math.max(maxy, Y[i].getUB() + HEIGHT[i].getUB());
             }
-            IntVar maxX = VariableFactory.bounded(StringUtils.randomName("diffn"), minx, maxx, solver);
-            IntVar minX = VariableFactory.bounded(StringUtils.randomName("diffn"), minx, maxx, solver);
-            IntVar diffX = VariableFactory.bounded(StringUtils.randomName("diffn"), 0, maxx - minx, solver);
-            IntVar maxY = VariableFactory.bounded(StringUtils.randomName("diffn"), miny, maxy, solver);
-            IntVar minY = VariableFactory.bounded(StringUtils.randomName("diffn"), miny, maxy, solver);
-            IntVar diffY = VariableFactory.bounded(StringUtils.randomName("diffn"), 0, maxy - miny, solver);
+            IntVar maxX = solver.makeIntVar(randomName("diffn"), minx, maxx, true);
+            IntVar minX = solver.makeIntVar(randomName("diffn"), minx, maxx, true);
+            IntVar diffX = solver.makeIntVar(randomName("diffn"), 0, maxx - minx, true);
+            IntVar maxY = solver.makeIntVar(randomName("diffn"), miny, maxy, true);
+            IntVar minY = solver.makeIntVar(randomName("diffn"), miny, maxy, true);
+            IntVar diffY = solver.makeIntVar(randomName("diffn"), 0, maxy - miny, true);
             return new Constraint[]{
                     diffNCons,
                     minimum(minX, X), maximum(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
@@ -961,7 +965,7 @@ public class IntConstraintFactory {
                 System.arraycopy(OCCURRENCES, 0, cards, 0, VALUES.length);
                 for (int i = VALUES.length; i < n2; i++) {
                     values[i] = toAdd.get(i - VALUES.length);
-                    cards[i] = VariableFactory.fixed(0, VARS[0].getSolver());
+                    cards[i] = VARS[0].getSolver().makeIntVar(0);
                 }
                 return new GlobalCardinality(VARS, values, cards);
             } else {
@@ -1114,7 +1118,7 @@ public class IntConstraintFactory {
             int n = VARS.length;
             PERMVARS = new IntVar[n];
             for (int p = 0; p < n; p++) {
-                PERMVARS[p] = VariableFactory.bounded("p_" + (p + 1), 1, n, VARS[0][0].getSolver());
+                PERMVARS[p] = VARS[0][0].getSolver().makeIntVar("p_" + (p + 1), 1, n, true);
             }
         }
         return new Constraint("keysorting", new PropKeysorting(VARS, SORTEDVARS, PERMVARS, K));
@@ -1295,7 +1299,7 @@ public class IntConstraintFactory {
                     return new Constraint[]{
                             arithm(START, "!=", END),
                             circuit(ArrayUtils.append(VARS, new IntVar[]{START}), OFFSET),
-                            element(VariableFactory.fixed(VARS.length + OFFSET, END.getSolver()), VARS, END, OFFSET)
+                            element(END.getSolver().makeIntVar(VARS.length + OFFSET), VARS, END, OFFSET)
                     };
                 }
         }
@@ -1338,7 +1342,7 @@ public class IntConstraintFactory {
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, int SCALAR) {
         assert VARS.length>0;
         Solver s = VARS[0].getSolver();
-        IntVar scalarVar = VariableFactory.fixed(SCALAR,s);
+        IntVar scalarVar = s.makeIntVar(SCALAR);
         return scalar(VARS,COEFFS,OPERATOR,scalarVar);
     }
 
@@ -1401,7 +1405,7 @@ public class IntConstraintFactory {
     public static Constraint subcircuit(IntVar[] VARS, int OFFSET, IntVar SUBCIRCUIT_SIZE) {
         int n = VARS.length;
         Solver solver = VARS[0].getSolver();
-        IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
+        IntVar nbLoops = solver.makeIntVar("nLoops", 0, n, true);
         return new Constraint("SubCircuit", ArrayUtils.append(
                 alldifferent(VARS).getPropagators(),
                 ArrayUtils.toArray(
@@ -1448,7 +1452,7 @@ public class IntConstraintFactory {
                 return new Constraint[]{
                         arithm(START, "<", VARS.length + OFFSET),
                         subcircuit(ArrayUtils.append(VARS, new IntVar[]{START}), OFFSET, VariableFactory.offset(SIZE, 1)),
-                        element(VariableFactory.fixed(VARS.length + OFFSET, END.getSolver()), VARS, END, OFFSET)
+                        element(END.getSolver().makeIntVar(VARS.length + OFFSET), VARS, END, OFFSET)
                 };
         }
     }
@@ -1475,7 +1479,7 @@ public class IntConstraintFactory {
     public static Constraint sum(IntVar[] VARS, String OPERATOR, int SUM) {
         assert VARS.length>0;
         Solver s = VARS[0].getSolver();
-        IntVar sumVar = VariableFactory.fixed(SUM,s);
+        IntVar sumVar = s.makeIntVar(SUM);
         return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), sumVar);
     }
 
@@ -1512,7 +1516,7 @@ public class IntConstraintFactory {
     public static Constraint sum(BoolVar[] VARS, String OPERATOR, int SUM) {
         assert VARS.length>0;
         Solver s = VARS[0].getSolver();
-        IntVar sumVar = VariableFactory.fixed(SUM,s);
+        IntVar sumVar = s.makeIntVar(SUM);
         return sum(VARS,OPERATOR,sumVar);
     }
 
@@ -1533,7 +1537,7 @@ public class IntConstraintFactory {
             lb += v.getLB();
             ub += v.getUB();
         }
-        IntVar p = VariableFactory.bounded(StringUtils.randomName(), lb, ub, SUM.getSolver());
+        IntVar p = SUM.getSolver().makeIntVar(randomName(), lb, ub, true);
         SUM.getSolver().post(sum(VARS, "=", p));
         return arithm(p, OPERATOR, SUM);
     }
@@ -1656,7 +1660,7 @@ public class IntConstraintFactory {
         assert n == COST_MATRIX.length && n == COST_MATRIX[0].length;
         IntVar[] costOf = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            costOf[i] = VariableFactory.enumerated("costOf(" + i + ")", COST_MATRIX[i], COST.getSolver());
+            costOf[i] = COST.getSolver().makeIntVar("costOf(" + i + ")", COST_MATRIX[i]);
         }
         Constraint[] model = new Constraint[n + 2];
         for (int i = 0; i < n; i++) {

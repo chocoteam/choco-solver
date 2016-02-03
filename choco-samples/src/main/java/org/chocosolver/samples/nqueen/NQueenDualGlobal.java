@@ -31,7 +31,6 @@ package org.chocosolver.samples.nqueen;
 
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -52,13 +51,13 @@ public class NQueenDualGlobal extends AbstractNQueen {
         IntVar[] dualdiag2 = new IntVar[n];
 
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-            diag1[i] = VariableFactory.enumerated("D1_" + i, 1, 2 * n, solver);
-            diag2[i] = VariableFactory.enumerated("D2_" + i, -n, n, solver);
+            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
+            diag1[i] = solver.makeIntVar("D1_" + i, 1, 2 * n, false);
+            diag2[i] = solver.makeIntVar("D2_" + i, -n, n, false);
 
-            dualvars[i] = VariableFactory.enumerated("DQ_" + i, 1, n, solver);
-            dualdiag1[i] = VariableFactory.enumerated("DD1_" + i, 1, 2 * n, solver);
-            dualdiag2[i] = VariableFactory.enumerated("DD2_" + i, -n, n, solver);
+            dualvars[i] = solver.makeIntVar("DQ_" + i, 1, n, false);
+            dualdiag1[i] = solver.makeIntVar("DD1_" + i, 1, 2 * n, false);
+            dualdiag2[i] = solver.makeIntVar("DD2_" + i, -n, n, false);
         }
 
         for (int i = 0; i < n; i++) {

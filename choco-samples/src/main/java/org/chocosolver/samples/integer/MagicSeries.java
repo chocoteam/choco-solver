@@ -63,7 +63,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.boundedArray("var", n, 0, n - 1, solver);
+        vars = solver.makeIntVarArray("var", n, 0, n - 1, true);
         counts = new Constraint[n];
         for (int i = 0; i < n; i++) {
             counts[i] = IntConstraintFactory.count(i, vars, VariableFactory.eq(vars[i]));

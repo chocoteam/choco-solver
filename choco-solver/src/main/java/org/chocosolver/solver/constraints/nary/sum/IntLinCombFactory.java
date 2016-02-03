@@ -39,6 +39,7 @@ import org.chocosolver.solver.variables.VariableFactory;
 import java.util.Arrays;
 
 import static org.chocosolver.solver.constraints.ICF.*;
+import static org.chocosolver.solver.variables.VariableFactory.toBoolVar;
 
 /**
  * A factory to reduce and detect specific cases related to integer linear combinations.
@@ -227,11 +228,11 @@ public class IntLinCombFactory {
                 Solver SOLVER = VARS[0].getSolver();
                 if (nbools == VARS.length) {
                     if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new Constraint("BoolSum", new PropSumBoolIncr(VariableFactory.toBoolVar(tmpV), b, OPERATOR,
-                                VariableFactory.fixed(RESULT, SOLVER), 0));
+                        return new Constraint("BoolSum", new PropSumBoolIncr(toBoolVar(tmpV), b, OPERATOR,
+                                SOLVER.makeIntVar(RESULT), 0));
                     } else {
-                        return new Constraint("BoolSum", new PropSumBool(VariableFactory.toBoolVar(tmpV), b, OPERATOR,
-                                VariableFactory.fixed(RESULT, SOLVER), 0));
+                        return new Constraint("BoolSum", new PropSumBool(toBoolVar(tmpV), b, OPERATOR,
+                                SOLVER.makeIntVar(RESULT), 0));
                     }
                 }
                 if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool()) {
@@ -263,7 +264,7 @@ public class IntLinCombFactory {
     public static Constraint selectScalar(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT) {
         Solver SOLVER = VARS[0].getSolver();
         if (VARS.length == 1 && OPERATOR == Operator.EQ) {
-            return times(VARS[0], COEFFS[0], VariableFactory.fixed(RESULT, SOLVER));
+            return times(VARS[0], COEFFS[0], SOLVER.makeIntVar(RESULT));
         }
         if (VARS.length == 2 && OPERATOR == Operator.EQ && RESULT == 0) {
             if (COEFFS[0] == 1) {

@@ -39,8 +39,9 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.util.tools.StringUtils;
 import org.testng.annotations.Test;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 public class EnvironmentTest {
 
@@ -49,13 +50,13 @@ public class EnvironmentTest {
 		int n = 14;
 		IntVar[] vars, vectors;
 		Solver solver = new Solver("CostasArrays");
-		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
+		vars = solver.makeIntVarArray("v", n, 0, n - 1, false);
 		vectors = new IntVar[n * n - n];
 		int idx = 0;
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (i != j) {
-					IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
+					IntVar k = solver.makeIntVar(randomName(), -20000, 20000, true);
 					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
 					// just to create many variables
 					IntConstraintFactory.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reif();

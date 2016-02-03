@@ -51,7 +51,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
@@ -69,7 +68,7 @@ public class MagicSequence extends AbstractProblem {
 
         int[] values = ArrayUtils.zeroToN(n);
 
-        x = VariableFactory.enumeratedArray("x", n, 0, n - 1, solver);
+        x = solver.makeIntVarArray("x", n, 0, n - 1, false);
 
         boolean closed = true; // restricts domains of VARS to VALUES if set to true
         solver.post(IntConstraintFactory.global_cardinality(x, values, x, closed));

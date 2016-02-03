@@ -37,7 +37,6 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Random;
@@ -70,10 +69,10 @@ public class SantaClaude extends AbstractProblem {
         Random rand = new Random(29091981);
         double precision = 1.e-6;
 
-        kid_gift = VariableFactory.enumeratedArray("g2k", n_kids, 0, n_gifts, solver);
-        kid_price = VariableFactory.enumeratedArray("p2k", n_kids, 0, max_price, solver);
-        total_cost = VariableFactory.bounded("total cost", 0, max_price * n_kids, solver);
-        average = VariableFactory.real("average", 0, max_price * n_kids, precision, solver);
+        kid_gift = solver.makeIntVarArray("g2k", n_kids, 0, n_gifts, false);
+        kid_price = solver.makeIntVarArray("p2k", n_kids, 0, max_price, false);
+        total_cost = solver.makeIntVar("total cost", 0, max_price * n_kids, true);
+        average = solver.makeRealVar("average", 0, max_price * n_kids, precision);
 
 
         gift_price = new int[n_gifts];
@@ -92,7 +91,7 @@ public class SantaClaude extends AbstractProblem {
         }
         funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
-        RealVar[] all_vars = ArrayUtils.append(VariableFactory.real(kid_price, precision), new RealVar[]{average});
+        RealVar[] all_vars = ArrayUtils.append(solver.makeRealViewArray(kid_price, precision), new RealVar[]{average});
         String function = funBuilder.toString();
 
         solver.post(new RealConstraint(function, all_vars));

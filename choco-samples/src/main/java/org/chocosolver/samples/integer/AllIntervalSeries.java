@@ -36,8 +36,9 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * CSPLib prob007:<br/>
@@ -74,17 +75,17 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
+        vars = solver.makeIntVarArray("v", m, 0, m - 1, false);
         dist = new IntVar[m - 1];
 
         if (!use_views) {
-            dist = VariableFactory.enumeratedArray("dist", m - 1, 1, m - 1, solver);
+            dist = solver.makeIntVarArray("dist", m - 1, 1, m - 1, false);
             for (int i = 0; i < m - 1; i++) {
                 solver.post(IntConstraintFactory.distance(vars[i + 1], vars[i], "=", dist[i]));
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
-				IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
+                IntVar k = solver.makeIntVar(randomName(), -20000, 20000, true);
 				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[i+1]));
 				dist[i] = VariableFactory.abs(k);
                 solver.post(IntConstraintFactory.member(dist[i], 1, m - 1));

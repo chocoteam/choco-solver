@@ -40,7 +40,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -49,8 +48,8 @@ public class SetIntUnion {
 	@Test(groups="1s", timeOut=60000)
 	public void test1() {
         Solver s = new Solver();
-        IntVar[] x = VariableFactory.enumeratedArray("ints", 4, 0, 5, s);
-        SetVar values = VariableFactory.fixed("values", new int[]{0, 1, 4}, s);
+        IntVar[] x = s.makeIntVarArray("ints", 4, 0, 5, false);
+        SetVar values = s.makeSetVar("values", new int[]{0, 1, 4});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
@@ -62,13 +61,13 @@ public class SetIntUnion {
 	public void test2() {
         Solver s = new Solver();
         IntVar[] x = new IntVar[]{
-                VariableFactory.fixed(0, s)
-                , VariableFactory.fixed(2, s)
-                , VariableFactory.fixed(5, s)
-                , VariableFactory.fixed(0, s)
-                , VariableFactory.fixed(2, s)
+                s.makeIntVar(0)
+                , s.makeIntVar(2)
+                , s.makeIntVar(5)
+                , s.makeIntVar(0)
+                , s.makeIntVar(2)
         };
-        SetVar values = VariableFactory.fixed("values", new int[]{0, 1, 4}, s);
+        SetVar values = s.makeSetVar("values", new int[]{0, 1, 4});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
@@ -81,13 +80,13 @@ public class SetIntUnion {
 	public void test3() {
         Solver s = new Solver();
         IntVar[] x = new IntVar[]{
-                VariableFactory.fixed(0, s)
-                , VariableFactory.fixed(2, s)
-                , VariableFactory.fixed(5, s)
-                , VariableFactory.fixed(0, s)
-                , VariableFactory.fixed(2, s)
+                s.makeIntVar(0)
+                , s.makeIntVar(2)
+                , s.makeIntVar(5)
+                , s.makeIntVar(0)
+                , s.makeIntVar(2)
         };
-        SetVar values = VariableFactory.set("values", -1, 6, s);
+        SetVar values = s.makeSetVar("values", new int[]{}, new int[]{-1,0,1,2,3,4,5,6});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);

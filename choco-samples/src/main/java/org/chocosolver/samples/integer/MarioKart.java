@@ -39,10 +39,11 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Random;
+
+import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
  *
@@ -233,14 +234,14 @@ public class MarioKart extends AbstractProblem {
 	/** Creation of CP variables */
 	private void variables() {
 		/* Choco variables */
-		fuelConsumed = VariableFactory.bounded("Fuel Consumption", 0, FUEL, solver);
-		goldFound = VariableFactory.bounded("Gold Found", 0, CITY_SIZE * MAX_GOLD, solver);
+		fuelConsumed = solver.makeIntVar("Fuel Consumption", 0, FUEL, true);
+		goldFound = solver.makeIntVar("Gold Found", 0, CITY_SIZE * MAX_GOLD, true);
 		/* Initialisation of the boolean matrix */
-		edges = VariableFactory.boolMatrix("edges", n, n, solver);
+		edges = solver.makeBoolVarMatrix("edges", n, n);
 		/* Initialisation of all the next value for each house */
-		next = VariableFactory.enumeratedArray("next", n, 0, n - 1, solver);
+		next = solver.makeIntVarArray("next", n, 0, n - 1, false);
 		/* Initialisation of the size variable */
-		size = VariableFactory.bounded("size", 2, n, solver);
+		size = solver.makeIntVar("size", 2, n, true);
 	}
 
 	/** Post all the constraints of the problem */
@@ -276,7 +277,7 @@ public class MarioKart extends AbstractProblem {
 		 * identifies the min/max fuel consumption involved by visiting each house */
 		IntVar[] fuelHouse = new IntVar[HOUSE_NUMBER];
 		for(int i=0;i<HOUSE_NUMBER;i++){
-			fuelHouse[i] = VariableFactory.enumerated("fuelHouse",0,FUEL,solver);
+			fuelHouse[i] = solver.makeIntVar("fuelHouse", 0, FUEL, false);
 			solver.post(ICF.element(fuelHouse[i],consumptions[i],next[i],0,"none"));
 		}
 		solver.post(ICF.sum(fuelHouse,"=",fuelConsumed));
@@ -289,8 +290,8 @@ public class MarioKart extends AbstractProblem {
 		for (int i = 0; i < goldMatrix.length; i++)
 			for (int j = 0; j < goldMatrix.length; j++)
 				goldMatrix[i][j] = (i == j) ? 0 : gold[i];
-		solver.post(ICF.knapsack(ArrayUtils.flatten(edges), VariableFactory.fixed(FUEL, solver),
-				goldFound, ArrayUtils.flatten(consumptions), ArrayUtils.flatten(goldMatrix)));
+		solver.post(ICF.knapsack(flatten(edges), solver.makeIntVar(FUEL),
+				goldFound, flatten(consumptions), flatten(goldMatrix)));
 	}
 
 	// SOME USEFUL METHODS

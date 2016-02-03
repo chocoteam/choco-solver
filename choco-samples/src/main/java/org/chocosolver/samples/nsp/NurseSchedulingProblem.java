@@ -37,7 +37,6 @@ package org.chocosolver.samples.nsp;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
 import java.util.HashMap;
@@ -107,18 +106,18 @@ public class NurseSchedulingProblem {
     }
 
     private void makeVariables(Solver solver) {
-        this.shifts = VariableFactory.enumeratedMatrix("S", data.nbEmployees(), data.nbDays(), 0, data.nbActivities() - 1, solver);
+        this.shifts = solver.makeIntVarMatrix("S", data.nbEmployees(), data.nbDays(), 0, data.nbActivities() - 1, false);
 
         this.occurrences = new IntVar[data.nbEmployees()][data.nbActivities()];
         for (int e = 0; e < data.nbEmployees(); e++) {
             for (int a = 0; a < occurrences[e].length; a++) {
-                occurrences[e][a] = VariableFactory.bounded("n" + data.getLiteral(a) + e, data.getCounterLB(e, a), data.getCounterUB(e, a), solver);
+                occurrences[e][a] = solver.makeIntVar("n" + data.getLiteral(a) + e, data.getCounterLB(e, a), data.getCounterUB(e, a), true);
             }
         }
 
         this.covers = new IntVar[data.nbActivities()][];
         for (int a = 0; a < covers.length; a++) {
-            this.covers[a] = VariableFactory.boundedArray("B", data.nbDays(), data.getCoverLB(a), data.getCoverUB(a), solver);
+            this.covers[a] = solver.makeIntVarArray("B", data.nbDays(), data.getCoverLB(a), data.getCoverUB(a), true);
         }
     }
 

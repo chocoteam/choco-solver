@@ -33,8 +33,8 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
 /**

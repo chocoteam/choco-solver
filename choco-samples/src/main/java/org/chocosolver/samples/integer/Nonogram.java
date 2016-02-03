@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 
@@ -47,6 +46,8 @@ import java.awt.event.WindowEvent;
 import java.awt.image.ImageObserver;
 import java.awt.image.PixelGrabber;
 import java.io.IOException;
+
+import static java.lang.String.format;
 
 /**
  * CSPLib prob012:<br/>
@@ -81,7 +82,7 @@ public class Nonogram extends AbstractProblem {
         vars = new BoolVar[nR][nC];
         for (int i = 0; i < nR; i++) {
             for (int j = 0; j < nC; j++) {
-                vars[i][j] = VariableFactory.bool(String.format("B_%d_%d", i, j), solver);
+                vars[i][j] = solver.makeBoolVar(format("B_%d_%d", i, j));
             }
         }
         for (int i = 0; i < nR; i++) {

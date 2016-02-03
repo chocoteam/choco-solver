@@ -31,10 +31,6 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
-import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
@@ -42,7 +38,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -59,10 +54,10 @@ public class LogicTreeTest {
     public void test1() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver);
-        BoolVar b = VariableFactory.bool("b", solver);
-        BoolVar c = VariableFactory.bool("c", solver);
-        BoolVar d = VariableFactory.bool("d", solver);
+        BoolVar a = solver.makeBoolVar("a");
+        BoolVar b = solver.makeBoolVar("b");
+        BoolVar c = solver.makeBoolVar("c");
+        BoolVar d = solver.makeBoolVar("d");
 
 
         LogOp root = LogOp.nand(LogOp.nor(a, b), LogOp.or(c, d));
@@ -76,11 +71,11 @@ public class LogicTreeTest {
     public void test12() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver);
-        BoolVar b = VariableFactory.bool("b", solver);
-        BoolVar c = VariableFactory.bool("c", solver);
-        BoolVar d = VariableFactory.bool("d", solver);
-        BoolVar e = VariableFactory.bool("e", solver);
+        BoolVar a = solver.makeBoolVar("a");
+        BoolVar b = solver.makeBoolVar("b");
+        BoolVar c = solver.makeBoolVar("c");
+        BoolVar d = solver.makeBoolVar("d");
+        BoolVar e = solver.makeBoolVar("e");
 
 
         LogOp root = LogOp.and(LogOp.nand(LogOp.nor(a, b), LogOp.or(c, d)), e);
@@ -95,10 +90,10 @@ public class LogicTreeTest {
     public void test2() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver).not();
-        BoolVar b = VariableFactory.bool("b", solver);
-        BoolVar c = VariableFactory.bool("c", solver);
-        BoolVar d = VariableFactory.bool("d", solver);
+        BoolVar a = solver.makeBoolVar("a").not();
+        BoolVar b = solver.makeBoolVar("b");
+        BoolVar c = solver.makeBoolVar("c");
+        BoolVar d = solver.makeBoolVar("d");
 
         LogOp root = LogOp.or(LogOp.or(LogOp.or(a, b), c), d);
 
@@ -111,9 +106,9 @@ public class LogicTreeTest {
     public void test3() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver);
-        BoolVar b = VariableFactory.bool("b", solver);
-        BoolVar c = VariableFactory.bool("c", solver);
+        BoolVar a = solver.makeBoolVar("a");
+        BoolVar b = solver.makeBoolVar("b");
+        BoolVar c = solver.makeBoolVar("c");
 
         LogOp root = LogOp.or(LogOp.and(a, b), c);
         root = LogicTreeToolBox.developOr(root);
@@ -125,10 +120,10 @@ public class LogicTreeTest {
     public void test4() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver).not();
-        BoolVar b = VariableFactory.bool("b", solver);
-        BoolVar c = VariableFactory.bool("c", solver);
-        BoolVar d = VariableFactory.bool("d", solver);
+        BoolVar a = solver.makeBoolVar("a").not();
+        BoolVar b = solver.makeBoolVar("b");
+        BoolVar c = solver.makeBoolVar("c");
+        BoolVar d = solver.makeBoolVar("d");
 
         LogOp root = LogOp.nor(LogOp.or(LogOp.nand(a, b), c), d);
 
@@ -142,10 +137,10 @@ public class LogicTreeTest {
     public void test5() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver).not();
-        BoolVar b = VariableFactory.bool("b", solver);
-        BoolVar c = VariableFactory.bool("c", solver);
-        BoolVar d = VariableFactory.bool("d", solver);
+        BoolVar a = solver.makeBoolVar("a").not();
+        BoolVar b = solver.makeBoolVar("b");
+        BoolVar c = solver.makeBoolVar("c");
+        BoolVar d = solver.makeBoolVar("d");
 
         LogOp root = LogOp.and(LogOp.and(LogOp.and(a, b), c), d);
 
@@ -159,8 +154,8 @@ public class LogicTreeTest {
     public void test6() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver);
-        BoolVar b = VariableFactory.bool("b", solver);
+        BoolVar a = solver.makeBoolVar("a");
+        BoolVar b = solver.makeBoolVar("b");
 
         LogOp root = LogOp.implies(a, b);
 
@@ -173,9 +168,9 @@ public class LogicTreeTest {
     public void test7() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver);
-        BoolVar b = VariableFactory.bool("b", solver);
-        BoolVar c = VariableFactory.bool("c", solver);
+        BoolVar a = solver.makeBoolVar("a");
+        BoolVar b = solver.makeBoolVar("b");
+        BoolVar c = solver.makeBoolVar("c");
 
 
         LogOp root = LogOp.ifThenElse(a, b, c);
@@ -189,12 +184,12 @@ public class LogicTreeTest {
     public void test8() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver);
+        BoolVar a = solver.makeBoolVar("a");
         BoolVar na = a.not();
-        BoolVar b = VariableFactory.bool("b", solver);
+        BoolVar b = solver.makeBoolVar("b");
         BoolVar nb = b.not();
-        BoolVar c = VariableFactory.bool("c", solver);
-        BoolVar d = VariableFactory.bool("d", solver);
+        BoolVar c = solver.makeBoolVar("c");
+        BoolVar d = solver.makeBoolVar("d");
 
         LogOp root = LogOp.and(LogOp.or(a, b, na), LogOp.or(c, d), LogOp.or(b, nb));
 
@@ -207,11 +202,11 @@ public class LogicTreeTest {
     public void test9() {
         Solver solver = new Solver();
 
-        BoolVar a = VariableFactory.bool("a", solver);
+        BoolVar a = solver.makeBoolVar("a");
         BoolVar na = a.not();
-        BoolVar b = VariableFactory.bool("b", solver);
-        BoolVar c = VariableFactory.bool("c", solver);
-        BoolVar d = VariableFactory.bool("d", solver);
+        BoolVar b = solver.makeBoolVar("b");
+        BoolVar c = solver.makeBoolVar("c");
+        BoolVar d = solver.makeBoolVar("d");
 
         LogOp root = LogOp.and(a, b, na, c, d);
 
@@ -224,7 +219,7 @@ public class LogicTreeTest {
     public void test10() {
 
         Solver solver = new Solver();
-        BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
+        BoolVar[] rows = solver.makeBoolVarArray("b", 3);
 
         LogicalConstraintFactory.ifThen(
 						rows[0],
@@ -238,7 +233,7 @@ public class LogicTreeTest {
 
         for (int seed = 0; seed < 2000; seed++) {
             Solver sCNF = new Solver();
-            BoolVar[] rCNF = VariableFactory.boolArray("b", 3, sCNF);
+            BoolVar[] rCNF = sCNF.makeBoolVarArray("b", 3);
             LogOp tree = LogOp.ifOnlyIf(
                     rCNF[0],
                     LogOp.and(rCNF[1], rCNF[2])
@@ -255,8 +250,8 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test11(){
         Solver solver = new Solver();
-        BoolVar a = VariableFactory.bool("a", solver);
-        BoolVar b = VariableFactory.bool("b", solver);
+        BoolVar a = solver.makeBoolVar("a");
+        BoolVar b = solver.makeBoolVar("b");
         LogOp l = LogOp.or(
                 LogOp.and(a, b.not()),
                 LogOp.and(a.not(), b),
@@ -269,8 +264,8 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test13(){
         Solver solver = new Solver();
-        BoolVar a = VariableFactory.bool("a", solver);
-        BoolVar b = VariableFactory.bool("b", solver);
+        BoolVar a = solver.makeBoolVar("a");
+        BoolVar b = solver.makeBoolVar("b");
         LogOp l = LogOp.or(a, b, a.not());
         ILogical ll = LogicTreeToolBox.toCNF(l, solver);
         Assert.assertEquals(ll.toString(), "cste -- 1 = 1");
@@ -280,8 +275,8 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test14(){
         Solver solver = new Solver();
-        BoolVar a = VariableFactory.bool("a", solver);
-        BoolVar b = VariableFactory.bool("b", solver);
+        BoolVar a = solver.makeBoolVar("a");
+        BoolVar b = solver.makeBoolVar("b");
         LogOp l = LogOp.or(a, b, a.not(), a.not());
         ILogical ll = LogicTreeToolBox.toCNF(l, solver);
         Assert.assertEquals(ll.toString(), "cste -- 1 = 1");
@@ -290,9 +285,9 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test15(){
         Solver solver = new Solver();
-        IntVar a = VariableFactory.enumerated("a", -1, 1, solver);
-        BoolVar b1 = VariableFactory.bool("b1", solver);
-        BoolVar b2 = VariableFactory.bool("b2", solver);
+        IntVar a = solver.makeIntVar("a", -1, 1, false);
+        BoolVar b1 = solver.makeBoolVar("b1");
+        BoolVar b2 = solver.makeBoolVar("b2");
         ICF.arithm(a,"=",0).reifyWith(b1);
         ICF.arithm(a,">",0).reifyWith(b2);
 
@@ -316,9 +311,9 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test16(){
         Solver solver = new Solver();
-        IntVar a = VariableFactory.enumerated("a", -1, 1, solver);
-        BoolVar b1 = VariableFactory.bool("b1", solver);
-        BoolVar b2 = VariableFactory.bool("b2", solver);
+        IntVar a = solver.makeIntVar("a", -1, 1, false);
+        BoolVar b1 = solver.makeBoolVar("b1");
+        BoolVar b2 = solver.makeBoolVar("b2");
         ICF.arithm(a,"=",0).reifyWith(b1);
         ICF.arithm(a,">",0).reifyWith(b2);
 
@@ -339,9 +334,9 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test17(){
         Solver solver = new Solver();
-        IntVar a = VariableFactory.enumerated("a", -1, 1, solver);
-        BoolVar b1 = VariableFactory.bool("b1", solver);
-        BoolVar b2 = VariableFactory.bool("b2", solver);
+        IntVar a = solver.makeIntVar("a", -1, 1, false);
+        BoolVar b1 = solver.makeBoolVar("b1");
+        BoolVar b2 = solver.makeBoolVar("b2");
         ICF.arithm(a,"=",0).reifyWith(b1);
         ICF.arithm(a,">",0).reifyWith(b2);
 

@@ -39,8 +39,6 @@ import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
@@ -60,8 +58,8 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver("t1");
-        IntVar x = VariableFactory.bounded("X", 1, 3, solver);
-        IntVar y = VariableFactory.bounded("Y", 1, 3, solver);
+        IntVar x = solver.makeIntVar("X", 1, 3, true);
+        IntVar y = solver.makeIntVar("Y", 1, 3, true);
         solver.post(IntConstraintFactory.arithm(x, ">=", y));
         solver.post(IntConstraintFactory.arithm(x, "<=", 2));
 
@@ -71,7 +69,7 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
-        IntVar[] VARS = VariableFactory.enumeratedArray("X", 2, 0, 2, solver);
+        IntVar[] VARS = solver.makeIntVarArray("X", 2, 0, 2, false);
         Constraint CSTR = ICF.arithm(VARS[0], "+", VARS[1], "=", 2);
         solver.post(CSTR, CSTR);
         solver.findAllSolutions();
@@ -92,7 +90,7 @@ public class PropEngineTest {
                 return false;
             }
         });
-        IntVar[] vars = VariableFactory.enumeratedArray("V", 3, 0, 4, solver);
+        IntVar[] vars = solver.makeIntVarArray("V", 3, 0, 4, false);
         solver.post(ICF.alldifferent(vars));
         Arrays.sort(vars, (o1, o2) -> o2.getId() - o1.getId());
 
@@ -147,7 +145,7 @@ public class PropEngineTest {
     public void testGregy41(){
         for(int i = 0 ; i < 20; i++) {
             Solver solver = new Solver("Propagation condition");
-            IntVar[] X = VariableFactory.enumeratedArray("X", 2, 0, 2, solver);
+            IntVar[] X = solver.makeIntVarArray("X", 2, 0, 2, false);
             solver.post(new Constraint("test", new Propagator(X, PropagatorPriority.UNARY, true) {
 
                 @Override

@@ -67,19 +67,19 @@ public class CumulativeSample extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
-		IntVar capa = VariableFactory.fixed(6,solver);
+		IntVar capa = solver.makeIntVar(6);
 		int n = 10;
 		int max = 1000;
-		makespan = VariableFactory.bounded("makespan",0,max,solver);
-		start = VariableFactory.boundedArray("start",n,0,max,solver);
+		makespan = solver.makeIntVar("makespan", 0, max, true);
+		start = solver.makeIntVarArray("start", n, 0, max, true);
 		IntVar[] end = new IntVar[n];
 		IntVar[] duration = new IntVar[n];
 		IntVar[] height = new IntVar[n];
 		Task[] task = new Task[n];
 		Random rd = new Random(0);
 		for(int i=0;i<n;i++){
-			duration[i] = VariableFactory.fixed(rd.nextInt(20)+1,solver);
-			height[i] = VariableFactory.fixed(rd.nextInt(5)+1,solver);
+			duration[i] = solver.makeIntVar(rd.nextInt(20) + 1);
+			height[i] = solver.makeIntVar(rd.nextInt(5) + 1);
 			end[i] = VariableFactory.offset(start[i],duration[i].getValue());
 			task[i] = new Task(start[i],duration[i],end[i]);
 		}

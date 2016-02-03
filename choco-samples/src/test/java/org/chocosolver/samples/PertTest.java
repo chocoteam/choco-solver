@@ -57,16 +57,16 @@ public class PertTest {
 
         IntVar masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden;
-        masonry = VariableFactory.bounded("masonry", 0, horizon, solver);
-        carpentry = VariableFactory.enumerated("carpentry", 0, horizon, solver);
-        plumbing = VariableFactory.enumerated("plumbing", 0, horizon, solver);
-        ceiling = VariableFactory.enumerated("ceiling", 0, horizon, solver);
-        roofing = VariableFactory.enumerated("roofing", 0, horizon, solver);
-        painting = VariableFactory.enumerated("painting", 0, horizon, solver);
-        windows = VariableFactory.enumerated("windows", 0, horizon, solver);
-        facade = VariableFactory.enumerated("facade", 0, horizon, solver);
-        garden = VariableFactory.enumerated("garden", 0, horizon, solver);
-        objective = VariableFactory.enumerated("moving", 0, horizon - 1, solver);
+        masonry = solver.makeIntVar("masonry", 0, horizon, true);
+        carpentry = solver.makeIntVar("carpentry", 0, horizon, false);
+        plumbing = solver.makeIntVar("plumbing", 0, horizon, false);
+        ceiling = solver.makeIntVar("ceiling", 0, horizon, false);
+        roofing = solver.makeIntVar("roofing", 0, horizon, false);
+        painting = solver.makeIntVar("painting", 0, horizon, false);
+        windows = solver.makeIntVar("windows", 0, horizon, false);
+        facade = solver.makeIntVar("facade", 0, horizon, false);
+        garden = solver.makeIntVar("garden", 0, horizon, false);
+        objective = solver.makeIntVar("moving", 0, horizon - 1, false);
 
         solver.post(precedence(masonry, 7, carpentry));
         solver.post(precedence(masonry, 7, plumbing));

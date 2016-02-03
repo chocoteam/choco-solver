@@ -33,7 +33,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.HashSet;
 
@@ -52,7 +51,7 @@ public class NQueenBinary extends AbstractNQueen {
         set = new HashSet<>();
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
+            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
         }
 
 

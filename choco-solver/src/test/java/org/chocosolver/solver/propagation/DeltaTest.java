@@ -38,7 +38,9 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.EnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.util.ESat;
@@ -67,8 +69,8 @@ public class DeltaTest {
     @Test(groups="1s", timeOut=60000)
     public void testEq() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VariableFactory.enumerated("X", 1, 6, solver);
-        IntVar y = VariableFactory.enumerated("Y", 1, 6, solver);
+        IntVar x = solver.makeIntVar("X", 1, 6, false);
+        IntVar y = solver.makeIntVar("Y", 1, 6, false);
 
         solver.post(IntConstraintFactory.arithm(x, "=", y));
 
@@ -85,13 +87,13 @@ public class DeltaTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL() {
         Solver solver = new Solver();
-        final SetVar s0 = VariableFactory.set("s0", 0, 1, solver);
-        final BoolVar b0 = VariableFactory.bool("b0", solver);
-        final BoolVar b1 = VariableFactory.bool("b1", solver);
-        final IntVar i0 = VariableFactory.bool("i0", solver);
+        final SetVar s0 = solver.makeSetVar("s0", new int[]{}, new int[]{0,1});
+        final BoolVar b0 = solver.makeBoolVar("b0");
+        final BoolVar b1 = solver.makeBoolVar("b1");
+        final IntVar i0 = solver.makeBoolVar("i0");
         solver.set(ISF.lexico_LB(i0));
         solver.post(SCF.bool_channel(new BoolVar[]{b0, b1}, s0, 0));
-        solver.post(SCF.cardinality(s0, VariableFactory.fixed(0, solver)));
+        solver.post(SCF.cardinality(s0, solver.makeIntVar(0)));
 
         solver.findSolution();
         solver.getSearchLoop().reset();
@@ -103,8 +105,8 @@ public class DeltaTest {
     public void testJL2() {
         for (int k = 0; k < 50; k++) {
             Solver s = new Solver();
-            final IntVar i = VariableFactory.enumerated("i", -2, 2, s);
-            final IntVar j = VariableFactory.enumerated("j", -2, 2, s);
+            final IntVar i = s.makeIntVar("i", -2, 2, false);
+            final IntVar j = s.makeIntVar("j", -2, 2, false);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
             s.set(ISF.random_value(new IntVar[]{i, j}));
@@ -117,8 +119,8 @@ public class DeltaTest {
     public void testJL3() {
         for (int k = 0; k < 10; k++) {
             Solver s = new Solver();
-            final IntVar i = VariableFactory.bounded("i", -2, 2, s);
-            final IntVar j = VariableFactory.bounded("j", -2, 2, s);
+            final IntVar i = s.makeIntVar("i", -2, 2, true);
+            final IntVar j = s.makeIntVar("j", -2, 2, true);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
             s.set(ISF.random_bound(new IntVar[]{i, j}));
@@ -131,8 +133,8 @@ public class DeltaTest {
     public void testJL4() {
         for (int k = 0; k < 10; k++) {
             Solver s = new Solver();
-            final IntVar i = VariableFactory.bool("i", s);
-            final IntVar j = VariableFactory.bool("j", s);
+            final IntVar i = s.makeBoolVar("i");
+            final IntVar j = s.makeBoolVar("j");
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
             s.set(ISF.random_value(new IntVar[]{i, j}));

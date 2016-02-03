@@ -41,7 +41,6 @@ import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
 
 /**
@@ -54,8 +53,8 @@ public class ELNSTest {
 
     private void small(long seed) {
         Solver solver = new Solver();
-        final IntVar[] vars = VariableFactory.boundedArray("var", 6, 0, 4, solver);
-        final IntVar obj = VariableFactory.bounded("obj", 0, 6, solver);
+        final IntVar[] vars = solver.makeIntVarArray("var", 6, 0, 4, true);
+        final IntVar obj = solver.makeIntVar("obj", 0, 6, true);
 
         solver.post(ICF.sum(vars, "=", obj));
         solver.post(ICF.arithm(vars[0], "+", vars[1], "<", 2));

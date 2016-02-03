@@ -58,7 +58,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 
 /**
@@ -79,14 +78,14 @@ public class SendMoreMoney extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        S = VariableFactory.enumerated("S", 0, 9, solver);
-        E = VariableFactory.enumerated("E", 0, 9, solver);
-        N = VariableFactory.enumerated("N", 0, 9, solver);
-        D = VariableFactory.enumerated("D", 0, 9, solver);
-        M = VariableFactory.enumerated("M", 0, 9, solver);
-        O = VariableFactory.enumerated("0", 0, 9, solver);
-        R = VariableFactory.enumerated("R", 0, 9, solver);
-        Y = VariableFactory.enumerated("Y", 0, 9, solver);
+        S = solver.makeIntVar("S", 0, 9, false);
+        E = solver.makeIntVar("E", 0, 9, false);
+        N = solver.makeIntVar("N", 0, 9, false);
+        D = solver.makeIntVar("D", 0, 9, false);
+        M = solver.makeIntVar("M", 0, 9, false);
+        O = solver.makeIntVar("0", 0, 9, false);
+        R = solver.makeIntVar("R", 0, 9, false);
+        Y = solver.makeIntVar("Y", 0, 9, false);
 
         solver.post(IntConstraintFactory.arithm(S, "!=", 0));
         solver.post(IntConstraintFactory.arithm(M, "!=", 0));

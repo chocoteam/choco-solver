@@ -38,7 +38,6 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -65,17 +64,17 @@ public class SmallSantaClaude {
         final int max_price = 24;
 
         // FD variables
-        final IntVar[] kid_gift = VariableFactory.enumeratedArray("g2k", n_kids, 0, n_gifts, solver);
-        final IntVar[] kid_price = VariableFactory.boundedArray("p2k", n_kids, min_price, max_price, solver);
-        final IntVar total_cost = VariableFactory.bounded("total cost", min_price * n_kids, max_price * n_kids, solver);
+        final IntVar[] kid_gift = solver.makeIntVarArray("g2k", n_kids, 0, n_gifts, false);
+        final IntVar[] kid_price = solver.makeIntVarArray("p2k", n_kids, min_price, max_price, true);
+        final IntVar total_cost = solver.makeIntVar("total cost", min_price * n_kids, max_price * n_kids, true);
 
         // CD variable
         double precision = 1.e-4;
-        final RealVar average = VariableFactory.real("average", min_price, max_price, precision, solver);
-        final RealVar average_deviation = VariableFactory.real("average_deviation", 0, max_price, precision, solver);
+        final RealVar average = solver.makeRealVar("average", min_price, max_price, precision);
+        final RealVar average_deviation = solver.makeRealVar("average_deviation", 0, max_price, precision);
 
         // continuous views of FD variables
-        RealVar[] realViews = VariableFactory.real(kid_price, precision);
+        RealVar[] realViews = solver.makeRealViewArray(kid_price, precision);
 
         // kids must have different gifts
         solver.post(IntConstraintFactory.alldifferent(kid_gift, "AC"));

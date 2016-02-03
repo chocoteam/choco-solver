@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
@@ -72,8 +71,8 @@ public class Contrived extends AbstractProblem {
         if (d == 0) {
             d = l + 1;
         }
-        v = VariableFactory.boundedArray("v", 5, 1, 50, solver);
-        w = VariableFactory.boundedArray("v", l, 1, d, solver);
+        v = solver.makeIntVarArray("v", 5, 1, 50, true);
+        w = solver.makeIntVarArray("v", l, 1, d, true);
 
         solver.post(IntConstraintFactory.alldifferent(v, "BC"));
         solver.post(IntConstraintFactory.alldifferent(w, "BC"));

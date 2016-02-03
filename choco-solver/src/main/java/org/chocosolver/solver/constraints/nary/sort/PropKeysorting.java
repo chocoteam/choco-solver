@@ -33,7 +33,6 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.sort.ArraySort;
 import org.chocosolver.util.sort.IntComparator;
@@ -115,7 +114,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             System.arraycopy(x[i], 0, X[i], 0, k);
             System.arraycopy(y[i], 0, Y[i], 0, k);
-            this.X[i][k] = VariableFactory.fixed(i + 1, solver);
+            this.X[i][k] = solver.makeIntVar(i + 1);
             this.Y[i][k] = p[i];
             System.arraycopy(x[i], k, X[i], k + 1, m - k);
             System.arraycopy(y[i], k, Y[i], k + 1, m - k);

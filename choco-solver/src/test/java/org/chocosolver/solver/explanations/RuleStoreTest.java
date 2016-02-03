@@ -37,7 +37,6 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -55,9 +54,9 @@ public class RuleStoreTest {
 
     public void setUp() {
         solver = new Solver();
-        E = VariableFactory.enumerated("E", 0, 6, solver);
-        I = VariableFactory.bounded("I", 0, 6, solver);
-        B = VariableFactory.bool("B", solver);
+        E = solver.makeIntVar("E", 0, 6, false);
+        I = solver.makeIntVar("I", 0, 6, true);
+        B = solver.makeBoolVar("B");
     }
 
     @Test(groups="1s", timeOut=60000)

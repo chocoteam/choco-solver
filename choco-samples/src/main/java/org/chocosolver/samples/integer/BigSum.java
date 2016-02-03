@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
 /**
@@ -56,7 +55,7 @@ public class BigSum extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.boundedArray("v", n, 0, 5000, solver);
+        vars = solver.makeIntVarArray("v", n, 0, 5000, true);
         solver.post(IntConstraintFactory.sum(vars, "=", 500000));
         solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
     }

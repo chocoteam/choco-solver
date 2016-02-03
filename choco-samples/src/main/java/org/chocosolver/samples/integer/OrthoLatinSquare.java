@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 import java.util.ArrayList;
@@ -64,9 +63,9 @@ public class OrthoLatinSquare extends AbstractProblem {
     @Override
     public void buildModel() {
         int mm = m * m;
-        square1 = VariableFactory.boundedArray("s1", mm, 1, m, solver);
-        square2 = VariableFactory.boundedArray("s2", mm, 1, m, solver);
-        vars = VariableFactory.enumeratedArray("vars", mm, 0, mm - 1, solver);
+        square1 = solver.makeIntVarArray("s1", mm, 1, m, true);
+        square2 = solver.makeIntVarArray("s2", mm, 1, m, true);
+        vars = solver.makeIntVarArray("vars", mm, 0, mm - 1, false);
 
         List<Constraint> ADS = new ArrayList<>();
 

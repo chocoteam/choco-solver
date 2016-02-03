@@ -44,7 +44,6 @@ import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * Small example enumerating solutions of
@@ -64,9 +63,9 @@ public class ReifSample extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		x = VariableFactory.enumerated("x", 0, 3, solver);
-		y = VariableFactory.enumerated("y",0,3,solver);
-		z = VariableFactory.enumerated("z",0,3,solver);
+		x = solver.makeIntVar("x", 0, 3, false);
+		y = solver.makeIntVar("y", 0, 3, false);
+		z = solver.makeIntVar("z", 0, 3, false);
 		Constraint imp = LCF.and(
 				ICF.arithm(x, ">", y),
 				ICF.arithm(y, ">", z),

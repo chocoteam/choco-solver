@@ -35,7 +35,10 @@ import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -146,8 +149,8 @@ public class RealTest {
         Solver solver = new Solver();
 
         double precision = 0.00000001;
-        IntVar x = VariableFactory.bounded("x", 0, 9, solver);
-        IntVar y = VariableFactory.bounded("y", 0, 9, solver);
+        IntVar x = solver.makeIntVar("x", 0, 9, true);
+        IntVar y = solver.makeIntVar("y", 0, 9, true);
         RealVar[] vars = new RealVar[]{VariableFactory.real(x, precision), VariableFactory.real(y, precision)};
         // Actually ,we need the calculated result like these :
         // x : [2.000000, 2.000000], y : [4.000000, 4.000000]
@@ -166,7 +169,7 @@ public class RealTest {
         Solver solver = new Solver();
 
         // Declare variables
-        RealVar attr = VariableFactory.real("attr", 0.0, 20.0, 0.1, solver);
+        RealVar attr = solver.makeRealVar("attr", 0.0, 20.0, 0.1);
 
         // Create and reify constraints to assign values to the real
         RealConstraint attrEquals1 = new RealConstraint("attrEquals1", "{0}=4.0", Ibex.HC4, attr);
@@ -193,7 +196,7 @@ public class RealTest {
     public void testFreemajb2() {
         Solver solver = new Solver();
 
-        RealVar x = VariableFactory.real("x", 0.0, 5.0, 0.001, solver);
+        RealVar x = solver.makeRealVar("x", 0.0, 5.0, 0.001);
         System.out.println("Before solving:");
 
         RealConstraint newRange = new RealConstraint("newRange", "1.4142<{0};{0}<3.1416", Ibex.HC4, x);

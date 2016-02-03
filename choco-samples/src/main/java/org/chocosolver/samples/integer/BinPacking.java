@@ -37,7 +37,6 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.AllSolutionsRecorder;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * Bin packing example
@@ -76,9 +75,9 @@ public class BinPacking extends AbstractProblem{
 		weights = d1_w;
 		nbBins  = d1_nb;
 		// variables
-		bins = VariableFactory.enumeratedArray("bin",nbItems,0,nbBins-1,solver);
-		loads= VariableFactory.boundedArray("load",nbBins,0,1000,solver);
-		minLoad = VariableFactory.bounded("minLoad",0,1000,solver);
+		bins = solver.makeIntVarArray("bin", nbItems, 0, nbBins - 1, false);
+		loads = solver.makeIntVarArray("load", nbBins, 0, 1000, true);
+		minLoad = solver.makeIntVar("minLoad", 0, 1000, true);
 		solver.post(ICF.bin_packing(bins,weights,loads,0));
 		solver.post(ICF.minimum(minLoad,loads));
 	}

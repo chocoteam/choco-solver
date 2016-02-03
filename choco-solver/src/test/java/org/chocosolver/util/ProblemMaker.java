@@ -34,7 +34,8 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.util.tools.StringUtils;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * A factory dedicated to problems creation.
@@ -55,7 +56,7 @@ public class ProblemMaker {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
+            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
         }
         solver.addHook("vars", vars);
         for (int i = 0; i < n - 1; i++) {
@@ -79,13 +80,13 @@ public class ProblemMaker {
     @SuppressWarnings("Duplicates")
     public static Solver makeCostasArrays(int n){
         Solver solver = new Solver();
-        IntVar[] vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
+        IntVar[] vars = solver.makeIntVarArray("v", n, 0, n - 1, false);
         IntVar[] vectors = new IntVar[(n*(n-1))/2];
         IntVar[][] diff = new IntVar[n][n];
         int idx = 0;
         for (int i = 0; i < n; i++) {
             for (int j = i+1; j < n; j++) {
-                IntVar k = VariableFactory.enumerated(StringUtils.randomName(), -n, n, solver);
+                IntVar k = solver.makeIntVar(randomName(), -n, n, false);
                 solver.post(ICF.arithm(k,"!=",0));
                 solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
                 vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
@@ -113,7 +114,7 @@ public class ProblemMaker {
     @SuppressWarnings("Duplicates")
     public static Solver makeGolombRuler(int m){
         Solver solver = new Solver();
-        IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+        IntVar[] ticks = solver.makeIntVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         solver.addHook("ticks", ticks);
         solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
 
@@ -121,7 +122,7 @@ public class ProblemMaker {
             solver.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
         }
 
-        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+        IntVar[] diffs = solver.makeIntVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         solver.addHook("diffs", diffs);
         IntVar[][] m_diffs = new IntVar[m][m];
         for (int k = 0, i = 0; i < m - 1; i++) {

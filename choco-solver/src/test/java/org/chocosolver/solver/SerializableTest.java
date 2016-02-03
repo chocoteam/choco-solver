@@ -29,14 +29,12 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -134,7 +132,7 @@ public class SerializableTest {
     @Test(groups="1s", timeOut=60000)
     public void testIntegerVariable() {
         Solver s = new Solver();
-        IntVar var = VariableFactory.enumerated("v", 1, 10, s);
+        IntVar var = s.makeIntVar("v", 1, 10, false);
         File file = null;
         try {
             file = write(var);
@@ -153,7 +151,7 @@ public class SerializableTest {
     @Test(groups="1s", timeOut=60000)
     public void testConstraint() {
         Solver s = new Solver();
-        IntVar var = VariableFactory.enumerated("v", 1, 10, s);
+        IntVar var = s.makeIntVar("v", 1, 10, false);
         Constraint c = IntConstraintFactory.arithm(var, "=", 0);
         File file = null;
         try {
@@ -176,7 +174,7 @@ public class SerializableTest {
         int n = 8;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, s);
+            vars[i] = s.makeIntVar("Q_" + i, 1, n, false);
         }
 
 

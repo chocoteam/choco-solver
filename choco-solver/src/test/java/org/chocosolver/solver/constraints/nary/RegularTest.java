@@ -39,8 +39,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -62,7 +60,7 @@ public class RegularTest {
         int n = 10;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
 
 
@@ -93,7 +91,7 @@ public class RegularTest {
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
 
         // different rules are formulated as patterns that must NOT be matched by x
@@ -135,7 +133,7 @@ public class RegularTest {
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -167,7 +165,7 @@ public class RegularTest {
         int n = 13;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
         FiniteAutomaton auto = new FiniteAutomaton();
         int start = auto.addState();
@@ -197,7 +195,7 @@ public class RegularTest {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
         solver.post(IntConstraintFactory.regular(vars, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
@@ -214,7 +212,7 @@ public class RegularTest {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, new int[]{0, 10, 20}, solver);
+            vars[i] = solver.makeIntVar("x_" + i, new int[]{0, 10, 20});
         }
         solver.post(IntConstraintFactory.regular(vars, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
@@ -227,7 +225,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
     public void testNeg() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 4, -10, 10, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 4, -10, 10, false);
         solver.post(ICF.regular(CS, new FiniteAutomaton("<-9>1*")));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -246,7 +244,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000)
     public void testregExp1() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 2, 0, 3, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 2, 0, 3, false);
         solver.post(ICF.regular(CS, new FiniteAutomaton("[12]*")));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
@@ -255,7 +253,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000)
     public void testregExp2() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 2, 0, 3, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 2, 0, 3, false);
         solver.post(ICF.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
@@ -264,7 +262,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000)
     public void testregExp3() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 2, 0, 3, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 2, 0, 3, false);
         solver.post(ICF.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)));
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
@@ -275,7 +273,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000)
     public void testregExp4() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 2, 0, 3, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 2, 0, 3, false);
         solver.post(ICF.regular(CS, new FiniteAutomaton(".*", 0, 3)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
@@ -284,7 +282,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000)
     public void testregExp5() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 2, 0, 3, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 2, 0, 3, false);
         solver.post(ICF.regular(CS, new FiniteAutomaton("1{2}")));
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
@@ -295,7 +293,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000)
     public void testregExp6() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 4, 0, 3, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 4, 0, 3, false);
         solver.post(ICF.regular(CS, new FiniteAutomaton("0{2,3}1*")));
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
@@ -306,7 +304,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000)
     public void testregExp7() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 10, 0, 2, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 10, 0, 2, false);
         solver.post(ICF.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")));
         Chatterbox.showSolutions(solver, () -> {
             for (int i = 0; i < 10; i++) {
@@ -325,7 +323,7 @@ public class RegularTest {
     @Test(groups="1s", timeOut=60000)
     public void testregExp8() {
         Solver solver = new Solver();
-        IntVar[] CS = VariableFactory.enumeratedArray("CS", 3, new int[]{43, 59, 117}, solver);
+        IntVar[] CS = solver.makeIntVarArray("CS", 3, new int[]{43, 59, 117});
         solver.post(ICF.regular(CS, new FiniteAutomaton("<43><59><117>")));
         solver.set(ISF.lexico_LB(CS));
         solver.findAllSolutions();

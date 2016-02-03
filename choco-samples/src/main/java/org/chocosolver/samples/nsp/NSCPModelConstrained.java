@@ -39,7 +39,6 @@ import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /*
@@ -206,7 +205,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         description += "cover[gccFix] ";
         IntVar[] cover = new IntVar[data.nbActivities()];
         for (int a = 0; a < data.nbActivities(); a++) {
-            cover[a] = VariableFactory.bounded("cover_" + a, data.getCoverLB(a), data.getCoverUB(a), solver);
+            cover[a] = solver.makeIntVar("cover_" + a, data.getCoverLB(a), data.getCoverUB(a), true);
         }
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (IntVar[] var : vars) {
@@ -342,7 +341,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             if (lb > 0 || ub < 7) {
                 for (int t = 0; t < data.nbWeeks(); t++) {
 //                    IntVar occ = ConstraintFactory.makeIntVar("nW" + t + data.getLiteral(a) + e, lb, ub, "cp:bound", Options.V_NO_DECISION);
-                    IntVar occ = VariableFactory.bounded("nW" + t + data.getLiteral(a) + e, lb, ub, solver);
+                    IntVar occ = solver.makeIntVar("nW" + t + data.getLiteral(a) + e, lb, ub, true);
                     System.arraycopy(shifts[e], t * 7, vars, 0, 7);
                     solver.post(IntConstraintFactory.count(a, vars, occ));
                 }
@@ -356,7 +355,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         for (int e = 0; e < data.nbEmployees(); e++) {
             IntVar[] cards = new IntVar[data.nbActivities()];
             for (int a = 0; a < data.nbActivities(); a++) {
-                cards[a] = VariableFactory.bounded("card_" + a, data.getWeekCounterLB(e, a), data.getWeekCounterLB(e, a), solver);
+                cards[a] = solver.makeIntVar("card_" + a, data.getWeekCounterLB(e, a), data.getWeekCounterLB(e, a), true);
             }
             for (int t = 0; t < data.nbWeeks(); t++) {
                 System.arraycopy(shifts[e], t * 7, vars, 0, 7);
@@ -449,7 +448,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         for (IntVar[] s : this.shifts) {
             for (int t = 0; t + 2 < data.nbDays(); t++) {
                 //solver.post(Options.E_DECOMP, ConstraintFactory.ifThenElse(ConstraintFactory.eq(s[t], n), ConstraintFactory.or(ConstraintFactory.eq(s[t+1], n), ConstraintFactory.and(ConstraintFactory.eq(s[t+1], r), ConstraintFactory.eq(s[t+2], r)))));
-                BoolVar[] bvars = VariableFactory.boolArray("b", 4, solver);
+                BoolVar[] bvars = solver.makeBoolVarArray("b", 4);
                 LogOp tree = LogOp.implies(
                         bvars[0],
                         LogOp.or(bvars[1], bvars[2], bvars[3])
@@ -465,7 +464,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         IntConstraintFactory.arithm(s[t + 2], "=", r), IntConstraintFactory.arithm(s[t + 2], "!=", r));
             }
             int t = data.nbDays() - 2;
-            BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
+            BoolVar[] bvars = solver.makeBoolVarArray("b", 2);
 //            solver.post(ConstraintFactory.ifThenElse(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
             LogOp tree = LogOp.implies(bvars[0], bvars[1]);
             SatFactory.addClauses(tree, solver);
@@ -497,7 +496,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         int r = data.getValue("REST");
         for (IntVar[] s : this.shifts) {
             for (int t = 5; t + 15 < data.nbDays(); t += 7) {
-                BoolVar[] bvars = VariableFactory.boolArray("b", 6, solver);
+                BoolVar[] bvars = solver.makeBoolVarArray("b", 6);
                 LogOp tree = LogOp.implies(
                         LogOp.and(
                                 LogOp.or(bvars[0], bvars[1]),
@@ -575,7 +574,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         int r = data.getValue("REST");
         for (IntVar[] s : this.shifts) {
             for (int t = 5; t + 1 < data.nbDays(); t += 7) {
-                BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
+                BoolVar[] bvars = solver.makeBoolVarArray("b", 2);
                 LogOp tree = LogOp.ifOnlyIf(bvars[0], bvars[1]);
                 SatFactory.addClauses(tree, solver);
                 LogicalConstraintFactory.ifThenElse(bvars[0],

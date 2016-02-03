@@ -47,7 +47,10 @@ import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
@@ -125,9 +128,9 @@ public class AirPlaneLanding extends AbstractProblem {
         earliness = new IntVar[n];
         LLTs = new int[n];
         int obj_ub = 0;
-        IntVar ZERO = VariableFactory.fixed(0, solver);
+        IntVar ZERO = solver.makeIntVar(0);
         for (int i = 0; i < n; i++) {
-            planes[i] = VariableFactory.bounded("p_" + i, data[i][ELT], data[i][LLT], solver);
+            planes[i] = solver.makeIntVar("p_" + i, data[i][ELT], data[i][LLT], true);
 
 //            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
 //            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
@@ -144,7 +147,7 @@ public class AirPlaneLanding extends AbstractProblem {
         //disjunctive
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
-                BoolVar boolVar = VariableFactory.bool("b_" + i + "_" + j, solver);
+                BoolVar boolVar = solver.makeBoolVar("b_" + i + "_" + j);
                 booleans.add(boolVar);
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
@@ -155,7 +158,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
         bVars = booleans.toArray(new BoolVar[booleans.size()]);
 
-        objective = VariableFactory.bounded("obj", 0, obj_ub, solver);
+        objective = solver.makeIntVar("obj", 0, obj_ub, true);
 
         // build cost array
         costLAT = new int[2 * n];
@@ -167,10 +170,10 @@ public class AirPlaneLanding extends AbstractProblem {
         }
 
 //        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
-        IntVar obj_e = VariableFactory.bounded("obj_e", 0, obj_ub, solver);
+        IntVar obj_e = solver.makeIntVar("obj_e", 0, obj_ub, true);
         solver.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), "=", obj_e));
 
-        IntVar obj_t = VariableFactory.bounded("obj_t", 0, obj_ub, solver);
+        IntVar obj_t = solver.makeIntVar("obj_t", 0, obj_ub, true);
         solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t));
         solver.post(IntConstraintFactory.sum(new IntVar[]{obj_e, obj_t}, "=", objective));
 

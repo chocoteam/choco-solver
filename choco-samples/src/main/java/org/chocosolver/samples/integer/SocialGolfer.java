@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
@@ -93,12 +92,12 @@ public class SocialGolfer extends AbstractProblem {
         P = new BoolVar[p][g][w];
         // p plays in group g in week w
         for (int i = 0; i < p; i++) {
-            P[i] = VariableFactory.boolMatrix("p_" + i, g, w, solver);
+            P[i] = solver.makeBoolVarMatrix("p_" + i, g, w);
         }
         M = new BoolVar[p][p][w];
         // i meets j in week w (i<j)
         for (int i = 0; i < p; i++) {
-            M[i] = VariableFactory.boolMatrix("m_" + i, p, w, solver);
+            M[i] = solver.makeBoolVarMatrix("m_" + i, p, w);
         }
 
         // each player is part of exactly one group in each week
@@ -150,7 +149,7 @@ public class SocialGolfer extends AbstractProblem {
         // each pair of players only meets once
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
-                solver.post(IntConstraintFactory.sum(M[i][j], "=", VariableFactory.bool("sum", solver)));
+                solver.post(IntConstraintFactory.sum(M[i][j], "=", solver.makeBoolVar("sum")));
             }
         }
 

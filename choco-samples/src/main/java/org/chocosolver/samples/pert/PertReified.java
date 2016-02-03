@@ -34,7 +34,6 @@ import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -59,7 +58,7 @@ public class PertReified extends Pert {
     public void buildModel() {
         setUp();
 
-        vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
+        vars = solver.makeIntVarArray("task", n, 0, horizon, true);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
@@ -78,7 +77,7 @@ public class PertReified extends Pert {
             }
             for (int l = 0; l < _vars.length - 1; l++) {
                 for (int m = l + 1; m < _vars.length; m++) {
-                    BoolVar bvar = VariableFactory.bool("b" + l + "_" + m, solver);
+                    BoolVar bvar = solver.makeBoolVar("b" + l + "_" + m);
                     lbvars.add(bvar);
 					LogicalConstraintFactory.ifThenElse(bvar, precedence(_vars[l], _durs[l], _vars[m]), precedence(_vars[m], _durs[m], _vars[l]));
                 }

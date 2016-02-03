@@ -38,7 +38,6 @@ import org.chocosolver.solver.constraints.nary.automata.FA.utils.CounterState;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -60,9 +59,9 @@ public class CostRegularTest {
         int n = 10;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", 3, 4, solver);
+        IntVar cost = solver.makeIntVar("z", 3, 4, true);
 
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -97,9 +96,9 @@ public class CostRegularTest {
         int n = 10;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", 3, 4, solver);
+        IntVar cost = solver.makeIntVar("z", 3, 4, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -138,9 +137,9 @@ public class CostRegularTest {
         int n = 28;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", 0, 4, solver);
+        IntVar cost = solver.makeIntVar("z", 0, 4, true);
 
         // different rules are formulated as patterns that must NOT be matched by x
         List<String> forbiddenRegExps = new ArrayList<>();
@@ -187,9 +186,9 @@ public class CostRegularTest {
         int n = 28;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", 0, 4, solver);
+        IntVar cost = solver.makeIntVar("z", 0, 4, true);
 
         // different rules are formulated as patterns that must NOT be matched by x
         List<String> forbiddenRegExps = new ArrayList<>();
@@ -239,9 +238,9 @@ public class CostRegularTest {
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", 10, 10, solver);
+        IntVar cost = solver.makeIntVar("z", 10, 10, true);
 
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -281,9 +280,9 @@ public class CostRegularTest {
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", 10, 10, solver);
+        IntVar cost = solver.makeIntVar("z", 10, 10, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -324,9 +323,9 @@ public class CostRegularTest {
         int n = 13;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", 4, 6, solver);
+        IntVar cost = solver.makeIntVar("z", 4, 6, true);
 
         FiniteAutomaton auto = new FiniteAutomaton();
         int start = auto.addState();
@@ -362,9 +361,9 @@ public class CostRegularTest {
         int n = 13;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", 4, 6, solver);
+        IntVar cost = solver.makeIntVar("z", 4, 6, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -413,9 +412,9 @@ public class CostRegularTest {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
+            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = VariableFactory.bounded("z", n / 2, n / 2 + 1, solver);
+        IntVar cost = solver.makeIntVar("z", n / 2, n / 2 + 1, true);
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, c2, cost.getLB(), cost.getUB())));
         solver.set(IntStrategyFactory.lexico_LB(vars));

@@ -35,7 +35,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IEnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -49,7 +48,8 @@ import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueBoundIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.tools.StringUtils;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * <br/>
@@ -452,7 +452,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return VariableFactory.bool(StringUtils.randomName(this.name), solver);
+        return solver.makeBoolVar(randomName(this.name));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

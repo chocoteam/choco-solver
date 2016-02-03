@@ -34,7 +34,6 @@ import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
 
 /**
@@ -48,7 +47,7 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testattmostnminusone() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 4, solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 4);
         SatFactory.addAtMostNMinusOne(BVARS);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -57,7 +56,7 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testattmostone() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 4, solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 4);
         SatFactory.addAtMostOne(BVARS);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -66,7 +65,7 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolandarrayequalfalse() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 4, solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 4);
         SatFactory.addBoolAndArrayEqualFalse(BVARS);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -75,7 +74,7 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolorarrayequaltrue() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 4, solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 4);
         SatFactory.addBoolOrArrayEqualTrue(BVARS);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -84,9 +83,9 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolandeqvar() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolAndEqVar(L, R, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -95,8 +94,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testbooleq() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
         SatFactory.addBoolEq(L, R);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -105,9 +104,9 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testbooliseqvar() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolIsEqVar(L, R, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -116,9 +115,9 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolislevar() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolIsLeVar(L, R, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -127,9 +126,9 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolisltvar() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolIsLtVar(L, R, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -138,9 +137,9 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolisneqvar() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolIsNeqVar(L, R, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -149,8 +148,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolle() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
         SatFactory.addBoolLe(L, R);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -159,8 +158,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboollt() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
         SatFactory.addBoolLt(L, R);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -169,8 +168,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolnot() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
         SatFactory.addBoolNot(L, R);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -179,8 +178,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolandarrayequalvar() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 4, solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 4);
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolAndArrayEqVar(BVARS, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -189,8 +188,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolorarrayequalvar() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 4, solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 4);
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolOrArrayEqVar(BVARS, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -199,9 +198,9 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testbooloreqvar() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolOrEqVar(L, R, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -210,9 +209,9 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolxoreqvar() {
         Solver solver = new Solver();
-        BoolVar L = VariableFactory.bool("L", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar L = solver.makeBoolVar("L");
+        BoolVar R = solver.makeBoolVar("R");
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addBoolXorEqVar(L, R, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -221,10 +220,10 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolclauseslop() {
         Solver solver = new Solver();
-        BoolVar C1 = VariableFactory.bool("C1", solver);
-        BoolVar C2 = VariableFactory.bool("C2", solver);
-        BoolVar R = VariableFactory.bool("R", solver);
-        BoolVar AR = VariableFactory.bool("AR", solver);
+        BoolVar C1 = solver.makeBoolVar("C1");
+        BoolVar C2 = solver.makeBoolVar("C2");
+        BoolVar R = solver.makeBoolVar("R");
+        BoolVar AR = solver.makeBoolVar("AR");
         SatFactory.addClauses(
                 LogOp.ifThenElse(LogOp.nand(C1, C2), R, AR),
                 solver);
@@ -235,10 +234,10 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolclauses() {
         Solver solver = new Solver();
-        BoolVar P1 = VariableFactory.bool("P1", solver);
-        BoolVar P2 = VariableFactory.bool("P2", solver);
-        BoolVar P3 = VariableFactory.bool("P3", solver);
-        BoolVar N = VariableFactory.bool("N", solver);
+        BoolVar P1 = solver.makeBoolVar("P1");
+        BoolVar P2 = solver.makeBoolVar("P2");
+        BoolVar P3 = solver.makeBoolVar("P3");
+        BoolVar N = solver.makeBoolVar("N");
         SatFactory.addClauses(new BoolVar[]{P1, P2, P3}, new BoolVar[]{N});
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -247,7 +246,7 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolfalse() {
         Solver solver = new Solver();
-        BoolVar B = VariableFactory.bool("B", solver);
+        BoolVar B = solver.makeBoolVar("B");
         SatFactory.addFalse(B);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -256,8 +255,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testmaxboolarraylesseqvar() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 3, solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 3);
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addMaxBoolArrayLessEqVar(BVARS, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -266,8 +265,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testsumboolarraygreatereqvar() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 3, solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 3);
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addSumBoolArrayGreaterEqVar(BVARS, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -276,8 +275,8 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testsumboolarraylesseqvar() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VariableFactory.boolArray("BS", 3, solver);
-        BoolVar T = VariableFactory.bool("T", solver);
+        BoolVar[] BVARS = solver.makeBoolVarArray("BS", 3);
+        BoolVar T = solver.makeBoolVar("T");
         SatFactory.addSumBoolArrayLessEqVar(BVARS, T);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -286,7 +285,7 @@ public class SatConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testbooltrue() {
         Solver solver = new Solver();
-        BoolVar B = VariableFactory.bool("B", solver);
+        BoolVar B = solver.makeBoolVar("B");
         SatFactory.addTrue(B);
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();

@@ -50,7 +50,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testBool1() {
         Solver solver = new Solver();
-        BoolVar var = VariableFactory.bool("b", solver);
+        BoolVar var = solver.makeBoolVar("b");
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(0, vit.next());
@@ -62,7 +62,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testBool2() {
         Solver solver = new Solver();
-        BoolVar var = VariableFactory.bool("b", solver);
+        BoolVar var = solver.makeBoolVar("b");
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(1, vit.previous());
@@ -74,7 +74,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testBool3() {
         Solver solver = new Solver();
-        BoolVar var = VariableFactory.bool("b", solver);
+        BoolVar var = solver.makeBoolVar("b");
         DisposableRangeIterator rit = var.getRangeIterator(true);
         Assert.assertTrue(rit.hasNext());
         Assert.assertEquals(0, rit.min());
@@ -86,7 +86,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testBool4() {
         Solver solver = new Solver();
-        BoolVar var = VariableFactory.bool("b", solver);
+        BoolVar var = solver.makeBoolVar("b");
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(0, vit.min());
@@ -98,7 +98,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testBound1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.bounded("b", 1, 3, solver);
+        IntVar var = solver.makeIntVar("b", 1, 3, true);
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
@@ -112,7 +112,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testBound2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.bounded("b", 1, 3, solver);
+        IntVar var = solver.makeIntVar("b", 1, 3, true);
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(3, vit.previous());
@@ -126,7 +126,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testBound3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.bounded("b", 1, 3, solver);
+        IntVar var = solver.makeIntVar("b", 1, 3, true);
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -138,7 +138,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testBound4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.bounded("b", 1, 3, solver);
+        IntVar var = solver.makeIntVar("b", 1, 3, true);
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(1, vit.min());
@@ -150,7 +150,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnum1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver);
+        IntVar var = solver.makeIntVar("b", new int[]{1, 2, 4});
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
@@ -164,7 +164,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnum2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver);
+        IntVar var = solver.makeIntVar("b", new int[]{1, 2, 4});
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.previous());
@@ -178,7 +178,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnum3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver);
+        IntVar var = solver.makeIntVar("b", new int[]{1, 2, 4});
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -194,7 +194,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnum4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver);
+        IntVar var = solver.makeIntVar("b", new int[]{1, 2, 4});
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.min());
@@ -210,7 +210,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testCste1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.fixed(8, solver);
+        IntVar var = solver.makeIntVar(8);
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(8, vit.next());
@@ -220,7 +220,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testCste2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.fixed(8, solver);
+        IntVar var = solver.makeIntVar(8);
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.previous());
@@ -230,7 +230,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testCste3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.fixed(8, solver);
+        IntVar var = solver.makeIntVar(8);
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(8, vit.min());
@@ -242,7 +242,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testCste4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.fixed(8, solver);
+        IntVar var = solver.makeIntVar(8);
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.min());
@@ -254,7 +254,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.offset(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -276,7 +276,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.offset(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -298,7 +298,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.offset(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -322,7 +322,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.offset(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -346,7 +346,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(VariableFactory.bounded("b", 1, 4, solver), 2);
+        IntVar var = VariableFactory.scale(solver.makeIntVar("b", 1, 4, true), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -362,7 +362,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.scale(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -386,7 +386,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.scale(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -416,7 +416,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.scale(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -446,7 +446,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
+        IntVar var = VariableFactory.minus(solver.makeIntVar("b", new int[]{1, 2, 4}));
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -468,7 +468,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
+        IntVar var = VariableFactory.minus(solver.makeIntVar("b", new int[]{1, 2, 4}));
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -490,7 +490,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
+        IntVar var = VariableFactory.minus(solver.makeIntVar("b", new int[]{1, 2, 4}));
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -514,7 +514,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
+        IntVar var = VariableFactory.minus(solver.makeIntVar("b", new int[]{1, 2, 4}));
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -538,7 +538,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.abs(solver.makeIntVar("b", new int[]{-2, 1, 4}));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -557,7 +557,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.abs(solver.makeIntVar("b", new int[]{-2, 1, 4}));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -576,7 +576,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.abs(solver.makeIntVar("b", new int[]{-2, 1, 4}));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -597,7 +597,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.abs(solver.makeIntVar("b", new int[]{-2, 1, 4}));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -618,7 +618,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMax1() {
         Solver solver = new Solver();
-        IntVar var = Max.var(VariableFactory.enumerated("a", new int[]{3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
+        IntVar var = Max.var(solver.makeIntVar("a", new int[]{3, 4}), solver.makeIntVar("b", new int[]{2, 5}));
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.next());
@@ -632,7 +632,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMax2() {
         Solver solver = new Solver();
-        IntVar var = Max.var(VariableFactory.enumerated("a", new int[]{3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
+        IntVar var = Max.var(solver.makeIntVar("a", new int[]{3, 4}), solver.makeIntVar("b", new int[]{2, 5}));
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(5, vit.previous());
@@ -646,7 +646,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMax3() {
         Solver solver = new Solver();
-        IntVar var = Max.var(VariableFactory.enumerated("a", new int[]{3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
+        IntVar var = Max.var(solver.makeIntVar("a", new int[]{3, 4}), solver.makeIntVar("b", new int[]{2, 5}));
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.min());
@@ -658,7 +658,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMax4() {
         Solver solver = new Solver();
-        IntVar var = Max.var(VariableFactory.enumerated("a", new int[]{3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
+        IntVar var = Max.var(solver.makeIntVar("a", new int[]{3, 4}), solver.makeIntVar("b", new int[]{2, 5}));
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(3, vit.min());
@@ -670,7 +670,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void JLiangWaterlooTest() throws ContradictionException {
         Solver s = new Solver();
-        IntVar ivar = VariableFactory.enumerated("ivar", new int[]{1, 2, 3, 888, 1000, 2000}, s);
+        IntVar ivar = s.makeIntVar("ivar", new int[]{1, 2, 3, 888, 1000, 2000});
         ivar.removeValue(1000, Cause.Null);
 
         DisposableRangeIterator iter = ivar.getRangeIterator(true);

@@ -38,7 +38,6 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -72,11 +71,11 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        itemCost = VariableFactory.enumeratedArray("item", 4, 1, 711, solver);
+        itemCost = solver.makeIntVarArray("item", 4, 1, 711, false);
         solver.post(IntConstraintFactory.sum(itemCost, "=", 711));
 
         // intermediary products
-        IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 71100, solver);
+        IntVar[] tmp = solver.makeIntVarArray("tmp", 2, 1, 71100, true);
         solver.post(IntConstraintFactory.times(itemCost[0], itemCost[1], tmp[0]));
         solver.post(IntConstraintFactory.times(itemCost[2], itemCost[3], tmp[1]));
 

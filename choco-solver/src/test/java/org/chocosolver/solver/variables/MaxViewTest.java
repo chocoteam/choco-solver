@@ -29,11 +29,11 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.testng.Assert;
@@ -50,7 +50,7 @@ import java.util.Random;
 public class MaxViewTest {
 
     public void maxref(Solver solver, IntVar x, IntVar y, IntVar z) {
-        BoolVar[] bs = VariableFactory.boolArray("b", 3, solver);
+        BoolVar[] bs = solver.makeBoolVarArray("b", 3);
         LogicalConstraintFactory.ifThenElse(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x));
         LogicalConstraintFactory.ifThenElse(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y));
         LogicalConstraintFactory.ifThenElse(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y));
@@ -71,9 +71,9 @@ public class MaxViewTest {
             Solver ref = new Solver();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = VariableFactory.bounded("x", domains[0][0], domains[0][1], ref);
-                xs[1] = VariableFactory.bounded("y", domains[1][0], domains[1][1], ref);
-                xs[2] = VariableFactory.bounded("z", domains[2][0], domains[2][1], ref);
+                xs[0] = ref.makeIntVar("x", domains[0][0], domains[0][1], true);
+                xs[1] = ref.makeIntVar("y", domains[1][0], domains[1][1], true);
+                xs[2] = ref.makeIntVar("z", domains[2][0], domains[2][1], true);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
                 ref.set(IntStrategyFactory.random_bound(xs, seed));
@@ -81,9 +81,9 @@ public class MaxViewTest {
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = VariableFactory.bounded("x", domains[0][0], domains[0][1], solver);
-                xs[1] = VariableFactory.bounded("y", domains[1][0], domains[1][1], solver);
-                xs[2] = VariableFactory.bounded("z", domains[1][0], domains[2][1], solver);
+                xs[0] = solver.makeIntVar("x", domains[0][0], domains[0][1], true);
+                xs[1] = solver.makeIntVar("y", domains[1][0], domains[1][1], true);
+                xs[2] = solver.makeIntVar("z", domains[1][0], domains[2][1], true);
                 max(solver, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(IntStrategyFactory.random_bound(xs, seed));
@@ -104,9 +104,9 @@ public class MaxViewTest {
             Solver ref = new Solver();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = VariableFactory.enumerated("x", domains[0], ref);
-                xs[1] = VariableFactory.enumerated("y", domains[1], ref);
-                xs[2] = VariableFactory.enumerated("z", domains[2], ref);
+                xs[0] = ref.makeIntVar("x", domains[0]);
+                xs[1] = ref.makeIntVar("y", domains[1]);
+                xs[2] = ref.makeIntVar("z", domains[2]);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
                 ref.set(IntStrategyFactory.random_value(xs, seed));
@@ -114,9 +114,9 @@ public class MaxViewTest {
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = VariableFactory.enumerated("x", domains[0], solver);
-                xs[1] = VariableFactory.enumerated("y", domains[1], solver);
-                xs[2] = VariableFactory.enumerated("z", domains[2], solver);
+                xs[0] = solver.makeIntVar("x", domains[0]);
+                xs[1] = solver.makeIntVar("y", domains[1]);
+                xs[2] = solver.makeIntVar("z", domains[2]);
                 max(solver, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(IntStrategyFactory.random_value(xs, seed));

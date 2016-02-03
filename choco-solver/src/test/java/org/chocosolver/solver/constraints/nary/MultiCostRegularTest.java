@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -52,12 +51,12 @@ public class MultiCostRegularTest {
     private Solver make(int period, long seed) {
 
         Solver solver = new Solver();
-        IntVar[] sequence = VariableFactory.enumeratedArray("x", period, 0, 2, solver);
+        IntVar[] sequence = solver.makeIntVarArray("x", period, 0, 2, false);
         IntVar[] bounds = new IntVar[4];
-        bounds[0] = VariableFactory.bounded("z_0", 0, 80, solver);
-        bounds[1] = VariableFactory.bounded("day", 0, 28, solver);
-        bounds[2] = VariableFactory.bounded("night", 0, 28, solver);
-        bounds[3] = VariableFactory.bounded("rest", 0, 28, solver);
+        bounds[0] = solver.makeIntVar("z_0", 0, 80, true);
+        bounds[1] = solver.makeIntVar("day", 0, 28, true);
+        bounds[2] = solver.makeIntVar("night", 0, 28, true);
+        bounds[3] = solver.makeIntVar("rest", 0, 28, true);
 
         FiniteAutomaton auto = new FiniteAutomaton();
         int idx = auto.addState();

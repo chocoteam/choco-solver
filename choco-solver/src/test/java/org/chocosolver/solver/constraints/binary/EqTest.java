@@ -32,7 +32,6 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -48,8 +47,8 @@ public class EqTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver s = new Solver();
-        IntVar two1 = VariableFactory.fixed(2, s);
-        IntVar two2 = VariableFactory.fixed(2, s);
+        IntVar two1 = s.makeIntVar(2);
+        IntVar two2 = s.makeIntVar(2);
         s.post(ICF.arithm(two1, "=", two2));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
@@ -59,8 +58,8 @@ public class EqTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver s = new Solver();
-        IntVar three = VariableFactory.fixed(3, s);
-        IntVar two = VariableFactory.fixed(2, s);
+        IntVar three = s.makeIntVar(3);
+        IntVar two = s.makeIntVar(2);
         s.post(ICF.arithm(three, "-", two, "=", 1));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
@@ -69,8 +68,8 @@ public class EqTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         Solver s = new Solver();
-        IntVar three = VariableFactory.fixed(3, s);
-        IntVar two = VariableFactory.fixed(2, s);
+        IntVar three = s.makeIntVar(3);
+        IntVar two = s.makeIntVar(2);
         s.post(ICF.arithm(three, "=", two, "+", 1));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());

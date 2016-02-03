@@ -35,8 +35,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.*;
 import org.chocosolver.solver.constraints.reification.PropCondis;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.util.tools.StringUtils;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * A factory dedicated to SAT.
@@ -513,7 +513,7 @@ public class SatFactory {
             return addBoolLe(BOOLVARS[0], TARGET);
         }
 
-        BoolVar extra = VariableFactory.bool(StringUtils.randomName(), solver);
+        BoolVar extra = solver.makeBoolVar(randomName());
         int tlit = sat.Literal(TARGET);
         int elit = sat.Literal(extra);
         TIntList lits = new TIntArrayList(BOOLVARS.length + 1);

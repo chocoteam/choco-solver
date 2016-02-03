@@ -37,7 +37,6 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -68,24 +67,24 @@ public class SetCstrsTest {
 
 	public static IntVar[] eqFilter(String mode){
 		Solver s = new Solver();
-		IntVar x = VariableFactory.enumerated("x", 0, 10, s);
-		IntVar y = VariableFactory.enumerated("y", 0, 10, s);
+		IntVar x = s.makeIntVar("x", 0, 10, false);
+		IntVar y = s.makeIntVar("y", 0, 10, false);
 		// set view of A
-		SetVar xset = VariableFactory.set("x as a set", 0, 10, s);
-		SetVar yset = VariableFactory.set("y as a set", 0, 10, s);
+		SetVar xset = s.makeSetVar("x as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar yset = s.makeSetVar("y as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(SCF.int_values_union(new IntVar[]{x},xset));
 		s.post(SCF.int_values_union(new IntVar[]{y},yset));
 		// X +9 <= Y or Y + 9 <= X
-		SetVar Xleft = VariableFactory.set("", 0, 10, s);
-		SetVar tmpLeft = VariableFactory.set("", 9, 19, s);
+		SetVar Xleft = s.makeSetVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar tmpLeft = s.makeSetVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
 		s.post(SCF.offSet(Xleft,tmpLeft,9));
-		SetVar Yleft = VariableFactory.set("", 0, 10, s);
+		SetVar Yleft = s.makeSetVar("",  new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(eq(tmpLeft, Yleft,mode));
 
-		SetVar Yright = VariableFactory.set("",0, 10, s);
-		SetVar tmpRight = VariableFactory.set("", 9, 19, s);
+		SetVar Yright = s.makeSetVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar tmpRight = s.makeSetVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
 		s.post(SCF.offSet(Yright,tmpRight,9));
-		SetVar Xright = VariableFactory.set("", 0, 10, s);
+		SetVar Xright = s.makeSetVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(eq(tmpRight, Xright,mode));
 
 		//

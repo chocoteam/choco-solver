@@ -35,7 +35,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -81,11 +80,11 @@ public class ParetoTest {
         // --- Creates decision variables
         IntVar[] occurrences = new IntVar[nbItems.length];
         for (int i = 0; i < nbItems.length; i++) {
-            occurrences[i] = VariableFactory.bounded("occurrences_" + i, 0, nbItems[i], s);
+            occurrences[i] = s.makeIntVar("occurrences_" + i, 0, nbItems[i], true);
         }
-        IntVar totalWeight = VariableFactory.bounded("totalWeight", 0, capacity, s);
-        IntVar totalProfit_1 = VariableFactory.bounded("totalProfit_1", 0, maxProfit_1, s);
-        IntVar totalProfit_2 = VariableFactory.bounded("totalProfit_2", 0, maxProfit_2, s);
+        IntVar totalWeight = s.makeIntVar("totalWeight", 0, capacity, true);
+        IntVar totalProfit_1 = s.makeIntVar("totalProfit_1", 0, maxProfit_1, true);
+        IntVar totalProfit_2 = s.makeIntVar("totalProfit_2", 0, maxProfit_2, true);
 
         // --- Posts constraints
         s.post(IntConstraintFactory.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1));

@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 
@@ -56,13 +55,13 @@ public class BottleneckTest {
             IntVar[] exps = new IntVar[n];
             IntVar[] bws = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                nexts[i] = VariableFactory.enumerated("n_" + i, 0, 200, solver);
-                exps[i] = VariableFactory.enumerated("e_" + i, 0, 200, solver);
-                bws[i] = VariableFactory.enumerated("b_" + i, 0, 2000, solver);
+                nexts[i] = solver.makeIntVar("n_" + i, 0, 200, false);
+                exps[i] = solver.makeIntVar("e_" + i, 0, 200, false);
+                bws[i] = solver.makeIntVar("b_" + i, 0, 2000, false);
                 solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
             }
 
-            IntVar sum = VariableFactory.bounded("sum", 0, 2000 * n, solver);
+            IntVar sum = solver.makeIntVar("sum", 0, 2000 * n, true);
 			solver.post(IntConstraintFactory.sum(bws, "=", sum));
 
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
@@ -83,13 +82,13 @@ public class BottleneckTest {
             IntVar[] exps = new IntVar[n];
             IntVar[] bws = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                nexts[i] = VariableFactory.enumerated("n_" + i, 0, 200, solver);
-                exps[i] = VariableFactory.enumerated("e_" + i, 0, 200, solver);
-                bws[i] = VariableFactory.enumerated("b_" + i, 0, 2000, solver);
+                nexts[i] = solver.makeIntVar("n_" + i, 0, 200, false);
+                exps[i] = solver.makeIntVar("e_" + i, 0, 200, false);
+                bws[i] = solver.makeIntVar("b_" + i, 0, 2000, false);
 				solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
             }
 
-            IntVar sum = VariableFactory.bounded("sum", 0, 2000 * n, solver);
+            IntVar sum = solver.makeIntVar("sum", 0, 2000 * n, true);
 			solver.post(IntConstraintFactory.sum(bws, "=", sum));
 
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});

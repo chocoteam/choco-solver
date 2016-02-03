@@ -46,7 +46,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
@@ -60,8 +59,8 @@ public class LexChainTest {
     public void lexChainTest1() {
         Solver s = new Solver();
 
-        IntVar[] ar1 = VariableFactory.boundedArray("v1", 3, 0, 10, s);
-        IntVar[] ar2 = VariableFactory.boundedArray("v2", 3, -1, 9, s);
+        IntVar[] ar1 = s.makeIntVarArray("v1", 3, 0, 10, true);
+        IntVar[] ar2 = s.makeIntVarArray("v2", 3, -1, 9, true);
 
         Constraint c = ICF.lex_chain_less_eq(ar1, ar2);
         s.post(c);
@@ -76,12 +75,12 @@ public class LexChainTest {
 
 
     private ILogical reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
-        BoolVar b1 = VariableFactory.bool("A" + i, solver);
+        BoolVar b1 = solver.makeBoolVar("A" + i);
         LogicalConstraintFactory.ifThenElse(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i]));
         if (i == X.length - 1) {
             return b1;
         } else {
-            BoolVar b2 = VariableFactory.bool("B" + i, solver);
+            BoolVar b2 = solver.makeBoolVar("B" + i);
             LogicalConstraintFactory.ifThenElse(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i]));
             return LogOp.or(b1, LogOp.and(b2, reformulate(i + 1, X, Y, solver)));
         }
@@ -92,8 +91,8 @@ public class LexChainTest {
         IntVar[][] X = new IntVar[n][m];
         for (int i = 0; i < n; i++) {
             X[i] = bounded ?
-                    VariableFactory.boundedArray("X_" + i, m, 0, k, solver) :
-                    VariableFactory.enumeratedArray("X_" + i, m, 0, k, solver);
+                    solver.makeIntVarArray("X_" + i, m, 0, k, true) :
+                    solver.makeIntVarArray("X_" + i, m, 0, k, false);
         }
         ILogical[] trees = new ILogical[n - 1];
         for (int i = 0; i < n - 1; i++) {
@@ -115,8 +114,8 @@ public class LexChainTest {
         IntVar[][] X = new IntVar[n][m];
         for (int i = 0; i < n; i++) {
             X[i] = bounded ?
-                    VariableFactory.boundedArray("X_" + i, m, 0, k, solver) :
-                    VariableFactory.enumeratedArray("X_" + i, m, 0, k, solver);
+                    solver.makeIntVarArray("X_" + i, m, 0, k, true) :
+                    solver.makeIntVarArray("X_" + i, m, 0, k, false);
         }
         solver.post(ICF.lex_chain_less(X));
 		if(bounded){
@@ -180,7 +179,7 @@ public class LexChainTest {
         Solver solver = new Solver();
         IntVar[][] X = new IntVar[3][2];
         for (int i = 0; i < 3; i++) {
-            X[i] = VariableFactory.boundedArray("X_" + i, 2, 0, 2, solver);
+            X[i] = solver.makeIntVarArray("X_" + i, 2, 0, 2, true);
         }
 
         solver.post(ICF.lex_chain_less(X));

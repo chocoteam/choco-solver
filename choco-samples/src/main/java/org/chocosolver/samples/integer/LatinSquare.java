@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 
@@ -65,7 +64,7 @@ public class LatinSquare extends AbstractProblem {
         vars = new IntVar[m * m];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < m; j++) {
-                vars[i * m + j] = VariableFactory.enumerated("C" + i + "_" + j, 0, m - 1, solver);
+                vars[i * m + j] = solver.makeIntVar("C" + i + "_" + j, 0, m - 1, false);
             }
         }
         // Constraints

@@ -37,7 +37,6 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -72,9 +71,9 @@ public class Grocery extends AbstractProblem {
     public void buildModel() {
         double epsilon = 0.000001d;
         // 4 integer variables (price in cents)
-        itemCost = VariableFactory.boundedArray("item", 4, 1, 711, solver);
+        itemCost = solver.makeIntVarArray("item", 4, 1, 711, true);
         // views as real variables to be used by Ibex
-        realitemCost = VariableFactory.real(itemCost, epsilon);
+        realitemCost = solver.makeRealViewArray(itemCost, epsilon);
 
 	solver.post(new RealConstraint("Sum", "{0} + {1} + {2} + {3} = 711", Ibex.COMPO, realitemCost));
 	solver.post(new RealConstraint("Product", "{0} * {1}/100 * {2}/100 * {3}/100 = 711", Ibex.HC4, realitemCost));

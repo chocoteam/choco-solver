@@ -34,7 +34,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -48,8 +47,8 @@ public class Overview {
         // 1. Create a Solver
         Solver solver = new Solver("my first problem");
         // 2. Create variables through the variable factory
-        IntVar x = VariableFactory.bounded("X", 0, 5, solver);
-        IntVar y = VariableFactory.bounded("Y", 0, 5, solver);
+        IntVar x = solver.makeIntVar("X", 0, 5, true);
+        IntVar y = solver.makeIntVar("Y", 0, 5, true);
         // 3. Create and post constraints by using constraint factories
         solver.post(IntConstraintFactory.arithm(x, "+", y, "<", 5));
         // 4. Define the search strategy
