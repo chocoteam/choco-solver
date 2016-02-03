@@ -64,7 +64,7 @@ public interface Modeler {
             IntVar[] vars = new IntVar[n];
             try {
                 for (int i = 0; i < vars.length; i++) {
-                    vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                    vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                     if (map != null) map.put(domains[i], vars[i]);
                 }
             } catch (ArrayIndexOutOfBoundsException ce) {
@@ -88,9 +88,9 @@ public interface Modeler {
             IntVar[] X = new IntVar[n / 2];
             IntVar[] Y = new IntVar[n / 2];
             for (int i = 0; i < n / 2; i++) {
-                X[i] = VF.enumerated("X_" + i, domains[i], s);
+                X[i] = VariableFactory.enumerated("X_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], X[i]);
-                Y[i] = VF.enumerated("Y_" + i, domains[i + (n / 2)], s);
+                Y[i] = VariableFactory.enumerated("Y_" + i, domains[i + (n / 2)], s);
                 if (map != null) map.put(domains[i + (n / 2)], Y[i]);
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
@@ -121,9 +121,9 @@ public interface Modeler {
             IntVar[] Y = new IntVar[n / 2];
             int off = n / 2;
             for (int i = 0; i < n / 2; i++) {
-                X[i] = VF.bounded("X_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                X[i] = VariableFactory.bounded("X_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], X[i]);
-                Y[i] = VF.bounded("Y_" + i, domains[i + off][0], domains[i + off][domains[i + off].length - 1], s);
+                Y[i] = VariableFactory.bounded("Y_" + i, domains[i + off][0], domains[i + off][domains[i + off].length - 1], s);
                 if (map != null) map.put(domains[i + (n / 2)], Y[i]);
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
@@ -144,7 +144,7 @@ public interface Modeler {
             Solver s = new Solver("NeqAC_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.post(ICF.arithm(vars[0], "!=", vars[1]));
@@ -164,7 +164,7 @@ public interface Modeler {
             Solver s = new Solver("AllDiffAC_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.post(ICF.alldifferent(vars, "AC"));
@@ -184,7 +184,7 @@ public interface Modeler {
             Solver s = new Solver("AllDiffBC_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.post(ICF.alldifferent(vars, "BC"));
@@ -205,14 +205,14 @@ public interface Modeler {
             boolean closed = (Boolean) parameters;
             IntVar[] vars = new IntVar[n / 2];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             int[] values = new int[n / 2];
             IntVar[] cards = new IntVar[n / 2];
             for (int i = 0; i < cards.length; i++) {
                 values[i] = i;
-                cards[i] = VF.enumerated("c_" + i, domains[i + n / 2], s);
+                cards[i] = VariableFactory.enumerated("c_" + i, domains[i + n / 2], s);
                 if (map != null) map.put(domains[i + n / 2], cards[i]);
             }
             s.post(ICF.global_cardinality(vars, values, cards, closed));
@@ -232,7 +232,7 @@ public interface Modeler {
             Solver s = new Solver("Times_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.post(ICF.times(vars[0], vars[1], vars[2]));
@@ -252,7 +252,7 @@ public interface Modeler {
             Solver s = new Solver("Absolute_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.post(ICF.absolute(vars[0], vars[1]));
@@ -272,10 +272,10 @@ public interface Modeler {
             Solver s = new Solver("Count");
             IntVar[] vars = new IntVar[n - 1];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            IntVar occVar = VF.bounded("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
+            IntVar occVar = VariableFactory.bounded("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             String ro = "=";
@@ -287,7 +287,7 @@ public interface Modeler {
                     ro = ">=";
                     break;
             }
-            IntVar tmp = VF.bounded("occ", 0, vars.length, s);
+            IntVar tmp = VariableFactory.bounded("occ", 0, vars.length, s);
             s.post(
                     ICF.arithm(tmp, ro, occVar),
                     ICF.count(params[1], vars, tmp)
@@ -308,10 +308,10 @@ public interface Modeler {
             Solver s = new Solver("Count");
             IntVar[] vars = new IntVar[n - 1];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            IntVar occVar = VF.enumerated("ovar", domains[n - 1], s);
+            IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             String ro = "=";
@@ -323,7 +323,7 @@ public interface Modeler {
                     ro = ">=";
                     break;
             }
-            IntVar tmp = VF.bounded("occ", 0, vars.length, s);
+            IntVar tmp = VariableFactory.bounded("occ", 0, vars.length, s);
             s.post(
                     ICF.count(params[1], vars, tmp),
                     ICF.arithm(tmp, ro, occVar)
@@ -344,12 +344,12 @@ public interface Modeler {
             Solver s = new Solver("Lex");
             IntVar[] X = new IntVar[n / 2];
             for (int i = 0; i < n / 2; i++) {
-                X[i] = VF.enumerated("X_" + i, domains[i], s);
+                X[i] = VariableFactory.enumerated("X_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], X[i]);
             }
             IntVar[] Y = new IntVar[n / 2];
             for (int i = n / 2; i < n; i++) {
-                Y[i - n / 2] = VF.enumerated("Y_" + i, domains[i], s);
+                Y[i - n / 2] = VariableFactory.enumerated("Y_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], Y[i - n / 2]);
             }
             Constraint ctr = (Boolean) parameters ? ICF.lex_less(X, Y) : ICF.lex_less_eq(X, Y);
@@ -370,17 +370,17 @@ public interface Modeler {
             Solver s = new Solver("LexChain");
             IntVar[] X = new IntVar[n / 3];
             for (int i = 0; i < n / 3; i++) {
-                X[i] = VF.enumerated("X_" + i, domains[i], s);
+                X[i] = VariableFactory.enumerated("X_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], X[i]);
             }
             IntVar[] Y = new IntVar[n / 3];
             for (int i = n / 3; i < 2 * n / 3; i++) {
-                Y[i - n / 3] = VF.enumerated("Y_" + i, domains[i], s);
+                Y[i - n / 3] = VariableFactory.enumerated("Y_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], Y[i - n / 3]);
             }
             IntVar[] Z = new IntVar[n / 3];
             for (int i = 2 * n / 3; i < n; i++) {
-                Z[i - 2 * n / 3] = VF.enumerated("Z_" + i, domains[i], s);
+                Z[i - 2 * n / 3] = VariableFactory.enumerated("Z_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], Z[i - 2 * n / 3]);
             }
             Constraint ctr = (Boolean) parameters ? ICF.lex_chain_less(X, Y, Z) : ICF.lex_chain_less_eq(X, Y, Z);
@@ -401,7 +401,7 @@ public interface Modeler {
             Solver s = new Solver("Element_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.post(ICF.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0, "detect"));
@@ -421,10 +421,10 @@ public interface Modeler {
             Solver s = new Solver("Among");
             IntVar[] vars = new IntVar[n - 1];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            IntVar occVar = VF.enumerated("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
+            IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             s.post(ICF.among(occVar, vars, params));
@@ -444,10 +444,10 @@ public interface Modeler {
             Solver s = new Solver("Among");
             IntVar[] vars = new IntVar[n - 1];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            IntVar occVar = VF.enumerated("ovar", domains[n - 1], s);
+            IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             s.post(ICF.among(occVar, vars, params));
@@ -468,7 +468,7 @@ public interface Modeler {
             IntVar[] vars = new IntVar[n];
             IntVar[] decvars = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
                 if (i < n - 1) {
                     decvars[i] = vars[i];
@@ -508,7 +508,7 @@ public interface Modeler {
             IntVar[] vars = new IntVar[n];
             TIntArrayList vals = new TIntArrayList();
             for (int i = 0; i < n; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 for (int j : domains[i]) {
                     if (!vals.contains(j)) {
                         vals.add(j);
@@ -517,7 +517,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             int[] values = vals.toArray();
-            IntVar[] cards = VF.boolArray("cards", values.length, s);
+            IntVar[] cards = VariableFactory.boolArray("cards", values.length, s);
             s.post(ICF.global_cardinality(vars, values, cards, false));
             s.set(ISF.random_value(vars));
             return s;
@@ -536,7 +536,7 @@ public interface Modeler {
             IntVar[] vars = new IntVar[n];
             IntVar[] succs = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (i < n - 1) {
                     succs[i] = vars[i];
                 }
@@ -560,7 +560,7 @@ public interface Modeler {
             Solver s = new Solver("circuit_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.post(ICF.circuit(vars, 0));
@@ -580,12 +580,12 @@ public interface Modeler {
             Solver s = new Solver("path_" + n);
             IntVar[] vars = new IntVar[n - 2];
             for (int i = 0; i < n - 2; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            IntVar from = VF.enumerated("v_" + (n - 2), domains[n - 2], s);
+            IntVar from = VariableFactory.enumerated("v_" + (n - 2), domains[n - 2], s);
             if (map != null) map.put(domains[n - 2], from);
-            IntVar to = VF.enumerated("v_" + (n - 1), domains[n - 1], s);
+            IntVar to = VariableFactory.enumerated("v_" + (n - 1), domains[n - 1], s);
             if (map != null) map.put(domains[n - 1], to);
             s.post(ICF.path(vars, from, to, 0));
             s.set(ISF.random_value(ArrayUtils.append(vars, new IntVar[]{from, to})));
@@ -604,10 +604,10 @@ public interface Modeler {
             Solver s = new Solver("subcircuit_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.subcircuit(vars, 0, VF.bounded("length", 0, vars.length - 1, s)));
+            s.post(ICF.subcircuit(vars, 0, VariableFactory.bounded("length", 0, vars.length - 1, s)));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -632,7 +632,7 @@ public interface Modeler {
             IntVar[] dx = new IntVar[k];
             IntVar[] dy = new IntVar[k];
             for (int i = 0; i < n; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             for (int i = 0; i < k; i++) {
@@ -664,11 +664,11 @@ public interface Modeler {
             IntVar[] h = new IntVar[k];
             Task[] tasks = new Task[k];
             for (int i = 0; i < n; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], solver);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], solver);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             for (int i = 0; i < k; i++) {
-                tasks[i] = VF.task(vars[i], vars[i + k], vars[i + 2 * k]);
+                tasks[i] = VariableFactory.task(vars[i], vars[i + k], vars[i + 2 * k]);
                 h[i] = vars[i + 3 * k];
             }
             IntVar capa = vars[vars.length - 1];
@@ -717,7 +717,7 @@ public interface Modeler {
             Solver s = new Solver("mddc_(sum)" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
@@ -738,7 +738,7 @@ public interface Modeler {
             Solver s = new Solver("ivpc" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = VF.enumerated("v_" + i, domains[i], s);
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
@@ -802,7 +802,7 @@ public interface Modeler {
             BoolVar[] vars = new BoolVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = domains[i].length > 1 ? VariableFactory.bool("X_" + i, s) :
-                        domains[i][0] == 0 ? VF.fixed(false, s) : VF.fixed(true, s);
+                        domains[i][0] == 0 ? VariableFactory.fixed(false, s) : VariableFactory.fixed(true, s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
@@ -824,7 +824,7 @@ public interface Modeler {
             BoolVar[] vars = new BoolVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = domains[i].length > 1 ? VariableFactory.bool("X_" + i, s) :
-                        domains[i][0] == 0 ? VF.fixed(false, s) : VF.fixed(true, s);
+                        domains[i][0] == 0 ? VariableFactory.fixed(false, s) : VariableFactory.fixed(true, s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
 

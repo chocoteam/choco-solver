@@ -50,7 +50,7 @@ import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -198,8 +198,8 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testFirstFail1() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
-        IntVar v2 = VF.enumerated("v2", 3, 4, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
+        IntVar v2 = VariableFactory.enumerated("v2", 3, 4, solver);
         IntVar[] vs = new IntVar[]{v1, v2};
         VariableSelector<IntVar> eval = new FirstFail();
         IntVar va = eval.getVariable(vs);
@@ -209,8 +209,8 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testAntiFirstFail1() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
-        IntVar v2 = VF.enumerated("v2", 3, 4, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
+        IntVar v2 = VariableFactory.enumerated("v2", 3, 4, solver);
         IntVar[] vs = new IntVar[]{v1, v2};
         VariableSelector<IntVar> eval = new AntiFirstFail();
         IntVar va = eval.getVariable(vs);
@@ -220,8 +220,8 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testLargest1() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
-        IntVar v2 = VF.enumerated("v2", 3, 4, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
+        IntVar v2 = VariableFactory.enumerated("v2", 3, 4, solver);
         IntVar[] vs = new IntVar[]{v1, v2};
         VariableSelector<IntVar> eval = new Largest();
         IntVar va = eval.getVariable(vs);
@@ -231,8 +231,8 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testSmallest1() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
-        IntVar v2 = VF.enumerated("v2", 3, 4, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
+        IntVar v2 = VariableFactory.enumerated("v2", 3, 4, solver);
         IntVar[] vs = new IntVar[]{v1, v2};
         VariableSelector<IntVar> eval = new Smallest();
         IntVar va = eval.getVariable(vs);
@@ -242,8 +242,8 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testOccurrence1() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
-        IntVar v2 = VF.enumerated("v2", 3, 4, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
+        IntVar v2 = VariableFactory.enumerated("v2", 3, 4, solver);
         IntVar[] vs = new IntVar[]{v1, v2};
         solver.post(ICF.member(v1, 2, 3));
         solver.post(ICF.member(v1, 3, 4));
@@ -255,8 +255,8 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testMaxRegret1() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", new int[]{1, 5}, solver);
-        IntVar v2 = VF.enumerated("v2", new int[]{3, 4}, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", new int[]{1, 5}, solver);
+        IntVar v2 = VariableFactory.enumerated("v2", new int[]{3, 4}, solver);
         IntVar[] vs = new IntVar[]{v1, v2};
         VariableSelector<IntVar> eval = new MaxRegret();
         IntVar va = eval.getVariable(vs);
@@ -266,8 +266,8 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testInputOrder() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", new int[]{1, 5}, solver);
-        IntVar v2 = VF.enumerated("v2", new int[]{3, 4}, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", new int[]{1, 5}, solver);
+        IntVar v2 = VariableFactory.enumerated("v2", new int[]{3, 4}, solver);
         IntVar[] vs = new IntVar[]{v1, v2};
         VariableSelector<IntVar> eval = new InputOrder<>();
         IntVar va = eval.getVariable(vs);
@@ -277,7 +277,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinDelta1() {
         Solver solver = new Solver();
-        SetVar v1 = VF.set("v1", 1, 5, solver);
+        SetVar v1 = VariableFactory.set("v1", 1, 5, solver);
         VariableEvaluator<SetVar> eval = new MinDelta();
         double va = eval.evaluate(v1);
         Assert.assertEquals(5.0, va);
@@ -286,7 +286,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testMaxDelta1() {
         Solver solver = new Solver();
-        SetVar v1 = VF.set("v1", 1, 5, solver);
+        SetVar v1 = VariableFactory.set("v1", 1, 5, solver);
         VariableEvaluator<SetVar> eval = new MaxDelta();
         double va = eval.evaluate(v1);
         Assert.assertEquals(-5.0, va);
@@ -295,7 +295,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testFirstFail2() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
         VariableEvaluator<IntVar> eval = new FirstFail();
         double va = eval.evaluate(v1);
         Assert.assertEquals(5.0, va);
@@ -304,7 +304,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testAntiFirstFail2() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
         VariableEvaluator<IntVar> eval = new AntiFirstFail();
         double va = eval.evaluate(v1);
         Assert.assertEquals(-5.0, va);
@@ -313,7 +313,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testLargest2() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
         VariableEvaluator<IntVar> eval = new Largest();
         double va = eval.evaluate(v1);
         Assert.assertEquals(-5.0, va);
@@ -322,7 +322,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testSmallest2() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
         VariableEvaluator<IntVar> eval = new Smallest();
         double va = eval.evaluate(v1);
         Assert.assertEquals(1.0, va);
@@ -331,7 +331,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testOccurrence2() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", 1, 5, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", 1, 5, solver);
         solver.post(ICF.member(v1, 2, 3));
         solver.post(ICF.member(v1, 3, 4));
         VariableEvaluator<IntVar> eval = new Occurrence<>();
@@ -342,7 +342,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testMaxRegret2() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", new int[]{1, 5}, solver);
+        IntVar v1 = VariableFactory.enumerated("v1", new int[]{1, 5}, solver);
         VariableEvaluator<IntVar> eval = new MaxRegret();
         double va = eval.evaluate(v1);
         Assert.assertEquals(-4.0, va);
@@ -351,7 +351,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinDelta2() {
         Solver solver = new Solver();
-        SetVar v1 = VF.set("v1", 1, 5, solver);
+        SetVar v1 = VariableFactory.set("v1", 1, 5, solver);
         VariableEvaluator<SetVar> eval = new MinDelta();
         double va = eval.evaluate(v1);
         Assert.assertEquals(5.0, va);
@@ -360,7 +360,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testMaxDelta2() {
         Solver solver = new Solver();
-        SetVar v1 = VF.set("v1", 1, 5, solver);
+        SetVar v1 = VariableFactory.set("v1", 1, 5, solver);
         VariableEvaluator<SetVar> eval = new MaxDelta();
         double va = eval.evaluate(v1);
         Assert.assertEquals(-5.0, va);
@@ -369,7 +369,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testFH3321() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+        IntVar[] X = VariableFactory.enumeratedArray("X", 2, 0, 2, solver);
         solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(true), ISF.split(), X));
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -379,7 +379,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testFH3322() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+        IntVar[] X = VariableFactory.enumeratedArray("X", 2, 0, 2, solver);
         solver.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(false), ISF.reverse_split(), X));
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -390,7 +390,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testFH33232() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+        IntVar[] X = VariableFactory.enumeratedArray("X", 2, 0, 2, solver);
         solver.set(ISF.dichotomic(ISF.minDomainSize_var_selector(), true, X));
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -400,7 +400,7 @@ public class StrategyTest {
     @Test(groups="1s", timeOut=60000)
     public void testFH3324() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 2, 0, 2, solver);
+        IntVar[] X = VariableFactory.enumeratedArray("X", 2, 0, 2, solver);
         solver.set(ISF.dichotomic(ISF.minDomainSize_var_selector(), false, X));
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();

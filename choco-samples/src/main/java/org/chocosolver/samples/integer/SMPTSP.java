@@ -38,7 +38,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * simple CP model to solve a toy SMPTSP instance
@@ -87,10 +87,10 @@ public class SMPTSP extends AbstractProblem {
 		};
 
 		// Variables
-		nbValues = VF.bounded("nb shifts", 0, nbAvailableShifts, solver);
+		nbValues = VariableFactory.bounded("nb shifts", 0, nbAvailableShifts, solver);
 		assignment = new IntVar[nbTasks];
 		for(int i=0;i<nbTasks;i++){
-			assignment[i] = VF.enumerated("t" + (i+1), skilledShifts[i], solver);
+			assignment[i] = VariableFactory.enumerated("t" + (i+1), skilledShifts[i], solver);
 		}
 
 		// Constraints

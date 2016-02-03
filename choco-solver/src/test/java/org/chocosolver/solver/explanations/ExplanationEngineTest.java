@@ -51,7 +51,7 @@ import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
 import org.testng.Assert;
@@ -67,7 +67,7 @@ public class ExplanationEngineTest {
 
 
     public void model1(Solver solver, int n) {
-        IntVar[] vs = VF.enumeratedArray("V", n, 1, n - 1, solver);
+        IntVar[] vs = VariableFactory.enumeratedArray("V", n, 1, n - 1, solver);
         for (int i = 0; i < n - 1; i++) {
             solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)));
         }
@@ -100,7 +100,7 @@ public class ExplanationEngineTest {
     }
 
     private void model2(Solver solver, int n) {
-        IntVar[] vs = VF.enumeratedArray("V", 2, 0, n, solver);
+        IntVar[] vs = VariableFactory.enumeratedArray("V", 2, 0, n, solver);
         solver.post(new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)));
         solver.post(new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)));
     }
@@ -132,7 +132,7 @@ public class ExplanationEngineTest {
     }
 
     private void model3(Solver solver, int n) {
-        IntVar[] vs = VF.boundedArray("V", n, 2, n + 2, solver);
+        IntVar[] vs = VariableFactory.boundedArray("V", n, 2, n + 2, solver);
         solver.post(ICF.arithm(vs[n - 2], "=", vs[n - 1]));
         solver.post(ICF.arithm(vs[n - 2], "!=", vs[n - 1]));
     }
@@ -178,7 +178,7 @@ public class ExplanationEngineTest {
         int n = 3;
         System.out.printf("n = %d : ", n);
         Solver solver = new Solver();
-        IntVar[] vs = VF.enumeratedArray("V", n, 0, n, solver);
+        IntVar[] vs = VariableFactory.enumeratedArray("V", n, 0, n, solver);
         solver.post(new Constraint((n - 2) + ">" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 2], vs[n - 1]}, 1)));
         solver.post(new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)));
 
@@ -204,7 +204,7 @@ public class ExplanationEngineTest {
     public void testNosol0E() {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
-            IntVar[] vars = VF.enumeratedArray("p", n, 0, n - 2, solver);
+            IntVar[] vars = VariableFactory.enumeratedArray("p", n, 0, n - 2, solver);
             solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
@@ -221,7 +221,7 @@ public class ExplanationEngineTest {
     public void testNosol0B() {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
-            IntVar[] vars = VF.boundedArray("p", n, 0, n - 2, solver);
+            IntVar[] vars = VariableFactory.boundedArray("p", n, 0, n - 2, solver);
             solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
             solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
@@ -238,7 +238,7 @@ public class ExplanationEngineTest {
     public void testNosol1E() {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
-            IntVar[] vars = VF.enumeratedArray("p", n, 0, n - 2, solver);
+            IntVar[] vars = VariableFactory.enumeratedArray("p", n, 0, n - 2, solver);
             for (int i = 0; i < n - 1; i++) {
                 solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
             }
@@ -255,7 +255,7 @@ public class ExplanationEngineTest {
     public void testNosol1B() {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
-            IntVar[] vars = VF.boundedArray("p", n, 0, n - 2, solver);
+            IntVar[] vars = VariableFactory.boundedArray("p", n, 0, n - 2, solver);
             for (int i = 0; i < n - 1; i++) {
                 solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
             }
@@ -275,8 +275,8 @@ public class ExplanationEngineTest {
         for (long seed = 0; seed < 10; seed++) {
 
             final Solver solver = new Solver();
-            IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
-            BoolVar[] bs = VF.boolArray("b", 2, solver);
+            IntVar[] p = VariableFactory.enumeratedArray("p", 10, 0, 3, solver);
+            BoolVar[] bs = VariableFactory.boolArray("b", 2, solver);
             ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
             ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
             solver.post(ICF.arithm(bs[0], "=", bs[1]));
@@ -296,8 +296,8 @@ public class ExplanationEngineTest {
     public void testReif2() { // to test PropagatorActivation, from bs to p
 
         final Solver solver = new Solver();
-        IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
-        BoolVar[] bs = VF.boolArray("b", 2, solver);
+        IntVar[] p = VariableFactory.enumeratedArray("p", 10, 0, 3, solver);
+        BoolVar[] bs = VariableFactory.boolArray("b", 2, solver);
         ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
         ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
         solver.post(ICF.arithm(bs[0], "=", bs[1]));
@@ -320,8 +320,8 @@ public class ExplanationEngineTest {
     public void testReif3() { // to test PropagatorActivation, from bs to p
 
         final Solver solver = new Solver();
-        IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
-        BoolVar[] bs = VF.boolArray("b", 2, solver);
+        IntVar[] p = VariableFactory.enumeratedArray("p", 10, 0, 3, solver);
+        BoolVar[] bs = VariableFactory.boolArray("b", 2, solver);
         ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
         ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
         solver.post(ICF.arithm(bs[0], "=", bs[1]));
@@ -622,9 +622,9 @@ public class ExplanationEngineTest {
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = VF.bounded("x^", 0, x[i].getUB() * x[i].getUB(), solver);
+            sx[i] = VariableFactory.bounded("x^", 0, x[i].getUB() * x[i].getUB(), solver);
             sxy[i] = sx[i];
-            sy[i] = VF.bounded("y^", 0, y[i].getUB() * y[i].getUB(), solver);
+            sy[i] = VariableFactory.bounded("y^", 0, y[i].getUB() * y[i].getUB(), solver);
             sxy[size + i] = sy[i];
             solver.post(IntConstraintFactory.times(x[i], x[i], sx[i]));
             solver.post(IntConstraintFactory.times(y[i], y[i], sy[i]));
@@ -664,7 +664,7 @@ public class ExplanationEngineTest {
     public void testClauses() {
         int n = 4;
         Solver solver = new Solver();
-        BoolVar[] bs = VF.boolArray("B", n, solver);
+        BoolVar[] bs = VariableFactory.boolArray("B", n, solver);
         for (int i = 1; i < n; i++) {
             SatFactory.addBoolEq(bs[0], bs[i]);
         }
@@ -689,7 +689,7 @@ public class ExplanationEngineTest {
     public void testClauses2() {
         int n = 5;
         Solver solver = new Solver();
-        BoolVar[] bs = VF.boolArray("B", n, solver);
+        BoolVar[] bs = VariableFactory.boolArray("B", n, solver);
         SatFactory.addBoolOrArrayEqualTrue(bs); // useless
         SatFactory.addBoolIsLeVar(bs[0], bs[1], bs[2]);
         SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
@@ -714,7 +714,7 @@ public class ExplanationEngineTest {
     public void testClauses3() {
         int n = 12;
         Solver solver = new Solver();
-        BoolVar[] bs = VF.boolArray("B", n, solver);
+        BoolVar[] bs = VariableFactory.boolArray("B", n, solver);
         SatFactory.addClauses(new BoolVar[]{bs[0], bs[1], bs[2]}, new BoolVar[]{});
         SatFactory.addClauses(new BoolVar[]{bs[0], bs[1]}, new BoolVar[]{bs[2]});
         // pollution
@@ -745,7 +745,7 @@ public class ExplanationEngineTest {
     public void testClauses4() {
         int n = 12;
         Solver solver = new Solver();
-        BoolVar[] bs = VF.boolArray("B", n, solver);
+        BoolVar[] bs = VariableFactory.boolArray("B", n, solver);
         SatFactory.addClauses(new BoolVar[]{bs[2]}, new BoolVar[]{bs[0], bs[1]});
         SatFactory.addClauses(new BoolVar[]{}, new BoolVar[]{bs[0], bs[1], bs[2]});
 
@@ -784,7 +784,7 @@ public class ExplanationEngineTest {
     private Solver test(int n, int m, int expMode) {
         // infeasible problem
         Solver s = new Solver();
-        IntVar[] x = VF.boundedArray("x", n, 0, m, s);
+        IntVar[] x = VariableFactory.boundedArray("x", n, 0, m, s);
         s.post(ICF.alldifferent(x, "NEQS"));
         s.post(ICF.arithm(x[n - 2], "=", x[n - 1]));
         // explanations
@@ -805,14 +805,14 @@ public class ExplanationEngineTest {
 
         Solver s = new Solver();
 
-        IntVar one = VF.fixed(1, s);
-        IntVar three = VF.fixed(3, s);
-        IntVar four = VF.fixed(4, s);
-        IntVar six = VF.fixed(6, s);
-        IntVar seven = VF.fixed(7, s);
+        IntVar one = VariableFactory.fixed(1, s);
+        IntVar three = VariableFactory.fixed(3, s);
+        IntVar four = VariableFactory.fixed(4, s);
+        IntVar six = VariableFactory.fixed(6, s);
+        IntVar seven = VariableFactory.fixed(7, s);
 
-        IntVar x = VF.integer("x", 1, 10, s);
-        IntVar y = VF.integer("y", 1, 10, s);
+        IntVar x = VariableFactory.integer("x", 1, 10, s);
+        IntVar y = VariableFactory.integer("y", 1, 10, s);
 
         Constraint xGE3 = ICF.arithm(x, ">=", three);
         Constraint xLE4 = ICF.arithm(x, "<=", four);
@@ -842,8 +842,8 @@ public class ExplanationEngineTest {
     public void testOnce1(){
         Solver solver = new Solver();
         int n = 4;
-        IntVar[] X = VF.enumeratedArray("X", 4, 1, 2, solver);
-        BoolVar[] B = VF.boolArray("B", 4, solver);
+        IntVar[] X = VariableFactory.enumeratedArray("X", 4, 1, 2, solver);
+        BoolVar[] B = VariableFactory.boolArray("B", 4, solver);
         for(int i = 0 ; i < n; i++){
             ICF.arithm(X[i], ">", i).reifyWith(B[i]);
         }
@@ -857,9 +857,9 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void testIntSat() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.bounded("x", -2, 3, solver);
-        IntVar y = VF.bounded("y", 1, 4, solver);
-        IntVar z = VF.bounded("z", -2, 2, solver);
+        IntVar x = VariableFactory.bounded("x", -2, 3, solver);
+        IntVar y = VariableFactory.bounded("y", 1, 4, solver);
+        IntVar z = VariableFactory.bounded("z", -2, 2, solver);
 
         solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{1, -3, -3}, "<=", 1));
         solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{-2, 3, 2}, "<=", -2));
@@ -896,9 +896,9 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test111() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.bounded("x", 0, 1, solver);
-        IntVar y = VF.bounded("y", 0, 1, solver);
-        IntVar z = VF.bounded("z", 0, 1, solver);
+        IntVar x = VariableFactory.bounded("x", 0, 1, solver);
+        IntVar y = VariableFactory.bounded("y", 0, 1, solver);
+        IntVar z = VariableFactory.bounded("z", 0, 1, solver);
 
         solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2));
 

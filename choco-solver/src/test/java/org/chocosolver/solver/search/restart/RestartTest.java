@@ -41,7 +41,7 @@ import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -134,8 +134,8 @@ public class RestartTest {
         for (int j = 1; j < 5; j++) {
             int n = 200;
             Solver solver = new Solver(Environments.TRAIL.make(), "Test");
-            IntVar[] X = VF.enumeratedArray("X", n, 1, n, solver);
-            IntVar[] Y = VF.enumeratedArray("Y", n, n + 1, 2 * (n + 1), solver);
+            IntVar[] X = VariableFactory.enumeratedArray("X", n, 1, n, solver);
+            IntVar[] Y = VariableFactory.enumeratedArray("Y", n, n + 1, 2 * (n + 1), solver);
             solver.post(ICF.alldifferent(X));
             for (int i = 0; i < n; i++) {
                 solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));

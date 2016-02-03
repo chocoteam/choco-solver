@@ -108,9 +108,9 @@ public class BoolNotViewTest {
     @Test(groups="1s", timeOut=60000)
     public void testPrevNext() {
         Solver solver = new Solver();
-        BoolVar a = VF.bool("a", solver);
-        BoolVar b = VF.bool("b", solver);
-        solver.post(ICF.arithm(a, "+", VF.not(b), "=", 2));
+        BoolVar a = VariableFactory.bool("a", solver);
+        BoolVar b = VariableFactory.bool("b", solver);
+        solver.post(ICF.arithm(a, "+", VariableFactory.not(b), "=", 2));
         Assert.assertTrue(solver.findSolution());
     }
 }

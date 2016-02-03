@@ -32,7 +32,7 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropOpposite;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.StringUtils;
@@ -166,7 +166,7 @@ public class Constraint implements Serializable {
     public final BoolVar reif() {
         if (boolReif == null) {
             Solver s = propagators[0].getSolver();
-            boolReif = VF.bool(StringUtils.randomName(), s);
+            boolReif = VariableFactory.bool(StringUtils.randomName(), s);
             s.post(new ReificationConstraint(boolReif, this, getOpposite()));
         }
         return boolReif;

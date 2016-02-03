@@ -32,7 +32,7 @@ package org.chocosolver.util;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -48,7 +48,7 @@ public class MDDTest {
     @Test(groups="1s", timeOut=60000)
     public void test0() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("X", 4, 0, 2, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("X", 4, 0, 2, solver);
         Tuples tuples = new Tuples();
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples);
         Assert.assertEquals(mdd.getDiagram(), new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
@@ -59,7 +59,7 @@ public class MDDTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("X", 4, 0, 2, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("X", 4, 0, 2, solver);
         Tuples tuples = new Tuples();
         tuples.add(0, 0, 0, 0);
         tuples.add(0, 0, 0, 1);
@@ -82,7 +82,7 @@ public class MDDTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("X", 3, 0, 1, solver);
         Tuples tuples = new Tuples();
         tuples.add(0, 0, 0);
         tuples.add(0, 0, 1);
@@ -105,8 +105,8 @@ public class MDDTest {
     public void test3() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[2];
-        vars[0] = VF.enumerated("X", -1, 0, solver);
-        vars[1] = VF.enumerated("Y", new int[]{-1, 2}, solver);
+        vars[0] = VariableFactory.enumerated("X", -1, 0, solver);
+        vars[1] = VariableFactory.enumerated("Y", new int[]{-1, 2}, solver);
         Tuples tuples = new Tuples();
         tuples.add(0, -1);
         tuples.add(-1, 2);
@@ -123,8 +123,8 @@ public class MDDTest {
     public void test4() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[2];
-        vars[0] = VF.enumerated("X", 0, 1, solver);
-        vars[1] = VF.enumerated("Y", new int[]{-1, 1}, solver);
+        vars[0] = VariableFactory.enumerated("X", 0, 1, solver);
+        vars[1] = VariableFactory.enumerated("Y", new int[]{-1, 1}, solver);
         Tuples tuples = new Tuples();
         tuples.add(0, -1);
         tuples.add(1, -1);
@@ -142,9 +142,9 @@ public class MDDTest {
     public void test5() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[3];
-        vars[0] = VF.enumerated("V0", -1, 1, solver);
-        vars[1] = VF.enumerated("V1", -1, 1, solver);
-        vars[2] = VF.enumerated("V2", -1, 1, solver);
+        vars[0] = VariableFactory.enumerated("V0", -1, 1, solver);
+        vars[1] = VariableFactory.enumerated("V1", -1, 1, solver);
+        vars[2] = VariableFactory.enumerated("V2", -1, 1, solver);
         Tuples tuples = new Tuples();
         tuples.add(0, -1, -1);
         tuples.add(-1, 0, -1);

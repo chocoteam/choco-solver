@@ -41,7 +41,7 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
@@ -201,8 +201,8 @@ public class ElementTest {
     public void testInc1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
-            IntVar I = VF.enumerated("I", 0, 5, solver);
-            IntVar R = VF.enumerated("R", 0, 10, solver);
+            IntVar I = VariableFactory.enumerated("I", 0, 5, solver);
+            IntVar R = VariableFactory.enumerated("R", 0, 10, solver);
             solver.post(ICF.element(R, new int[]{0, 2, 4, 6, 7}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
@@ -214,8 +214,8 @@ public class ElementTest {
     public void testDec1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
-            IntVar I = VF.enumerated("I", 0, 5, solver);
-            IntVar R = VF.enumerated("R", 0, 10, solver);
+            IntVar I = VariableFactory.enumerated("I", 0, 5, solver);
+            IntVar R = VariableFactory.enumerated("R", 0, 10, solver);
             solver.post(ICF.element(R, new int[]{7, 6, 4, 2, 0}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
@@ -227,8 +227,8 @@ public class ElementTest {
     public void testReg1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
-            IntVar I = VF.enumerated("I", 0, 13, solver);
-            IntVar R = VF.enumerated("R", 0, 21, solver);
+            IntVar I = VariableFactory.enumerated("I", 0, 13, solver);
+            IntVar R = VariableFactory.enumerated("R", 0, 21, solver);
             solver.post(ICF.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
@@ -240,8 +240,8 @@ public class ElementTest {
     public void testTAR1(){
         for (int i = 1; i < 20; i++) {
             Solver solver = new Solver();
-            IntVar I = VF.bounded("I", 0, 3, solver);
-            IntVar R = VF.enumerated("R", -1, 0, solver);
+            IntVar I = VariableFactory.bounded("I", 0, 3, solver);
+            IntVar R = VariableFactory.enumerated("R", -1, 0, solver);
             solver.post(ICF.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1, "detect"));
             solver.set(ISF.random_bound(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
@@ -251,9 +251,9 @@ public class ElementTest {
     @Test
     public void testSolverOrMin() {
         Solver s = new Solver();
-        IntVar val = VF.bounded("v", 0, 9, s);
+        IntVar val = VariableFactory.bounded("v", 0, 9, s);
         // b=> val={5,6,7,8}[2]
-        Constraint el = ElementFactory.detect(val, new int[] { 5, 6, 7, 8 }, VF.fixed(2, s), 0);
+        Constraint el = ElementFactory.detect(val, new int[] { 5, 6, 7, 8 }, VariableFactory.fixed(2, s), 0);
         s.post(LCF.or(el.reif()));
         // s.post(el);// works instead of previous post
         s.findAllSolutions();
@@ -264,10 +264,10 @@ public class ElementTest {
     @Test
     public void testSolverOrFull() {
         Solver s = new Solver();
-        BoolVar b = VF.bool("b", s);
-        IntVar val = VF.bounded("v", 0, 9, s);
+        BoolVar b = VariableFactory.bool("b", s);
+        IntVar val = VariableFactory.bounded("v", 0, 9, s);
         // b=> val={5,6,7,8}[2]
-        Constraint el = ElementFactory.detect(val, new int[] { 5, 6, 7, 8 }, VF.fixed(2, s), 0);
+        Constraint el = ElementFactory.detect(val, new int[] { 5, 6, 7, 8 }, VariableFactory.fixed(2, s), 0);
         s.post(LCF.or(b.not(), el.reif()));
         // !b=> val=2
         Constraint affect = ICF.arithm(val, "=", 2);

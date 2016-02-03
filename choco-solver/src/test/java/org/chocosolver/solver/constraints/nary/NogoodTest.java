@@ -36,7 +36,7 @@ import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -51,7 +51,7 @@ public class NogoodTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         final Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 2, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 3, 0, 2, solver);
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
         SLF.restart(solver,
@@ -66,7 +66,7 @@ public class NogoodTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         final Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 3, 0, 3, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 3, 0, 3, solver);
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
         SLF.restart(solver,

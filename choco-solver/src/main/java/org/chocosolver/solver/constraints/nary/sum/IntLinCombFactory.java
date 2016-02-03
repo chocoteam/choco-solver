@@ -34,7 +34,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.Arrays;
 
@@ -227,22 +227,22 @@ public class IntLinCombFactory {
                 Solver SOLVER = VARS[0].getSolver();
                 if (nbools == VARS.length) {
                     if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new Constraint("BoolSum", new PropSumBoolIncr(VF.toBoolVar(tmpV), b, OPERATOR,
-                                VF.fixed(RESULT, SOLVER), 0));
+                        return new Constraint("BoolSum", new PropSumBoolIncr(VariableFactory.toBoolVar(tmpV), b, OPERATOR,
+                                VariableFactory.fixed(RESULT, SOLVER), 0));
                     } else {
-                        return new Constraint("BoolSum", new PropSumBool(VF.toBoolVar(tmpV), b, OPERATOR,
-                                VF.fixed(RESULT, SOLVER), 0));
+                        return new Constraint("BoolSum", new PropSumBool(VariableFactory.toBoolVar(tmpV), b, OPERATOR,
+                                VariableFactory.fixed(RESULT, SOLVER), 0));
                     }
                 }
                 if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool()) {
                     // the large domain variable is on the last idx
                     assert COEFFS[VARS.length - 1] == -1;
                     if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new Constraint("BoolSum", new PropSumBoolIncr(VF.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                        return new Constraint("BoolSum", new PropSumBoolIncr(VariableFactory.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     } else {
-                        return new Constraint("BoolSum", new PropSumBool(VF.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                        return new Constraint("BoolSum", new PropSumBool(VariableFactory.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     }
@@ -263,7 +263,7 @@ public class IntLinCombFactory {
     public static Constraint selectScalar(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT) {
         Solver SOLVER = VARS[0].getSolver();
         if (VARS.length == 1 && OPERATOR == Operator.EQ) {
-            return times(VARS[0], COEFFS[0], VF.fixed(RESULT, SOLVER));
+            return times(VARS[0], COEFFS[0], VariableFactory.fixed(RESULT, SOLVER));
         }
         if (VARS.length == 2 && OPERATOR == Operator.EQ && RESULT == 0) {
             if (COEFFS[0] == 1) {

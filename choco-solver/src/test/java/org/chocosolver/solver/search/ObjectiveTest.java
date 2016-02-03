@@ -45,7 +45,7 @@ import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -64,7 +64,7 @@ public class ObjectiveTest {
     public void test1() {
         Solver solver = new Solver();
 
-        IntVar iv = VF.enumerated("iv", -5, 15, solver);
+        IntVar iv = VariableFactory.enumerated("iv", -5, 15, solver);
         solver.post(ICF.arithm(iv, ">=", 0));
         solver.post(ICF.arithm(iv, "<=", 10));
         Random rnd = new Random();
@@ -129,7 +129,7 @@ public class ObjectiveTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
-        IntVar iv = VF.enumerated("iv", 0, 10, solver);
+        IntVar iv = VariableFactory.enumerated("iv", 0, 10, solver);
         solver.post(ICF.arithm(iv, ">=", 2));
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
@@ -144,7 +144,7 @@ public class ObjectiveTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         final Solver solver = new Solver();
-        final IntVar iv = VF.enumerated("iv", 0, 10, solver);
+        final IntVar iv = VariableFactory.enumerated("iv", 0, 10, solver);
         solver.post(ICF.arithm(iv, ">=", 2));
 
         solver.post(new Constraint("Conditionnal",
@@ -182,7 +182,7 @@ public class ObjectiveTest {
     @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
-        IntVar iv = VF.enumerated("iv", 0, 10, solver);
+        IntVar iv = VariableFactory.enumerated("iv", 0, 10, solver);
         BoolVar v = ICF.arithm(iv, "<=", 2).reif();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
@@ -196,8 +196,8 @@ public class ObjectiveTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL1() {
         Solver solver = new Solver();
-        BoolVar b1 = VF.bool("b1", solver);
-        BoolVar b2 = VF.bool("b2", solver);
+        BoolVar b1 = VariableFactory.bool("b1", solver);
+        BoolVar b2 = VariableFactory.bool("b2", solver);
         solver.post(ICF.arithm(b1, "<=", b2));
 //        SMF.log(solver, true, true);
         solver.set(new ObjectiveManager<IntVar, Integer>(b1, ResolutionPolicy.MINIMIZE, true));
@@ -225,7 +225,7 @@ public class ObjectiveTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testJL2() {
 		Solver solver = new Solver();
-		IntVar a = VF.enumerated("a", -2, 2, solver);
+		IntVar a = VariableFactory.enumerated("a", -2, 2, solver);
 
 		solver.set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),

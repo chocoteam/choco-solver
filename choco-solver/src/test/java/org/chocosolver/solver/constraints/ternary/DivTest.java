@@ -36,7 +36,7 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.testng.annotations.Test;
 
@@ -61,8 +61,8 @@ public class DivTest extends AbstractTernaryTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL() {
         Solver solver = new Solver();
-        IntVar i = VF.enumerated("i", 0, 2, solver);
-        solver.post(ICF.eucl_div(i, VF.one(solver), VF.zero(solver)).getOpposite());
+        IntVar i = VariableFactory.enumerated("i", 0, 2, solver);
+        solver.post(ICF.eucl_div(i, VariableFactory.one(solver), VariableFactory.zero(solver)).getOpposite());
 //        SMF.log(solver, true, false);
         solver.findAllSolutions();
     }
@@ -71,9 +71,9 @@ public class DivTest extends AbstractTernaryTest {
     public void testJL2() {
         for (int i = 0; i < 100000; i++) {
             final Solver s = new Solver();
-            IntVar a = VF.enumerated("a", new int[]{0, 2, 3, 4}, s);
-            IntVar b = VF.enumerated("b", new int[]{-1, 1, 3, 4}, s);
-            IntVar c = VF.enumerated("c", new int[]{-3, 1, 4}, s);
+            IntVar a = VariableFactory.enumerated("a", new int[]{0, 2, 3, 4}, s);
+            IntVar b = VariableFactory.enumerated("b", new int[]{-1, 1, 3, 4}, s);
+            IntVar c = VariableFactory.enumerated("c", new int[]{-3, 1, 4}, s);
             s.post(ICF.eucl_div(a, b, c));
             s.set(ISF.random_value(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);

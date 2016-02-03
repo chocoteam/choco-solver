@@ -614,7 +614,7 @@ In Choco |version|, it is possible to reify any constraint. Reifying a constrain
 
 Or: ::
 
- BoolVar b = VF.bool("b", solver);
+ BoolVar b = VariableFactory.bool("b", solver);
  constraint.reifyWith(b);
 
 The first API ``constraint.reify()`` creates the variable, if it does not already exists, and reify the constraint.

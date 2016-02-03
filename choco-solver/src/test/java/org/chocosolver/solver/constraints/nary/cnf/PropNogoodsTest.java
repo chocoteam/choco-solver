@@ -39,7 +39,7 @@ import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
@@ -61,7 +61,7 @@ public class PropNogoodsTest {
     @BeforeMethod(alwaysRun = true)
     public void setUp() throws Exception {
         Solver solver = new Solver("nogoods");
-        vars = VF.enumeratedArray("X", 4, -1, 1, solver);
+        vars = VariableFactory.enumeratedArray("X", 4, -1, 1, solver);
         PNG = solver.getNogoodStore().getPropNogoods();
         lits = new int[6];
         lits[0] = PNG.Literal(vars[0], 0, true);
@@ -167,7 +167,7 @@ public class PropNogoodsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testLiteral2() throws Exception {
-        BoolVar[] b = VF.boolArray("B", 100, vars[0].getSolver());
+        BoolVar[] b = VariableFactory.boolArray("B", 100, vars[0].getSolver());
         for(int i = 0 ; i < 100; i++){
             PNG.Literal(b[i], 0, true);
             PNG.Literal(b[i], 0, false);
@@ -300,7 +300,7 @@ public class PropNogoodsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testDeclareDomainNogood(){
-        IntVar var = VF.enumerated("X4", -1, 1, vars[0].getSolver());
+        IntVar var = VariableFactory.enumerated("X4", -1, 1, vars[0].getSolver());
         PNG.declareDomainNogood(var);
         try{
             PNG.doReduce(13);

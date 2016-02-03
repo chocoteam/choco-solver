@@ -85,13 +85,13 @@ public class DeltaTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL() {
         Solver solver = new Solver();
-        final SetVar s0 = VF.set("s0", 0, 1, solver);
-        final BoolVar b0 = VF.bool("b0", solver);
-        final BoolVar b1 = VF.bool("b1", solver);
-        final IntVar i0 = VF.bool("i0", solver);
+        final SetVar s0 = VariableFactory.set("s0", 0, 1, solver);
+        final BoolVar b0 = VariableFactory.bool("b0", solver);
+        final BoolVar b1 = VariableFactory.bool("b1", solver);
+        final IntVar i0 = VariableFactory.bool("i0", solver);
         solver.set(ISF.lexico_LB(i0));
         solver.post(SCF.bool_channel(new BoolVar[]{b0, b1}, s0, 0));
-        solver.post(SCF.cardinality(s0, VF.fixed(0, solver)));
+        solver.post(SCF.cardinality(s0, VariableFactory.fixed(0, solver)));
 
         solver.findSolution();
         solver.getSearchLoop().reset();
@@ -103,8 +103,8 @@ public class DeltaTest {
     public void testJL2() {
         for (int k = 0; k < 50; k++) {
             Solver s = new Solver();
-            final IntVar i = VF.enumerated("i", -2, 2, s);
-            final IntVar j = VF.enumerated("j", -2, 2, s);
+            final IntVar i = VariableFactory.enumerated("i", -2, 2, s);
+            final IntVar j = VariableFactory.enumerated("j", -2, 2, s);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
             s.set(ISF.random_value(new IntVar[]{i, j}));
@@ -117,8 +117,8 @@ public class DeltaTest {
     public void testJL3() {
         for (int k = 0; k < 10; k++) {
             Solver s = new Solver();
-            final IntVar i = VF.bounded("i", -2, 2, s);
-            final IntVar j = VF.bounded("j", -2, 2, s);
+            final IntVar i = VariableFactory.bounded("i", -2, 2, s);
+            final IntVar j = VariableFactory.bounded("j", -2, 2, s);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
             s.set(ISF.random_bound(new IntVar[]{i, j}));
@@ -131,8 +131,8 @@ public class DeltaTest {
     public void testJL4() {
         for (int k = 0; k < 10; k++) {
             Solver s = new Solver();
-            final IntVar i = VF.bool("i", s);
-            final IntVar j = VF.bool("j", s);
+            final IntVar i = VariableFactory.bool("i", s);
+            final IntVar j = VariableFactory.bool("j", s);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
             s.set(ISF.random_value(new IntVar[]{i, j}));

@@ -47,7 +47,7 @@ import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.Assert;
@@ -70,7 +70,7 @@ public class TableTest {
             tuples.add(3, 3, 3);
 
             Solver solver = new Solver();
-            IntVar[] vars = VF.enumeratedArray("X", 3, 1, 2, solver);
+            IntVar[] vars = VariableFactory.enumeratedArray("X", 3, 1, 2, solver);
             Constraint tableConstraint = ICF.table(vars, tuples, a);
             solver.post(tableConstraint);
 
@@ -94,7 +94,7 @@ public class TableTest {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {10, 2, 4}, {5, 0, 20}};
         for (int p = 0; p < params.length; p++) {
             Solver solver = new Solver();
-            IntVar[] vars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
+            IntVar[] vars = VariableFactory.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
             allEquals(solver, vars, -1);
             long nbs = solver.findAllSolutions();
             long nbn = solver.getMeasures().getNodeCount();
@@ -102,7 +102,7 @@ public class TableTest {
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 10; s++) {
                     Solver tsolver = new Solver(ALGOS[a]);
-                    IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
+                    IntVar[] tvars = VariableFactory.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                     allEquals(tsolver, tvars, a);
                     tsolver.set(ISF.random_value(tvars, s));
                     Assert.assertEquals(tsolver.findAllSolutions(), nbs);
@@ -127,7 +127,7 @@ public class TableTest {
 
         for (int p = 2; p < params.length; p++) {
             Solver solver = new Solver();
-            IntVar[] vars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
+            IntVar[] vars = VariableFactory.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
             allDifferent(solver, vars, -1);
             long nbs = solver.findAllSolutions();
             long nbn = solver.getMeasures().getNodeCount();
@@ -135,7 +135,7 @@ public class TableTest {
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 1; s++) {
                     Solver tsolver = new Solver(ALGOS[a]);
-                    IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
+                    IntVar[] tvars = VariableFactory.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                     allDifferent(tsolver, tvars, a);
                     tsolver.set(ISF.random_value(tvars, s));
                     Assert.assertEquals(tsolver.findAllSolutions(), nbs);
@@ -204,7 +204,7 @@ public class TableTest {
         String[] ALGOS = {"FC", "GAC2001", "GAC3rm"};
         for(String s : ALGOS){
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 10, 0, 100, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 10, 0, 100, solver);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
@@ -216,7 +216,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testMDD1() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("X", 3, 0, 1, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("X", 3, 0, 1, solver);
         Tuples tuples = new Tuples();
         tuples.add(0, 0, 0);
         tuples.add(1, 1, 1);
@@ -228,7 +228,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testMDD2() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("X", 3, 0, 2, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("X", 3, 0, 2, solver);
         Tuples tuples = new Tuples();
         tuples.add(0, 1, 2);
         tuples.add(2, 1, 0);
@@ -245,7 +245,7 @@ public class TableTest {
         for (int p = 0; p < params.length; p++) {
             for (long seed = 0; seed < 10; seed++) {
                 Solver solver = new Solver();
-                IntVar[] vars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
+                IntVar[] vars = VariableFactory.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], solver);
                 rnd.setSeed(seed);
                 Tuples tuples = TuplesFactory.generateTuples(values -> rnd.nextBoolean(), true, vars);
                 solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
@@ -255,7 +255,7 @@ public class TableTest {
                 for (int a = 0; a < ALGOS.length; a++) {
                     for (int s = 0; s < 1; s++) {
                         Solver tsolver = new Solver(ALGOS[a]);
-                        IntVar[] tvars = VF.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
+                        IntVar[] tvars = VariableFactory.enumeratedArray("v1", params[p][0], params[p][1], params[p][2], tsolver);
                         tsolver.post(ICF.table(tvars, tuples, ALGOS[a]));
                         tsolver.set(ISF.random_value(tvars, s));
                         Assert.assertEquals(tsolver.findAllSolutions(), nbs);
@@ -269,7 +269,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testTuplesTable1() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 4, 0, 3, solver);
         Tuples t = new Tuples(true);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -288,7 +288,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testTuplesTable2() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 4, 0, 3, solver);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -307,7 +307,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testTuplesLargeTable1() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 4, 0, 3, solver);
         Tuples t = new Tuples(true);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -326,7 +326,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testTuplesLargeTable2() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 4, 0, 3, solver);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -345,7 +345,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testTuplesVeryLargeTable1() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 4, 0, 3, solver);
         Tuples t = new Tuples(true);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -364,7 +364,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testTuplesVeryLargeTable2() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 4, 0, 3, solver);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -383,7 +383,7 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testTuplesVeryLargeTableDuplicate() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("vars", 4, 0, 3, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("vars", 4, 0, 3, solver);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -406,9 +406,9 @@ public class TableTest {
         for (String a : ALGOS) {
             Solver solver = new Solver();
             IntVar x, y, z;
-            x = VF.enumerated("x", 1, 3, solver);
-            y = VF.enumerated("y", 0, 3, solver);
-            z = VF.enumerated("z", 0, 1, solver);
+            x = VariableFactory.enumerated("x", 1, 3, solver);
+            y = VariableFactory.enumerated("y", 0, 3, solver);
+            z = VariableFactory.enumerated("z", 0, 1, solver);
             Tuples ts = TuplesFactory.scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
             solver.post(ICF.table(new IntVar[]{x, z, z, y}, ts, a));
             solver.findAllSolutions();

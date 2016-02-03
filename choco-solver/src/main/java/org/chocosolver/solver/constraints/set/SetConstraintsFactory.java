@@ -457,7 +457,7 @@ public class SetConstraintsFactory {
         IntVar integer = INTEGER;
         if (!INTEGER.hasEnumeratedDomain()) {
             Solver s = INTEGER.getSolver();
-            integer = VF.enumerated("enumViewOf(" + INTEGER.getName() + ")", INTEGER.getLB(), INTEGER.getUB(), s);
+            integer = VariableFactory.enumerated("enumViewOf(" + INTEGER.getName() + ")", INTEGER.getLB(), INTEGER.getUB(), s);
             s.post(ICF.arithm(integer, "=", INTEGER));
         }
         return new Constraint("SetNotMember",

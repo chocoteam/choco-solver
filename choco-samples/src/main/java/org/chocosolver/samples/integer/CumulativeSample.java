@@ -43,7 +43,7 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.Random;
 
@@ -67,20 +67,20 @@ public class CumulativeSample extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
-		IntVar capa = VF.fixed(6,solver);
+		IntVar capa = VariableFactory.fixed(6,solver);
 		int n = 10;
 		int max = 1000;
-		makespan = VF.bounded("makespan",0,max,solver);
-		start = VF.boundedArray("start",n,0,max,solver);
+		makespan = VariableFactory.bounded("makespan",0,max,solver);
+		start = VariableFactory.boundedArray("start",n,0,max,solver);
 		IntVar[] end = new IntVar[n];
 		IntVar[] duration = new IntVar[n];
 		IntVar[] height = new IntVar[n];
 		Task[] task = new Task[n];
 		Random rd = new Random(0);
 		for(int i=0;i<n;i++){
-			duration[i] = VF.fixed(rd.nextInt(20)+1,solver);
-			height[i] = VF.fixed(rd.nextInt(5)+1,solver);
-			end[i] = VF.offset(start[i],duration[i].getValue());
+			duration[i] = VariableFactory.fixed(rd.nextInt(20)+1,solver);
+			height[i] = VariableFactory.fixed(rd.nextInt(5)+1,solver);
+			end[i] = VariableFactory.offset(start[i],duration[i].getValue());
 			task[i] = new Task(start[i],duration[i],end[i]);
 		}
 		solver.post(ICF.cumulative(task,height,capa,true));

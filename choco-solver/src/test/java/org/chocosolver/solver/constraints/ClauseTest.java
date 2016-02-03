@@ -39,7 +39,7 @@ import org.chocosolver.solver.constraints.nary.cnf.PropSat;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -292,7 +292,7 @@ public class ClauseTest {
         Solver s = new Solver();
         IEnvironment e = s.getEnvironment();
         BoolVar[] bs = new BoolVar[n];
-        bs[0] = VF.bool("b0", s);
+        bs[0] = VariableFactory.bool("b0", s);
         SatFactory.addFalse(bs[0]);
         PropSat sat = s.getMinisat().getPropSat();
 
@@ -300,7 +300,7 @@ public class ClauseTest {
         s.propagate();
         for (int i = 1; i < n; i++) {
             e.worldPush();
-            bs[i] = VF.bool("b" + i, s);
+            bs[i] = VariableFactory.bool("b" + i, s);
             sat.addLearnt(sat.Literal(bs[i]));
             s.propagate();
             Assert.assertTrue(bs[i].isInstantiatedTo(1));

@@ -166,7 +166,7 @@ public class RealTest {
         Solver solver = new Solver();
 
         // Declare variables
-        RealVar attr = VF.real("attr", 0.0, 20.0, 0.1, solver);
+        RealVar attr = VariableFactory.real("attr", 0.0, 20.0, 0.1, solver);
 
         // Create and reify constraints to assign values to the real
         RealConstraint attrEquals1 = new RealConstraint("attrEquals1", "{0}=4.0", Ibex.HC4, attr);

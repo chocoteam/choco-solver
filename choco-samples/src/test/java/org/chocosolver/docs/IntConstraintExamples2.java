@@ -35,7 +35,7 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.annotations.Test;
 
@@ -51,7 +51,7 @@ public class IntConstraintExamples2 {
     @Test(groups="1s", timeOut=60000)
     public void mddc() {
         Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("X", 2, -2, 2, solver);
+        IntVar[] vars = VariableFactory.enumeratedArray("X", 2, -2, 2, solver);
         Tuples tuples = new Tuples();
         tuples.add(0, -1);
         tuples.add(1, -1);
@@ -64,9 +64,9 @@ public class IntConstraintExamples2 {
     @Test(groups="1s", timeOut=60000)
     public void clause_channeling() {
         Solver solver = new Solver();
-        IntVar iv = VF.enumerated("iv", 1, 3, solver);
-        BoolVar[] eqs = VF.boolArray("eq", 3, solver);
-        BoolVar[] lqs = VF.boolArray("lq", 3, solver);
+        IntVar iv = VariableFactory.enumerated("iv", 1, 3, solver);
+        BoolVar[] eqs = VariableFactory.boolArray("eq", 3, solver);
+        BoolVar[] lqs = VariableFactory.boolArray("lq", 3, solver);
         solver.post(ICF.clause_channeling(iv, eqs, lqs));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -75,7 +75,7 @@ public class IntConstraintExamples2 {
     @Test(groups="1s", timeOut=60000)
     public void int_value_precede_chain() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, 1, 3, solver);
+        IntVar[] X = VariableFactory.enumeratedArray("X", 3, 1, 3, solver);
         solver.post(ICF.int_value_precede_chain(X, 1, 2));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -84,7 +84,7 @@ public class IntConstraintExamples2 {
     @Test(groups="1s", timeOut=60000)
     public void int_value_precede_chain2() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, 1, 3, solver);
+        IntVar[] X = VariableFactory.enumeratedArray("X", 3, 1, 3, solver);
         solver.post(ICF.int_value_precede_chain(X, new int[]{2,3,1}));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();

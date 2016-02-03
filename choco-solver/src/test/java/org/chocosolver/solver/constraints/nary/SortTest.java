@@ -35,7 +35,7 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.nary.sort.PropSort;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -53,17 +53,17 @@ public class SortTest {
         IntVar[] X, Y;
         X = new IntVar[5];
         Y = new IntVar[5];
-        X[0] = VF.bounded("X1", 1, 16, solver);
-        X[1] = VF.bounded("X2", 5, 10, solver);
-        X[2] = VF.bounded("X3", 7, 9, solver);
-        X[3] = VF.bounded("X4", 12, 15, solver);
-        X[4] = VF.bounded("X5", 1, 13, solver);
+        X[0] = VariableFactory.bounded("X1", 1, 16, solver);
+        X[1] = VariableFactory.bounded("X2", 5, 10, solver);
+        X[2] = VariableFactory.bounded("X3", 7, 9, solver);
+        X[3] = VariableFactory.bounded("X4", 12, 15, solver);
+        X[4] = VariableFactory.bounded("X5", 1, 13, solver);
 
-        Y[0] = VF.bounded("Y1", 2, 3, solver);
-        Y[1] = VF.bounded("Y2", 6, 7, solver);
-        Y[2] = VF.bounded("Y3", 8, 11, solver);
-        Y[3] = VF.bounded("Y4", 13, 16, solver);
-        Y[4] = VF.bounded("Y5", 14, 18, solver);
+        Y[0] = VariableFactory.bounded("Y1", 2, 3, solver);
+        Y[1] = VariableFactory.bounded("Y2", 6, 7, solver);
+        Y[2] = VariableFactory.bounded("Y3", 8, 11, solver);
+        Y[3] = VariableFactory.bounded("Y4", 13, 16, solver);
+        Y[4] = VariableFactory.bounded("Y5", 14, 18, solver);
 
         solver.post(new Constraint("sort", new PropSort(X, Y)));
         /*if (solver.findSolution()) {
@@ -89,13 +89,13 @@ public class SortTest {
         IntVar[] X, Y;
         X = new IntVar[3];
         Y = new IntVar[3];
-        X[0] = VF.bounded("X1", 0, 0, solver);
-        X[1] = VF.bounded("X2", 0, 1, solver);
-        X[2] = VF.bounded("X3", 1, 1, solver);
+        X[0] = VariableFactory.bounded("X1", 0, 0, solver);
+        X[1] = VariableFactory.bounded("X2", 0, 1, solver);
+        X[2] = VariableFactory.bounded("X3", 1, 1, solver);
 
-        Y[0] = VF.bounded("Y1", 0, 0, solver);
-        Y[1] = VF.bounded("Y2", 0, 0, solver);
-        Y[2] = VF.bounded("Y3", 1, 1, solver);
+        Y[0] = VariableFactory.bounded("Y1", 0, 0, solver);
+        Y[1] = VariableFactory.bounded("Y2", 0, 0, solver);
+        Y[2] = VariableFactory.bounded("Y3", 1, 1, solver);
 
         solver.post(ICF.sort(X, Y));
         try {
@@ -112,13 +112,13 @@ public class SortTest {
         IntVar[] X, Y;
         X = new IntVar[3];
         Y = new IntVar[3];
-        X[0] = VF.bounded("X1", 2, 2, solver);
-        X[1] = VF.bounded("X2", 0, 2, solver);
-        X[2] = VF.bounded("X3", 0, 0, solver);
+        X[0] = VariableFactory.bounded("X1", 2, 2, solver);
+        X[1] = VariableFactory.bounded("X2", 0, 2, solver);
+        X[2] = VariableFactory.bounded("X3", 0, 0, solver);
 
-        Y[0] = VF.bounded("Y1", 0, 0, solver);
-        Y[1] = VF.bounded("Y2", 0, 0, solver);
-        Y[2] = VF.bounded("Y3", 2, 2, solver);
+        Y[0] = VariableFactory.bounded("Y1", 0, 0, solver);
+        Y[1] = VariableFactory.bounded("Y2", 0, 0, solver);
+        Y[2] = VariableFactory.bounded("Y3", 2, 2, solver);
 
         solver.post(ICF.sort(X, Y));
         try {
@@ -135,13 +135,13 @@ public class SortTest {
         IntVar[] X, Y;
         X = new IntVar[3];
         Y = new IntVar[3];
-        X[0] = VF.bounded("X1", 0, 7, solver);
-        X[1] = VF.bounded("X2", 3, 5, solver);
-        X[2] = VF.bounded("X3", 1, 5, solver);
+        X[0] = VariableFactory.bounded("X1", 0, 7, solver);
+        X[1] = VariableFactory.bounded("X2", 3, 5, solver);
+        X[2] = VariableFactory.bounded("X3", 1, 5, solver);
 
-        Y[0] = VF.bounded("Y1", 0, 2, solver);
-        Y[1] = VF.bounded("Y2", 1, 9, solver);
-        Y[2] = VF.bounded("Y3", 7, 9, solver);
+        Y[0] = VariableFactory.bounded("Y1", 0, 2, solver);
+        Y[1] = VariableFactory.bounded("Y2", 1, 9, solver);
+        Y[2] = VariableFactory.bounded("Y3", 7, 9, solver);
 
         solver.post(ICF.sort(X, Y));
         try {

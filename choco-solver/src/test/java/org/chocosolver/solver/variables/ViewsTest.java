@@ -458,8 +458,8 @@ public class ViewsTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL1() throws ContradictionException {
         Solver s = new Solver();
-        IntVar v1 = VF.enumerated("v1", -2, 2, s);
-        IntVar v2 = VF.minus(VF.minus(VF.enumerated("v2", -2, 2, s)));
+        IntVar v1 = VariableFactory.enumerated("v1", -2, 2, s);
+        IntVar v2 = VariableFactory.minus(VariableFactory.minus(VariableFactory.enumerated("v2", -2, 2, s)));
         s.post(ICF.arithm(v1, "=", v2));
         s.post(ICF.arithm(v2, "!=", 1));
 
@@ -471,8 +471,8 @@ public class ViewsTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL2() {
         Solver solver = new Solver();
-        SetVar v1 = VF.fixed("{0,1}", new int[]{0, 1}, solver);
-        SetVar v2 = VF.set("v2", 0, 3, solver);
+        SetVar v1 = VariableFactory.fixed("{0,1}", new int[]{0, 1}, solver);
+        SetVar v2 = VariableFactory.set("v2", 0, 3, solver);
         solver.post(SCF.subsetEq(new SetVar[]{v1, v2}));
         solver.set(SetStrategyFactory.force_first(new SetVar[]{v1, v2}));
         solver.findAllSolutions();
@@ -483,9 +483,9 @@ public class ViewsTest {
     public void testJL3() {
         Solver solver = new Solver();
         solver.post(ICF.arithm(
-                VF.enumerated("int", -3, 3, solver),
+                VariableFactory.enumerated("int", -3, 3, solver),
                 "=",
-                VF.minus(VF.bool("bool", solver))));
+                VariableFactory.minus(VariableFactory.bool("bool", solver))));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
@@ -493,11 +493,11 @@ public class ViewsTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL4() throws ContradictionException {
         Solver s = new Solver();
-        BoolVar bool = VF.bool("bool", s);
-        BoolVar view = VF.eq(bool);
-        SetVar set = VF.set("set", 0, 1, s);
+        BoolVar bool = VariableFactory.bool("bool", s);
+        BoolVar view = VariableFactory.eq(bool);
+        SetVar set = VariableFactory.set("set", 0, 1, s);
         s.post(SCF.bool_channel(new BoolVar[]{view, bool}, set, 0));
-        s.post(SCF.member(VF.one(s), set));
+        s.post(SCF.member(VariableFactory.one(s), set));
         s.set(ISF.minDom_UB(bool));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
@@ -506,9 +506,9 @@ public class ViewsTest {
     @Test(groups="1s", timeOut=60000)
     public void testJG() throws ContradictionException {
         Solver s = new Solver();
-        BoolVar bool = VF.bool("bool", s);
-        BoolVar view = VF.eq(bool);
-        IntVar sum = VF.bounded("sum", 0, 6, s);
+        BoolVar bool = VariableFactory.bool("bool", s);
+        BoolVar view = VariableFactory.eq(bool);
+        IntVar sum = VariableFactory.bounded("sum", 0, 6, s);
         s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
         s.propagate();
@@ -518,9 +518,9 @@ public class ViewsTest {
     @Test(groups="1s", timeOut=60000)
     public void testJG2() throws ContradictionException {
         Solver s = new Solver();
-        BoolVar bool = VF.bool("bool", s);
-        BoolVar view = VF.not(bool);
-        IntVar sum = VF.bounded("sum", 0, 6, s);
+        BoolVar bool = VariableFactory.bool("bool", s);
+        BoolVar view = VariableFactory.not(bool);
+        IntVar sum = VariableFactory.bounded("sum", 0, 6, s);
         s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
         s.propagate();
@@ -530,9 +530,9 @@ public class ViewsTest {
     @Test(groups="1s", timeOut=60000)
     public void testJG3() throws ContradictionException {
         Solver s = new Solver();
-        IntVar var = VF.bounded("int", 0, 2, s);
-        IntVar view = VF.eq(var);
-        IntVar sum = VF.bounded("sum", 0, 6, s);
+        IntVar var = VariableFactory.bounded("int", 0, 2, s);
+        IntVar view = VariableFactory.eq(var);
+        IntVar sum = VariableFactory.bounded("sum", 0, 6, s);
         s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
         s.propagate();
@@ -542,9 +542,9 @@ public class ViewsTest {
     @Test(groups="1s", timeOut=60000)
     public void testJG4() throws ContradictionException {
         Solver s = new Solver();
-        IntVar var = VF.bounded("int", 0, 2, s);
-        IntVar view = VF.minus(var);
-        IntVar sum = VF.bounded("sum", 0, 6, s);
+        IntVar var = VariableFactory.bounded("int", 0, 2, s);
+        IntVar view = VariableFactory.minus(var);
+        IntVar sum = VariableFactory.bounded("sum", 0, 6, s);
         s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
         s.propagate();

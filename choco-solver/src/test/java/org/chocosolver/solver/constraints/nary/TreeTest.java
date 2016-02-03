@@ -41,7 +41,7 @@ import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -59,8 +59,8 @@ public class TreeTest {
 
 	private Solver model(boolean defaultCstr) {
 		Solver solver = new Solver();
-		IntVar[] VS = VF.enumeratedArray("VS", 6, -1, 6, solver);
-		IntVar NT = VF.enumerated("NT", 2, 3, solver);
+		IntVar[] VS = VariableFactory.enumeratedArray("VS", 6, -1, 6, solver);
+		IntVar NT = VariableFactory.enumerated("NT", 2, 3, solver);
 		if(defaultCstr) {
 			solver.post(ICF.tree(VS, NT, 0));
 		}else{

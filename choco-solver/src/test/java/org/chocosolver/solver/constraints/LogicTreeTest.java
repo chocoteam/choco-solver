@@ -42,7 +42,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -255,8 +255,8 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test11(){
         Solver solver = new Solver();
-        BoolVar a = VF.bool("a", solver);
-        BoolVar b = VF.bool("b", solver);
+        BoolVar a = VariableFactory.bool("a", solver);
+        BoolVar b = VariableFactory.bool("b", solver);
         LogOp l = LogOp.or(
                 LogOp.and(a, b.not()),
                 LogOp.and(a.not(), b),
@@ -269,8 +269,8 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test13(){
         Solver solver = new Solver();
-        BoolVar a = VF.bool("a", solver);
-        BoolVar b = VF.bool("b", solver);
+        BoolVar a = VariableFactory.bool("a", solver);
+        BoolVar b = VariableFactory.bool("b", solver);
         LogOp l = LogOp.or(a, b, a.not());
         ILogical ll = LogicTreeToolBox.toCNF(l, solver);
         Assert.assertEquals(ll.toString(), "cste -- 1 = 1");
@@ -280,8 +280,8 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test14(){
         Solver solver = new Solver();
-        BoolVar a = VF.bool("a", solver);
-        BoolVar b = VF.bool("b", solver);
+        BoolVar a = VariableFactory.bool("a", solver);
+        BoolVar b = VariableFactory.bool("b", solver);
         LogOp l = LogOp.or(a, b, a.not(), a.not());
         ILogical ll = LogicTreeToolBox.toCNF(l, solver);
         Assert.assertEquals(ll.toString(), "cste -- 1 = 1");
@@ -290,9 +290,9 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test15(){
         Solver solver = new Solver();
-        IntVar a = VF.enumerated("a", -1, 1, solver);
-        BoolVar b1 = VF.bool("b1", solver);
-        BoolVar b2 = VF.bool("b2", solver);
+        IntVar a = VariableFactory.enumerated("a", -1, 1, solver);
+        BoolVar b1 = VariableFactory.bool("b1", solver);
+        BoolVar b2 = VariableFactory.bool("b2", solver);
         ICF.arithm(a,"=",0).reifyWith(b1);
         ICF.arithm(a,">",0).reifyWith(b2);
 
@@ -316,9 +316,9 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test16(){
         Solver solver = new Solver();
-        IntVar a = VF.enumerated("a", -1, 1, solver);
-        BoolVar b1 = VF.bool("b1", solver);
-        BoolVar b2 = VF.bool("b2", solver);
+        IntVar a = VariableFactory.enumerated("a", -1, 1, solver);
+        BoolVar b1 = VariableFactory.bool("b1", solver);
+        BoolVar b2 = VariableFactory.bool("b2", solver);
         ICF.arithm(a,"=",0).reifyWith(b1);
         ICF.arithm(a,">",0).reifyWith(b2);
 
@@ -339,9 +339,9 @@ public class LogicTreeTest {
     @Test(groups="1s", timeOut=60000)
     public void test17(){
         Solver solver = new Solver();
-        IntVar a = VF.enumerated("a", -1, 1, solver);
-        BoolVar b1 = VF.bool("b1", solver);
-        BoolVar b2 = VF.bool("b2", solver);
+        IntVar a = VariableFactory.enumerated("a", -1, 1, solver);
+        BoolVar b1 = VariableFactory.bool("b1", solver);
+        BoolVar b2 = VariableFactory.bool("b2", solver);
         ICF.arithm(a,"=",0).reifyWith(b1);
         ICF.arithm(a,">",0).reifyWith(b2);
 

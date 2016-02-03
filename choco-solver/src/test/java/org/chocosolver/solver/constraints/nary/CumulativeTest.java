@@ -38,7 +38,7 @@ import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
 
 /**
@@ -142,12 +142,12 @@ public class CumulativeTest {
 							 boolean graph, int mode) {
 		final Solver solver = new Solver();
 		int dmax = 5+dmin*2;
-		final IntVar[] s = VF.enumeratedArray("s",n,0,n*dmax,solver);
-		final IntVar[] d = VF.enumeratedArray("d",n,dmin,dmax,solver);
-		final IntVar[] e = VF.enumeratedArray("e",n,0,n*dmax,solver);
-		final IntVar[] h = VF.enumeratedArray("h",n,0,hmax,solver);
-		final IntVar capa = VF.enumerated("capa", 0, capamax, solver);
-		final IntVar last = VF.enumerated("last", 0, n * dmax, solver);
+		final IntVar[] s = VariableFactory.enumeratedArray("s",n,0,n*dmax,solver);
+		final IntVar[] d = VariableFactory.enumeratedArray("d",n,dmin,dmax,solver);
+		final IntVar[] e = VariableFactory.enumeratedArray("e",n,0,n*dmax,solver);
+		final IntVar[] h = VariableFactory.enumeratedArray("h",n,0,hmax,solver);
+		final IntVar capa = VariableFactory.enumerated("capa", 0, capamax, solver);
+		final IntVar last = VariableFactory.enumerated("last", 0, n * dmax, solver);
 		Task[] t = new Task[n];
 		for(int i=0;i<n;i++){
 			t[i] = new Task(s[i],d[i],e[i]);

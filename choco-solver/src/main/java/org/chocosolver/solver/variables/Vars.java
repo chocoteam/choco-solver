@@ -46,7 +46,7 @@ public interface Vars {
     //*************************************************************************************
 
     default BoolVar makeBoolVar(boolean CONSTANT) {
-        return VF.fixed(CONSTANT, _me());
+        return VariableFactory.fixed(CONSTANT, _me());
     }
 
     default BoolVar makeBoolVar() {
@@ -54,7 +54,7 @@ public interface Vars {
     }
 
     default BoolVar makeBoolVar(String NAME) {
-        return VF.bool(NAME, _me());
+        return VariableFactory.bool(NAME, _me());
     }
 
     // ARRAY
@@ -108,14 +108,14 @@ public interface Vars {
     }
 
     default IntVar makeIntVar(String NAME, int CONSTANT) {
-        return VF.fixed(NAME, CONSTANT, _me());
+        return VariableFactory.fixed(NAME, CONSTANT, _me());
     }
 
     default IntVar makeIntVar(String NAME, int MIN, int MAX, boolean boundedDomain) {
         if (boundedDomain) {
-            return VF.bounded(NAME, MIN, MAX, _me());
+            return VariableFactory.bounded(NAME, MIN, MAX, _me());
         } else {
-            return VF.enumerated(NAME, MIN, MAX, _me());
+            return VariableFactory.enumerated(NAME, MIN, MAX, _me());
         }
     }
 
@@ -125,7 +125,7 @@ public interface Vars {
     }
 
     default IntVar makeIntVar(String NAME, int[] VALUES) {
-        return VF.enumerated(NAME, VALUES, _me());
+        return VariableFactory.enumerated(NAME, VALUES, _me());
     }
 
     // ARRAY
@@ -210,11 +210,11 @@ public interface Vars {
     //*************************************************************************************
 
     default RealVar makeRealVar(String NAME, double MIN, double MAX, double PRECISION) {
-        return VF.real(NAME, MIN, MAX, PRECISION, _me());
+        return VariableFactory.real(NAME, MIN, MAX, PRECISION, _me());
     }
 
     default RealVar makeRealView(IntVar VAR, double PRECISION) {
-        return VF.real(VAR, PRECISION);
+        return VariableFactory.real(VAR, PRECISION);
     }
 
     // ARRAY
@@ -228,7 +228,7 @@ public interface Vars {
     }
 
     default RealVar[] makeRealViewArray(IntVar[] VAR, double PRECISION) {
-        return VF.real(VAR, PRECISION);
+        return VariableFactory.real(VAR, PRECISION);
     }
 
     // MATRIX
@@ -262,11 +262,11 @@ public interface Vars {
     }
 
     default SetVar makeSetVar(String NAME, int[] KERNEL, int[] ENVELOPE) {
-        return VF.set(NAME, ENVELOPE, KERNEL, _me());
+        return VariableFactory.set(NAME, ENVELOPE, KERNEL, _me());
     }
 
     default SetVar makeSetVar(String NAME, int[] CONSTANT_SET) {
-        return VF.fixed(NAME, CONSTANT_SET, _me());
+        return VariableFactory.fixed(NAME, CONSTANT_SET, _me());
     }
 
     // ARRAY

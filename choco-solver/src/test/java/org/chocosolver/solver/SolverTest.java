@@ -185,10 +185,10 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testFH1() {
         Solver solver = new Solver();
-        BoolVar b = VF.bool("b", solver);
-        IntVar i = VF.bounded("i", VF.MIN_INT_BOUND, VF.MAX_INT_BOUND, solver);
-        SetVar s = VF.set("s", 2, 3, solver);
-        RealVar r = VF.real("r", 1.0, 2.2, 0.01, solver);
+        BoolVar b = VariableFactory.bool("b", solver);
+        IntVar i = VariableFactory.bounded("i", VariableFactory.MIN_INT_BOUND, VariableFactory.MAX_INT_BOUND, solver);
+        SetVar s = VariableFactory.set("s", 2, 3, solver);
+        RealVar r = VariableFactory.real("r", 1.0, 2.2, 0.01, solver);
 
         BoolVar[] bvars = solver.retrieveBoolVars();
         Assert.assertEquals(bvars, new BoolVar[]{b});
@@ -208,8 +208,8 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testRetrieveInt() {
         Solver solver = new Solver();
-        BoolVar b = VF.bool("b", solver);
-        IntVar i = VF.enumerated("i", 1, 3, solver);
+        BoolVar b = VariableFactory.bool("b", solver);
+        IntVar i = VariableFactory.enumerated("i", 1, 3, solver);
         IntVar[] is = solver.retrieveIntVars(false);
         Assert.assertEquals(1, is.length);
         IntVar[] is2 = solver.retrieveIntVars(true);
@@ -219,8 +219,8 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testRetrieveBool() {
         Solver solver = new Solver();
-        BoolVar b = VF.bool("b", solver);
-        IntVar i = VF.enumerated("i", 1, 3, solver);
+        BoolVar b = VariableFactory.bool("b", solver);
+        IntVar i = VariableFactory.enumerated("i", 1, 3, solver);
         IntVar[] bs = solver.retrieveBoolVars();
         Assert.assertEquals(1, bs.length);
     }
@@ -228,7 +228,7 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testFH2() {
         Solver solver = new Solver();
-        BoolVar b = VF.bool("b", solver);
+        BoolVar b = VariableFactory.bool("b", solver);
         solver.post(ICF.arithm(b, "=", 2));
         solver.findAllSolutions();
         Assert.assertEquals(solver.isFeasible(), ESat.FALSE);
@@ -299,7 +299,7 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL300(){
         Solver s = new Solver();
-        IntVar i = VF.enumerated("i", -5, 5, s);
+        IntVar i = VariableFactory.enumerated("i", -5, 5, s);
         s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, i);
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(s.getSolutionRecorder().getLastSolution().getIntVal(i).intValue(), 5);
@@ -314,7 +314,7 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testMonitors(){
         Solver solver = new Solver();
-        IntVar v = VF.bool("b", solver);
+        IntVar v = VariableFactory.bool("b", solver);
         final int[] c = {0};
         final int[] d = {0};
         IMonitorSolution sm1 = () -> c[0]++;
@@ -341,7 +341,7 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testCriteria(){
         Solver solver = new Solver();
-        IntVar v = VF.bool("b", solver);
+        IntVar v = VariableFactory.bool("b", solver);
         Criterion c1 = () -> solver.getMeasures().getNodeCount() == 1;
         Criterion c2 = () -> solver.getMeasures().getSolutionCount() == 1;
         solver.addStopCriterion(c1);
@@ -363,8 +363,8 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testCompSearch(){
         Solver solver = new Solver();
-        IntVar[] v = VF.boolArray("v", 2, solver);
-        IntVar[] w = VF.boolArray("w", 2, solver);
+        IntVar[] v = VariableFactory.boolArray("v", 2, solver);
+        IntVar[] w = VariableFactory.boolArray("w", 2, solver);
         solver.post(ICF.arithm(v[0], "!=", v[1]));
         solver.post(ICF.arithm(w[0], "!=", w[1]));
         solver.set(ISF.lexico_LB(v));
@@ -376,7 +376,7 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testAssociates(){
         Solver s = new Solver();
-        BoolVar v = VF.bool("V", s);
+        BoolVar v = VariableFactory.bool("V", s);
         Assert.assertEquals(s.getNbVars(), 1);
         s.associates(v);
         Assert.assertEquals(s.getNbVars(), 2);
@@ -389,7 +389,7 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testRestore() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar[] v = VF.boolArray("v", 2, solver);
+        IntVar[] v = VariableFactory.boolArray("v", 2, solver);
         solver.post(ICF.arithm(v[0], "!=", v[1]));
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, v[0]);
         solver.restoreLastSolution();

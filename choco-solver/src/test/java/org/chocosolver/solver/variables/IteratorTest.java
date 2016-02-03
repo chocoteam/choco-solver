@@ -670,7 +670,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void JLiangWaterlooTest() throws ContradictionException {
         Solver s = new Solver();
-        IntVar ivar = VF.enumerated("ivar", new int[]{1, 2, 3, 888, 1000, 2000}, s);
+        IntVar ivar = VariableFactory.enumerated("ivar", new int[]{1, 2, 3, 888, 1000, 2000}, s);
         ivar.removeValue(1000, Cause.Null);
 
         DisposableRangeIterator iter = ivar.getRangeIterator(true);

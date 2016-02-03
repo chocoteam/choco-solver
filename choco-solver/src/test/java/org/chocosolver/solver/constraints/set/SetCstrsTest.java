@@ -37,7 +37,7 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -68,24 +68,24 @@ public class SetCstrsTest {
 
 	public static IntVar[] eqFilter(String mode){
 		Solver s = new Solver();
-		IntVar x = VF.enumerated("x", 0, 10, s);
-		IntVar y = VF.enumerated("y", 0, 10, s);
+		IntVar x = VariableFactory.enumerated("x", 0, 10, s);
+		IntVar y = VariableFactory.enumerated("y", 0, 10, s);
 		// set view of A
-		SetVar xset = VF.set("x as a set", 0, 10, s);
-		SetVar yset = VF.set("y as a set", 0, 10, s);
+		SetVar xset = VariableFactory.set("x as a set", 0, 10, s);
+		SetVar yset = VariableFactory.set("y as a set", 0, 10, s);
 		s.post(SCF.int_values_union(new IntVar[]{x},xset));
 		s.post(SCF.int_values_union(new IntVar[]{y},yset));
 		// X +9 <= Y or Y + 9 <= X
-		SetVar Xleft = VF.set("", 0, 10, s);
-		SetVar tmpLeft = VF.set("", 9, 19, s);
+		SetVar Xleft = VariableFactory.set("", 0, 10, s);
+		SetVar tmpLeft = VariableFactory.set("", 9, 19, s);
 		s.post(SCF.offSet(Xleft,tmpLeft,9));
-		SetVar Yleft = VF.set("", 0, 10, s);
+		SetVar Yleft = VariableFactory.set("", 0, 10, s);
 		s.post(eq(tmpLeft, Yleft,mode));
 
-		SetVar Yright = VF.set("",0, 10, s);
-		SetVar tmpRight = VF.set("", 9, 19, s);
+		SetVar Yright = VariableFactory.set("",0, 10, s);
+		SetVar tmpRight = VariableFactory.set("", 9, 19, s);
 		s.post(SCF.offSet(Yright,tmpRight,9));
-		SetVar Xright = VF.set("", 0, 10, s);
+		SetVar Xright = VariableFactory.set("", 0, 10, s);
 		s.post(eq(tmpRight, Xright,mode));
 
 		//

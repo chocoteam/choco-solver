@@ -34,7 +34,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -282,7 +282,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public IntVar duplicate() {
-        return VF.fixed(StringUtils.randomName(), this.constante, solver);
+        return VariableFactory.fixed(StringUtils.randomName(), this.constante, solver);
     }
 
     @Override

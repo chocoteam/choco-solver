@@ -331,7 +331,7 @@ Available views are: ``not``, ``offset``, ``eq``, ``minus``, ``scale`` and ``rea
 Constants
 ---------
 
-Fixed-value integer variables should be created with the specific ``VF.fixed(int, Solver)`` function.
+Fixed-value integer variables should be created with the specific ``VariableFactory.fixed(int, Solver)`` function.
 
 :ref:`[Constants] <22_variables_constant_label>`
 

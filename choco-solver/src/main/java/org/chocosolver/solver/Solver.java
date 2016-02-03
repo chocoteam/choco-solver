@@ -331,8 +331,8 @@ public class Solver implements Serializable, Vars{
     }
 
     private void _zeroOne(){
-        ZERO = (BoolVar) VF.fixed(0, this);
-        ONE = (BoolVar) VF.fixed(1, this);
+        ZERO = (BoolVar) VariableFactory.fixed(0, this);
+        ONE = (BoolVar) VariableFactory.fixed(1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
     }

@@ -38,7 +38,7 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
@@ -188,16 +188,16 @@ public class DynamicPostTest {
     public void testJLpareto() {
         // Objectives are to maximize "a" and maximize "b".
         Solver solver = new Solver();
-        IntVar a = VF.enumerated("a", 0, 2, solver);
-        IntVar b = VF.enumerated("b", 0, 2, solver);
-        IntVar c = VF.enumerated("c", 0, 2, solver);
+        IntVar a = VariableFactory.enumerated("a", 0, 2, solver);
+        IntVar b = VariableFactory.enumerated("b", 0, 2, solver);
+        IntVar c = VariableFactory.enumerated("c", 0, 2, solver);
 
         solver.post(ICF.arithm(a, "+", b, "<", 3));
 
         // START extra variables/constraints for guided improvement algorithm
         List<Constraint> stack = new ArrayList<>();
-        IntVar lbA = VF.enumerated("lbA", 0, 2, solver);
-        IntVar lbB = VF.enumerated("lbB", 0, 2, solver);
+        IntVar lbA = VariableFactory.enumerated("lbA", 0, 2, solver);
+        IntVar lbB = VariableFactory.enumerated("lbB", 0, 2, solver);
         BoolVar aSBetter = ICF.arithm(a, ">", lbA).reif();
         BoolVar bSBetter = ICF.arithm(b, ">", lbB).reif();
         BoolVar aBetter = ICF.arithm(a, ">=", lbA).reif();

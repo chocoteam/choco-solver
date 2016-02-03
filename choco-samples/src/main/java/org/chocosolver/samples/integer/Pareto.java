@@ -40,7 +40,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -69,9 +69,9 @@ public class Pareto extends AbstractProblem {
 	@Override
 	public void buildModel() {
 		// the problem is to maximize a and b
-		a = VF.enumerated("a", 0, 2, solver);
-		b = VF.enumerated("b", 0, 2, solver);
-		c = VF.enumerated("c", 0, 2, solver);
+		a = VariableFactory.enumerated("a", 0, 2, solver);
+		b = VariableFactory.enumerated("b", 0, 2, solver);
+		c = VariableFactory.enumerated("c", 0, 2, solver);
 
 		solver.post(ICF.arithm(a, "+", b, "<", 3));
 	}

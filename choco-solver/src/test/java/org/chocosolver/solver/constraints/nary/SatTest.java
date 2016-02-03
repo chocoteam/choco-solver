@@ -38,7 +38,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -55,8 +55,8 @@ public class SatTest {
     public void test1() {
         Solver solver = new Solver();
         BoolVar b1, b2;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
         SatFactory.addBoolEq(b1, b2);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -66,8 +66,8 @@ public class SatTest {
     public void test2() {
         Solver solver = new Solver();
         BoolVar b1, b2;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
         SatFactory.addBoolNot(b1, b2);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -77,8 +77,8 @@ public class SatTest {
     public void test3() {
         Solver solver = new Solver();
         BoolVar b1, b2;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
         SatFactory.addBoolLe(b1, b2);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
@@ -89,9 +89,9 @@ public class SatTest {
     public void test4() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
-        r = VF.bool("r", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
+        r = VariableFactory.bool("r", solver);
         SatFactory.addBoolIsEqVar(b1, b2, r);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
@@ -101,9 +101,9 @@ public class SatTest {
     public void test5() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
-        r = VF.bool("r", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
+        r = VariableFactory.bool("r", solver);
         SatFactory.addBoolAndEqVar(b1, b2, r);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
@@ -113,9 +113,9 @@ public class SatTest {
     public void test6() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
-        r = VF.bool("r", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
+        r = VariableFactory.bool("r", solver);
         SatFactory.addBoolOrEqVar(b1, b2, r);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
@@ -125,8 +125,8 @@ public class SatTest {
     public void test7() {
         Solver solver = new Solver();
         BoolVar b1, b2;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
         SatFactory.addBoolLt(b1, b2);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
@@ -136,9 +136,9 @@ public class SatTest {
     public void test8() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
-        r = VF.bool("r", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
+        r = VariableFactory.bool("r", solver);
         SatFactory.addBoolIsLeVar(b1, b2, r);
 //        SMF.log(solver, true, true);
         solver.findAllSolutions();
@@ -149,9 +149,9 @@ public class SatTest {
     public void test9() {
         Solver solver = new Solver();
         BoolVar b1, b2, r;
-        b1 = VF.bool("b1", solver);
-        b2 = VF.bool("b2", solver);
-        r = VF.bool("r", solver);
+        b1 = VariableFactory.bool("b1", solver);
+        b2 = VariableFactory.bool("b2", solver);
+        r = VariableFactory.bool("r", solver);
         SatFactory.addBoolIsLtVar(b1, b2, r);
 //        SMF.log(solver, true, true);
         solver.findAllSolutions();
@@ -163,7 +163,7 @@ public class SatTest {
     public void test10() {
         Solver solver = new Solver();
         BoolVar b1;
-        b1 = VF.bool("b1", solver);
+        b1 = VariableFactory.bool("b1", solver);
         SatFactory.addTrue(b1);
         //        SMF.log(solver, true, true);
         solver.findAllSolutions();
@@ -175,7 +175,7 @@ public class SatTest {
     public void test11() {
         Solver solver = new Solver();
         BoolVar b1;
-        b1 = VF.bool("b1", solver);
+        b1 = VariableFactory.bool("b1", solver);
         SatFactory.addFalse(b1);
         //        SMF.log(solver, true, true);
         solver.findAllSolutions();
@@ -186,7 +186,7 @@ public class SatTest {
     @Test(groups="1s", timeOut=60000)
     public void test12() {
         Solver solver = new Solver();
-        BoolVar[] bs = VF.boolArray("b", 3, solver);
+        BoolVar[] bs = VariableFactory.boolArray("b", 3, solver);
         SatFactory.addBoolOrArrayEqualTrue(bs);
         SatFactory.addFalse(bs[0]);
         SatFactory.addFalse(bs[1]);
@@ -200,11 +200,11 @@ public class SatTest {
     public void testAlexLoboda() throws ContradictionException {
         Solver solver = new Solver();
         // VARS
-        IntVar var = VF.enumerated("var", new int[]{0, 2}, solver);
-        BoolVar eq2 = VF.bool("eq2", solver);
-        BoolVar bvar = VF.bool("already", solver);
-        BoolVar bvar2 = VF.bool("bvar2", solver);
-        BoolVar cond = VF.bool("cond", solver);
+        IntVar var = VariableFactory.enumerated("var", new int[]{0, 2}, solver);
+        BoolVar eq2 = VariableFactory.bool("eq2", solver);
+        BoolVar bvar = VariableFactory.bool("already", solver);
+        BoolVar bvar2 = VariableFactory.bool("bvar2", solver);
+        BoolVar cond = VariableFactory.bool("cond", solver);
         // CSTRS
         SatFactory.addFalse(bvar);
         ICF.arithm(var, "=", 2).reifyWith(eq2);
