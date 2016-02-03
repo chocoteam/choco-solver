@@ -175,10 +175,15 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     public void update() {
         if (isOptimization()) {
             assert objective.isInstantiated();
+            N newVal = getObjUB();
             if (policy == ResolutionPolicy.MINIMIZE) {
-                this.bestProvedUB = getObjUB();
+                if(bestProvedUB == null || newVal.doubleValue() < bestProvedUB.doubleValue()) {
+                    bestProvedUB = newVal;
+                }
             } else {
-                this.bestProvedLB = getObjLB();
+                if(bestProvedLB == null || newVal.doubleValue() > bestProvedLB.doubleValue()) {
+                    bestProvedLB = newVal;
+                }
             }
         }
     }

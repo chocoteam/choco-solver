@@ -324,11 +324,12 @@ public class ParallelResolution {
             int cost = 0;
             for (Solver s : solvers) {
                 if (s.getMeasures().getSolutionCount() > 0) {
+                    int solVal = s.getSolutionRecorder().getLastSolution().getIntVal((IntVar)s.getObjectives()[0]);
                     if (best == null
-                            || (cost > (int) s.getObjectiveManager().getBestSolutionValue() && min)
-                            || (cost < (int) s.getObjectiveManager().getBestSolutionValue() && !min)) {
+                            || (cost > solVal && min)
+                            || (cost < solVal && !min)) {
                         best = s;
-                        cost = (int) s.getObjectiveManager().getBestSolutionValue();
+                        cost = solVal;
                     }
                 }
             }
