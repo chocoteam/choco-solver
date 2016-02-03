@@ -308,14 +308,14 @@ public class IntIterableRangeSetTest {
 
         IntIterableRangeSet is1;
 
-        is1 = is.complement(0, 11);
+        is1 = IntIterableSetUtils.complement(is, 0, 11);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 11);
         Assert.assertEquals(is1.nextValue(0), 4);
         Assert.assertEquals(is1.nextValue(4), 6);
         Assert.assertEquals(is1.nextValue(6), 11);
 
-        is1 = is.complement(Integer.MIN_VALUE, Integer.MAX_VALUE);
+        is1 = IntIterableSetUtils.complement(is, Integer.MIN_VALUE, Integer.MAX_VALUE);
         Assert.assertEquals(is1.first(), Integer.MIN_VALUE);
         Assert.assertEquals(is1.last(), Integer.MAX_VALUE);
         Assert.assertEquals(is1.nextValue(0), 4);
@@ -323,7 +323,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(6), 11);
         Assert.assertEquals(is1.nextValue(11), 12);
 
-        is1 = is.complement(1, 15);
+        is1 = IntIterableSetUtils.complement(is, 1, 15);
         Assert.assertEquals(is1.first(), 4);
         Assert.assertEquals(is1.last(), 15);
         Assert.assertEquals(is1.nextValue(0), 4);
@@ -331,7 +331,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(6), 11);
         Assert.assertEquals(is1.nextValue(11), 12);
 
-        is1 = is.complement(2, 15);
+        is1 = IntIterableSetUtils.complement(is, 2, 15);
         Assert.assertEquals(is1.first(), 4);
         Assert.assertEquals(is1.last(), 15);
         Assert.assertEquals(is1.nextValue(0), 4);
@@ -339,7 +339,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(6), 11);
         Assert.assertEquals(is1.nextValue(11), 12);
 
-        is1 = is.complement(3, 15);
+        is1 = IntIterableSetUtils.complement(is, 3, 15);
         Assert.assertEquals(is1.first(), 4);
         Assert.assertEquals(is1.last(), 15);
         Assert.assertEquals(is1.nextValue(0), 4);
@@ -347,7 +347,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(6), 11);
         Assert.assertEquals(is1.nextValue(11), 12);
 
-        is1 = is.complement(4, 15);
+        is1 = IntIterableSetUtils.complement(is, 4, 15);
         Assert.assertEquals(is1.first(), 4);
         Assert.assertEquals(is1.last(), 15);
         Assert.assertEquals(is1.nextValue(0), 4);
@@ -355,27 +355,27 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(6), 11);
         Assert.assertEquals(is1.nextValue(11), 12);
 
-        is1 = is.complement(5, 15);
+        is1 = IntIterableSetUtils.complement(is, 5, 15);
         Assert.assertEquals(is1.first(), 6);
         Assert.assertEquals(is1.last(), 15);
         Assert.assertEquals(is1.nextValue(0), 6);
         Assert.assertEquals(is1.nextValue(6), 11);
         Assert.assertEquals(is1.nextValue(11), 12);
 
-        is1 = is.complement(6, 15);
+        is1 = IntIterableSetUtils.complement(is, 6, 15);
         Assert.assertEquals(is1.first(), 6);
         Assert.assertEquals(is1.last(), 15);
         Assert.assertEquals(is1.nextValue(0), 6);
         Assert.assertEquals(is1.nextValue(6), 11);
         Assert.assertEquals(is1.nextValue(11), 12);
 
-        is1 = is.complement(7, 15);
+        is1 = IntIterableSetUtils.complement(is, 7, 15);
         Assert.assertEquals(is1.first(), 11);
         Assert.assertEquals(is1.last(), 15);
         Assert.assertEquals(is1.nextValue(0), 11);
         Assert.assertEquals(is1.nextValue(11), 12);
 
-        is1 = is.complement(0, 10);
+        is1 = IntIterableSetUtils.complement(is, 0, 10);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 6);
         Assert.assertEquals(is1.nextValue(-1), 0);
@@ -383,7 +383,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(4), 6);
         Assert.assertEquals(is1.nextValue(6), Integer.MAX_VALUE);
 
-        is1 = is.complement(0, 9);
+        is1 = IntIterableSetUtils.complement(is, 0, 9);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 6);
         Assert.assertEquals(is1.nextValue(-1), 0);
@@ -391,7 +391,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(4), 6);
         Assert.assertEquals(is1.nextValue(6), Integer.MAX_VALUE);
 
-        is1 = is.complement(0, 8);
+        is1 = IntIterableSetUtils.complement(is, 0, 8);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 6);
         Assert.assertEquals(is1.nextValue(-1), 0);
@@ -399,7 +399,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(4), 6);
         Assert.assertEquals(is1.nextValue(6), Integer.MAX_VALUE);
 
-        is1 = is.complement(0, 7);
+        is1 = IntIterableSetUtils.complement(is, 0, 7);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 6);
         Assert.assertEquals(is1.nextValue(-1), 0);
@@ -407,7 +407,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(4), 6);
         Assert.assertEquals(is1.nextValue(6), Integer.MAX_VALUE);
 
-        is1 = is.complement(0, 6);
+        is1 = IntIterableSetUtils.complement(is, 0, 6);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 6);
         Assert.assertEquals(is1.nextValue(-1), 0);
@@ -415,21 +415,21 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is1.nextValue(4), 6);
         Assert.assertEquals(is1.nextValue(6), Integer.MAX_VALUE);
 
-        is1 = is.complement(0, 5);
+        is1 = IntIterableSetUtils.complement(is, 0, 5);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 4);
         Assert.assertEquals(is1.nextValue(-1), 0);
         Assert.assertEquals(is1.nextValue(0), 4);
         Assert.assertEquals(is1.nextValue(4), Integer.MAX_VALUE);
 
-        is1 = is.complement(0, 4);
+        is1 = IntIterableSetUtils.complement(is, 0, 4);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 4);
         Assert.assertEquals(is1.nextValue(-1), 0);
         Assert.assertEquals(is1.nextValue(0), 4);
         Assert.assertEquals(is1.nextValue(4), Integer.MAX_VALUE);
 
-        is1 = is.complement(0, 3);
+        is1 = IntIterableSetUtils.complement(is, 0, 3);
         Assert.assertEquals(is1.first(), 0);
         Assert.assertEquals(is1.last(), 0);
         Assert.assertEquals(is1.nextValue(-1), 0);
@@ -461,7 +461,7 @@ public class IntIterableRangeSetTest {
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
             IntIterableRangeSet s1 = plus1(t1, t2);
-            IntIterableRangeSet s2 = IntIterableSetFactory.plus(t1, t2);
+            IntIterableRangeSet s2 = IntIterableSetUtils.plus(t1, t2);
             Assert.assertEquals(s2.SIZE, s1.SIZE);
             Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
             Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
@@ -487,7 +487,7 @@ public class IntIterableRangeSetTest {
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
             IntIterableRangeSet s1 = minus1(t1, t2);
-            IntIterableRangeSet s2 = IntIterableSetFactory.minus(t1, t2);
+            IntIterableRangeSet s2 = IntIterableSetUtils.minus(t1, t2);
             Assert.assertEquals(s2.SIZE, s1.SIZE);
             Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
             Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));

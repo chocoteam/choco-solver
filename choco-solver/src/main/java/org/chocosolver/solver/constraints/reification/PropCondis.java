@@ -41,7 +41,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.ranges.IntIterableRangeSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSetFactory;
+import org.chocosolver.solver.variables.ranges.IntIterableSetUtils;
 import org.chocosolver.util.ESat;
 
 import java.util.ArrayList;
@@ -333,7 +333,7 @@ public class PropCondis extends Propagator<BoolVar> {
                         rs = new IntIterableRangeSet();
                         domains.put(i, rs);
                     }
-                    IntIterableSetFactory.dvar_set(allvars[i], rs);
+                    IntIterableSetUtils.copyIn(allvars[i], rs);
                     toUnion.set(i);
                 }
             }
@@ -341,7 +341,7 @@ public class PropCondis extends Propagator<BoolVar> {
             for (int p = toUnion.nextSetBit(0); p >= 0; p = toUnion.nextSetBit(p + 1)) {
                 // check if domain has changed
                 if (cardinalities[p] > allvars[p].getDomainSize()) {
-                    IntIterableSetFactory.fd_union(domains.get(p), allvars[p]);
+                    IntIterableSetUtils.union(domains.get(p), allvars[p]);
                     if (domains.get(p).size() == cardinalities[p]) {
                         toUnion.clear(p);
                     }

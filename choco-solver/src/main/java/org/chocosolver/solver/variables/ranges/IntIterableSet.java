@@ -156,4 +156,17 @@ public interface IntIterableSet{
      */
     int size();
 
+    /**
+     * add the value x to all integers stored in this set
+     *
+     * @param x value to add
+     */
+    void plus(int x);
+
+    /**
+     * subtract the value x to all integers stored in this set
+     *
+     * @param x value to add
+     */
+    void minus(int x);
 }

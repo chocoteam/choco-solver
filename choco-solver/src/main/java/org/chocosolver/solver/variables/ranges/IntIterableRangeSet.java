@@ -360,51 +360,6 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     /**
-     * @param lbu lower bound (inclusive) of the universe
-     * @param ubu upper bound (inclusive) of the universe
-     * @return the complement of this set wrt to universe set [<i>lbu</i>, <i>ubu</i>].
-     * Values smaller than <i>lbu</i> and greater than <i>ubu</i> are ignored.
-     */
-    public IntIterableRangeSet complement(int lbu, int ubu) {
-        assert lbu <= ubu;
-        IntIterableRangeSet t = new IntIterableRangeSet();
-        t.ELEMENTS = new int[this.SIZE + 2];
-        int i = 0, j = 0;
-        int lb = lbu;
-        while (i < SIZE && ELEMENTS[i] <= lbu) {
-            i += 2;
-            lb = ELEMENTS[i - 1]+1;
-        }
-        if(i == SIZE){
-            if(lb < ubu) {
-                t.ELEMENTS[j++] = lb;
-                t.ELEMENTS[j++] = ubu;
-                t.CARDINALITY += t.ELEMENTS[j - 1] - t.ELEMENTS[j - 2] + 1;
-                t.SIZE += 2;
-            }// else: empty set
-        }else{
-            assert ELEMENTS[i] > lb;
-            t.ELEMENTS[j++] = lb;
-            t.ELEMENTS[j++] = this.ELEMENTS[i++] - 1;
-            t.CARDINALITY += t.ELEMENTS[j - 1] - t.ELEMENTS[j - 2] + 1;
-            t.SIZE += 2;
-            while (i < SIZE - 2 && ELEMENTS[i] < ubu) {
-                t.ELEMENTS[j++] = this.ELEMENTS[i++] + 1;
-                t.ELEMENTS[j++] = this.ELEMENTS[i++] - 1;
-                t.CARDINALITY += t.ELEMENTS[j - 1] - t.ELEMENTS[j - 2] + 1;
-                t.SIZE += 2;
-            }
-            if (ELEMENTS[i] < ubu) {
-                t.ELEMENTS[j++] = this.ELEMENTS[i++] + 1;
-                t.ELEMENTS[j++] = ubu;
-                t.CARDINALITY += t.ELEMENTS[j - 1] - t.ELEMENTS[j - 2] + 1;
-                t.SIZE += 2;
-            }
-        }
-        return t;
-    }
-
-    /**
      * By convention, range are numbered starting from 1 (not 0).
      *
      * @param x a value
