@@ -38,7 +38,6 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -151,7 +150,7 @@ public class RealTest {
         double precision = 0.00000001;
         IntVar x = solver.makeIntVar("x", 0, 9, true);
         IntVar y = solver.makeIntVar("y", 0, 9, true);
-        RealVar[] vars = new RealVar[]{VariableFactory.real(x, precision), VariableFactory.real(y, precision)};
+        RealVar[] vars = solver.makeRealViewArray(new IntVar[]{x,y}, precision);
         // Actually ,we need the calculated result like these :
         // x : [2.000000, 2.000000], y : [4.000000, 4.000000]
         // or x : [1.000000, 1.000000], y : [8.000000, 8.000000]

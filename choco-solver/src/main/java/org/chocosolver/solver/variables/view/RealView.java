@@ -34,7 +34,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -179,7 +178,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
 
     @Override
     public RealVar duplicate() {
-        return VariableFactory.real(this.var, this.precision);
+        return solver.makeRealView(this.var, this.precision);
     }
 
 }

@@ -38,7 +38,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
+//import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -225,7 +225,7 @@ public class LogicTreeTest {
 						rows[0],
 						IntConstraintFactory.arithm(rows[1], "+", rows[2], "=", 2));
         LogicalConstraintFactory.ifThen(
-						VariableFactory.not(rows[0]),
+						rows[0].not(),
 						IntConstraintFactory.arithm(rows[1], "+", rows[2], "<=", 1));
         //SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();

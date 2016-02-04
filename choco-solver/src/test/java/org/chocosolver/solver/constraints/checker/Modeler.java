@@ -42,7 +42,7 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VariableFactory;
+//import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -671,7 +671,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             for (int i = 0; i < k; i++) {
-                tasks[i] = VariableFactory.task(vars[i], vars[i + k], vars[i + 2 * k]);
+                tasks[i] = new Task(vars[i], vars[i + k], vars[i + 2 * k]);
                 h[i] = vars[i + 3 * k];
             }
             IntVar capa = vars[vars.length - 1];

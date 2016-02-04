@@ -39,7 +39,6 @@ import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * The cyclo hexan problem but hybrids finite/continuous problems
@@ -74,7 +73,7 @@ public class HybridCycloHexan extends AbstractProblem {
 		// finite domain
 		intx = solver.makeIntVar("x", new int[]{-10, -9, 0, 2, 42});
 		// continuous view
-		x = VariableFactory.real(intx,precision);
+		x = solver.makeRealView(intx,precision);
 		y = solver.makeRealVar("y", -1.0e8, 1.0e8, precision);
 		z = solver.makeRealVar("z", -1.0e8, 1.0e8, precision);
 

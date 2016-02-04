@@ -37,7 +37,6 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -59,7 +58,7 @@ public class CountTest {
         Solver solver = new Solver();
         IntVar[] vars = solver.makeIntVarArray("var", n, 0, n - 1, true);
         for (int i = 0; i < n; i++) {
-            solver.post(IntConstraintFactory.count(i, vars, VariableFactory.eq(vars[i])));
+            solver.post(IntConstraintFactory.count(i, vars, vars[i]));
         }
         solver.post(IntConstraintFactory.sum(vars, "=", n)); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
