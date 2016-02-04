@@ -301,7 +301,7 @@ public class MinusView extends IntView {
 
     @Override
     public IntVar duplicate() {
-        return solver.makeIntMinusView(this.var);
+        return solver.intMinusView(this.var);
     }
 
     @Override

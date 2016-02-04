@@ -62,10 +62,10 @@ public class LNSTest {
         // occurrence of each item
         IntVar[] objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = solver.makeIntVar("o_" + (i + 1), 0, (int) ceil(capacities[1] / volumes[i]), true);
+            objects[i] = solver.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1] / volumes[i]), true);
         }
-        final IntVar power = solver.makeIntVar("power", 0, 99999, true);
-        IntVar scalar = solver.makeIntVar("weight", capacities[0], capacities[1], true);
+        final IntVar power = solver.intVar("power", 0, 99999, true);
+        IntVar scalar = solver.intVar("weight", capacities[0], capacities[1], true);
         solver.post(IntConstraintFactory.scalar(objects, volumes, "=", scalar));
         solver.post(IntConstraintFactory.scalar(objects, energies, "=", power));
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));

@@ -57,21 +57,21 @@ public class Eq5 extends AbstractProblem {
     @Override
     public void buildModel() {
         vars = new IntVar[15];
-        vars[0] = solver.makeIntVar("A90397", -20, 20, false);
-        vars[1] = solver.makeIntVar("A90429", -20, 20, false);
-        vars[2] = solver.makeIntVar("A90461", -20, 20, false);
-        vars[3] = solver.makeIntVar("A90493", -20, 20, false);
-        vars[4] = solver.makeIntVar("A90525", -20, 20, false);
-        vars[5] = solver.makeIntVar("A90557", -20, 20, false);
-        vars[6] = solver.makeIntVar("A90589", -20, 20, false);
-        vars[7] = solver.makeIntVar("A90621", -20, 20, false);
-        vars[8] = solver.makeIntVar("A90653", -20, 20, false);
-        vars[9] = solver.makeIntVar("A90685", -20, 20, false);
-        vars[10] = solver.makeIntVar("A90717", -20, 20, false);
-        vars[11] = solver.makeIntVar("A90749", -20, 20, false);
-        vars[12] = solver.makeIntVar("A90781", -20, 20, false);
-        vars[13] = solver.makeIntVar("A90813", -20, 20, false);
-        vars[14] = solver.makeIntVar("A90845", -20, 20, false);
+        vars[0] = solver.intVar("A90397", -20, 20, false);
+        vars[1] = solver.intVar("A90429", -20, 20, false);
+        vars[2] = solver.intVar("A90461", -20, 20, false);
+        vars[3] = solver.intVar("A90493", -20, 20, false);
+        vars[4] = solver.intVar("A90525", -20, 20, false);
+        vars[5] = solver.intVar("A90557", -20, 20, false);
+        vars[6] = solver.intVar("A90589", -20, 20, false);
+        vars[7] = solver.intVar("A90621", -20, 20, false);
+        vars[8] = solver.intVar("A90653", -20, 20, false);
+        vars[9] = solver.intVar("A90685", -20, 20, false);
+        vars[10] = solver.intVar("A90717", -20, 20, false);
+        vars[11] = solver.intVar("A90749", -20, 20, false);
+        vars[12] = solver.intVar("A90781", -20, 20, false);
+        vars[13] = solver.intVar("A90813", -20, 20, false);
+        vars[14] = solver.intVar("A90845", -20, 20, false);
 
 //        A90397 + A90429 * 3 + A90461 * 9 + A90493 * 27 + A90525 * 81 + A90557 + A90589 * 3 + A90621 * 9 +
 //                A90653 * 27 + A90685 + A90717 * 3 + A90749 * 9 + A90781 + A90813 * 3 + A90845 = 380

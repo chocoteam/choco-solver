@@ -56,16 +56,16 @@ public class BoolNotViewTest {
             Solver ref = new Solver();
             {
                 BoolVar[] xs = new BoolVar[2];
-                xs[0] = ref.makeBoolVar("x");
-                xs[1] = ref.makeBoolVar("y");
+                xs[0] = ref.boolVar("x");
+                xs[1] = ref.boolVar("y");
                 ref.post(IntConstraintFactory.sum(xs, "=", 1));
                 ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
                 BoolVar[] xs = new BoolVar[2];
-                xs[0] = solver.makeBoolVar("x");
-                xs[1] = solver.makeBoolNotView(xs[0]);
+                xs[0] = solver.boolVar("x");
+                xs[1] = solver.boolNotView(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, "=", 1));
                 solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
@@ -79,8 +79,8 @@ public class BoolNotViewTest {
     @Test(groups="1s", timeOut=60000)
     public void testIt() {
         Solver ref = new Solver();
-        BoolVar o = ref.makeBoolVar("b");
-        BoolVar v = ref.makeBoolNotView(o);
+        BoolVar o = ref.boolVar("b");
+        BoolVar v = ref.boolNotView(o);
         DisposableValueIterator vit = v.getValueIterator(true);
         while (vit.hasNext()) {
             Assert.assertTrue(o.contains(vit.next()));
@@ -108,9 +108,9 @@ public class BoolNotViewTest {
     @Test(groups="1s", timeOut=60000)
     public void testPrevNext() {
         Solver solver = new Solver();
-        BoolVar a = solver.makeBoolVar("a");
-        BoolVar b = solver.makeBoolVar("b");
-        solver.post(ICF.arithm(a, "+", solver.makeBoolNotView(b), "=", 2));
+        BoolVar a = solver.boolVar("a");
+        BoolVar b = solver.boolVar("b");
+        solver.post(ICF.arithm(a, "+", solver.boolNotView(b), "=", 2));
         Assert.assertTrue(solver.findSolution());
     }
 }

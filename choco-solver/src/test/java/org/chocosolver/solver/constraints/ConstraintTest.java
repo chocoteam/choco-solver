@@ -50,9 +50,9 @@ public class ConstraintTest {
     public void testBooleanChannelingJL() {
         //#issue 190
         Solver solver = new Solver();
-        BoolVar[] bs = solver.makeBoolVarArray("bs", 3);
-        SetVar s1 = solver.makeSetVar("s1", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
-        SetVar s2 = solver.makeSetVar("s2", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
+        BoolVar[] bs = solver.boolVarArray("bs", 3);
+        SetVar s1 = solver.setVar("s1", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
+        SetVar s2 = solver.setVar("s2", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
         solver.post(LCF.or(SCF.all_equal(new SetVar[]{s1, s2}), SCF.bool_channel(bs, s1, 0)));
         solver.findAllSolutions();
         Assert.assertEquals(2040, solver.getMeasures().getSolutionCount());
@@ -61,7 +61,7 @@ public class ConstraintTest {
     @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions() {
         Solver solver = new Solver();
-        IntVar[] ivs = solver.makeIntVarArray("X", 4, 0, 10, false);
+        IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
         solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
         solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
         solver.post(ICF.arithm(ivs[0], ">=", ivs[2])); // INST + UB or INST + LB
@@ -76,7 +76,7 @@ public class ConstraintTest {
     @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions2() {
         Solver solver = new Solver();
-        IntVar[] ivs = solver.makeIntVarArray("X", 4, 0, 10, false);
+        IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
         solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
         solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
         Constraint cr = ICF.arithm(ivs[0], ">=", ivs[2]);

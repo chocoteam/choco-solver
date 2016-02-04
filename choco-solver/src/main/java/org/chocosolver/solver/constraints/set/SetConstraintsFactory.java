@@ -423,7 +423,7 @@ public class SetConstraintsFactory {
      * @return a constraint ensuring that SET belongs to SETS
      */
     public static Constraint member(SetVar[] SETS, SetVar SET) {
-        IntVar index = SET.getSolver().makeIntVar("idx_tmp", 0, SETS.length - 1, false);
+        IntVar index = SET.getSolver().intVar("idx_tmp", 0, SETS.length - 1, false);
         return element(index, SETS, 0, SET);
     }
 
@@ -459,7 +459,7 @@ public class SetConstraintsFactory {
         IntVar integer = INTEGER;
         if (!INTEGER.hasEnumeratedDomain()) {
             Solver s = INTEGER.getSolver();
-            integer = s.makeIntVar("enumViewOf(" + INTEGER.getName() + ")", INTEGER.getLB(), INTEGER.getUB(), false);
+            integer = s.intVar("enumViewOf(" + INTEGER.getName() + ")", INTEGER.getLB(), INTEGER.getUB(), false);
             s.post(ICF.arithm(integer, "=", INTEGER));
         }
         return new Constraint("SetNotMember",

@@ -81,7 +81,7 @@ public class Pert extends AbstractProblem {
     public void buildModel() {
         setUp();
 
-        vars = solver.makeIntVarArray("task", n, 0, horizon, true);
+        vars = solver.intVarArray("task", n, 0, horizon, true);
 
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {

@@ -96,7 +96,7 @@ public class BIBD extends AbstractProblem {
         _vars = new BoolVar[b][v];
         for (int i = 0; i < v; i++) {
             for (int j = 0; j < b; j++) {
-                vars[i][j] = solver.makeBoolVar("V(" + i + "," + j + ")");
+                vars[i][j] = solver.boolVar("V(" + i + "," + j + ")");
                 _vars[j][i] = vars[i][j];
             }
 
@@ -113,7 +113,7 @@ public class BIBD extends AbstractProblem {
         // Exactly l ones in scalar product between two different rows
         for (int i1 = 0; i1 < v; i1++) {
             for (int i2 = i1 + 1; i2 < v; i2++) {
-                BoolVar[] score = solver.makeBoolVarArray(format("row(%d,%d)", i1, i2), b);
+                BoolVar[] score = solver.boolVarArray(format("row(%d,%d)", i1, i2), b);
                 for (int j = 0; j < b; j++) {
                     solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }

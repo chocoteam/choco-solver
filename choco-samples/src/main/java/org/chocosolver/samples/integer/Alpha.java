@@ -58,7 +58,7 @@ public class Alpha extends AbstractProblem {
     public void buildModel() {
         letters = new IntVar[26];
         for (int i = 0; i < 26; i++) {
-            letters[i] = solver.makeIntVar("" + (char) (97 + i), 1, 26, true);
+            letters[i] = solver.intVar("" + (char) (97 + i), 1, 26, true);
         }
         solver.post(IntConstraintFactory.sum(extract("ballet"), "=", 45));
         solver.post(IntConstraintFactory.sum(extract("cello"), "=", 43));

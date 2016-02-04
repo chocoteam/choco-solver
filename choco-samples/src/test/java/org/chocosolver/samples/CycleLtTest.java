@@ -55,7 +55,7 @@ public class CycleLtTest {
         Solver s = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = s.makeIntVar("v_" + i, min, n, false);
+            vars[i] = s.intVar("v_" + i, min, n, false);
         }
         Constraint[] cstrs = new Constraint[m + 1];
         int i;

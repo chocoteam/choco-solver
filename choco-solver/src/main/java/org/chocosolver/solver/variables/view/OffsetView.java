@@ -314,7 +314,7 @@ public final class OffsetView extends IntView {
 
     @Override
     public IntVar duplicate() {
-        return solver.makeIntOffsetView(this.var, this.cste);
+        return solver.intOffsetView(this.var, this.cste);
     }
 
     @Override

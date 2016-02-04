@@ -108,14 +108,14 @@ public class RLFAP extends AbstractProblem {
             int vidx = _var[i][0] - 1;
             if (vidx > prev) {
                 for (; prev < vidx; ) {
-                    vars[prev++] = solver.makeIntVar(0);
+                    vars[prev++] = solver.intVar(0);
                 }
             }
             int didx = _var[i][1];
             if (_var[i].length > 2) {
-                vars[vidx] = solver.makeIntVar(_var[i][2]);
+                vars[vidx] = solver.intVar(_var[i][2]);
             } else {
-                vars[vidx] = solver.makeIntVar("v_" + vidx, _dom[didx]);
+                vars[vidx] = solver.intVar("v_" + vidx, _dom[didx]);
                 values.addAll(_dom[didx]);
             }
             prev = vidx + 1;
@@ -132,13 +132,13 @@ public class RLFAP extends AbstractProblem {
 
         }
         if (opt) {
-            cards = solver.makeIntVarArray("c", values.size(), 0, vars.length, true);
+            cards = solver.intVarArray("c", values.size(), 0, vars.length, true);
             freqs = values.toArray();
             Arrays.sort(freqs);
             for (int i = 0; i < freqs.length; i++) {
                 solver.post(IntConstraintFactory.count(freqs[i], vars, cards[i]));
             }
-            nb0 = solver.makeIntVar("nb0", 0, freqs.length, true);
+            nb0 = solver.intVar("nb0", 0, freqs.length, true);
             solver.post(IntConstraintFactory.count(0, cards, nb0));
         }
         // RANKING VARIABLES PER LAYER OF DISTINCT SPOT

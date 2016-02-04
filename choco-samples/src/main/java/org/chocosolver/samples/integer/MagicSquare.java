@@ -73,7 +73,7 @@ public class MagicSquare extends AbstractProblem {
         int k = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++, k++) {
-                matrix[i][j] = solver.makeIntVar("square" + i + "," + j, 1, n * n, false);
+                matrix[i][j] = solver.intVar("square" + i + "," + j, 1, n * n, false);
                 vars[k] = matrix[i][j];
                 invMatrix[j][i] = matrix[i][j];
             }

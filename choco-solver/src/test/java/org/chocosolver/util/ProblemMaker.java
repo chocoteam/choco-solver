@@ -55,7 +55,7 @@ public class ProblemMaker {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
+            vars[i] = solver.intVar("Q_" + i, 1, n, false);
         }
         solver.addHook("vars", vars);
         for (int i = 0; i < n - 1; i++) {
@@ -79,16 +79,16 @@ public class ProblemMaker {
     @SuppressWarnings("Duplicates")
     public static Solver makeCostasArrays(int n){
         Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("v", n, 0, n - 1, false);
+        IntVar[] vars = solver.intVarArray("v", n, 0, n - 1, false);
         IntVar[] vectors = new IntVar[(n*(n-1))/2];
         IntVar[][] diff = new IntVar[n][n];
         int idx = 0;
         for (int i = 0; i < n; i++) {
             for (int j = i+1; j < n; j++) {
-                IntVar k = solver.makeIntVar(randomName(), -n, n, false);
+                IntVar k = solver.intVar(randomName(), -n, n, false);
                 solver.post(ICF.arithm(k,"!=",0));
                 solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
-                vectors[idx] = solver.makeIntOffsetView(k, 2 * n * (j - i));
+                vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }
@@ -113,7 +113,7 @@ public class ProblemMaker {
     @SuppressWarnings("Duplicates")
     public static Solver makeGolombRuler(int m){
         Solver solver = new Solver();
-        IntVar[] ticks = solver.makeIntVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        IntVar[] ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         solver.addHook("ticks", ticks);
         solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
 
@@ -121,7 +121,7 @@ public class ProblemMaker {
             solver.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
         }
 
-        IntVar[] diffs = solver.makeIntVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        IntVar[] diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         solver.addHook("diffs", diffs);
         IntVar[][] m_diffs = new IntVar[m][m];
         for (int k = 0, i = 0; i < m - 1; i++) {

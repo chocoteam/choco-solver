@@ -63,9 +63,9 @@ public class ReifSample extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		x = solver.makeIntVar("x", 0, 3, false);
-		y = solver.makeIntVar("y", 0, 3, false);
-		z = solver.makeIntVar("z", 0, 3, false);
+		x = solver.intVar("x", 0, 3, false);
+		y = solver.intVar("y", 0, 3, false);
+		z = solver.intVar("z", 0, 3, false);
 		Constraint imp = LCF.and(
 				ICF.arithm(x, ">", y),
 				ICF.arithm(y, ">", z),

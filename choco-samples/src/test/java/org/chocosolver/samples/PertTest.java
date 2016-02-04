@@ -56,16 +56,16 @@ public class PertTest {
 
         IntVar masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden;
-        masonry = solver.makeIntVar("masonry", 0, horizon, true);
-        carpentry = solver.makeIntVar("carpentry", 0, horizon, false);
-        plumbing = solver.makeIntVar("plumbing", 0, horizon, false);
-        ceiling = solver.makeIntVar("ceiling", 0, horizon, false);
-        roofing = solver.makeIntVar("roofing", 0, horizon, false);
-        painting = solver.makeIntVar("painting", 0, horizon, false);
-        windows = solver.makeIntVar("windows", 0, horizon, false);
-        facade = solver.makeIntVar("facade", 0, horizon, false);
-        garden = solver.makeIntVar("garden", 0, horizon, false);
-        objective = solver.makeIntVar("moving", 0, horizon - 1, false);
+        masonry = solver.intVar("masonry", 0, horizon, true);
+        carpentry = solver.intVar("carpentry", 0, horizon, false);
+        plumbing = solver.intVar("plumbing", 0, horizon, false);
+        ceiling = solver.intVar("ceiling", 0, horizon, false);
+        roofing = solver.intVar("roofing", 0, horizon, false);
+        painting = solver.intVar("painting", 0, horizon, false);
+        windows = solver.intVar("windows", 0, horizon, false);
+        facade = solver.intVar("facade", 0, horizon, false);
+        garden = solver.intVar("garden", 0, horizon, false);
+        objective = solver.intVar("moving", 0, horizon - 1, false);
 
         solver.post(precedence(masonry, 7, carpentry));
         solver.post(precedence(masonry, 7, plumbing));
@@ -92,7 +92,7 @@ public class PertTest {
      * x + d < y
      */
     private static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return IntConstraintFactory.arithm(x.getSolver().makeIntOffsetView(x, duration), "<", y);
+        return IntConstraintFactory.arithm(x.getSolver().intOffsetView(x, duration), "<", y);
     }
 
     @Test(groups="1s", timeOut=60000)

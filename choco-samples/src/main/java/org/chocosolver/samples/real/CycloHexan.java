@@ -67,9 +67,9 @@ public class CycloHexan extends AbstractProblem {
                         " z^2 * (1 + x^2) + x * (x - 24 * z) = -13 \n" + "This example comes from the Elisa project (LINA) examples. \n");
 
         double precision = 1.0e-6;
-        x = solver.makeRealVar("x", NEGATIVE_INFINITY, POSITIVE_INFINITY, precision);
-        y = solver.makeRealVar("y", -1.0e8, 1.0e8, precision);
-        z = solver.makeRealVar("z", -1.0e8, 1.0e8, precision);
+        x = solver.realVar("x", NEGATIVE_INFINITY, POSITIVE_INFINITY, precision);
+        y = solver.realVar("y", -1.0e8, 1.0e8, precision);
+        z = solver.realVar("z", -1.0e8, 1.0e8, precision);
 
         vars = new RealVar[]{x, y, z};
 		solver.post(new RealConstraint("RealConstraint",

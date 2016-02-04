@@ -513,7 +513,7 @@ public class SatFactory {
             return addBoolLe(BOOLVARS[0], TARGET);
         }
 
-        BoolVar extra = solver.makeBoolVar(randomName());
+        BoolVar extra = solver.boolVar(randomName());
         int tlit = sat.Literal(TARGET);
         int elit = sat.Literal(extra);
         TIntList lits = new TIntArrayList(BOOLVARS.length + 1);

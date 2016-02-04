@@ -101,12 +101,12 @@ public class Knapsack extends AbstractProblem {
         // occurrence of each item
         objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = solver.makeIntVar("o_" + (i + 1), 0, nbOmax[i], true);
+            objects[i] = solver.intVar("o_" + (i + 1), 0, nbOmax[i], true);
         }
         // objective variable
-        power = solver.makeIntVar("power", 0, 9999, true);
+        power = solver.intVar("power", 0, 9999, true);
 
-        IntVar scalar = solver.makeIntVar("weight", capacites[0] - 1, capacites[1] + 1, true);
+        IntVar scalar = solver.intVar("weight", capacites[0] - 1, capacites[1] + 1, true);
 
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
     }

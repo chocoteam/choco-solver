@@ -74,19 +74,19 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = solver.makeIntVarArray("v", m, 0, m - 1, false);
+        vars = solver.intVarArray("v", m, 0, m - 1, false);
         dist = new IntVar[m - 1];
 
         if (!use_views) {
-            dist = solver.makeIntVarArray("dist", m - 1, 1, m - 1, false);
+            dist = solver.intVarArray("dist", m - 1, 1, m - 1, false);
             for (int i = 0; i < m - 1; i++) {
                 solver.post(IntConstraintFactory.distance(vars[i + 1], vars[i], "=", dist[i]));
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
-                IntVar k = solver.makeIntVar(randomName(), -20000, 20000, true);
+                IntVar k = solver.intVar(randomName(), -20000, 20000, true);
 				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[i+1]));
-				dist[i] = solver.makeIntAbsView(k);
+				dist[i] = solver.intAbsView(k);
                 solver.post(IntConstraintFactory.member(dist[i], 1, m - 1));
             }
         }

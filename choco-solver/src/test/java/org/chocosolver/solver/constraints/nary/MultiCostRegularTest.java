@@ -51,12 +51,12 @@ public class MultiCostRegularTest {
     private Solver make(int period, long seed) {
 
         Solver solver = new Solver();
-        IntVar[] sequence = solver.makeIntVarArray("x", period, 0, 2, false);
+        IntVar[] sequence = solver.intVarArray("x", period, 0, 2, false);
         IntVar[] bounds = new IntVar[4];
-        bounds[0] = solver.makeIntVar("z_0", 0, 80, true);
-        bounds[1] = solver.makeIntVar("day", 0, 28, true);
-        bounds[2] = solver.makeIntVar("night", 0, 28, true);
-        bounds[3] = solver.makeIntVar("rest", 0, 28, true);
+        bounds[0] = solver.intVar("z_0", 0, 80, true);
+        bounds[1] = solver.intVar("day", 0, 28, true);
+        bounds[2] = solver.intVar("night", 0, 28, true);
+        bounds[3] = solver.intVar("rest", 0, 28, true);
 
         FiniteAutomaton auto = new FiniteAutomaton();
         int idx = auto.addState();

@@ -64,7 +64,7 @@ public class IntValuePrecedeChainTest {
             long s1, s2;
             {
                 Solver solver = new Solver();
-                IntVar[] vars = solver.makeIntVarArray("X", 5, 0, 5, false);
+                IntVar[] vars = solver.intVarArray("X", 5, 0, 5, false);
                 solver.post(ICF.int_value_precede_chain(vars, 1, 2));
                 solver.set(ISF.random(vars, i));
                 solver.findAllSolutions();
@@ -72,7 +72,7 @@ public class IntValuePrecedeChainTest {
             }
             {
                 Solver solver = new Solver();
-                IntVar[] vars = solver.makeIntVarArray("X", 5, 0, 5, false);
+                IntVar[] vars = solver.intVarArray("X", 5, 0, 5, false);
                 int_value_precede_chain_dec(vars, 1, 2);
                 solver.set(ISF.random(vars, i));
                 solver.findAllSolutions();

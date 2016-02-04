@@ -63,9 +63,9 @@ public class OrthoLatinSquare extends AbstractProblem {
     @Override
     public void buildModel() {
         int mm = m * m;
-        square1 = solver.makeIntVarArray("s1", mm, 1, m, true);
-        square2 = solver.makeIntVarArray("s2", mm, 1, m, true);
-        vars = solver.makeIntVarArray("vars", mm, 0, mm - 1, false);
+        square1 = solver.intVarArray("s1", mm, 1, m, true);
+        square2 = solver.intVarArray("s2", mm, 1, m, true);
+        vars = solver.intVarArray("vars", mm, 0, mm - 1, false);
 
         List<Constraint> ADS = new ArrayList<>();
 

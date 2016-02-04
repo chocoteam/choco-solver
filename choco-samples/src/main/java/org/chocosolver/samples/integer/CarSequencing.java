@@ -81,7 +81,7 @@ public class CarSequencing extends AbstractProblem {
         parse(data.source());
         prepare();
         int max = nClasses - 1;
-        cars = solver.makeIntVarArray("cars", nCars, 0, max, false);
+        cars = solver.intVarArray("cars", nCars, 0, max, false);
 
         IntVar[] expArray = new IntVar[nClasses];
 
@@ -94,21 +94,21 @@ public class CarSequencing extends AbstractProblem {
                 IntVar[] atMost = new IntVar[nbConf];
                 for (int i = 0; i < nbConf; i++) {
                     // optfreq[optNum][0] times AT MOST
-                    atMost[i] = solver.makeIntVar("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], true);
+                    atMost[i] = solver.intVar("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], true);
                 }
                 solver.post(IntConstraintFactory.global_cardinality(carSequence, options[optNum], atMost, false));
-                IntVar[] atLeast = solver.makeIntVarArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, true);
+                IntVar[] atLeast = solver.intVarArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, true);
                 solver.post(IntConstraintFactory.global_cardinality(carSequence, idleConfs[optNum], atLeast, false));
 
                 // all others configurations may be chosen
-                IntVar sum = solver.makeIntVar("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, true);
+                IntVar sum = solver.intVar("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, true);
                 solver.post(IntConstraintFactory.sum(atLeast, "=", sum));
             }
         }
 
         int[] values = new int[expArray.length];
         for (int i = 0; i < expArray.length; i++) {
-            expArray[i] = solver.makeIntVar("var_" + i, 0, demands[i], false);
+            expArray[i] = solver.intVar("var_" + i, 0, demands[i], false);
             values[i] = i;
         }
         solver.post(IntConstraintFactory.global_cardinality(cars, values, expArray, false));

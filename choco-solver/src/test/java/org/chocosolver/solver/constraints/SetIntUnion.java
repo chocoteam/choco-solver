@@ -48,8 +48,8 @@ public class SetIntUnion {
 	@Test(groups="1s", timeOut=60000)
 	public void test1() {
         Solver s = new Solver();
-        IntVar[] x = s.makeIntVarArray("ints", 4, 0, 5, false);
-        SetVar values = s.makeSetVar("values", new int[]{0, 1, 4});
+        IntVar[] x = s.intVarArray("ints", 4, 0, 5, false);
+        SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
@@ -61,13 +61,13 @@ public class SetIntUnion {
 	public void test2() {
         Solver s = new Solver();
         IntVar[] x = new IntVar[]{
-                s.makeIntVar(0)
-                , s.makeIntVar(2)
-                , s.makeIntVar(5)
-                , s.makeIntVar(0)
-                , s.makeIntVar(2)
+                s.intVar(0)
+                , s.intVar(2)
+                , s.intVar(5)
+                , s.intVar(0)
+                , s.intVar(2)
         };
-        SetVar values = s.makeSetVar("values", new int[]{0, 1, 4});
+        SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
@@ -80,13 +80,13 @@ public class SetIntUnion {
 	public void test3() {
         Solver s = new Solver();
         IntVar[] x = new IntVar[]{
-                s.makeIntVar(0)
-                , s.makeIntVar(2)
-                , s.makeIntVar(5)
-                , s.makeIntVar(0)
-                , s.makeIntVar(2)
+                s.intVar(0)
+                , s.intVar(2)
+                , s.intVar(5)
+                , s.intVar(0)
+                , s.intVar(2)
         };
-        SetVar values = s.makeSetVar("values", new int[]{}, new int[]{-1,0,1,2,3,4,5,6});
+        SetVar values = s.setVar("values", new int[]{}, new int[]{-1,0,1,2,3,4,5,6});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);

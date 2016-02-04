@@ -70,9 +70,9 @@ public class Sudoku extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (data.grid(i, j) > 0) {
-                    rows[i][j] = solver.makeIntVar(data.grid(i, j));
+                    rows[i][j] = solver.intVar(data.grid(i, j));
                 } else {
-                    rows[i][j] = solver.makeIntVar("c_" + i + "_" + j, 1, n, false);
+                    rows[i][j] = solver.intVar("c_" + i + "_" + j, 1, n, false);
                 }
                 cols[j][i] = rows[i][j];
             }

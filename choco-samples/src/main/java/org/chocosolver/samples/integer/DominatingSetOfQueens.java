@@ -61,9 +61,9 @@ public class DominatingSetOfQueens {
 		IntVar[] X = new IntVar[n * n];
 		//une variable par case avec pour domaine la reine qui l attaque. (les reines sont ainsi designees par les valeurs, et les cases par les variables)
 		for (int i = 0; i < X.length; i++) {
-			X[i] = pb.makeIntVar("Q" + i, 1, n * n, false);
+			X[i] = pb.intVar("Q" + i, 1, n * n, false);
 		}
-		IntVar N = pb.makeIntVar(val);
+		IntVar N = pb.intVar(val);
 		pb.post(IntConstraintFactory.nvalues(X,N));
 		//i appartient a la variable j ssi la case i est sur une ligne/colonne/diagonale de j
 		for (int i = 1; i <= n; i++) {

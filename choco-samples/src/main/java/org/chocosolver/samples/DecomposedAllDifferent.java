@@ -64,7 +64,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
     @Override
     public void buildModel() {
         int i = n;
-        X = solver.makeIntVarArray("v", n, 0, n, false);
+        X = solver.intVarArray("v", n, 0, n, false);
         int[] union = new int[n];
         for (int j = 0; j < i; j++) {
             union[j] = j;
@@ -86,7 +86,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 //                        Constraint ocB = ConstraintFactory.geq(X[j], l + 1, solver, eng2);
 //                        lcstrs.add(new ReifiedConstraint(b, cB, ocB, solver, eng2));
                 for (int q = p; q <= u; q++) {
-                    BoolVar a = solver.makeBoolVar("A" + j + "_" + p + "_" + q);
+                    BoolVar a = solver.boolVar("A" + j + "_" + p + "_" + q);
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
@@ -118,7 +118,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(IntConstraintFactory.sum(ai, "=", solver.makeIntVar("scal", 0, q - p + 1, true)));
+                solver.post(IntConstraintFactory.sum(ai, "=", solver.intVar("scal", 0, q - p + 1, true)));
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);

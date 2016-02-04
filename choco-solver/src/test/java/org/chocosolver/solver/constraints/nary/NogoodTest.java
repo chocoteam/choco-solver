@@ -50,7 +50,7 @@ public class NogoodTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         final Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("vars", 3, 0, 2, false);
+        IntVar[] vars = solver.intVarArray("vars", 3, 0, 2, false);
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
         SLF.restart(solver,
@@ -65,7 +65,7 @@ public class NogoodTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         final Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("vars", 3, 0, 3, false);
+        IntVar[] vars = solver.intVarArray("vars", 3, 0, 3, false);
         SMF.nogoodRecordingFromRestarts(solver);
         solver.set(ISF.random_value(vars, 29091981L));
         SLF.restart(solver,

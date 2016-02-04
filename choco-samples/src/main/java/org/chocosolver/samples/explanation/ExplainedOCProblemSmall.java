@@ -56,7 +56,7 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = solver.makeIntVarArray("x", n, 1, vals, false);
+        vars = solver.intVarArray("x", n, 1, vals, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++)
                 solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j]));

@@ -71,8 +71,8 @@ public class GlobalCardinality extends Constraint {
     public static Constraint[] reformulate(IntVar[] vars, IntVar[] card, Solver solver) {
         List<Constraint> cstrs = new ArrayList<>();
         for (int i = 0; i < card.length; i++) {
-			IntVar cste = solver.makeIntVar(i);
-			BoolVar[] bs = solver.makeBoolVarArray("b_" + i, vars.length);
+			IntVar cste = solver.intVar(i);
+			BoolVar[] bs = solver.boolVarArray("b_" + i, vars.length);
             for (int j = 0; j < vars.length; j++) {
                 LCF.ifThenElse(bs[j], ICF.arithm(vars[j], "=", cste), ICF.arithm(vars[j], "!=", cste));
             }

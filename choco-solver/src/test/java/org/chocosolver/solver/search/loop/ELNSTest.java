@@ -53,8 +53,8 @@ public class ELNSTest {
 
     private void small(long seed) {
         Solver solver = new Solver();
-        final IntVar[] vars = solver.makeIntVarArray("var", 6, 0, 4, true);
-        final IntVar obj = solver.makeIntVar("obj", 0, 6, true);
+        final IntVar[] vars = solver.intVarArray("var", 6, 0, 4, true);
+        final IntVar obj = solver.intVar("obj", 0, 6, true);
 
         solver.post(ICF.sum(vars, "=", obj));
         solver.post(ICF.arithm(vars[0], "+", vars[1], "<", 2));

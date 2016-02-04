@@ -51,10 +51,10 @@ public class CNFTest {
         for (int i = 0; i < 2; i++) {
 
             Solver solver = new Solver();
-            BoolVar a = solver.makeBoolVar("a");
-            BoolVar b = solver.makeBoolVar("b");
-            IntVar x = solver.makeIntVar("x", 0, 24, true);
-            IntVar y = solver.makeIntVar("y", 0, 24, true);
+            BoolVar a = solver.boolVar("a");
+            BoolVar b = solver.boolVar("b");
+            IntVar x = solver.intVar("x", 0, 24, true);
+            IntVar y = solver.intVar("y", 0, 24, true);
 
             if (i == 0) {
                 SatFactory.addClauses(LogOp.implies(

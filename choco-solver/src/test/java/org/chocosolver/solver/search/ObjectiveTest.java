@@ -63,7 +63,7 @@ public class ObjectiveTest {
     public void test1() {
         Solver solver = new Solver();
 
-        IntVar iv = solver.makeIntVar("iv", -5, 15, false);
+        IntVar iv = solver.intVar("iv", -5, 15, false);
         solver.post(ICF.arithm(iv, ">=", 0));
         solver.post(ICF.arithm(iv, "<=", 10));
         Random rnd = new Random();
@@ -128,7 +128,7 @@ public class ObjectiveTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
-        IntVar iv = solver.makeIntVar("iv", 0, 10, false);
+        IntVar iv = solver.intVar("iv", 0, 10, false);
         solver.post(ICF.arithm(iv, ">=", 2));
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
@@ -143,7 +143,7 @@ public class ObjectiveTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         final Solver solver = new Solver();
-        final IntVar iv = solver.makeIntVar("iv", 0, 10, false);
+        final IntVar iv = solver.intVar("iv", 0, 10, false);
         solver.post(ICF.arithm(iv, ">=", 2));
 
         solver.post(new Constraint("Conditionnal",
@@ -181,7 +181,7 @@ public class ObjectiveTest {
     @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
-        IntVar iv = solver.makeIntVar("iv", 0, 10, false);
+        IntVar iv = solver.intVar("iv", 0, 10, false);
         BoolVar v = ICF.arithm(iv, "<=", 2).reif();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
@@ -195,8 +195,8 @@ public class ObjectiveTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL1() {
         Solver solver = new Solver();
-        BoolVar b1 = solver.makeBoolVar("b1");
-        BoolVar b2 = solver.makeBoolVar("b2");
+        BoolVar b1 = solver.boolVar("b1");
+        BoolVar b2 = solver.boolVar("b2");
         solver.post(ICF.arithm(b1, "<=", b2));
 //        SMF.log(solver, true, true);
         solver.set(new ObjectiveManager<IntVar, Integer>(b1, ResolutionPolicy.MINIMIZE, true));
@@ -224,7 +224,7 @@ public class ObjectiveTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testJL2() {
 		Solver solver = new Solver();
-        IntVar a = solver.makeIntVar("a", -2, 2, false);
+        IntVar a = solver.intVar("a", -2, 2, false);
 
 		solver.set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),

@@ -287,7 +287,7 @@ public class EqView extends IntView {
 
     @Override
     public IntVar duplicate() {
-        return solver.makeIntEqView(this.var);
+        return solver.intEqView(this.var);
     }
 
     @Override

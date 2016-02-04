@@ -70,7 +70,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        ticks = solver.makeIntVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
 
         solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
 
@@ -80,7 +80,7 @@ public class GolombRuler extends AbstractProblem {
         }
         solver.post(lex);
 
-        diffs = solver.makeIntVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         m_diffs = new IntVar[m][m];
         distances = new Constraint[(m * m - m) / 2];
         for (int k = 0, i = 0; i < m - 1; i++) {

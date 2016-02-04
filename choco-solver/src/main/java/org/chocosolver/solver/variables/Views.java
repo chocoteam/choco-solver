@@ -54,7 +54,7 @@ public interface Views {
      * @param bool a boolean variable.
      * @return a BoolVar equal to <i>not(bool)</i> (or 1-bool)
      */
-    default BoolVar makeBoolNotView(BoolVar bool) {
+    default BoolVar boolNotView(BoolVar bool) {
         return VariableFactory.not(bool);
     }
 
@@ -63,7 +63,7 @@ public interface Views {
      * @param var a boolean variable
      * @return a BoolVar equal to <i>var</i>
      */
-    default BoolVar makeBoolEqView(BoolVar var) {
+    default BoolVar boolEqView(BoolVar var) {
         return VariableFactory.eq(var);
     }
 
@@ -77,7 +77,7 @@ public interface Views {
      * @param var an integer variable
      * @return an IntVar equal to <i>var</i>
      */
-    default IntVar makeIntEqView(IntVar var) {
+    default IntVar intEqView(IntVar var) {
         return VariableFactory.eq(var);
     }
 
@@ -87,7 +87,7 @@ public interface Views {
      * @param cste a constant (can be either negative or positive)
      * @return an IntVar equal to <i>var+cste</i>
      */
-    default IntVar makeIntOffsetView(IntVar var, int cste) {
+    default IntVar intOffsetView(IntVar var, int cste) {
         return VariableFactory.offset(var, cste);
     }
 
@@ -98,7 +98,7 @@ public interface Views {
      * @param var an integer variable
      * @return an IntVar equal to <i>-var</i>
      */
-    default IntVar makeIntMinusView(IntVar var) {
+    default IntVar intMinusView(IntVar var) {
         return VariableFactory.minus(var);
     }
 
@@ -116,7 +116,7 @@ public interface Views {
      * @param cste a constant.
      * @return an IntVar equal to <i>var*cste</i>
      */
-    default IntVar makeIntScaleView(IntVar VAR, int cste) {
+    default IntVar intScaleView(IntVar VAR, int cste) {
         return VariableFactory.scale(VAR, cste);
     }
 
@@ -131,7 +131,7 @@ public interface Views {
      * @param var an integer variable.
      * @return an IntVar equal to the absolute value of <i>var</i>
      */
-    default IntVar makeIntAbsView(IntVar var) {
+    default IntVar intAbsView(IntVar var) {
         return VariableFactory.abs(var);
     }
 
@@ -146,7 +146,7 @@ public interface Views {
      * @param precision double precision (e.g., 0.00001d)
      * @return a RealVar of domain equal to the domain of <i>var</i>
      */
-    default RealVar makeRealIntView(IntVar var, double precision) {
+    default RealVar realIntView(IntVar var, double precision) {
         return VariableFactory.real(var, precision);
     }
 
@@ -157,7 +157,7 @@ public interface Views {
      * @param precision double precision (e.g., 0.00001d)
      * @return a real view of <i>var</i>
      */
-    default RealVar[] makeRealIntViewArray(IntVar[] var, double precision) {
+    default RealVar[] realIntViewArray(IntVar[] var, double precision) {
         return VariableFactory.real(var, precision);
     }
 
@@ -170,10 +170,10 @@ public interface Views {
      * @param precision double precision (e.g., 0.00001d)
      * @return a real view of <i>var</i>
      */
-    default RealVar[][] makeRealIntViewMatrix(IntVar[][] var, double precision) {
+    default RealVar[][] realIntViewMatrix(IntVar[][] var, double precision) {
         RealVar[][] vars = new RealVar[var.length][var[0].length];
         for (int i = 0; i < var.length; i++) {
-            vars[i] = makeRealIntViewArray(var[i], precision);
+            vars[i] = realIntViewArray(var[i], precision);
         }
         return vars;
     }

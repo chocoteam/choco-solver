@@ -93,14 +93,14 @@ public class HamiltonianPathTest {
 			}
 			if(l.isEmpty())throw new UnsupportedOperationException();
 			if(enumerated){
-				succ[i] = solver.makeIntVar("suc", l.toArray());
+				succ[i] = solver.intVar("suc", l.toArray());
 			}else{
-				succ[i] = solver.makeIntVar("suc", offset, n + offset, true);
+				succ[i] = solver.intVar("suc", offset, n + offset, true);
 				solver.post(ICF.member(succ[i],l.toArray()));
 			}
 		}
-		succ[n - 1] = solver.makeIntVar(n + offset);
-		solver.post(ICF.path(succ, solver.makeIntVar(offset), solver.makeIntVar(n - 1 + offset), offset));
+		succ[n - 1] = solver.intVar(n + offset);
+		solver.post(ICF.path(succ, solver.intVar(offset), solver.intVar(n - 1 + offset), offset));
 		// configure solver
 		if (rd) {
 			if(enumerated){

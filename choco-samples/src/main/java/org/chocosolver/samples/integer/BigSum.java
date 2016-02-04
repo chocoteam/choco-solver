@@ -55,7 +55,7 @@ public class BigSum extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = solver.makeIntVarArray("v", n, 0, 5000, true);
+        vars = solver.intVarArray("v", n, 0, 5000, true);
         solver.post(IntConstraintFactory.sum(vars, "=", 500000));
         solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
     }

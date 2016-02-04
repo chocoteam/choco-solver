@@ -234,14 +234,14 @@ public class MarioKart extends AbstractProblem {
 	/** Creation of CP variables */
 	private void variables() {
 		/* Choco variables */
-		fuelConsumed = solver.makeIntVar("Fuel Consumption", 0, FUEL, true);
-		goldFound = solver.makeIntVar("Gold Found", 0, CITY_SIZE * MAX_GOLD, true);
+		fuelConsumed = solver.intVar("Fuel Consumption", 0, FUEL, true);
+		goldFound = solver.intVar("Gold Found", 0, CITY_SIZE * MAX_GOLD, true);
 		/* Initialisation of the boolean matrix */
-		edges = solver.makeBoolVarMatrix("edges", n, n);
+		edges = solver.boolVarMatrix("edges", n, n);
 		/* Initialisation of all the next value for each house */
-		next = solver.makeIntVarArray("next", n, 0, n - 1, false);
+		next = solver.intVarArray("next", n, 0, n - 1, false);
 		/* Initialisation of the size variable */
-		size = solver.makeIntVar("size", 2, n, true);
+		size = solver.intVar("size", 2, n, true);
 	}
 
 	/** Post all the constraints of the problem */
@@ -277,7 +277,7 @@ public class MarioKart extends AbstractProblem {
 		 * identifies the min/max fuel consumption involved by visiting each house */
 		IntVar[] fuelHouse = new IntVar[HOUSE_NUMBER];
 		for(int i=0;i<HOUSE_NUMBER;i++){
-			fuelHouse[i] = solver.makeIntVar("fuelHouse", 0, FUEL, false);
+			fuelHouse[i] = solver.intVar("fuelHouse", 0, FUEL, false);
 			solver.post(ICF.element(fuelHouse[i],consumptions[i],next[i],0,"none"));
 		}
 		solver.post(ICF.sum(fuelHouse,"=",fuelConsumed));
@@ -290,7 +290,7 @@ public class MarioKart extends AbstractProblem {
 		for (int i = 0; i < goldMatrix.length; i++)
 			for (int j = 0; j < goldMatrix.length; j++)
 				goldMatrix[i][j] = (i == j) ? 0 : gold[i];
-		solver.post(ICF.knapsack(flatten(edges), solver.makeIntVar(FUEL),
+		solver.post(ICF.knapsack(flatten(edges), solver.intVar(FUEL),
 				goldFound, flatten(consumptions), flatten(goldMatrix)));
 	}
 

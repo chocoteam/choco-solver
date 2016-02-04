@@ -141,12 +141,12 @@ public class CumulativeTest {
 							 boolean graph, int mode) {
 		final Solver solver = new Solver();
 		int dmax = 5+dmin*2;
-		final IntVar[] s = solver.makeIntVarArray("s", n, 0, n * dmax, false);
-		final IntVar[] d = solver.makeIntVarArray("d", n, dmin, dmax, false);
-		final IntVar[] e = solver.makeIntVarArray("e", n, 0, n * dmax, false);
-		final IntVar[] h = solver.makeIntVarArray("h", n, 0, hmax, false);
-		final IntVar capa = solver.makeIntVar("capa", 0, capamax, false);
-		final IntVar last = solver.makeIntVar("last", 0, n * dmax, false);
+		final IntVar[] s = solver.intVarArray("s", n, 0, n * dmax, false);
+		final IntVar[] d = solver.intVarArray("d", n, dmin, dmax, false);
+		final IntVar[] e = solver.intVarArray("e", n, 0, n * dmax, false);
+		final IntVar[] h = solver.intVarArray("h", n, 0, hmax, false);
+		final IntVar capa = solver.intVar("capa", 0, capamax, false);
+		final IntVar last = solver.intVar("last", 0, n * dmax, false);
 		Task[] t = new Task[n];
 		for(int i=0;i<n;i++){
 			t[i] = new Task(s[i],d[i],e[i]);

@@ -68,9 +68,9 @@ public class Pareto extends AbstractProblem {
 	@Override
 	public void buildModel() {
 		// the problem is to maximize a and b
-		a = solver.makeIntVar("a", 0, 2, false);
-		b = solver.makeIntVar("b", 0, 2, false);
-		c = solver.makeIntVar("c", 0, 2, false);
+		a = solver.intVar("a", 0, 2, false);
+		b = solver.intVar("b", 0, 2, false);
+		c = solver.intVar("c", 0, 2, false);
 
 		solver.post(ICF.arithm(a, "+", b, "<", 3));
 	}

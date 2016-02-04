@@ -53,31 +53,31 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[4][3];
         Y = new IntVar[4][3];
-        X[0][0] = solver.makeIntVar("X11", 2);
-        X[0][1] = solver.makeIntVar("X12", 3);
-        X[0][2] = solver.makeIntVar("X13", 1001);
-        X[1][0] = solver.makeIntVar("X21", 2);
-        X[1][1] = solver.makeIntVar("X22", 4);
-        X[1][2] = solver.makeIntVar("X23", 1002);
-        X[2][0] = solver.makeIntVar("X31", 1);
-        X[2][1] = solver.makeIntVar("X32", 5);
-        X[2][2] = solver.makeIntVar("X33", 1003);
-        X[3][0] = solver.makeIntVar("X41", 2);
-        X[3][1] = solver.makeIntVar("X42", 3);
-        X[3][2] = solver.makeIntVar("X43", 1004);
+        X[0][0] = solver.intVar("X11", 2);
+        X[0][1] = solver.intVar("X12", 3);
+        X[0][2] = solver.intVar("X13", 1001);
+        X[1][0] = solver.intVar("X21", 2);
+        X[1][1] = solver.intVar("X22", 4);
+        X[1][2] = solver.intVar("X23", 1002);
+        X[2][0] = solver.intVar("X31", 1);
+        X[2][1] = solver.intVar("X32", 5);
+        X[2][2] = solver.intVar("X33", 1003);
+        X[3][0] = solver.intVar("X41", 2);
+        X[3][1] = solver.intVar("X42", 3);
+        X[3][2] = solver.intVar("X43", 1004);
 
-        Y[0][0] = solver.makeIntVar("Y11", 0, 3, true);
-        Y[0][1] = solver.makeIntVar("Y12", 2, 6, true);
-        Y[0][2] = solver.makeIntVar("Y13", 1000, 10006, true);
-        Y[1][0] = solver.makeIntVar("Y21", 0, 3, true);
-        Y[1][1] = solver.makeIntVar("Y22", 2, 6, true);
-        Y[1][2] = solver.makeIntVar("Y23", 1000, 10006, true);
-        Y[2][0] = solver.makeIntVar("Y31", 0, 3, true);
-        Y[2][1] = solver.makeIntVar("Y32", 2, 6, true);
-        Y[2][2] = solver.makeIntVar("Y33", 1000, 10006, true);
-        Y[3][0] = solver.makeIntVar("Y41", 0, 3, true);
-        Y[3][1] = solver.makeIntVar("Y42", 2, 6, true);
-        Y[3][2] = solver.makeIntVar("Y43", 1000, 10006, true);
+        Y[0][0] = solver.intVar("Y11", 0, 3, true);
+        Y[0][1] = solver.intVar("Y12", 2, 6, true);
+        Y[0][2] = solver.intVar("Y13", 1000, 10006, true);
+        Y[1][0] = solver.intVar("Y21", 0, 3, true);
+        Y[1][1] = solver.intVar("Y22", 2, 6, true);
+        Y[1][2] = solver.intVar("Y23", 1000, 10006, true);
+        Y[2][0] = solver.intVar("Y31", 0, 3, true);
+        Y[2][1] = solver.intVar("Y32", 2, 6, true);
+        Y[2][2] = solver.intVar("Y33", 1000, 10006, true);
+        Y[3][0] = solver.intVar("Y41", 0, 3, true);
+        Y[3][1] = solver.intVar("Y42", 2, 6, true);
+        Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
         solver.post(ICF.keysorting(X, null, Y, 2));
         solver.findSolution();
@@ -101,31 +101,31 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[4][3];
         Y = new IntVar[4][3];
-        X[0][0] = solver.makeIntVar("X11", 2);
-        X[0][1] = solver.makeIntVar("X12", 3);
-        X[0][2] = solver.makeIntVar("X13", 1001);
-        X[1][0] = solver.makeIntVar("X21", 2);
-        X[1][1] = solver.makeIntVar("X22", 4);
-        X[1][2] = solver.makeIntVar("X23", 1002);
-        X[2][0] = solver.makeIntVar("X31", 1);
-        X[2][1] = solver.makeIntVar("X32", 5);
-        X[2][2] = solver.makeIntVar("X33", 1003);
-        X[3][0] = solver.makeIntVar("X41", 2);
-        X[3][1] = solver.makeIntVar("X42", 3);
-        X[3][2] = solver.makeIntVar("X43", 1004);
+        X[0][0] = solver.intVar("X11", 2);
+        X[0][1] = solver.intVar("X12", 3);
+        X[0][2] = solver.intVar("X13", 1001);
+        X[1][0] = solver.intVar("X21", 2);
+        X[1][1] = solver.intVar("X22", 4);
+        X[1][2] = solver.intVar("X23", 1002);
+        X[2][0] = solver.intVar("X31", 1);
+        X[2][1] = solver.intVar("X32", 5);
+        X[2][2] = solver.intVar("X33", 1003);
+        X[3][0] = solver.intVar("X41", 2);
+        X[3][1] = solver.intVar("X42", 3);
+        X[3][2] = solver.intVar("X43", 1004);
 
-        Y[0][0] = solver.makeIntVar("Y11", 0, 3, true);
-        Y[0][1] = solver.makeIntVar("Y12", 2, 6, true);
-        Y[0][2] = solver.makeIntVar("Y13", 1000, 10006, true);
-        Y[1][0] = solver.makeIntVar("Y21", 0, 3, true);
-        Y[1][1] = solver.makeIntVar("Y22", 2, 6, true);
-        Y[1][2] = solver.makeIntVar("Y23", 1000, 10006, true);
-        Y[2][0] = solver.makeIntVar("Y31", 0, 3, true);
-        Y[2][1] = solver.makeIntVar("Y32", 2, 6, true);
-        Y[2][2] = solver.makeIntVar("Y33", 1000, 10006, true);
-        Y[3][0] = solver.makeIntVar("Y41", 0, 3, true);
-        Y[3][1] = solver.makeIntVar("Y42", 2, 6, true);
-        Y[3][2] = solver.makeIntVar("Y43", 1000, 10006, true);
+        Y[0][0] = solver.intVar("Y11", 0, 3, true);
+        Y[0][1] = solver.intVar("Y12", 2, 6, true);
+        Y[0][2] = solver.intVar("Y13", 1000, 10006, true);
+        Y[1][0] = solver.intVar("Y21", 0, 3, true);
+        Y[1][1] = solver.intVar("Y22", 2, 6, true);
+        Y[1][2] = solver.intVar("Y23", 1000, 10006, true);
+        Y[2][0] = solver.intVar("Y31", 0, 3, true);
+        Y[2][1] = solver.intVar("Y32", 2, 6, true);
+        Y[2][2] = solver.intVar("Y33", 1000, 10006, true);
+        Y[3][0] = solver.intVar("Y41", 0, 3, true);
+        Y[3][1] = solver.intVar("Y42", 2, 6, true);
+        Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
         solver.post(ICF.keysorting(X, null, Y, 1));
         solver.findSolution();
@@ -150,31 +150,31 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[4][3];
         Y = new IntVar[4][3];
-        X[0][0] = solver.makeIntVar("X11", 2);
-        X[0][1] = solver.makeIntVar("X12", 3);
-        X[0][2] = solver.makeIntVar("X13", 1001);
-        X[1][0] = solver.makeIntVar("X21", 2);
-        X[1][1] = solver.makeIntVar("X22", 4);
-        X[1][2] = solver.makeIntVar("X23", 1002);
-        X[2][0] = solver.makeIntVar("X31", 1);
-        X[2][1] = solver.makeIntVar("X32", 5);
-        X[2][2] = solver.makeIntVar("X33", 1003);
-        X[3][0] = solver.makeIntVar("X41", 2);
-        X[3][1] = solver.makeIntVar("X42", 3);
-        X[3][2] = solver.makeIntVar("X43", 1004);
+        X[0][0] = solver.intVar("X11", 2);
+        X[0][1] = solver.intVar("X12", 3);
+        X[0][2] = solver.intVar("X13", 1001);
+        X[1][0] = solver.intVar("X21", 2);
+        X[1][1] = solver.intVar("X22", 4);
+        X[1][2] = solver.intVar("X23", 1002);
+        X[2][0] = solver.intVar("X31", 1);
+        X[2][1] = solver.intVar("X32", 5);
+        X[2][2] = solver.intVar("X33", 1003);
+        X[3][0] = solver.intVar("X41", 2);
+        X[3][1] = solver.intVar("X42", 3);
+        X[3][2] = solver.intVar("X43", 1004);
 
-        Y[0][0] = solver.makeIntVar("Y11", 0, 3, true);
-        Y[0][1] = solver.makeIntVar("Y12", 2, 6, true);
-        Y[0][2] = solver.makeIntVar("Y13", 1000, 10006, true);
-        Y[1][0] = solver.makeIntVar("Y21", 0, 3, true);
-        Y[1][1] = solver.makeIntVar("Y22", 2, 6, true);
-        Y[1][2] = solver.makeIntVar("Y23", 1000, 10006, true);
-        Y[2][0] = solver.makeIntVar("Y31", 0, 3, true);
-        Y[2][1] = solver.makeIntVar("Y32", 2, 6, true);
-        Y[2][2] = solver.makeIntVar("Y33", 1000, 10006, true);
-        Y[3][0] = solver.makeIntVar("Y41", 0, 3, true);
-        Y[3][1] = solver.makeIntVar("Y42", 2, 6, true);
-        Y[3][2] = solver.makeIntVar("Y43", 1000, 10006, true);
+        Y[0][0] = solver.intVar("Y11", 0, 3, true);
+        Y[0][1] = solver.intVar("Y12", 2, 6, true);
+        Y[0][2] = solver.intVar("Y13", 1000, 10006, true);
+        Y[1][0] = solver.intVar("Y21", 0, 3, true);
+        Y[1][1] = solver.intVar("Y22", 2, 6, true);
+        Y[1][2] = solver.intVar("Y23", 1000, 10006, true);
+        Y[2][0] = solver.intVar("Y31", 0, 3, true);
+        Y[2][1] = solver.intVar("Y32", 2, 6, true);
+        Y[2][2] = solver.intVar("Y33", 1000, 10006, true);
+        Y[3][0] = solver.intVar("Y41", 0, 3, true);
+        Y[3][1] = solver.intVar("Y42", 2, 6, true);
+        Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
         solver.post(ICF.keysorting(X, null, Y, 0));
         solver.findSolution();
@@ -198,19 +198,19 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[3][2];
         Y = new IntVar[3][2];
-        X[0][0] = solver.makeIntVar("X11", 15);
-        X[0][1] = solver.makeIntVar("X12", 0);
-        X[1][0] = solver.makeIntVar("X21", 15);
-        X[1][1] = solver.makeIntVar("X22", 8);
-        X[2][0] = solver.makeIntVar("X31", 15);
-        X[2][1] = solver.makeIntVar("X32", 19);
+        X[0][0] = solver.intVar("X11", 15);
+        X[0][1] = solver.intVar("X12", 0);
+        X[1][0] = solver.intVar("X21", 15);
+        X[1][1] = solver.intVar("X22", 8);
+        X[2][0] = solver.intVar("X31", 15);
+        X[2][1] = solver.intVar("X32", 19);
 
-        Y[0][0] = solver.makeIntVar("Y11", 14, 16, true);
-        Y[0][1] = solver.makeIntVar("Y12", 0, 19, true);
-        Y[1][0] = solver.makeIntVar("Y21", 14, 16, true);
-        Y[1][1] = solver.makeIntVar("Y22", 0, 19, true);
-        Y[2][0] = solver.makeIntVar("Y31", 14, 16, true);
-        Y[2][1] = solver.makeIntVar("Y32", 0, 19, true);
+        Y[0][0] = solver.intVar("Y11", 14, 16, true);
+        Y[0][1] = solver.intVar("Y12", 0, 19, true);
+        Y[1][0] = solver.intVar("Y21", 14, 16, true);
+        Y[1][1] = solver.intVar("Y22", 0, 19, true);
+        Y[2][0] = solver.intVar("Y31", 14, 16, true);
+        Y[2][1] = solver.intVar("Y32", 0, 19, true);
 
         solver.post(ICF.keysorting(X, null, Y, 2));
         solver.findSolution();
@@ -228,17 +228,17 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[5][1];
         Y = new IntVar[5][1];
-        X[0][0] = solver.makeIntVar("X1", 1, 16, true);
-        X[1][0] = solver.makeIntVar("X2", 5, 10, true);
-        X[2][0] = solver.makeIntVar("X3", 7, 9, true);
-        X[3][0] = solver.makeIntVar("X4", 12, 15, true);
-        X[4][0] = solver.makeIntVar("X5", 1, 13, true);
+        X[0][0] = solver.intVar("X1", 1, 16, true);
+        X[1][0] = solver.intVar("X2", 5, 10, true);
+        X[2][0] = solver.intVar("X3", 7, 9, true);
+        X[3][0] = solver.intVar("X4", 12, 15, true);
+        X[4][0] = solver.intVar("X5", 1, 13, true);
 
-        Y[0][0] = solver.makeIntVar("Y1", 2, 3, true);
-        Y[1][0] = solver.makeIntVar("Y2", 6, 7, true);
-        Y[2][0] = solver.makeIntVar("Y3", 8, 11, true);
-        Y[3][0] = solver.makeIntVar("Y4", 13, 16, true);
-        Y[4][0] = solver.makeIntVar("Y5", 14, 18, true);
+        Y[0][0] = solver.intVar("Y1", 2, 3, true);
+        Y[1][0] = solver.intVar("Y2", 6, 7, true);
+        Y[2][0] = solver.intVar("Y3", 8, 11, true);
+        Y[3][0] = solver.intVar("Y4", 13, 16, true);
+        Y[4][0] = solver.intVar("Y5", 14, 18, true);
 
         solver.post(ICF.keysorting(X, null, Y, 1));
         Assert.assertEquals(solver.findAllSolutions(), 182);
@@ -251,13 +251,13 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[1][3];
         Y = new IntVar[1][3];
-        X[0][0] = solver.makeIntVar("X1", 0, 0, true);
-        X[0][1] = solver.makeIntVar("X2", 0, 1, true);
-        X[0][2] = solver.makeIntVar("X3", 1, 1, true);
+        X[0][0] = solver.intVar("X1", 0, 0, true);
+        X[0][1] = solver.intVar("X2", 0, 1, true);
+        X[0][2] = solver.intVar("X3", 1, 1, true);
 
-        Y[0][0] = solver.makeIntVar("Y1", 0, 0, true);
-        Y[0][1] = solver.makeIntVar("Y2", 0, 0, true);
-        Y[0][2] = solver.makeIntVar("Y3", 1, 1, true);
+        Y[0][0] = solver.intVar("Y1", 0, 0, true);
+        Y[0][1] = solver.intVar("Y2", 0, 0, true);
+        Y[0][2] = solver.intVar("Y3", 1, 1, true);
 
         solver.post(ICF.keysorting(X, null, Y, 1));
         try {
@@ -274,13 +274,13 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[1][3];
         Y = new IntVar[1][3];
-        X[0][0] = solver.makeIntVar("X1", 2, 2, true);
-        X[0][1] = solver.makeIntVar("X2", 0, 2, true);
-        X[0][2] = solver.makeIntVar("X3", 0, 0, true);
+        X[0][0] = solver.intVar("X1", 2, 2, true);
+        X[0][1] = solver.intVar("X2", 0, 2, true);
+        X[0][2] = solver.intVar("X3", 0, 0, true);
 
-        Y[0][0] = solver.makeIntVar("Y1", 0, 0, true);
-        Y[0][1] = solver.makeIntVar("Y2", 0, 0, true);
-        Y[0][2] = solver.makeIntVar("Y3", 2, 2, true);
+        Y[0][0] = solver.intVar("Y1", 0, 0, true);
+        Y[0][1] = solver.intVar("Y2", 0, 0, true);
+        Y[0][2] = solver.intVar("Y3", 2, 2, true);
 
         solver.post(ICF.keysorting(X, null, Y, 1));
         try {
@@ -297,13 +297,13 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[1][3];
         Y = new IntVar[1][3];
-        X[0][0] = solver.makeIntVar("X1", 0, 7, true);
-        X[0][1] = solver.makeIntVar("X2", 3, 5, true);
-        X[0][2] = solver.makeIntVar("X3", 1, 5, true);
+        X[0][0] = solver.intVar("X1", 0, 7, true);
+        X[0][1] = solver.intVar("X2", 3, 5, true);
+        X[0][2] = solver.intVar("X3", 1, 5, true);
 
-        Y[0][0] = solver.makeIntVar("Y1", 0, 2, true);
-        Y[0][1] = solver.makeIntVar("Y2", 1, 9, true);
-        Y[0][2] = solver.makeIntVar("Y3", 7, 9, true);
+        Y[0][0] = solver.intVar("Y1", 0, 2, true);
+        Y[0][1] = solver.intVar("Y2", 1, 9, true);
+        Y[0][2] = solver.intVar("Y3", 7, 9, true);
 
         solver.post(ICF.keysorting(X, null, Y, 1));
         try {
@@ -320,23 +320,23 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[4][2];
         Y = new IntVar[4][2];
-        X[0][0] = solver.makeIntVar("X21", 3, 3, true);
-        X[0][1] = solver.makeIntVar("X22", 1, 1, true);
-        X[1][0] = solver.makeIntVar("X31", 1, 4, true);
-        X[1][1] = solver.makeIntVar("X32", 2, 2, true);
-        X[2][0] = solver.makeIntVar("X41", 4, 4, true);
-        X[2][1] = solver.makeIntVar("X42", 3, 3, true);
-        X[3][0] = solver.makeIntVar("X51", 1, 4, true);
-        X[3][1] = solver.makeIntVar("X52", 4, 4, true);
+        X[0][0] = solver.intVar("X21", 3, 3, true);
+        X[0][1] = solver.intVar("X22", 1, 1, true);
+        X[1][0] = solver.intVar("X31", 1, 4, true);
+        X[1][1] = solver.intVar("X32", 2, 2, true);
+        X[2][0] = solver.intVar("X41", 4, 4, true);
+        X[2][1] = solver.intVar("X42", 3, 3, true);
+        X[3][0] = solver.intVar("X51", 1, 4, true);
+        X[3][1] = solver.intVar("X52", 4, 4, true);
 
-        Y[0][0] = solver.makeIntVar("Y21", 1, 4, true);
-        Y[0][1] = solver.makeIntVar("Y22", 1, 4, true);
-        Y[1][0] = solver.makeIntVar("Y31", 1, 4, true);
-        Y[1][1] = solver.makeIntVar("Y32", 1, 4, true);
-        Y[2][0] = solver.makeIntVar("Y41", 1, 4, true);
-        Y[2][1] = solver.makeIntVar("Y42", 1, 4, true);
-        Y[3][0] = solver.makeIntVar("Y51", 1, 4, true);
-        Y[3][1] = solver.makeIntVar("Y52", 1, 4, true);
+        Y[0][0] = solver.intVar("Y21", 1, 4, true);
+        Y[0][1] = solver.intVar("Y22", 1, 4, true);
+        Y[1][0] = solver.intVar("Y31", 1, 4, true);
+        Y[1][1] = solver.intVar("Y32", 1, 4, true);
+        Y[2][0] = solver.intVar("Y41", 1, 4, true);
+        Y[2][1] = solver.intVar("Y42", 1, 4, true);
+        Y[3][0] = solver.intVar("Y51", 1, 4, true);
+        Y[3][1] = solver.intVar("Y52", 1, 4, true);
 
 
         solver.post(ICF.keysorting(X, null, Y, 2));
@@ -353,15 +353,15 @@ public class KeysortingTest {
         IntVar[][] X, Y;
         X = new IntVar[1][4];
         Y = new IntVar[1][4];
-        X[0][0] = solver.makeIntVar("X21", 3, 3, true);
-        X[0][1] = solver.makeIntVar("X31", 1, 4, true);
-        X[0][2] = solver.makeIntVar("X41", 4, 4, true);
-        X[0][3] = solver.makeIntVar("X51", 1, 4, true);
+        X[0][0] = solver.intVar("X21", 3, 3, true);
+        X[0][1] = solver.intVar("X31", 1, 4, true);
+        X[0][2] = solver.intVar("X41", 4, 4, true);
+        X[0][3] = solver.intVar("X51", 1, 4, true);
 
-        Y[0][0] = solver.makeIntVar("Y21", 1, 4, true);
-        Y[0][1] = solver.makeIntVar("Y31", 1, 4, true);
-        Y[0][2] = solver.makeIntVar("Y41", 1, 4, true);
-        Y[0][3] = solver.makeIntVar("Y51", 1, 4, true);
+        Y[0][0] = solver.intVar("Y21", 1, 4, true);
+        Y[0][1] = solver.intVar("Y31", 1, 4, true);
+        Y[0][2] = solver.intVar("Y41", 1, 4, true);
+        Y[0][3] = solver.intVar("Y51", 1, 4, true);
 
 
         solver.post(ICF.keysorting(X, null, Y, 1));

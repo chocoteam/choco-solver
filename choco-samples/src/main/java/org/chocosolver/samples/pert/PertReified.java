@@ -58,7 +58,7 @@ public class PertReified extends Pert {
     public void buildModel() {
         setUp();
 
-        vars = solver.makeIntVarArray("task", n, 0, horizon, true);
+        vars = solver.intVarArray("task", n, 0, horizon, true);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
@@ -77,7 +77,7 @@ public class PertReified extends Pert {
             }
             for (int l = 0; l < _vars.length - 1; l++) {
                 for (int m = l + 1; m < _vars.length; m++) {
-                    BoolVar bvar = solver.makeBoolVar("b" + l + "_" + m);
+                    BoolVar bvar = solver.boolVar("b" + l + "_" + m);
                     lbvars.add(bvar);
 					LogicalConstraintFactory.ifThenElse(bvar, precedence(_vars[l], _durs[l], _vars[m]), precedence(_vars[m], _durs[m], _vars[l]));
                 }

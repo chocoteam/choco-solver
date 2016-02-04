@@ -91,15 +91,15 @@ public class BACP extends AbstractProblem {
     @Override
     public void buildModel() {
         // period is assigned to
-        course_period = solver.makeIntVarArray("c_p", n_courses, 0, n_periods, false);
+        course_period = solver.intVarArray("c_p", n_courses, 0, n_periods, false);
         // whether period i has a course j assigned
-        x = solver.makeBoolVarMatrix("X", n_periods, n_courses);
+        x = solver.boolVarMatrix("X", n_periods, n_courses);
         // total load for each period
-        load = solver.makeIntVarArray("load", n_periods, 0, load_per_period_ub - load_per_period_lb + 1, false);
+        load = solver.intVarArray("load", n_periods, 0, load_per_period_ub - load_per_period_lb + 1, false);
         // opt. target
-        objective = solver.makeIntVar("objective", load_per_period_lb, load_per_period_ub, true);
+        objective = solver.intVar("objective", load_per_period_lb, load_per_period_ub, true);
         // sum variable
-        IntVar sum = solver.makeIntVar("courses_per_period", courses_per_period_lb, courses_per_period_ub, true);
+        IntVar sum = solver.intVar("courses_per_period", courses_per_period_lb, courses_per_period_ub, true);
         // constraints
         for (int i = 0; i < n_periods; i++) {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\

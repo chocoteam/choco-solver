@@ -93,7 +93,7 @@ public class MeetingScheduling extends AbstractProblem {
     @Override
     public void buildModel() {
         mspdata = parse(mData.source());
-        meetingTime = solver.makeIntVarArray("ts", mspdata.numberOfMeetings, 0, mspdata.domainSize - 1, false);
+        meetingTime = solver.intVarArray("ts", mspdata.numberOfMeetings, 0, mspdata.domainSize - 1, false);
         boolean[][] conflicts = new boolean[mspdata.numberOfMeetings][mspdata.numberOfMeetings];
         for (int i = 0; i < mspdata.numberOfAgents; i++) { // for each pair of meeting
             for (int j = 0; j < mspdata.agentMeetings[i].length; j++) {

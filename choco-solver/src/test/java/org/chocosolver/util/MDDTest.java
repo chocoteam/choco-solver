@@ -47,7 +47,7 @@ public class MDDTest {
     @Test(groups="1s", timeOut=60000)
     public void test0() {
         Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("X", 4, 0, 2, false);
+        IntVar[] vars = solver.intVarArray("X", 4, 0, 2, false);
         Tuples tuples = new Tuples();
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples);
         Assert.assertEquals(mdd.getDiagram(), new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
@@ -58,7 +58,7 @@ public class MDDTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("X", 4, 0, 2, false);
+        IntVar[] vars = solver.intVarArray("X", 4, 0, 2, false);
         Tuples tuples = new Tuples();
         tuples.add(0, 0, 0, 0);
         tuples.add(0, 0, 0, 1);
@@ -81,7 +81,7 @@ public class MDDTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("X", 3, 0, 1, false);
+        IntVar[] vars = solver.intVarArray("X", 3, 0, 1, false);
         Tuples tuples = new Tuples();
         tuples.add(0, 0, 0);
         tuples.add(0, 0, 1);
@@ -104,8 +104,8 @@ public class MDDTest {
     public void test3() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[2];
-        vars[0] = solver.makeIntVar("X", -1, 0, false);
-        vars[1] = solver.makeIntVar("Y", new int[]{-1, 2});
+        vars[0] = solver.intVar("X", -1, 0, false);
+        vars[1] = solver.intVar("Y", new int[]{-1, 2});
         Tuples tuples = new Tuples();
         tuples.add(0, -1);
         tuples.add(-1, 2);
@@ -122,8 +122,8 @@ public class MDDTest {
     public void test4() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[2];
-        vars[0] = solver.makeIntVar("X", 0, 1, false);
-        vars[1] = solver.makeIntVar("Y", new int[]{-1, 1});
+        vars[0] = solver.intVar("X", 0, 1, false);
+        vars[1] = solver.intVar("Y", new int[]{-1, 1});
         Tuples tuples = new Tuples();
         tuples.add(0, -1);
         tuples.add(1, -1);
@@ -141,9 +141,9 @@ public class MDDTest {
     public void test5() {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[3];
-        vars[0] = solver.makeIntVar("V0", -1, 1, false);
-        vars[1] = solver.makeIntVar("V1", -1, 1, false);
-        vars[2] = solver.makeIntVar("V2", -1, 1, false);
+        vars[0] = solver.intVar("V0", -1, 1, false);
+        vars[1] = solver.intVar("V1", -1, 1, false);
+        vars[2] = solver.intVar("V2", -1, 1, false);
         Tuples tuples = new Tuples();
         tuples.add(0, -1, -1);
         tuples.add(-1, 0, -1);

@@ -58,8 +58,8 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver solver = new Solver("t1");
-        IntVar x = solver.makeIntVar("X", 1, 3, true);
-        IntVar y = solver.makeIntVar("Y", 1, 3, true);
+        IntVar x = solver.intVar("X", 1, 3, true);
+        IntVar y = solver.intVar("Y", 1, 3, true);
         solver.post(IntConstraintFactory.arithm(x, ">=", y));
         solver.post(IntConstraintFactory.arithm(x, "<=", 2));
 
@@ -69,7 +69,7 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
-        IntVar[] VARS = solver.makeIntVarArray("X", 2, 0, 2, false);
+        IntVar[] VARS = solver.intVarArray("X", 2, 0, 2, false);
         Constraint CSTR = ICF.arithm(VARS[0], "+", VARS[1], "=", 2);
         solver.post(CSTR, CSTR);
         solver.findAllSolutions();
@@ -90,7 +90,7 @@ public class PropEngineTest {
                 return false;
             }
         });
-        IntVar[] vars = solver.makeIntVarArray("V", 3, 0, 4, false);
+        IntVar[] vars = solver.intVarArray("V", 3, 0, 4, false);
         solver.post(ICF.alldifferent(vars));
         Arrays.sort(vars, (o1, o2) -> o2.getId() - o1.getId());
 
@@ -145,7 +145,7 @@ public class PropEngineTest {
     public void testGregy41(){
         for(int i = 0 ; i < 20; i++) {
             Solver solver = new Solver("Propagation condition");
-            IntVar[] X = solver.makeIntVarArray("X", 2, 0, 2, false);
+            IntVar[] X = solver.intVarArray("X", 2, 0, 2, false);
             solver.post(new Constraint("test", new Propagator(X, PropagatorPriority.UNARY, true) {
 
                 @Override

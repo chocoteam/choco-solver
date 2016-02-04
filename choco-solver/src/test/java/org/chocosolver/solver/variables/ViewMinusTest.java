@@ -55,8 +55,8 @@ public class ViewMinusTest {
     public void test1() {
         Solver solver = new Solver();
 
-        IntVar X = solver.makeIntVar("X", 1, 10, false);
-        IntVar Y = solver.makeIntMinusView(X);
+        IntVar X = solver.intVar("X", 1, 10, false);
+        IntVar Y = solver.intMinusView(X);
 
         try {
 			if(!solver.getSettings().enableViews())
@@ -124,16 +124,16 @@ public class ViewMinusTest {
             Solver ref = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = ref.makeIntVar("x", 1, 15, true);
-                xs[1] = ref.makeIntVar("y", -15, -1, true);
+                xs[0] = ref.intVar("x", 1, 15, true);
+                xs[1] = ref.intVar("y", -15, -1, true);
                 ref.post(IntConstraintFactory.sum(xs, "=", 0));
                 ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = solver.makeIntVar("x", 1, 15, true);
-                xs[1] = solver.makeIntMinusView(xs[0]);
+                xs[0] = solver.intVar("x", 1, 15, true);
+                xs[1] = solver.intMinusView(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, "=", 0));
                 solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
@@ -152,16 +152,16 @@ public class ViewMinusTest {
             Solver ref = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = ref.makeIntVar("x", 1, 15, false);
-                xs[1] = ref.makeIntVar("y", -15, -1, false);
+                xs[0] = ref.intVar("x", 1, 15, false);
+                xs[1] = ref.intVar("y", -15, -1, false);
                 ref.post(IntConstraintFactory.sum(xs, "=", 0));
                 ref.set(IntStrategyFactory.random_value(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = solver.makeIntVar("x", 1, 15, false);
-                xs[1] = solver.makeIntMinusView(xs[0]);
+                xs[0] = solver.intVar("x", 1, 15, false);
+                xs[1] = solver.intMinusView(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, "=", 0));
                 solver.set(IntStrategyFactory.random_value(xs, seed));
             }
@@ -179,8 +179,8 @@ public class ViewMinusTest {
             random.setSeed(seed);
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = solver.makeIntVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = solver.makeIntMinusView(o);
+            IntVar o = solver.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
+            IntVar v = solver.intMinusView(o);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(-vit.next()));
@@ -213,8 +213,8 @@ public class ViewMinusTest {
             random.setSeed(seed);
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = solver.makeIntVar("o", domains[0]);
-            IntVar v = solver.makeIntMinusView(o);
+            IntVar o = solver.intVar("o", domains[0]);
+            IntVar v = solver.intMinusView(o);
 			if(!solver.getSettings().enableViews()){
 				try {
 					solver.propagate();

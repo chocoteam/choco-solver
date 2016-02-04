@@ -127,9 +127,9 @@ public class AirPlaneLanding extends AbstractProblem {
         earliness = new IntVar[n];
         LLTs = new int[n];
         int obj_ub = 0;
-        IntVar ZERO = solver.makeIntVar(0);
+        IntVar ZERO = solver.intVar(0);
         for (int i = 0; i < n; i++) {
-            planes[i] = solver.makeIntVar("p_" + i, data[i][ELT], data[i][LLT], true);
+            planes[i] = solver.intVar("p_" + i, data[i][ELT], data[i][LLT], true);
 
 //            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
 //            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
@@ -138,15 +138,15 @@ public class AirPlaneLanding extends AbstractProblem {
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-            earliness[i] = Max.var(ZERO, solver.makeIntOffsetView(solver.makeIntMinusView(planes[i]), data[i][TT]));
-            tardiness[i] = Max.var(ZERO, solver.makeIntOffsetView(planes[i], -data[i][TT]));
+            earliness[i] = Max.var(ZERO, solver.intOffsetView(solver.intMinusView(planes[i]), data[i][TT]));
+            tardiness[i] = Max.var(ZERO, solver.intOffsetView(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<>();
         //disjunctive
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
-                BoolVar boolVar = solver.makeBoolVar("b_" + i + "_" + j);
+                BoolVar boolVar = solver.boolVar("b_" + i + "_" + j);
                 booleans.add(boolVar);
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
@@ -157,7 +157,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
         bVars = booleans.toArray(new BoolVar[booleans.size()]);
 
-        objective = solver.makeIntVar("obj", 0, obj_ub, true);
+        objective = solver.intVar("obj", 0, obj_ub, true);
 
         // build cost array
         costLAT = new int[2 * n];
@@ -169,10 +169,10 @@ public class AirPlaneLanding extends AbstractProblem {
         }
 
 //        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
-        IntVar obj_e = solver.makeIntVar("obj_e", 0, obj_ub, true);
+        IntVar obj_e = solver.intVar("obj_e", 0, obj_ub, true);
         solver.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), "=", obj_e));
 
-        IntVar obj_t = solver.makeIntVar("obj_t", 0, obj_ub, true);
+        IntVar obj_t = solver.intVar("obj_t", 0, obj_ub, true);
         solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t));
         solver.post(IntConstraintFactory.sum(new IntVar[]{obj_e, obj_t}, "=", objective));
 

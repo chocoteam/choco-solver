@@ -60,16 +60,16 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        d = solver.makeIntVar("d", 1, 9, true);
-        o = solver.makeIntVar("o", 0, 9, true);
-        n = solver.makeIntVar("n", 0, 9, true);
-        a = solver.makeIntVar("a", 0, 9, true);
-        l = solver.makeIntVar("l", 0, 9, true);
-        g = solver.makeIntVar("g", 1, 9, true);
-        e = solver.makeIntVar("e", 0, 9, true);
-        r = solver.makeIntVar("r", 1, 9, true);
-        b = solver.makeIntVar("b", 0, 9, true);
-        t = solver.makeIntVar("t", 0, 9, true);
+        d = solver.intVar("d", 1, 9, true);
+        o = solver.intVar("o", 0, 9, true);
+        n = solver.intVar("n", 0, 9, true);
+        a = solver.intVar("a", 0, 9, true);
+        l = solver.intVar("l", 0, 9, true);
+        g = solver.intVar("g", 1, 9, true);
+        e = solver.intVar("e", 0, 9, true);
+        r = solver.intVar("r", 1, 9, true);
+        b = solver.intVar("b", 0, 9, true);
+        t = solver.intVar("t", 0, 9, true);
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
         solver.post(IntConstraintFactory.alldifferent(letters, "BC"));

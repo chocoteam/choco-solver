@@ -48,9 +48,9 @@ public class NQueenGlobal extends AbstractNQueen {
         IntVar[] diag2 = new IntVar[n];
 
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
-            diag1[i] = solver.makeIntOffsetView(vars[i], i);
-            diag2[i] = solver.makeIntOffsetView(vars[i], -i);
+            vars[i] = solver.intVar("Q_" + i, 1, n, false);
+            diag1[i] = solver.intOffsetView(vars[i], i);
+            diag2[i] = solver.intOffsetView(vars[i], -i);
         }
 
         solver.post(IntConstraintFactory.alldifferent(vars, "BC"));

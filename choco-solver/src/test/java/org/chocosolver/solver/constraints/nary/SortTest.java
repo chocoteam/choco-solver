@@ -52,17 +52,17 @@ public class SortTest {
         IntVar[] X, Y;
         X = new IntVar[5];
         Y = new IntVar[5];
-        X[0] = solver.makeIntVar("X1", 1, 16, true);
-        X[1] = solver.makeIntVar("X2", 5, 10, true);
-        X[2] = solver.makeIntVar("X3", 7, 9, true);
-        X[3] = solver.makeIntVar("X4", 12, 15, true);
-        X[4] = solver.makeIntVar("X5", 1, 13, true);
+        X[0] = solver.intVar("X1", 1, 16, true);
+        X[1] = solver.intVar("X2", 5, 10, true);
+        X[2] = solver.intVar("X3", 7, 9, true);
+        X[3] = solver.intVar("X4", 12, 15, true);
+        X[4] = solver.intVar("X5", 1, 13, true);
 
-        Y[0] = solver.makeIntVar("Y1", 2, 3, true);
-        Y[1] = solver.makeIntVar("Y2", 6, 7, true);
-        Y[2] = solver.makeIntVar("Y3", 8, 11, true);
-        Y[3] = solver.makeIntVar("Y4", 13, 16, true);
-        Y[4] = solver.makeIntVar("Y5", 14, 18, true);
+        Y[0] = solver.intVar("Y1", 2, 3, true);
+        Y[1] = solver.intVar("Y2", 6, 7, true);
+        Y[2] = solver.intVar("Y3", 8, 11, true);
+        Y[3] = solver.intVar("Y4", 13, 16, true);
+        Y[4] = solver.intVar("Y5", 14, 18, true);
 
         solver.post(new Constraint("sort", new PropSort(X, Y)));
         /*if (solver.findSolution()) {
@@ -88,13 +88,13 @@ public class SortTest {
         IntVar[] X, Y;
         X = new IntVar[3];
         Y = new IntVar[3];
-        X[0] = solver.makeIntVar("X1", 0, 0, true);
-        X[1] = solver.makeIntVar("X2", 0, 1, true);
-        X[2] = solver.makeIntVar("X3", 1, 1, true);
+        X[0] = solver.intVar("X1", 0, 0, true);
+        X[1] = solver.intVar("X2", 0, 1, true);
+        X[2] = solver.intVar("X3", 1, 1, true);
 
-        Y[0] = solver.makeIntVar("Y1", 0, 0, true);
-        Y[1] = solver.makeIntVar("Y2", 0, 0, true);
-        Y[2] = solver.makeIntVar("Y3", 1, 1, true);
+        Y[0] = solver.intVar("Y1", 0, 0, true);
+        Y[1] = solver.intVar("Y2", 0, 0, true);
+        Y[2] = solver.intVar("Y3", 1, 1, true);
 
         solver.post(ICF.sort(X, Y));
         try {
@@ -111,13 +111,13 @@ public class SortTest {
         IntVar[] X, Y;
         X = new IntVar[3];
         Y = new IntVar[3];
-        X[0] = solver.makeIntVar("X1", 2, 2, true);
-        X[1] = solver.makeIntVar("X2", 0, 2, true);
-        X[2] = solver.makeIntVar("X3", 0, 0, true);
+        X[0] = solver.intVar("X1", 2, 2, true);
+        X[1] = solver.intVar("X2", 0, 2, true);
+        X[2] = solver.intVar("X3", 0, 0, true);
 
-        Y[0] = solver.makeIntVar("Y1", 0, 0, true);
-        Y[1] = solver.makeIntVar("Y2", 0, 0, true);
-        Y[2] = solver.makeIntVar("Y3", 2, 2, true);
+        Y[0] = solver.intVar("Y1", 0, 0, true);
+        Y[1] = solver.intVar("Y2", 0, 0, true);
+        Y[2] = solver.intVar("Y3", 2, 2, true);
 
         solver.post(ICF.sort(X, Y));
         try {
@@ -134,13 +134,13 @@ public class SortTest {
         IntVar[] X, Y;
         X = new IntVar[3];
         Y = new IntVar[3];
-        X[0] = solver.makeIntVar("X1", 0, 7, true);
-        X[1] = solver.makeIntVar("X2", 3, 5, true);
-        X[2] = solver.makeIntVar("X3", 1, 5, true);
+        X[0] = solver.intVar("X1", 0, 7, true);
+        X[1] = solver.intVar("X2", 3, 5, true);
+        X[2] = solver.intVar("X3", 1, 5, true);
 
-        Y[0] = solver.makeIntVar("Y1", 0, 2, true);
-        Y[1] = solver.makeIntVar("Y2", 1, 9, true);
-        Y[2] = solver.makeIntVar("Y3", 7, 9, true);
+        Y[0] = solver.intVar("Y1", 0, 2, true);
+        Y[1] = solver.intVar("Y2", 1, 9, true);
+        Y[2] = solver.intVar("Y3", 7, 9, true);
 
         solver.post(ICF.sort(X, Y));
         try {

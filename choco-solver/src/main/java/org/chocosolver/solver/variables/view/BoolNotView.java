@@ -241,7 +241,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return solver.makeBoolNotView(this.var);
+        return solver.boolNotView(this.var);
     }
 
     @Override

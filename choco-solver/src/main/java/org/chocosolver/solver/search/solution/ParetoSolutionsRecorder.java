@@ -85,7 +85,7 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
                 symbol = Operator.LT;
             }
             for (int i = 0; i < n; i++) {
-                bvars[i] = solver.makeBoolVar("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")");
+                bvars[i] = solver.boolVar("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")");
                 ICF.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
                 lits[i] = psat.Literal(bvars[i]);
             }

@@ -229,10 +229,10 @@ public class IntLinCombFactory {
                 if (nbools == VARS.length) {
                     if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
                         return new Constraint("BoolSum", new PropSumBoolIncr(toBoolVar(tmpV), b, OPERATOR,
-                                SOLVER.makeIntVar(RESULT), 0));
+                                SOLVER.intVar(RESULT), 0));
                     } else {
                         return new Constraint("BoolSum", new PropSumBool(toBoolVar(tmpV), b, OPERATOR,
-                                SOLVER.makeIntVar(RESULT), 0));
+                                SOLVER.intVar(RESULT), 0));
                     }
                 }
                 if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool()) {
@@ -264,7 +264,7 @@ public class IntLinCombFactory {
     public static Constraint selectScalar(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT) {
         Solver SOLVER = VARS[0].getSolver();
         if (VARS.length == 1 && OPERATOR == Operator.EQ) {
-            return times(VARS[0], COEFFS[0], SOLVER.makeIntVar(RESULT));
+            return times(VARS[0], COEFFS[0], SOLVER.intVar(RESULT));
         }
         if (VARS.length == 2 && OPERATOR == Operator.EQ && RESULT == 0) {
             if (COEFFS[0] == 1) {

@@ -62,7 +62,7 @@ public interface Model {
             Solver s = new Solver("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = s.makeSetVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
+                vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             SetVar[] sets = new SetVar[n - 1];
@@ -86,7 +86,7 @@ public interface Model {
             Solver s = new Solver("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = s.makeSetVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
+                vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             SetVar[] sets = new SetVar[n - 1];
@@ -110,7 +110,7 @@ public interface Model {
             Solver s = new Solver("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = s.makeSetVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
+                vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = SetConstraintsFactory.all_disjoint(vars);
@@ -132,7 +132,7 @@ public interface Model {
             Solver s = new Solver("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = s.makeSetVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
+                vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = SetConstraintsFactory.all_different(vars);
@@ -154,7 +154,7 @@ public interface Model {
             Solver s = new Solver("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = s.makeSetVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
+                vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = SetConstraintsFactory.subsetEq(vars);
@@ -176,7 +176,7 @@ public interface Model {
             Solver s = new Solver("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
-                vars[i] = s.makeSetVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
+                vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = SetConstraintsFactory.all_equal(vars);
@@ -198,10 +198,10 @@ public interface Model {
             Solver s = new Solver("boolSum_" + n);
             IntVar[] vars = new IntVar[n];
             BoolVar[] bools = new BoolVar[n - 1];
-            vars[n - 1] = s.makeIntVar("sum", domains[n - 1].getIntDom());
+            vars[n - 1] = s.intVar("sum", domains[n - 1].getIntDom());
             if (rvars[n - 1] == null) rvars[n - 1] = vars[n - 1];
             for (int i = 0; i < n - 1; i++) {
-                vars[i] = bools[i] = s.makeBoolVar("v_" + i);
+                vars[i] = bools[i] = s.boolVar("v_" + i);
                 if (domains[i].getIntDom().length == 1) {
                     try {
                         bools[i].instantiateTo(domains[i].getIntDom()[0], Cause.Null);
@@ -229,7 +229,7 @@ public interface Model {
             IntVar[] vars = new IntVar[n];
             try {
                 for (int i = 0; i < vars.length; i++) {
-                    vars[i] = s.makeIntVar("v_" + i, domains[i].getIntDom());
+                    vars[i] = s.intVar("v_" + i, domains[i].getIntDom());
                     if (rvars[i] == null) rvars[i] = vars[i];
                 }
             } catch (ArrayIndexOutOfBoundsException ce) {
@@ -253,9 +253,9 @@ public interface Model {
             IntVar[] X = new IntVar[n / 2];
             IntVar[] Y = new IntVar[n / 2];
             for (int i = 0; i < n / 2; i++) {
-                X[i] = s.makeIntVar("X_" + i, domains[i].getIntDom());
+                X[i] = s.intVar("X_" + i, domains[i].getIntDom());
                 if (rvars[i] == null) rvars[i] = X[i];
-                Y[i] = s.makeIntVar("Y_" + i, domains[i + (n / 2)].getIntDom());
+                Y[i] = s.intVar("Y_" + i, domains[i + (n / 2)].getIntDom());
                 if (rvars[i + n / 2] == null) rvars[i + n / 2] = Y[i];
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
@@ -277,7 +277,7 @@ public interface Model {
             IntVar[] vars = new IntVar[n];
             IntVar[] decvars = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {
-                vars[i] = s.makeIntVar("v_" + i, domains[i].getIntDom());
+                vars[i] = s.intVar("v_" + i, domains[i].getIntDom());
                 if (rvars[i] == null) rvars[i] = vars[i];
                 if (i < n - 1) {
                     decvars[i] = vars[i];

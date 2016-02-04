@@ -59,7 +59,7 @@ public class AllDifferentTest {
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = s.makeIntVar("v_" + i, 1, n, false);
+            vars[i] = s.intVar("v_" + i, 1, n, false);
         }
         s.post(IntConstraintFactory.alldifferent(vars, "BC"));
         if (simple) {
@@ -77,8 +77,8 @@ public class AllDifferentTest {
             IntVar[] diag2 = new IntVar[n];
 
             for (int i = 0; i < n; i++) {
-                diag1[i] = s.makeIntVar("v_" + (i + 2 * n), -n, n, false);
-                diag2[i] = s.makeIntVar("v_" + (i + n), 1, 2 * n, false);
+                diag1[i] = s.intVar("v_" + (i + 2 * n), -n, n, false);
+                diag2[i] = s.intVar("v_" + (i + n), 1, 2 * n, false);
             }
             for (int i = 0; i < n; i++) {
                 s.post(IntConstraintFactory.arithm(diag1[i], "=", vars[i], "-", i));
@@ -113,10 +113,10 @@ public class AllDifferentTest {
 
         int n = 4;
         IntVar[] vars = new IntVar[n];
-        vars[0] = s.makeIntVar("v_0", new int[]{1, 6});
-        vars[1] = s.makeIntVar("v_1", new int[]{1, 3});
-        vars[2] = s.makeIntVar("v_2", new int[]{3, 5});
-        vars[3] = s.makeIntVar("v_3", new int[]{1, 3, 5, 6});
+        vars[0] = s.intVar("v_0", new int[]{1, 6});
+        vars[1] = s.intVar("v_1", new int[]{1, 3});
+        vars[2] = s.intVar("v_2", new int[]{3, 5});
+        vars[3] = s.intVar("v_3", new int[]{1, 3, 5, 6});
 
 
         List<Constraint> lcstrs = new ArrayList<>(10);
@@ -153,11 +153,11 @@ public class AllDifferentTest {
 
         int n = 5;
         IntVar[] vars = new IntVar[n];
-        vars[0] = s.makeIntVar("v_0", 5);
-        vars[1] = s.makeIntVar("v_1", 3);
-        vars[2] = s.makeIntVar("v_2", 3, 4, true);
-        vars[3] = s.makeIntVar("v_3", 2, 6, true);
-        vars[4] = s.makeIntVar("v_4", 2, 6, true);
+        vars[0] = s.intVar("v_0", 5);
+        vars[1] = s.intVar("v_1", 3);
+        vars[2] = s.intVar("v_2", 3, 4, true);
+        vars[3] = s.intVar("v_3", 2, 6, true);
+        vars[4] = s.intVar("v_4", 2, 6, true);
 
 
         List<Constraint> lcstrs = new ArrayList<>(10);
@@ -216,11 +216,11 @@ public class AllDifferentTest {
         IntVar[] vars = new IntVar[domains.length];
         if (bounded) {
             for (int i = 0; i < domains.length; i++) {
-                vars[i] = s.makeIntVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
+                vars[i] = s.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
             }
         } else {
             for (int i = 0; i < domains.length; i++) {
-                vars[i] = s.makeIntVar("v_" + i, domains[i]);
+                vars[i] = s.intVar("v_" + i, domains[i]);
             }
         }
 
@@ -256,10 +256,10 @@ public class AllDifferentTest {
     public void testXX() {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[4];
-        ts[0] = solver.makeIntVar("t0", new int[]{2, 3, 4});
-        ts[1] = solver.makeIntVar("t1", new int[]{-3, -2, -1, 1, 2});
-        ts[2] = solver.makeIntVar("t2", new int[]{-3, -2, -1, 1, 2, 3});
-        ts[3] = solver.makeIntVar("t3", new int[]{-3, -2, -1, 1, 2, 3});
+        ts[0] = solver.intVar("t0", new int[]{2, 3, 4});
+        ts[1] = solver.intVar("t1", new int[]{-3, -2, -1, 1, 2});
+        ts[2] = solver.intVar("t2", new int[]{-3, -2, -1, 1, 2, 3});
+        ts[3] = solver.intVar("t3", new int[]{-3, -2, -1, 1, 2, 3});
 
         try {
             solver.propagate();
@@ -284,9 +284,9 @@ public class AllDifferentTest {
     public void testXXX() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[3];
-        ts[0] = solver.makeIntVar("t0", 2, 2, false);
-        ts[1] = solver.makeIntVar("t1", 1, 3, false);
-        ts[2] = solver.makeIntVar("t2", 1, 3, false);
+        ts[0] = solver.intVar("t0", 2, 2, false);
+        ts[1] = solver.intVar("t1", 1, 3, false);
+        ts[2] = solver.intVar("t2", 1, 3, false);
 
         solver.post(ICF.alldifferent(ts, "BC"));
 
@@ -299,9 +299,9 @@ public class AllDifferentTest {
     public void testB() {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[3];
-        ts[0] = solver.makeIntVar("t0", 2, 4, true);
-        ts[1] = solver.makeIntVar("t1", 1, 3, true);
-        ts[2] = solver.makeIntVar("t2", 1, 3, true);
+        ts[0] = solver.intVar("t0", 2, 4, true);
+        ts[1] = solver.intVar("t1", 1, 3, true);
+        ts[2] = solver.intVar("t2", 1, 3, true);
 
         solver.post(ICF.alldifferent(ts, "FC"));
 
@@ -314,9 +314,9 @@ public class AllDifferentTest {
     public void testE() {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[3];
-        ts[0] = solver.makeIntVar("t0", 2, 4, false);
-        ts[1] = solver.makeIntVar("t1", 1, 3, false);
-        ts[2] = solver.makeIntVar("t2", 1, 3, false);
+        ts[0] = solver.intVar("t0", 2, 4, false);
+        ts[1] = solver.intVar("t1", 1, 3, false);
+        ts[2] = solver.intVar("t2", 1, 3, false);
 
         solver.post(ICF.alldifferent(ts, "FC"));
 
@@ -329,38 +329,38 @@ public class AllDifferentTest {
     public void testB1() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[32];
-        X[0] = solver.makeIntVar("V0", new int[]{-1, 19, 24, 25});
-        X[1] = solver.makeIntVar("V1", new int[]{-13, 1, 12});
-        X[2] = solver.makeIntVar("V2", new int[]{-9, -8, 9, 19});
-        X[3] = solver.makeIntVar("V3", new int[]{6});
-        X[4] = solver.makeIntVar("V4", new int[]{-3, 4, 11, 12});
-        X[5] = solver.makeIntVar("V5", new int[]{-6, 25});
-        X[6] = solver.makeIntVar("V6", new int[]{7, 12, 21});
-        X[7] = solver.makeIntVar("V7", new int[]{4, 7, 11, 12});
-        X[8] = solver.makeIntVar("V8", new int[]{-8, -4, 0, 21});
-        X[9] = solver.makeIntVar("V9", new int[]{-3, 12});
-        X[10] = solver.makeIntVar("X10", new int[]{0});
-        X[11] = solver.makeIntVar("X11", new int[]{-15, -3, 3});
-        X[12] = solver.makeIntVar("X12", new int[]{-5, 3, 21, 24});
-        X[13] = solver.makeIntVar("X13", new int[]{3});
-        X[14] = solver.makeIntVar("X14", new int[]{-16, 13, 16});
-        X[15] = solver.makeIntVar("X15", new int[]{-14, -12, 0, 20});
-        X[16] = solver.makeIntVar("X16", new int[]{-9, 11});
-        X[17] = solver.makeIntVar("X17", new int[]{-15, 13});
-        X[18] = solver.makeIntVar("X18", new int[]{-12, -4, 21});
-        X[19] = solver.makeIntVar("X19", new int[]{-1});
-        X[20] = solver.makeIntVar("X20", new int[]{2, 11, 14});
-        X[21] = solver.makeIntVar("X21", new int[]{-9, 7, 21});
-        X[22] = solver.makeIntVar("X22", new int[]{-16, 10, 15});
-        X[23] = solver.makeIntVar("X23", new int[]{20, 24});
-        X[24] = solver.makeIntVar("X24", new int[]{23});
-        X[25] = solver.makeIntVar("X25", new int[]{-7, 5});
-        X[26] = solver.makeIntVar("X26", new int[]{-2, 1, 10, 12});
-        X[27] = solver.makeIntVar("X27", new int[]{-16, -6, 12, 15});
-        X[28] = solver.makeIntVar("X28", new int[]{-9});
-        X[29] = solver.makeIntVar("X29", new int[]{-6, -4});
-        X[30] = solver.makeIntVar("X30", new int[]{-15, -2, -1, 3});
-        X[31] = solver.makeIntVar("X31", new int[]{1, 10, 14});
+        X[0] = solver.intVar("V0", new int[]{-1, 19, 24, 25});
+        X[1] = solver.intVar("V1", new int[]{-13, 1, 12});
+        X[2] = solver.intVar("V2", new int[]{-9, -8, 9, 19});
+        X[3] = solver.intVar("V3", new int[]{6});
+        X[4] = solver.intVar("V4", new int[]{-3, 4, 11, 12});
+        X[5] = solver.intVar("V5", new int[]{-6, 25});
+        X[6] = solver.intVar("V6", new int[]{7, 12, 21});
+        X[7] = solver.intVar("V7", new int[]{4, 7, 11, 12});
+        X[8] = solver.intVar("V8", new int[]{-8, -4, 0, 21});
+        X[9] = solver.intVar("V9", new int[]{-3, 12});
+        X[10] = solver.intVar("X10", new int[]{0});
+        X[11] = solver.intVar("X11", new int[]{-15, -3, 3});
+        X[12] = solver.intVar("X12", new int[]{-5, 3, 21, 24});
+        X[13] = solver.intVar("X13", new int[]{3});
+        X[14] = solver.intVar("X14", new int[]{-16, 13, 16});
+        X[15] = solver.intVar("X15", new int[]{-14, -12, 0, 20});
+        X[16] = solver.intVar("X16", new int[]{-9, 11});
+        X[17] = solver.intVar("X17", new int[]{-15, 13});
+        X[18] = solver.intVar("X18", new int[]{-12, -4, 21});
+        X[19] = solver.intVar("X19", new int[]{-1});
+        X[20] = solver.intVar("X20", new int[]{2, 11, 14});
+        X[21] = solver.intVar("X21", new int[]{-9, 7, 21});
+        X[22] = solver.intVar("X22", new int[]{-16, 10, 15});
+        X[23] = solver.intVar("X23", new int[]{20, 24});
+        X[24] = solver.intVar("X24", new int[]{23});
+        X[25] = solver.intVar("X25", new int[]{-7, 5});
+        X[26] = solver.intVar("X26", new int[]{-2, 1, 10, 12});
+        X[27] = solver.intVar("X27", new int[]{-16, -6, 12, 15});
+        X[28] = solver.intVar("X28", new int[]{-9});
+        X[29] = solver.intVar("X29", new int[]{-6, -4});
+        X[30] = solver.intVar("X30", new int[]{-15, -2, -1, 3});
+        X[31] = solver.intVar("X31", new int[]{1, 10, 14});
 
         solver.post(ICF.alldifferent(X, "AC"));
         solver.propagate();

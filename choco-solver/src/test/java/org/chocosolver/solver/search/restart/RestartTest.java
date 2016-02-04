@@ -56,7 +56,7 @@ public class RestartTest {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
+            vars[i] = solver.intVar("Q_" + i, 1, n, false);
         }
 
 
@@ -132,8 +132,8 @@ public class RestartTest {
         for (int j = 1; j < 5; j++) {
             int n = 200;
             Solver solver = new Solver(Environments.TRAIL.make(), "Test");
-            IntVar[] X = solver.makeIntVarArray("X", n, 1, n, false);
-            IntVar[] Y = solver.makeIntVarArray("Y", n, n + 1, 2 * (n + 1), false);
+            IntVar[] X = solver.intVarArray("X", n, 1, n, false);
+            IntVar[] Y = solver.intVarArray("Y", n, n + 1, 2 * (n + 1), false);
             solver.post(ICF.alldifferent(X));
             for (int i = 0; i < n; i++) {
                 solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));

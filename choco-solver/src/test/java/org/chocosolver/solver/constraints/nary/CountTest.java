@@ -56,7 +56,7 @@ public class CountTest {
 
     protected static Solver modelit(int n) {
         Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("var", n, 0, n - 1, true);
+        IntVar[] vars = solver.intVarArray("var", n, 0, n - 1, true);
         for (int i = 0; i < n; i++) {
             solver.post(IntConstraintFactory.count(i, vars, vars[i]));
         }
@@ -106,9 +106,9 @@ public class CountTest {
         int n = 2;
         for (int i = 0; i < 200; i++) {
             Solver solver = new Solver();
-            IntVar[] vars = solver.makeIntVarArray("o", n, 0, n, true);
+            IntVar[] vars = solver.intVarArray("o", n, 0, n, true);
             int value = 1;
-            IntVar occ = solver.makeIntVar("oc", 0, n, true);
+            IntVar occ = solver.intVar("oc", 0, n, true);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(IntStrategyFactory.random_bound(allvars, i));
             solver.post(IntConstraintFactory.count(value, vars, occ));
@@ -129,9 +129,9 @@ public class CountTest {
             Solver solver = new Solver();
             IntVar[] vars;
             if (enumvar) {
-                vars = solver.makeIntVarArray("e", nbVar, 0, sizeDom, false);
+                vars = solver.intVarArray("e", nbVar, 0, sizeDom, false);
             } else {
-                vars = solver.makeIntVarArray("e", nbVar, 0, sizeDom, true);
+                vars = solver.intVarArray("e", nbVar, 0, sizeDom, true);
             }
 
             List<IntVar> lvs = new LinkedList<>();
@@ -188,7 +188,7 @@ public class CountTest {
      */
     public Constraint getTableForOccurence(IntVar[] vs, IntVar occ, int val, int ub) {
         Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("e", vs.length + 1, 0, ub, false);
+        IntVar[] vars = solver.intVarArray("e", vs.length + 1, 0, ub, false);
 
         Tuples tuples = new Tuples(true);
         solver.set(IntStrategyFactory.lexico_LB(vars));
@@ -223,8 +223,8 @@ public class CountTest {
      * @return Constraint
      */
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int val) {
-        BoolVar[] bs = solver.makeBoolVarArray("b", vs.length);
-        IntVar vval = solver.makeIntVar(val);
+        BoolVar[] bs = solver.boolVarArray("b", vs.length);
+        IntVar vval = solver.intVar(val);
         for (int i = 0; i < vs.length; i++) {
             LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval));
         }

@@ -80,7 +80,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     @Override
     public BoolVar not() {
         if (!hasNot()) {
-            not = solver.makeBoolNotView(this);
+            not = solver.boolNotView(this);
             not._setNot(this);
         }
         return not;
@@ -118,7 +118,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public IntVar duplicate() {
-        return solver.makeIntVar(StringUtils.randomName(), this.constante);
+        return solver.intVar(StringUtils.randomName(), this.constante);
     }
 
 }

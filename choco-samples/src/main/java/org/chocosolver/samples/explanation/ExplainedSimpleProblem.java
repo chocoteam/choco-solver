@@ -56,7 +56,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = solver.makeIntVarArray("x", n, 1, vals, false);
+        vars = solver.intVarArray("x", n, 1, vals, false);
         for (int i = 0; i < vars.length - 1; i++) {
             solver.post(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
         }

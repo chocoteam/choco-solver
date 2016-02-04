@@ -80,11 +80,11 @@ public class ParetoTest {
         // --- Creates decision variables
         IntVar[] occurrences = new IntVar[nbItems.length];
         for (int i = 0; i < nbItems.length; i++) {
-            occurrences[i] = s.makeIntVar("occurrences_" + i, 0, nbItems[i], true);
+            occurrences[i] = s.intVar("occurrences_" + i, 0, nbItems[i], true);
         }
-        IntVar totalWeight = s.makeIntVar("totalWeight", 0, capacity, true);
-        IntVar totalProfit_1 = s.makeIntVar("totalProfit_1", 0, maxProfit_1, true);
-        IntVar totalProfit_2 = s.makeIntVar("totalProfit_2", 0, maxProfit_2, true);
+        IntVar totalWeight = s.intVar("totalWeight", 0, capacity, true);
+        IntVar totalProfit_1 = s.intVar("totalProfit_1", 0, maxProfit_1, true);
+        IntVar totalProfit_2 = s.intVar("totalProfit_2", 0, maxProfit_2, true);
 
         // --- Posts constraints
         s.post(IntConstraintFactory.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1));

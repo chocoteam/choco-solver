@@ -53,7 +53,7 @@ public class TestSolveur {
             Solver s = new Solver();
             IntVar[] vars = new IntVar[kk];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = s.makeIntVar("v_" + i, min, kk, false);
+                vars[i] = s.intVar("v_" + i, min, kk, false);
             }
             Constraint[] cstrs = new Constraint[m];
             int k = 0;
@@ -83,7 +83,7 @@ public class TestSolveur {
             Solver s = new Solver();
             IntVar[] vars = new IntVar[k];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = s.makeIntVar("v_" + i, min, k, false);
+                vars[i] = s.intVar("v_" + i, min, k, false);
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
@@ -104,7 +104,7 @@ public class TestSolveur {
         Solver s = new Solver();
         IntVar[] vars = new IntVar[k];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = s.makeIntVar("v_" + i, min, max, false);
+            vars[i] = s.intVar("v_" + i, min, max, false);
         }
         Constraint[] cstrs = new Constraint[k];
         int i;
@@ -145,7 +145,7 @@ public class TestSolveur {
             Solver s = new Solver();
             IntVar[] vars = new IntVar[k];
             for (int i = 0; i < vars.length; i++) {
-                vars[i] = s.makeIntVar("v_" + i, min, max, false);
+                vars[i] = s.intVar("v_" + i, min, max, false);
             }
             Constraint[] cstrs = new Constraint[m + 1];
             int i;
@@ -173,7 +173,7 @@ public class TestSolveur {
         Solver s = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = s.makeIntVar("v_" + i, min, max, false);
+            vars[i] = s.intVar("v_" + i, min, max, false);
         }
         Constraint[] cstrs = new Constraint[m];
         int i;
@@ -212,7 +212,7 @@ public class TestSolveur {
         Solver s = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = s.makeIntVar("v_" + i, min, max, false);
+            vars[i] = s.intVar("v_" + i, min, max, false);
         }
         int i;
         for (i = 0; i < (n / 2) - 1; i++) {
@@ -243,7 +243,7 @@ public class TestSolveur {
     public void fakePigeonHolesTest() {
         int n = 5;
         Solver solver = new Solver();
-        IntVar[] vars = solver.makeIntVarArray("p", n, 0, n, false);
+        IntVar[] vars = solver.intVarArray("p", n, 0, n, false);
 
         for (int i = 0; i < n - 1; i++) {
             solver.post(IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]));

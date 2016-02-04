@@ -166,7 +166,7 @@ public class Constraint implements Serializable {
     public final BoolVar reif() {
         if (boolReif == null) {
             Solver s = propagators[0].getSolver();
-            boolReif = s.makeBoolVar(randomName());
+            boolReif = s.boolVar(randomName());
             s.post(new ReificationConstraint(boolReif, this, getOpposite()));
         }
         return boolReif;

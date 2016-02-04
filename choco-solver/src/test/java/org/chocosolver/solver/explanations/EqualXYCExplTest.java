@@ -81,10 +81,10 @@ public class EqualXYCExplTest {
         List<Constraint> lcstrss = new ArrayList<>(1);
 
         for (int i = 0; i < varsr.length; i++) {
-            varsr[i] = ref.makeIntVar("v_" + i, 0, nbvars, false);
-            indicesr[i] = ref.makeIntVar("i_" + i, 0, nbvars, false);
-            varss[i] = sol.makeIntVar("v_" + i, 0, nbvars, false);
-            indicess[i] = sol.makeIntVar("i_" + i, 0, nbvars, false);
+            varsr[i] = ref.intVar("v_" + i, 0, nbvars, false);
+            indicesr[i] = ref.intVar("i_" + i, 0, nbvars, false);
+            varss[i] = sol.intVar("v_" + i, 0, nbvars, false);
+            indicess[i] = sol.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
         ref.set(IntStrategyFactory.lexico_LB(allvarsr));

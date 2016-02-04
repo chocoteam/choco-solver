@@ -653,7 +653,7 @@ public class BitsetArrayIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL01() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = s.makeIntVar("i", new int[]{0, 98, 99});
+        IntVar i = s.intVar("i", new int[]{0, 98, 99});
         IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
         i.updateUpperBound(98, Cause.Null);
         d.freeze();
@@ -667,7 +667,7 @@ public class BitsetArrayIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL02() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = s.makeIntVar("i", new int[]{0, 98, 99});
+        IntVar i = s.intVar("i", new int[]{0, 98, 99});
         IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
         i.updateBounds(0,98, Cause.Null);
         d.freeze();
@@ -681,7 +681,7 @@ public class BitsetArrayIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL03() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = s.makeIntVar("i", new int[]{2, 3, 99});
+        IntVar i = s.intVar("i", new int[]{2, 3, 99});
         IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
         i.updateLowerBound(3, Cause.Null);
         d.freeze();
@@ -695,7 +695,7 @@ public class BitsetArrayIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL04() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = s.makeIntVar("i", new int[]{2, 3, 99});
+        IntVar i = s.intVar("i", new int[]{2, 3, 99});
         IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
         i.updateBounds(3,99, Cause.Null);
         d.freeze();

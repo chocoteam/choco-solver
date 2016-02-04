@@ -70,19 +70,19 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        positions = solver.makeIntVarArray("pos", data.people(), 0, data.people() - 1, true);
-        violations = solver.makeIntVar("viol", 0, data.preferences().length, true);
+        positions = solver.intVarArray("pos", data.people(), 0, data.people() - 1, true);
+        violations = solver.intVar("viol", 0, data.preferences().length, true);
 
-        viols = solver.makeBoolVarArray("b", data.prefPerPeople());
+        viols = solver.boolVarArray("b", data.prefPerPeople());
         dist = new IntVar[data.prefPerPeople()];
         for (int i = 0; i < data.prefPerPeople(); i++) {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
 
 
-            IntVar k = solver.makeIntVar(randomName(), -20000, 20000, true);
+            IntVar k = solver.intVar(randomName(), -20000, 20000, true);
 			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]));
-			dist[i] = solver.makeIntAbsView(k);
+			dist[i] = solver.intAbsView(k);
 
             ifThenElse(viols[i],
                             arithm(dist[i], ">", 1),

@@ -55,13 +55,13 @@ public class BottleneckTest {
             IntVar[] exps = new IntVar[n];
             IntVar[] bws = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                nexts[i] = solver.makeIntVar("n_" + i, 0, 200, false);
-                exps[i] = solver.makeIntVar("e_" + i, 0, 200, false);
-                bws[i] = solver.makeIntVar("b_" + i, 0, 2000, false);
+                nexts[i] = solver.intVar("n_" + i, 0, 200, false);
+                exps[i] = solver.intVar("e_" + i, 0, 200, false);
+                bws[i] = solver.intVar("b_" + i, 0, 2000, false);
                 solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
             }
 
-            IntVar sum = solver.makeIntVar("sum", 0, 2000 * n, true);
+            IntVar sum = solver.intVar("sum", 0, 2000 * n, true);
 			solver.post(IntConstraintFactory.sum(bws, "=", sum));
 
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
@@ -82,13 +82,13 @@ public class BottleneckTest {
             IntVar[] exps = new IntVar[n];
             IntVar[] bws = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                nexts[i] = solver.makeIntVar("n_" + i, 0, 200, false);
-                exps[i] = solver.makeIntVar("e_" + i, 0, 200, false);
-                bws[i] = solver.makeIntVar("b_" + i, 0, 2000, false);
+                nexts[i] = solver.intVar("n_" + i, 0, 200, false);
+                exps[i] = solver.intVar("e_" + i, 0, 200, false);
+                bws[i] = solver.intVar("b_" + i, 0, 2000, false);
 				solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
             }
 
-            IntVar sum = solver.makeIntVar("sum", 0, 2000 * n, true);
+            IntVar sum = solver.intVar("sum", 0, 2000 * n, true);
 			solver.post(IntConstraintFactory.sum(bws, "=", sum));
 
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});

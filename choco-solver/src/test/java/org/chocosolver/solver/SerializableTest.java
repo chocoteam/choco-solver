@@ -132,7 +132,7 @@ public class SerializableTest {
     @Test(groups="1s", timeOut=60000)
     public void testIntegerVariable() {
         Solver s = new Solver();
-        IntVar var = s.makeIntVar("v", 1, 10, false);
+        IntVar var = s.intVar("v", 1, 10, false);
         File file = null;
         try {
             file = write(var);
@@ -151,7 +151,7 @@ public class SerializableTest {
     @Test(groups="1s", timeOut=60000)
     public void testConstraint() {
         Solver s = new Solver();
-        IntVar var = s.makeIntVar("v", 1, 10, false);
+        IntVar var = s.intVar("v", 1, 10, false);
         Constraint c = IntConstraintFactory.arithm(var, "=", 0);
         File file = null;
         try {
@@ -174,7 +174,7 @@ public class SerializableTest {
         int n = 8;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = s.makeIntVar("Q_" + i, 1, n, false);
+            vars[i] = s.intVar("Q_" + i, 1, n, false);
         }
 
 

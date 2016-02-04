@@ -61,7 +61,7 @@ public class ClauseTest {
                 final BoolVar[] bs = new BoolVar[n];
 
                 for (int j = 0; j < n; j++) {
-                    bsource[j] = s.makeBoolVar("b" + j);
+                    bsource[j] = s.boolVar("b" + j);
                 }
 
                 for (int j = 0; j < n; j++) {
@@ -89,7 +89,7 @@ public class ClauseTest {
         Solver s = new Solver();
 
         BoolVar[] bs = new BoolVar[1];
-        bs[0] = s.makeBoolVar("to be");
+        bs[0] = s.boolVar("to be");
 
         LogOp and = LogOp.and(bs[0], bs[0].not());
 
@@ -104,7 +104,7 @@ public class ClauseTest {
     public void testBothOr() {
         Solver s = new Solver();
 
-        BoolVar b = s.makeBoolVar("to be");
+        BoolVar b = s.boolVar("to be");
 
         LogOp or = LogOp.or(b, b.not());
 
@@ -122,7 +122,7 @@ public class ClauseTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver solver = new Solver();
-        BoolVar[] bvars = solver.makeBoolVarArray("b", 2);
+        BoolVar[] bvars = solver.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1]);
         SatFactory.addClauses(tree, solver);
 
@@ -139,7 +139,7 @@ public class ClauseTest {
     @Test(groups="1s", timeOut=60000)
     public void test30() {
         Solver solver = new Solver();
-        BoolVar[] bvars = solver.makeBoolVarArray("b", 2);
+        BoolVar[] bvars = solver.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1]);
         SatFactory.addClauses(tree, solver);
 
@@ -156,7 +156,7 @@ public class ClauseTest {
     @Test(groups="1s", timeOut=60000)
     public void test31() {
         Solver solver = new Solver();
-        BoolVar[] bvars = solver.makeBoolVarArray("b", 2);
+        BoolVar[] bvars = solver.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not());
         SatFactory.addClauses(tree, solver);
 
@@ -173,7 +173,7 @@ public class ClauseTest {
     @Test(groups="1s", timeOut=60000)
     public void test32() {
         Solver solver = new Solver();
-        BoolVar[] bvars = solver.makeBoolVarArray("b", 2);
+        BoolVar[] bvars = solver.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not());
         SatFactory.addClauses(tree, solver);
 
@@ -190,7 +190,7 @@ public class ClauseTest {
     @Test(groups="1s", timeOut=60000)
     public void test33() {
         Solver solver = new Solver();
-        BoolVar[] bvars = solver.makeBoolVarArray("b", 3);
+        BoolVar[] bvars = solver.boolVarArray("b", 3);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not(), bvars[2].not());
         SatFactory.addClauses(tree, solver);
 
@@ -211,7 +211,7 @@ public class ClauseTest {
             long n1, n2;
             {
                 Solver solver = new Solver();
-                BoolVar[] bvars = solver.makeBoolVarArray("b", 3);
+                BoolVar[] bvars = solver.boolVarArray("b", 3);
                 LogOp tree = LogOp.ifOnlyIf(
                         LogOp.and(bvars[1], bvars[2]),
                         bvars[0]);
@@ -223,7 +223,7 @@ public class ClauseTest {
             }
             {
                 Solver solver = new Solver();
-                BoolVar[] bvars = solver.makeBoolVarArray("b", 3);
+                BoolVar[] bvars = solver.boolVarArray("b", 3);
                 solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
 
                 solver.set(IntStrategyFactory.random_bound(bvars, seed));
@@ -250,7 +250,7 @@ public class ClauseTest {
             boolean s1, s2;
             {
                 Solver solver = new Solver();
-                BoolVar[] bvars = solver.makeBoolVarArray("b", 3);
+                BoolVar[] bvars = solver.boolVarArray("b", 3);
                 LogOp tree = LogOp.ifOnlyIf(
                         LogOp.and(bvars[1], bvars[2]),
                         bvars[0]);
@@ -266,7 +266,7 @@ public class ClauseTest {
             }
             {
                 Solver solver = new Solver();
-                BoolVar[] bvars = solver.makeBoolVarArray("b", 3);
+                BoolVar[] bvars = solver.boolVarArray("b", 3);
                 solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
                 try {
                     solver.propagate();
@@ -288,7 +288,7 @@ public class ClauseTest {
         Solver s = new Solver();
         IEnvironment e = s.getEnvironment();
         BoolVar[] bs = new BoolVar[n];
-        bs[0] = s.makeBoolVar("b0");
+        bs[0] = s.boolVar("b0");
         SatFactory.addFalse(bs[0]);
         PropSat sat = s.getMinisat().getPropSat();
 
@@ -296,7 +296,7 @@ public class ClauseTest {
         s.propagate();
         for (int i = 1; i < n; i++) {
             e.worldPush();
-            bs[i] = s.makeBoolVar("b" + i);
+            bs[i] = s.boolVar("b" + i);
             sat.addLearnt(sat.Literal(bs[i]));
             s.propagate();
             Assert.assertTrue(bs[i].isInstantiatedTo(1));

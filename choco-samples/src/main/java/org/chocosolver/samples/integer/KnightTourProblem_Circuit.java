@@ -81,7 +81,7 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
 					values.add(j);
                 }
             }
-            succ[i] = solver.makeIntVar("succ_" + i, values.toArray());
+            succ[i] = solver.intVar("succ_" + i, values.toArray());
         }
         solver.post(ICF.circuit(succ,0));
     }

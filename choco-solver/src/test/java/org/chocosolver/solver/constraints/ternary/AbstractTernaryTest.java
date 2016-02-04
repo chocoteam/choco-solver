@@ -79,9 +79,9 @@ public abstract class AbstractTernaryTest {
         IntVar[] vars = new IntVar[3];
         for (int i = 0; i < 3; i++) {
             if (bounded) {
-                vars[i] = s.makeIntVar("x_" + i, domains[i][0], domains[i][1], true);
+                vars[i] = s.intVar("x_" + i, domains[i][0], domains[i][1], true);
             } else {
-                vars[i] = s.makeIntVar("x_" + i, domains[i]);
+                vars[i] = s.intVar("x_" + i, domains[i]);
             }
         }
         Constraint div = make(vars, s);

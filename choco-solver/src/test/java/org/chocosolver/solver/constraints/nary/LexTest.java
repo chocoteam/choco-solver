@@ -60,8 +60,8 @@ public class LexTest {
             IntVar[] vs1 = new IntVar[n1 / 2];
             IntVar[] vs2 = new IntVar[n1 / 2];
             for (int i = 0; i < n1 / 2; i++) {
-                vs1[i] = solver.makeIntVar("" + i, 0, k, true);
-                vs2[i] = solver.makeIntVar("" + i, 0, k, true);
+                vs1[i] = solver.intVar("" + i, 0, k, true);
+                vs2[i] = solver.intVar("" + i, 0, k, true);
             }
             solver.post(IntConstraintFactory.lex_less_eq(vs1, vs2));
             solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(vs1, vs2), seed));
@@ -80,8 +80,8 @@ public class LexTest {
             IntVar[] vs1 = new IntVar[n1 / 2];
             IntVar[] vs2 = new IntVar[n1 / 2];
             for (int i = 0; i < n1 / 2; i++) {
-                vs1[i] = solver.makeIntVar("" + i, 0, k, true);
-                vs2[i] = solver.makeIntVar("" + i, 0, k, true);
+                vs1[i] = solver.intVar("" + i, 0, k, true);
+                vs2[i] = solver.intVar("" + i, 0, k, true);
             }
             solver.post(IntConstraintFactory.lex_less(vs1, vs2));
             solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(vs1, vs2), seed));
@@ -94,9 +94,9 @@ public class LexTest {
     @Test(groups="1s", timeOut=60000)
     public void testLexiSatisfied() {
         Solver solver = new Solver();
-        IntVar v1 = solver.makeIntVar("v1", 1, 1, true);
-        IntVar v2 = solver.makeIntVar("v2", 2, 2, true);
-        IntVar v3 = solver.makeIntVar("v3", 3, 3, true);
+        IntVar v1 = solver.intVar("v1", 1, 1, true);
+        IntVar v2 = solver.intVar("v2", 2, 2, true);
+        IntVar v3 = solver.intVar("v3", 3, 3, true);
         Constraint c1 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
         Constraint c2 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
         Constraint c3 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
@@ -119,11 +119,11 @@ public class LexTest {
         IntVar[] a = new IntVar[2];
         IntVar[] b = new IntVar[2];
 
-        a[0] = solver.makeIntVar("a1", 5, 7, true);
-        a[1] = solver.makeIntVar("a2", 1, 1, true);
+        a[0] = solver.intVar("a1", 5, 7, true);
+        a[1] = solver.intVar("a2", 1, 1, true);
 
-        b[0] = solver.makeIntVar("b1", 5, 8, true);
-        b[1] = solver.makeIntVar("b2", 0, 0, true);
+        b[0] = solver.intVar("b1", 5, 8, true);
+        b[1] = solver.intVar("b2", 0, 0, true);
 
 
         solver.post(IntConstraintFactory.lex_less(a, b));
@@ -144,11 +144,11 @@ public class LexTest {
         IntVar[] a = new IntVar[2];
         IntVar[] b = new IntVar[2];
 
-        a[0] = solver.makeIntVar("a2", new int[]{5, 8});
-        a[1] = solver.makeIntVar("a3", new int[]{-2, 0});
+        a[0] = solver.intVar("a2", new int[]{5, 8});
+        a[1] = solver.intVar("a3", new int[]{-2, 0});
 
-        b[0] = solver.makeIntVar("b2", new int[]{5, 8});
-        b[1] = solver.makeIntVar("b3", new int[]{-3, -2});
+        b[0] = solver.intVar("b2", new int[]{5, 8});
+        b[1] = solver.intVar("b3", new int[]{-3, -2});
 
 
         solver.post(IntConstraintFactory.lex_less(a, b));
@@ -169,11 +169,11 @@ public class LexTest {
         IntVar[] a = new IntVar[2];
         IntVar[] b = new IntVar[2];
 
-        a[0] = solver.makeIntVar("a1", new int[]{-2, 5});
-        a[1] = solver.makeIntVar("a2", new int[]{-1, 1});
+        a[0] = solver.intVar("a1", new int[]{-2, 5});
+        a[1] = solver.intVar("a2", new int[]{-1, 1});
 
-        b[0] = solver.makeIntVar("b1", new int[]{3, 5});
-        b[1] = solver.makeIntVar("b2", new int[]{-6, -1});
+        b[0] = solver.intVar("b1", new int[]{3, 5});
+        b[1] = solver.intVar("b2", new int[]{-6, -1});
 
 
         solver.post(IntConstraintFactory.lex_less(a, b));
@@ -193,11 +193,11 @@ public class LexTest {
         IntVar[] a = new IntVar[2];
         IntVar[] b = new IntVar[2];
 
-        a[0] = solver.makeIntVar("a1", new int[]{5});
-        a[1] = solver.makeIntVar("a2", new int[]{-1, 1});
+        a[0] = solver.intVar("a1", new int[]{5});
+        a[1] = solver.intVar("a2", new int[]{-1, 1});
 
-        b[0] = solver.makeIntVar("b1", new int[]{3, 5});
-        b[1] = solver.makeIntVar("b2", new int[]{-6, -1});
+        b[0] = solver.intVar("b1", new int[]{3, 5});
+        b[1] = solver.intVar("b2", new int[]{-6, -1});
 
 
         solver.post(IntConstraintFactory.lex_less(a, b));
@@ -215,17 +215,17 @@ public class LexTest {
         IntVar[] a = new IntVar[5];
         IntVar[] b = new IntVar[5];
 
-        a[0] = solver.makeIntVar("a1", new int[]{2});
-        a[1] = solver.makeIntVar("a2", new int[]{1, 3, 4});
-        a[2] = solver.makeIntVar("a3", new int[]{1, 2, 3, 4, 5});
-        a[3] = solver.makeIntVar("a4", new int[]{1, 2});
-        a[4] = solver.makeIntVar("a5", new int[]{3, 4, 5});
+        a[0] = solver.intVar("a1", new int[]{2});
+        a[1] = solver.intVar("a2", new int[]{1, 3, 4});
+        a[2] = solver.intVar("a3", new int[]{1, 2, 3, 4, 5});
+        a[3] = solver.intVar("a4", new int[]{1, 2});
+        a[4] = solver.intVar("a5", new int[]{3, 4, 5});
 
-        b[0] = solver.makeIntVar("b1", new int[]{0, 1, 2});
-        b[1] = solver.makeIntVar("b2", new int[]{1});
-        b[2] = solver.makeIntVar("b3", new int[]{0, 1, 2, 3, 4});
-        b[3] = solver.makeIntVar("b4", new int[]{0, 1});
-        b[4] = solver.makeIntVar("b5", new int[]{0, 1, 2});
+        b[0] = solver.intVar("b1", new int[]{0, 1, 2});
+        b[1] = solver.intVar("b2", new int[]{1});
+        b[2] = solver.intVar("b3", new int[]{0, 1, 2, 3, 4});
+        b[3] = solver.intVar("b4", new int[]{0, 1});
+        b[4] = solver.intVar("b5", new int[]{0, 1, 2});
 
 
         solver.post(IntConstraintFactory.lex_less(a, b));
@@ -243,13 +243,13 @@ public class LexTest {
         IntVar[] a = new IntVar[3];
         IntVar[] b = new IntVar[3];
 
-        a[0] = solver.makeIntVar("a1", new int[]{-10, -3, 2});
-        a[1] = solver.makeIntVar("a2", new int[]{-5, -4, 2});
-        a[2] = solver.makeIntVar("a3", new int[]{2});
+        a[0] = solver.intVar("a1", new int[]{-10, -3, 2});
+        a[1] = solver.intVar("a2", new int[]{-5, -4, 2});
+        a[2] = solver.intVar("a3", new int[]{2});
 
-        b[0] = solver.makeIntVar("b1", new int[]{-10, -1, 3});
-        b[1] = solver.makeIntVar("b2", new int[]{-5});
-        b[2] = solver.makeIntVar("b3", new int[]{-4, 2});
+        b[0] = solver.intVar("b1", new int[]{-10, -1, 3});
+        b[1] = solver.intVar("b2", new int[]{-5});
+        b[2] = solver.intVar("b3", new int[]{-4, 2});
 
 
         solver.post(IntConstraintFactory.lex_less(a, b));

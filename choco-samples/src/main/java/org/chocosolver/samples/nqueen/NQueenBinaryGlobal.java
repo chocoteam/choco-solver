@@ -45,7 +45,7 @@ public class NQueenBinaryGlobal extends AbstractNQueen {
     public void buildModel() {
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
+            vars[i] = solver.intVar("Q_" + i, 1, n, false);
         }
 
         solver.post(IntConstraintFactory.alldifferent(vars, "BC"));

@@ -82,7 +82,7 @@ public class Nonogram extends AbstractProblem {
         vars = new BoolVar[nR][nC];
         for (int i = 0; i < nR; i++) {
             for (int j = 0; j < nC; j++) {
-                vars[i][j] = solver.makeBoolVar(format("B_%d_%d", i, j));
+                vars[i][j] = solver.boolVar(format("B_%d_%d", i, j));
             }
         }
         for (int i = 0; i < nR; i++) {

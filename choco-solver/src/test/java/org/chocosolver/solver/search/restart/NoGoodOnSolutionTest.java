@@ -65,8 +65,8 @@ public class NoGoodOnSolutionTest {
             }
         }
         Solver s = new Solver();
-        IntVar z = s.makeIntVar("z", Z, Z + 10, true);
-        IntVar[] vars = s.makeIntVarArray("x", n, 0, n - 1, false);
+        IntVar z = s.intVar("z", Z, Z + 10, true);
+        IntVar[] vars = s.intVarArray("x", n, 0, n - 1, false);
         s.post(ICF.tsp(vars, z, costs));
         s.set(ISF.random_value(vars));
         SMF.limitSolution(s, MAX_NB_SOLS);
@@ -131,7 +131,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
         int n = 8;
-        IntVar[] vars = solver.makeIntVarArray("Q", n, 1, n, false);
+        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
@@ -155,7 +155,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
         int n = 8;
-        IntVar[] vars = solver.makeIntVarArray("Q", n, 1, n, false);
+        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
@@ -179,7 +179,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
         int n = 8;
-        IntVar[] vars = solver.makeIntVarArray("Q", n, 1, n, false);
+        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
@@ -202,7 +202,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
         int n = 8;
-        IntVar[] vars = solver.makeIntVarArray("Q", n, 1, n, false);
+        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;

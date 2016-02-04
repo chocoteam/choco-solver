@@ -60,8 +60,8 @@ public class ModTest extends AbstractTernaryTest {
 	@Test(groups="1s", timeOut=60000)
 	public void test2() {
 		Solver solver = new Solver();
-		IntVar res = solver.makeIntVar("r", 1, 2, true);
-		solver.post(IntConstraintFactory.mod(res, solver.makeIntVar(2), solver.makeIntVar(1)));
+		IntVar res = solver.intVar("r", 1, 2, true);
+		solver.post(IntConstraintFactory.mod(res, solver.intVar(2), solver.intVar(1)));
 		try {
 			solver.propagate();
 			Assert.assertTrue(res.isInstantiatedTo(1));
@@ -73,9 +73,9 @@ public class ModTest extends AbstractTernaryTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testJL() {
 		Solver s = new Solver();
-		IntVar dividend = s.makeIntVar("dividend", 2, 3, false);
-		IntVar divisor = s.makeIntVar(1);
-		IntVar remainder = s.makeIntVar("remainder", 1, 2, false);
+		IntVar dividend = s.intVar("dividend", 2, 3, false);
+		IntVar divisor = s.intVar(1);
+		IntVar remainder = s.intVar("remainder", 1, 2, false);
 		s.post(ICF.mod(dividend, divisor, remainder).getOpposite());
 		s.set(ISF.lexico_LB(dividend, divisor, remainder));
 		s.findSolution();

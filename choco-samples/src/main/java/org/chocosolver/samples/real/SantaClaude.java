@@ -69,10 +69,10 @@ public class SantaClaude extends AbstractProblem {
         Random rand = new Random(29091981);
         double precision = 1.e-6;
 
-        kid_gift = solver.makeIntVarArray("g2k", n_kids, 0, n_gifts, false);
-        kid_price = solver.makeIntVarArray("p2k", n_kids, 0, max_price, false);
-        total_cost = solver.makeIntVar("total cost", 0, max_price * n_kids, true);
-        average = solver.makeRealVar("average", 0, max_price * n_kids, precision);
+        kid_gift = solver.intVarArray("g2k", n_kids, 0, n_gifts, false);
+        kid_price = solver.intVarArray("p2k", n_kids, 0, max_price, false);
+        total_cost = solver.intVar("total cost", 0, max_price * n_kids, true);
+        average = solver.realVar("average", 0, max_price * n_kids, precision);
 
 
         gift_price = new int[n_gifts];
@@ -91,7 +91,7 @@ public class SantaClaude extends AbstractProblem {
         }
         funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
-        RealVar[] all_vars = ArrayUtils.append(solver.makeRealIntViewArray(kid_price, precision), new RealVar[]{average});
+        RealVar[] all_vars = ArrayUtils.append(solver.realIntViewArray(kid_price, precision), new RealVar[]{average});
         String function = funBuilder.toString();
 
         solver.post(new RealConstraint(function, all_vars));

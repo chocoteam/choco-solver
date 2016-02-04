@@ -55,11 +55,11 @@ public class DistanceTest {
             long nbSol, nbNod;
             {
 				final Solver solver = new Solver();
-                IntVar X = solver.makeIntVar("X", 1, 10, false);
-                IntVar Y = solver.makeIntVar("Y", 1, 10, false);
-                IntVar diff = solver.makeIntVar("X-Y", -9, 9, true);
+                IntVar X = solver.intVar("X", 1, 10, false);
+                IntVar Y = solver.intVar("Y", 1, 10, false);
+                IntVar diff = solver.intVar("X-Y", -9, 9, true);
 				solver.post(IntConstraintFactory.sum(new IntVar[]{Y,diff}, "=", X));
-                IntVar Z = solver.makeIntAbsView(diff);
+                IntVar Z = solver.intAbsView(diff);
                 solver.post(IntConstraintFactory.arithm(Z, "=", 5));
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
@@ -77,8 +77,8 @@ public class DistanceTest {
             }
             {
                 final Solver solver = new Solver();
-                IntVar X = solver.makeIntVar("X", 1, 10, false);
-                IntVar Y = solver.makeIntVar("Y", 1, 10, false);
+                IntVar X = solver.intVar("X", 1, 10, false);
+                IntVar Y = solver.intVar("Y", 1, 10, false);
                 solver.post(IntConstraintFactory.distance(X, Y, "=", 5));
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
@@ -104,15 +104,15 @@ public class DistanceTest {
             IntVar[] vs1, vs2;
             Propagator p2;
             {
-                IntVar X = s1.makeIntVar("X", 1, k, false);
-                IntVar Y = s1.makeIntVar("Y", 1, k, false);
+                IntVar X = s1.intVar("X", 1, k, false);
+                IntVar Y = s1.intVar("Y", 1, k, false);
                 vs1 = new IntVar[]{X, Y};
                 Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2);
                 s1.post(c);
             }
             {
-                IntVar X = s2.makeIntVar("X", 1, k, false);
-                IntVar Y = s2.makeIntVar("Y", 1, k, false);
+                IntVar X = s2.intVar("X", 1, k, false);
+                IntVar Y = s2.intVar("Y", 1, k, false);
                 vs2 = new IntVar[]{X, Y};
                 Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2);
                 s2.post(c);
@@ -153,9 +153,9 @@ public class DistanceTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         Solver solver = new Solver();
-        IntVar X = solver.makeIntVar("X", -5, 5, true);
-        IntVar Y = solver.makeIntVar("Y", -5, 5, true);
-        IntVar Z = solver.makeIntVar("Z", 0, 10, true);
+        IntVar X = solver.intVar("X", -5, 5, true);
+        IntVar Y = solver.intVar("Y", -5, 5, true);
+        IntVar Z = solver.intVar("Z", 0, 10, true);
         solver.post(IntConstraintFactory.distance(X, Y, "=", Z));
         solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{Z, X, Y, Z}));
 //        SearchMonitorFactory.log(solver, true, true);

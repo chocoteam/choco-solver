@@ -96,13 +96,13 @@ public class WarehouseLocation extends AbstractProblem {
     @Override
     public void buildModel() {
         setUp();
-        suppliers = solver.makeIntVarArray("sup", nS, 0, nWH - 1, false);
-        open = solver.makeBoolVarArray("o", nWH);
-        costPerStore = solver.makeIntVarArray("cPs", nS, 0, 9999, true);
-        totCost = solver.makeIntVar("cost", 0, 99999, true);
+        suppliers = solver.intVarArray("sup", nS, 0, nWH - 1, false);
+        open = solver.boolVarArray("o", nWH);
+        costPerStore = solver.intVarArray("cPs", nS, 0, 9999, true);
+        totCost = solver.intVar("cost", 0, 99999, true);
 
         // A warehouse is open, if it supplies to a store
-        IntVar ONE = solver.makeIntVar(1);
+        IntVar ONE = solver.intVar(1);
         for (int s = 0; s < nS; s++) {
             solver.post(IntConstraintFactory.element(ONE, open, suppliers[s], 0));
         }
@@ -111,13 +111,13 @@ public class WarehouseLocation extends AbstractProblem {
             solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s], 0, "detect"));
         }
         for (int w = 0; w < nWH; w++) {
-            IntVar tmp = solver.makeIntVar("occur_" + w, 0, suppliers.length, true);
+            IntVar tmp = solver.intVar("occur_" + w, 0, suppliers.length, true);
             solver.post(IntConstraintFactory.count(w, suppliers, tmp));
             solver.post(IntConstraintFactory.arithm(tmp, ">=", open[w]));
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
-            IntVar tmp = solver.makeIntVar("occur_" + w, 0, capacity[w], true);
+            IntVar tmp = solver.intVar("occur_" + w, 0, capacity[w], true);
             solver.post(IntConstraintFactory.count(w, suppliers, tmp));
         }
 

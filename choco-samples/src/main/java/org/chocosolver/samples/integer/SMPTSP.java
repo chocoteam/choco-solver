@@ -86,10 +86,10 @@ public class SMPTSP extends AbstractProblem {
 		};
 
 		// Variables
-		nbValues = solver.makeIntVar("nb shifts", 0, nbAvailableShifts, true);
+		nbValues = solver.intVar("nb shifts", 0, nbAvailableShifts, true);
 		assignment = new IntVar[nbTasks];
 		for(int i=0;i<nbTasks;i++){
-			assignment[i] = solver.makeIntVar("t" + (i + 1), skilledShifts[i]);
+			assignment[i] = solver.intVar("t" + (i + 1), skilledShifts[i]);
 		}
 
 		// Constraints

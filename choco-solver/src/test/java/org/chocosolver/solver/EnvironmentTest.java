@@ -49,17 +49,17 @@ public class EnvironmentTest {
 		int n = 14;
 		IntVar[] vars, vectors;
 		Solver solver = new Solver("CostasArrays");
-		vars = solver.makeIntVarArray("v", n, 0, n - 1, false);
+		vars = solver.intVarArray("v", n, 0, n - 1, false);
 		vectors = new IntVar[n * n - n];
 		int idx = 0;
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (i != j) {
-					IntVar k = solver.makeIntVar(randomName(), -20000, 20000, true);
+					IntVar k = solver.intVar(randomName(), -20000, 20000, true);
 					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
 					// just to create many variables
 					IntConstraintFactory.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reif();
-					vectors[idx] = solver.makeIntOffsetView(k, 2 * n * (j - i));
+					vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
 					idx++;
 				}
 			}

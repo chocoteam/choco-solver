@@ -49,9 +49,9 @@ public class ClauseChannelingTest {
         for (int i = 1; i < 200; i++) {
             for (int seed = 1; seed < 100; seed++) {
                 Solver solver = new Solver();
-                IntVar iv = solver.makeIntVar("iv", 1, i, false);
-                BoolVar[] eqs = solver.makeBoolVarArray("eq", i);
-                BoolVar[] lqs = solver.makeBoolVarArray("lq", i);
+                IntVar iv = solver.intVar("iv", 1, i, false);
+                BoolVar[] eqs = solver.boolVarArray("eq", i);
+                BoolVar[] lqs = solver.boolVarArray("lq", i);
 
                 solver.post(ICF.clause_channeling(iv, eqs, lqs));
 
@@ -67,9 +67,9 @@ public class ClauseChannelingTest {
         for (int i = 1; i < 100; i++) {
             for (int seed = 1; seed < 200; seed++) {
                 Solver solver = new Solver();
-                IntVar iv = solver.makeIntVar("iv", 1, i, true);
-                BoolVar[] eqs = solver.makeBoolVarArray("eq", i);
-                BoolVar[] lqs = solver.makeBoolVarArray("lq", i);
+                IntVar iv = solver.intVar("iv", 1, i, true);
+                BoolVar[] eqs = solver.boolVarArray("eq", i);
+                BoolVar[] lqs = solver.boolVarArray("lq", i);
 
                 solver.post(ICF.clause_channeling(iv, eqs, lqs));
 
@@ -87,9 +87,9 @@ public class ClauseChannelingTest {
                 Solver sr = new Solver();
                 Solver sc = new Solver();
                 {
-                    IntVar iv = sr.makeIntVar("iv", 1, i, false);
-                    BoolVar[] eqs = sr.makeBoolVarArray("eq", i);
-                    BoolVar[] lqs = sr.makeBoolVarArray("lq", i);
+                    IntVar iv = sr.intVar("iv", 1, i, false);
+                    BoolVar[] eqs = sr.boolVarArray("eq", i);
+                    BoolVar[] lqs = sr.boolVarArray("lq", i);
 
                     for (int j = 1; j <= i; j++) {
                         ICF.arithm(iv, "=", j).reifyWith(eqs[j - 1]);
@@ -102,9 +102,9 @@ public class ClauseChannelingTest {
                     sr.findAllSolutions();
                 }
                 {
-                    IntVar iv = sc.makeIntVar("iv", 1, i, false);
-                    BoolVar[] eqs = sc.makeBoolVarArray("eq", i);
-                    BoolVar[] lqs = sc.makeBoolVarArray("lq", i);
+                    IntVar iv = sc.intVar("iv", 1, i, false);
+                    BoolVar[] eqs = sc.boolVarArray("eq", i);
+                    BoolVar[] lqs = sc.boolVarArray("lq", i);
 
                     sc.post(ICF.clause_channeling(iv, eqs, lqs));
 
@@ -126,9 +126,9 @@ public class ClauseChannelingTest {
                 Solver sr = new Solver();
                 Solver sc = new Solver();
                 {
-                    IntVar iv = sr.makeIntVar("iv", 1, i, true);
-                    BoolVar[] eqs = sr.makeBoolVarArray("eq", i);
-                    BoolVar[] lqs = sr.makeBoolVarArray("lq", i);
+                    IntVar iv = sr.intVar("iv", 1, i, true);
+                    BoolVar[] eqs = sr.boolVarArray("eq", i);
+                    BoolVar[] lqs = sr.boolVarArray("lq", i);
 
                     for (int j = 1; j <= i; j++) {
                         ICF.arithm(iv, "=", j).reifyWith(eqs[j - 1]);
@@ -141,9 +141,9 @@ public class ClauseChannelingTest {
                     sr.findAllSolutions();
                 }
                 {
-                    IntVar iv = sc.makeIntVar("iv", 1, i, true);
-                    BoolVar[] eqs = sc.makeBoolVarArray("eq", i);
-                    BoolVar[] lqs = sc.makeBoolVarArray("lq", i);
+                    IntVar iv = sc.intVar("iv", 1, i, true);
+                    BoolVar[] eqs = sc.boolVarArray("eq", i);
+                    BoolVar[] lqs = sc.boolVarArray("lq", i);
 
                     sc.post(ICF.clause_channeling(iv, eqs, lqs));
 

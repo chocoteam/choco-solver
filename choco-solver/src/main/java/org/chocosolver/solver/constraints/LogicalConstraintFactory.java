@@ -54,7 +54,7 @@ public class LogicalConstraintFactory {
 	 */
 	public static Constraint and(BoolVar... BOOLS){
 		Solver s = BOOLS[0].getSolver();
-		IntVar sum = s.makeIntVar(randomName(), 0, BOOLS.length, true);
+		IntVar sum = s.intVar(randomName(), 0, BOOLS.length, true);
 		s.post(IntConstraintFactory.sum(BOOLS,"=",sum));
 		return IntConstraintFactory.arithm(sum,"=",BOOLS.length);
 	}
@@ -66,7 +66,7 @@ public class LogicalConstraintFactory {
 	 */
 	public static Constraint or(BoolVar... BOOLS){
 		Solver s = BOOLS[0].getSolver();
-		IntVar sum = s.makeIntVar(randomName(), 0, BOOLS.length, true);
+		IntVar sum = s.intVar(randomName(), 0, BOOLS.length, true);
 		s.post(IntConstraintFactory.sum(BOOLS,"=",sum));
 		return IntConstraintFactory.arithm(sum,">=",1);
 	}

@@ -331,8 +331,8 @@ public class Solver implements Serializable, IModeler{
     }
 
     private void _zeroOne(){
-        ZERO = (BoolVar) this.makeIntVar(0);
-        ONE = (BoolVar) this.makeIntVar(1);
+        ZERO = (BoolVar) this.intVar(0);
+        ONE = (BoolVar) this.intVar(1);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
     }

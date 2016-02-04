@@ -86,8 +86,8 @@ public class MemberSetTest {
                 for (int h = 0; h < 2; h++) {
                     doms = DomainBuilder.buildFullDomains(2, -4, 5, random, d / 10.d, h == 0);
                     Solver solver = new Solver();
-                    SetVar s = solver.makeSetVar("s", new int[]{}, doms[0]);
-                    IntVar i = solver.makeIntVar("i", doms[1]);
+                    SetVar s = solver.setVar("s", new int[]{}, doms[0]);
+                    IntVar i = solver.intVar("i", doms[1]);
                     solver.post(SCF.member(i, s));
                     //Chatterbox.showSolutions(solver);
                     Assert.assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
@@ -115,8 +115,8 @@ public class MemberSetTest {
                         doms[1][j] = lb + j;
                     }
                     Solver solver = new Solver();
-                    SetVar s = solver.makeSetVar("s", new int[]{}, doms[0]);
-                    IntVar i = solver.makeIntVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
+                    SetVar s = solver.setVar("s", new int[]{}, doms[0]);
+                    IntVar i = solver.intVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
                     solver.post(SCF.member(i, s));
                     //Chatterbox.showSolutions(solver);
                     Assert.assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),

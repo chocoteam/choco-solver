@@ -55,7 +55,7 @@ public interface Vars {
      * @param value constant value of the boolean variable (true or false)
      * @return a constant of type BoolVar
      */
-    default BoolVar makeBoolVar(boolean value) {
+    default BoolVar boolVar(boolean value) {
         if(value){
             return _me().ONE();
         }else{
@@ -67,8 +67,8 @@ public interface Vars {
      * Create a boolean variable, i.e. a particular integer variable of domain {0, 1}
      * @return a BoolVar of domain {0, 1}
      */
-    default BoolVar makeBoolVar() {
-        return makeBoolVar(StringUtils.randomName());
+    default BoolVar boolVar() {
+        return boolVar(StringUtils.randomName());
     }
 
     /**
@@ -76,7 +76,7 @@ public interface Vars {
      * @param name name of the variable
      * @return a BoolVar of domain {0, 1}
      */
-    default BoolVar makeBoolVar(String name) {
+    default BoolVar boolVar(String name) {
         return VariableFactory.bool(name, _me());
     }
 
@@ -87,8 +87,8 @@ public interface Vars {
      * @param size number of variable to create
      * @return an array of <i>size</i> BoolVar of domain {0, 1}
      */
-    default BoolVar[] makeBoolVarArray(int size) {
-        return makeBoolVarArray(StringUtils.randomName(),size);
+    default BoolVar[] boolVarArray(int size) {
+        return boolVarArray(StringUtils.randomName(),size);
     }
 
     /**
@@ -97,10 +97,10 @@ public interface Vars {
      * @param size number of variable to create
      * @return an array of <i>size</i> BoolVar of domain {0, 1}
      */
-    default BoolVar[] makeBoolVarArray(String name, int size) {
+    default BoolVar[] boolVarArray(String name, int size) {
         BoolVar[] vars = new BoolVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeBoolVar(name + "[" + i + "]");
+            vars[i] = boolVar(name + "[" + i + "]");
         }
         return vars;
     }
@@ -113,8 +113,8 @@ public interface Vars {
      * @param dim2 number of columns in the matrix
      * @return a matrix of <i>dim1*dim2</i> BoolVar of domain {0, 1}
      */
-    default BoolVar[][] makeBoolVarMatrix(int dim1, int dim2) {
-        return makeBoolVarMatrix(StringUtils.randomName(),dim1,dim2);
+    default BoolVar[][] boolVarMatrix(int dim1, int dim2) {
+        return boolVarMatrix(StringUtils.randomName(),dim1,dim2);
     }
 
     /**
@@ -124,10 +124,10 @@ public interface Vars {
      * @param dim2 number of columns in the matrix
      * @return a matrix of <i>dim1*dim2</i> BoolVar of domain {0, 1}
      */
-    default BoolVar[][] makeBoolVarMatrix(String name, int dim1, int dim2) {
+    default BoolVar[][] boolVarMatrix(String name, int dim1, int dim2) {
         BoolVar[][] vars = new BoolVar[dim1][];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeBoolVarArray(name + "[" + i + "]", dim2);
+            vars[i] = boolVarArray(name + "[" + i + "]", dim2);
         }
         return vars;
     }
@@ -143,8 +143,8 @@ public interface Vars {
      * @param value constant value of the variable
      * @return a constant IntVar of domain {<i>value</i>}
      */
-    default IntVar makeIntVar(int value) {
-        return makeIntVar(VariableFactory.CSTE_NAME + value,value);
+    default IntVar intVar(int value) {
+        return intVar(VariableFactory.CSTE_NAME + value,value);
     }
 
     /**
@@ -153,8 +153,8 @@ public interface Vars {
      * @param values initial domain of the variable
      * @return an IntVar of domain <i>values</i>
      */
-    default IntVar makeIntVar(int[] values) {
-        return makeIntVar(StringUtils.randomName(),values);
+    default IntVar intVar(int[] values) {
+        return intVar(StringUtils.randomName(),values);
     }
 
     /**
@@ -164,8 +164,8 @@ public interface Vars {
      * @param ub initial domain upper bound
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar makeIntVar(int lb, int ub) {
-        return makeIntVar(StringUtils.randomName(),lb, ub);
+    default IntVar intVar(int lb, int ub) {
+        return intVar(StringUtils.randomName(),lb, ub);
     }
 
     /**
@@ -175,8 +175,8 @@ public interface Vars {
      * @param boundedDomain specifies whether to use a bounded domain or an enumerated domain
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar makeIntVar(int lb, int ub, boolean boundedDomain) {
-        return makeIntVar(StringUtils.randomName(), lb, ub, boundedDomain);
+    default IntVar intVar(int lb, int ub, boolean boundedDomain) {
+        return intVar(StringUtils.randomName(), lb, ub, boundedDomain);
     }
 
     /**
@@ -185,7 +185,7 @@ public interface Vars {
      * @param value value of the variable
      * @return a constant IntVar of domain {<i>value</i>}
      */
-    default IntVar makeIntVar(String name, int value) {
+    default IntVar intVar(String name, int value) {
         return VariableFactory.fixed(name, value, _me());
     }
 
@@ -197,7 +197,7 @@ public interface Vars {
      * @param boundedDomain specifies whether to use a bounded domain or an enumerated domain
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar makeIntVar(String name, int lb, int ub, boolean boundedDomain) {
+    default IntVar intVar(String name, int lb, int ub, boolean boundedDomain) {
         if (boundedDomain) {
             return VariableFactory.bounded(name, lb, ub, _me());
         } else {
@@ -213,9 +213,9 @@ public interface Vars {
      * @param ub initial domain upper bound
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar makeIntVar(String name, int lb, int ub) {
+    default IntVar intVar(String name, int lb, int ub) {
         boolean bounded = ub - lb + 1 >= _me().getSettings().getMaxDomSizeForEnumerated();
-        return makeIntVar(name, lb, ub, bounded);
+        return intVar(name, lb, ub, bounded);
     }
 
     /**
@@ -225,7 +225,7 @@ public interface Vars {
      * @param values initial domain
      * @return an IntVar of domain <i>values</i>
      */
-    default IntVar makeIntVar(String name, int[] values) {
+    default IntVar intVar(String name, int[] values) {
         return VariableFactory.enumerated(name, values, _me());
     }
 
@@ -237,8 +237,8 @@ public interface Vars {
      * @param values initial domain of each variable
      * @return an array of <i>size</i> IntVar of domain <i>values</i>
      */
-    default IntVar[] makeIntVarArray(int size, int[] values) {
-        return makeIntVarArray(StringUtils.randomName(), size, values);
+    default IntVar[] intVarArray(int size, int[] values) {
+        return intVarArray(StringUtils.randomName(), size, values);
     }
 
     /**
@@ -248,8 +248,8 @@ public interface Vars {
      * @param ub initial domain upper bound of each variable
      * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[] makeIntVarArray(int size, int lb, int ub) {
-        return makeIntVarArray(StringUtils.randomName(), size, lb, ub);
+    default IntVar[] intVarArray(int size, int lb, int ub) {
+        return intVarArray(StringUtils.randomName(), size, lb, ub);
     }
 
     /**
@@ -260,8 +260,8 @@ public interface Vars {
      * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
      * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[] makeIntVarArray(int size, int lb, int ub, boolean boundedDomain) {
-        return makeIntVarArray(StringUtils.randomName(), size, lb, ub, boundedDomain);
+    default IntVar[] intVarArray(int size, int lb, int ub, boolean boundedDomain) {
+        return intVarArray(StringUtils.randomName(), size, lb, ub, boundedDomain);
     }
 
     /**
@@ -273,10 +273,10 @@ public interface Vars {
      * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
      * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[] makeIntVarArray(String name, int size, int lb, int ub, boolean boundedDomain) {
+    default IntVar[] intVarArray(String name, int size, int lb, int ub, boolean boundedDomain) {
         IntVar[] vars = new IntVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeIntVar(name + "[" + i + "]", lb, ub, boundedDomain);
+            vars[i] = intVar(name + "[" + i + "]", lb, ub, boundedDomain);
         }
         return vars;
     }
@@ -289,10 +289,10 @@ public interface Vars {
      * @param ub initial domain upper bound of each variable
      * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[] makeIntVarArray(String name, int size, int lb, int ub) {
+    default IntVar[] intVarArray(String name, int size, int lb, int ub) {
         IntVar[] vars = new IntVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeIntVar(name + "[" + i + "]", lb, ub);
+            vars[i] = intVar(name + "[" + i + "]", lb, ub);
         }
         return vars;
     }
@@ -304,10 +304,10 @@ public interface Vars {
      * @param values initial domain of each variable
      * @return an array of <i>size</i> IntVar of domain <i>values</i>
      */
-    default IntVar[] makeIntVarArray(String name, int size, int[] values) {
+    default IntVar[] intVarArray(String name, int size, int[] values) {
         IntVar[] vars = new IntVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeIntVar(name + "[" + i + "]", values);
+            vars[i] = intVar(name + "[" + i + "]", values);
         }
         return vars;
     }
@@ -321,8 +321,8 @@ public interface Vars {
      * @param values initial domain of each variable
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain <i>values</i>
      */
-    default IntVar[][] makeIntVarMatrix(int dim1, int dim2, int[] values) {
-        return makeIntVarMatrix(StringUtils.randomName(), dim1, dim2, values);
+    default IntVar[][] intVarMatrix(int dim1, int dim2, int[] values) {
+        return intVarMatrix(StringUtils.randomName(), dim1, dim2, values);
     }
 
     /**
@@ -333,8 +333,8 @@ public interface Vars {
      * @param ub initial domain upper bound of each variable
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[][] makeIntVarMatrix(int dim1, int dim2, int lb, int ub) {
-        return makeIntVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub);
+    default IntVar[][] intVarMatrix(int dim1, int dim2, int lb, int ub) {
+        return intVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub);
     }
 
     /**
@@ -346,8 +346,8 @@ public interface Vars {
      * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[][] makeIntVarMatrix(int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
-        return makeIntVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub, boundedDomain);
+    default IntVar[][] intVarMatrix(int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
+        return intVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub, boundedDomain);
     }
 
     /**
@@ -360,10 +360,10 @@ public interface Vars {
      * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[][] makeIntVarMatrix(String name, int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
+    default IntVar[][] intVarMatrix(String name, int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
         IntVar[][] vars = new IntVar[dim1][dim2];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeIntVarArray(name + "[" + i + "]", dim2, lb, ub, boundedDomain);
+            vars[i] = intVarArray(name + "[" + i + "]", dim2, lb, ub, boundedDomain);
         }
         return vars;
     }
@@ -377,10 +377,10 @@ public interface Vars {
      * @param ub initial domain upper bound of each variable
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[][] makeIntVarMatrix(String name, int dim1, int dim2, int lb, int ub) {
+    default IntVar[][] intVarMatrix(String name, int dim1, int dim2, int lb, int ub) {
         IntVar[][] vars = new IntVar[dim1][dim2];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeIntVarArray(name + "[" + i + "]", dim2, lb, ub);
+            vars[i] = intVarArray(name + "[" + i + "]", dim2, lb, ub);
         }
         return vars;
     }
@@ -393,10 +393,10 @@ public interface Vars {
      * @param values initial domain of each variable
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain <i>values</i>
      */
-    default IntVar[][] makeIntVarMatrix(String name, int dim1, int dim2, int[] values) {
+    default IntVar[][] intVarMatrix(String name, int dim1, int dim2, int[] values) {
         IntVar[][] vars = new IntVar[dim1][dim2];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeIntVarArray(name + "[" + i + "]", dim2, values);
+            vars[i] = intVarArray(name + "[" + i + "]", dim2, values);
         }
         return vars;
     }
@@ -412,8 +412,8 @@ public interface Vars {
      * @param precision double precision (e.g., 0.00001d)
      * @return a constant RealVar of domain {<i>value</i>}
      */
-    default RealVar makeRealVar(double value, double precision) {
-        return makeRealVar(VariableFactory.CSTE_NAME+value, value, value, precision);
+    default RealVar realVar(double value, double precision) {
+        return realVar(VariableFactory.CSTE_NAME+value, value, value, precision);
     }
 
     /**
@@ -423,8 +423,8 @@ public interface Vars {
      * @param precision double precision (e.g., 0.00001d)
      * @return a RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar makeRealVar(double lb, double ub, double precision) {
-        return makeRealVar(StringUtils.randomName(), lb, ub, precision);
+    default RealVar realVar(double lb, double ub, double precision) {
+        return realVar(StringUtils.randomName(), lb, ub, precision);
     }
 
     /**
@@ -435,7 +435,7 @@ public interface Vars {
      * @param precision double precision (e.g., 0.00001d)
      * @return a RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar makeRealVar(String name, double lb, double ub, double precision) {
+    default RealVar realVar(String name, double lb, double ub, double precision) {
         return VariableFactory.real(name, lb, ub, precision, _me());
     }
 
@@ -449,8 +449,8 @@ public interface Vars {
      * @param precision double precision (e.g., 0.00001d)
      * @return an array of <i>size</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar[] makeRealVarArray(int size, double lb, double ub, double precision) {
-        return makeRealVarArray(StringUtils.randomName(), size, lb, ub, precision);
+    default RealVar[] realVarArray(int size, double lb, double ub, double precision) {
+        return realVarArray(StringUtils.randomName(), size, lb, ub, precision);
     }
 
     /**
@@ -462,10 +462,10 @@ public interface Vars {
      * @param precision double precision (e.g., 0.00001d)
      * @return an array of <i>size</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar[] makeRealVarArray(String name, int size, double lb, double ub, double precision) {
+    default RealVar[] realVarArray(String name, int size, double lb, double ub, double precision) {
         RealVar[] vars = new RealVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeRealVar(name + "[" + i + "]", lb, ub, precision);
+            vars[i] = realVar(name + "[" + i + "]", lb, ub, precision);
         }
         return vars;
     }
@@ -481,8 +481,8 @@ public interface Vars {
      * @param precision double precision (e.g., 0.00001d)
      * @return a matrix of <i>dim1*dim2</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar[][] makeRealVarMatrix(int dim1, int dim2, double lb, double ub, double precision) {
-        return makeRealVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub, precision);
+    default RealVar[][] realVarMatrix(int dim1, int dim2, double lb, double ub, double precision) {
+        return realVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub, precision);
     }
 
     /**
@@ -495,10 +495,10 @@ public interface Vars {
      * @param precision double precision (e.g., 0.00001d)
      * @return a matrix of <i>dim1*dim2</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar[][] makeRealVarMatrix(String name, int dim1, int dim2, double lb, double ub, double precision) {
+    default RealVar[][] realVarMatrix(String name, int dim1, int dim2, double lb, double ub, double precision) {
         RealVar[][] vars = new RealVar[dim1][];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeRealVarArray(name + "[" + i + "]", dim2, lb, ub, precision);
+            vars[i] = realVarArray(name + "[" + i + "]", dim2, lb, ub, precision);
         }
         return vars;
     }
@@ -514,8 +514,8 @@ public interface Vars {
      * @param ub initial domain upper bound (contains potential elements)
      * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar makeSetVar(int[] lb, int[] ub) {
-        return makeSetVar(StringUtils.randomName(), lb, ub);
+    default SetVar setVar(int[] lb, int[] ub) {
+        return setVar(StringUtils.randomName(), lb, ub);
     }
 
     /**
@@ -523,12 +523,12 @@ public interface Vars {
      * @param value value of the set variable, e.g. {0,4,9}
      * @return a constant SetVar of domain {<i>value</i>}
      */
-    default SetVar makeSetVar(int[] value) {
+    default SetVar setVar(int[] value) {
         String name = VariableFactory.CSTE_NAME+"{";
         for(int i=0;i<value.length;i++){
             name+=value[i]+i<value.length-1?", ":"";
         }name += "}";
-        return makeSetVar(name, value);
+        return setVar(name, value);
     }
 
     /**
@@ -539,7 +539,7 @@ public interface Vars {
      * @param ub initial domain upper bound (contains potential elements)
      * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar makeSetVar(String name, int[] lb, int[] ub) {
+    default SetVar setVar(String name, int[] lb, int[] ub) {
         return VariableFactory.set(name, ub, lb, _me());
     }
 
@@ -549,7 +549,7 @@ public interface Vars {
      * @param value value of the set variable, e.g. {0,4,9}
      * @return a constant SetVar of domain {<i>value</i>}
      */
-    default SetVar makeSetVar(String name, int[] value) {
+    default SetVar setVar(String name, int[] value) {
         return VariableFactory.fixed(name, value, _me());
     }
 
@@ -562,8 +562,8 @@ public interface Vars {
      * @param ub initial domain upper bound of every variable (contains potential elements)
      * @return an array of <i>size</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar[] makeSetVarArray(int size, int[] lb, int[] ub) {
-        return makeSetVarArray(StringUtils.randomName(), size, lb, ub);
+    default SetVar[] setVarArray(int size, int[] lb, int[] ub) {
+        return setVarArray(StringUtils.randomName(), size, lb, ub);
     }
 
     /**
@@ -574,10 +574,10 @@ public interface Vars {
      * @param ub initial domain upper bound of every variable (contains potential elements)
      * @return an array of <i>size</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar[] makeSetVarArray(String name, int size, int[] lb, int[] ub) {
+    default SetVar[] setVarArray(String name, int size, int[] lb, int[] ub) {
         SetVar[] vars = new SetVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeSetVar(name + "[" + i + "]", lb, ub);
+            vars[i] = setVar(name + "[" + i + "]", lb, ub);
         }
         return vars;
     }
@@ -592,8 +592,8 @@ public interface Vars {
      * @param ub initial domain upper bound of every variable (contains potential elements)
      * @return a matrix of <i>dim1*dim2</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar[][] makeSetVarMatrix(int dim1, int dim2, int[] lb, int[] ub) {
-        return makeSetVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub);
+    default SetVar[][] setVarMatrix(int dim1, int dim2, int[] lb, int[] ub) {
+        return setVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub);
     }
 
     /**
@@ -605,10 +605,10 @@ public interface Vars {
      * @param ub initial domain upper bound of every variable (contains potential elements)
      * @return a matrix of <i>dim1*dim2</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar[][] makeSetVarMatrix(String name, int dim1, int dim2, int[] lb, int[] ub) {
+    default SetVar[][] setVarMatrix(String name, int dim1, int dim2, int[] lb, int[] ub) {
         SetVar[][] vars = new SetVar[dim1][dim2];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeSetVarArray(name + "[" + i + "]", dim2, lb, ub);
+            vars[i] = setVarArray(name + "[" + i + "]", dim2, lb, ub);
         }
         return vars;
     }

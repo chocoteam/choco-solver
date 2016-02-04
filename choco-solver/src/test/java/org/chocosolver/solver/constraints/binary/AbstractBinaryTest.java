@@ -75,9 +75,9 @@ public abstract class AbstractBinaryTest {
         IntVar[] vars = new IntVar[2];
         for (int i = 0; i < 2; i++) {
             if (bounded) {
-                vars[i] = s.makeIntVar("x_" + i, domains[i][0], domains[i][1], true);
+                vars[i] = s.intVar("x_" + i, domains[i][0], domains[i][1], true);
             } else {
-                vars[i] = s.makeIntVar("x_" + i, domains[i]);
+                vars[i] = s.intVar("x_" + i, domains[i]);
             }
         }
         Constraint div = make(vars, s);

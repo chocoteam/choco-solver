@@ -54,9 +54,9 @@ public class RuleStoreTest {
 
     public void setUp() {
         solver = new Solver();
-        E = solver.makeIntVar("E", 0, 6, false);
-        I = solver.makeIntVar("I", 0, 6, true);
-        B = solver.makeBoolVar("B");
+        E = solver.intVar("E", 0, 6, false);
+        I = solver.intVar("I", 0, 6, true);
+        B = solver.boolVar("B");
     }
 
     @Test(groups="1s", timeOut=60000)

@@ -59,9 +59,9 @@ public class CostRegularTest {
         int n = 10;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", 3, 4, true);
+        IntVar cost = solver.intVar("z", 3, 4, true);
 
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -96,9 +96,9 @@ public class CostRegularTest {
         int n = 10;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", 3, 4, true);
+        IntVar cost = solver.intVar("z", 3, 4, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -137,9 +137,9 @@ public class CostRegularTest {
         int n = 28;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", 0, 4, true);
+        IntVar cost = solver.intVar("z", 0, 4, true);
 
         // different rules are formulated as patterns that must NOT be matched by x
         List<String> forbiddenRegExps = new ArrayList<>();
@@ -186,9 +186,9 @@ public class CostRegularTest {
         int n = 28;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", 0, 4, true);
+        IntVar cost = solver.intVar("z", 0, 4, true);
 
         // different rules are formulated as patterns that must NOT be matched by x
         List<String> forbiddenRegExps = new ArrayList<>();
@@ -238,9 +238,9 @@ public class CostRegularTest {
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", 10, 10, true);
+        IntVar cost = solver.intVar("z", 10, 10, true);
 
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -280,9 +280,9 @@ public class CostRegularTest {
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", 10, 10, true);
+        IntVar cost = solver.intVar("z", 10, 10, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -323,9 +323,9 @@ public class CostRegularTest {
         int n = 13;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", 4, 6, true);
+        IntVar cost = solver.intVar("z", 4, 6, true);
 
         FiniteAutomaton auto = new FiniteAutomaton();
         int start = auto.addState();
@@ -361,9 +361,9 @@ public class CostRegularTest {
         int n = 13;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", 4, 6, true);
+        IntVar cost = solver.intVar("z", 4, 6, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -412,9 +412,9 @@ public class CostRegularTest {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("x_" + i, 0, 2, false);
+            vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.makeIntVar("z", n / 2, n / 2 + 1, true);
+        IntVar cost = solver.intVar("z", n / 2, n / 2 + 1, true);
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, c2, cost.getLB(), cost.getUB())));
         solver.set(IntStrategyFactory.lexico_LB(vars));

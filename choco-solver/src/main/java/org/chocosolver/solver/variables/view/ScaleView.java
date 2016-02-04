@@ -319,7 +319,7 @@ public final class ScaleView extends IntView {
 
     @Override
     public IntVar duplicate() {
-        return solver.makeIntScaleView(this.var, this.cste);
+        return solver.intScaleView(this.var, this.cste);
     }
 
     @Override

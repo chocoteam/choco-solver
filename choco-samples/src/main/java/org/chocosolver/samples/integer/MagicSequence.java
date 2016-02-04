@@ -68,7 +68,7 @@ public class MagicSequence extends AbstractProblem {
 
         int[] values = ArrayUtils.zeroToN(n);
 
-        x = solver.makeIntVarArray("x", n, 0, n - 1, false);
+        x = solver.intVarArray("x", n, 0, n - 1, false);
 
         boolean closed = true; // restricts domains of VARS to VALUES if set to true
         solver.post(IntConstraintFactory.global_cardinality(x, values, x, closed));

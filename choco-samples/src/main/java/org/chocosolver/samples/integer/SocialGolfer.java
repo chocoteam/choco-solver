@@ -92,12 +92,12 @@ public class SocialGolfer extends AbstractProblem {
         P = new BoolVar[p][g][w];
         // p plays in group g in week w
         for (int i = 0; i < p; i++) {
-            P[i] = solver.makeBoolVarMatrix("p_" + i, g, w);
+            P[i] = solver.boolVarMatrix("p_" + i, g, w);
         }
         M = new BoolVar[p][p][w];
         // i meets j in week w (i<j)
         for (int i = 0; i < p; i++) {
-            M[i] = solver.makeBoolVarMatrix("m_" + i, p, w);
+            M[i] = solver.boolVarMatrix("m_" + i, p, w);
         }
 
         // each player is part of exactly one group in each week
@@ -149,7 +149,7 @@ public class SocialGolfer extends AbstractProblem {
         // each pair of players only meets once
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
-                solver.post(IntConstraintFactory.sum(M[i][j], "=", solver.makeBoolVar("sum")));
+                solver.post(IntConstraintFactory.sum(M[i][j], "=", solver.boolVar("sum")));
             }
         }
 

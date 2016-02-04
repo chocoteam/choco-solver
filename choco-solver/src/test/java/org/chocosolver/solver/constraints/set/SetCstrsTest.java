@@ -67,24 +67,24 @@ public class SetCstrsTest {
 
 	public static IntVar[] eqFilter(String mode){
 		Solver s = new Solver();
-		IntVar x = s.makeIntVar("x", 0, 10, false);
-		IntVar y = s.makeIntVar("y", 0, 10, false);
+		IntVar x = s.intVar("x", 0, 10, false);
+		IntVar y = s.intVar("y", 0, 10, false);
 		// set view of A
-		SetVar xset = s.makeSetVar("x as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		SetVar yset = s.makeSetVar("y as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar xset = s.setVar("x as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar yset = s.setVar("y as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(SCF.int_values_union(new IntVar[]{x},xset));
 		s.post(SCF.int_values_union(new IntVar[]{y},yset));
 		// X +9 <= Y or Y + 9 <= X
-		SetVar Xleft = s.makeSetVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		SetVar tmpLeft = s.makeSetVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
+		SetVar Xleft = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar tmpLeft = s.setVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
 		s.post(SCF.offSet(Xleft,tmpLeft,9));
-		SetVar Yleft = s.makeSetVar("",  new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar Yleft = s.setVar("",  new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(eq(tmpLeft, Yleft,mode));
 
-		SetVar Yright = s.makeSetVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		SetVar tmpRight = s.makeSetVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
+		SetVar Yright = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar tmpRight = s.setVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
 		s.post(SCF.offSet(Yright,tmpRight,9));
-		SetVar Xright = s.makeSetVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar Xright = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(eq(tmpRight, Xright,mode));
 
 		//

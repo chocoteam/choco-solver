@@ -49,8 +49,8 @@ public class SubcircuitTest {
     @Test(groups="1s", timeOut=60000)
     public static void test1() {
         Solver solver = new Solver();
-        IntVar[] x = solver.makeIntVarArray("x", 10, 0, 20, true);
-        solver.post(IntConstraintFactory.subcircuit(x, 0, solver.makeIntVar("length", 0, x.length - 1, true)));
+        IntVar[] x = solver.intVarArray("x", 10, 0, 20, true);
+        solver.post(IntConstraintFactory.subcircuit(x, 0, solver.intVar("length", 0, x.length - 1, true)));
         solver.findSolution();
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
     }
@@ -58,10 +58,10 @@ public class SubcircuitTest {
     @Test(groups="1s", timeOut=60000)
     public static void test2() {
         Solver solver = new Solver();
-        IntVar[] x = solver.makeIntVarArray("x", 5, 0, 4, true);
-        IntVar[] y = solver.makeIntVarArray("y", 5, 5, 9, true);
+        IntVar[] x = solver.intVarArray("x", 5, 0, 4, true);
+        IntVar[] y = solver.intVarArray("y", 5, 5, 9, true);
         IntVar[] vars = ArrayUtils.append(x, y);
-        solver.post(IntConstraintFactory.subcircuit(vars, 0, solver.makeIntVar("length", 0, vars.length - 1, true)));
+        solver.post(IntConstraintFactory.subcircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)));
         solver.findSolution();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
@@ -69,8 +69,8 @@ public class SubcircuitTest {
     @Test(groups="1s", timeOut=60000)
     public static void test3() {
         Solver solver = new Solver();
-        IntVar[] x = solver.makeIntVarArray("x", 5, 0, 4, false);
-        IntVar[] y = solver.makeIntVarArray("y", 5, 5, 9, false);
+        IntVar[] x = solver.intVarArray("x", 5, 0, 4, false);
+        IntVar[] y = solver.intVarArray("y", 5, 5, 9, false);
         final IntVar[] vars = ArrayUtils.append(x, y);
         try {
             vars[1].removeValue(1, Cause.Null);
@@ -79,7 +79,7 @@ public class SubcircuitTest {
             e.printStackTrace();
             Assert.assertTrue(false);
         }
-        solver.post(IntConstraintFactory.subcircuit(vars, 0, solver.makeIntVar("length", 0, vars.length - 1, true)));
+        solver.post(IntConstraintFactory.subcircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)));
         solver.findSolution();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 0);
     }
@@ -90,8 +90,8 @@ public class SubcircuitTest {
         int n = 6;
         int min = 2;
         int max = 4;
-        IntVar[] vars = solver.makeIntVarArray("x", n, 0, n, true);
-        IntVar nb = solver.makeIntVar("size", min, max, true);
+        IntVar[] vars = solver.intVarArray("x", n, 0, n, true);
+        IntVar nb = solver.intVar("size", min, max, true);
         solver.post(IntConstraintFactory.subcircuit(vars, 0, nb));
         solver.findAllSolutions();
         int nbSol = 0;

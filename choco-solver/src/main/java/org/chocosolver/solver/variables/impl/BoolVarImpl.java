@@ -451,7 +451,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return solver.makeBoolVar(randomName(this.name));
+        return solver.boolVar(randomName(this.name));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -490,7 +490,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public BoolVar not() {
         if (!hasNot()) {
-            not = solver.makeBoolNotView(this);
+            not = solver.boolNotView(this);
             not._setNot(this);
         }
         return not;

@@ -57,8 +57,8 @@ public class SimpleExplanationTest {
         // set varriables
         IntVar[] vars = new IntVar[3];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = enumerated ? s.makeIntVar("x" + i, 1, vars.length, false)
-                    : s.makeIntVar("x" + i, 1, vars.length + 1, true);
+            vars[i] = enumerated ? s.intVar("x" + i, 1, vars.length, false)
+                    : s.intVar("x" + i, 1, vars.length + 1, true);
         }
         // post constraints
         Constraint[] lcstrs = new Constraint[3];

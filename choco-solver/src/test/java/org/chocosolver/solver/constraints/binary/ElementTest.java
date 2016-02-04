@@ -78,8 +78,8 @@ public class ElementTest {
     public void test1() {
         Solver s = new Solver();
         int[] values = new int[]{1, 2, 0, 4, 3};
-        IntVar index = s.makeIntVar("v_0", -3, 10, false);
-        IntVar var = s.makeIntVar("v_1", -20, 20, false);
+        IntVar index = s.intVar("v_0", -3, 10, false);
+        IntVar var = s.intVar("v_1", -20, 20, false);
         model(s, index, values, var, 0, 5);
     }
 
@@ -87,8 +87,8 @@ public class ElementTest {
     public void test2() {
         Solver s = new Solver();
         int[] values = new int[]{1, 2, 0, 4, 3};
-        IntVar index = s.makeIntVar("v_0", 2, 10, false);
-        IntVar var = s.makeIntVar("v_1", -20, 20, false);
+        IntVar index = s.intVar("v_0", 2, 10, false);
+        IntVar var = s.intVar("v_1", -20, 20, false);
         model(s, index, values, var, 0, 3);
     }
 
@@ -97,8 +97,8 @@ public class ElementTest {
         for (int j = 0; j < 100; j++) {
             Random r = new Random(j);
             Solver s = new Solver();
-            IntVar index = s.makeIntVar("v_0", 23, 25, false);
-            IntVar val = s.makeIntVar("v_1", 0, 1, true);
+            IntVar index = s.intVar("v_0", 23, 25, false);
+            IntVar val = s.intVar("v_1", 0, 1, true);
             int[] values = new int[24];
             for (int i = 0; i < values.length; i++) {
                 values[i] = r.nextInt(2);
@@ -111,8 +111,8 @@ public class ElementTest {
     public void test4() {
         Solver s = new Solver();
         int[] values = new int[]{0, 0, 1};
-        IntVar index = s.makeIntVar("v_0", 1, 3, false);
-        IntVar var = s.makeIntVar("v_1", 0, 1, false);
+        IntVar index = s.intVar("v_0", 1, 3, false);
+        IntVar var = s.intVar("v_1", 0, 1, false);
         model(s, index, values, var, 1, 3);
     }
 
@@ -138,8 +138,8 @@ public class ElementTest {
         List<Constraint> lcstrs = new ArrayList<>(1);
 
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = s.makeIntVar("v_" + i, 0, 10, false);
-            indices[i] = s.makeIntVar("i_" + i, 0, values.length - 1, false);
+            vars[i] = s.intVar("v_" + i, 0, 10, false);
+            indices[i] = s.intVar("i_" + i, 0, values.length - 1, false);
             lcstrs.add(IntConstraintFactory.element(vars[i], values, indices[i], 0, "detect"));
         }
 
@@ -169,8 +169,8 @@ public class ElementTest {
         List<Constraint> lcstrsr = new ArrayList<>(1);
 
         for (int i = 0; i < varsr.length; i++) {
-            varsr[i] = ref.makeIntVar("v_" + i, 0, nbvars, false);
-            indicesr[i] = ref.makeIntVar("i_" + i, 0, nbvars, false);
+            varsr[i] = ref.intVar("v_" + i, 0, nbvars, false);
+            indicesr[i] = ref.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
         ref.set(IntStrategyFactory.random_value(allvarsr, seed));
@@ -199,8 +199,8 @@ public class ElementTest {
     public void testInc1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
-            IntVar I = solver.makeIntVar("I", 0, 5, false);
-            IntVar R = solver.makeIntVar("R", 0, 10, false);
+            IntVar I = solver.intVar("I", 0, 5, false);
+            IntVar R = solver.intVar("R", 0, 10, false);
             solver.post(ICF.element(R, new int[]{0, 2, 4, 6, 7}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
@@ -212,8 +212,8 @@ public class ElementTest {
     public void testDec1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
-            IntVar I = solver.makeIntVar("I", 0, 5, false);
-            IntVar R = solver.makeIntVar("R", 0, 10, false);
+            IntVar I = solver.intVar("I", 0, 5, false);
+            IntVar R = solver.intVar("R", 0, 10, false);
             solver.post(ICF.element(R, new int[]{7, 6, 4, 2, 0}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
@@ -225,8 +225,8 @@ public class ElementTest {
     public void testReg1() {
         for (int i = 0; i < 20; i++) {
             Solver solver = new Solver();
-            IntVar I = solver.makeIntVar("I", 0, 13, false);
-            IntVar R = solver.makeIntVar("R", 0, 21, false);
+            IntVar I = solver.intVar("I", 0, 13, false);
+            IntVar R = solver.intVar("R", 0, 21, false);
             solver.post(ICF.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
@@ -238,8 +238,8 @@ public class ElementTest {
     public void testTAR1(){
         for (int i = 1; i < 20; i++) {
             Solver solver = new Solver();
-            IntVar I = solver.makeIntVar("I", 0, 3, true);
-            IntVar R = solver.makeIntVar("R", -1, 0, false);
+            IntVar I = solver.intVar("I", 0, 3, true);
+            IntVar R = solver.intVar("R", -1, 0, false);
             solver.post(ICF.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1, "detect"));
             solver.set(ISF.random_bound(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
@@ -249,9 +249,9 @@ public class ElementTest {
     @Test
     public void testSolverOrMin() {
         Solver s = new Solver();
-        IntVar val = s.makeIntVar("v", 0, 9, true);
+        IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
-        Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.makeIntVar(2), 0);
+        Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
         s.post(LCF.or(el.reif()));
         // s.post(el);// works instead of previous post
         s.findAllSolutions();
@@ -262,10 +262,10 @@ public class ElementTest {
     @Test
     public void testSolverOrFull() {
         Solver s = new Solver();
-        BoolVar b = s.makeBoolVar("b");
-        IntVar val = s.makeIntVar("v", 0, 9, true);
+        BoolVar b = s.boolVar("b");
+        IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
-        Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.makeIntVar(2), 0);
+        Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
         s.post(LCF.or(b.not(), el.reif()));
         // !b=> val=2
         Constraint affect = ICF.arithm(val, "=", 2);

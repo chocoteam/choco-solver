@@ -76,19 +76,19 @@ public class Partition extends AbstractProblem {
 		// x initial domain
 		int[] x_envelope = new int[]{1,3,2,8}; // not necessarily ordered
 		int[] x_kernel = new int[]{1};
-		x = solver.makeSetVar("x", x_kernel, x_envelope);
+		x = solver.setVar("x", x_kernel, x_envelope);
 		// y initial domain
 		int[] y_envelope = new int[]{2,6,7};
-		y = solver.makeSetVar("y", new int[]{}, y_envelope);
+		y = solver.setVar("y", new int[]{}, y_envelope);
 		// z initial domain
 		int[] z_envelope = new int[]{2,1,3,5,7,12};
 		int[] z_kernel = new int[]{2};
-		z = solver.makeSetVar("z", z_kernel, z_envelope);
+		z = solver.setVar("z", z_kernel, z_envelope);
 		// universe initial domain (note that the universe is a variable)
 		int[] universe_envelope = new int[]{1,2,3,5,7,8,42};
-		universe = solver.makeSetVar("universe", new int[]{}, universe_envelope);
+		universe = solver.setVar("universe", new int[]{}, universe_envelope);
 		// sum variable
-		sum = solver.makeIntVar("sum of universe", 12, 19, true);
+		sum = solver.intVar("sum of universe", 12, 19, true);
 
 		/////////////////
 		// CONSTRAINTS //
@@ -98,7 +98,7 @@ public class Partition extends AbstractProblem {
 		solver.post(SetConstraintsFactory.partition(new SetVar[]{x, y, z}, universe));
 		if (noEmptySet) {
 			// forbid empty sets
-			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, solver.makeIntVar(0)));
+			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, solver.intVar(0)));
 		}
 		// restricts the sum of elements in universe
 		solver.post(SetConstraintsFactory.sum(universe, sum, true));

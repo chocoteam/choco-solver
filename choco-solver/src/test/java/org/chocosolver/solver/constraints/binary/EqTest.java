@@ -47,8 +47,8 @@ public class EqTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver s = new Solver();
-        IntVar two1 = s.makeIntVar(2);
-        IntVar two2 = s.makeIntVar(2);
+        IntVar two1 = s.intVar(2);
+        IntVar two2 = s.intVar(2);
         s.post(ICF.arithm(two1, "=", two2));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
@@ -58,8 +58,8 @@ public class EqTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         Solver s = new Solver();
-        IntVar three = s.makeIntVar(3);
-        IntVar two = s.makeIntVar(2);
+        IntVar three = s.intVar(3);
+        IntVar two = s.intVar(2);
         s.post(ICF.arithm(three, "-", two, "=", 1));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
@@ -68,8 +68,8 @@ public class EqTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         Solver s = new Solver();
-        IntVar three = s.makeIntVar(3);
-        IntVar two = s.makeIntVar(2);
+        IntVar three = s.intVar(3);
+        IntVar two = s.intVar(2);
         s.post(ICF.arithm(three, "=", two, "+", 1));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());

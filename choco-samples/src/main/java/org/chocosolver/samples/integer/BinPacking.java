@@ -75,9 +75,9 @@ public class BinPacking extends AbstractProblem{
 		weights = d1_w;
 		nbBins  = d1_nb;
 		// variables
-		bins = solver.makeIntVarArray("bin", nbItems, 0, nbBins - 1, false);
-		loads = solver.makeIntVarArray("load", nbBins, 0, 1000, true);
-		minLoad = solver.makeIntVar("minLoad", 0, 1000, true);
+		bins = solver.intVarArray("bin", nbItems, 0, nbBins - 1, false);
+		loads = solver.intVarArray("load", nbBins, 0, 1000, true);
+		minLoad = solver.intVar("minLoad", 0, 1000, true);
 		solver.post(ICF.bin_packing(bins,weights,loads,0));
 		solver.post(ICF.minimum(minLoad,loads));
 	}

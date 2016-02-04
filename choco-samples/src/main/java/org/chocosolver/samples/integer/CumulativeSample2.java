@@ -58,19 +58,19 @@ public class CumulativeSample2 extends AbstractProblem {
 		// build variables
 		starts = new IntVar[NUM_OF_TASKS];
 		ends = new IntVar[NUM_OF_TASKS];
-		IntVar duration = solver.makeIntVar(10);
-		maxEnd = solver.makeIntVar("maxEnd", 0, HORIZON, true);
+		IntVar duration = solver.intVar(10);
+		maxEnd = solver.intVar("maxEnd", 0, HORIZON, true);
 		IntVar[] res = new IntVar[NUM_OF_TASKS];
 		Task[] tasks = new Task[NUM_OF_TASKS];
 		for (int iTask=0; iTask < NUM_OF_TASKS; ++iTask) {
-			starts[iTask] = solver.makeIntVar("start" + iTask, 0, HORIZON, true);
-			ends[iTask] = solver.makeIntVar("ends" + iTask, 0, HORIZON, true);
+			starts[iTask] = solver.intVar("start" + iTask, 0, HORIZON, true);
+			ends[iTask] = solver.intVar("ends" + iTask, 0, HORIZON, true);
 			tasks[iTask] = new Task(starts[iTask], duration, ends[iTask]);
-			res[iTask] = solver.makeIntVar(1);
+			res[iTask] = solver.intVar(1);
 		}
 
 		// post a cumulative constraint
-		solver.post(IntConstraintFactory.cumulative(tasks, res, solver.makeIntVar(1), false));
+		solver.post(IntConstraintFactory.cumulative(tasks, res, solver.intVar(1), false));
 
 		// maintain makespan
 		solver.post(IntConstraintFactory.maximum(maxEnd, ends));

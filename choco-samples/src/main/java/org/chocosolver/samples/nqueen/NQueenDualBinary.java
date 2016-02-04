@@ -46,8 +46,8 @@ public class NQueenDualBinary extends AbstractNQueen {
         IntVar[] dualvars = new IntVar[n];
 
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
-            dualvars[i] = solver.makeIntVar("QD_" + i, 1, n, false);
+            vars[i] = solver.intVar("Q_" + i, 1, n, false);
+            dualvars[i] = solver.intVar("QD_" + i, 1, n, false);
         }
 
         for (int i = 0; i < n - 1; i++) {

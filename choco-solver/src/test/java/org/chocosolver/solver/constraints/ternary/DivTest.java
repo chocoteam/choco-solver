@@ -60,7 +60,7 @@ public class DivTest extends AbstractTernaryTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL() {
         Solver solver = new Solver();
-        IntVar i = solver.makeIntVar("i", 0, 2, false);
+        IntVar i = solver.intVar("i", 0, 2, false);
         solver.post(ICF.eucl_div(i, solver.ONE(), solver.ZERO()).getOpposite());
 //        SMF.log(solver, true, false);
         solver.findAllSolutions();
@@ -70,9 +70,9 @@ public class DivTest extends AbstractTernaryTest {
     public void testJL2() {
         for (int i = 0; i < 100000; i++) {
             final Solver s = new Solver();
-            IntVar a = s.makeIntVar("a", new int[]{0, 2, 3, 4});
-            IntVar b = s.makeIntVar("b", new int[]{-1, 1, 3, 4});
-            IntVar c = s.makeIntVar("c", new int[]{-3, 1, 4});
+            IntVar a = s.intVar("a", new int[]{0, 2, 3, 4});
+            IntVar b = s.intVar("b", new int[]{-1, 1, 3, 4});
+            IntVar c = s.intVar("c", new int[]{-3, 1, 4});
             s.post(ICF.eucl_div(a, b, c));
             s.set(ISF.random_value(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);

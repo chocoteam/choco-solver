@@ -69,14 +69,14 @@ public class CostasArrays extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		vars = solver.makeIntVarArray("v", n, 0, n - 1, false);
+		vars = solver.intVarArray("v", n, 0, n - 1, false);
 		vectors = new IntVar[(n*(n-1))/2];
 		for (int i = 0, k = 0; i < n; i++) {
 			for (int j = i+1; j < n; j++, k++) {
-				IntVar d = solver.makeIntVar(randomName(), -n, n, false);
+				IntVar d = solver.intVar(randomName(), -n, n, false);
 				solver.post(ICF.arithm(d,"!=",0));
 				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],d},"=",vars[j]));
-				vectors[k] = solver.makeIntOffsetView(d, 2 * n * (j - i));
+				vectors[k] = solver.intOffsetView(d, 2 * n * (j - i));
 			}
 		}
 		solver.post(IntConstraintFactory.alldifferent(vars, "AC"));

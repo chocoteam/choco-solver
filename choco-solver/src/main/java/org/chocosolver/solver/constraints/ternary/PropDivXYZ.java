@@ -50,7 +50,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z) {
-        this(x, y, z, x.getSolver().makeIntAbsView(x), x.getSolver().makeIntAbsView(y), x.getSolver().makeIntAbsView(z));
+        this(x, y, z, x.getSolver().intAbsView(x), x.getSolver().intAbsView(y), x.getSolver().intAbsView(z));
     }
 
     private PropDivXYZ(IntVar x, IntVar y, IntVar z, IntVar ax, IntVar ay, IntVar az) {

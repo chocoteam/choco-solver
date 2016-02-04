@@ -64,7 +64,7 @@ public class LatinSquare extends AbstractProblem {
         vars = new IntVar[m * m];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < m; j++) {
-                vars[i * m + j] = solver.makeIntVar("C" + i + "_" + j, 0, m - 1, false);
+                vars[i * m + j] = solver.intVar("C" + i + "_" + j, 0, m - 1, false);
             }
         }
         // Constraints

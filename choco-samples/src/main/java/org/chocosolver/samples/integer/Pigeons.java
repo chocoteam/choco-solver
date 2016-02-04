@@ -56,7 +56,7 @@ public class Pigeons extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = solver.makeIntVarArray("p", n, 1, n - 1, false);
+        vars = solver.intVarArray("p", n, 1, n - 1, false);
 
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {

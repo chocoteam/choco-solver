@@ -60,7 +60,7 @@ public class PropNogoodsTest {
     @BeforeMethod(alwaysRun = true)
     public void setUp() throws Exception {
         Solver solver = new Solver("nogoods");
-        vars = solver.makeIntVarArray("X", 4, -1, 1, false);
+        vars = solver.intVarArray("X", 4, -1, 1, false);
         PNG = solver.getNogoodStore().getPropNogoods();
         lits = new int[6];
         lits[0] = PNG.Literal(vars[0], 0, true);
@@ -166,7 +166,7 @@ public class PropNogoodsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testLiteral2() throws Exception {
-        BoolVar[] b = vars[0].getSolver().makeBoolVarArray("B", 100);
+        BoolVar[] b = vars[0].getSolver().boolVarArray("B", 100);
         for(int i = 0 ; i < 100; i++){
             PNG.Literal(b[i], 0, true);
             PNG.Literal(b[i], 0, false);
@@ -299,7 +299,7 @@ public class PropNogoodsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testDeclareDomainNogood(){
-        IntVar var = vars[0].getSolver().makeIntVar("X4", -1, 1, false);
+        IntVar var = vars[0].getSolver().intVar("X4", -1, 1, false);
         PNG.declareDomainNogood(var);
         try{
             PNG.doReduce(13);

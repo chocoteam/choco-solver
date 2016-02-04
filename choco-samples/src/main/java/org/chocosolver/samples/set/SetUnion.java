@@ -65,15 +65,15 @@ public class SetUnion extends AbstractProblem {
     @Override
     public void buildModel() {
         // x initial domain
-        x = solver.makeSetVar("x", new int[]{1}, new int[]{1, -2, 3});
+        x = solver.setVar("x", new int[]{1}, new int[]{1, -2, 3});
         // y initial domain
-        y = solver.makeSetVar("y", new int[]{}, new int[]{-6, -2, 7});
+        y = solver.setVar("y", new int[]{}, new int[]{-6, -2, 7});
         // z initial domain
-        z = solver.makeSetVar("z", new int[]{}, new int[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7});
+        z = solver.setVar("z", new int[]{}, new int[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7});
         // set-union constraint
 		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
         if (noEmptySet) {
-            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, solver.makeIntVar(0)));
+            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, solver.intVar(0)));
         }
     }
 

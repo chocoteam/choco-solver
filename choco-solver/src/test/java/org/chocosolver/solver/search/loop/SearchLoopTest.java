@@ -53,7 +53,7 @@ import static org.chocosolver.solver.search.loop.SLF.*;
 public class SearchLoopTest {
 
     public void queen(Solver solver, int n) {
-        IntVar[] q = solver.makeIntVarArray("Q", n, 1, n, false);
+        IntVar[] q = solver.intVarArray("Q", n, 1, n, false);
         solver.post(ICF.alldifferent(q, "AC"));
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
@@ -65,8 +65,8 @@ public class SearchLoopTest {
     }
 
     public void golomb(Solver solver, int m) {
-        IntVar[] ticks = solver.makeIntVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
-        IntVar[] diffs = solver.makeIntVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        IntVar[] ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        IntVar[] diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
 
         solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
 
@@ -164,7 +164,7 @@ public class SearchLoopTest {
     @Test(groups="1s", timeOut=60000)
     public void test2DDS2() {
         Solver solver = new Solver();
-        IntVar[] bs = solver.makeBoolVarArray("b", 4);
+        IntVar[] bs = solver.boolVarArray("b", 4);
         dds(solver, ISF.lexico_LB(bs), 3);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
@@ -225,7 +225,7 @@ public class SearchLoopTest {
     public void test7() {
         Solver solver = new Solver();
         int n = 3;
-        BoolVar[] B = solver.makeBoolVarArray("b", n - 1);
+        BoolVar[] B = solver.boolVarArray("b", n - 1);
         SLF.lds(solver, ISF.lexico_UB(B), 1);
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
@@ -238,8 +238,8 @@ public class SearchLoopTest {
     public void test8() {
         Solver solver = new Solver();
         int n = 3;
-        IntVar[] X = solver.makeIntVarArray("X", n, 0, n, false);
-        BoolVar[] B = solver.makeBoolVarArray("b", n - 1);
+        IntVar[] X = solver.intVarArray("X", n, 0, n, false);
+        BoolVar[] B = solver.boolVarArray("b", n - 1);
         for (int i = 0; i < n - 1; i++) {
             ICF.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
@@ -256,8 +256,8 @@ public class SearchLoopTest {
     public void test9() {
         Solver solver = new Solver();
         int n = 3;
-        IntVar[] X = solver.makeIntVarArray("X", n, 0, n, false);
-        BoolVar[] B = solver.makeBoolVarArray("b", n - 1);
+        IntVar[] X = solver.intVarArray("X", n, 0, n, false);
+        BoolVar[] B = solver.boolVarArray("b", n - 1);
         for (int i = 0; i < n - 1; i++) {
             ICF.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }

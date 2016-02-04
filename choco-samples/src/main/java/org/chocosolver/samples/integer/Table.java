@@ -62,7 +62,7 @@ public class Table extends AbstractProblem {
 	public void buildModel() {
 		vars = new IntVar[n];
 		for (int i = 0; i < vars.length; i++) {
-			vars[i] = solver.makeIntVar("Q_" + i, lowB, upB, false);
+			vars[i] = solver.intVar("Q_" + i, lowB, upB, false);
 		}
 		Random rand = new Random(12);
 		Tuples tuples = new Tuples(true);

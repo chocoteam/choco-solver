@@ -75,8 +75,8 @@ public class Partition extends AbstractProblem {
     public void buildModel() {
         int size = this.N / 2;
         IntVar[] x, y;
-        x = solver.makeIntVarArray("x", size, 1, 2 * size, false);
-        y = solver.makeIntVarArray("y", size, 1, 2 * size, false);
+        x = solver.intVarArray("x", size, 1, 2 * size, false);
+        y = solver.intVarArray("y", size, 1, 2 * size, false);
 
 //        break symmetries
         for (int i = 0; i < size - 1; i++) {
@@ -111,9 +111,9 @@ public class Partition extends AbstractProblem {
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = solver.makeIntVar("x^", 0, x[i].getUB() * x[i].getUB(), true);
+            sx[i] = solver.intVar("x^", 0, x[i].getUB() * x[i].getUB(), true);
             sxy[i] = sx[i];
-            sy[i] = solver.makeIntVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
+            sy[i] = solver.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
             sxy[size + i] = sy[i];
             solver.post(IntConstraintFactory.times(x[i], x[i], sx[i]));
             solver.post(IntConstraintFactory.times(y[i], y[i], sy[i]));
