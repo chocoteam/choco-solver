@@ -36,10 +36,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.solver.variables.delta.IEnumDelta;
-import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
-import org.chocosolver.solver.variables.delta.NoDelta;
-import org.chocosolver.solver.variables.delta.OneValueDelta;
+import org.chocosolver.solver.variables.delta.*;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -59,6 +56,9 @@ import org.chocosolver.util.tools.StringUtils;
  */
 public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
+    /**
+     * Serial number for serialization purpose
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -76,21 +76,39 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * A bi partite set indicating for each value whether it is present or not.
      * If the set contains the domain, the variable is not instanciated.
      */
-
     protected final BasicIndexedBipartiteSet notInstanciated;
-
+    /**
+     * To iterate over removed values
+     */
     IEnumDelta delta = NoDelta.singleton;
-
+    /**
+     * To iterate over values in the domain
+     */
+    private DisposableValueIterator _viterator;
+    /**
+     * To iterate over ranges
+     */
+    private DisposableRangeIterator _riterator;
+    /**
+     * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
+     * on value removal
+     */
     protected boolean reactOnRemoval = false;
 
-    private DisposableValueIterator _viterator;
-
-    private DisposableRangeIterator _riterator;
-
+    /**
+     * Associate boolean variable expressing not(this)
+     */
     private BoolVar not;
+    /**
+     * For boolean expression purpose
+     */
+    private boolean isNot = false;
 
-    //////////////////////////////////////////////////////////////////////////////////////
-
+    /**
+     * Create a BoolVar {0,1} or {true, false}
+     * @param name name of the variable
+     * @param solver declaring solver
+     */
     public BoolVarImpl(String name, Solver solver) {
         super(name, solver);
         notInstanciated = this.solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
@@ -388,10 +406,30 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
+    public int nextValueOut(int v) {
+        if(!notInstanciated.contains(offset) && v == mValue - 1){
+            return mValue + 1;
+        }else if(-1 <= v && v <= 1){
+            return 2;
+        }
+        return v + 1;
+    }
+
+    @Override
     public int previousValue(int v) {
         if (v > getUB()) return getUB();
         if (v > getLB()) return getLB();
         return Integer.MIN_VALUE;
+    }
+
+    @Override
+    public int previousValueOut(int v) {
+        if(!notInstanciated.contains(offset) && v == mValue + 1){
+            return mValue - 1;
+        }else if(0 <= v && v <= 2){
+            return -1;
+        }
+        return v - 1;
     }
 
     @Override
@@ -425,6 +463,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
@@ -434,6 +473,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
+            //noinspection unchecked
             monitors[i].onUpdate(this, event);
         }
     }
@@ -450,6 +490,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         return VAR | BOOL;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public BoolVar duplicate() {
         return VariableFactory.bool(StringUtils.randomName(this.name), solver);
@@ -506,8 +547,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean isLit() {
         return true;
     }
-
-    private boolean isNot = false;
 
     @Override
     public boolean isNot() {

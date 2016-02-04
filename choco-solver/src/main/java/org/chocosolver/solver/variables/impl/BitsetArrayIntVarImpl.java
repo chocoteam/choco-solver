@@ -272,6 +272,23 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int oub = getUB();
         int nlb = values.nextValue(olb - 1);
         int nub = values.previousValue(oub + 1);
+        int i;
+        if (nlb != olb) {
+            // look for the new lb
+            do {
+                i = INDICES.nextSetBit(V2I.get(olb) + 1);
+                olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
+                nlb = values.nextValue(olb - 1);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb != olb);
+        }
+        if (nub != oub) {
+            // look for the new ub
+            do {
+                i = INDICES.prevSetBit(V2I.get(oub) - 1);
+                oub = i > -1 ? VALUES[i] : Integer.MIN_VALUE;
+                nub = values.previousValue(oub + 1);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub != oub);
+        }
         // the new bounds are now known, delegate to the right method
         boolean hasChanged = updateBounds(nlb, nub, cause);
         // now deal with holes
@@ -713,6 +730,23 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     }
 
     @Override
+    public int nextValueOut(int aValue) {
+        int lb = LB.get();
+        int ub = UB.get();
+        if(VALUES[lb] - 1 <= aValue && aValue <= VALUES[ub]){
+            int i = V2I.get(aValue); // if aValue is known
+            if (i == -1) {
+                i = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aValue, true);
+            }
+            while(i < VALUES.length && VALUES[i] == aValue + 1 && INDICES.get(i)){
+                aValue = VALUES[i];
+                i++;
+            }
+        }
+        return aValue + 1;
+    }
+
+    @Override
     public int previousValue(int aValue) {
         int ub = UB.get();
         if (aValue > VALUES[ub]) return VALUES[ub];
@@ -731,6 +765,23 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
         }
         return (i >= 0) ? VALUES[i] : Integer.MIN_VALUE;
+    }
+
+    @Override
+    public int previousValueOut(int aValue) {
+        int lb = LB.get();
+        int ub = UB.get();
+        if(VALUES[lb]<= aValue && aValue <= VALUES[ub] + 1){
+            int i = V2I.get(aValue); // if aValue is known
+            if (i == -1) {
+                i = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aValue, true) - 1;
+            }
+            while(i > -1 && VALUES[i] == aValue - 1 && INDICES.get(i)){
+                aValue = VALUES[i];
+                i--;
+            }
+        }
+        return aValue - 1;
     }
 
     @Override

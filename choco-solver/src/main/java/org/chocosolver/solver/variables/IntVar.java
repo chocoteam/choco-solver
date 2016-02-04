@@ -258,7 +258,7 @@ public interface IntVar extends Variable {
     int getRange();
 
     /**
-     * Returns the next value just after v in <code>this</code>.
+     * Returns the first value just after v in <code>this</code> which is <b>in</b> the domain.
      * If no such value exists, returns Integer.MAX_VALUE;
      * <p>
      * To iterate over the values in a <code>IntVar</code>,
@@ -276,7 +276,17 @@ public interface IntVar extends Variable {
     int nextValue(int v);
 
     /**
-     * Returns the previous value just befor v in <code>this</code>.
+     * Returns the first value just after v in <code>this</code> which is <b>out of</b> the domain.
+     * If <i>v</i> is less than or equal to {@link #getLB()-2}, returns <i>v + 1</i>,
+     * if <i>v</i> is greater than or equal to {@link #getUB()}, returns <i>v + 1</i>.
+     *
+     * @param v the value to start checking (exclusive)
+     * @return the next value out of the domain
+     */
+    int nextValueOut(int v);
+
+    /**
+     * Returns the previous value just before v in <code>this</code>.
      * If no such value exists, returns Integer.MIN_VALUE;
      * <p>
      * To iterate over the values in a <code>IntVar</code>,
@@ -293,6 +303,15 @@ public interface IntVar extends Variable {
      */
     int previousValue(int v);
 
+    /**
+     * Returns the first value just before v in <code>this</code> which is <b>out of</b> the domain.
+     * If <i>v</i> is greater than or equal to {@link #getUB()+2}, returns <i>v - 1</i>,
+     * if <i>v</i> is less than or equal to {@link #getLB()}, returns <i>v - 1</i>.
+     *
+     * @param v the value to start checking (exclusive)
+     * @return the previous value out of the domain
+     */
+    int previousValueOut(int v);
 
     /**
      * Retrieves an iterator over values of <code>this</code>.

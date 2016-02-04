@@ -102,6 +102,7 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     /**
      * Create an interval-based ordered set initialized to singleton {e}
+     * @param e singleton value
      */
     public IntIterableRangeSet(int e) {
         ELEMENTS = new int[10];
@@ -338,7 +339,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     /**
-     * add the value x to all integers stored in this set
+     * add the value <i>x</i> to all integers stored in this set
      *
      * @param x value to add
      */
@@ -349,7 +350,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     /**
-     * subtract the value x to all integers stored in this set
+     * subtract the value <i>x</i> to all integers stored in this set
      *
      * @param x value to add
      */
@@ -357,6 +358,18 @@ public class IntIterableRangeSet implements IntIterableSet {
         for (int i = 0; i < SIZE; i++) {
             ELEMENTS[i] -= x;
         }
+    }
+
+    /**
+     * multiply by <i>x</i> to all integers stored in this set
+     *
+     * @param x value to add
+     */
+    public void times(int x) {
+        for (int i = 0; i < SIZE; i++) {
+            ELEMENTS[i] *= x;
+        }
+        CARDINALITY *= x;
     }
 
     /**
@@ -392,7 +405,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      *
      * @param minCapacity the desired minimum capacity
      */
-    private void grow(int minCapacity) {
+    void grow(int minCapacity) {
         if (minCapacity - ELEMENTS.length > 0) {
             // overflow-conscious code
             int oldCapacity = ELEMENTS.length;

@@ -49,8 +49,15 @@ import org.chocosolver.util.ESat;
  */
 public final class BoolNotView extends IntView implements BoolVar {
 
+    /**
+     * Variable to observe
+     */
     protected final BoolVar var;
 
+    /**
+     * Create a not view based on <i>var<i/> 
+     * @param var a boolean variable
+     */
     public BoolNotView(BoolVar var) {
         super("not(" + var.getName() + ")", var);
         this.var = var;
@@ -214,11 +221,31 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     @Override
+    public int nextValueOut(int v) {
+        if(var.isInstantiated() && v == getValue() - 1){
+            return getValue() + 1;
+        }else if(-1 <= v && v <= 1){
+            return 2;
+        }
+        return v + 1;
+    }
+
+    @Override
     public int previousValue(int v) {
         if (v > 1 && contains(1)) {
             return 1;
         }
         return v >= 1 && contains(0) ? 0 : Integer.MIN_VALUE;
+    }
+
+    @Override
+    public int previousValueOut(int v) {
+        if(var.isInstantiated() && v == getValue() + 1){
+            return getValue() - 1;
+        }else if(0 <= v && v <= 2){
+            return -1;
+        }
+        return v - 1;
     }
 
     @Override

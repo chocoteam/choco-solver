@@ -55,8 +55,16 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public final class OffsetView extends IntView {
 
+    /**
+     * A constant value
+     */
     public final int cste;
 
+    /**
+     * A view based on <i>var<i/> such that <i>var<i/> + <i>cste<i/>
+     * @param var an integer variable
+     * @param cste an int
+     */
     public OffsetView(final IntVar var, final int cste) {
         super("(" + var.getName() + "+" + cste + ")", var);
         this.cste = cste;
@@ -300,12 +308,22 @@ public final class OffsetView extends IntView {
     }
 
     @Override
+    public int nextValueOut(int v) {
+        return var.nextValueOut(v - cste) + cste;
+    }
+
+    @Override
     public int previousValue(int v) {
         int value = var.previousValue(v - cste);
         if (value == Integer.MIN_VALUE) {
             return Integer.MIN_VALUE;
         }
         return value + cste;
+    }
+
+    @Override
+    public int previousValueOut(int v) {
+        return var.previousValueOut(v - cste) + cste;
     }
 
     @Override

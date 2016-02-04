@@ -213,11 +213,29 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
+    public int nextValueOut(int v) {
+        if(v == constante -1){
+            return constante + 1;
+        }else{
+            return v + 1;
+        }
+    }
+
+    @Override
     public int previousValue(int v) {
         if (v > constante) {
             return constante;
         } else {
             return Integer.MIN_VALUE;
+        }
+    }
+
+    @Override
+    public int previousValueOut(int v) {
+        if(v == constante + 1){
+            return constante - 1;
+        }else{
+            return v - 1;
         }
     }
 
@@ -244,6 +262,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public void subscribeView(IView view) {
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         return IIntDeltaMonitor.Default.NONE;
@@ -280,6 +299,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         return Variable.INT | Variable.CSTE;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IntVar duplicate() {
         return VF.fixed(StringUtils.randomName(), this.constante, solver);
@@ -290,6 +310,9 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {
 
+                /**
+                 * Set to <tt>true</tt> if iteration has not started yet, <tt>false</tt> otherwise
+                 */
                 boolean _next;
 
                 @Override
@@ -340,6 +363,9 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeIterator() {
+                /**
+                 * Set to <tt>true<tt/> if the iteration has not started yet, <tt>false<tt/> otherwise
+                 */
                 boolean _next;
 
                 @Override

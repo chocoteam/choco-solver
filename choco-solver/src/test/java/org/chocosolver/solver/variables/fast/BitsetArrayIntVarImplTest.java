@@ -34,7 +34,6 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.impl.BitsetArrayIntVarImpl;
@@ -651,10 +650,45 @@ public class BitsetArrayIntVarImplTest {
         Assert.assertEquals(x.getUB(), 2);
     }
 
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void testRemValsBut7() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-27,-25,-20}, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-29);
+        rems.addAll(-29,-28,-26,-22,-21);
+        x.removeAllValuesBut(rems, Cause.Null);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRemValsBut8() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-27,-25,-21}, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-29);
+        rems.addAll(-29,-28,-26,-22,-21);
+        x.removeAllValuesBut(rems, Cause.Null);
+        Assert.assertEquals(x.getLB(), -21);
+        Assert.assertEquals(x.getUB(), -21);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRemValsBut9() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-29,-25,-21}, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-29);
+        rems.addAll(-29,-28,-26,-22,-20);
+        x.removeAllValuesBut(rems, Cause.Null);
+        Assert.assertEquals(x.getLB(), -29);
+        Assert.assertEquals(x.getUB(), -29);
+    }
+
+
     @Test(groups="1s", timeOut=60000)
     public void testJL01() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = VF.enumerated("i", new int[]{0,98,99}, s);
+        IntVar i = new BitsetArrayIntVarImpl("i", new int[]{0,98,99}, s);
         IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
         i.updateUpperBound(98, Cause.Null);
         d.freeze();
@@ -668,7 +702,7 @@ public class BitsetArrayIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL02() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = VF.enumerated("i", new int[]{0,98,99}, s);
+        IntVar i = new BitsetArrayIntVarImpl("i", new int[]{0,98,99}, s);
         IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
         i.updateBounds(0,98, Cause.Null);
         d.freeze();
@@ -682,7 +716,7 @@ public class BitsetArrayIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL03() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = VF.enumerated("i", new int[]{2,3,99}, s);
+        IntVar i = new BitsetArrayIntVarImpl("i", new int[]{2,3,99}, s);
         IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
         i.updateLowerBound(3, Cause.Null);
         d.freeze();
@@ -696,7 +730,7 @@ public class BitsetArrayIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL04() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = VF.enumerated("i", new int[]{2,3,99}, s);
+        IntVar i = new BitsetArrayIntVarImpl("i", new int[]{2,3,99}, s);
         IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
         i.updateBounds(3,99, Cause.Null);
         d.freeze();
@@ -705,5 +739,71 @@ public class BitsetArrayIntVarImplTest {
         d.unfreeze();
         Assert.assertEquals(remvals.size(), 1);
         Assert.assertEquals(remvals.get(0), 2);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNextOut1(){
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-1, 0, 1}, solver);
+        Assert.assertEquals(x.nextValueOut(-4), -3);
+        Assert.assertEquals(x.nextValueOut(-3), -2);
+        Assert.assertEquals(x.nextValueOut(-2), 2);
+        Assert.assertEquals(x.nextValueOut(2), 3);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNextOut2() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-1, 0, 1}, solver);
+        x.instantiateTo(-1, Cause.Null);
+        Assert.assertEquals(x.nextValueOut(-4), -3);
+        Assert.assertEquals(x.nextValueOut(-3), -2);
+        Assert.assertEquals(x.nextValueOut(-2), 0);
+        Assert.assertEquals(x.nextValueOut(0), 1);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNextOut3() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-2,-1,1,2,5,6,7}, solver);
+        Assert.assertEquals(x.nextValueOut(-4), -3);
+        Assert.assertEquals(x.nextValueOut(-3), 0);
+        Assert.assertEquals(x.nextValueOut(0), 3);
+        Assert.assertEquals(x.nextValueOut(3), 4);
+        Assert.assertEquals(x.nextValueOut(4), 8);
+        Assert.assertEquals(x.nextValueOut(8), 9);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testPreviousOut1(){
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-1, 0, 1}, solver);
+        Assert.assertEquals(x.previousValueOut(4), 3);
+        Assert.assertEquals(x.previousValueOut(3), 2);
+        Assert.assertEquals(x.previousValueOut(2), -2);
+        Assert.assertEquals(x.previousValueOut(-2), -3);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testPreviousOut2() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-1, 0, 1}, solver);
+        x.instantiateTo(1, Cause.Null);
+        Assert.assertEquals(x.previousValueOut(4), 3);
+        Assert.assertEquals(x.previousValueOut(3), 2);
+        Assert.assertEquals(x.previousValueOut(2), 0);
+        Assert.assertEquals(x.previousValueOut(0), -1);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testPreviousOut3() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = new BitsetArrayIntVarImpl("X", new int[]{-2,-1,1,2,5,6,7}, solver);
+        Assert.assertEquals(x.previousValueOut(9), 8);
+        Assert.assertEquals(x.previousValueOut(8), 4);
+        Assert.assertEquals(x.previousValueOut(4), 3);
+        Assert.assertEquals(x.previousValueOut(3), 0);
+        Assert.assertEquals(x.previousValueOut(0), -3);
+        Assert.assertEquals(x.previousValueOut(-3), -4);
     }
 }

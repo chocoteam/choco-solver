@@ -30,6 +30,7 @@
 package org.chocosolver.solver.variables.ranges;
 
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
 
 import java.util.Arrays;
 
@@ -44,15 +45,24 @@ public class IntIterableSetUtils {
 
     /**
      * Copy the domain of <i>var</i> in <i>set</i>.
-     * First, clear <i>set</i> then call {@link #union(IntIterableRangeSet, IntVar)}
-     * TODO: more efficient operation
+     * First, it clears <i>set</i>, then it fills it with the value in <i>var</i>.
      *
      * @param var an integer variable
      * @param set set to transfer values to
      */
     public static void copyIn(IntVar var, IntIterableRangeSet set) {
         set.clear();
-        union(set, var);
+        DisposableRangeIterator rit = var.getRangeIterator(true);
+        while (rit.hasNext()) {
+            int lb = rit.min();
+            int ub = rit.max();
+            set.grow(set.SIZE + 2);
+            set.ELEMENTS[set.SIZE++] = lb;
+            set.ELEMENTS[set.SIZE++] = ub;
+            set.CARDINALITY += ub - lb + 1;
+            rit.next();
+        }
+        rit.dispose();
     }
 
     /**
@@ -109,6 +119,7 @@ public class IntIterableSetUtils {
 
 
     /**
+     * @param set on which the complement is based
      * @param lbu lower bound (inclusive) of the universe
      * @param ubu upper bound (inclusive) of the universe
      * @return the complement of this set wrt to universe set [<i>lbu</i>, <i>ubu</i>].
@@ -160,9 +171,20 @@ public class IntIterableSetUtils {
      */
     public static IntIterableRangeSet plus(IntIterableRangeSet set1, IntIterableRangeSet set2) {
         IntIterableRangeSet t = new IntIterableRangeSet();
+        plus(t, set1, set2);
+        return t;
+    }
+    /**
+     * Set <i>setr</i> to {a + b | a in <i>set1</i>, b in <i>set2</i>}
+     * @param setr set of ints
+     * @param set1 a set of ints
+     * @param set2 a set of ints
+     */
+    public static void plus(IntIterableRangeSet setr, IntIterableRangeSet set1, IntIterableRangeSet set2) {
+        setr.clear();
         int s1 = set1.SIZE >> 1;
         int s2 = set2.SIZE >> 1;
-        t.ELEMENTS = new int[set1.SIZE * set2.SIZE];
+        setr.grow(set1.SIZE + set2.SIZE);
         int i = 0, j = 0;
         int[] is = new int[s2];
         Arrays.fill(is, -1);
@@ -192,9 +214,10 @@ public class IntIterableSetUtils {
                 }
             }
             if (!extend) {
-                t.ELEMENTS[t.SIZE++] = lb;
-                t.ELEMENTS[t.SIZE++] = ub;
-                t.CARDINALITY += ub - lb + 1;
+                setr.grow(setr.SIZE + 2);
+                setr.ELEMENTS[setr.SIZE++] = lb;
+                setr.ELEMENTS[setr.SIZE++] = ub;
+                setr.CARDINALITY += ub - lb + 1;
                 lb = Integer.MAX_VALUE;
                 for (int k = i; k <= j; k++) {
                     int _lb = set1.ELEMENTS[is[k] << 1] + set2.ELEMENTS[k << 1];
@@ -205,10 +228,10 @@ public class IntIterableSetUtils {
                 }
             }
         } while (is[s2 - 1] < s1);
-        t.ELEMENTS[t.SIZE++] = lb;
-        t.ELEMENTS[t.SIZE++] = ub;
-        t.CARDINALITY += ub - lb + 1;
-        return t;
+        setr.grow(setr.SIZE + 2);
+        setr.ELEMENTS[setr.SIZE++] = lb;
+        setr.ELEMENTS[setr.SIZE++] = ub;
+        setr.CARDINALITY += ub - lb + 1;
     }
 
 
@@ -219,9 +242,21 @@ public class IntIterableSetUtils {
      */
     public static IntIterableRangeSet minus(IntIterableRangeSet set1, IntIterableRangeSet set2) {
         IntIterableRangeSet t = new IntIterableRangeSet();
+        minus(t, set1, set2);
+        return t;
+    }
+
+    /**
+     * Set <i>setr</i> to {a - b | a in <i>set1</i>, b in <i>set2</i>}
+     * @param setr set of ints
+     * @param set1 a set of ints
+     * @param set2 a set of ints
+     */
+    public static void minus(IntIterableRangeSet setr, IntIterableRangeSet set1, IntIterableRangeSet set2) {
+        setr.clear();
         int s1 = set1.SIZE >> 1;
         int s2 = set2.SIZE >> 1;
-        t.ELEMENTS = new int[set1.SIZE * set2.SIZE];
+        setr.grow(set1.SIZE + set2.SIZE);
         int i = s2 - 1, j = s2 - 1;
         int[] is = new int[s2];
         Arrays.fill(is, -1);
@@ -251,9 +286,10 @@ public class IntIterableSetUtils {
                 }
             }
             if (!extend) {
-                t.ELEMENTS[t.SIZE++] = lb;
-                t.ELEMENTS[t.SIZE++] = ub;
-                t.CARDINALITY += ub - lb + 1;
+                setr.grow(setr.SIZE + 2);
+                setr.ELEMENTS[setr.SIZE++] = lb;
+                setr.ELEMENTS[setr.SIZE++] = ub;
+                setr.CARDINALITY += ub - lb + 1;
                 lb = Integer.MAX_VALUE;
                 for (int k = i; k <= j; k++) {
                     int _lb = set1.ELEMENTS[is[k] << 1] - set2.ELEMENTS[(k << 1) + 1];
@@ -264,10 +300,10 @@ public class IntIterableSetUtils {
                 }
             }
         } while (is[0] < s1);
-        t.ELEMENTS[t.SIZE++] = lb;
-        t.ELEMENTS[t.SIZE++] = ub;
-        t.CARDINALITY += ub - lb + 1;
-        return t;
+        setr.grow(setr.SIZE + 2);
+        setr.ELEMENTS[setr.SIZE++] = lb;
+        setr.ELEMENTS[setr.SIZE++] = ub;
+        setr.CARDINALITY += ub - lb + 1;
     }
 
 

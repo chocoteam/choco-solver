@@ -639,6 +639,40 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 2);
     }
 
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void testRemValsBut7() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", new int[]{-27,-25,-20}, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-29);
+        rems.addAll(-29,-28,-26,-22,-21);
+        x.removeAllValuesBut(rems, Cause.Null);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRemValsBut8() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", new int[]{-27,-25,-21}, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-29);
+        rems.addAll(-29,-28,-26,-22,-21);
+        x.removeAllValuesBut(rems, Cause.Null);
+        Assert.assertEquals(x.getLB(), -21);
+        Assert.assertEquals(x.getUB(), -21);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRemValsBut9() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", new int[]{-29,-25,-21}, solver);
+        IntIterableSet rems = new IntIterableBitSet();
+        rems.setOffset(-29);
+        rems.addAll(-29,-28,-26,-22,-20);
+        x.removeAllValuesBut(rems, Cause.Null);
+        Assert.assertEquals(x.getLB(), -29);
+        Assert.assertEquals(x.getUB(), -29);
+    }
+
     @Test(groups="1s", timeOut=60000)
     public void testJL1() throws ContradictionException {
         Solver s = new Solver();
@@ -666,6 +700,72 @@ public class BitsetIntVarImplTest {
         i.updateBounds(1, 100, Cause.Null);
         Assert.assertEquals(i.getLB(), 50);
         Assert.assertEquals(i.getUB(), 50);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNextOut1(){
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", -1, 1, solver);
+        Assert.assertEquals(x.nextValueOut(-4), -3);
+        Assert.assertEquals(x.nextValueOut(-3), -2);
+        Assert.assertEquals(x.nextValueOut(-2), 2);
+        Assert.assertEquals(x.nextValueOut(2), 3);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNextOut2() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", -1, 1, solver);
+        x.instantiateTo(-1, Cause.Null);
+        Assert.assertEquals(x.nextValueOut(-4), -3);
+        Assert.assertEquals(x.nextValueOut(-3), -2);
+        Assert.assertEquals(x.nextValueOut(-2), 0);
+        Assert.assertEquals(x.nextValueOut(0), 1);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNextOut3() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", new int[]{-2,-1,1,2,5,6,7}, solver);
+        Assert.assertEquals(x.nextValueOut(-4), -3);
+        Assert.assertEquals(x.nextValueOut(-3), 0);
+        Assert.assertEquals(x.nextValueOut(0), 3);
+        Assert.assertEquals(x.nextValueOut(3), 4);
+        Assert.assertEquals(x.nextValueOut(4), 8);
+        Assert.assertEquals(x.nextValueOut(8), 9);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testPreviousOut1(){
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", -1, 1, solver);
+        Assert.assertEquals(x.previousValueOut(4), 3);
+        Assert.assertEquals(x.previousValueOut(3), 2);
+        Assert.assertEquals(x.previousValueOut(2), -2);
+        Assert.assertEquals(x.previousValueOut(-2), -3);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testPreviousOut2() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", -1, 1, solver);
+        x.instantiateTo(1, Cause.Null);
+        Assert.assertEquals(x.previousValueOut(4), 3);
+        Assert.assertEquals(x.previousValueOut(3), 2);
+        Assert.assertEquals(x.previousValueOut(2), 0);
+        Assert.assertEquals(x.previousValueOut(0), -1);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testPreviousOut3() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VF.enumerated("X", new int[]{-2,-1,1,2,5,6,7}, solver);
+        Assert.assertEquals(x.previousValueOut(9), 8);
+        Assert.assertEquals(x.previousValueOut(8), 4);
+        Assert.assertEquals(x.previousValueOut(4), 3);
+        Assert.assertEquals(x.previousValueOut(3), 0);
+        Assert.assertEquals(x.previousValueOut(0), -3);
+        Assert.assertEquals(x.previousValueOut(-3), -4);
     }
 
 }

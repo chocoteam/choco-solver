@@ -55,6 +55,10 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 public class MinusView extends IntView {
 
 
+    /**
+     * Create a -<i>var<i/> view
+     * @param var a integer variable
+     */
     public MinusView(final IntVar var) {
         super("-(" + var.getName() + ")", var);
     }
@@ -289,10 +293,20 @@ public class MinusView extends IntView {
     }
 
     @Override
+    public int nextValueOut(int v) {
+        return -var.previousValueOut(-v);
+    }
+
+    @Override
     public int previousValue(int v) {
         int value = var.nextValue(-v);
         if (value == Integer.MAX_VALUE) return Integer.MIN_VALUE;
         return -value;
+    }
+
+    @Override
+    public int previousValueOut(int v) {
+        return -var.nextValueOut(-v);
     }
 
     @Override

@@ -58,28 +58,58 @@ import java.util.BitSet;
  */
 public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
+    /**
+     * Serial number for serialization purpose
+     */
     private static final long serialVersionUID = 1L;
-
+    /**
+     * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
+     * on value removal
+     */
     protected boolean reactOnRemoval = false;
-
-    //  Bitset of available values -- includes offset
+    /**
+     * Bitset of available values -- includes offset
+     */
     private final IStateBitSet VALUES;
-    // Lower bound of the current domain -- includes offset
+    /**
+     * Lower bound of the current domain -- includes offset
+     */
     private final IStateInt LB;
-    // Upper bound of the current domain -- includes offset
+    /**
+     * Upper bound of the current domain -- includes offset
+     */
     private final IStateInt UB;
+    /**
+     * Current size of domain
+     */
     private final IStateInt SIZE;
-    //offset of the lower bound and the first value in the domain
+    /**
+     * offset of the lower bound and the first value in the domain
+     */
     private final int OFFSET;
+    /**
+     * number of total bits used
+     */
     private final int LENGTH;
-
+    /**
+     * To iterate over removed values
+     */
     private IEnumDelta delta = NoDelta.singleton;
-
+    /**
+     * To iterate over values in the domain
+     */
     private DisposableValueIterator _viterator;
+    /**
+     * To iterate over ranges
+     */
     private DisposableRangeIterator _riterator;
 
-    //////////////////////////////////////////////////////////////////////////////////////
-
+    /**
+     * Create an enumerated IntVar based on a bitset
+     * @param name name of the variable
+     * @param sortedValues original domain values
+     * @param solver declaring solver
+     */
     public BitsetIntVarImpl(String name, int[] sortedValues, Solver solver) {
         super(name, solver);
         IEnvironment env = solver.getEnvironment();
@@ -95,6 +125,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         LENGTH = capacity;
     }
 
+    /**
+     * Create an enumerated IntVar based on a bitset
+     * @param name name of the variable
+     * @param offset lower bound
+     * @param values values in the domain (bit to true + offset)
+     * @param solver declaring solver
+     */
     private BitsetIntVarImpl(String name, int offset, BitSet values, Solver solver) {
         super(name, solver);
         IEnvironment env = this.solver.getEnvironment();
@@ -110,6 +147,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         LENGTH = this.UB.get();
     }
 
+    /**
+     * Create an enumerated IntVar based on a bitset
+     * @param name name of the variable
+     * @param min lower bound
+     * @param max upper bound
+     * @param solver declaring solver
+     */
     public BitsetIntVarImpl(String name, int min, int max, Solver solver) {
         super(name, solver);
         IEnvironment env = this.solver.getEnvironment();
@@ -253,10 +297,28 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        assert cause != null;
         int olb = getLB();
         int oub = getUB();
         int nlb = values.nextValue(olb - 1);
         int nub = values.previousValue(oub + 1);
+        int i;
+        if (nlb != olb) {
+            // look for the new lb
+            do {
+                i = VALUES.nextSetBit(olb - OFFSET + 1);
+                olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
+                nlb = values.nextValue(olb - 1);
+            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb != olb);
+        }
+        if (nub != oub && nlb <= nub) {
+            // look for the new ub
+            do {
+                i = VALUES.prevSetBit(oub - OFFSET - 1);
+                oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
+                nub = values.previousValue(oub + 1);
+            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub != oub);
+        }
         // the new bounds are now known, delegate to the right method
         boolean hasChanged = updateBounds(nlb, nub, cause);
         // now deal with holes
@@ -641,6 +703,16 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
+    public int nextValueOut(int aValue) {
+        int lb = getLB();
+        int ub = getUB();
+        if(lb - 1 <= aValue && aValue <= ub){
+            return VALUES.nextClearBit(aValue -OFFSET + 1) + OFFSET;
+        }
+        return aValue + 1;
+    }
+
+    @Override
     public int previousValue(int aValue) {
         aValue -= OFFSET;
         int ub = UB.get();
@@ -648,6 +720,16 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         aValue = VALUES.prevSetBit(aValue - 1);
         if (aValue > -1) return aValue + OFFSET;
         return Integer.MIN_VALUE;
+    }
+
+    @Override
+    public int previousValueOut(int aValue) {
+        int lb = getLB();
+        int ub = getUB();
+        if(lb <= aValue && aValue <= ub + 1){
+            return VALUES.prevClearBit(aValue -OFFSET - 1) + OFFSET;
+        }
+        return aValue - 1;
     }
 
     @Override
@@ -694,12 +776,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new EnumDeltaMonitor(delta, propagator);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
@@ -722,6 +806,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         return VAR | INT;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IntVar duplicate() {
         return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), solver);
@@ -734,6 +819,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {
 
+                /**
+                 * Current value
+                 */
                 int value;
 
                 @Override
@@ -786,7 +874,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeIterator() {
 
+                /**
+                 * Lower bound of the current range
+                 */
                 int from;
+                /**
+                 * Upper bound of the current range
+                 */
                 int to;
 
                 @Override

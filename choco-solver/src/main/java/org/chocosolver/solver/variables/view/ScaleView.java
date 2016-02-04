@@ -55,6 +55,11 @@ public final class ScaleView extends IntView {
 
     public final int cste;
 
+    /**
+     * Create a <i>cste<i/> &times; <i>var<i/> view
+     * @param var a variable
+     * @param cste a positive integer
+     */
     public ScaleView(final IntVar var, final int cste) {
         super("(" + var.getName() + "*" + cste + ")", var);
         assert (cste > 0) : "view cste must be >0";
@@ -305,12 +310,22 @@ public final class ScaleView extends IntView {
     }
 
     @Override
+    public int nextValueOut(int v) {
+        return var.nextValue(MathUtils.divFloor(v, cste)) * cste;
+    }
+
+    @Override
     public int previousValue(int v) {
         int value = var.previousValue(MathUtils.divCeil(v, cste));
         if (value == Integer.MIN_VALUE) {
             return Integer.MIN_VALUE;
         }
         return value * cste;
+    }
+
+    @Override
+    public int previousValueOut(int v) {
+        return var.previousValueOut(MathUtils.divCeil(v, cste)) * cste;
     }
 
     @Override

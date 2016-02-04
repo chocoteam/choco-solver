@@ -57,20 +57,48 @@ import org.chocosolver.util.tools.StringUtils;
  */
 public final class IntervalIntVarImpl extends AbstractVariable implements IntVar {
 
+    /**
+     * Serial number for serialization purpose
+     */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
+     * on value removal
+     */
     protected boolean reactOnRemoval = false;
-
-    private final IStateInt LB, UB, SIZE;
-
+    /**
+     * Lower bound of the current domain
+     */
+    private final IStateInt LB;
+    /**
+     * Upper bound of the current domain
+     */
+    private final IStateInt UB;
+    /**
+     * Current size of domain
+     */
+    private final IStateInt SIZE;
+    /**
+     * To iterate over removed values
+     */
     IIntervalDelta delta = NoDelta.singleton;
-
+    /**
+     * To iterate over values in the domain
+     */
     private DisposableValueIterator _viterator;
-
+    /**
+     * To iterate over ranges
+     */
     private DisposableRangeIterator _riterator;
 
-    //////////////////////////////////////////////////////////////////////////////////////
-
+    /**
+     * Create a bounded domain IntVar : [min,max]
+     * @param name name of the variable
+     * @param min lower bound
+     * @param max upper bound
+     * @param solver declaring solver
+     */
     public IntervalIntVarImpl(String name, int min, int max, Solver solver) {
         super(name, solver);
         IEnvironment env = solver.getEnvironment();
@@ -481,6 +509,16 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
+    public int nextValueOut(int v) {
+        int ub = UB.get();
+        if (LB.get() - 1 <= v && v <= ub) {
+            return ub + 1;
+        }else{
+            return v + 1;
+        }
+    }
+
+    @Override
     public int previousValue(int aValue) {
         int ub = UB.get();
         if (aValue > ub) {
@@ -489,6 +527,16 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             return aValue - 1;
         } else {
             return Integer.MIN_VALUE;
+        }
+    }
+
+    @Override
+    public int previousValueOut(int v) {
+        int lb = LB.get();
+        if (lb <= v && v <= UB.get() + 1) {
+            return lb - 1;
+        }else{
+            return v - 1;
         }
     }
 
@@ -523,12 +571,14 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new IntervalDeltaMonitor(delta, propagator);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
@@ -549,6 +599,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return VAR | INT;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public IntVar duplicate() {
         return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), solver);

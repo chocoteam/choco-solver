@@ -104,7 +104,7 @@ public class ViewsTest {
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
-            check(ref, solver, seed, true, true);
+            check(ref, solver, seed, false, true);
         }
     }
 
@@ -321,14 +321,14 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = VariableFactory.enumerated("Z", -200, 200, solver);
+                IntVar z = VariableFactory.enumerated("z", -200, 200, solver);
                 Constraint cstr = IntConstraintFactory.sum(new IntVar[]{z, y}, "=", x);
                 solver.post(cstr);
 //				System.out.println(cstr);
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
 
             }
-            check(ref, solver, seed, true, true);
+            check(ref, solver, seed, false, true);
         }
     }
 
@@ -378,11 +378,11 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar diff = VariableFactory.enumerated("diff", -2, 2, solver);
-                solver.post(IntConstraintFactory.sum(new IntVar[]{diff, y}, "=", x));
-                IntVar z = VariableFactory.abs(diff);
-                solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, z}, "BC"));
-                solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
+                IntVar z = VariableFactory.enumerated("z", -2, 2, solver);
+                solver.post(new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
+                IntVar az = VariableFactory.abs(z);
+                solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, az}, "BC"));
+                solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
             }
             check(ref, solver, seed, true, true);
         }
@@ -414,7 +414,7 @@ public class ViewsTest {
                 IntVar[] t = new IntVar[k - 1];
                 for (int i = 0; i < k - 1; i++) {
                     IntVar z = VariableFactory.enumerated("Z", -200, 200, solver);
-                    solver.post(IntConstraintFactory.sum(new IntVar[]{z, x[i]}, "=", x[i + 1]));
+                    solver.post(new Constraint("SP", new PropScalar(new IntVar[]{x[i + 1], x[i], z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
                     t[i] = VariableFactory.abs(z);
                 }
                 solver.post(IntConstraintFactory.alldifferent(x, "BC"));

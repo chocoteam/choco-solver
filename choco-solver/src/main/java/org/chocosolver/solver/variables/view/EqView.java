@@ -48,6 +48,10 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class EqView extends IntView {
 
+    /**
+     * Create an equality view of <i>var<i/> 
+     * @param var an integer variable
+     */
     public EqView(IntVar var) {
         super("eq(" + var.getName() + ")", var);
     }
@@ -277,8 +281,18 @@ public class EqView extends IntView {
     }
 
     @Override
+    public int nextValueOut(int v) {
+        return var.nextValueOut(v);
+    }
+
+    @Override
     public int previousValue(int v) {
         return var.previousValue(v);
+    }
+
+    @Override
+    public int previousValueOut(int v) {
+        return var.previousValueOut(v);
     }
 
     @Override
