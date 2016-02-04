@@ -46,9 +46,12 @@ import java.util.Arrays;
  * <p>
  * Note that, for the sack of readability, the Java naming convention is not respected for methods arguments.
  *
+ * Deprecated : variable creation should be done through the {@code Solver} object which extends {@code IModeler}
+ *
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18 nov. 2010
  */
+@Deprecated
 public class VariableFactory {
 
     VariableFactory() {

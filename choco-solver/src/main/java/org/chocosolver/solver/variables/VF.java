@@ -33,9 +33,12 @@ package org.chocosolver.solver.variables;
  * A short-named version of {@code VariableFactory}
  * <br/>
  *
+ * Deprecated : variable creation should be done through the {@code Solver} object which extends {@code IModeler}
+ *
  * @author Charles Prud'homme
  * @since 15/05/13
  */
+@Deprecated
 public final class VF extends VariableFactory{
     // SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
 }

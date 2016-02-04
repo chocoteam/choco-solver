@@ -53,7 +53,7 @@ public interface IVariableFactory {
     //*************************************************************************************
 
     /**
-     * Create a constant boolean variable equal to 1 if value and 0 otherwise
+     * Create a constant boolean variable equal to 1 if <i>value</i> is true and 0 otherwise
      * @param value constant value of the boolean variable (true or false)
      * @return a constant of type BoolVar
      */
@@ -141,7 +141,7 @@ public interface IVariableFactory {
     // SINGLE
 
     /**
-     * Create a constant integer variable
+     * Create a constant integer variable equal to <i>value</i>
      * @param value constant value of the variable
      * @return a constant IntVar of domain {<i>value</i>}
      */
@@ -182,7 +182,7 @@ public interface IVariableFactory {
     }
 
     /**
-     * Create a constant integer variable
+     * Create a constant integer variable equal to <i>value</i>
      * @param name name of the variable
      * @param value value of the variable
      * @return a constant IntVar of domain {<i>value</i>}
