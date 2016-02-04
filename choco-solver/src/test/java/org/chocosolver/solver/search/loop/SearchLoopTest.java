@@ -40,7 +40,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -120,7 +119,7 @@ public class SearchLoopTest {
     @Test(groups="1s", timeOut=60000)
     public void test2DDS2() {
         Solver solver = new Solver();
-        IntVar[] bs = VF.boolArray("b", 4, solver);
+        IntVar[] bs = solver.boolVarArray("b", 4);
         dds(solver, ISF.lexico_LB(bs), 3);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);

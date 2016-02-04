@@ -41,8 +41,6 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.variables.VariableFactory.bool;
-
 /**
  * <p>
  * Project: choco.
@@ -188,7 +186,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals1() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -1, 1, 2, 4);
@@ -200,7 +198,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals21() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -2);
@@ -211,7 +209,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals22() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
         rems.add(-4);
@@ -222,7 +220,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals3() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(1, 2, 3);
@@ -233,7 +231,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals31() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(4);
@@ -245,7 +243,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemVals41() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 0, 1);
@@ -255,7 +253,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals42() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(0);
@@ -265,7 +263,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemVals5() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-1);
         rems.addAll(-1, 0, 1);
@@ -276,7 +274,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds1() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         x.updateBounds(-2, 2, Cause.Null);
         Assert.assertEquals(x.getLB(), 0);
         Assert.assertEquals(x.getUB(), 1);
@@ -285,7 +283,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds2() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         x.updateBounds(-2, 0, Cause.Null);
         Assert.assertEquals(x.getLB(), 0);
         Assert.assertEquals(x.getUB(), 0);
@@ -294,7 +292,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds3() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         x.updateBounds(1, 4, Cause.Null);
         Assert.assertEquals(x.getLB(), 1);
         Assert.assertEquals(x.getUB(), 1);
@@ -303,7 +301,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds4() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         x.updateBounds(0, 0, Cause.Null);
         Assert.assertTrue(x.isInstantiatedTo(0));
     }
@@ -311,14 +309,14 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testUpdBounds5() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         x.updateBounds(4, -2, Cause.Null);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut1() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 1, 2, 4);
@@ -331,7 +329,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut21() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(0, 1);
@@ -343,7 +341,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut22() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
         rems.add(-4);
@@ -353,7 +351,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut3() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(1, 2, 3);
@@ -365,7 +363,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut31() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(4);
@@ -376,7 +374,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut41() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 0, 1);
@@ -386,7 +384,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut42() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(0);
@@ -397,7 +395,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testNextOut1(){
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         Assert.assertEquals(x.nextValueOut(-2), -1);
         Assert.assertEquals(x.nextValueOut(-1), 2);
         Assert.assertEquals(x.nextValueOut(2), 3);
@@ -406,7 +404,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testNextOut2() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         x.instantiateTo(0, Cause.Null);
         Assert.assertEquals(x.nextValueOut(-2), -1);
         Assert.assertEquals(x.nextValueOut(-1), 1);
@@ -416,7 +414,7 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testPreviousOut1(){
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         Assert.assertEquals(x.previousValueOut(3), 2);
         Assert.assertEquals(x.previousValueOut(2), -1);
         Assert.assertEquals(x.previousValueOut(-1), -2);
@@ -425,13 +423,11 @@ public class BoolVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testPreviousOut2() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = bool("X", solver);
+        IntVar x = solver.boolVar();
         x.instantiateTo(1, Cause.Null);
         Assert.assertEquals(x.previousValueOut(4), 3);
         Assert.assertEquals(x.previousValueOut(3), 2);
         Assert.assertEquals(x.previousValueOut(2), 0);
         Assert.assertEquals(x.previousValueOut(0), -1);
     }
-
-
 }

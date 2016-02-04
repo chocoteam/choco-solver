@@ -54,8 +54,7 @@ import java.util.Arrays;
 @Deprecated
 public class VariableFactory {
 
-    VariableFactory() {
-    }
+    VariableFactory() {}
 
     public static final String CSTE_NAME = "cste -- ";
 
@@ -532,7 +531,7 @@ public class VariableFactory {
      * @param SOLVER the solver to build the integer variable in.
      */
     public static IntVar fixed(int VALUE, Solver SOLVER) {
-        return fixed(CSTE_NAME + VALUE, VALUE, SOLVER);
+        return SOLVER.intVar(VALUE);
     }
 
     /**
@@ -569,19 +568,7 @@ public class VariableFactory {
      * @param SOLVER the solver to build the integer variable in.
      */
     public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
-        if (NAME.equals(CSTE_NAME + VALUE) && SOLVER.cachedConstants.containsKey(VALUE)) {
-            return SOLVER.cachedConstants.get(VALUE);
-        }
-        IntVar cste;
-        if (VALUE == 0 || VALUE == 1) {
-            cste = new FixedBoolVarImpl(NAME, VALUE, SOLVER);
-        } else {
-            cste = new FixedIntVarImpl(NAME, VALUE, SOLVER);
-        }
-        if (NAME.equals(CSTE_NAME + VALUE)) {
-            SOLVER.cachedConstants.put(VALUE, cste);
-        }
-        return cste;
+        return SOLVER.intVar(NAME, VALUE);
     }
 
     /**
