@@ -378,11 +378,11 @@ public class ViewsTest {
             {
                 IntVar x = solver.intVar("x", 0, 2, false);
                 IntVar y = solver.intVar("y", 0, 2, false);
-                IntVar diff = solver.intVar("diff", -2, 2, false);
-                solver.post(IntConstraintFactory.sum(new IntVar[]{diff, y}, "=", x));
-                IntVar z = solver.intAbsView(diff);
-                solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, z}, "BC"));
-                solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
+                IntVar z = solver.intVar("z", -2, 2, false);
+                solver.post(new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
+                IntVar az = solver.intAbsView(z);
+                solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, az}, "BC"));
+                solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
             }
             check(ref, solver, seed, true, true);
         }
@@ -414,7 +414,7 @@ public class ViewsTest {
                 IntVar[] t = new IntVar[k - 1];
                 for (int i = 0; i < k - 1; i++) {
                     IntVar z = solver.intVar("Z", -200, 200, false);
-                    solver.post(IntConstraintFactory.sum(new IntVar[]{z, x[i]}, "=", x[i + 1]));
+                    solver.post(new Constraint("SP", new PropScalar(new IntVar[]{x[i + 1], x[i], z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
                     t[i] = solver.intAbsView(z);
                 }
                 solver.post(IntConstraintFactory.alldifferent(x, "BC"));
