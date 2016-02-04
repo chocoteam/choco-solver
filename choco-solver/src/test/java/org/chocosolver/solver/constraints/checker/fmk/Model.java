@@ -67,7 +67,7 @@ public interface Model {
             }
             SetVar[] sets = new SetVar[n - 1];
             System.arraycopy(vars, 0, sets, 0, n - 1);
-            Constraint ctr = SetConstraintsFactory.union(sets, vars[n - 1]);
+            Constraint ctr = s.union(sets, vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
             s.post(ctrs);
@@ -91,7 +91,7 @@ public interface Model {
             }
             SetVar[] sets = new SetVar[n - 1];
             System.arraycopy(vars, 0, sets, 0, n - 1);
-            Constraint ctr = SetConstraintsFactory.intersection(sets, vars[n - 1]);
+            Constraint ctr = s.intersection(sets, vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
             s.post(ctrs);
@@ -157,7 +157,7 @@ public interface Model {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = SetConstraintsFactory.subsetEq(vars);
+            Constraint ctr = s.subsetEq(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
             s.post(ctrs);

@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
-import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
@@ -92,8 +91,8 @@ public class DeltaTest {
         final BoolVar b1 = solver.boolVar("b1");
         final IntVar i0 = solver.boolVar("i0");
         solver.set(ISF.lexico_LB(i0));
-        solver.post(SCF.bool_channel(new BoolVar[]{b0, b1}, s0, 0));
-        solver.post(SCF.cardinality(s0, solver.intVar(0)));
+        solver.post(solver.setBoolsChanneling(new BoolVar[]{b0, b1}, s0, 0));
+        solver.post(solver.cardinality(s0, solver.intVar(0)));
 
         solver.findSolution();
         solver.getSearchLoop().reset();

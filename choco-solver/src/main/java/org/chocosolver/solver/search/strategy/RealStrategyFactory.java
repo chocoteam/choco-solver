@@ -33,7 +33,6 @@ import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
-import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.RealVar;

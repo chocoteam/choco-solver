@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
-import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.constraints.ternary.Max;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -473,7 +472,7 @@ public class ViewsTest {
         Solver solver = new Solver();
         SetVar v1 = solver.setVar("{0,1}", new int[]{0, 1});
         SetVar v2 = solver.setVar("v2", new int[]{}, new int[]{0,1,2,3});
-        solver.post(SCF.subsetEq(new SetVar[]{v1, v2}));
+        solver.post(solver.subsetEq(new SetVar[]{v1, v2}));
         solver.set(SetStrategyFactory.force_first(new SetVar[]{v1, v2}));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
@@ -496,8 +495,8 @@ public class ViewsTest {
         BoolVar bool = s.boolVar("bool");
         BoolVar view = s.boolEqView(bool);
         SetVar set = s.setVar("set", new int[]{}, new int[]{0,1});
-        s.post(SCF.bool_channel(new BoolVar[]{view, bool}, set, 0));
-        s.post(SCF.member(s.ONE(), set));
+        s.post(s.setBoolsChanneling(new BoolVar[]{view, bool}, set, 0));
+        s.post(s.member(s.ONE(), set));
         s.set(ISF.minDom_UB(bool));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);

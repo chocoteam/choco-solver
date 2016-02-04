@@ -27,18 +27,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver;
-
-import org.chocosolver.solver.constraints.IConstraintFactory;
-import org.chocosolver.solver.variables.IVariableFactory;
-import org.chocosolver.solver.variables.IViewFactory;
+package org.chocosolver.solver.constraints;
 
 /**
- * Interface to ease modeling
- * Enables to make variables, views and constraints
+ * Interface to make constraints over BoolVar, IntVar, RealVar and SetVar
+ *
+ * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface IModeler extends IVariableFactory, IViewFactory, IConstraintFactory {
+public interface IConstraintFactory extends IIntConstraintFactory, ILogicalConstraintFactory, IRealConstraintFactory, ISetConstraintFactory {
 
 }

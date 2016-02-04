@@ -38,7 +38,6 @@ package org.chocosolver.samples.set;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.variables.SetVar;
 
@@ -71,9 +70,9 @@ public class SetUnion extends AbstractProblem {
         // z initial domain
         z = solver.setVar("z", new int[]{}, new int[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7});
         // set-union constraint
-		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
+		solver.post(solver.union(new SetVar[]{x, y}, z));
         if (noEmptySet) {
-            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, solver.intVar(0)));
+            solver.post(solver.nbEmpty(new SetVar[]{x, y, z}, solver.intVar(0)));
         }
     }
 

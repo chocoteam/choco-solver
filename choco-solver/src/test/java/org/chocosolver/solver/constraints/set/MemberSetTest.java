@@ -88,7 +88,7 @@ public class MemberSetTest {
                     Solver solver = new Solver();
                     SetVar s = solver.setVar("s", new int[]{}, doms[0]);
                     IntVar i = solver.intVar("i", doms[1]);
-                    solver.post(SCF.member(i, s));
+                    solver.post(solver.member(i, s));
                     //Chatterbox.showSolutions(solver);
                     Assert.assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
                             Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
@@ -117,7 +117,7 @@ public class MemberSetTest {
                     Solver solver = new Solver();
                     SetVar s = solver.setVar("s", new int[]{}, doms[0]);
                     IntVar i = solver.intVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
-                    solver.post(SCF.member(i, s));
+                    solver.post(solver.member(i, s));
                     //Chatterbox.showSolutions(solver);
                     Assert.assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
                             Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));

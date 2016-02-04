@@ -98,10 +98,10 @@ public class Partition extends AbstractProblem {
 		solver.post(SetConstraintsFactory.partition(new SetVar[]{x, y, z}, universe));
 		if (noEmptySet) {
 			// forbid empty sets
-			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, solver.intVar(0)));
+			solver.post(solver.nbEmpty(new SetVar[]{x, y, z, universe}, solver.intVar(0)));
 		}
 		// restricts the sum of elements in universe
-		solver.post(SetConstraintsFactory.sum(universe, sum, true));
+		solver.post(solver.sum(universe, sum, true));
     }
 
     @Override

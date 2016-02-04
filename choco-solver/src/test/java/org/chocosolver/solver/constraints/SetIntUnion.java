@@ -35,7 +35,6 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.set.SCF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
@@ -50,7 +49,7 @@ public class SetIntUnion {
         Solver s = new Solver();
         IntVar[] x = s.intVarArray("ints", 4, 0, 5, false);
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
-        s.post(SCF.int_values_union(x, values));
+        s.post(s.union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
         s.set(ISF.lexico_LB(x));
@@ -68,7 +67,7 @@ public class SetIntUnion {
                 , s.intVar(2)
         };
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
-        s.post(SCF.int_values_union(x, values));
+        s.post(s.union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
         s.set(ISF.lexico_LB(x));
@@ -87,7 +86,7 @@ public class SetIntUnion {
                 , s.intVar(2)
         };
         SetVar values = s.setVar("values", new int[]{}, new int[]{-1,0,1,2,3,4,5,6});
-        s.post(SCF.int_values_union(x, values));
+        s.post(s.union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
         s.set(ISF.lexico_LB(x));

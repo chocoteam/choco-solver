@@ -50,7 +50,7 @@ public class SetCstrsTest {
 	@Test(groups="1s", timeOut=60000)
 	public static void testEq() {
 		IntVar[] v1 = eqFilter("offset");
-		IntVar[] v2 = eqFilter("all_equal");
+		IntVar[] v2 = eqFilter("allEqual");
 		for(int i=0;i<v1.length;i++) {
 			Assert.assertEquals(v1[i].getDomainSize(), v2[i].getDomainSize());
 			for(int v=v1[i].getLB();v<=v1[i].getUB();v=v1[i].nextValue(v)){
@@ -72,27 +72,27 @@ public class SetCstrsTest {
 		// set view of A
 		SetVar xset = s.setVar("x as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		SetVar yset = s.setVar("y as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		s.post(SCF.int_values_union(new IntVar[]{x},xset));
-		s.post(SCF.int_values_union(new IntVar[]{y},yset));
+		s.post(s.union(new IntVar[]{x},xset));
+		s.post(s.union(new IntVar[]{y},yset));
 		// X +9 <= Y or Y + 9 <= X
 		SetVar Xleft = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		SetVar tmpLeft = s.setVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
-		s.post(SCF.offSet(Xleft,tmpLeft,9));
+		s.post(s.offSet(Xleft,tmpLeft,9));
 		SetVar Yleft = s.setVar("",  new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(eq(tmpLeft, Yleft,mode));
 
 		SetVar Yright = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		SetVar tmpRight = s.setVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
-		s.post(SCF.offSet(Yright,tmpRight,9));
+		s.post(s.offSet(Yright,tmpRight,9));
 		SetVar Xright = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(eq(tmpRight, Xright,mode));
 
 		//
-		s.post(SCF.union(new SetVar[]{Xleft, Xright}, xset));
-		s.post(SCF.union(new SetVar[]{Yleft,Yright},yset));
+		s.post(s.union(new SetVar[]{Xleft, Xright}, xset));
+		s.post(s.union(new SetVar[]{Yleft,Yright},yset));
 		// link to booleans
-		BoolVar b1 = SCF.notEmpty(Yleft).reif();
-		BoolVar b2 = SCF.notEmpty(Yright).reif();
+		BoolVar b1 = s.notEmpty(Yleft).reif();
+		BoolVar b2 = s.notEmpty(Yright).reif();
 		// ---
 		SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
 		Chatterbox.showStatistics(s);
@@ -111,9 +111,9 @@ public class SetCstrsTest {
 
 	public static Constraint eq(SetVar x, SetVar y, String mode){
 		switch (mode){
-			case "offset":return SCF.offSet(x, y, 0);
+			case "offset":return x.getSolver().offSet(x, y, 0);
 			default:
-			case "all_equal":return SCF.all_equal(x, y);
+			case "allEqual":return x.getSolver().allEqual(x, y);
 		}
 	}
 }
