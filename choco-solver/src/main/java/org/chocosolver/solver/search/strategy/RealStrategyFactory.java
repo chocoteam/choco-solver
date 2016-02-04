@@ -84,7 +84,7 @@ public class RealStrategyFactory {
      * Selects the variable lower bound
      */
     public static RealValueSelector mid_value_selector() {
-        return new RealDomainMin();
+        return new RealDomainMiddle();
     }
 
     /**
