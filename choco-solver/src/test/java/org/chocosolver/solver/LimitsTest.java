@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.Move;

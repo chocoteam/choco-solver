@@ -33,7 +33,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -269,7 +268,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return VariableFactory.not(this.var);
+        return solver.boolNotView(this.var);
     }
 
     @Override

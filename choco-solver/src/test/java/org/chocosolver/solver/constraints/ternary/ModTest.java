@@ -36,8 +36,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -62,8 +60,8 @@ public class ModTest extends AbstractTernaryTest {
 	@Test(groups="1s", timeOut=60000)
 	public void test2() {
 		Solver solver = new Solver();
-		IntVar res = VariableFactory.bounded("r", 1, 2, solver);
-		solver.post(IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver)));
+		IntVar res = solver.intVar("r", 1, 2, true);
+		solver.post(IntConstraintFactory.mod(res, solver.intVar(2), solver.intVar(1)));
 		try {
 			solver.propagate();
 			Assert.assertTrue(res.isInstantiatedTo(1));
@@ -75,9 +73,9 @@ public class ModTest extends AbstractTernaryTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testJL() {
 		Solver s = new Solver();
-		IntVar dividend = VF.enumerated("dividend", 2, 3, s);
-		IntVar divisor = VF.fixed(1, s);
-		IntVar remainder = VF.enumerated("remainder", 1, 2, s);
+		IntVar dividend = s.intVar("dividend", 2, 3, false);
+		IntVar divisor = s.intVar(1);
+		IntVar remainder = s.intVar("remainder", 1, 2, false);
 		s.post(ICF.mod(dividend, divisor, remainder).getOpposite());
 		s.set(ISF.lexico_LB(dividend, divisor, remainder));
 		s.findSolution();

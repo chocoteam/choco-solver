@@ -37,7 +37,6 @@ import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +71,8 @@ public class GlobalCardinality extends Constraint {
     public static Constraint[] reformulate(IntVar[] vars, IntVar[] card, Solver solver) {
         List<Constraint> cstrs = new ArrayList<>();
         for (int i = 0; i < card.length; i++) {
-            IntVar cste = VF.fixed(i, solver);
-            BoolVar[] bs = VF.boolArray("b_" + i, vars.length, solver);
+			IntVar cste = solver.intVar(i);
+			BoolVar[] bs = solver.boolVarArray("b_" + i, vars.length);
             for (int j = 0; j < vars.length; j++) {
                 LCF.ifThenElse(bs[j], ICF.arithm(vars[j], "=", cste), ICF.arithm(vars[j], "!=", cste));
             }

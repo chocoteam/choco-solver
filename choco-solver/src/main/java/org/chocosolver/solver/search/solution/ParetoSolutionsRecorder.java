@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.nary.cnf.PropSat;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 
 /**
  * Class to store the pareto front (multi-objective optimization).
@@ -86,7 +85,7 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
                 symbol = Operator.LT;
             }
             for (int i = 0; i < n; i++) {
-                bvars[i] = VF.bool("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")", solver);
+                bvars[i] = solver.boolVar("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")");
                 ICF.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
                 lits[i] = psat.Literal(bvars[i]);
             }

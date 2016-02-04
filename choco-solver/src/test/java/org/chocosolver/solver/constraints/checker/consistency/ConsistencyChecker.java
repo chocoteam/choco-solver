@@ -30,8 +30,8 @@
 package org.chocosolver.solver.constraints.checker.consistency;
 
 import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.constraints.checker.Modeler;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.checker.Modeler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -40,10 +40,10 @@ import java.io.IOException;
 import java.util.Random;
 
 import static java.lang.System.arraycopy;
+import static org.chocosolver.solver.Solver.writeInFile;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildDomainsFromVar;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
 import static org.chocosolver.solver.constraints.checker.consistency.ConsistencyChecker.Consistency.valueOf;
-import static org.chocosolver.solver.Solver.writeInFile;
 import static org.testng.Assert.fail;
 
 /**

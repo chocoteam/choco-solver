@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.Random;
 
@@ -63,7 +62,7 @@ public class Table extends AbstractProblem {
 	public void buildModel() {
 		vars = new IntVar[n];
 		for (int i = 0; i < vars.length; i++) {
-			vars[i] = VariableFactory.enumerated("Q_" + i, lowB, upB, solver);
+			vars[i] = solver.intVar("Q_" + i, lowB, upB, false);
 		}
 		Random rand = new Random(12);
 		Tuples tuples = new Tuples(true);

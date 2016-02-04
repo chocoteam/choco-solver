@@ -34,11 +34,11 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
+
+import static java.lang.String.format;
 
 /**
  * CSPLib prob028:<br/>
@@ -96,7 +96,7 @@ public class BIBD extends AbstractProblem {
         _vars = new BoolVar[b][v];
         for (int i = 0; i < v; i++) {
             for (int j = 0; j < b; j++) {
-                vars[i][j] = VariableFactory.bool("V(" + i + "," + j + ")", solver);
+                vars[i][j] = solver.boolVar("V(" + i + "," + j + ")");
                 _vars[j][i] = vars[i][j];
             }
 
@@ -113,7 +113,7 @@ public class BIBD extends AbstractProblem {
         // Exactly l ones in scalar product between two different rows
         for (int i1 = 0; i1 < v; i1++) {
             for (int i2 = i1 + 1; i2 < v; i2++) {
-                BoolVar[] score = VariableFactory.boolArray(String.format("row(%d,%d)", i1, i2), b, solver);
+                BoolVar[] score = solver.boolVarArray(format("row(%d,%d)", i1, i2), b);
                 for (int j = 0; j < b; j++) {
                     solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }

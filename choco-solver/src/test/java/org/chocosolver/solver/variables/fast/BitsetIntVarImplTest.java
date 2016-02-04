@@ -33,7 +33,6 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
 import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
@@ -210,7 +209,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals0() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
@@ -219,7 +218,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals1() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -1, 1, 2, 4);
@@ -229,7 +228,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals11() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(2, 5, 8, 9);
@@ -240,7 +239,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals12() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(2, 5, 6, 8);
@@ -251,7 +250,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals13() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(2, 6, 9);
@@ -262,7 +261,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals14() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(5, 6, 8, 9);
@@ -273,7 +272,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemVals15() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(1, 2, 5, 6, 8, 9);
@@ -283,7 +282,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals21() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -2);
@@ -294,7 +293,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals22() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
         rems.add(-4);
@@ -305,7 +304,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals3() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(1, 2, 3);
@@ -316,7 +315,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals31() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(4);
@@ -328,7 +327,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals41() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 0, 1);
@@ -338,7 +337,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals42() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{-3, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{-3, 3});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(0);
@@ -348,7 +347,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemVals5() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -1, 1, solver);
+        IntVar x = solver.intVar("X", -1, 1, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-1);
         rems.addAll(-1, 0, 1);
@@ -359,7 +358,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals6() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{0, 2, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{0, 2, 3});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(0, 1, 2);
@@ -370,7 +369,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemVals7() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{0, 1, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{0, 1, 3});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(1, 2, 3);
@@ -381,7 +380,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testSte() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar v = VF.enumerated("V", new int[]{1, 2, 4, 5}, solver);
+        IntVar v = solver.intVar("V", new int[]{1, 2, 4, 5});
         v.removeValue(1, Cause.Null);
         IntVar w = v.duplicate();
         Assert.assertEquals(w.getLB(), v.getLB());
@@ -392,7 +391,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds1() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         x.updateBounds(-2, 2, Cause.Null);
         Assert.assertEquals(x.getLB(), -2);
         Assert.assertEquals(x.getUB(), 2);
@@ -401,7 +400,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds2() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         x.updateBounds(-2, 4, Cause.Null);
         Assert.assertEquals(x.getLB(), -2);
         Assert.assertEquals(x.getUB(), 3);
@@ -410,7 +409,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds3() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         x.updateBounds(-4, 2, Cause.Null);
         Assert.assertEquals(x.getLB(), -3);
         Assert.assertEquals(x.getUB(), 2);
@@ -419,7 +418,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds4() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         x.updateBounds(0, 0, Cause.Null);
         Assert.assertTrue(x.isInstantiatedTo(0));
     }
@@ -427,14 +426,14 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testUpdBounds5() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         x.updateBounds(4, -2, Cause.Null);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds6() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{-3, 0, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{-3, 0, 3});
         x.updateBounds(-2, 2, Cause.Null);
         Assert.assertEquals(x.getLB(), 0);
         Assert.assertEquals(x.getUB(), 0);
@@ -443,7 +442,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds7() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{-3, 0, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{-3, 0, 3});
         x.updateBounds(-2, 4, Cause.Null);
         Assert.assertEquals(x.getLB(), 0);
         Assert.assertEquals(x.getUB(), 3);
@@ -452,7 +451,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds8() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{-3, 0, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{-3, 0, 3});
         x.updateBounds(-4, 2, Cause.Null);
         Assert.assertEquals(x.getLB(), -3);
         Assert.assertEquals(x.getUB(), 0);
@@ -461,7 +460,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testUpdBounds9() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{-3, 0, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{-3, 0, 3});
         x.updateBounds(0, 0, Cause.Null);
         Assert.assertTrue(x.isInstantiatedTo(0));
     }
@@ -469,21 +468,21 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testUpdBounds10() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{-3, 0, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{-3, 0, 3});
         x.updateBounds(4, -2, Cause.Null);
     }
 
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testUpdBounds11() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         x.updateBounds(3, 4, Cause.Null);
     }
 
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut0() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
@@ -492,7 +491,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut1() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -1, 1, 2, 4);
@@ -512,7 +511,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut11() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(1, 6, 10, 11);
@@ -523,7 +522,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut12() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(9, 10, 11);
@@ -534,7 +533,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut13() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(2, 6, 9);
@@ -545,7 +544,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut14() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.add(2);
@@ -556,7 +555,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut15() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{2, 5, 6, 8, 9}, solver);
+        IntVar x = solver.intVar("X", new int[]{2, 5, 6, 8, 9});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(1, 3, 4);
@@ -566,7 +565,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut21() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 0, 1);
@@ -577,7 +576,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut22() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
         rems.addAll(-3, -2, -1, 0, 1, 2, 3);
@@ -589,7 +588,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut3() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(1, 2, 3);
@@ -600,7 +599,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut41() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -3, 3, solver);
+        IntVar x = solver.intVar("X", -3, 3, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -2, 2, 3);
@@ -610,7 +609,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut42() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{-3, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{-3, 3});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, 3);
@@ -620,7 +619,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut5() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", -1, 1, solver);
+        IntVar x = solver.intVar("X", -1, 1, false);
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(-1);
         rems.addAll(2, 3);
@@ -630,7 +629,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testRemValsBut6() throws ContradictionException {
         Solver solver = new Solver();
-        IntVar x = VF.enumerated("X", new int[]{0, 2, 3}, solver);
+        IntVar x = solver.intVar("X", new int[]{0, 2, 3});
         IntIterableSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(1, 2, 4);
@@ -676,7 +675,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL1() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = VF.enumerated("i", new int[]{0, 1, 100, 200}, s);
+        IntVar i = s.intVar("i", new int[]{0, 1, 100, 200});
         i.removeValue(100, Cause.Null);
         i.updateUpperBound(100, Cause.Null);
         Assert.assertEquals(i.getUB(), 1);
@@ -685,7 +684,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL2() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = VF.enumerated("i", new int[]{0, 1, 100, 200}, s);
+        IntVar i = s.intVar("i", new int[]{0, 1, 100, 200});
         i.removeValue(1, Cause.Null);
         i.updateLowerBound(1, Cause.Null);
         Assert.assertEquals(i.getLB(), 100);
@@ -694,7 +693,7 @@ public class BitsetIntVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL3() throws ContradictionException {
         Solver s = new Solver();
-        IntVar i = VF.enumerated("i", new int[]{0, 1, 50, 100, 200}, s);
+        IntVar i = s.intVar("i", new int[]{0, 1, 50, 100, 200});
         i.removeValue(1, Cause.Null);
         i.removeValue(100, Cause.Null);
         i.updateBounds(1, 100, Cause.Null);

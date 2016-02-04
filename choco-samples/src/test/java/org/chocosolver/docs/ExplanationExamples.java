@@ -36,7 +36,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.annotations.Test;
 
 /**
@@ -50,7 +49,7 @@ public class ExplanationExamples {
     @Test(groups="1s", timeOut=60000)
     public void dummy() {
         Solver solver = new Solver();
-        BoolVar[] bvars = VF.boolArray("B", 4, solver);
+        BoolVar[] bvars = solver.boolVarArray("B", 4);
         solver.post(ICF.arithm(bvars[2], "=", bvars[3]));
         solver.post(ICF.arithm(bvars[2], "!=", bvars[3]));
         solver.set(ISF.lexico_LB(bvars));
@@ -62,7 +61,7 @@ public class ExplanationExamples {
     @Test(groups="1s", timeOut=60000)
     public void pigeon() {
         Solver solver = new Solver();
-        IntVar[] pigeon = VF.enumeratedArray("p", 5, 1, 4, solver);
+        IntVar[] pigeon = solver.intVarArray("p", 5, 1, 4, false);
         for (int i = 0; i < 4; i++) {
             for (int j = i + 1; j < 5; j++) {
                 solver.post(ICF.arithm(pigeon[i], "!=", pigeon[j]));

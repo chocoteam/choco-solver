@@ -41,8 +41,8 @@ import java.util.Random;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
-import static org.chocosolver.solver.constraints.checker.fmk.Domain.*;
 import static org.chocosolver.solver.Solver.writeInFile;
+import static org.chocosolver.solver.constraints.checker.fmk.Domain.*;
 import static org.chocosolver.solver.variables.SetVar.END;
 import static org.testng.Assert.fail;
 

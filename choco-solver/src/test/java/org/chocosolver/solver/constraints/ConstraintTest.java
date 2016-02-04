@@ -35,7 +35,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -51,9 +50,9 @@ public class ConstraintTest {
     public void testBooleanChannelingJL() {
         //#issue 190
         Solver solver = new Solver();
-        BoolVar[] bs = VF.boolArray("bs", 3, solver);
-        SetVar s1 = VF.set("s1", -3, 3, solver);
-        SetVar s2 = VF.set("s2", -3, 3, solver);
+        BoolVar[] bs = solver.boolVarArray("bs", 3);
+        SetVar s1 = solver.setVar("s1", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
+        SetVar s2 = solver.setVar("s2", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
         solver.post(LCF.or(SCF.all_equal(new SetVar[]{s1, s2}), SCF.bool_channel(bs, s1, 0)));
         solver.findAllSolutions();
         Assert.assertEquals(2040, solver.getMeasures().getSolutionCount());
@@ -62,7 +61,7 @@ public class ConstraintTest {
     @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions() {
         Solver solver = new Solver();
-        IntVar[] ivs = VF.enumeratedArray("X", 4, 0, 10, solver);
+        IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
         solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
         solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
         solver.post(ICF.arithm(ivs[0], ">=", ivs[2])); // INST + UB or INST + LB
@@ -77,7 +76,7 @@ public class ConstraintTest {
     @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions2() {
         Solver solver = new Solver();
-        IntVar[] ivs = VF.enumeratedArray("X", 4, 0, 10, solver);
+        IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
         solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
         solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
         Constraint cr = ICF.arithm(ivs[0], ">=", ivs[2]);

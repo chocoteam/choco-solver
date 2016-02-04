@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -59,7 +58,7 @@ public class Ordering extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.boundedArray("v", n, 1, n, solver);
+        vars = solver.intVarArray("v", n, 1, n, true);
         cstrs = new Constraint[n - 1];
         for (int i = 0; i < n - 1; i++) {
             cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);

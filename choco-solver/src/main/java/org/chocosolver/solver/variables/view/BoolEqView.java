@@ -33,7 +33,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
@@ -70,7 +69,7 @@ public final class BoolEqView extends EqView implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return VF.eq(this.var);
+        return solver.boolEqView(this.var);
     }
 
     @Override

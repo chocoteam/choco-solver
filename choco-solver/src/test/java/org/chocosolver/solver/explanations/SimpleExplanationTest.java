@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -58,8 +57,8 @@ public class SimpleExplanationTest {
         // set varriables
         IntVar[] vars = new IntVar[3];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = enumerated ? VariableFactory.enumerated("x" + i, 1, vars.length, s)
-                    : VariableFactory.bounded("x" + i, 1, vars.length + 1, s);
+            vars[i] = enumerated ? s.intVar("x" + i, 1, vars.length, false)
+                    : s.intVar("x" + i, 1, vars.length + 1, true);
         }
         // post constraints
         Constraint[] lcstrs = new Constraint[3];

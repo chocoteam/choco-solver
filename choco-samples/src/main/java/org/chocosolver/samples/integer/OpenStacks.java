@@ -41,7 +41,6 @@ import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
@@ -91,43 +90,43 @@ public class OpenStacks extends AbstractProblem {
     @Override
     public void buildModel() {
         setUp();
-        scheds = VariableFactory.enumeratedArray("s", np, 0, np - 1, solver);
+        scheds = solver.intVarArray("s", np, 0, np - 1, false);
         solver.post(IntConstraintFactory.alldifferent(scheds, "BC"));
         o = new IntVar[nc][np + 1];
         for (int i = 0; i < nc; i++) {
-            o[i] = VariableFactory.enumeratedArray("o_" + i, np + 1, 0, norders[i], solver);
+            o[i] = solver.intVarArray("o_" + i, np + 1, 0, norders[i], false);
             // no order at t = 0
             solver.post(IntConstraintFactory.arithm(o[i][0], "=", 0));
         }
         for (int t = 1; t < np + 1; t++) {
             for (int i = 0; i < nc; i++) {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
-                IntVar value = VariableFactory.enumerated("val_" + t + "_" + i, 0, norders[i], solver);
+                IntVar value = solver.intVar("val_" + t + "_" + i, 0, norders[i], false);
                 solver.post(IntConstraintFactory.element(value, orders[i], scheds[t - 1], 0, "detect"));
                 solver.post(IntConstraintFactory.sum(new IntVar[]{o[i][t - 1], value}, "=", o[i][t]));
             }
         }
-        o2b = VariableFactory.boolMatrix("b", np, nc, solver);
+        o2b = solver.boolVarMatrix("b", np, nc);
         for (int i = 0; i < nc; i++) {
             for (int j = 1; j < np + 1; j++) {
-                BoolVar[] btmp = VariableFactory.boolArray("bT_" + i + "_" + j, 2, solver);
+                BoolVar[] btmp = solver.boolVarArray("bT_" + i + "_" + j, 2);
                 LogicalConstraintFactory.ifThenElse(btmp[0],
-                        IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver)),
-                        IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver)));
+                        IntConstraintFactory.arithm(o[i][j - 1], "<", solver.intVar(norders[i])),
+                        IntConstraintFactory.arithm(o[i][j - 1], ">=", solver.intVar(norders[i])));
 
                 LogicalConstraintFactory.ifThenElse(btmp[1],
-                        IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver)),
-                        IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver)));
+                        IntConstraintFactory.arithm(o[i][j], ">", solver.intVar(0)),
+                        IntConstraintFactory.arithm(o[i][j], "<=", solver.intVar(0)));
                 SatFactory.addClauses(LogOp.ifOnlyIf(o2b[j - 1][i], LogOp.and(btmp[0], btmp[1])), solver);
             }
         }
-        open = VariableFactory.boundedArray("open", np, 0, nc + 1, solver);
+        open = solver.intVarArray("open", np, 0, nc + 1, true);
         for (int i = 0; i < np; i++) {
             solver.post(IntConstraintFactory.sum(o2b[i], "=", open[i]));
         }
 
 
-        objective = VariableFactory.bounded("OBJ", 0, nc * np, solver);
+        objective = solver.intVar("OBJ", 0, nc * np, true);
         solver.post(ICF.maximum(objective, open));
     }
 

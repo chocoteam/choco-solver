@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -54,7 +53,7 @@ public class NotEqualX_YCTest {
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("v_" + i, 0, n, s);
+            vars[i] = s.intVar("v_" + i, 0, n, false);
         }
         s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
 
@@ -73,7 +72,7 @@ public class NotEqualX_YCTest {
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.bounded("v_" + i, 0, n, s);
+            vars[i] = s.intVar("v_" + i, 0, n, true);
         }
         s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
         s.set(IntStrategyFactory.lexico_LB(vars));
@@ -91,7 +90,7 @@ public class NotEqualX_YCTest {
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.bounded("v_" + i, 0, n, s);
+            vars[i] = s.intVar("v_" + i, 0, n, true);
         }
         s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
         s.set(IntStrategyFactory.lexico_LB(vars));

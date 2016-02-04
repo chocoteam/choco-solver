@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -57,7 +56,7 @@ public class ExplainedOCProblem extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("x", 2 * n, 1, vals, solver);
+        vars = solver.intVarArray("x", 2 * n, 1, vals, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++)
                 solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));

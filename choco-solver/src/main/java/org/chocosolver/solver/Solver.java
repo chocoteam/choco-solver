@@ -79,7 +79,7 @@ import java.util.*;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Solver implements Serializable {
+public class Solver implements Serializable, IModeler{
 
     /**
      * For serialization purpose
@@ -331,8 +331,8 @@ public class Solver implements Serializable {
     }
 
     private void _zeroOne(){
-        ZERO = (BoolVar) VF.fixed(0, this);
-        ONE = (BoolVar) VF.fixed(1, this);
+        ZERO = (BoolVar) this.intVar(0);
+        ONE = (BoolVar) this.intVar(1);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
     }
@@ -1580,5 +1580,13 @@ public class Solver implements Serializable {
     public Ibex getIbex() {
         if (ibex == null) ibex = new Ibex();
         return ibex;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public Solver _me(){
+        return this;
     }
 }

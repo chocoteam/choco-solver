@@ -43,7 +43,6 @@ import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * Small problem to illustrate how to use set variables
@@ -77,19 +76,19 @@ public class Partition extends AbstractProblem {
 		// x initial domain
 		int[] x_envelope = new int[]{1,3,2,8}; // not necessarily ordered
 		int[] x_kernel = new int[]{1};
-		x = VariableFactory.set("x", x_envelope, x_kernel, solver);
+		x = solver.setVar("x", x_kernel, x_envelope);
 		// y initial domain
 		int[] y_envelope = new int[]{2,6,7};
-		y = VariableFactory.set("y", y_envelope, solver);
+		y = solver.setVar("y", new int[]{}, y_envelope);
 		// z initial domain
 		int[] z_envelope = new int[]{2,1,3,5,7,12};
 		int[] z_kernel = new int[]{2};
-		z = VariableFactory.set("z", z_envelope, z_kernel, solver);
+		z = solver.setVar("z", z_kernel, z_envelope);
 		// universe initial domain (note that the universe is a variable)
 		int[] universe_envelope = new int[]{1,2,3,5,7,8,42};
-		universe = VariableFactory.set("universe", universe_envelope, solver);
+		universe = solver.setVar("universe", new int[]{}, universe_envelope);
 		// sum variable
-		sum = VariableFactory.bounded("sum of universe", 12, 19, solver);
+		sum = solver.intVar("sum of universe", 12, 19, true);
 
 		/////////////////
 		// CONSTRAINTS //
@@ -99,7 +98,7 @@ public class Partition extends AbstractProblem {
 		solver.post(SetConstraintsFactory.partition(new SetVar[]{x, y, z}, universe));
 		if (noEmptySet) {
 			// forbid empty sets
-			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, VariableFactory.fixed(0, solver)));
+			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, solver.intVar(0)));
 		}
 		// restricts the sum of elements in universe
 		solver.post(SetConstraintsFactory.sum(universe, sum, true));

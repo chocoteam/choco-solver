@@ -39,7 +39,6 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.annotations.Test;
 
 import java.util.BitSet;
@@ -49,8 +48,8 @@ public class NValueTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testAtLeast() {
         Solver solver = new Solver();
-        final IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
-        final IntVar N = VF.enumerated("N", 2, 3, solver);
+        final IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
+        final IntVar N = solver.intVar("N", 2, 3, false);
         solver.post(ICF.atleast_nvalues(XS, N, false));
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
@@ -76,8 +75,8 @@ public class NValueTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testAtMost() {
         Solver solver = new Solver();
-        final IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
-        final IntVar N = VF.enumerated("N", 2, 3, solver);
+        final IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
+        final IntVar N = solver.intVar("N", 2, 3, false);
         solver.post(ICF.atmost_nvalues(XS, N, false));
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);

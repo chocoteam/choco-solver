@@ -38,7 +38,6 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -102,12 +101,12 @@ public class Knapsack extends AbstractProblem {
         // occurrence of each item
         objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = VariableFactory.bounded("o_" + (i + 1), 0, nbOmax[i], solver);
+            objects[i] = solver.intVar("o_" + (i + 1), 0, nbOmax[i], true);
         }
         // objective variable
-        power = VariableFactory.bounded("power", 0, 9999, solver);
+        power = solver.intVar("power", 0, 9999, true);
 
-        IntVar scalar = VariableFactory.bounded("weight", capacites[0] - 1, capacites[1] + 1, solver);
+        IntVar scalar = solver.intVar("weight", capacites[0] - 1, capacites[1] + 1, true);
 
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
     }

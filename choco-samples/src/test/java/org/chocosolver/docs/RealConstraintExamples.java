@@ -34,7 +34,6 @@ import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.constraints.real.RealConstraint;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
 
 /**
@@ -48,8 +47,8 @@ public class RealConstraintExamples {
     public void testreal() {
         Solver solver = new Solver();
         double PREC = 0.01d; // precision
-        RealVar x = VariableFactory.real("x", -1.0d, 1.0d, PREC, solver);
-        RealVar y = VariableFactory.real("y", -1.0d, 1.0d, PREC, solver);
+        RealVar x = solver.realVar("x", -1.0d, 1.0d, PREC);
+        RealVar y = solver.realVar("y", -1.0d, 1.0d, PREC);
         RealConstraint rc = new RealConstraint(
                 "my fct",
                 "({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6",

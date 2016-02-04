@@ -31,7 +31,6 @@ package org.chocosolver.util.tools;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -95,10 +94,10 @@ public class ArrayUtilsTest {
     public void testGetColumn1() throws Exception {
         Solver solver = new Solver();
         IntVar[][] n = new IntVar[2][2];
-        n[0][0] = VF.enumerated("X1", 0,2, solver);
-        n[0][1] = VF.fixed("C1", 3, solver);
-        n[1][0] = VF.fixed("C2", 4, solver);
-        n[1][1] = VF.enumerated("X2", -2,0, solver);
+        n[0][0] = solver.intVar("X1", 0, 2, false);
+        n[0][1] = solver.intVar("C1", 3);
+        n[1][0] = solver.intVar("C2", 4);
+        n[1][1] = solver.intVar("X2", -2, 0, false);
         IntVar[] nn = ArrayUtils.getColumn(n, 1);
         Assert.assertEquals(nn, new IntVar[]{n[0][1], n[1][1]});
     }

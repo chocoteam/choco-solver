@@ -37,7 +37,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -57,16 +56,16 @@ public class PertTest {
 
         IntVar masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden;
-        masonry = VariableFactory.bounded("masonry", 0, horizon, solver);
-        carpentry = VariableFactory.enumerated("carpentry", 0, horizon, solver);
-        plumbing = VariableFactory.enumerated("plumbing", 0, horizon, solver);
-        ceiling = VariableFactory.enumerated("ceiling", 0, horizon, solver);
-        roofing = VariableFactory.enumerated("roofing", 0, horizon, solver);
-        painting = VariableFactory.enumerated("painting", 0, horizon, solver);
-        windows = VariableFactory.enumerated("windows", 0, horizon, solver);
-        facade = VariableFactory.enumerated("facade", 0, horizon, solver);
-        garden = VariableFactory.enumerated("garden", 0, horizon, solver);
-        objective = VariableFactory.enumerated("moving", 0, horizon - 1, solver);
+        masonry = solver.intVar("masonry", 0, horizon, true);
+        carpentry = solver.intVar("carpentry", 0, horizon, false);
+        plumbing = solver.intVar("plumbing", 0, horizon, false);
+        ceiling = solver.intVar("ceiling", 0, horizon, false);
+        roofing = solver.intVar("roofing", 0, horizon, false);
+        painting = solver.intVar("painting", 0, horizon, false);
+        windows = solver.intVar("windows", 0, horizon, false);
+        facade = solver.intVar("facade", 0, horizon, false);
+        garden = solver.intVar("garden", 0, horizon, false);
+        objective = solver.intVar("moving", 0, horizon - 1, false);
 
         solver.post(precedence(masonry, 7, carpentry));
         solver.post(precedence(masonry, 7, plumbing));
@@ -93,7 +92,7 @@ public class PertTest {
      * x + d < y
      */
     private static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return IntConstraintFactory.arithm(VariableFactory.offset(x, duration), "<", y);
+        return IntConstraintFactory.arithm(x.getSolver().intOffsetView(x, duration), "<", y);
     }
 
     @Test(groups="1s", timeOut=60000)

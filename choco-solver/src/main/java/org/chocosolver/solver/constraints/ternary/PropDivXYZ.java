@@ -33,7 +33,6 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
 /**
@@ -51,7 +50,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z) {
-        this(x, y, z, VariableFactory.abs(x), VariableFactory.abs(y), VariableFactory.abs(z));
+        this(x, y, z, x.getSolver().intAbsView(x), x.getSolver().intAbsView(y), x.getSolver().intAbsView(z));
     }
 
     private PropDivXYZ(IntVar x, IntVar y, IntVar z, IntVar ax, IntVar ay, IntVar az) {

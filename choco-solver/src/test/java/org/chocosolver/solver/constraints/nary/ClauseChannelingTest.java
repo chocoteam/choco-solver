@@ -34,7 +34,6 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -50,9 +49,9 @@ public class ClauseChannelingTest {
         for (int i = 1; i < 200; i++) {
             for (int seed = 1; seed < 100; seed++) {
                 Solver solver = new Solver();
-                IntVar iv = VF.enumerated("iv", 1, i, solver);
-                BoolVar[] eqs = VF.boolArray("eq", i, solver);
-                BoolVar[] lqs = VF.boolArray("lq", i, solver);
+                IntVar iv = solver.intVar("iv", 1, i, false);
+                BoolVar[] eqs = solver.boolVarArray("eq", i);
+                BoolVar[] lqs = solver.boolVarArray("lq", i);
 
                 solver.post(ICF.clause_channeling(iv, eqs, lqs));
 
@@ -68,9 +67,9 @@ public class ClauseChannelingTest {
         for (int i = 1; i < 100; i++) {
             for (int seed = 1; seed < 200; seed++) {
                 Solver solver = new Solver();
-                IntVar iv = VF.bounded("iv", 1, i, solver);
-                BoolVar[] eqs = VF.boolArray("eq", i, solver);
-                BoolVar[] lqs = VF.boolArray("lq", i, solver);
+                IntVar iv = solver.intVar("iv", 1, i, true);
+                BoolVar[] eqs = solver.boolVarArray("eq", i);
+                BoolVar[] lqs = solver.boolVarArray("lq", i);
 
                 solver.post(ICF.clause_channeling(iv, eqs, lqs));
 
@@ -88,9 +87,9 @@ public class ClauseChannelingTest {
                 Solver sr = new Solver();
                 Solver sc = new Solver();
                 {
-                    IntVar iv = VF.enumerated("iv", 1, i, sr);
-                    BoolVar[] eqs = VF.boolArray("eq", i, sr);
-                    BoolVar[] lqs = VF.boolArray("lq", i, sr);
+                    IntVar iv = sr.intVar("iv", 1, i, false);
+                    BoolVar[] eqs = sr.boolVarArray("eq", i);
+                    BoolVar[] lqs = sr.boolVarArray("lq", i);
 
                     for (int j = 1; j <= i; j++) {
                         ICF.arithm(iv, "=", j).reifyWith(eqs[j - 1]);
@@ -103,9 +102,9 @@ public class ClauseChannelingTest {
                     sr.findAllSolutions();
                 }
                 {
-                    IntVar iv = VF.enumerated("iv", 1, i, sc);
-                    BoolVar[] eqs = VF.boolArray("eq", i, sc);
-                    BoolVar[] lqs = VF.boolArray("lq", i, sc);
+                    IntVar iv = sc.intVar("iv", 1, i, false);
+                    BoolVar[] eqs = sc.boolVarArray("eq", i);
+                    BoolVar[] lqs = sc.boolVarArray("lq", i);
 
                     sc.post(ICF.clause_channeling(iv, eqs, lqs));
 
@@ -127,9 +126,9 @@ public class ClauseChannelingTest {
                 Solver sr = new Solver();
                 Solver sc = new Solver();
                 {
-                    IntVar iv = VF.bounded("iv", 1, i, sr);
-                    BoolVar[] eqs = VF.boolArray("eq", i, sr);
-                    BoolVar[] lqs = VF.boolArray("lq", i, sr);
+                    IntVar iv = sr.intVar("iv", 1, i, true);
+                    BoolVar[] eqs = sr.boolVarArray("eq", i);
+                    BoolVar[] lqs = sr.boolVarArray("lq", i);
 
                     for (int j = 1; j <= i; j++) {
                         ICF.arithm(iv, "=", j).reifyWith(eqs[j - 1]);
@@ -142,9 +141,9 @@ public class ClauseChannelingTest {
                     sr.findAllSolutions();
                 }
                 {
-                    IntVar iv = VF.bounded("iv", 1, i, sc);
-                    BoolVar[] eqs = VF.boolArray("eq", i, sc);
-                    BoolVar[] lqs = VF.boolArray("lq", i, sc);
+                    IntVar iv = sc.intVar("iv", 1, i, true);
+                    BoolVar[] eqs = sc.boolVarArray("eq", i);
+                    BoolVar[] lqs = sc.boolVarArray("lq", i);
 
                     sc.post(ICF.clause_channeling(iv, eqs, lqs));
 

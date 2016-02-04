@@ -40,7 +40,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -59,7 +58,7 @@ public class PropCondisTest {
     @Test(groups="1s", timeOut=60000)
     public void testCD1() throws ContradictionException {
         Solver s = new Solver();
-        IntVar a = VF.enumerated("A", 0, 10, s);
+        IntVar a = s.intVar("A", 0, 10, false);
         BoolVar b1 = ICF.arithm(a, "=", 9).reif();
         BoolVar b2 = ICF.arithm(a, "=", 10).reif();
         SatFactory.addConstructiveDisjunction(b1,b2);
@@ -74,8 +73,8 @@ public class PropCondisTest {
     @Test(groups="1s", timeOut=60000)
     public void testCD2() throws ContradictionException {
         Solver s = new Solver();
-        IntVar X = VF.enumerated("X", 0, 10, s);
-        IntVar Y = VF.enumerated("Y", 0, 10, s);
+        IntVar X = s.intVar("X", 0, 10, false);
+        IntVar Y = s.intVar("Y", 0, 10, false);
         Constraint c1 = ICF.arithm(X, "-", Y, "<=", -9);
         Constraint c2 = ICF.arithm(Y, "-", X, "<=", -9);
 
@@ -144,8 +143,8 @@ public class PropCondisTest {
             ls[j] = 3 + rnd.nextInt(4);
         }
         Solver solver = new Solver();
-        IntVar[] OS = VF.enumeratedArray("O", size, 0, os[2*size-1] + ls[2*size-1], solver);
-        IntVar[] LS = VF.enumeratedArray("L", size, 1, 10, solver);
+        IntVar[] OS = solver.intVarArray("O", size, 0, os[2 * size - 1] + ls[2 * size - 1], false);
+        IntVar[] LS = solver.intVarArray("L", size, 1, 10, false);
         for (int i = 0; i < size - 1; i++) {
             solver.post(ICF.sum(new IntVar[]{OS[i], LS[i]}, "<", OS[i + 1]));
         }
@@ -163,7 +162,7 @@ public class PropCondisTest {
                 SatFactory.addBoolOrArrayEqualTrue(disjunction);
             }
         }
-        IntVar horizon = VF.bounded("H", 0, os[2*size-1] + ls[2*size-1], solver);
+        IntVar horizon = solver.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);
         solver.post(ICF.sum(new IntVar[]{OS[size-1],LS[size-1]},horizon));
         solver.setObjectives(horizon);
         solver.addHook("decvars", ArrayUtils.append(OS, LS));

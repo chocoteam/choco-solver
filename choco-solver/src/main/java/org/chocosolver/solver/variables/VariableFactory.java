@@ -46,9 +46,12 @@ import java.util.Arrays;
  * <p>
  * Note that, for the sack of readability, the Java naming convention is not respected for methods arguments.
  *
+ * Deprecated : variable creation should be done through the {@code Solver} object which extends {@code IModeler}
+ *
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18 nov. 2010
  */
+@Deprecated
 public class VariableFactory {
 
     VariableFactory() {
@@ -94,7 +97,7 @@ public class VariableFactory {
     public static BoolVar[] boolArray(String NAME, int SIZE, Solver SOLVER) {
         BoolVar[] vars = new BoolVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = bool(NAME + "[" + i + "]", SOLVER);
+            vars[i] = SOLVER.boolVar(NAME + "[" + i + "]");
         }
         return vars;
     }
@@ -111,7 +114,7 @@ public class VariableFactory {
     public static BoolVar[][] boolMatrix(String NAME, int DIM1, int DIM2, Solver SOLVER) {
         BoolVar[][] vars = new BoolVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = boolArray(NAME + "[" + i + "]", DIM2, SOLVER);
+            vars[i] = SOLVER.boolVarArray(NAME + "[" + i + "]", DIM2);
         }
         return vars;
     }
@@ -136,9 +139,9 @@ public class VariableFactory {
     public static IntVar integer(String NAME, int MIN, int MAX, Solver SOLVER) {
         int size = MAX - MIN + 1;
         if (size < SOLVER.getSettings().getMaxDomSizeForEnumerated()) {
-            return enumerated(NAME, MIN, MAX, SOLVER);
+            return SOLVER.intVar(NAME, MIN, MAX, false);
         } else {
-            return bounded(NAME, MIN, MAX, SOLVER);
+            return SOLVER.intVar(NAME, MIN, MAX, true);
         }
     }
 
@@ -159,7 +162,7 @@ public class VariableFactory {
     public static IntVar[] integerArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = integer(NAME + "[" + i + "]", MIN, MAX, SOLVER);
+            vars[i] = SOLVER.intVar(NAME + "[" + i + "]", MIN, MAX);
         }
         return vars;
     }
@@ -224,7 +227,7 @@ public class VariableFactory {
     public static IntVar[] boundedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = bounded(NAME + "[" + i + "]", MIN, MAX, SOLVER);
+            vars[i] = SOLVER.intVar(NAME + "[" + i + "]", MIN, MAX, true);
         }
         return vars;
     }
@@ -244,7 +247,7 @@ public class VariableFactory {
     public static IntVar[][] boundedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = boundedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
+            vars[i] = SOLVER.intVarArray(NAME + "[" + i + "]", DIM2, MIN, MAX, true);
         }
         return vars;
     }
@@ -283,7 +286,7 @@ public class VariableFactory {
     public static IntVar[] enumeratedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = enumerated(NAME + "[" + i + "]", MIN, MAX, SOLVER);
+            vars[i] = SOLVER.intVar(NAME + "[" + i + "]", MIN, MAX, false);
         }
         return vars;
     }
@@ -302,7 +305,7 @@ public class VariableFactory {
     public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
+            vars[i] = SOLVER.intVarArray(NAME + "[" + i + "]", DIM2, MIN, MAX, false);
         }
         return vars;
     }
@@ -322,7 +325,7 @@ public class VariableFactory {
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
         } else if (VALUES.length == 2 && VALUES[0] == 0 && VALUES[1] == 1) {
-            return bool(NAME, SOLVER);
+            return SOLVER.boolVar(NAME);
         } else {
             int gap = VALUES[VALUES.length - 1] - VALUES[0];
             if (gap > 30 && gap / VALUES.length > 5) {
@@ -346,7 +349,7 @@ public class VariableFactory {
     public static IntVar[] enumeratedArray(String NAME, int SIZE, int[] VALUES, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = enumerated(NAME + "[" + i + "]", VALUES, SOLVER);
+            vars[i] = SOLVER.intVar(NAME + "[" + i + "]", VALUES);
         }
         return vars;
     }
@@ -365,7 +368,7 @@ public class VariableFactory {
     public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int[] VALUES, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, VALUES, SOLVER);
+            vars[i] = SOLVER.intVarArray(NAME + "[" + i + "]", DIM2, VALUES);
         }
         return vars;
     }
@@ -404,7 +407,7 @@ public class VariableFactory {
     public static RealVar[] realArray(String NAME, int SIZE, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         RealVar[] vars = new RealVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = real(NAME + "[" + i + "]", MIN, MAX, PRECISION, SOLVER);
+            vars[i] = SOLVER.realVar(NAME + "[" + i + "]", MIN, MAX, PRECISION);
         }
         return vars;
     }
@@ -738,9 +741,9 @@ public class VariableFactory {
             String name = "(" + VAR.getName() + "+" + CSTE + ")";
             IntVar ov;
             if (VAR.hasEnumeratedDomain()) {
-                ov = enumerated(name, lb, ub, s);
+                ov = s.intVar(name, lb, ub, false);
             } else {
-                ov = bounded(name, lb, ub, s);
+                ov = s.intVar(name, lb, ub, true);
             }
             s.post(ICF.arithm(ov, "-", VAR, "=", CSTE));
             return ov;
@@ -817,7 +820,7 @@ public class VariableFactory {
                 return BOOL.not();
             } else {
                 Solver s = BOOL.getSolver();
-                BoolVar ov = bool("not(" + BOOL.getName() + ")", s);
+                BoolVar ov = s.boolVar("not(" + BOOL.getName() + ")");
                 s.post(ICF.arithm(ov, "!=", BOOL));
                 BOOL._setNot(ov);
                 ov._setNot(BOOL);
@@ -846,9 +849,9 @@ public class VariableFactory {
             String name = "-(" + VAR.getName() + ")";
             IntVar ov;
             if (VAR.hasEnumeratedDomain()) {
-                ov = enumerated(name, lb, ub, s);
+                ov = s.intVar(name, lb, ub, false);
             } else {
-                ov = bounded(name, lb, ub, s);
+                ov = s.intVar(name, lb, ub, true);
             }
             s.post(ICF.arithm(ov, "+", VAR, "=", 0));
             return ov;
@@ -879,7 +882,7 @@ public class VariableFactory {
         } else {
             IntVar var;
             if (CSTE == 0) {
-                var = fixed(0, VAR.getSolver());
+                var = VAR.getSolver().intVar(0);
             } else if (CSTE == 1) {
                 var = VAR;
             } else {
@@ -892,9 +895,9 @@ public class VariableFactory {
                     String name = "(" + VAR.getName() + "*" + CSTE + ")";
                     IntVar ov;
                     if (VAR.hasEnumeratedDomain()) {
-                        ov = enumerated(name, lb, ub, s);
+                        ov = s.intVar(name, lb, ub, false);
                     } else {
-                        ov = bounded(name, lb, ub, s);
+                        ov = s.intVar(name, lb, ub, true);
                     }
                     s.post(ICF.times(VAR, CSTE, ov));
                     return ov;
@@ -919,7 +922,7 @@ public class VariableFactory {
      */
     public static IntVar abs(IntVar VAR) {
         if (VAR.isInstantiated()) {
-            return fixed(Math.abs(VAR.getValue()), VAR.getSolver());
+            return VAR.getSolver().intVar(Math.abs(VAR.getValue()));
         } else if (VAR.getLB() >= 0) {
             return VAR;
         } else if (VAR.getUB() <= 0) {
@@ -930,9 +933,9 @@ public class VariableFactory {
             String name = "|" + VAR.getName() + "|";
             IntVar abs;
             if (VAR.hasEnumeratedDomain()) {
-                abs = enumerated(name, 0, ub, s);
+                abs = s.intVar(name, 0, ub, false);
             } else {
-                abs = bounded(name, 0, ub, s);
+                abs = s.intVar(name, 0, ub, true);
             }
             s.post(IntConstraintFactory.absolute(abs, VAR));
             return abs;
@@ -954,7 +957,7 @@ public class VariableFactory {
             Solver s = VAR.getSolver();
             double lb = VAR.getLB();
             double ub = VAR.getUB();
-            RealVar rv = real("(real)" + VAR.getName(), lb, ub, PRECISION, s);
+            RealVar rv = s.realVar("(real)" + VAR.getName(), lb, ub, PRECISION);
             s.post(new IntEqRealConstraint(VAR, rv, PRECISION));
             return rv;
         }
@@ -980,7 +983,7 @@ public class VariableFactory {
             for (int i = 0; i < VARS.length; i++) {
                 double lb = VARS[i].getLB();
                 double ub = VARS[i].getUB();
-                reals[i] = real("(real)" + VARS[i].getName(), lb, ub, PRECISION, s);
+                reals[i] = s.realVar("(real)" + VARS[i].getName(), lb, ub, PRECISION);
             }
             s.post(new IntEqRealConstraint(VARS, reals, PRECISION));
         }

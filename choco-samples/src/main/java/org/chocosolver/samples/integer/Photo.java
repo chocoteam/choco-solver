@@ -36,12 +36,11 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
 import static org.chocosolver.solver.constraints.LogicalConstraintFactory.ifThenElse;
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * <a href="http://www.gecode.org">gecode</a>:<br/>
@@ -71,19 +70,19 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        positions = VariableFactory.boundedArray("pos", data.people(), 0, data.people() - 1, solver);
-        violations = VariableFactory.bounded("viol", 0, data.preferences().length, solver);
+        positions = solver.intVarArray("pos", data.people(), 0, data.people() - 1, true);
+        violations = solver.intVar("viol", 0, data.preferences().length, true);
 
-        viols = VariableFactory.boolArray("b", data.prefPerPeople(), solver);
+        viols = solver.boolVarArray("b", data.prefPerPeople());
         dist = new IntVar[data.prefPerPeople()];
         for (int i = 0; i < data.prefPerPeople(); i++) {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
 
 
-			IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
+            IntVar k = solver.intVar(randomName(), -20000, 20000, true);
 			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]));
-			dist[i] = VariableFactory.abs(k);
+			dist[i] = solver.intAbsView(k);
 
             ifThenElse(viols[i],
                             arithm(dist[i], ">", 1),

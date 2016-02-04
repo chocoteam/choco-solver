@@ -304,19 +304,19 @@ Their domains are implicitly defined by a function and implied variables.
 
 ``x = y + 2`` : ::
 
- IntVar x = VariableFactory.offset(y, 2);
+ IntVar x = solver.intOffsetView(y, 2);
 
 ``x = -y`` : ::
 
- IntVar x = VariableFactory.minus(y);
+ IntVar x = solver.intMinusView(y);
 
 ``x = 3*y`` : ::
 
- IntVar x = VariableFactory.scale(y, 3);
+ IntVar x = solver.intScaleView(y, 3);
 
 Views can be combined together: ::
 
- IntVar x = VariableFactory.offset(VariableFactory.scale(y,2),5);
+ IntVar x = solver.intOffsetView(solver.intScaleView(y,2),5);
 
 Set variable
 ------------
@@ -614,7 +614,7 @@ In Choco |version|, it is possible to reify any constraint. Reifying a constrain
 
 Or: ::
 
- BoolVar b = VF.bool("b", solver);
+ BoolVar b = VariableFactory.bool("b", solver);
  constraint.reifyWith(b);
 
 The first API ``constraint.reify()`` creates the variable, if it does not already exists, and reify the constraint.

@@ -37,7 +37,6 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -82,7 +81,7 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
 					values.add(j);
                 }
             }
-			succ[i] = VF.enumerated("succ_"+i,values.toArray(),solver);
+            succ[i] = solver.intVar("succ_" + i, values.toArray());
         }
         solver.post(ICF.circuit(succ,0));
     }

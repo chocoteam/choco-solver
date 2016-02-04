@@ -35,8 +35,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
@@ -77,8 +75,8 @@ public class Partition extends AbstractProblem {
     public void buildModel() {
         int size = this.N / 2;
         IntVar[] x, y;
-        x = VariableFactory.enumeratedArray("x", size, 1, 2 * size, solver);
-        y = VariableFactory.enumeratedArray("y", size, 1, 2 * size, solver);
+        x = solver.intVarArray("x", size, 1, 2 * size, false);
+        y = solver.intVarArray("y", size, 1, 2 * size, false);
 
 //        break symmetries
         for (int i = 0; i < size - 1; i++) {
@@ -113,9 +111,9 @@ public class Partition extends AbstractProblem {
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = VF.bounded("x^", 0, x[i].getUB() * x[i].getUB(), solver);
+            sx[i] = solver.intVar("x^", 0, x[i].getUB() * x[i].getUB(), true);
             sxy[i] = sx[i];
-            sy[i] = VF.bounded("y^", 0, y[i].getUB() * y[i].getUB(), solver);
+            sy[i] = solver.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
             sxy[size + i] = sy[i];
             solver.post(IntConstraintFactory.times(x[i], x[i], sx[i]));
             solver.post(IntConstraintFactory.times(y[i], y[i], sy[i]));

@@ -32,16 +32,12 @@ package org.chocosolver.solver.explanations;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.loop.LearnCBJ;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -64,7 +60,7 @@ public class ExplanationTest {
             for (int e = 1; e < engines.length; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Solver solver = new Solver();
-                    IntVar[] vars = VF.boundedArray("p", n, 0, n - 2, solver);
+                    IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, true);
                     solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
                     solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
                     solver.set(ISF.lexico_LB(vars));
@@ -84,7 +80,7 @@ public class ExplanationTest {
     public void testUserExpl() {
         int n = 7;
         final Solver solver = new Solver();
-        IntVar[] vars = VF.enumeratedArray("p", n, 0, n - 2, solver);
+        IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, false);
         solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
         solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
         solver.set(ISF.lexico_LB(vars));
@@ -103,7 +99,7 @@ public class ExplanationTest {
                 for (int e = 0; e < engines.length; e++) {
                     for (int ng = 0; ng < 2; ng++) {
                         final Solver solver = new Solver();
-                        IntVar[] pigeons = VF.enumeratedArray("p", n, 0, n - 2, solver);
+                        IntVar[] pigeons = solver.intVarArray("p", n, 0, n - 2, false);
                         solver.post(ICF.alldifferent(pigeons, "NEQS"));
                         solver.set(ISF.random_value(pigeons, seed));
                         engines[e].plugin(solver, ng == 1, false);
@@ -131,7 +127,7 @@ public class ExplanationTest {
                         int k = 0;
                         for (int i = 0; i < n; i++) {
                             for (int j = 0; j < n; j++, k++) {
-                                matrix[i][j] = VariableFactory.enumerated("square" + i + "," + j, 1, n * n, solver);
+                                matrix[i][j] = solver.intVar("square" + i + "," + j, 1, n * n, false);
                                 vars[k] = matrix[i][j];
                                 invMatrix[j][i] = matrix[i][j];
                             }
@@ -176,8 +172,8 @@ public class ExplanationTest {
             for (int e = 1; e < engines.length - 1; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Solver solver = new Solver();
-                    IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
-                    BoolVar[] bs = VF.boolArray("b", 2, solver);
+                    IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
+                    BoolVar[] bs = solver.boolVarArray("b", 2);
                     ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
                     ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
                     solver.post(ICF.arithm(bs[0], "=", bs[1]));
@@ -198,8 +194,8 @@ public class ExplanationTest {
         for (int e = 0; e < engines.length; e++) {
             for (int ng = 0; ng < 2; ng++) {
                 final Solver solver = new Solver();
-                IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
-                BoolVar[] bs = VF.boolArray("b", 2, solver);
+                IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
+                BoolVar[] bs = solver.boolVarArray("b", 2);
                 ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
                 ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
                 solver.post(ICF.arithm(bs[0], "=", bs[1]));
@@ -222,8 +218,8 @@ public class ExplanationTest {
         for (int e = 0; e < engines.length; e++) {
             for (int ng = 0; ng < 2; ng++) {
                 final Solver solver = new Solver();
-                IntVar[] p = VF.enumeratedArray("p", 10, 0, 3, solver);
-                BoolVar[] bs = VF.boolArray("b", 2, solver);
+                IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
+                BoolVar[] bs = solver.boolVarArray("b", 2);
                 ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
                 ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
                 solver.post(ICF.arithm(bs[0], "=", bs[1]));
@@ -246,7 +242,7 @@ public class ExplanationTest {
         for (int ng = 0; ng < 2; ng++) {
             Solver solver = new Solver();
             // The set of variables
-            IntVar[] p = VF.enumeratedArray("p", 5, 0, 4, solver);
+            IntVar[] p = solver.intVarArray("p", 5, 0, 4, false);
             // The initial constraints
             solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 3), ">=", 3));
             solver.post(ICF.arithm(p[2], "+", p[3], ">=", 1));

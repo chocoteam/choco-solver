@@ -33,10 +33,8 @@ import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -83,10 +81,10 @@ public class EqualXYCExplTest {
         List<Constraint> lcstrss = new ArrayList<>(1);
 
         for (int i = 0; i < varsr.length; i++) {
-            varsr[i] = VariableFactory.enumerated("v_" + i, 0, nbvars, ref);
-            indicesr[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, ref);
-            varss[i] = VariableFactory.enumerated("v_" + i, 0, nbvars, sol);
-            indicess[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, sol);
+            varsr[i] = ref.intVar("v_" + i, 0, nbvars, false);
+            indicesr[i] = ref.intVar("i_" + i, 0, nbvars, false);
+            varss[i] = sol.intVar("v_" + i, 0, nbvars, false);
+            indicess[i] = sol.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
         ref.set(IntStrategyFactory.lexico_LB(allvarsr));
