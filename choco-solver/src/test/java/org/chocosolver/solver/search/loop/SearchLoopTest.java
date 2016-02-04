@@ -32,7 +32,6 @@ package org.chocosolver.solver.search.loop;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.monitors.SMF;
@@ -42,7 +41,7 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
-import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -54,48 +53,9 @@ import static org.chocosolver.solver.search.loop.SLF.*;
  */
 public class SearchLoopTest {
 
-    public void queen(Solver solver, int n) {
-        IntVar[] q = VF.enumeratedArray("Q", n, 1, n, solver);
-        solver.post(ICF.alldifferent(q, "AC"));
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(IntConstraintFactory.arithm(q[i], "!=", q[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(q[i], "!=", q[j], "+", k));
-            }
-        }
-    }
-
-    public void golomb(Solver solver, int m) {
-        IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
-        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
-
-        solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
-
-        for (int i = 0; i < m - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
-        }
-        for (int k = 0, i = 0; i < m - 1; i++) {
-            for (int j = i + 1; j < m; j++, k++) {
-                // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                solver.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]));
-                solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                solver.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
-            }
-        }
-        solver.post(IntConstraintFactory.alldifferent(diffs, "BC"));
-        // break symetries
-        if (m > 2) {
-            solver.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
-        }
-        solver.setObjectives(ticks[m - 1]);
-    }
-
     @Test(groups="1s", timeOut=60000)
     public void test1DFS() {
-        Solver solver = new Solver();
-        queen(solver, 8);
+        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
         dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(true)));
         Chatterbox.showSolutions(solver);
         solver.findSolution();
@@ -105,8 +65,7 @@ public class SearchLoopTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1LDS() {
-        Solver solver = new Solver();
-        queen(solver, 8);
+        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
         lds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 4);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
@@ -115,8 +74,7 @@ public class SearchLoopTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1DDS() {
-        Solver solver = new Solver();
-        queen(solver, 8);
+        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
         dds(solver, ISF.lexico_LB(solver.retrieveIntVars(true)), 4);
         solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
@@ -125,18 +83,16 @@ public class SearchLoopTest {
 
     @Test(groups="10s", timeOut=60000)
     public void test1HBFS() {
-        Solver solver = new Solver();
-        golomb(solver, 8);
-        hbfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), .05, .1, 11);
+        Solver solver = ProblemMaker.makeGolombRuler(8);
+        hbfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), .05, .1, 32);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 271231);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 7522);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DFS() {
-        Solver solver = new Solver();
-        queen(solver, 8);
+        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
         dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(true)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
@@ -145,8 +101,7 @@ public class SearchLoopTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2LDS() {
-        Solver solver = new Solver();
-        queen(solver, 8);
+        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
         lds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 4);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
@@ -155,8 +110,7 @@ public class SearchLoopTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2DDS() {
-        Solver solver = new Solver();
-        queen(solver, 8);
+        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
         dds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 5);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -174,19 +128,17 @@ public class SearchLoopTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
-        Solver solver = new Solver();
-        golomb(solver, 6);
+        Solver solver = ProblemMaker.makeGolombRuler(6);
         dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
         Chatterbox.printShortStatistics(solver);
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 17);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 16);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-        Solver solver = new Solver();
-        queen(solver, 8);
+        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
         dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
         restart(solver,
                 limit -> solver.getMeasures().getNodeCount() >= limit,
@@ -198,8 +150,7 @@ public class SearchLoopTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test5() {
-        Solver solver = new Solver();
-        golomb(solver, 5);
+        Solver solver = ProblemMaker.makeGolombRuler(5);
         dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
         lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(false), 15, 0),
                 new NodeCounter(solver, 10));
@@ -211,8 +162,7 @@ public class SearchLoopTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test6() {
-        Solver solver = new Solver();
-        golomb(solver, 6);
+        Solver solver = ProblemMaker.makeGolombRuler(6);
         dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
         lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(false), 15, 0),
                 new NodeCounter(solver, 10));

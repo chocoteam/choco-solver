@@ -33,6 +33,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 
@@ -203,6 +204,30 @@ public class IntLinCombFactory {
                 } else {
                     assert COEFFS[0] == -1 && COEFFS[1] == -1;
                     return arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR.toString()), -RESULT);
+                }
+            case 3:
+                if(RESULT == 0 && OPERATOR == Operator.EQ) {
+                    // deal with X + Y = Z
+                    if ((COEFFS[0] == 1 && COEFFS[1] == 1 && COEFFS[2] == -1)
+                            || (COEFFS[0] == -1 && COEFFS[1] == -1 && COEFFS[2] == 1)) {
+                        return new Constraint(String.format("%s + %s = %s",
+                                VARS[0].getName(), VARS[1].getName(), VARS[2].getName()),
+                                new PropXplusYeqZ(VARS[0], VARS[1], VARS[2]));
+                    }
+                    // deal with X + Z  = Y
+                    if ((COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == 1)
+                            || (COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == -1)) {
+                        return new Constraint(String.format("%s + %s = %s",
+                                VARS[0].getName(), VARS[2].getName(), VARS[1].getName()),
+                                new PropXplusYeqZ(VARS[0], VARS[2], VARS[1]));
+                    }
+                    // deal with Y + Z  = X
+                    if ((COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == 1)
+                            || (COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == -1)) {
+                        return new Constraint(String.format("%s + %s = %s",
+                                VARS[1].getName(), VARS[2].getName(), VARS[0].getName()),
+                                new PropXplusYeqZ(VARS[1], VARS[2], VARS[0]));
+                    }
                 }
             default:
                 int b = 0, e = VARS.length;

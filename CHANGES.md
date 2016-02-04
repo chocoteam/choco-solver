@@ -14,12 +14,16 @@ like getting a solver which a solution -- or the best one (#362)
 - add impl of `IntIterableSet`: `IntIterableRangeSet`, (and a factory `IntIterableSetFactory` to be completed in the future)
 - method `retrieveIntVars` in `Solver` must specify whether or not to include BoolVar in the result
 
+### Variables
+- add new methods in IntVar to get next/previous value out of a domain
+
 ### Constraint
 
 - Use MDD as a table constraint (#366)
 - Can use ints in the right hand side of sum and scalar constraints instead of an IntVar
 - Deprecate constraint signatures to force specifying an operator for sum and scalar (#371)
 - add constructive disjunction (see `SatFactory`) (#367)
+- add ternary sum (X + Y = Z) achieving AC
 
 ### Propagation:
 

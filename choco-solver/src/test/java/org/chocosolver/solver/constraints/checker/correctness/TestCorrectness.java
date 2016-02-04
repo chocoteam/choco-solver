@@ -367,4 +367,25 @@ public class TestCorrectness {
             }
         }
     }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testPLUSBC() {
+        for (int i = 0; i < 3; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelplusbc, 3, -n, 2 * n, seed, false);
+                CorrectnessChecker.checkCorrectness(Modeler.modelplusbc, 3, 0, 1, seed, false);
+            }
+        }
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testPLUSAC() {
+        for (int i = 0; i < 4; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelplusac, 3, -n, 2 * n, seed, false);
+            }
+        }
+    }
 }

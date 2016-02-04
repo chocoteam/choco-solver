@@ -70,6 +70,32 @@ public class ProblemMaker {
     }
 
     /**
+     * Creates a n-Queen problem with one alldifferent constraint and binary constraints.
+     * n queens must be placed on a nxn chessboard.
+     * The variables can be accessed though the hook name "vars".
+     * @param n number of queens (or size of the chessboard)
+     * @return a solve-ready solver.
+     */
+    @SuppressWarnings("Duplicates")
+    public static Solver makeNQueenWithOneAlldifferent(int n){
+        Solver solver = new Solver();
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
+        }
+        solver.addHook("vars", vars);
+        solver.post(ICF.alldifferent(vars, "AC"));
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        return solver;
+    }
+
+    /**
      * Creates a Costas array problem of size n.
      * Two AllDifferent constraints are used, on achieving AC, the other BC.
      * The variables can be accessed though the hook name "vars" and "vectors".
@@ -115,24 +141,21 @@ public class ProblemMaker {
         Solver solver = new Solver();
         IntVar[] ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
         solver.addHook("ticks", ticks);
+        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+        solver.addHook("diffs", diffs);
         solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
 
         for (int i = 0; i < m - 1; i++) {
             solver.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
         }
 
-        IntVar[] diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
-        solver.addHook("diffs", diffs);
-        IntVar[][] m_diffs = new IntVar[m][m];
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                // <cpru 04/03/12> it is worth adding a constraint instead of a view
-                solver.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]));
+                solver.post(IntConstraintFactory.arithm(ticks[j],"-", ticks[i], "=", diffs[k]));
                 solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
                 solver.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
                 solver.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
-                m_diffs[i][j] = diffs[k];
             }
         }
         solver.post(IntConstraintFactory.alldifferent(diffs, "BC"));

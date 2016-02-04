@@ -351,6 +351,33 @@ public class IntConstraintFactory {
     //##################################################################################################################
 
     /**
+     * Ensures: VAR1 OP1 VAR2 OP2 VAR3, where OP1 and OP2 in {"=", "!=", ">","<",">=","<="} or {"+", "-"}
+     *
+     * @param VAR1 first variable
+     * @param OP1  an operator
+     * @param VAR2 second variable
+     * @param OP2  another operator
+     * @param VAR3 third variable
+     */
+    public static Constraint arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, IntVar VAR3) {
+        switch (OP1) {
+            case "+":
+                return scalar(new IntVar[]{VAR1, VAR2}, new int[]{1, 1}, OP2, VAR3);
+            case "-":
+                return scalar(new IntVar[]{VAR1, VAR2}, new int[]{1, -1}, OP2, VAR3);
+            default:
+                switch (OP2) {
+                    case "+":
+                        return scalar(new IntVar[]{VAR1, VAR3}, new int[]{1, -1}, OP1, VAR2);
+                    case "-":
+                        return scalar(new IntVar[]{VAR1, VAR3}, new int[]{1, 1}, OP1, VAR2);
+                }
+                break;
+        }
+        throw new SolverException("Unknown operators for arithm constraint");
+    }
+
+    /**
      * Ensures: <br/>
      * |VAR1-VAR2| OP VAR3
      * <br/>

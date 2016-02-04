@@ -248,19 +248,24 @@ public class TestConsistency {
         }
     }
 
-    /*@Test
-    public void runner() throws ClassNotFoundException, IOException, ContradictionException {
-        Solver s = Solver.readFromFile("/Users/kyzrsoze/Sources/Choco3/SOLVER_ERROR.ser");
-        s.getEnvironment().worldPopUntil(0);
-        s.getEnvironment().worldPush();
-        Constraint[] constraints = s.getCstrs();
-        for (int c = 0; c < constraints.length; c++) {
-            Propagator[] propagators = constraints[c].getPropagators();
-            for (int p = 0; p < propagators.length; p++) {
-                propagators[p].forcePropagate(PropagatorEventType.FULL_PROPAGATION);
-            }
+    // PLUS *******************************************************
+
+    @Test(groups="10s", timeOut=60000)
+    public void testPLUSBC() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++) {
+            checkConsistency(Modeler.modelplusbc, 3, 0, 1, null, seed + i, "bc");
+            checkConsistency(Modeler.modelplusbc, 3, -50, 50, null, seed + i, "bc");
         }
-        s.propagate();
-    }*/
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testPLUSAC() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++) {
+            checkConsistency(Modeler.modelplusac, 3, -15, 15, null, seed + i, "ac");
+        }
+    }
+
 }
 

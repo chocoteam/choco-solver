@@ -835,7 +835,49 @@ public interface Modeler {
 
         @Override
         public String name() {
-            return "modelmaxbc";
+            return "modelminbc";
+        }
+    };
+
+    Modeler modelplusbc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("plus" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.bounded("X_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.arithm(vars[0], "+", vars[1], "=", vars[2]));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "X+Y=Z (bc)";
+        }
+    };
+
+    Modeler modelplusac = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("plus" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.enumerated("X_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            s.post(ICF.arithm(vars[0], "+", vars[1], "=", vars[2]));
+            s.set(ISF.random_bound(vars));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "X+Y=Z (ac)";
         }
     };
 }
