@@ -37,7 +37,6 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 
@@ -60,7 +59,7 @@ public class EnvironmentTest {
 					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
 					// just to create many variables
 					IntConstraintFactory.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reif();
-					vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
+					vectors[idx] = solver.makeIntOffsetView(k, 2 * n * (j - i));
 					idx++;
 				}
 			}

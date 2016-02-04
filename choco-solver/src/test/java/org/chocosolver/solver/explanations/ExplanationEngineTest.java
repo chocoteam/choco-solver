@@ -51,7 +51,6 @@ import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -417,7 +416,7 @@ public class ExplanationEngineTest {
                 IntVar k = solver.makeIntVar(randomName(), -n, n, false);
                 solver.post(ICF.arithm(k, "!=", 0));
                 solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i], k}, "=", vars[j]));
-                vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
+                vectors[idx] = solver.makeIntOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }
@@ -499,7 +498,7 @@ public class ExplanationEngineTest {
         IntVar[] position = solver.makeIntVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
-                solver.post(IntConstraintFactory.arithm(VariableFactory.offset(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]));
+                solver.post(IntConstraintFactory.arithm(solver.makeIntOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]));
             }
         }
         solver.post(IntConstraintFactory.alldifferent(position, "FC"));

@@ -87,7 +87,6 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -463,7 +462,7 @@ public class IntConstraintFactory {
         } else if (Y == 1) {
             return arithm(X, "=", Z);
         } else if (Y < 0) {
-            return times(VariableFactory.minus(X), -Y, Z);
+            return times(X.getSolver().makeIntMinusView(X), -Y, Z);
         } else {
             return new Constraint("Times", new PropScale(X, Y, Z));
         }
@@ -885,8 +884,8 @@ public class IntConstraintFactory {
             for (int i = 0; i < X.length; i++) {
                 EX[i] = solver.makeIntVar(randomName("diffn"), X[i].getLB() + WIDTH[i].getLB(), X[i].getUB() + WIDTH[i].getUB(), true);
                 EY[i] = solver.makeIntVar(randomName("diffn"), Y[i].getLB() + HEIGHT[i].getLB(), Y[i].getUB() + HEIGHT[i].getUB(), true);
-                TX[i] = VariableFactory.task(X[i], WIDTH[i], EX[i]);
-                TY[i] = VariableFactory.task(Y[i], HEIGHT[i], EY[i]);
+                TX[i] = new Task(X[i], WIDTH[i], EX[i]);
+                TY[i] = new Task(Y[i], HEIGHT[i], EY[i]);
                 minx = Math.min(minx, X[i].getLB());
                 miny = Math.min(miny, Y[i].getLB());
                 maxx = Math.max(maxx, X[i].getUB() + WIDTH[i].getUB());
@@ -1451,7 +1450,7 @@ public class IntConstraintFactory {
             default:
                 return new Constraint[]{
                         arithm(START, "<", VARS.length + OFFSET),
-                        subcircuit(ArrayUtils.append(VARS, new IntVar[]{START}), OFFSET, VariableFactory.offset(SIZE, 1)),
+                        subcircuit(ArrayUtils.append(VARS, new IntVar[]{START}), OFFSET, END.getSolver().makeIntOffsetView(SIZE, 1)),
                         element(END.getSolver().makeIntVar(VARS.length + OFFSET), VARS, END, OFFSET)
                 };
         }

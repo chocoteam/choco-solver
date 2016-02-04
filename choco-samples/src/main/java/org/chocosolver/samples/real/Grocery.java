@@ -73,7 +73,7 @@ public class Grocery extends AbstractProblem {
         // 4 integer variables (price in cents)
         itemCost = solver.makeIntVarArray("item", 4, 1, 711, true);
         // views as real variables to be used by Ibex
-        realitemCost = solver.makeRealViewArray(itemCost, epsilon);
+        realitemCost = solver.makeRealIntViewArray(itemCost, epsilon);
 
 	solver.post(new RealConstraint("Sum", "{0} + {1} + {2} + {3} = 711", Ibex.COMPO, realitemCost));
 	solver.post(new RealConstraint("Product", "{0} * {1}/100 * {2}/100 * {3}/100 = 711", Ibex.HC4, realitemCost));

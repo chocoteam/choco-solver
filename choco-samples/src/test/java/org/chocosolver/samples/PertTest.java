@@ -37,7 +37,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -93,7 +92,7 @@ public class PertTest {
      * x + d < y
      */
     private static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return IntConstraintFactory.arithm(VariableFactory.offset(x, duration), "<", y);
+        return IntConstraintFactory.arithm(x.getSolver().makeIntOffsetView(x, duration), "<", y);
     }
 
     @Test(groups="1s", timeOut=60000)

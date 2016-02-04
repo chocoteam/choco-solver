@@ -40,7 +40,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -320,7 +319,7 @@ public class ReifiedTest {
         row[2] = s.makeIntVar(16);
 
         IntVar calc[] = new IntVar[2];
-        calc[0] = VariableFactory.offset(row[0], 2);
+        calc[0] = s.makeIntOffsetView(row[0], 2);
         calc[1] = s.makeIntVar("C", 0, 80, true);
         s.post(IntConstraintFactory.sum(new IntVar[]{row[0], row[1]}, "=", calc[1]));
 
@@ -356,7 +355,7 @@ public class ReifiedTest {
         row[2] = s.makeIntVar(16);
 
         IntVar calc[] = new IntVar[2];
-        calc[0] = VariableFactory.scale(row[0], 2);
+        calc[0] = s.makeIntScaleView(row[0], 2);
         calc[1] = s.makeIntVar("C", 0, 1600, true);
         s.post(IntConstraintFactory.times(row[0], row[1], calc[1]));
 

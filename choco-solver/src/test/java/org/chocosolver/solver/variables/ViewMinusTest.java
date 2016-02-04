@@ -56,7 +56,7 @@ public class ViewMinusTest {
         Solver solver = new Solver();
 
         IntVar X = solver.makeIntVar("X", 1, 10, false);
-        IntVar Y = VariableFactory.minus(X);
+        IntVar Y = solver.makeIntMinusView(X);
 
         try {
 			if(!solver.getSettings().enableViews())
@@ -133,7 +133,7 @@ public class ViewMinusTest {
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = solver.makeIntVar("x", 1, 15, true);
-                xs[1] = VariableFactory.minus(xs[0]);
+                xs[1] = solver.makeIntMinusView(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, "=", 0));
                 solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
@@ -161,7 +161,7 @@ public class ViewMinusTest {
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = solver.makeIntVar("x", 1, 15, false);
-                xs[1] = VariableFactory.minus(xs[0]);
+                xs[1] = solver.makeIntMinusView(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, "=", 0));
                 solver.set(IntStrategyFactory.random_value(xs, seed));
             }
@@ -180,7 +180,7 @@ public class ViewMinusTest {
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = solver.makeIntVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = VariableFactory.minus(o);
+            IntVar v = solver.makeIntMinusView(o);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(-vit.next()));
@@ -214,7 +214,7 @@ public class ViewMinusTest {
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = solver.makeIntVar("o", domains[0]);
-            IntVar v = VariableFactory.minus(o);
+            IntVar v = solver.makeIntMinusView(o);
 			if(!solver.getSettings().enableViews()){
 				try {
 					solver.propagate();

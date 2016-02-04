@@ -55,7 +55,7 @@ public class ScaleViewTest {
         Solver s = new Solver();
 
         IntVar X = s.makeIntVar("X", 1, 3, false);
-        IntVar Y = VariableFactory.scale(X, 2);
+        IntVar Y = s.makeIntScaleView(X, 2);
 
         IntVar[] vars = {X, Y};
 
@@ -77,7 +77,7 @@ public class ScaleViewTest {
         Solver s = new Solver();
 
         IntVar X = s.makeIntVar("X", 1, 4, false);
-        IntVar Y = VariableFactory.scale(X, 3);
+        IntVar Y = s.makeIntScaleView(X, 3);
 
         IntVar[] vars = {X, Y};
 
@@ -97,7 +97,7 @@ public class ScaleViewTest {
         Solver s = new Solver();
 
         IntVar X = s.makeIntVar("X", low, upp, false);
-        IntVar Y = VariableFactory.scale(X, coeff);
+        IntVar Y = s.makeIntScaleView(X, coeff);
 
         IntVar[] vars = {X, Y};
 
@@ -171,7 +171,7 @@ public class ScaleViewTest {
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = solver.makeIntVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = VariableFactory.scale(o, 2);
+            IntVar v = solver.makeIntScaleView(o, 2);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(vit.next() / 2));
@@ -205,7 +205,7 @@ public class ScaleViewTest {
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = solver.makeIntVar("o", domains[0]);
-            IntVar v = VariableFactory.scale(o, 2);
+            IntVar v = solver.makeIntScaleView(o, 2);
 			if(!solver.getSettings().enableViews()){
 				try {
 					// currently, the propagation is not sufficient (bound)

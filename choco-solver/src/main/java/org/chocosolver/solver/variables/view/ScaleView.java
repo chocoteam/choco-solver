@@ -32,7 +32,6 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -320,7 +319,7 @@ public final class ScaleView extends IntView {
 
     @Override
     public IntVar duplicate() {
-        return VariableFactory.scale(this.var, this.cste);
+        return solver.makeIntScaleView(this.var, this.cste);
     }
 
     @Override

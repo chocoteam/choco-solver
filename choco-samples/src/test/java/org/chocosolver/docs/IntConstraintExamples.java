@@ -39,10 +39,7 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
-
-import static org.chocosolver.solver.variables.VariableFactory.offset;
 
 /**
  * BEWARE: 5_elements.rst SHOULD BE UPDATED ANYTIME THIS CLASS IS CHANGED
@@ -368,10 +365,10 @@ public class IntConstraintExamples {
         IntVar[] HE = new IntVar[5];
         for (int i = 0; i < TS.length; i++) {
             IntVar S = solver.makeIntVar("S_" + i, 0, 4, true);
-            TS[i] = VariableFactory.task(
+            TS[i] = new Task(
                     S,
                     solver.makeIntVar("D_" + i, i + 1),
-                    offset(S, i + 1)
+                    solver.makeIntOffsetView(S, i + 1)
             );
             HE[i] = solver.makeIntVar("HE_" + i, i - 1, i + 1, true);
         }

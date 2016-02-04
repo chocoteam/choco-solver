@@ -254,7 +254,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.offset(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = solver.makeIntOffsetView(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -276,7 +276,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.offset(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = solver.makeIntOffsetView(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -298,7 +298,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.offset(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = solver.makeIntOffsetView(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -322,7 +322,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.offset(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = solver.makeIntOffsetView(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -346,7 +346,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(solver.makeIntVar("b", 1, 4, true), 2);
+        IntVar var = solver.makeIntScaleView(solver.makeIntVar("b", 1, 4, true), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -362,7 +362,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = solver.makeIntScaleView(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -386,7 +386,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = solver.makeIntScaleView(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -416,7 +416,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.scale(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = solver.makeIntScaleView(solver.makeIntVar("b", new int[]{1, 2, 4}), 2);
         if (!solver.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -446,7 +446,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.minus(solver.makeIntVar("b", new int[]{1, 2, 4}));
+        IntVar var = solver.makeIntMinusView(solver.makeIntVar("b", new int[]{1, 2, 4}));
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -468,7 +468,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.minus(solver.makeIntVar("b", new int[]{1, 2, 4}));
+        IntVar var = solver.makeIntMinusView(solver.makeIntVar("b", new int[]{1, 2, 4}));
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -490,7 +490,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.minus(solver.makeIntVar("b", new int[]{1, 2, 4}));
+        IntVar var = solver.makeIntMinusView(solver.makeIntVar("b", new int[]{1, 2, 4}));
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -514,7 +514,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.minus(solver.makeIntVar("b", new int[]{1, 2, 4}));
+        IntVar var = solver.makeIntMinusView(solver.makeIntVar("b", new int[]{1, 2, 4}));
         if (!solver.getSettings().enableViews()) {
             try {
                 solver.propagate();
@@ -538,7 +538,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.abs(solver.makeIntVar("b", new int[]{-2, 1, 4}));
+        IntVar var = solver.makeIntAbsView(solver.makeIntVar("b", new int[]{-2, 1, 4}));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -557,7 +557,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.abs(solver.makeIntVar("b", new int[]{-2, 1, 4}));
+        IntVar var = solver.makeIntAbsView(solver.makeIntVar("b", new int[]{-2, 1, 4}));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -576,7 +576,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.abs(solver.makeIntVar("b", new int[]{-2, 1, 4}));
+        IntVar var = solver.makeIntAbsView(solver.makeIntVar("b", new int[]{-2, 1, 4}));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -597,7 +597,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.abs(solver.makeIntVar("b", new int[]{-2, 1, 4}));
+        IntVar var = solver.makeIntAbsView(solver.makeIntVar("b", new int[]{-2, 1, 4}));
         try {
             solver.propagate();
         } catch (ContradictionException e) {

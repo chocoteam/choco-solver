@@ -27,43 +27,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples.nqueen;
+package org.chocosolver.solver;
 
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Vars;
+import org.chocosolver.solver.variables.Views;
 
 /**
- * <br/>
+ * Interface to ease modeling
+ * Enables to make variables, views and constraints
  *
- * @author Charles Prud'homme
- * @since 31/03/11
+ * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public class NQueenGlobal extends AbstractNQueen {
+public interface IModeler extends Vars, Views {
 
-    @Override
-    public void buildModel() {
-        vars = new IntVar[n];
-        IntVar[] diag1 = new IntVar[n];
-        IntVar[] diag2 = new IntVar[n];
-
-        for (int i = 0; i < n; i++) {
-            vars[i] = solver.makeIntVar("Q_" + i, 1, n, false);
-            diag1[i] = solver.makeIntOffsetView(vars[i], i);
-            diag2[i] = solver.makeIntOffsetView(vars[i], -i);
-        }
-
-        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
-        solver.post(IntConstraintFactory.alldifferent(diag1, "BC"));
-        solver.post(IntConstraintFactory.alldifferent(diag2, "BC"));
-    }
-
-    @Override
-    public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(vars));
-    }
-
-    public static void main(String[] args) {
-        new NQueenGlobal().execute(args);
-    }
 }

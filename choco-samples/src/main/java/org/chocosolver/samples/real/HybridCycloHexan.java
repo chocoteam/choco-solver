@@ -73,7 +73,7 @@ public class HybridCycloHexan extends AbstractProblem {
 		// finite domain
 		intx = solver.makeIntVar("x", new int[]{-10, -9, 0, 2, 42});
 		// continuous view
-		x = solver.makeRealView(intx,precision);
+		x = solver.makeRealIntView(intx,precision);
 		y = solver.makeRealVar("y", -1.0e8, 1.0e8, precision);
 		z = solver.makeRealVar("z", -1.0e8, 1.0e8, precision);
 

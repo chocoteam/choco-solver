@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
@@ -83,7 +82,7 @@ public class Photo extends AbstractProblem {
 
             IntVar k = solver.makeIntVar(randomName(), -20000, 20000, true);
 			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]));
-			dist[i] = VariableFactory.abs(k);
+			dist[i] = solver.makeIntAbsView(k);
 
             ifThenElse(viols[i],
                             arithm(dist[i], ">", 1),

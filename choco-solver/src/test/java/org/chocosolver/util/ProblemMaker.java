@@ -33,7 +33,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
@@ -89,7 +88,7 @@ public class ProblemMaker {
                 IntVar k = solver.makeIntVar(randomName(), -n, n, false);
                 solver.post(ICF.arithm(k,"!=",0));
                 solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
-                vectors[idx] = VariableFactory.offset(k, 2 * n * (j - i));
+                vectors[idx] = solver.makeIntOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }

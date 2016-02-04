@@ -178,7 +178,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
 
     @Override
     public RealVar duplicate() {
-        return solver.makeRealView(this.var, this.precision);
+        return solver.makeRealIntView(this.var, this.precision);
     }
 
 }

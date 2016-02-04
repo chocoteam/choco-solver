@@ -74,7 +74,7 @@ public class SmallSantaClaude {
         final RealVar average_deviation = solver.makeRealVar("average_deviation", 0, max_price, precision);
 
         // continuous views of FD variables
-        RealVar[] realViews = solver.makeRealViewArray(kid_price, precision);
+        RealVar[] realViews = solver.makeRealIntViewArray(kid_price, precision);
 
         // kids must have different gifts
         solver.post(IntConstraintFactory.alldifferent(kid_gift, "AC"));

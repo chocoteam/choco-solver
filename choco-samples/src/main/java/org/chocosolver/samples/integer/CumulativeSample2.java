@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
 /**
@@ -66,7 +65,7 @@ public class CumulativeSample2 extends AbstractProblem {
 		for (int iTask=0; iTask < NUM_OF_TASKS; ++iTask) {
 			starts[iTask] = solver.makeIntVar("start" + iTask, 0, HORIZON, true);
 			ends[iTask] = solver.makeIntVar("ends" + iTask, 0, HORIZON, true);
-			tasks[iTask] = VariableFactory.task(starts[iTask], duration, ends[iTask]);
+			tasks[iTask] = new Task(starts[iTask], duration, ends[iTask]);
 			res[iTask] = solver.makeIntVar(1);
 		}
 

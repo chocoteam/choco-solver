@@ -91,7 +91,7 @@ public class SantaClaude extends AbstractProblem {
         }
         funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
-        RealVar[] all_vars = ArrayUtils.append(solver.makeRealViewArray(kid_price, precision), new RealVar[]{average});
+        RealVar[] all_vars = ArrayUtils.append(solver.makeRealIntViewArray(kid_price, precision), new RealVar[]{average});
         String function = funBuilder.toString();
 
         solver.post(new RealConstraint(function, all_vars));

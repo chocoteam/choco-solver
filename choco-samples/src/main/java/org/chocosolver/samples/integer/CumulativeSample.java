@@ -43,7 +43,6 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.Random;
 
@@ -80,7 +79,7 @@ public class CumulativeSample extends AbstractProblem{
 		for(int i=0;i<n;i++){
 			duration[i] = solver.makeIntVar(rd.nextInt(20) + 1);
 			height[i] = solver.makeIntVar(rd.nextInt(5) + 1);
-			end[i] = VariableFactory.offset(start[i],duration[i].getValue());
+			end[i] = solver.makeIntOffsetView(start[i],duration[i].getValue());
 			task[i] = new Task(start[i],duration[i],end[i]);
 		}
 		solver.post(ICF.cumulative(task,height,capa,true));

@@ -38,7 +38,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -60,7 +59,7 @@ public class DistanceTest {
                 IntVar Y = solver.makeIntVar("Y", 1, 10, false);
                 IntVar diff = solver.makeIntVar("X-Y", -9, 9, true);
 				solver.post(IntConstraintFactory.sum(new IntVar[]{Y,diff}, "=", X));
-                IntVar Z = VariableFactory.abs(diff);
+                IntVar Z = solver.makeIntAbsView(diff);
                 solver.post(IntConstraintFactory.arithm(Z, "=", 5));
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {

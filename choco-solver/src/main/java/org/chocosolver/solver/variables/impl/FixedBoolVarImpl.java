@@ -35,7 +35,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.StringUtils;
 
@@ -81,7 +80,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     @Override
     public BoolVar not() {
         if (!hasNot()) {
-            not = VariableFactory.not(this);
+            not = solver.makeBoolNotView(this);
             not._setNot(this);
         }
         return not;

@@ -45,8 +45,6 @@ import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.variables.VariableFactory.minus;
-
 /**
  * <br/>
  *
@@ -176,7 +174,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = solver.makeIntVar("x", -2, 2, false);
-                IntVar z = VariableFactory.abs(x);
+                IntVar z = solver.makeIntAbsView(x);
                 solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, z}, seed));
 
             }
@@ -199,7 +197,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = solver.makeIntVar("x", -2, 2, false);
-                IntVar z = VariableFactory.offset(x, 1);
+                IntVar z = solver.makeIntOffsetView(x, 1);
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
 
             }
@@ -222,7 +220,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = solver.makeIntVar("x", -2, 2, false);
-                IntVar z = VariableFactory.scale(x, 2);
+                IntVar z = solver.makeIntScaleView(x, 2);
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
 
             }
@@ -245,7 +243,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = solver.makeIntVar("x", 0, 2, false);
-                IntVar z = VariableFactory.minus(x);
+                IntVar z = solver.makeIntMinusView(x);
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
 
             }
@@ -297,7 +295,7 @@ public class ViewsTest {
         {
             IntVar x = solver.makeIntVar("x", 160, 187, false);
             IntVar y = solver.makeIntVar("y", -999, 999, false);
-            IntVar z = VariableFactory.offset(VariableFactory.minus(x), 180);
+            IntVar z = solver.makeIntOffsetView(solver.makeIntMinusView(x), 180);
             solver.post(IntConstraintFactory.maximum(y, solver.makeIntVar(0), z));
 
             check(ref, solver, 0, false, true);
@@ -353,7 +351,7 @@ public class ViewsTest {
                 IntVar x = solver.makeIntVar("x", 0, 2, false);
                 IntVar y = solver.makeIntVar("y", 0, 2, false);
                 IntVar z = solver.makeIntVar("Z", -2, 2, false);
-                IntVar az = VariableFactory.abs(z);
+                IntVar az = solver.makeIntAbsView(z);
                 solver.post(IntConstraintFactory.sum(new IntVar[]{z, y}, "=", x));
                 solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
             }
@@ -382,7 +380,7 @@ public class ViewsTest {
                 IntVar y = solver.makeIntVar("y", 0, 2, false);
                 IntVar diff = solver.makeIntVar("diff", -2, 2, false);
                 solver.post(IntConstraintFactory.sum(new IntVar[]{diff, y}, "=", x));
-                IntVar z = VariableFactory.abs(diff);
+                IntVar z = solver.makeIntAbsView(diff);
                 solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, z}, "BC"));
                 solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
             }
@@ -417,7 +415,7 @@ public class ViewsTest {
                 for (int i = 0; i < k - 1; i++) {
                     IntVar z = solver.makeIntVar("Z", -200, 200, false);
                     solver.post(IntConstraintFactory.sum(new IntVar[]{z, x[i]}, "=", x[i + 1]));
-                    t[i] = VariableFactory.abs(z);
+                    t[i] = solver.makeIntAbsView(z);
                 }
                 solver.post(IntConstraintFactory.alldifferent(x, "BC"));
                 solver.post(IntConstraintFactory.alldifferent(t, "BC"));
@@ -434,8 +432,8 @@ public class ViewsTest {
     public void test6() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = solver.makeIntVar("x", 0, 10, false);
-        IntVar y = VariableFactory.abs(x);
-        IntVar z = VariableFactory.abs(VariableFactory.abs(x));
+        IntVar y = solver.makeIntAbsView(x);
+        IntVar z = solver.makeIntAbsView(solver.makeIntAbsView(x));
 
         for (int j = 0; j < 200; j++) {
 //            long t = -System.nanoTime();
@@ -461,7 +459,7 @@ public class ViewsTest {
     public void testJL1() throws ContradictionException {
         Solver s = new Solver();
         IntVar v1 = s.makeIntVar("v1", -2, 2, false);
-        IntVar v2 = VariableFactory.minus(VariableFactory.minus(s.makeIntVar("v2", -2, 2, false)));
+        IntVar v2 = s.makeIntMinusView(s.makeIntMinusView(s.makeIntVar("v2", -2, 2, false)));
         s.post(ICF.arithm(v1, "=", v2));
         s.post(ICF.arithm(v2, "!=", 1));
 
@@ -487,7 +485,7 @@ public class ViewsTest {
         solver.post(ICF.arithm(
                 solver.makeIntVar("int", -3, 3, false),
                 "=",
-                minus(solver.makeBoolVar("bool"))));
+                solver.makeIntMinusView(solver.makeBoolVar("bool"))));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
@@ -496,7 +494,7 @@ public class ViewsTest {
     public void testJL4() throws ContradictionException {
         Solver s = new Solver();
         BoolVar bool = s.makeBoolVar("bool");
-        BoolVar view = VariableFactory.eq(bool);
+        BoolVar view = s.makeBoolEqView(bool);
         SetVar set = s.makeSetVar("set", new int[]{}, new int[]{0,1});
         s.post(SCF.bool_channel(new BoolVar[]{view, bool}, set, 0));
         s.post(SCF.member(s.ONE(), set));
@@ -509,7 +507,7 @@ public class ViewsTest {
     public void testJG() throws ContradictionException {
         Solver s = new Solver();
         BoolVar bool = s.makeBoolVar("bool");
-        BoolVar view = VariableFactory.eq(bool);
+        BoolVar view = s.makeBoolEqView(bool);
         IntVar sum = s.makeIntVar("sum", 0, 6, true);
         s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
@@ -521,7 +519,7 @@ public class ViewsTest {
     public void testJG2() throws ContradictionException {
         Solver s = new Solver();
         BoolVar bool = s.makeBoolVar("bool");
-        BoolVar view = VariableFactory.not(bool);
+        BoolVar view = s.makeBoolNotView(bool);
         IntVar sum = s.makeIntVar("sum", 0, 6, true);
         s.post(ICF.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
@@ -533,7 +531,7 @@ public class ViewsTest {
     public void testJG3() throws ContradictionException {
         Solver s = new Solver();
         IntVar var = s.makeIntVar("int", 0, 2, true);
-        IntVar view = VariableFactory.eq(var);
+        IntVar view = s.makeIntEqView(var);
         IntVar sum = s.makeIntVar("sum", 0, 6, true);
         s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
@@ -545,7 +543,7 @@ public class ViewsTest {
     public void testJG4() throws ContradictionException {
         Solver s = new Solver();
         IntVar var = s.makeIntVar("int", 0, 2, true);
-        IntVar view = VariableFactory.minus(var);
+        IntVar view = s.makeIntMinusView(var);
         IntVar sum = s.makeIntVar("sum", 0, 6, true);
         s.post(ICF.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum));
         s.post(ICF.arithm(sum, ">", 2));
@@ -557,7 +555,7 @@ public class ViewsTest {
     public void testvanH() {
         Solver solver = new Solver();
         BoolVar x1 = solver.makeBoolVar("x1");
-        BoolVar x2 = VariableFactory.not(x1);
+        BoolVar x2 = solver.makeBoolNotView(x1);
         BoolVar x3 = solver.makeBoolVar("x3");
         IntVar[] av = new IntVar[]{x1, x2, x3};
         int[] coef = new int[]{5, 3, 2};

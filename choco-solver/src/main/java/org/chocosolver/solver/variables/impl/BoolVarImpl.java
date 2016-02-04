@@ -34,7 +34,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.solver.variables.delta.IEnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -491,7 +490,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public BoolVar not() {
         if (!hasNot()) {
-            not = VariableFactory.not(this);
+            not = solver.makeBoolNotView(this);
             not._setNot(this);
         }
         return not;

@@ -304,19 +304,19 @@ Their domains are implicitly defined by a function and implied variables.
 
 ``x = y + 2`` : ::
 
- IntVar x = VariableFactory.offset(y, 2);
+ IntVar x = solver.makeIntOffsetView(y, 2);
 
 ``x = -y`` : ::
 
- IntVar x = VariableFactory.minus(y);
+ IntVar x = solver.makeIntMinusView(y);
 
 ``x = 3*y`` : ::
 
- IntVar x = VariableFactory.scale(y, 3);
+ IntVar x = solver.makeIntScaleView(y, 3);
 
 Views can be combined together: ::
 
- IntVar x = VariableFactory.offset(VariableFactory.scale(y,2),5);
+ IntVar x = solver.makeIntOffsetView(solver.makeIntScaleView(y,2),5);
 
 Set variable
 ------------

@@ -43,7 +43,6 @@ import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
@@ -139,8 +138,8 @@ public class AirPlaneLanding extends AbstractProblem {
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-            earliness[i] = Max.var(ZERO, VariableFactory.offset(VariableFactory.minus(planes[i]), data[i][TT]));
-            tardiness[i] = Max.var(ZERO, VariableFactory.offset(planes[i], -data[i][TT]));
+            earliness[i] = Max.var(ZERO, solver.makeIntOffsetView(solver.makeIntMinusView(planes[i]), data[i][TT]));
+            tardiness[i] = Max.var(ZERO, solver.makeIntOffsetView(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<>();

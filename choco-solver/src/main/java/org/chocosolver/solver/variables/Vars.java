@@ -144,7 +144,7 @@ public interface Vars {
      * @return a constant IntVar of domain {<i>value</i>}
      */
     default IntVar makeIntVar(int value) {
-        return makeIntVar(StringUtils.randomName(),value);
+        return makeIntVar(VariableFactory.CSTE_NAME + value,value);
     }
 
     /**
@@ -158,25 +158,25 @@ public interface Vars {
     }
 
     /**
-     * Create an integer variable of initial domain [<i>min</i>, <i>max</i>]
-     * Uses an enumerated domain if <i>max</i>-<i>min</i> is small, and a bounded domain otherwise
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
-     * @return an IntVar of domain [<i>min</i>, <i>max</i>]
+     * Create an integer variable of initial domain [<i>lb</i>, <i>ub</i>]
+     * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
+     * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar makeIntVar(int min, int max) {
-        return makeIntVar(StringUtils.randomName(),min, max);
+    default IntVar makeIntVar(int lb, int ub) {
+        return makeIntVar(StringUtils.randomName(),lb, ub);
     }
 
     /**
-     * Create an integer variable of initial domain [<i>min</i>, <i>max</i>]
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
+     * Create an integer variable of initial domain [<i>lb</i>, <i>ub</i>]
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
      * @param boundedDomain specifies whether to use a bounded domain or an enumerated domain
-     * @return an IntVar of domain [<i>min</i>, <i>max</i>]
+     * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar makeIntVar(int min, int max, boolean boundedDomain) {
-        return makeIntVar(StringUtils.randomName(), min, max, boundedDomain);
+    default IntVar makeIntVar(int lb, int ub, boolean boundedDomain) {
+        return makeIntVar(StringUtils.randomName(), lb, ub, boundedDomain);
     }
 
     /**
@@ -190,32 +190,32 @@ public interface Vars {
     }
 
     /**
-     * Create an integer variable of initial domain [<i>min</i>, <i>max</i>]
+     * Create an integer variable of initial domain [<i>lb</i>, <i>ub</i>]
      * @param name name of the variable
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
      * @param boundedDomain specifies whether to use a bounded domain or an enumerated domain
-     * @return an IntVar of domain [<i>min</i>, <i>max</i>]
+     * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar makeIntVar(String name, int min, int max, boolean boundedDomain) {
+    default IntVar makeIntVar(String name, int lb, int ub, boolean boundedDomain) {
         if (boundedDomain) {
-            return VariableFactory.bounded(name, min, max, _me());
+            return VariableFactory.bounded(name, lb, ub, _me());
         } else {
-            return VariableFactory.enumerated(name, min, max, _me());
+            return VariableFactory.enumerated(name, lb, ub, _me());
         }
     }
 
     /**
-     * Create an integer variable of initial domain [<i>min</i>, <i>max</i>]
-     * Uses an enumerated domain if <i>max</i>-<i>min</i> is small, and a bounded domain otherwise
+     * Create an integer variable of initial domain [<i>lb</i>, <i>ub</i>]
+     * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
      * @param name name of the variable
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
-     * @return an IntVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
+     * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar makeIntVar(String name, int min, int max) {
-        boolean bounded = max - min + 1 >= _me().getSettings().getMaxDomSizeForEnumerated();
-        return makeIntVar(name, min, max, bounded);
+    default IntVar makeIntVar(String name, int lb, int ub) {
+        boolean bounded = ub - lb + 1 >= _me().getSettings().getMaxDomSizeForEnumerated();
+        return makeIntVar(name, lb, ub, bounded);
     }
 
     /**
@@ -242,57 +242,57 @@ public interface Vars {
     }
 
     /**
-     * Creates an array of <i>size</i> integer variables, taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates an array of <i>size</i> integer variables, taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param size number of variables
-     * @param min initial domain lower bound of each variable
-     * @param max initial domain upper bound of each variable
-     * @return an array of <i>size</i> IntVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound of each variable
+     * @param ub initial domain upper bound of each variable
+     * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[] makeIntVarArray(int size, int min, int max) {
-        return makeIntVarArray(StringUtils.randomName(), size, min, max);
+    default IntVar[] makeIntVarArray(int size, int lb, int ub) {
+        return makeIntVarArray(StringUtils.randomName(), size, lb, ub);
     }
 
     /**
-     * Creates an array of <i>size</i> integer variables, taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates an array of <i>size</i> integer variables, taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param size number of variables
-     * @param min initial domain lower bound of each variable
-     * @param max initial domain upper bound of each variable
+     * @param lb initial domain lower bound of each variable
+     * @param ub initial domain upper bound of each variable
      * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
-     * @return an array of <i>size</i> IntVar of domain [<i>min</i>, <i>max</i>]
+     * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[] makeIntVarArray(int size, int min, int max, boolean boundedDomain) {
-        return makeIntVarArray(StringUtils.randomName(), size, min, max, boundedDomain);
+    default IntVar[] makeIntVarArray(int size, int lb, int ub, boolean boundedDomain) {
+        return makeIntVarArray(StringUtils.randomName(), size, lb, ub, boundedDomain);
     }
 
     /**
-     * Creates an array of <i>size</i> integer variables, taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates an array of <i>size</i> integer variables, taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param name prefix name of the variables to create. The ith variable will be named <i>name</i>[i]
      * @param size number of variables
-     * @param min initial domain lower bound of each variable
-     * @param max initial domain upper bound of each variable
+     * @param lb initial domain lower bound of each variable
+     * @param ub initial domain upper bound of each variable
      * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
-     * @return an array of <i>size</i> IntVar of domain [<i>min</i>, <i>max</i>]
+     * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[] makeIntVarArray(String name, int size, int min, int max, boolean boundedDomain) {
+    default IntVar[] makeIntVarArray(String name, int size, int lb, int ub, boolean boundedDomain) {
         IntVar[] vars = new IntVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeIntVar(name + "[" + i + "]", min, max, boundedDomain);
+            vars[i] = makeIntVar(name + "[" + i + "]", lb, ub, boundedDomain);
         }
         return vars;
     }
 
     /**
-     * Creates an array of <i>size</i> integer variables, taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates an array of <i>size</i> integer variables, taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param name prefix name of the variables to create. The ith variable will be named <i>name</i>[i]
      * @param size number of variables
-     * @param min initial domain lower bound of each variable
-     * @param max initial domain upper bound of each variable
-     * @return an array of <i>size</i> IntVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound of each variable
+     * @param ub initial domain upper bound of each variable
+     * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[] makeIntVarArray(String name, int size, int min, int max) {
+    default IntVar[] makeIntVarArray(String name, int size, int lb, int ub) {
         IntVar[] vars = new IntVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeIntVar(name + "[" + i + "]", min, max);
+            vars[i] = makeIntVar(name + "[" + i + "]", lb, ub);
         }
         return vars;
     }
@@ -326,61 +326,61 @@ public interface Vars {
     }
 
     /**
-     * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param dim1 number of rows in the matrix
      * @param dim2 number of columns in the matrix
-     * @param min initial domain lower bound of each variable
-     * @param max initial domain upper bound of each variable
-     * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound of each variable
+     * @param ub initial domain upper bound of each variable
+     * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[][] makeIntVarMatrix(int dim1, int dim2, int min, int max) {
-        return makeIntVarMatrix(StringUtils.randomName(), dim1, dim2, min, max);
+    default IntVar[][] makeIntVarMatrix(int dim1, int dim2, int lb, int ub) {
+        return makeIntVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub);
     }
 
     /**
-     * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param dim1 number of rows in the matrix
      * @param dim2 number of columns in the matrix
-     * @param min initial domain lower bound of each variable
-     * @param max initial domain upper bound of each variable
+     * @param lb initial domain lower bound of each variable
+     * @param ub initial domain upper bound of each variable
      * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
-     * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>min</i>, <i>max</i>]
+     * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[][] makeIntVarMatrix(int dim1, int dim2, int min, int max, boolean boundedDomain) {
-        return makeIntVarMatrix(StringUtils.randomName(), dim1, dim2, min, max, boundedDomain);
+    default IntVar[][] makeIntVarMatrix(int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
+        return makeIntVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub, boundedDomain);
     }
 
     /**
-     * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param name prefix name of the variables to create. The variable in row i and col j will be named <i>name</i>[i][j]
      * @param dim1 number of rows in the matrix
      * @param dim2 number of columns in the matrix
-     * @param min initial domain lower bound of each variable
-     * @param max initial domain upper bound of each variable
+     * @param lb initial domain lower bound of each variable
+     * @param ub initial domain upper bound of each variable
      * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
-     * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>min</i>, <i>max</i>]
+     * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[][] makeIntVarMatrix(String name, int dim1, int dim2, int min, int max, boolean boundedDomain) {
+    default IntVar[][] makeIntVarMatrix(String name, int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
         IntVar[][] vars = new IntVar[dim1][dim2];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeIntVarArray(name + "[" + i + "]", dim2, min, max, boundedDomain);
+            vars[i] = makeIntVarArray(name + "[" + i + "]", dim2, lb, ub, boundedDomain);
         }
         return vars;
     }
 
     /**
-     * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param name prefix name of the variables to create. The variable in row i and col j will be named <i>name</i>[i][j]
      * @param dim1 number of rows in the matrix
      * @param dim2 number of columns in the matrix
-     * @param min initial domain lower bound of each variable
-     * @param max initial domain upper bound of each variable
-     * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound of each variable
+     * @param ub initial domain upper bound of each variable
+     * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default IntVar[][] makeIntVarMatrix(String name, int dim1, int dim2, int min, int max) {
+    default IntVar[][] makeIntVarMatrix(String name, int dim1, int dim2, int lb, int ub) {
         IntVar[][] vars = new IntVar[dim1][dim2];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeIntVarArray(name + "[" + i + "]", dim2, min, max);
+            vars[i] = makeIntVarArray(name + "[" + i + "]", dim2, lb, ub);
         }
         return vars;
     }
@@ -407,135 +407,98 @@ public interface Vars {
     //*************************************************************************************
 
     /**
-     * Creates a constant real variable equal to VALUE
-     * @param VALUE value of the variable
+     * Creates a constant real variable equal to <i>value</i>
+     * @param value constant value of the variable
      * @param precision double precision (e.g., 0.00001d)
-     * @return a constant RealVar of domain {VALUE}
+     * @return a constant RealVar of domain {<i>value</i>}
      */
-    default RealVar makeRealVar(double VALUE, double precision) {
-        return makeRealVar(VALUE, VALUE, precision);
+    default RealVar makeRealVar(double value, double precision) {
+        return makeRealVar(VariableFactory.CSTE_NAME+value, value, value, precision);
     }
 
     /**
-     * Creates a real variable, taking its domain in [<i>min</i>, <i>max</i>]
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
+     * Creates a real variable, taking its domain in [<i>lb</i>, <i>ub</i>]
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
      * @param precision double precision (e.g., 0.00001d)
-     * @return a RealVar of domain [<i>min</i>, <i>max</i>]
+     * @return a RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar makeRealVar(double min, double max, double precision) {
-        return makeRealVar(StringUtils.randomName(), min, max, precision);
+    default RealVar makeRealVar(double lb, double ub, double precision) {
+        return makeRealVar(StringUtils.randomName(), lb, ub, precision);
     }
 
     /**
-     * Creates a real variable, taking its domain in [<i>min</i>, <i>max</i>]
+     * Creates a real variable, taking its domain in [<i>lb</i>, <i>ub</i>]
      * @param name variable name
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
      * @param precision double precision (e.g., 0.00001d)
-     * @return a RealVar of domain [<i>min</i>, <i>max</i>]
+     * @return a RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar makeRealVar(String name, double min, double max, double precision) {
-        return VariableFactory.real(name, min, max, precision, _me());
-    }
-
-    /**
-     * Creates a real view of <i>var</i>, i.e. a RealVar of domain equal to the domain of <i>var</i>.
-     * This should be used to include an integer variable in an expression/constraint requiring RealVar
-     * @param var the integer variable to be viewed as a RealVar
-     * @param precision double precision (e.g., 0.00001d)
-     * @return a RealVar of domain equal to the domain of <i>var</i>
-     */
-    default RealVar makeRealView(IntVar var, double precision) {
-        return VariableFactory.real(var, precision);
+    default RealVar makeRealVar(String name, double lb, double ub, double precision) {
+        return VariableFactory.real(name, lb, ub, precision, _me());
     }
 
     // ARRAY
 
     /**
-     * Creates an array of <i>size</i> real variables, each of domain [<i>min</i>, <i>max</i>]
+     * Creates an array of <i>size</i> real variables, each of domain [<i>lb</i>, <i>ub</i>]
      * @param size number of variables
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
      * @param precision double precision (e.g., 0.00001d)
-     * @return an array of <i>size</i> RealVar of domain [<i>min</i>, <i>max</i>]
+     * @return an array of <i>size</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar[] makeRealVarArray(int size, double min, double max, double precision) {
-        return makeRealVarArray(StringUtils.randomName(), size, min, max, precision);
+    default RealVar[] makeRealVarArray(int size, double lb, double ub, double precision) {
+        return makeRealVarArray(StringUtils.randomName(), size, lb, ub, precision);
     }
 
     /**
-     * Creates an array of <i>size</i> real variables, each of domain [<i>min</i>, <i>max</i>]
+     * Creates an array of <i>size</i> real variables, each of domain [<i>lb</i>, <i>ub</i>]
      * @param name prefix name of the variables to create. The ith variable will be named <i>name</i>[i]
      * @param size number of variables
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
      * @param precision double precision (e.g., 0.00001d)
-     * @return an array of <i>size</i> RealVar of domain [<i>min</i>, <i>max</i>]
+     * @return an array of <i>size</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar[] makeRealVarArray(String name, int size, double min, double max, double precision) {
+    default RealVar[] makeRealVarArray(String name, int size, double lb, double ub, double precision) {
         RealVar[] vars = new RealVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeRealVar(name + "[" + i + "]", min, max, precision);
+            vars[i] = makeRealVar(name + "[" + i + "]", lb, ub, precision);
         }
         return vars;
-    }
-
-    /**
-     * Creates an array of real views for a set of integer variables
-     * This should be used to include an integer variable in an expression/constraint requiring RealVar
-     * @param var the array of integer variables to be viewed as real variables
-     * @param precision double precision (e.g., 0.00001d)
-     * @return a real view of <i>var</i>
-     */
-    default RealVar[] makeRealViewArray(IntVar[] var, double precision) {
-        return VariableFactory.real(var, precision);
     }
 
     // MATRIX
 
     /**
-     * Creates a matrix of <i>dim1*dim2</i> real variables, each of domain [<i>min</i>, <i>max</i>]
+     * Creates a matrix of <i>dim1*dim2</i> real variables, each of domain [<i>lb</i>, <i>ub</i>]
      * @param dim1 number of matrix rows
      * @param dim2 number of matrix columns
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
      * @param precision double precision (e.g., 0.00001d)
-     * @return a matrix of <i>dim1*dim2</i> RealVar of domain [<i>min</i>, <i>max</i>]
+     * @return a matrix of <i>dim1*dim2</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar[][] makeRealVarMatrix(int dim1, int dim2, double min, double max, double precision) {
-        return makeRealVarMatrix(StringUtils.randomName(), dim1, dim2, min, max, precision);
+    default RealVar[][] makeRealVarMatrix(int dim1, int dim2, double lb, double ub, double precision) {
+        return makeRealVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub, precision);
     }
 
     /**
-     * Creates a matrix of <i>dim1*dim2</i> real variables, each of domain [<i>min</i>, <i>max</i>]
+     * Creates a matrix of <i>dim1*dim2</i> real variables, each of domain [<i>lb</i>, <i>ub</i>]
      * @param name prefix name of the variables to create. The variable in row i and col j will be named <i>name</i>[i][j]
      * @param dim1 number of matrix rows
      * @param dim2 number of matrix columns
-     * @param min initial domain lower bound
-     * @param max initial domain upper bound
+     * @param lb initial domain lower bound
+     * @param ub initial domain upper bound
      * @param precision double precision (e.g., 0.00001d)
-     * @return a matrix of <i>dim1*dim2</i> RealVar of domain [<i>min</i>, <i>max</i>]
+     * @return a matrix of <i>dim1*dim2</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default RealVar[][] makeRealVarMatrix(String name, int dim1, int dim2, double min, double max, double precision) {
+    default RealVar[][] makeRealVarMatrix(String name, int dim1, int dim2, double lb, double ub, double precision) {
         RealVar[][] vars = new RealVar[dim1][];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeRealVarArray(name + "[" + i + "]", dim2, min, max, precision);
-        }
-        return vars;
-    }
-
-    /**
-     * Creates a matrix of real views for a matrix of integer variables
-     * This should be used to include an integer variable in an expression/constraint requiring RealVar
-     * @param var the matrix of integer variables to be viewed as real variables
-     * @param precision double precision (e.g., 0.00001d)
-     * @return a real view of <i>var</i>
-     */
-    default RealVar[][] makeRealViewMatrix(IntVar[][] var, double precision) {
-        RealVar[][] vars = new RealVar[var.length][var[0].length];
-        for (int i = 0; i < var.length; i++) {
-            vars[i] = makeRealViewArray(var[i], precision);
+            vars[i] = makeRealVarArray(name + "[" + i + "]", dim2, lb, ub, precision);
         }
         return vars;
     }
@@ -545,14 +508,14 @@ public interface Vars {
     //*************************************************************************************
 
     /**
-     * Creates a set variable taking its domain in [<i>min</i>, <i>max</i>],
+     * Creates a set variable taking its domain in [<i>lb</i>, <i>ub</i>],
      * For instance [{0,3},{-2,0,2,3}] means the variable must include both 0 and 3 and can additionnaly include -2, and 2
-     * @param min initial domain lower bound (contains mandatory elements that should be present in every solution)
-     * @param max initial domain upper bound (contains potential elements)
-     * @return a SetVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound (contains mandatory elements that should be present in every solution)
+     * @param ub initial domain upper bound (contains potential elements)
+     * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar makeSetVar(int[] min, int[] max) {
-        return makeSetVar(StringUtils.randomName(), min, max);
+    default SetVar makeSetVar(int[] lb, int[] ub) {
+        return makeSetVar(StringUtils.randomName(), lb, ub);
     }
 
     /**
@@ -561,19 +524,23 @@ public interface Vars {
      * @return a constant SetVar of domain {<i>value</i>}
      */
     default SetVar makeSetVar(int[] value) {
-        return makeSetVar(StringUtils.randomName(), value);
+        String name = VariableFactory.CSTE_NAME+"{";
+        for(int i=0;i<value.length;i++){
+            name+=value[i]+i<value.length-1?", ":"";
+        }name += "}";
+        return makeSetVar(name, value);
     }
 
     /**
-     * Creates a set variable taking its domain in [<i>min</i>, <i>max</i>],
+     * Creates a set variable taking its domain in [<i>lb</i>, <i>ub</i>],
      * For instance [{0,3},{-2,0,2,3}] means the variable must include both 0 and 3 and can additionnaly include -2, and 2
      * @param name name of the variable
-     * @param min initial domain lower bound (contains mandatory elements that should be present in every solution)
-     * @param max initial domain upper bound (contains potential elements)
-     * @return a SetVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound (contains mandatory elements that should be present in every solution)
+     * @param ub initial domain upper bound (contains potential elements)
+     * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar makeSetVar(String name, int[] min, int[] max) {
-        return VariableFactory.set(name, max, min, _me());
+    default SetVar makeSetVar(String name, int[] lb, int[] ub) {
+        return VariableFactory.set(name, ub, lb, _me());
     }
 
     /**
@@ -589,28 +556,28 @@ public interface Vars {
     // ARRAY
 
     /**
-     * Creates an array of <i>size</i> set variables, taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates an array of <i>size</i> set variables, taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param size number of variables
-     * @param min initial domain lower bound of every variable (contains mandatory elements that should be present in every solution)
-     * @param max initial domain upper bound of every variable (contains potential elements)
-     * @return an array of <i>size</i> SetVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound of every variable (contains mandatory elements that should be present in every solution)
+     * @param ub initial domain upper bound of every variable (contains potential elements)
+     * @return an array of <i>size</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar[] makeSetVarArray(int size, int[] min, int[] max) {
-        return makeSetVarArray(StringUtils.randomName(), size, min, max);
+    default SetVar[] makeSetVarArray(int size, int[] lb, int[] ub) {
+        return makeSetVarArray(StringUtils.randomName(), size, lb, ub);
     }
 
     /**
-     * Creates an array of <i>size</i> set variables, taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates an array of <i>size</i> set variables, taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param name prefix name of the variables to create. The ith variable will be named <i>name</i>[i]
      * @param size number of variables
-     * @param min initial domain lower bound of every variable (contains mandatory elements that should be present in every solution)
-     * @param max initial domain upper bound of every variable (contains potential elements)
-     * @return an array of <i>size</i> SetVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound of every variable (contains mandatory elements that should be present in every solution)
+     * @param ub initial domain upper bound of every variable (contains potential elements)
+     * @return an array of <i>size</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar[] makeSetVarArray(String name, int size, int[] min, int[] max) {
+    default SetVar[] makeSetVarArray(String name, int size, int[] lb, int[] ub) {
         SetVar[] vars = new SetVar[size];
         for (int i = 0; i < size; i++) {
-            vars[i] = makeSetVar(name + "[" + i + "]", min, max);
+            vars[i] = makeSetVar(name + "[" + i + "]", lb, ub);
         }
         return vars;
     }
@@ -618,30 +585,30 @@ public interface Vars {
     // MATRIX
 
     /**
-     * Creates a matrix of <i>dim1*dim2</i> set variables, taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates a matrix of <i>dim1*dim2</i> set variables, taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param dim1 number of rows in the matrix
      * @param dim2 number of columns in the matrix
-     * @param min initial domain lower bound of every variable (contains mandatory elements that should be present in every solution)
-     * @param max initial domain upper bound of every variable (contains potential elements)
-     * @return a matrix of <i>dim1*dim2</i> SetVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound of every variable (contains mandatory elements that should be present in every solution)
+     * @param ub initial domain upper bound of every variable (contains potential elements)
+     * @return a matrix of <i>dim1*dim2</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar[][] makeSetVarMatrix(int dim1, int dim2, int[] min, int[] max) {
-        return makeSetVarMatrix(StringUtils.randomName(), dim1, dim2, min, max);
+    default SetVar[][] makeSetVarMatrix(int dim1, int dim2, int[] lb, int[] ub) {
+        return makeSetVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub);
     }
 
     /**
-     * Creates a matrix of <i>dim1*dim2</i> set variables, taking their domain in [<i>min</i>, <i>max</i>]
+     * Creates a matrix of <i>dim1*dim2</i> set variables, taking their domain in [<i>lb</i>, <i>ub</i>]
      * @param name prefix name of the variables to create. The variable in row i and col j will be named <i>name</i>[i][j]
      * @param dim1 number of rows in the matrix
      * @param dim2 number of columns in the matrix
-     * @param min initial domain lower bound of every variable (contains mandatory elements that should be present in every solution)
-     * @param max initial domain upper bound of every variable (contains potential elements)
-     * @return a matrix of <i>dim1*dim2</i> SetVar of domain [<i>min</i>, <i>max</i>]
+     * @param lb initial domain lower bound of every variable (contains mandatory elements that should be present in every solution)
+     * @param ub initial domain upper bound of every variable (contains potential elements)
+     * @return a matrix of <i>dim1*dim2</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
-    default SetVar[][] makeSetVarMatrix(String name, int dim1, int dim2, int[] min, int[] max) {
+    default SetVar[][] makeSetVarMatrix(String name, int dim1, int dim2, int[] lb, int[] ub) {
         SetVar[][] vars = new SetVar[dim1][dim2];
         for (int i = 0; i < dim1; i++) {
-            vars[i] = makeSetVarArray(name + "[" + i + "]", dim2, min, max);
+            vars[i] = makeSetVarArray(name + "[" + i + "]", dim2, lb, ub);
         }
         return vars;
     }

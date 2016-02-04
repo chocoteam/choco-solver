@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -87,7 +86,7 @@ public class AllIntervalSeries extends AbstractProblem {
             for (int i = 0; i < m - 1; i++) {
                 IntVar k = solver.makeIntVar(randomName(), -20000, 20000, true);
 				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[i+1]));
-				dist[i] = VariableFactory.abs(k);
+				dist[i] = solver.makeIntAbsView(k);
                 solver.post(IntConstraintFactory.member(dist[i], 1, m - 1));
             }
         }
