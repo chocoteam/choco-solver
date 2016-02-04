@@ -39,7 +39,6 @@ package org.chocosolver.samples.set;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -95,7 +94,7 @@ public class Partition extends AbstractProblem {
 		/////////////////
 
 		// partition constraint
-		solver.post(SetConstraintsFactory.partition(new SetVar[]{x, y, z}, universe));
+		solver.post(solver.partition(new SetVar[]{x, y, z}, universe));
 		if (noEmptySet) {
 			// forbid empty sets
 			solver.post(solver.nbEmpty(new SetVar[]{x, y, z, universe}, solver.intVar(0)));

@@ -32,7 +32,6 @@ package org.chocosolver.solver.search;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -187,7 +186,7 @@ public class StrategyTest {
         IntVar[] x = solver.intVarArray("x", 5, 1, 6, false);
         SetVar y = solver.setVar("y", new int[]{}, new int[]{1,2,3,4,5,6,7,8,9,10});
         solver.post(ICF.alldifferent(x));
-        solver.post(SetConstraintsFactory.member(x[0], y));
+        solver.post(solver.member(x[0], y));
         solver.findSolution();
         AbstractStrategy strat = solver.getStrategy();
         Assert.assertTrue(strat instanceof LastConflict);

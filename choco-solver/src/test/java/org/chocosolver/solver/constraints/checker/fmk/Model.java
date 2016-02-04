@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -113,10 +112,8 @@ public interface Model {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = SetConstraintsFactory.all_disjoint(vars);
-            Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(ctrs);
+            s.post(s.allDisjoint(vars));
             s.set(strategy);
             return s;
         }
@@ -135,10 +132,8 @@ public interface Model {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = SetConstraintsFactory.all_different(vars);
-            Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(ctrs);
+            s.post(s.allDifferent(vars));
             s.set(strategy);
             return s;
         }
@@ -179,10 +174,8 @@ public interface Model {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = SetConstraintsFactory.all_equal(vars);
-            Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(ctrs);
+            s.post(s.allEqual(vars));
             s.set(strategy);
             return s;
         }
