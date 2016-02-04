@@ -27,62 +27,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples.explanation;
+package org.chocosolver.solver;
 
-import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.IVariableFactory;
+import org.chocosolver.solver.variables.IViewFactory;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 01/05/11
- * Time: 13:26
+ * Interface to ease modeling
+ * Enables to make variables, views and constraints
+ *
+ * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public class ExplainedSimpleProblem extends AbstractProblem {
+public interface IModeler extends IVariableFactory, IViewFactory {
 
-    IntVar[] vars;
-    int n = 4;
-    int vals = n + 1;
-
-    @Override
-    public void createSolver() {
-        solver = new Solver();
-    }
-
-
-    @Override
-    public void buildModel() {
-        vars = solver.intVarArray("x", n, 1, vals, false);
-        for (int i = 0; i < vars.length - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
-        }
-    }
-
-    @Override
-    public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(vars));
-    }
-
-    @Override
-    public void solve() {
-        ExplanationFactory.CBJ.plugin(solver, false, false);
-        if (solver.findSolution()) {
-            do {
-                this.prettyOut();
-            }
-            while (solver.nextSolution());
-        }
-    }
-
-    @Override
-    public void prettyOut() {
-    }
-
-    public static void main(String[] args) {
-        new ExplainedSimpleProblem().execute(args);
-    }
 }

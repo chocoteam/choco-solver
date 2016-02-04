@@ -39,7 +39,6 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -49,7 +48,7 @@ public class CircuitTest {
     @Test(groups="1s", timeOut=60000)
     public static void test1() {
         Solver solver = new Solver();
-        IntVar[] x = VariableFactory.boundedArray("x", 10, 0, 20, solver);
+        IntVar[] x = solver.intVarArray("x", 10, 0, 20, true);
         solver.post(IntConstraintFactory.circuit(x, 0));
         solver.findSolution();
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
@@ -58,7 +57,7 @@ public class CircuitTest {
     @Test(groups="1s", timeOut=60000)
     public static void test2() {
         Solver solver = new Solver();
-        IntVar[] x = VariableFactory.enumeratedArray("x", 10, 0, 10, solver);
+        IntVar[] x = solver.intVarArray("x", 10, 0, 10, false);
         solver.post(IntConstraintFactory.circuit(x, 0));
         solver.findSolution();
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
@@ -67,8 +66,8 @@ public class CircuitTest {
     @Test(groups="1s", timeOut=60000)
     public static void test3() {
         Solver solver = new Solver();
-        IntVar[] x = VariableFactory.boundedArray("x", 5, 0, 4, solver);
-        IntVar[] y = VariableFactory.boundedArray("y", 5, 5, 9, solver);
+        IntVar[] x = solver.intVarArray("x", 5, 0, 4, true);
+        IntVar[] y = solver.intVarArray("y", 5, 5, 9, true);
         IntVar[] vars = ArrayUtils.append(x, y);
         solver.post(IntConstraintFactory.circuit(vars, 0));
         solver.findSolution();
@@ -79,7 +78,7 @@ public class CircuitTest {
     public static void test4() {
         for (int n = 2; n < 8; n++) {
             Solver solver = new Solver();
-            IntVar[] x = VariableFactory.boundedArray("x", n, 0, n - 1, solver);
+            IntVar[] x = solver.intVarArray("x", n, 0, n - 1, true);
             solver.post(IntConstraintFactory.circuit(x, 0));
             solver.findAllSolutions();
             Assert.assertEquals(factorial(n - 1), solver.getMeasures().getSolutionCount());

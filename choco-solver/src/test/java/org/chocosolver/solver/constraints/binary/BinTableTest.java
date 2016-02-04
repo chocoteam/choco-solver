@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -87,8 +86,8 @@ public class BinTableTest {
         setUp();
         for (String a : ALGOS) {
             s = new Solver();
-            v1 = VF.enumerated("v1", 1, 4, s);
-            v2 = VF.enumerated("v2", 1, 4, s);
+            v1 = s.intVar("v1", 1, 4, false);
+            v2 = s.intVar("v2", 1, 4, false);
             s.post(ICF.table(v1, v2, feasible, a));
 
             s.findAllSolutions();
@@ -103,8 +102,8 @@ public class BinTableTest {
         setUp();
         for (String a : ALGOS) {
             s = new Solver();
-            v1 = VF.enumerated("v1", 1, 4, s);
-            v2 = VF.enumerated("v2", 1, 4, s);
+            v1 = s.intVar("v1", 1, 4, false);
+            v2 = s.intVar("v2", 1, 4, false);
             s.post(ICF.table(v1, v2, infeasible, a));
 
             s.findAllSolutions();
@@ -125,16 +124,16 @@ public class BinTableTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbsolute() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", -10, 10, solver);
-        IntVar v2 = VF.enumerated("v2", -10, 10, solver);
+        IntVar v1 = solver.intVar("v1", -10, 10, false);
+        IntVar v2 = solver.intVar("v2", -10, 10, false);
         solver.post(absolute(v1, v2, -1));
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
                 Solver tsolver = new Solver();
-                IntVar tv1 = VF.enumerated("tv1", -10, 10, tsolver);
-                IntVar tv2 = VF.enumerated("tv2", -10, 10, tsolver);
+                IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
+                IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 tsolver.post(absolute(tv1, tv2, a));
                 tsolver.set(ISF.random_value(new IntVar[]{tv1, tv2}));
                 Assert.assertEquals(tsolver.findAllSolutions(), nbs);
@@ -154,16 +153,16 @@ public class BinTableTest {
     @Test(groups="1s", timeOut=60000)
     public void testArithmLT() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", -10, 10, solver);
-        IntVar v2 = VF.enumerated("v2", -10, 10, solver);
+        IntVar v1 = solver.intVar("v1", -10, 10, false);
+        IntVar v2 = solver.intVar("v2", -10, 10, false);
         solver.post(arithmLT(v1, v2, -1));
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
         for (int s = 0; s < 20; s++) {
             for (int a = 0; a < ALGOS.length; a++) {
                 Solver tsolver = new Solver();
-                IntVar tv1 = VF.enumerated("tv1", -10, 10, tsolver);
-                IntVar tv2 = VF.enumerated("tv2", -10, 10, tsolver);
+                IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
+                IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 tsolver.post(arithmLT(tv1, tv2, a));
                 tsolver.set(ISF.random_value(new IntVar[]{tv1, tv2}));
                 Assert.assertEquals(tsolver.findAllSolutions(), nbs);
@@ -183,16 +182,16 @@ public class BinTableTest {
     @Test(groups="1s", timeOut=60000)
     public void testArithmNQ() {
         Solver solver = new Solver();
-        IntVar v1 = VF.enumerated("v1", -10, 10, solver);
-        IntVar v2 = VF.enumerated("v2", -10, 10, solver);
+        IntVar v1 = solver.intVar("v1", -10, 10, false);
+        IntVar v2 = solver.intVar("v2", -10, 10, false);
         solver.post(arithmNQ(v1, v2, -1));
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
                 Solver tsolver = new Solver();
-                IntVar tv1 = VF.enumerated("tv1", -10, 10, tsolver);
-                IntVar tv2 = VF.enumerated("tv2", -10, 10, tsolver);
+                IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
+                IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 tsolver.post(arithmNQ(tv1, tv2, a));
                 tsolver.set(ISF.random_value(new IntVar[]{tv1, tv2}));
                 Assert.assertEquals(tsolver.findAllSolutions(), nbs);
@@ -212,7 +211,7 @@ public class BinTableTest {
                 tuples.add(1, 1);
 
                 Solver solver = new Solver();
-                IntVar[] vars = VF.enumeratedArray("X", 2, -1, 1, solver);
+                IntVar[] vars = solver.intVarArray("X", 2, -1, 1, false);
                 solver.post(ICF.table(vars[0], vars[1], tuples, a));
 
                 solver.set(ISF.random_value(vars));
@@ -232,7 +231,7 @@ public class BinTableTest {
                 tuples.add(1, 1);
 
                 Solver solver = new Solver();
-                IntVar[] vars = VF.enumeratedArray("X", 2, -1, 1, solver);
+                IntVar[] vars = solver.intVarArray("X", 2, -1, 1, false);
                 solver.post(ICF.table(vars[0], vars[1], tuples, a));
 
                 solver.set(ISF.random_value(vars));

@@ -39,7 +39,6 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VF;
 import org.testng.annotations.Test;
 
 /**
@@ -53,7 +52,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void arithm1() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 1, 4, solver);
+        IntVar X = solver.intVar("X", 1, 4, false);
         solver.post(ICF.arithm(X, ">", 2));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -62,7 +61,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testmember1() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 1, 4, solver);
+        IntVar X = solver.intVar("X", 1, 4, false);
         solver.post(ICF.member(X, new int[]{-2, -1, 0, 1, 2}));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -71,7 +70,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testmember2() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 1, 4, solver);
+        IntVar X = solver.intVar("X", 1, 4, false);
         solver.post(ICF.member(X, 2, 5));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -80,7 +79,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testnotmember1() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 1, 4, solver);
+        IntVar X = solver.intVar("X", 1, 4, false);
         solver.post(ICF.not_member(X, new int[]{-2, -1, 0, 1, 2}));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -90,7 +89,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testnotmember2() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 1, 4, solver);
+        IntVar X = solver.intVar("X", 1, 4, false);
         solver.post(ICF.not_member(X, 2, 5));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -99,8 +98,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testabsolute() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 0, 2, solver);
-        IntVar Y = VF.enumerated("X", -6, 1, solver);
+        IntVar X = solver.intVar("X", 0, 2, false);
+        IntVar Y = solver.intVar("X", -6, 1, false);
         solver.post(ICF.absolute(X, Y));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -109,8 +108,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testarithm3() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 0, 2, solver);
-        IntVar Y = VF.enumerated("X", -6, 1, solver);
+        IntVar X = solver.intVar("X", 0, 2, false);
+        IntVar Y = solver.intVar("X", -6, 1, false);
         solver.post(ICF.arithm(X, "<=", Y, "+", 1));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -119,8 +118,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testdistance1() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 0, 2, solver);
-        IntVar Y = VF.enumerated("X", -3, 1, solver);
+        IntVar X = solver.intVar("X", 0, 2, false);
+        IntVar Y = solver.intVar("X", -3, 1, false);
         solver.post(ICF.distance(X, Y, "=", 1));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -129,8 +128,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testelement1() {
         Solver solver = new Solver();
-        IntVar V = VF.enumerated("V", -2, 2, solver);
-        IntVar I = VF.enumerated("I", 0, 5, solver);
+        IntVar V = solver.intVar("V", -2, 2, false);
+        IntVar I = solver.intVar("I", 0, 5, false);
         solver.post(ICF.element(V, new int[]{2, -2, 1, -1, 0}, I, 0, "none"));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -139,8 +138,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testsquare() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 0, 5, solver);
-        IntVar Y = VF.enumerated("Y", -1, 3, solver);
+        IntVar X = solver.intVar("X", 0, 5, false);
+        IntVar Y = solver.intVar("Y", -1, 3, false);
         solver.post(ICF.square(X, Y));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -149,8 +148,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testtable1() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 0, 5, solver);
-        IntVar Y = VF.enumerated("Y", -1, 3, solver);
+        IntVar X = solver.intVar("X", 0, 5, false);
+        IntVar Y = solver.intVar("Y", -1, 3, false);
         Tuples tuples = new Tuples(true);
         tuples.add(1, -2);
         tuples.add(1, 1);
@@ -164,9 +163,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testdistance2() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 1, 3, solver);
-        IntVar Y = VF.enumerated("Y", -1, 1, solver);
-        IntVar Z = VF.enumerated("Z", 2, 3, solver);
+        IntVar X = solver.intVar("X", 1, 3, false);
+        IntVar Y = solver.intVar("Y", -1, 1, false);
+        IntVar Z = solver.intVar("Z", 2, 3, false);
         solver.post(ICF.distance(X, Y, "<", Z));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -175,9 +174,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testeucli_div() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 1, 3, solver);
-        IntVar Y = VF.enumerated("Y", -1, 1, solver);
-        IntVar Z = VF.enumerated("Z", 2, 3, solver);
+        IntVar X = solver.intVar("X", 1, 3, false);
+        IntVar Y = solver.intVar("Y", -1, 1, false);
+        IntVar Z = solver.intVar("Z", 2, 3, false);
         solver.post(ICF.eucl_div(X, Y, Z));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -186,9 +185,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testmaximum() {
         Solver solver = new Solver();
-        IntVar MAX = VF.enumerated("MAX", 1, 3, solver);
-        IntVar Y = VF.enumerated("Y", -1, 1, solver);
-        IntVar Z = VF.enumerated("Z", 2, 3, solver);
+        IntVar MAX = solver.intVar("MAX", 1, 3, false);
+        IntVar Y = solver.intVar("Y", -1, 1, false);
+        IntVar Z = solver.intVar("Z", 2, 3, false);
         solver.post(ICF.maximum(MAX, Y, Z));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -197,9 +196,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testminimum() {
         Solver solver = new Solver();
-        IntVar MIN = VF.enumerated("MIN", 1, 3, solver);
-        IntVar Y = VF.enumerated("Y", -1, 1, solver);
-        IntVar Z = VF.enumerated("Z", 2, 3, solver);
+        IntVar MIN = solver.intVar("MIN", 1, 3, false);
+        IntVar Y = solver.intVar("Y", -1, 1, false);
+        IntVar Z = solver.intVar("Z", 2, 3, false);
         solver.post(ICF.minimum(MIN, Y, Z));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -208,9 +207,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testmod() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", 2, 4, solver);
-        IntVar Y = VF.enumerated("Y", -1, 4, solver);
-        IntVar Z = VF.enumerated("Z", 1, 3, solver);
+        IntVar X = solver.intVar("X", 2, 4, false);
+        IntVar Y = solver.intVar("Y", -1, 4, false);
+        IntVar Z = solver.intVar("Z", 1, 3, false);
         solver.post(ICF.mod(X, Y, Z));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -219,9 +218,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testtimes() {
         Solver solver = new Solver();
-        IntVar X = VF.enumerated("X", -1, 2, solver);
-        IntVar Y = VF.enumerated("Y", 2, 4, solver);
-        IntVar Z = VF.enumerated("Z", 5, 7, solver);
+        IntVar X = solver.intVar("X", -1, 2, false);
+        IntVar Y = solver.intVar("Y", 2, 4, false);
+        IntVar Z = solver.intVar("Z", 5, 7, false);
         solver.post(ICF.times(X, Y, Z));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -230,10 +229,10 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testalldifferent() {
         Solver solver = new Solver();
-        IntVar W = VF.enumerated("W", 0, 1, solver);
-        IntVar X = VF.enumerated("X", -1, 2, solver);
-        IntVar Y = VF.enumerated("Y", 2, 4, solver);
-        IntVar Z = VF.enumerated("Z", 5, 7, solver);
+        IntVar W = solver.intVar("W", 0, 1, false);
+        IntVar X = solver.intVar("X", -1, 2, false);
+        IntVar Y = solver.intVar("Y", 2, 4, false);
+        IntVar Z = solver.intVar("Z", 5, 7, false);
         solver.post(ICF.alldifferent(new IntVar[]{W, X, Y, Z}));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -242,7 +241,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testalldifferent_cond() {
         Solver solver = new Solver();
-        IntVar[] XS = VF.enumeratedArray("XS", 5, 0, 3, solver);
+        IntVar[] XS = solver.intVarArray("XS", 5, 0, 3, false);
         solver.post(ICF.alldifferent_conditionnal(XS,
                 x -> !x.contains(1) && !x.contains(3)));
         Chatterbox.showSolutions(solver);
@@ -252,7 +251,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testalldifferent_exc0() {
         Solver solver = new Solver();
-        IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
+        IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
         solver.post(ICF.alldifferent_except_0(XS));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -261,8 +260,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testamong() {
         Solver solver = new Solver();
-        IntVar N = VF.enumerated("N", 2, 3, solver);
-        IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 6, solver);
+        IntVar N = solver.intVar("N", 2, 3, false);
+        IntVar[] XS = solver.intVarArray("XS", 4, 0, 6, false);
         solver.post(ICF.among(N, XS, new int[]{1, 2, 3}));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -272,8 +271,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testatleast_nvalues() {
         Solver solver = new Solver();
-        IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
-        IntVar N = VF.enumerated("N", 2, 3, solver);
+        IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
+        IntVar N = solver.intVar("N", 2, 3, false);
         solver.post(ICF.atleast_nvalues(XS, N, true));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -282,8 +281,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testatmost_nvalues() {
         Solver solver = new Solver();
-        IntVar[] XS = VF.enumeratedArray("XS", 4, 0, 2, solver);
-        IntVar N = VF.enumerated("N", 1, 3, solver);
+        IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
+        IntVar N = solver.intVar("N", 1, 3, false);
         solver.post(ICF.atmost_nvalues(XS, N, false));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -292,9 +291,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testbin_packing() {
         Solver solver = new Solver();
-        IntVar[] IBIN = VF.enumeratedArray("IBIN", 5, 1, 3, solver);
+        IntVar[] IBIN = solver.intVarArray("IBIN", 5, 1, 3, false);
         int[] sizes = new int[]{2, 3, 1, 4, 2};
-        IntVar[] BLOADS = VF.enumeratedArray("BLOADS", 3, 0, 5, solver);
+        IntVar[] BLOADS = solver.intVarArray("BLOADS", 3, 0, 5, false);
         solver.post(ICF.bin_packing(IBIN, sizes, BLOADS, 1));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -303,8 +302,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testboolean_channeling() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VF.boolArray("BVARS", 5, solver);
-        IntVar VAR = VF.enumerated("VAR", 1, 5, solver);
+        BoolVar[] BVARS = solver.boolVarArray("BVARS", 5);
+        IntVar VAR = solver.intVar("VAR", 1, 5, false);
         solver.post(ICF.boolean_channeling(BVARS, VAR, 1));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -313,7 +312,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testcircuit() {
         Solver solver = new Solver();
-        IntVar[] NODES = VF.enumeratedArray("NODES", 5, 0, 4, solver);
+        IntVar[] NODES = solver.intVarArray("NODES", 5, 0, 4, false);
         solver.post(ICF.circuit(NODES, 0, CircuitConf.LIGHT));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -322,8 +321,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testcost_regular() {
         Solver solver = new Solver();
-        IntVar[] VARS = VF.enumeratedArray("VARS", 5, 0, 2, solver);
-        IntVar COST = VF.enumerated("COST", 0, 10, solver);
+        IntVar[] VARS = solver.intVarArray("VARS", 5, 0, 2, false);
+        IntVar COST = solver.intVar("COST", 0, 10, false);
         FiniteAutomaton fauto = new FiniteAutomaton();
         int start = fauto.addState();
         int end = fauto.addState();
@@ -351,9 +350,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testcount() {
         Solver solver = new Solver();
-        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 3, solver);
-        IntVar VA = VF.enumerated("VA", new int[]{1, 3}, solver);
-        IntVar CO = VF.enumerated("CO", new int[]{0, 2, 4}, solver);
+        IntVar[] VS = solver.intVarArray("VS", 4, 0, 3, false);
+        IntVar VA = solver.intVar("VA", new int[]{1, 3});
+        IntVar CO = solver.intVar("CO", new int[]{0, 2, 4});
         solver.post(ICF.count(VA, VS, CO));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -365,15 +364,15 @@ public class IntConstraintExamples {
         Task[] TS = new Task[5];
         IntVar[] HE = new IntVar[5];
         for (int i = 0; i < TS.length; i++) {
-            IntVar S = VF.bounded("S_" + i, 0, 4, solver);
-            TS[i] = VF.task(
+            IntVar S = solver.intVar("S_" + i, 0, 4, true);
+            TS[i] = new Task(
                     S,
-                    VF.fixed("D_" + i, i + 1, solver),
-                    VF.offset(S, i + 1)
+                    solver.intVar("D_" + i, i + 1),
+                    solver.intOffsetView(S, i + 1)
             );
-            HE[i] = VF.bounded("HE_" + i, i - 1, i + 1, solver);
+            HE[i] = solver.intVar("HE_" + i, i - 1, i + 1, true);
         }
-        IntVar CA = VF.enumerated("CA", 1, 3, solver);
+        IntVar CA = solver.intVar("CA", 1, 3, false);
         solver.post(ICF.cumulative(TS, HE, CA, true));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -382,13 +381,13 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testdiffn() {
         Solver solver = new Solver();
-        IntVar[] X = VF.boundedArray("X", 4, 0, 1, solver);
-        IntVar[] Y = VF.boundedArray("Y", 4, 0, 2, solver);
+        IntVar[] X = solver.intVarArray("X", 4, 0, 1, true);
+        IntVar[] Y = solver.intVarArray("Y", 4, 0, 2, true);
         IntVar[] D = new IntVar[4];
         IntVar[] W = new IntVar[4];
         for (int i = 0; i < 4; i++) {
-            D[i] = VF.fixed("D_" + i, 1, solver);
-            W[i] = VF.fixed("W_" + i, i + 1, solver);
+            D[i] = solver.intVar("D_" + i, 1);
+            W[i] = solver.intVar("W_" + i, i + 1);
         }
         solver.post(ICF.diffn(X, Y, D, W, true));
         Chatterbox.showSolutions(solver);
@@ -398,9 +397,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testglobal_cardinality() {
         Solver solver = new Solver();
-        IntVar[] VS = VF.boundedArray("VS", 4, 0, 4, solver);
+        IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, true);
         int[] values = new int[]{-1, 1, 2};
-        IntVar[] OCC = VF.boundedArray("OCC", 3, 0, 2, solver);
+        IntVar[] OCC = solver.intVarArray("OCC", 3, 0, 2, true);
         solver.post(ICF.global_cardinality(VS, values, OCC, true));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -409,8 +408,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testinverse_channeling() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, 0, 3, solver);
-        IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 4, solver);
+        IntVar[] X = solver.intVarArray("X", 3, 0, 3, false);
+        IntVar[] Y = solver.intVarArray("Y", 3, 1, 4, false);
         solver.post(ICF.inverse_channeling(X, Y, 0, 1));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -420,11 +419,11 @@ public class IntConstraintExamples {
     public void testknapsack() {
         Solver solver = new Solver();
         IntVar[] IT = new IntVar[3]; // 3 items
-        IT[0] = VF.bounded("IT_0", 0, 3, solver);
-        IT[1] = VF.bounded("IT_1", 0, 2, solver);
-        IT[2] = VF.bounded("IT_2", 0, 1, solver);
-        IntVar WE = VF.bounded("WE", 0, 8, solver);
-        IntVar EN = VF.bounded("EN", 0, 6, solver);
+        IT[0] = solver.intVar("IT_0", 0, 3, true);
+        IT[1] = solver.intVar("IT_1", 0, 2, true);
+        IT[2] = solver.intVar("IT_2", 0, 1, true);
+        IntVar WE = solver.intVar("WE", 0, 8, true);
+        IntVar EN = solver.intVar("EN", 0, 6, true);
         int[] weights = new int[]{1, 3, 4};
         int[] energies = new int[]{1, 4, 6};
         solver.post(ICF.knapsack(IT, WE, EN, weights, energies));
@@ -435,9 +434,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testlex_chain_less() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
-        IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
-        IntVar[] Z = VF.enumeratedArray("Z", 3, 0, 2, solver);
+        IntVar[] X = solver.intVarArray("X", 3, -1, 1, false);
+        IntVar[] Y = solver.intVarArray("Y", 3, 1, 2, false);
+        IntVar[] Z = solver.intVarArray("Z", 3, 0, 2, false);
         solver.post(ICF.lex_chain_less(X, Y, Z));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -446,9 +445,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testlex_chain_less_eq() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
-        IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
-        IntVar[] Z = VF.enumeratedArray("Z", 3, 0, 2, solver);
+        IntVar[] X = solver.intVarArray("X", 3, -1, 1, false);
+        IntVar[] Y = solver.intVarArray("Y", 3, 1, 2, false);
+        IntVar[] Z = solver.intVarArray("Z", 3, 0, 2, false);
         solver.post(ICF.lex_chain_less_eq(X, Y, Z));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -457,8 +456,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testlex_less() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
-        IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
+        IntVar[] X = solver.intVarArray("X", 3, -1, 1, false);
+        IntVar[] Y = solver.intVarArray("Y", 3, 1, 2, false);
         solver.post(ICF.lex_less(X, Y));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -467,8 +466,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testlex_less_eq() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, -1, 1, solver);
-        IntVar[] Y = VF.enumeratedArray("Y", 3, 1, 2, solver);
+        IntVar[] X = solver.intVarArray("X", 3, -1, 1, false);
+        IntVar[] Y = solver.intVarArray("Y", 3, 1, 2, false);
         solver.post(ICF.lex_less_eq(X, Y));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -477,8 +476,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testmulticost_regular() {
         Solver solver = new Solver();
-        IntVar[] VARS = VF.enumeratedArray("VARS", 5, 0, 2, solver);
-        IntVar[] CVARS = VF.enumeratedArray("CVARS", 5, 0, 10, solver);
+        IntVar[] VARS = solver.intVarArray("VARS", 5, 0, 2, false);
+        IntVar[] CVARS = solver.intVarArray("CVARS", 5, 0, 10, false);
         FiniteAutomaton fauto = new FiniteAutomaton();
         int start = fauto.addState();
         int end = fauto.addState();
@@ -506,8 +505,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testnvalues() {
         Solver solver = new Solver();
-        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 2, solver);
-        IntVar N = VF.enumerated("N", 0, 3, solver);
+        IntVar[] VS = solver.intVarArray("VS", 4, 0, 2, false);
+        IntVar N = solver.intVar("N", 0, 3, false);
         solver.post(ICF.nvalues(VS, N));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -516,9 +515,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testpath() {
         Solver solver = new Solver();
-        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
-        IntVar S = VF.enumerated("S", 0, 3, solver);
-        IntVar E = VF.enumerated("E", 0, 3, solver);
+        IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, false);
+        IntVar S = solver.intVar("S", 0, 3, false);
+        IntVar E = solver.intVar("E", 0, 3, false);
         solver.post(ICF.path(VS, S, E, 0));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -527,7 +526,7 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testregular() {
         Solver solver = new Solver();
-        IntVar[] CS = VF.enumeratedArray("CS", 4, 1, 5, solver);
+        IntVar[] CS = solver.intVarArray("CS", 4, 1, 5, false);
         solver.post(ICF.regular(CS,
                 new FiniteAutomaton("(1|2)(3*)(4|5)")));
         Chatterbox.showSolutions(solver);
@@ -537,9 +536,9 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testscalar() {
         Solver solver = new Solver();
-        IntVar[] CS = VF.enumeratedArray("CS", 4, 1, 4, solver);
+        IntVar[] CS = solver.intVarArray("CS", 4, 1, 4, false);
         int[] coeffs = new int[]{1, 2, 3, 4};
-        IntVar R = VF.bounded("R", 0, 20, solver);
+        IntVar R = solver.intVar("R", 0, 20, true);
         solver.post(ICF.scalar(CS, coeffs, "=", R));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -548,8 +547,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testsort() {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, 0, 2, solver);
-        IntVar[] Y = VF.enumeratedArray("Y", 3, 0, 2, solver);
+        IntVar[] X = solver.intVarArray("X", 3, 0, 2, false);
+        IntVar[] Y = solver.intVarArray("Y", 3, 0, 2, false);
         solver.post(ICF.sort(X, Y));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -558,8 +557,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testsubcircuit() {
         Solver solver = new Solver();
-        IntVar[] NODES = VF.enumeratedArray("NS", 5, 0, 4, solver);
-        IntVar SI = VF.enumerated("SI", 2, 3, solver);
+        IntVar[] NODES = solver.intVarArray("NS", 5, 0, 4, false);
+        IntVar SI = solver.intVar("SI", 2, 3, false);
         solver.post(ICF.subcircuit(NODES, 0, SI));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -568,10 +567,10 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testsubpath() {
         Solver solver = new Solver();
-        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
-        IntVar S = VF.enumerated("S", 0, 3, solver);
-        IntVar E = VF.enumerated("E", 0, 3, solver);
-        IntVar SI = VF.enumerated("SI", 2, 3, solver);
+        IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, false);
+        IntVar S = solver.intVar("S", 0, 3, false);
+        IntVar E = solver.intVar("E", 0, 3, false);
+        IntVar SI = solver.intVar("SI", 2, 3, false);
         solver.post(ICF.subpath(VS, S, E, 0, SI));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -580,8 +579,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testsum() {
         Solver solver = new Solver();
-        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
-        IntVar SU = VF.enumerated("SU", 2, 3, solver);
+        IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, false);
+        IntVar SU = solver.intVar("SU", 2, 3, false);
         solver.post(ICF.sum(VS, "<=", SU));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -590,8 +589,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testtree() {
         Solver solver = new Solver();
-        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
-        IntVar NT = VF.enumerated("NT", 2, 3, solver);
+        IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, false);
+        IntVar NT = solver.intVar("NT", 2, 3, false);
         solver.post(ICF.tree(VS, NT, 0));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -600,8 +599,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testtsp() {
         Solver solver = new Solver();
-        IntVar[] VS = VF.enumeratedArray("VS", 4, 0, 4, solver);
-        IntVar CO = VF.enumerated("CO", 0, 15, solver);
+        IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, false);
+        IntVar CO = solver.intVar("CO", 0, 15, false);
         int[][] costs = new int[][]{{0, 1, 3, 7}, {1, 0, 1, 3}, {3, 1, 0, 1}, {7, 3, 1, 0}};
         solver.post(ICF.tsp(VS, CO, costs));
         Chatterbox.showSolutions(solver);
@@ -611,8 +610,8 @@ public class IntConstraintExamples {
     @Test(groups="1s", timeOut=60000)
     public void testbit_channeling() {
         Solver solver = new Solver();
-        BoolVar[] BVARS = VF.boolArray("BVARS", 4, solver);
-        IntVar VAR = VF.enumerated("VAR", 0, 15, solver);
+        BoolVar[] BVARS = solver.boolVarArray("BVARS", 4);
+        IntVar VAR = solver.intVar("VAR", 0, 15, false);
         solver.post(ICF.bit_channeling(BVARS, VAR));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();

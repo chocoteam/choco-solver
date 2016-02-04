@@ -31,7 +31,6 @@ package org.chocosolver.samples.nqueen;
 
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -45,7 +44,7 @@ public class NQueenLinearBinary extends AbstractNQueen {
     public void buildModel() {
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
+            vars[i] = solver.intVar("Q_" + i, 1, n, false);
         }
 
         for (int i = 0; i < n - 1; i++) {

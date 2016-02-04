@@ -41,7 +41,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.set.SetConstraintsFactory;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * Small problem to illustrate how to use set variables
@@ -66,15 +65,15 @@ public class SetUnion extends AbstractProblem {
     @Override
     public void buildModel() {
         // x initial domain
-		x = VariableFactory.set("x",new int[]{1,-2,3},new int[]{1},solver);
+        x = solver.setVar("x", new int[]{1}, new int[]{1, -2, 3});
         // y initial domain
-		y = VariableFactory.set("y",new int[]{-6,-2,7},solver);
+        y = solver.setVar("y", new int[]{}, new int[]{-6, -2, 7});
         // z initial domain
-		z = VariableFactory.set("z",-2,7,solver);
+        z = solver.setVar("z", new int[]{}, new int[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7});
         // set-union constraint
 		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
         if (noEmptySet) {
-            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, VariableFactory.fixed(0, solver)));
+            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, solver.intVar(0)));
         }
     }
 

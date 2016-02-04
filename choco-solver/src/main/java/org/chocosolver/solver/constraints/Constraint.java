@@ -32,16 +32,16 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropOpposite;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.StringUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * A Constraint is basically a set of <code>Propagator</code>.
@@ -166,7 +166,7 @@ public class Constraint implements Serializable {
     public final BoolVar reif() {
         if (boolReif == null) {
             Solver s = propagators[0].getSolver();
-            boolReif = VF.bool(StringUtils.randomName(), s);
+            boolReif = s.boolVar(randomName());
             s.post(new ReificationConstraint(boolReif, this, getOpposite()));
         }
         return boolReif;

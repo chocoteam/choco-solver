@@ -33,7 +33,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
@@ -94,7 +93,7 @@ public class MeetingScheduling extends AbstractProblem {
     @Override
     public void buildModel() {
         mspdata = parse(mData.source());
-        meetingTime = VariableFactory.enumeratedArray("ts", mspdata.numberOfMeetings, 0, mspdata.domainSize - 1, solver);
+        meetingTime = solver.intVarArray("ts", mspdata.numberOfMeetings, 0, mspdata.domainSize - 1, false);
         boolean[][] conflicts = new boolean[mspdata.numberOfMeetings][mspdata.numberOfMeetings];
         for (int i = 0; i < mspdata.numberOfAgents; i++) { // for each pair of meeting
             for (int j = 0; j < mspdata.agentMeetings[i].length; j++) {

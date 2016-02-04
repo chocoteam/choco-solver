@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * A verbal arithmetic puzzle:
@@ -61,16 +60,16 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        d = VariableFactory.bounded("d", 1, 9, solver);
-        o = VariableFactory.bounded("o", 0, 9, solver);
-        n = VariableFactory.bounded("n", 0, 9, solver);
-        a = VariableFactory.bounded("a", 0, 9, solver);
-        l = VariableFactory.bounded("l", 0, 9, solver);
-        g = VariableFactory.bounded("g", 1, 9, solver);
-        e = VariableFactory.bounded("e", 0, 9, solver);
-        r = VariableFactory.bounded("r", 1, 9, solver);
-        b = VariableFactory.bounded("b", 0, 9, solver);
-        t = VariableFactory.bounded("t", 0, 9, solver);
+        d = solver.intVar("d", 1, 9, true);
+        o = solver.intVar("o", 0, 9, true);
+        n = solver.intVar("n", 0, 9, true);
+        a = solver.intVar("a", 0, 9, true);
+        l = solver.intVar("l", 0, 9, true);
+        g = solver.intVar("g", 1, 9, true);
+        e = solver.intVar("e", 0, 9, true);
+        r = solver.intVar("r", 1, 9, true);
+        b = solver.intVar("b", 0, 9, true);
+        t = solver.intVar("t", 0, 9, true);
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
         solver.post(IntConstraintFactory.alldifferent(letters, "BC"));

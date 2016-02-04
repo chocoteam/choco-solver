@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
@@ -97,13 +96,13 @@ public class WarehouseLocation extends AbstractProblem {
     @Override
     public void buildModel() {
         setUp();
-        suppliers = VariableFactory.enumeratedArray("sup", nS, 0, nWH - 1, solver);
-        open = VariableFactory.boolArray("o", nWH, solver);
-        costPerStore = VariableFactory.boundedArray("cPs", nS, 0, 9999, solver);
-        totCost = VariableFactory.bounded("cost", 0, 99999, solver);
+        suppliers = solver.intVarArray("sup", nS, 0, nWH - 1, false);
+        open = solver.boolVarArray("o", nWH);
+        costPerStore = solver.intVarArray("cPs", nS, 0, 9999, true);
+        totCost = solver.intVar("cost", 0, 99999, true);
 
         // A warehouse is open, if it supplies to a store
-        IntVar ONE = VariableFactory.fixed(1, solver);
+        IntVar ONE = solver.intVar(1);
         for (int s = 0; s < nS; s++) {
             solver.post(IntConstraintFactory.element(ONE, open, suppliers[s], 0));
         }
@@ -112,13 +111,13 @@ public class WarehouseLocation extends AbstractProblem {
             solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s], 0, "detect"));
         }
         for (int w = 0; w < nWH; w++) {
-            IntVar tmp = VariableFactory.bounded("occur_" + w, 0, suppliers.length, solver);
+            IntVar tmp = solver.intVar("occur_" + w, 0, suppliers.length, true);
             solver.post(IntConstraintFactory.count(w, suppliers, tmp));
             solver.post(IntConstraintFactory.arithm(tmp, ">=", open[w]));
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
-            IntVar tmp = VariableFactory.bounded("occur_" + w, 0, capacity[w], solver);
+            IntVar tmp = solver.intVar("occur_" + w, 0, capacity[w], true);
             solver.post(IntConstraintFactory.count(w, suppliers, tmp));
         }
 

@@ -38,7 +38,9 @@ import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.VariableFactory;
+
+import static java.lang.Double.NEGATIVE_INFINITY;
+import static java.lang.Double.POSITIVE_INFINITY;
 
 /**
  * The cyclo hexan problem.
@@ -65,9 +67,9 @@ public class CycloHexan extends AbstractProblem {
                         " z^2 * (1 + x^2) + x * (x - 24 * z) = -13 \n" + "This example comes from the Elisa project (LINA) examples. \n");
 
         double precision = 1.0e-6;
-        x = VariableFactory.real("x", Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, precision, solver);
-        y = VariableFactory.real("y", -1.0e8, 1.0e8, precision, solver);
-        z = VariableFactory.real("z", -1.0e8, 1.0e8, precision, solver);
+        x = solver.realVar("x", NEGATIVE_INFINITY, POSITIVE_INFINITY, precision);
+        y = solver.realVar("y", -1.0e8, 1.0e8, precision);
+        z = solver.realVar("z", -1.0e8, 1.0e8, precision);
 
         vars = new RealVar[]{x, y, z};
 		solver.post(new RealConstraint("RealConstraint",

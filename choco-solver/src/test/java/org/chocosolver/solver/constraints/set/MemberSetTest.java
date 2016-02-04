@@ -29,12 +29,11 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -87,8 +86,8 @@ public class MemberSetTest {
                 for (int h = 0; h < 2; h++) {
                     doms = DomainBuilder.buildFullDomains(2, -4, 5, random, d / 10.d, h == 0);
                     Solver solver = new Solver();
-                    SetVar s = VF.set("s", doms[0], new int[]{}, solver);
-                    IntVar i = VF.enumerated("i", doms[1], solver);
+                    SetVar s = solver.setVar("s", new int[]{}, doms[0]);
+                    IntVar i = solver.intVar("i", doms[1]);
                     solver.post(SCF.member(i, s));
                     //Chatterbox.showSolutions(solver);
                     Assert.assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
@@ -116,8 +115,8 @@ public class MemberSetTest {
                         doms[1][j] = lb + j;
                     }
                     Solver solver = new Solver();
-                    SetVar s = VF.set("s", doms[0], new int[]{}, solver);
-                    IntVar i = VF.bounded("i", doms[1][0], doms[1][doms[1].length - 1], solver);
+                    SetVar s = solver.setVar("s", new int[]{}, doms[0]);
+                    IntVar i = solver.intVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
                     solver.post(SCF.member(i, s));
                     //Chatterbox.showSolutions(solver);
                     Assert.assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),

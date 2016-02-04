@@ -36,9 +36,9 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * Costas Arrays
@@ -69,14 +69,14 @@ public class CostasArrays extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
+		vars = solver.intVarArray("v", n, 0, n - 1, false);
 		vectors = new IntVar[(n*(n-1))/2];
 		for (int i = 0, k = 0; i < n; i++) {
 			for (int j = i+1; j < n; j++, k++) {
-				IntVar d = VariableFactory.enumerated(StringUtils.randomName(), -n, n, solver);
+				IntVar d = solver.intVar(randomName(), -n, n, false);
 				solver.post(ICF.arithm(d,"!=",0));
 				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],d},"=",vars[j]));
-				vectors[k] = VariableFactory.offset(d, 2 * n * (j - i));
+				vectors[k] = solver.intOffsetView(d, 2 * n * (j - i));
 			}
 		}
 		solver.post(IntConstraintFactory.alldifferent(vars, "AC"));

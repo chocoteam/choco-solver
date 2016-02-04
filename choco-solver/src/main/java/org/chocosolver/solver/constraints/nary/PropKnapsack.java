@@ -43,7 +43,6 @@ import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 

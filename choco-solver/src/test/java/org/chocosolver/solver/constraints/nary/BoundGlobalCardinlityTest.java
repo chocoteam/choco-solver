@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinali
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -55,8 +54,8 @@ public class BoundGlobalCardinlityTest {
     public void test0() throws ContradictionException {
         Solver solver = new Solver();
 
-        IntVar[] vars = VariableFactory.boundedArray("vars", 6, 0, 3, solver);
-        IntVar[] card = VariableFactory.boundedArray("card", 4, 0, 6, solver);
+        IntVar[] vars = solver.intVarArray("vars", 6, 0, 3, true);
+        IntVar[] card = solver.intVarArray("card", 4, 0, 6, true);
 
         int[] values = new int[4];
         for (int i = 0; i < values.length; i++) {
@@ -92,8 +91,8 @@ public class BoundGlobalCardinlityTest {
                 values[i] = i;
             }
             {
-                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, solver);
-                IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, solver);
+                IntVar[] vars = solver.intVarArray("vars", n, 0, m - 1, true);
+                IntVar[] cards = solver.intVarArray("cards", m, 0, n, true);
                 solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
 //              solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
                 solver.set(IntStrategyFactory.lexico_LB(ArrayUtils.append(vars, cards)));
@@ -101,8 +100,8 @@ public class BoundGlobalCardinlityTest {
             // reformulation
             Solver ref = new Solver();
             {
-                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, ref);
-                IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, ref);
+                IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);
+                IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
                 ref.post(GlobalCardinality.reformulate(vars, cards, ref));
                 ref.set(IntStrategyFactory.lexico_LB(ArrayUtils.append(vars, cards)));
             }
@@ -129,8 +128,8 @@ public class BoundGlobalCardinlityTest {
                 values[i] = i;
             }
             {
-                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, solver);
-                IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, solver);
+                IntVar[] vars = solver.intVarArray("vars", n, 0, m - 1, true);
+                IntVar[] cards = solver.intVarArray("cards", m, 0, n, true);
                 solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
 //                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
                 solver.set(IntStrategyFactory.lexico_LB(vars));
@@ -138,8 +137,8 @@ public class BoundGlobalCardinlityTest {
             // reformulation
             Solver ref = new Solver();
             {
-                IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, ref);
-                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, ref);
+                IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
+                IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);
                 ref.post(GlobalCardinality.reformulate(vars, cards, ref));
                 ref.set(IntStrategyFactory.lexico_LB(vars));
             }

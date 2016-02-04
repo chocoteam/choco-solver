@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -58,7 +57,7 @@ public class BigLeq extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
+        vars = solver.intVarArray("v", m, 0, m - 1, false);
         for (int i = 0; i < m - 1; i++) {
             solver.post(IntConstraintFactory.arithm(vars[i], "<=", vars[i + 1]));
         }

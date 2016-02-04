@@ -52,9 +52,9 @@ public class ViewSumXYTest {
     public void test1() {
         Solver solver = new Solver();
 
-        IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
-        IntVar Y = VariableFactory.enumerated("Y", 3, 8, solver);
-        IntVar Z = VariableFactory.enumerated("Z",0,200,solver);
+        IntVar X = solver.intVar("X", 1, 10, false);
+        IntVar Y = solver.intVar("Y", 3, 8, false);
+        IntVar Z = solver.intVar("Z", 0, 200, false);
 		solver.post(IntConstraintFactory.sum(new IntVar[]{X,Y}, "=", Z));
 
         try {
@@ -117,18 +117,18 @@ public class ViewSumXYTest {
             Solver ref = new Solver();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = VariableFactory.bounded("x", 1, 5, ref);
-                xs[1] = VariableFactory.bounded("y", 1, 5, ref);
-                xs[2] = VariableFactory.bounded("z", 2, 10, ref);
+                xs[0] = ref.intVar("x", 1, 5, true);
+                xs[1] = ref.intVar("y", 1, 5, true);
+                xs[2] = ref.intVar("z", 2, 10, true);
                 ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
                 ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = VariableFactory.bounded("x", 1, 5, solver);
-                xs[1] = VariableFactory.bounded("y", 1, 5, solver);
-				IntVar Z = VariableFactory.enumerated("Z",0,200,solver);
+                xs[0] = solver.intVar("x", 1, 5, true);
+                xs[1] = solver.intVar("y", 1, 5, true);
+                IntVar Z = solver.intVar("Z", 0, 200, false);
 				solver.post(IntConstraintFactory.sum(xs, "=", Z));
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(IntStrategyFactory.random_bound(xs, seed));
@@ -148,18 +148,18 @@ public class ViewSumXYTest {
             Solver ref = new Solver();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = VariableFactory.enumerated("x", 1, 5, ref);
-                xs[1] = VariableFactory.enumerated("y", 1, 5, ref);
-                xs[2] = VariableFactory.enumerated("z", 2, 10, ref);
+                xs[0] = ref.intVar("x", 1, 5, false);
+                xs[1] = ref.intVar("y", 1, 5, false);
+                xs[2] = ref.intVar("z", 2, 10, false);
                 ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
                 ref.set(IntStrategyFactory.random_value(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = VariableFactory.enumerated("x", 1, 5, solver);
-                xs[1] = VariableFactory.enumerated("y", 1, 5, solver);
-				IntVar Z = VariableFactory.enumerated("Z",0,200,solver);
+                xs[0] = solver.intVar("x", 1, 5, false);
+                xs[1] = solver.intVar("y", 1, 5, false);
+                IntVar Z = solver.intVar("Z", 0, 200, false);
 				solver.post(IntConstraintFactory.sum(xs, "=", Z));
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(IntStrategyFactory.random_value(xs, seed));

@@ -29,10 +29,10 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -54,8 +54,8 @@ public class ScaleViewTest {
     public void test1() {
         Solver s = new Solver();
 
-        IntVar X = VariableFactory.enumerated("X", 1, 3, s);
-        IntVar Y = VariableFactory.scale(X, 2);
+        IntVar X = s.intVar("X", 1, 3, false);
+        IntVar Y = s.intScaleView(X, 2);
 
         IntVar[] vars = {X, Y};
 
@@ -76,8 +76,8 @@ public class ScaleViewTest {
     public void test2() {
         Solver s = new Solver();
 
-        IntVar X = VariableFactory.enumerated("X", 1, 4, s);
-        IntVar Y = VariableFactory.scale(X, 3);
+        IntVar X = s.intVar("X", 1, 4, false);
+        IntVar Y = s.intScaleView(X, 3);
 
         IntVar[] vars = {X, Y};
 
@@ -96,8 +96,8 @@ public class ScaleViewTest {
     private Solver bijective(int low, int upp, int coeff) {
         Solver s = new Solver();
 
-        IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar Y = VariableFactory.scale(X, coeff);
+        IntVar X = s.intVar("X", low, upp, false);
+        IntVar Y = s.intScaleView(X, coeff);
 
         IntVar[] vars = {X, Y};
 
@@ -116,9 +116,9 @@ public class ScaleViewTest {
     private Solver contraint(int low, int upp, int coeff) {
         Solver s = new Solver();
 
-        IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar C = VariableFactory.fixed("C", coeff, s);
-        IntVar Y = VariableFactory.enumerated("Y", low * coeff, upp * coeff, s);
+        IntVar X = s.intVar("X", low, upp, false);
+        IntVar C = s.intVar("C", coeff);
+        IntVar Y = s.intVar("Y", low * coeff, upp * coeff, false);
 
         IntVar[] vars = {X, Y};
 
@@ -170,8 +170,8 @@ public class ScaleViewTest {
             random.setSeed(seed);
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
-            IntVar v = VariableFactory.scale(o, 2);
+            IntVar o = solver.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
+            IntVar v = solver.intScaleView(o, 2);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(vit.next() / 2));
@@ -204,8 +204,8 @@ public class ScaleViewTest {
             random.setSeed(seed);
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = VariableFactory.enumerated("o", domains[0], solver);
-            IntVar v = VariableFactory.scale(o, 2);
+            IntVar o = solver.intVar("o", domains[0]);
+            IntVar v = solver.intScaleView(o, 2);
 			if(!solver.getSettings().enableViews()){
 				try {
 					// currently, the propagation is not sufficient (bound)

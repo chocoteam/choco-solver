@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
@@ -83,11 +82,11 @@ public class Langford extends AbstractProblem {
     public void buildModel() {
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
-        position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
+        position = solver.intVarArray("p", n * k, 0, k * n - 1, false);
         lights = new Constraint[(k - 1) * n + 1];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
-                lights[i + j * n] = IntConstraintFactory.arithm(VariableFactory.offset(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]);
+                lights[i + j * n] = IntConstraintFactory.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]);
             }
         }
         lights[(k - 1) * n] = IntConstraintFactory.arithm(position[0], "<", position[n * k - 1]);

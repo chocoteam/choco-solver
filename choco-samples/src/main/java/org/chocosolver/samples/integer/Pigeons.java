@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -57,7 +56,7 @@ public class Pigeons extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("p", n, 1, n - 1, solver);
+        vars = solver.intVarArray("p", n, 1, n - 1, false);
 
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {

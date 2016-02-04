@@ -54,7 +54,6 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
-import static org.chocosolver.solver.variables.VariableFactory.*;
 
 public class StableMarriage extends AbstractProblem {
 
@@ -189,8 +188,8 @@ public class StableMarriage extends AbstractProblem {
         //
         // variables
         //
-        wife = enumeratedArray("wife", n, 0, n - 1, solver);
-        husband = enumeratedArray("husband", n, 0, n - 1, solver);
+        wife = solver.intVarArray("wife", n, 0, n - 1, false);
+        husband = solver.intVarArray("husband", n, 0, n - 1, false);
 
         solver.post(alldifferent(wife, "BC"));
         solver.post(alldifferent(husband, "BC"));
@@ -205,7 +204,7 @@ public class StableMarriage extends AbstractProblem {
       solver.addConstraint(
           solver.makeEquality(solver.makeElement(husband, wife[m]), m));
       */
-            solver.post(element(fixed(m, solver), husband, wife[m], 0));
+            solver.post(element(solver.intVar(m), husband, wife[m], 0));
         }
 
         //   forall(w in Women)
@@ -215,7 +214,7 @@ public class StableMarriage extends AbstractProblem {
       solver.addConstraint(
           solver.makeEquality(solver.makeElement(wife, husband[w]), w));
       */
-            solver.post(element(fixed(w, solver), wife, husband[w], 0));
+            solver.post(element(solver.intVar(w), wife, husband[w], 0));
         }
 
 
@@ -233,10 +232,10 @@ public class StableMarriage extends AbstractProblem {
                         solver.makeElement(rankMen[m], wife[m]).var(),
                         rankMen[m][o]);
         */
-                IntVar v1 = enumerated("v1", 0, n - 1, solver);
+                IntVar v1 = solver.intVar("v1", 0, n - 1, false);
                 solver.post(element(v1, rankMen[m], wife[m], 0, "detect"));
 
-                BoolVar b1 = bool("b1", solver);
+                BoolVar b1 = solver.boolVar("b1");
                 LogicalConstraintFactory.ifThenElse(b1,
                         arithm(v1, ">", rankMen[m][o]),
                         arithm(v1, "<=", rankMen[m][o])
@@ -248,10 +247,10 @@ public class StableMarriage extends AbstractProblem {
                         solver.makeElement(rankWomen[o], husband[o]).var(),
                         rankWomen[o][m]);
         */
-                IntVar v2 = enumerated("v2", 0, n - 1, solver);
+                IntVar v2 = solver.intVar("v2", 0, n - 1, false);
                 solver.post(element(v2, rankWomen[o], husband[o], 0, "detect"));
 
-                BoolVar b2 = bool("b2", solver);
+                BoolVar b2 = solver.boolVar("b2");
                 LogicalConstraintFactory.ifThenElse(b2,
                         arithm(v2, "<", rankWomen[o][m]),
                         arithm(v2, ">=", rankWomen[o][m])
@@ -285,10 +284,10 @@ public class StableMarriage extends AbstractProblem {
                         solver.makeElement(rankWomen[w], husband[w]).var(),
                         rankWomen[w][o]);
         */
-                IntVar v1 = enumerated("v1", 0, n - 1, solver);
+                IntVar v1 = solver.intVar("v1", 0, n - 1, false);
                 solver.post(element(v1, rankWomen[w], husband[w], 0, "detect"));
 
-                BoolVar b1 = bool("b1", solver);
+                BoolVar b1 = solver.boolVar("b1");
                 LogicalConstraintFactory.ifThenElse(b1,
                         arithm(v1, ">", rankWomen[w][o]),
                         arithm(v1, "<=", rankWomen[w][o])
@@ -300,10 +299,10 @@ public class StableMarriage extends AbstractProblem {
                         solver.makeElement(rankMen[o], wife[o]).var(),
                         rankMen[o][w]);
         */
-                IntVar v2 = enumerated("v2", 0, n - 1, solver);
+                IntVar v2 = solver.intVar("v2", 0, n - 1, false);
                 solver.post(element(v2, rankMen[o], wife[o], 0, "detect"));
 
-                BoolVar b2 = bool("b2", solver);
+                BoolVar b2 = solver.boolVar("b2");
                 LogicalConstraintFactory.ifThenElse(b2,
                         arithm(v2, "<", rankMen[o][w]),
                         arithm(v2, ">=", rankMen[o][w])

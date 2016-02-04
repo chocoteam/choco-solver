@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
 import java.util.Arrays;
@@ -81,7 +80,7 @@ public class Eq20 extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.boundedArray("v", n, 0, 10, solver);
+        vars = solver.intVarArray("v", n, 0, 10, true);
         for (int i = 0; i < coeffs.length; i++) {
             solver.post(IntConstraintFactory.scalar(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), "=", coeffs[i][0]));
         }

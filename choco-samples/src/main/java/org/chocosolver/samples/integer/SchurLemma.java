@@ -34,7 +34,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
@@ -71,7 +70,7 @@ public class SchurLemma extends AbstractProblem {
     @Override
     public void buildModel() {
 
-        M = VariableFactory.boolMatrix("b", n, k, solver); // M_ij is true iff ball i is in box j
+        M = solver.boolVarMatrix("b", n, k); // M_ij is true iff ball i is in box j
 
         for (int i = 0; i < n; i++) {
             solver.post(IntConstraintFactory.sum(M[i], "=", 1));
@@ -82,7 +81,7 @@ public class SchurLemma extends AbstractProblem {
                 for (int y = 1; y <= n; y++) {
                     for (int z = 1; z <= n; z++) {
                         if (x + y == z)
-                            solver.post(IntConstraintFactory.sum(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, "=", VariableFactory.bounded("sum", 0, 2, solver)));
+                            solver.post(IntConstraintFactory.sum(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, "=", solver.intVar("sum", 0, 2, true)));
                     }
                 }
             }

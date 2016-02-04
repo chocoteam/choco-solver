@@ -29,10 +29,11 @@
  */
 package org.chocosolver.memory.structure;
 
-import java.util.Arrays;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.IStateIntVector;
+
+import java.util.Arrays;
 
 /**
  * A stored list dedicated to positive integers and three operations :

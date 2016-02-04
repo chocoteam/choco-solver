@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.kohsuke.args4j.Option;
 
 import java.util.ArrayList;
@@ -65,7 +64,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
     @Override
     public void buildModel() {
         int i = n;
-        X = VariableFactory.enumeratedArray("v", n, 0, n, solver);
+        X = solver.intVarArray("v", n, 0, n, false);
         int[] union = new int[n];
         for (int j = 0; j < i; j++) {
             union[j] = j;
@@ -87,7 +86,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 //                        Constraint ocB = ConstraintFactory.geq(X[j], l + 1, solver, eng2);
 //                        lcstrs.add(new ReifiedConstraint(b, cB, ocB, solver, eng2));
                 for (int q = p; q <= u; q++) {
-                    BoolVar a = VariableFactory.bool("A" + j + "_" + p + "_" + q, solver);
+                    BoolVar a = solver.boolVar("A" + j + "_" + p + "_" + q);
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
@@ -119,7 +118,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(IntConstraintFactory.sum(ai, "=", VariableFactory.bounded("scal", 0, q - p + 1, solver)));
+                solver.post(IntConstraintFactory.sum(ai, "=", solver.intVar("scal", 0, q - p + 1, true)));
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);

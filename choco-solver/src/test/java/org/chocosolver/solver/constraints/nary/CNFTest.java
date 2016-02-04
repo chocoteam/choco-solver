@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
 
 /**
@@ -52,10 +51,10 @@ public class CNFTest {
         for (int i = 0; i < 2; i++) {
 
             Solver solver = new Solver();
-            BoolVar a = VariableFactory.bool("a", solver);
-            BoolVar b = VariableFactory.bool("b", solver);
-            IntVar x = VariableFactory.bounded("x", 0, 24, solver);
-            IntVar y = VariableFactory.bounded("y", 0, 24, solver);
+            BoolVar a = solver.boolVar("a");
+            BoolVar b = solver.boolVar("b");
+            IntVar x = solver.intVar("x", 0, 24, true);
+            IntVar y = solver.intVar("y", 0, 24, true);
 
             if (i == 0) {
                 SatFactory.addClauses(LogOp.implies(

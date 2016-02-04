@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /**
  * A curriculum is a set of courses with prerequisites.
@@ -92,15 +91,15 @@ public class BACP extends AbstractProblem {
     @Override
     public void buildModel() {
         // period is assigned to
-        course_period = VariableFactory.enumeratedArray("c_p", n_courses, 0, n_periods, solver);
+        course_period = solver.intVarArray("c_p", n_courses, 0, n_periods, false);
         // whether period i has a course j assigned
-        x = VariableFactory.boolMatrix("X", n_periods, n_courses, solver);
+        x = solver.boolVarMatrix("X", n_periods, n_courses);
         // total load for each period
-        load = VariableFactory.enumeratedArray("load", n_periods, 0, load_per_period_ub - load_per_period_lb + 1, solver);
+        load = solver.intVarArray("load", n_periods, 0, load_per_period_ub - load_per_period_lb + 1, false);
         // opt. target
-        objective = VariableFactory.bounded("objective", load_per_period_lb, load_per_period_ub, solver);
+        objective = solver.intVar("objective", load_per_period_lb, load_per_period_ub, true);
         // sum variable
-        IntVar sum = VariableFactory.bounded("courses_per_period", courses_per_period_lb, courses_per_period_ub, solver);
+        IntVar sum = solver.intVar("courses_per_period", courses_per_period_lb, courses_per_period_ub, true);
         // constraints
         for (int i = 0; i < n_periods; i++) {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\

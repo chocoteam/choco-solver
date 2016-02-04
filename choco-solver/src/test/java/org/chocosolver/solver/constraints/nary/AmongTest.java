@@ -38,7 +38,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -91,9 +90,9 @@ public class AmongTest {
         int n = 2;
         for (int i = 0; i < 500; i++) {
             Solver solver = new Solver();
-            IntVar[] vars = VariableFactory.boundedArray("o", n, 0, n, solver);
+            IntVar[] vars = solver.intVarArray("o", n, 0, n, true);
             int value = 1;
-            IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
+            IntVar occ = solver.intVar("oc", 0, n, true);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(IntStrategyFactory.random_bound(allvars, i));
             solver.post(IntConstraintFactory.among(occ, vars, new int[]{value}));
@@ -108,9 +107,9 @@ public class AmongTest {
         int n = 2;
         for (int i = 0; i < 500; i++) {
             Solver solver = new Solver();
-            IntVar[] vars = VariableFactory.boundedArray("o", n, 0, n, solver);
+            IntVar[] vars = solver.intVarArray("o", n, 0, n, true);
             int[] values = {1, 2, 0};
-            IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
+            IntVar occ = solver.intVar("oc", 0, n, true);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(IntStrategyFactory.random_bound(allvars, i));
             solver.post(IntConstraintFactory.among(occ, vars, values));
@@ -124,9 +123,9 @@ public class AmongTest {
     @Test(groups="1s", timeOut=60000)
     public void test4() {
         Solver solver = new Solver();
-        IntVar[] vars = VariableFactory.enumeratedArray("o", 4, new int[]{0, 1, 2, 5}, solver);
+        IntVar[] vars = solver.intVarArray("o", 4, new int[]{0, 1, 2, 5});
         int[] values = {1, 2, 0};
-        IntVar occ = VariableFactory.bounded("oc", 0, 4, solver);
+        IntVar occ = solver.intVar("oc", 0, 4, true);
         solver.post(IntConstraintFactory.among(occ, vars, values));
         try {
             solver.propagate();
@@ -150,9 +149,9 @@ public class AmongTest {
             Solver solver = new Solver();
             IntVar[] vars;
             if (enumvar) {
-                vars = VariableFactory.enumeratedArray("e", nbVar, 0, sizeDom, solver);
+                vars = solver.intVarArray("e", nbVar, 0, sizeDom, false);
             } else {
-                vars = VariableFactory.boundedArray("e", nbVar, 0, sizeDom, solver);
+                vars = solver.intVarArray("e", nbVar, 0, sizeDom, true);
             }
 
             List<IntVar> lvs = new LinkedList<>();
@@ -203,9 +202,9 @@ public class AmongTest {
             Solver solver = new Solver();
             IntVar[] vars;
             if (enumvar) {
-                vars = VariableFactory.enumeratedArray("e", nbVar, 0, sizeDom, solver);
+                vars = solver.intVarArray("e", nbVar, 0, sizeDom, false);
             } else {
-                vars = VariableFactory.boundedArray("e", nbVar, 0, sizeDom, solver);
+                vars = solver.intVarArray("e", nbVar, 0, sizeDom, true);
             }
 
             List<IntVar> lvs = new LinkedList<>();
@@ -260,8 +259,8 @@ public class AmongTest {
      * @return Constraint
      */
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int val) {
-        BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
-        IntVar vval = VariableFactory.fixed(val, solver);
+        BoolVar[] bs = solver.boolVarArray("b", vs.length);
+        IntVar vval = solver.intVar(val);
         for (int i = 0; i < vs.length; i++) {
             LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval));
         }
@@ -269,7 +268,7 @@ public class AmongTest {
     }
 
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
-        BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
+        BoolVar[] bs = solver.boolVarArray("b", vs.length);
         for (int i = 0; i < vs.length; i++) {
             LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values));
         }

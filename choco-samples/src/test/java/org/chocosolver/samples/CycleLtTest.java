@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
 import org.testng.annotations.Test;
 
@@ -56,7 +55,7 @@ public class CycleLtTest {
         Solver s = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("v_" + i, min, n, s);
+            vars[i] = s.intVar("v_" + i, min, n, false);
         }
         Constraint[] cstrs = new Constraint[m + 1];
         int i;

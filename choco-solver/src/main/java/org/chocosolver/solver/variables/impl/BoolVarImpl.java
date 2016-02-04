@@ -34,9 +34,10 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VF;
-import org.chocosolver.solver.variables.VariableFactory;
-import org.chocosolver.solver.variables.delta.*;
+import org.chocosolver.solver.variables.delta.IEnumDelta;
+import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.delta.NoDelta;
+import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -46,7 +47,8 @@ import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueBoundIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.tools.StringUtils;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * <br/>
@@ -493,7 +495,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @SuppressWarnings("unchecked")
     @Override
     public BoolVar duplicate() {
-        return VariableFactory.bool(StringUtils.randomName(this.name), solver);
+        return solver.boolVar(randomName(this.name));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -532,7 +534,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public BoolVar not() {
         if (!hasNot()) {
-            not = VF.not(this);
+            not = solver.boolNotView(this);
             not._setNot(this);
         }
         return not;

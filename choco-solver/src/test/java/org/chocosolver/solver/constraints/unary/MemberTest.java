@@ -29,14 +29,13 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
-import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -89,7 +88,7 @@ public class MemberTest {
 
                 IntVar[] vars = new IntVar[1];
                 int[][] values = DomainBuilder.buildFullDomains(2, 0, i, r, d, false);
-                vars[0] = VariableFactory.enumerated("v", values[0], s);
+                vars[0] = s.intVar("v", values[0]);
 
                 Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
@@ -117,7 +116,7 @@ public class MemberTest {
                 int lb = values[0][0];
                 int ub = values[0][values[0].length - 1];
 
-                vars[0] = VariableFactory.bounded("v", lb, ub, s);
+                vars[0] = s.intVar("v", lb, ub, true);
 
                 Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
@@ -136,7 +135,7 @@ public class MemberTest {
     @Test(groups="1s", timeOut=60000)
     public void test_alxpgr() {
         Solver s = new Solver();
-        IntVar vars = VariableFactory.enumerated("v", 0, 10, s);
+        IntVar vars = s.intVar("v", 0, 10, false);
         int[] values = new int[]{0, 2, 4, 6, 8};
 
         s.post(ICF.member(vars, values));

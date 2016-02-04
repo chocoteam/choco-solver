@@ -37,7 +37,6 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -68,24 +67,24 @@ public class SetCstrsTest {
 
 	public static IntVar[] eqFilter(String mode){
 		Solver s = new Solver();
-		IntVar x = VF.enumerated("x", 0, 10, s);
-		IntVar y = VF.enumerated("y", 0, 10, s);
+		IntVar x = s.intVar("x", 0, 10, false);
+		IntVar y = s.intVar("y", 0, 10, false);
 		// set view of A
-		SetVar xset = VF.set("x as a set", 0, 10, s);
-		SetVar yset = VF.set("y as a set", 0, 10, s);
+		SetVar xset = s.setVar("x as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar yset = s.setVar("y as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(SCF.int_values_union(new IntVar[]{x},xset));
 		s.post(SCF.int_values_union(new IntVar[]{y},yset));
 		// X +9 <= Y or Y + 9 <= X
-		SetVar Xleft = VF.set("", 0, 10, s);
-		SetVar tmpLeft = VF.set("", 9, 19, s);
+		SetVar Xleft = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar tmpLeft = s.setVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
 		s.post(SCF.offSet(Xleft,tmpLeft,9));
-		SetVar Yleft = VF.set("", 0, 10, s);
+		SetVar Yleft = s.setVar("",  new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(eq(tmpLeft, Yleft,mode));
 
-		SetVar Yright = VF.set("",0, 10, s);
-		SetVar tmpRight = VF.set("", 9, 19, s);
+		SetVar Yright = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
+		SetVar tmpRight = s.setVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
 		s.post(SCF.offSet(Yright,tmpRight,9));
-		SetVar Xright = VF.set("", 0, 10, s);
+		SetVar Xright = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
 		s.post(eq(tmpRight, Xright,mode));
 
 		//

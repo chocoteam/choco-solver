@@ -40,7 +40,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -49,8 +48,8 @@ public class SetIntUnion {
 	@Test(groups="1s", timeOut=60000)
 	public void test1() {
         Solver s = new Solver();
-        IntVar[] x = VF.enumeratedArray("ints", 4, 0, 5, s);
-        SetVar values = VF.fixed("values", new int[]{0, 1, 4}, s);
+        IntVar[] x = s.intVarArray("ints", 4, 0, 5, false);
+        SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
@@ -62,13 +61,13 @@ public class SetIntUnion {
 	public void test2() {
         Solver s = new Solver();
         IntVar[] x = new IntVar[]{
-                VF.fixed(0, s)
-                , VF.fixed(2, s)
-                , VF.fixed(5, s)
-                , VF.fixed(0, s)
-                , VF.fixed(2, s)
+                s.intVar(0)
+                , s.intVar(2)
+                , s.intVar(5)
+                , s.intVar(0)
+                , s.intVar(2)
         };
-        SetVar values = VF.fixed("values", new int[]{0, 1, 4}, s);
+        SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);
@@ -81,13 +80,13 @@ public class SetIntUnion {
 	public void test3() {
         Solver s = new Solver();
         IntVar[] x = new IntVar[]{
-                VF.fixed(0, s)
-                , VF.fixed(2, s)
-                , VF.fixed(5, s)
-                , VF.fixed(0, s)
-                , VF.fixed(2, s)
+                s.intVar(0)
+                , s.intVar(2)
+                , s.intVar(5)
+                , s.intVar(0)
+                , s.intVar(2)
         };
-        SetVar values = VF.set("values", -1, 6, s);
+        SetVar values = s.setVar("values", new int[]{}, new int[]{-1,0,1,2,3,4,5,6});
         s.post(SCF.int_values_union(x, values));
         Chatterbox.showStatistics(s);
         Chatterbox.showSolutions(s);

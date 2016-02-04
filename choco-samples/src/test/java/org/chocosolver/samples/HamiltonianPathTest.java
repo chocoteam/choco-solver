@@ -41,7 +41,6 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.util.PoolManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -94,14 +93,14 @@ public class HamiltonianPathTest {
 			}
 			if(l.isEmpty())throw new UnsupportedOperationException();
 			if(enumerated){
-				succ[i] = VF.enumerated("suc",l.toArray(),solver);
+				succ[i] = solver.intVar("suc", l.toArray());
 			}else{
-				succ[i] = VF.bounded("suc",offset,n+offset,solver);
+				succ[i] = solver.intVar("suc", offset, n + offset, true);
 				solver.post(ICF.member(succ[i],l.toArray()));
 			}
 		}
-		succ[n-1] = VF.fixed(n+offset,solver);
-		solver.post(ICF.path(succ,VF.fixed(offset,solver),VF.fixed(n-1+offset,solver),offset));
+		succ[n - 1] = solver.intVar(n + offset);
+		solver.post(ICF.path(succ, solver.intVar(offset), solver.intVar(n - 1 + offset), offset));
 		// configure solver
 		if (rd) {
 			if(enumerated){

@@ -38,7 +38,6 @@ import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -66,8 +65,8 @@ public class NoGoodOnSolutionTest {
             }
         }
         Solver s = new Solver();
-        IntVar z = VF.bounded("z", Z, Z + 10, s);
-        IntVar[] vars = VF.enumeratedArray("x", n, 0, n - 1, s);
+        IntVar z = s.intVar("z", Z, Z + 10, true);
+        IntVar[] vars = s.intVarArray("x", n, 0, n - 1, false);
         s.post(ICF.tsp(vars, z, costs));
         s.set(ISF.random_value(vars));
         SMF.limitSolution(s, MAX_NB_SOLS);
@@ -132,7 +131,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
         int n = 8;
-        IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
+        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
@@ -156,7 +155,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
         int n = 8;
-        IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
+        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
@@ -180,7 +179,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
         int n = 8;
-        IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
+        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
@@ -203,7 +202,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Solver solver = new Solver();
         int n = 8;
-        IntVar[] vars = VF.enumeratedArray("Q", n, 1, n, solver);
+        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;

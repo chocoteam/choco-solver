@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -61,11 +60,11 @@ public class MinTest extends AbstractTernaryTest {
     public void test2() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] X = new IntVar[4];
-        IntVar min = VF.fixed(-5, solver);
-        X[0] = VF.fixed(-3, solver);
-        X[1] = VF.bounded("1", -4, -3, solver);
-        X[2] = VF.bounded("2", -5, -2,solver);
-        X[3] = VF.fixed(-3, solver);
+        IntVar min = solver.intVar(-5);
+        X[0] = solver.intVar(-3);
+        X[1] = solver.intVar("1", -4, -3, true);
+        X[2] = solver.intVar("2", -5, -2, true);
+        X[3] = solver.intVar(-3);
 
         solver.post(ICF.minimum(min, X));
         solver.propagate();

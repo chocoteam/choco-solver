@@ -32,9 +32,9 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.StringUtils;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * Created by IntelliJ IDEA.
@@ -54,7 +54,7 @@ public class LogicalConstraintFactory {
 	 */
 	public static Constraint and(BoolVar... BOOLS){
 		Solver s = BOOLS[0].getSolver();
-		IntVar sum = VariableFactory.bounded(StringUtils.randomName(),0,BOOLS.length,s);
+		IntVar sum = s.intVar(randomName(), 0, BOOLS.length, true);
 		s.post(IntConstraintFactory.sum(BOOLS,"=",sum));
 		return IntConstraintFactory.arithm(sum,"=",BOOLS.length);
 	}
@@ -66,7 +66,7 @@ public class LogicalConstraintFactory {
 	 */
 	public static Constraint or(BoolVar... BOOLS){
 		Solver s = BOOLS[0].getSolver();
-		IntVar sum = VariableFactory.bounded(StringUtils.randomName(),0,BOOLS.length,s);
+		IntVar sum = s.intVar(randomName(), 0, BOOLS.length, true);
 		s.post(IntConstraintFactory.sum(BOOLS,"=",sum));
 		return IntConstraintFactory.arithm(sum,">=",1);
 	}

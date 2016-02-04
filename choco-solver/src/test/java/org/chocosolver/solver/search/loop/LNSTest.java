@@ -37,8 +37,9 @@ import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.Test;
+
+import static java.lang.Math.ceil;
 
 /**
  * <br/>
@@ -61,10 +62,10 @@ public class LNSTest {
         // occurrence of each item
         IntVar[] objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = VariableFactory.bounded("o_" + (i + 1), 0, (int) Math.ceil(capacities[1] / volumes[i]), solver);
+            objects[i] = solver.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1] / volumes[i]), true);
         }
-        final IntVar power = VariableFactory.bounded("power", 0, 99999, solver);
-        IntVar scalar = VariableFactory.bounded("weight", capacities[0], capacities[1], solver);
+        final IntVar power = solver.intVar("power", 0, 99999, true);
+        IntVar scalar = solver.intVar("weight", capacities[0], capacities[1], true);
         solver.post(IntConstraintFactory.scalar(objects, volumes, "=", scalar));
         solver.post(IntConstraintFactory.scalar(objects, energies, "=", power));
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));

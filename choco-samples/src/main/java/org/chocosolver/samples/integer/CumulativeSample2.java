@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
 /**
@@ -59,19 +58,19 @@ public class CumulativeSample2 extends AbstractProblem {
 		// build variables
 		starts = new IntVar[NUM_OF_TASKS];
 		ends = new IntVar[NUM_OF_TASKS];
-		IntVar duration = VariableFactory.fixed(10, solver);
-		maxEnd = VariableFactory.bounded("maxEnd", 0, HORIZON, solver);
+		IntVar duration = solver.intVar(10);
+		maxEnd = solver.intVar("maxEnd", 0, HORIZON, true);
 		IntVar[] res = new IntVar[NUM_OF_TASKS];
 		Task[] tasks = new Task[NUM_OF_TASKS];
 		for (int iTask=0; iTask < NUM_OF_TASKS; ++iTask) {
-			starts[iTask] = VariableFactory.bounded("start" + iTask, 0, HORIZON, solver);
-			ends[iTask] = VariableFactory.bounded("ends" + iTask, 0, HORIZON, solver);
-			tasks[iTask] = VariableFactory.task(starts[iTask], duration, ends[iTask]);
-			res[iTask] = VariableFactory.fixed(1 , solver);
+			starts[iTask] = solver.intVar("start" + iTask, 0, HORIZON, true);
+			ends[iTask] = solver.intVar("ends" + iTask, 0, HORIZON, true);
+			tasks[iTask] = new Task(starts[iTask], duration, ends[iTask]);
+			res[iTask] = solver.intVar(1);
 		}
 
 		// post a cumulative constraint
-		solver.post(IntConstraintFactory.cumulative(tasks, res, VariableFactory.fixed(1, solver), false));
+		solver.post(IntConstraintFactory.cumulative(tasks, res, solver.intVar(1), false));
 
 		// maintain makespan
 		solver.post(IntConstraintFactory.maximum(maxEnd, ends));

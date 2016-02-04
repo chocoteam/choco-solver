@@ -36,7 +36,6 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.util.ESat;
 
 import java.util.Arrays;
@@ -212,7 +211,7 @@ class RecursiveSearchLoop {
 
     public static void main(String[] args) {
         Solver solver = new Solver();
-        IntVar[] X = VF.enumeratedArray("X", 3, 0, 2, solver);
+        IntVar[] X = solver.intVarArray("X", 3, 0, 2, false);
 //        solver.post(ICF.alldifferent(X));
         solver.set(new SevenQueuesPropagatorEngine(solver));
         solver.getEngine().initialize();

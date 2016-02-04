@@ -177,7 +177,7 @@ public class SearchLoopTest {
     public void test7() {
         Solver solver = new Solver();
         int n = 3;
-        BoolVar[] B = VF.boolArray("b", n - 1, solver);
+        BoolVar[] B = solver.boolVarArray("b", n - 1);
         SLF.lds(solver, ISF.lexico_UB(B), 1);
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
@@ -190,8 +190,8 @@ public class SearchLoopTest {
     public void test8() {
         Solver solver = new Solver();
         int n = 3;
-        IntVar[] X = VF.enumeratedArray("X", n, 0, n, solver);
-        BoolVar[] B = VF.boolArray("b", n - 1, solver);
+        IntVar[] X = solver.intVarArray("X", n, 0, n, false);
+        BoolVar[] B = solver.boolVarArray("b", n - 1);
         for (int i = 0; i < n - 1; i++) {
             ICF.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
@@ -208,8 +208,8 @@ public class SearchLoopTest {
     public void test9() {
         Solver solver = new Solver();
         int n = 3;
-        IntVar[] X = VF.enumeratedArray("X", n, 0, n, solver);
-        BoolVar[] B = VF.boolArray("b", n - 1, solver);
+        IntVar[] X = solver.intVarArray("X", n, 0, n, false);
+        BoolVar[] B = solver.boolVarArray("b", n - 1);
         for (int i = 0; i < n - 1; i++) {
             ICF.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
