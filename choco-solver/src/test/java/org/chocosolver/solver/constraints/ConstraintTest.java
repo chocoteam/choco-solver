@@ -52,7 +52,7 @@ public class ConstraintTest {
         BoolVar[] bs = solver.boolVarArray("bs", 3);
         SetVar s1 = solver.setVar("s1", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
         SetVar s2 = solver.setVar("s2", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
-        solver.post(LCF.or(solver.allEqual(new SetVar[]{s1, s2}), solver.setBoolsChanneling(bs, s1, 0)));
+        solver.post(solver.or(solver.allEqual(new SetVar[]{s1, s2}), solver.setBoolsChanneling(bs, s1, 0)));
         solver.findAllSolutions();
         Assert.assertEquals(2040, solver.getMeasures().getSolutionCount());
     }

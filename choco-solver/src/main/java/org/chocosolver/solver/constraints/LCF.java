@@ -36,4 +36,8 @@
 
 package org.chocosolver.solver.constraints;
 
+/**
+ * Deprecated : constraint creation should be done through the {@code Solver} object which extends {@code IModeler}
+ */
+@Deprecated
 public class LCF extends LogicalConstraintFactory{}

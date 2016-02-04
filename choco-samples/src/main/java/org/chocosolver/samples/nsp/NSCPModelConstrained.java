@@ -31,7 +31,6 @@ package org.chocosolver.samples.nsp;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
 import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
@@ -454,13 +453,13 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         LogOp.or(bvars[1], bvars[2], bvars[3])
                 );
                 SatFactory.addClauses(tree, solver);
-                LogicalConstraintFactory.ifThenElse(bvars[0],
+                solver.ifThenElse(bvars[0],
                         IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n));
-                LogicalConstraintFactory.ifThenElse(bvars[1],
+                solver.ifThenElse(bvars[1],
                         IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n));
-                LogicalConstraintFactory.ifThenElse(bvars[2],
+                solver.ifThenElse(bvars[2],
                         IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r));
-                LogicalConstraintFactory.ifThenElse(bvars[3],
+                solver.ifThenElse(bvars[3],
                         IntConstraintFactory.arithm(s[t + 2], "=", r), IntConstraintFactory.arithm(s[t + 2], "!=", r));
             }
             int t = data.nbDays() - 2;
@@ -468,9 +467,9 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //            solver.post(ConstraintFactory.ifThenElse(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
             LogOp tree = LogOp.implies(bvars[0], bvars[1]);
             SatFactory.addClauses(tree, solver);
-            LogicalConstraintFactory.ifThenElse(bvars[0],
+            solver.ifThenElse(bvars[0],
                     IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n));
-            LogicalConstraintFactory.ifThenElse(bvars[1],
+            solver.ifThenElse(bvars[1],
                     IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n));
         }
     }
@@ -504,19 +503,19 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         LogOp.and(bvars[4], bvars[5])
                 );
                 SatFactory.addClauses(tree, solver);
-                LogicalConstraintFactory.ifThenElse(bvars[0],
+                solver.ifThenElse(bvars[0],
                         IntConstraintFactory.arithm(s[t], "=", r),
                         IntConstraintFactory.arithm(s[t], "!=", r));
-                LogicalConstraintFactory.ifThenElse(bvars[1],
+                solver.ifThenElse(bvars[1],
                         IntConstraintFactory.arithm(s[t + 1], "=", r),
                         IntConstraintFactory.arithm(s[t + 1], "!=", r));
-                LogicalConstraintFactory.ifThenElse(bvars[2],
+                solver.ifThenElse(bvars[2],
                         IntConstraintFactory.arithm(s[t + 7], "=", r), IntConstraintFactory.arithm(s[t + 7], "!=", r));
-                LogicalConstraintFactory.ifThenElse(bvars[3],
+                solver.ifThenElse(bvars[3],
                         IntConstraintFactory.arithm(s[t + 8], "=", r), IntConstraintFactory.arithm(s[t + 8], "!=", r));
-                LogicalConstraintFactory.ifThenElse(bvars[4],
+                solver.ifThenElse(bvars[4],
                         IntConstraintFactory.arithm(s[t + 14], "=", r), IntConstraintFactory.arithm(s[t + 14], "!=", r));
-                LogicalConstraintFactory.ifThenElse(bvars[5],
+                solver.ifThenElse(bvars[5],
                         IntConstraintFactory.arithm(s[t + 15], "=", r), IntConstraintFactory.arithm(s[t + 15], "!=", r));
 
                 /*solver.post(ConstraintFactory.ifThenElse(
@@ -577,10 +576,10 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 BoolVar[] bvars = solver.boolVarArray("b", 2);
                 LogOp tree = LogOp.ifOnlyIf(bvars[0], bvars[1]);
                 SatFactory.addClauses(tree, solver);
-                LogicalConstraintFactory.ifThenElse(bvars[0],
+                solver.ifThenElse(bvars[0],
                         IntConstraintFactory.arithm(s[t], "=", r),
                         IntConstraintFactory.arithm(s[t], "!=", r));
-                LogicalConstraintFactory.ifThenElse(bvars[1],
+                solver.ifThenElse(bvars[1],
                         IntConstraintFactory.arithm(s[t + 1], "=", r),
                         IntConstraintFactory.arithm(s[t + 1], "!=", r));
                 //solver.post(ConstraintFactory.ifOnlyIf(ConstraintFactory.eq(s[t], r), ConstraintFactory.eq(s[t + 1], r)));

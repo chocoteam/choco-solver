@@ -33,7 +33,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -104,7 +103,7 @@ public class BACP extends AbstractProblem {
         for (int i = 0; i < n_periods; i++) {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\
             for (int j = 0; j < n_courses; j++) {
-                LogicalConstraintFactory.ifThenElse(x[i][j],
+                solver.ifThenElse(x[i][j],
 								IntConstraintFactory.arithm(course_period[j], "=", i),
 								IntConstraintFactory.arithm(course_period[j], "!=", i)
                 );

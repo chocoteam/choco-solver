@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -53,7 +52,7 @@ public class IntValuePrecedeChainTest {
             for (int i = 0; i < j; i++) {
                 bis[i] = ICF.arithm(X[i], "=", S).reif();
             }
-            LCF.ifThen(bj, LCF.or(bis));
+            solver.ifThen(bj, solver.or(bis));
         }
     }
 

@@ -39,7 +39,10 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.*;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -76,12 +79,12 @@ public class LexChainTest {
 
     private ILogical reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
         BoolVar b1 = solver.boolVar("A" + i);
-        LogicalConstraintFactory.ifThenElse(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i]));
+        solver.ifThenElse(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i]));
         if (i == X.length - 1) {
             return b1;
         } else {
             BoolVar b2 = solver.boolVar("B" + i);
-            LogicalConstraintFactory.ifThenElse(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i]));
+            solver.ifThenElse(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i]));
             return LogOp.or(b1, LogOp.and(b2, reformulate(i + 1, X, Y, solver)));
         }
     }

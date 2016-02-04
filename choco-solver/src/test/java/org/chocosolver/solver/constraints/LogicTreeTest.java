@@ -220,10 +220,10 @@ public class LogicTreeTest {
         Solver solver = new Solver();
         BoolVar[] rows = solver.boolVarArray("b", 3);
 
-        LogicalConstraintFactory.ifThen(
+        solver.ifThen(
 						rows[0],
 						IntConstraintFactory.arithm(rows[1], "+", rows[2], "=", 2));
-        LogicalConstraintFactory.ifThen(
+        solver.ifThen(
 						rows[0].not(),
 						IntConstraintFactory.arithm(rows[1], "+", rows[2], "<=", 1));
         //SearchMonitorFactory.log(solver, true, true);

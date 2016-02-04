@@ -33,7 +33,6 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -151,7 +150,7 @@ public class PropCondisTest {
         for (int i = 0; i < size; i++) {
             BoolVar[] disjunction = new BoolVar[os.length];
             for (int j = 0; j < os.length; j++) {
-                disjunction[j] = LogicalConstraintFactory.and(
+                disjunction[j] = solver.and(
                         ICF.arithm(OS[i], ">", os[j]),
                         ICF.arithm(OS[i], "+", LS[i], "<", os[j] + ls[j])
                 ).reif();

@@ -39,7 +39,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
-import static org.chocosolver.solver.constraints.LogicalConstraintFactory.ifThenElse;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
@@ -84,7 +83,7 @@ public class Photo extends AbstractProblem {
 			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]));
 			dist[i] = solver.intAbsView(k);
 
-            ifThenElse(viols[i],
+            solver.ifThenElse(viols[i],
                             arithm(dist[i], ">", 1),
                             arithm(dist[i], "<=", 1));
         }

@@ -43,7 +43,6 @@ package org.chocosolver.samples.integer; /**
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -236,7 +235,7 @@ public class StableMarriage extends AbstractProblem {
                 solver.post(element(v1, rankMen[m], wife[m], 0, "detect"));
 
                 BoolVar b1 = solver.boolVar("b1");
-                LogicalConstraintFactory.ifThenElse(b1,
+                solver.ifThenElse(b1,
                         arithm(v1, ">", rankMen[m][o]),
                         arithm(v1, "<=", rankMen[m][o])
                 );
@@ -251,7 +250,7 @@ public class StableMarriage extends AbstractProblem {
                 solver.post(element(v2, rankWomen[o], husband[o], 0, "detect"));
 
                 BoolVar b2 = solver.boolVar("b2");
-                LogicalConstraintFactory.ifThenElse(b2,
+                solver.ifThenElse(b2,
                         arithm(v2, "<", rankWomen[o][m]),
                         arithm(v2, ">=", rankWomen[o][m])
                 );
@@ -288,7 +287,7 @@ public class StableMarriage extends AbstractProblem {
                 solver.post(element(v1, rankWomen[w], husband[w], 0, "detect"));
 
                 BoolVar b1 = solver.boolVar("b1");
-                LogicalConstraintFactory.ifThenElse(b1,
+                solver.ifThenElse(b1,
                         arithm(v1, ">", rankWomen[w][o]),
                         arithm(v1, "<=", rankWomen[w][o])
                 );
@@ -303,7 +302,7 @@ public class StableMarriage extends AbstractProblem {
                 solver.post(element(v2, rankMen[o], wife[o], 0, "detect"));
 
                 BoolVar b2 = solver.boolVar("b2");
-                LogicalConstraintFactory.ifThenElse(b2,
+                solver.ifThenElse(b2,
                         arithm(v2, "<", rankMen[o][w]),
                         arithm(v2, ">=", rankMen[o][w])
                 );

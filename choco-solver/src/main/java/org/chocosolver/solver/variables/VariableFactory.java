@@ -30,15 +30,8 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
-import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.variables.impl.*;
-import org.chocosolver.solver.variables.view.*;
+import org.chocosolver.solver.variables.impl.SetVarImpl;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-
-import java.util.Arrays;
 
 /**
  * A factory to create variables (boolean, integer, set, graph, task and real) and views (most of them rely on integer variable).

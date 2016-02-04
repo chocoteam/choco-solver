@@ -33,7 +33,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -74,7 +73,7 @@ public class GlobalCardinality extends Constraint {
 			IntVar cste = solver.intVar(i);
 			BoolVar[] bs = solver.boolVarArray("b_" + i, vars.length);
             for (int j = 0; j < vars.length; j++) {
-                LCF.ifThenElse(bs[j], ICF.arithm(vars[j], "=", cste), ICF.arithm(vars[j], "!=", cste));
+				solver.ifThenElse(bs[j], ICF.arithm(vars[j], "=", cste), ICF.arithm(vars[j], "!=", cste));
             }
             cstrs.add(ICF.sum(bs, "=", card[i]));
         }

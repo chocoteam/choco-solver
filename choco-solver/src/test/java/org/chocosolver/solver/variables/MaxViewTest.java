@@ -31,7 +31,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
@@ -51,9 +50,9 @@ public class MaxViewTest {
 
     public void maxref(Solver solver, IntVar x, IntVar y, IntVar z) {
         BoolVar[] bs = solver.boolVarArray("b", 3);
-        LogicalConstraintFactory.ifThenElse(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x));
-        LogicalConstraintFactory.ifThenElse(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y));
-        LogicalConstraintFactory.ifThenElse(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y));
+        solver.ifThenElse(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x));
+        solver.ifThenElse(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y));
+        solver.ifThenElse(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y));
         SatFactory.addClauses(LogOp.or(LogOp.and(bs[0], bs[2]),
                 LogOp.and(bs[1], bs[2].not())), solver);
     }

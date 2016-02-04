@@ -40,7 +40,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -66,14 +65,14 @@ public class ReifSample extends AbstractProblem {
 		x = solver.intVar("x", 0, 3, false);
 		y = solver.intVar("y", 0, 3, false);
 		z = solver.intVar("z", 0, 3, false);
-		Constraint imp = LCF.and(
+		Constraint imp = solver.and(
 				ICF.arithm(x, ">", y),
 				ICF.arithm(y, ">", z),
 				ICF.arithm(z, ">", x)
 		);
 		Constraint ad = ICF.alldifferent(new IntVar[]{x, y, z}, "DEFAULT");
-		Constraint nad = LCF.not(ad);
-		solver.post(LCF.or(imp, nad));
+		Constraint nad = solver.not(ad);
+		solver.post(solver.or(imp, nad));
 	}
 
 	@Override

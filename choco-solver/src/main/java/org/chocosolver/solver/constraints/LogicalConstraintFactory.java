@@ -31,16 +31,17 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
-import static org.chocosolver.util.tools.StringUtils.randomName;
-
 /**
+ *
+ * Deprecated : constraint creation should be done through the {@code Solver} object which extends {@code IModeler}
+ *
  * Created by IntelliJ IDEA.
  * @author Jean-Guillaume Fages
  * @since 15/05/2013
  */
+@Deprecated
 public class LogicalConstraintFactory {
 
 	//***********************************************************************************
@@ -53,10 +54,7 @@ public class LogicalConstraintFactory {
 	 * @return a constraint and ensuring that variables in BOOLS are all set to true
 	 */
 	public static Constraint and(BoolVar... BOOLS){
-		Solver s = BOOLS[0].getSolver();
-		IntVar sum = s.intVar(randomName(), 0, BOOLS.length, true);
-		s.post(IntConstraintFactory.sum(BOOLS,"=",sum));
-		return IntConstraintFactory.arithm(sum,"=",BOOLS.length);
+		return BOOLS[0].getSolver().and(BOOLS);
 	}
 
 	/**
@@ -65,10 +63,7 @@ public class LogicalConstraintFactory {
 	 * @return a constraint or ensuring that at least one variables in BOOLS is set to true
 	 */
 	public static Constraint or(BoolVar... BOOLS){
-		Solver s = BOOLS[0].getSolver();
-		IntVar sum = s.intVar(randomName(), 0, BOOLS.length, true);
-		s.post(IntConstraintFactory.sum(BOOLS,"=",sum));
-		return IntConstraintFactory.arithm(sum,">=",1);
+		return BOOLS[0].getSolver().or(BOOLS);
 	}
 
 	/**
@@ -181,19 +176,7 @@ public class LogicalConstraintFactory {
 	 * @param CSTR the constraint to be satisfied when BVAR = 1
 	 */
 	public static void ifThen(BoolVar BVAR, Constraint CSTR) {
-		Solver s = BVAR.getSolver();
-		// PRESOLVE
-		if(BVAR.contains(1)){
-			if(BVAR.isInstantiated()){
-				s.post(CSTR);
-			}else if(CSTR.isSatisfied() == ESat.FALSE){
-				s.post(ICF.arithm(BVAR,"=",0));
-			}
-			// END OF PRESOLVE
-			else {
-				s.post(ICF.arithm(BVAR, "<=", CSTR.reif()));
-			}
-		}
+		BVAR.getSolver().ifThen(BVAR,CSTR);
 	}
 
 	/**
@@ -208,22 +191,7 @@ public class LogicalConstraintFactory {
 	 * @param CSTR the constraint to be satisfied when BVAR = 1
 	 */
 	public static void reification(BoolVar BVAR, Constraint CSTR){
-		Solver s = BVAR.getSolver();
-		// PRESOLVE
-		ESat entail = CSTR.isSatisfied();
-		if(BVAR.isInstantiatedTo(1)){
-			s.post(CSTR);
-		}else if(BVAR.isInstantiatedTo(0)) {
-			s.post(not(CSTR));
-		}else if(entail == ESat.TRUE) {
-			s.post(ICF.arithm(BVAR,"=",1));
-		}else if(entail == ESat.FALSE) {
-			s.post(ICF.arithm(BVAR,"=",0));
-		}
-		// END OF PRESOLVE
-		else {
-			CSTR.reifyWith(BVAR);
-		}
+		BVAR.getSolver().reification(BVAR,CSTR);
 	}
 
 	//***********************************************************************************

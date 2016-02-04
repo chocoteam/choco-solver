@@ -33,7 +33,6 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
@@ -262,7 +261,7 @@ public class AmongTest {
         BoolVar[] bs = solver.boolVarArray("b", vs.length);
         IntVar vval = solver.intVar(val);
         for (int i = 0; i < vs.length; i++) {
-            LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval));
+            solver.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval));
         }
         return IntConstraintFactory.sum(bs, "=", occ);
     }
@@ -270,7 +269,7 @@ public class AmongTest {
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
         BoolVar[] bs = solver.boolVarArray("b", vs.length);
         for (int i = 0; i < vs.length; i++) {
-            LogicalConstraintFactory.ifThenElse(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values));
+            solver.ifThenElse(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values));
         }
         return IntConstraintFactory.sum(bs, "=", occ);
     }

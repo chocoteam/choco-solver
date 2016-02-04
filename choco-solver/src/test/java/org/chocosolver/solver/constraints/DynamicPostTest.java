@@ -203,9 +203,9 @@ public class DynamicPostTest {
         push(ICF.arithm(lbA, "=", a), stack, solver);
         push(ICF.arithm(lbB, "=", b), stack, solver);
         Constraint strictlyBetter
-                = LCF.or(
-                LCF.and(aSBetter, bBetter),
-                LCF.and(aBetter, bSBetter));
+                = solver.or(
+                solver.and(aSBetter, bBetter),
+                solver.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
         solver.set(ISF.lexico_LB(a, b, c, lbA, lbB));
         int nbSolution = 0;
@@ -244,7 +244,7 @@ public class DynamicPostTest {
             solver.getEngine().flush();
             solver.getSearchLoop().reset();
 
-            solver.post(LCF.or(
+            solver.post(solver.or(
                     ICF.arithm(a, ">", bestA),
                     ICF.arithm(b, ">", bestB)));
         }
@@ -257,7 +257,7 @@ public class DynamicPostTest {
         IntVar x = solver.intVar("x", 1, 2, false);
         IntVar y = solver.intVar("y", 1, 2, false);
         IntVar z = solver.intVar("z", 1, 2, false);
-        Constraint c = LCF.or(
+        Constraint c = solver.or(
                 ICF.arithm(x, "<", y),
                 ICF.arithm(x, "<", z));
         solver.post(c);

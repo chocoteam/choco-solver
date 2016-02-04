@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -138,7 +137,7 @@ public class SocialGolfer extends AbstractProblem {
 				for (int l = 0; l < w; l++) {
 					BoolVar[] group = new BoolVar[g];
 					for (int k = 0; k < g; k++) {
-						group[k] = LogicalConstraintFactory.and(P[i][k][l], P[j][k][l]).reif();
+						group[k] = solver.and(P[i][k][l], P[j][k][l]).reif();
 						solver.post(IntConstraintFactory.arithm(group[k], "<=", M[i][j][l]));
                     }
 					solver.post(IntConstraintFactory.sum(group, "=", M[i][j][l]));

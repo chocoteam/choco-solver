@@ -34,7 +34,6 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
@@ -110,11 +109,11 @@ public class OpenStacks extends AbstractProblem {
         for (int i = 0; i < nc; i++) {
             for (int j = 1; j < np + 1; j++) {
                 BoolVar[] btmp = solver.boolVarArray("bT_" + i + "_" + j, 2);
-                LogicalConstraintFactory.ifThenElse(btmp[0],
+                solver.ifThenElse(btmp[0],
                         IntConstraintFactory.arithm(o[i][j - 1], "<", solver.intVar(norders[i])),
                         IntConstraintFactory.arithm(o[i][j - 1], ">=", solver.intVar(norders[i])));
 
-                LogicalConstraintFactory.ifThenElse(btmp[1],
+                solver.ifThenElse(btmp[1],
                         IntConstraintFactory.arithm(o[i][j], ">", solver.intVar(0)),
                         IntConstraintFactory.arithm(o[i][j], "<=", solver.intVar(0)));
                 SatFactory.addClauses(LogOp.ifOnlyIf(o2b[j - 1][i], LogOp.and(btmp[0], btmp[1])), solver);
