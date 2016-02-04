@@ -50,8 +50,8 @@ import org.testng.annotations.Test;
 
 import java.text.MessageFormat;
 
-import static org.chocosolver.solver.variables.VariableFactory.MAX_INT_BOUND;
-import static org.chocosolver.solver.variables.VariableFactory.MIN_INT_BOUND;
+import static org.chocosolver.solver.variables.IVariableFactory.MAX_INT_BOUND;
+import static org.chocosolver.solver.variables.IVariableFactory.MIN_INT_BOUND;
 
 /**
  * <br/>

@@ -30,6 +30,10 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.impl.*;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.StringUtils;
 
 /**
@@ -40,6 +44,20 @@ import org.chocosolver.util.tools.StringUtils;
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
 public interface IVariableFactory {
+
+    String CSTE_NAME = "cste -- ";
+
+    /**
+     * Provide a minimum value for integer variable lower bound.
+     * Do not prevent from underflow, but may avoid it, somehow.
+     */
+    int MIN_INT_BOUND = Integer.MIN_VALUE / 100;
+
+    /**
+     * Provide a minimum value for integer variable lower bound.
+     * Do not prevent from overflow, but may avoid it, somehow.
+     */
+    int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
 
     /**
      * Simple method to get a solver object
@@ -66,6 +84,24 @@ public interface IVariableFactory {
     }
 
     /**
+     * Create a constant boolean variable equal to 1 if <i>value</i> is true and 0 otherwise
+     * @param name name of the variable
+     * @param value constant value of the boolean variable (true or false)
+     * @return a constant of type BoolVar
+     */
+    default BoolVar boolVar(String name, boolean value) {
+        int intVal = value?1:0;
+        if (name.equals(CSTE_NAME + intVal) && _me().cachedConstants.containsKey(intVal)) {
+            return (BoolVar)_me().cachedConstants.get(intVal);
+        }
+        BoolVar cste = new FixedBoolVarImpl(name, intVal, _me());
+        if (name.equals(CSTE_NAME + intVal)) {
+            _me().cachedConstants.put(intVal, cste);
+        }
+        return cste;
+    }
+
+    /**
      * Create a boolean variable, i.e. a particular integer variable of domain {0, 1}
      * @return a BoolVar of domain {0, 1}
      */
@@ -79,7 +115,7 @@ public interface IVariableFactory {
      * @return a BoolVar of domain {0, 1}
      */
     default BoolVar boolVar(String name) {
-        return VariableFactory.bool(name, _me());
+        return new BoolVarImpl(name, _me());
     }
 
     // ARRAY
@@ -146,7 +182,7 @@ public interface IVariableFactory {
      * @return a constant IntVar of domain {<i>value</i>}
      */
     default IntVar intVar(int value) {
-        return intVar(VariableFactory.CSTE_NAME + value,value);
+        return intVar(CSTE_NAME + value,value);
     }
 
     /**
@@ -188,7 +224,18 @@ public interface IVariableFactory {
      * @return a constant IntVar of domain {<i>value</i>}
      */
     default IntVar intVar(String name, int value) {
-        return VariableFactory.fixed(name, value, _me());
+        checkIntDomainRange(name, value, value);
+        if (value == 0 || value == 1) {
+            return boolVar(name,value==1);
+        }
+        if (name.equals(CSTE_NAME + value) && _me().cachedConstants.containsKey(value)) {
+            return _me().cachedConstants.get(value);
+        }
+        IntVar cste = new FixedIntVarImpl(name, value, _me());
+        if (name.equals(CSTE_NAME + value)) {
+            _me().cachedConstants.put(value, cste);
+        }
+        return cste;
     }
 
     /**
@@ -200,10 +247,15 @@ public interface IVariableFactory {
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(String name, int lb, int ub, boolean boundedDomain) {
-        if (boundedDomain) {
-            return VariableFactory.bounded(name, lb, ub, _me());
+        checkIntDomainRange(name, lb, ub);
+        if (lb == ub) {
+            return intVar(name, lb);
+        } else if (lb == 0 && ub == 1) {
+            return boolVar(name);
+        } else  if(boundedDomain) {
+            return new IntervalIntVarImpl(name, lb, ub, _me());
         } else {
-            return VariableFactory.enumerated(name, lb, ub, _me());
+            return new BitsetIntVarImpl(name, lb, ub, _me());
         }
     }
 
@@ -228,7 +280,20 @@ public interface IVariableFactory {
      * @return an IntVar of domain <i>values</i>
      */
     default IntVar intVar(String name, int[] values) {
-        return VariableFactory.enumerated(name, values, _me());
+        values = ArrayUtils.mergeAndSortIfNot(values.clone());
+        checkIntDomainRange(name, values[0], values[values.length - 1]);
+        if (values.length == 1) {
+            return intVar(name, values[0]);
+        } else if (values.length == 2 && values[0] == 0 && values[1] == 1) {
+            return boolVar(name);
+        } else {
+            int gap = values[values.length - 1] - values[0];
+            if (gap > 30 && gap / values.length > 5) {
+                return new BitsetArrayIntVarImpl(name, values, _me());
+            } else {
+                return new BitsetIntVarImpl(name, values, _me());
+            }
+        }
     }
 
     // ARRAY
@@ -415,7 +480,7 @@ public interface IVariableFactory {
      * @return a constant RealVar of domain {<i>value</i>}
      */
     default RealVar realVar(double value, double precision) {
-        return realVar(VariableFactory.CSTE_NAME+value, value, value, precision);
+        return realVar(CSTE_NAME+value, value, value, precision);
     }
 
     /**
@@ -438,7 +503,8 @@ public interface IVariableFactory {
      * @return a RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default RealVar realVar(String name, double lb, double ub, double precision) {
-        return VariableFactory.real(name, lb, ub, precision, _me());
+        checkRealDomainRange(name, lb, ub);
+        return new RealVarImpl(name, lb, ub, precision, _me());
     }
 
     // ARRAY
@@ -526,7 +592,7 @@ public interface IVariableFactory {
      * @return a constant SetVar of domain {<i>value</i>}
      */
     default SetVar setVar(int[] value) {
-        String name = VariableFactory.CSTE_NAME+"{";
+        String name = CSTE_NAME+"{";
         for(int i=0;i<value.length;i++){
             name+=value[i]+i<value.length-1?", ":"";
         }name += "}";
@@ -542,7 +608,7 @@ public interface IVariableFactory {
      * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default SetVar setVar(String name, int[] lb, int[] ub) {
-        return VariableFactory.set(name, ub, lb, _me());
+        return new SetVarImpl(name, ub, SetType.BITSET, lb, SetType.BITSET, _me());
     }
 
     /**
@@ -552,7 +618,7 @@ public interface IVariableFactory {
      * @return a constant SetVar of domain {<i>value</i>}
      */
     default SetVar setVar(String name, int[] value) {
-        return VariableFactory.fixed(name, value, _me());
+        return new FixedSetVarImpl(name, value, _me());
     }
 
     // ARRAY
@@ -613,5 +679,62 @@ public interface IVariableFactory {
             vars[i] = setVarArray(name + "[" + i + "]", dim2, lb, ub);
         }
         return vars;
+    }
+
+
+
+
+
+    //*************************************************************************************
+    // UTILS
+    //*************************************************************************************
+
+    /**
+     * Checks domain range.
+     * Throws an exception if wrong range definition
+     *
+     * @param NAME name of the variable
+     * @param MIN  lower bound of the domain
+     * @param MAX  upper bound of the domain
+     */
+    default void checkIntDomainRange(String NAME, int MIN, int MAX) {
+        if (MIN - Integer.MIN_VALUE == 0 || MAX - Integer.MAX_VALUE == 0) {
+            throw new SolverException(NAME + ": consider reducing the bounds to avoid unexpected results");
+        }
+        if (MAX < MIN) {
+            throw new SolverException(NAME + ": wrong domain definition, lower bound > upper bound");
+        }
+    }
+
+    /**
+     * Checks domain range.
+     * Throws an exception if wrong range definition
+     *
+     * @param NAME name of the variable
+     * @param MIN  lower bound of the domain
+     * @param MAX  upper bound of the domain
+     */
+    default void checkRealDomainRange(String NAME, double MIN, double MAX) {
+        if (MIN - Double.MIN_VALUE == 0 || MAX - Double.MAX_VALUE == 0) {
+            throw new SolverException(NAME + ": consider reducing the bounds to avoid unexpected results");
+        }
+        if (MAX < MIN) {
+            throw new SolverException(NAME + ": wrong domain definition, lower bound > upper bound");
+        }
+    }
+
+    /**
+     * Converts <i>ivars</i> into an array of boolean variables
+     *
+     * @param ivars an IntVar array containing only boolean variables
+     * @return an array of BoolVar
+     * @throws java.lang.ClassCastException if one variable is not a BoolVar
+     */
+    default BoolVar[] toBoolVar(IntVar... ivars) {
+        BoolVar[] bvars = new BoolVar[ivars.length];
+        for (int i = ivars.length - 1; i >= 0; i--) {
+            bvars[i] = (BoolVar) ivars[i];
+        }
+        return bvars;
     }
 }

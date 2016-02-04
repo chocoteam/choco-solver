@@ -30,6 +30,10 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
+import org.chocosolver.solver.variables.view.*;
 
 /**
  * Interface to make views (BoolVar, IntVar, RealVar and SetVar)
@@ -57,7 +61,20 @@ public interface IViewFactory {
      * @return a BoolVar equal to <i>not(bool)</i> (or 1-bool)
      */
     default BoolVar boolNotView(BoolVar bool) {
-        return VariableFactory.not(bool);
+        if (bool.hasNot()) {
+            return bool.not();
+        } else {
+            if (_me().getSettings().enableViews()) {
+                return new BoolNotView(bool);
+            }else {
+                BoolVar ov = _me().boolVar("not(" + bool.getName() + ")");
+                _me().post(ICF.arithm(ov, "!=", bool));
+                bool._setNot(ov);
+                ov._setNot(bool);
+                ov.setNot(true);
+                return ov;
+            }
+        }
     }
 
     /**
@@ -66,7 +83,18 @@ public interface IViewFactory {
      * @return a BoolVar equal to <i>var</i>
      */
     default BoolVar boolEqView(BoolVar var) {
-        return VariableFactory.eq(var);
+        if (_me().getSettings().enableViews()) {
+            return new BoolEqView(var);
+
+        } else {
+            BoolVar ov = var.duplicate();
+            _me().post(ICF.arithm(ov, "=", var));
+            if (var.hasNot()) {
+                ov._setNot(var.not());
+            }
+            ov.setNot(var.isNot());
+            return ov;
+        }
     }
 
 
@@ -80,7 +108,17 @@ public interface IViewFactory {
      * @return an IntVar equal to <i>var</i>
      */
     default IntVar intEqView(IntVar var) {
-        return VariableFactory.eq(var);
+        if ((var.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
+            return boolEqView((BoolVar) var);
+        } else {
+            if (_me().getSettings().enableViews()) {
+                return new EqView(var);
+            } else {
+                IntVar ov = var.duplicate();
+                _me().post(ICF.arithm(ov, "=", var));
+                return ov;
+            }
+        }
     }
 
     /**
@@ -90,7 +128,24 @@ public interface IViewFactory {
      * @return an IntVar equal to <i>var+cste</i>
      */
     default IntVar intOffsetView(IntVar var, int cste) {
-        return VariableFactory.offset(var, cste);
+        if (cste == 0) {
+            return var;
+        }
+        if (_me().getSettings().enableViews()) {
+            return new OffsetView(var, cste);
+        } else {
+            int lb = var.getLB() + cste;
+            int ub = var.getUB() + cste;
+            String name = "(" + var.getName() + "+" + cste + ")";
+            IntVar ov;
+            if (var.hasEnumeratedDomain()) {
+                ov = _me().intVar(name, lb, ub, false);
+            } else {
+                ov = _me().intVar(name, lb, ub, true);
+            }
+            _me().post(ICF.arithm(ov, "-", var, "=", cste));
+            return ov;
+        }
     }
 
     /**
@@ -101,25 +156,68 @@ public interface IViewFactory {
      * @return an IntVar equal to <i>-var</i>
      */
     default IntVar intMinusView(IntVar var) {
-        return VariableFactory.minus(var);
+        if (_me().getSettings().enableViews()) {
+            return new MinusView(var);
+        } else {
+            int ub = -var.getLB();
+            int lb = -var.getUB();
+            String name = "-(" + var.getName() + ")";
+            IntVar ov;
+            if (var.hasEnumeratedDomain()) {
+                ov = _me().intVar(name, lb, ub, false);
+            } else {
+                ov = _me().intVar(name, lb, ub, true);
+            }
+            _me().post(ICF.arithm(ov, "+", var, "=", 0));
+            return ov;
+        }
     }
 
     /**
-     * Creates a view over VAR equal to <i>var*cste</i>.
+     * Creates a view over <i>var</i> equal to <i>var*cste</i>.
      * Requires <i>cste</i> > -2
      * <p>
      * <br/>- if <i>cste</i> &lt; -1, throws an exception;
      * <br/>- if <i>cste</i> = -1, returns a minus view;
      * <br/>- if <i>cste</i> = 0, returns a fixed variable;
-     * <br/>- if <i>cste</i> = 1, returns VAR;
+     * <br/>- if <i>cste</i> = 1, returns <i>var</i>;
      * <br/>- otherwise, returns a scale view;
      * <p>
-     * @param VAR  an integer variable
+     * @param var  an integer variable
      * @param cste a constant.
      * @return an IntVar equal to <i>var*cste</i>
      */
-    default IntVar intScaleView(IntVar VAR, int cste) {
-        return VariableFactory.scale(VAR, cste);
+    default IntVar intScaleView(IntVar var, int cste) {
+        if (cste == -1) {
+            return intMinusView(var);
+        }
+        if (cste < 0) {
+            throw new UnsupportedOperationException("scale requires a coefficient >= -1 (found "+cste+")");
+        } else {
+            IntVar v2;
+            if (cste == 0) {
+                v2 = _me().intVar(0);
+            } else if (cste == 1) {
+                v2 = var;
+            } else {
+                if (_me().getSettings().enableViews()) {
+                    v2 = new ScaleView(var, cste);
+                } else {
+                    int lb = var.getLB() * cste;
+                    int ub = var.getUB() * cste;
+                    String name = "(" + var.getName() + "*" + cste + ")";
+                    IntVar ov;
+                    if (var.hasEnumeratedDomain()) {
+                        ov = _me().intVar(name, lb, ub, false);
+                    } else {
+                        ov = _me().intVar(name, lb, ub, true);
+                    }
+                    _me().post(ICF.times(var, cste, ov));
+                    return ov;
+                }
+            }
+            return v2;
+        }
     }
 
     /**
@@ -134,7 +232,24 @@ public interface IViewFactory {
      * @return an IntVar equal to the absolute value of <i>var</i>
      */
     default IntVar intAbsView(IntVar var) {
-        return VariableFactory.abs(var);
+        if (var.isInstantiated()) {
+            return _me().intVar(Math.abs(var.getValue()));
+        } else if (var.getLB() >= 0) {
+            return var;
+        } else if (var.getUB() <= 0) {
+            return intMinusView(var);
+        } else {
+            int ub = Math.max(-var.getLB(), var.getUB());
+            String name = "|" + var.getName() + "|";
+            IntVar abs;
+            if (var.hasEnumeratedDomain()) {
+                abs = _me().intVar(name, 0, ub, false);
+            } else {
+                abs = _me().intVar(name, 0, ub, true);
+            }
+            _me().post(IntConstraintFactory.absolute(abs, var));
+            return abs;
+        }
     }
 
     //*************************************************************************************
@@ -149,18 +264,39 @@ public interface IViewFactory {
      * @return a RealVar of domain equal to the domain of <i>var</i>
      */
     default RealVar realIntView(IntVar var, double precision) {
-        return VariableFactory.real(var, precision);
+        if (_me().getSettings().enableViews()) {
+            return new RealView(var, precision);
+        } else {
+            double lb = var.getLB();
+            double ub = var.getUB();
+            RealVar rv = _me().realVar("(real)" + var.getName(), lb, ub, precision);
+            _me().post(new IntEqRealConstraint(var, rv, precision));
+            return rv;
+        }
     }
 
     /**
      * Creates an array of real views for a set of integer variables
      * This should be used to include an integer variable in an expression/constraint requiring RealVar
-     * @param var the array of integer variables to be viewed as real variables
+     * @param ints the array of integer variables to be viewed as real variables
      * @param precision double precision (e.g., 0.00001d)
-     * @return a real view of <i>var</i>
+     * @return a real view of <i>ints</i>
      */
-    default RealVar[] realIntViewArray(IntVar[] var, double precision) {
-        return VariableFactory.real(var, precision);
+    default RealVar[] realIntViewArray(IntVar[] ints, double precision) {
+        RealVar[] reals = new RealVar[ints.length];
+        if (_me().getSettings().enableViews()) {
+            for (int i = 0; i < ints.length; i++) {
+                reals[i] = realIntView(ints[i], precision);
+            }
+        } else {
+            for (int i = 0; i < ints.length; i++) {
+                double lb = ints[i].getLB();
+                double ub = ints[i].getUB();
+                reals[i] = _me().realVar("(real)" + ints[i].getName(), lb, ub, precision);
+            }
+            _me().post(new IntEqRealConstraint(ints, reals, precision));
+        }
+        return reals;
     }
 
     // MATRIX
@@ -168,14 +304,14 @@ public interface IViewFactory {
     /**
      * Creates a matrix of real views for a matrix of integer variables
      * This should be used to include an integer variable in an expression/constraint requiring RealVar
-     * @param var the matrix of integer variables to be viewed as real variables
+     * @param ints the matrix of integer variables to be viewed as real variables
      * @param precision double precision (e.g., 0.00001d)
-     * @return a real view of <i>var</i>
+     * @return a real view of <i>ints</i>
      */
-    default RealVar[][] realIntViewMatrix(IntVar[][] var, double precision) {
-        RealVar[][] vars = new RealVar[var.length][var[0].length];
-        for (int i = 0; i < var.length; i++) {
-            vars[i] = realIntViewArray(var[i], precision);
+    default RealVar[][] realIntViewMatrix(IntVar[][] ints, double precision) {
+        RealVar[][] vars = new RealVar[ints.length][ints[0].length];
+        for (int i = 0; i < ints.length; i++) {
+            vars[i] = realIntViewArray(ints[i], precision);
         }
         return vars;
     }

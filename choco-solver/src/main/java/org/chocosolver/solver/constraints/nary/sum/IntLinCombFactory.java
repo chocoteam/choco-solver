@@ -35,12 +35,10 @@ import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.Arrays;
 
 import static org.chocosolver.solver.constraints.ICF.*;
-import static org.chocosolver.solver.variables.VariableFactory.toBoolVar;
 
 /**
  * A factory to reduce and detect specific cases related to integer linear combinations.
@@ -253,10 +251,10 @@ public class IntLinCombFactory {
                 Solver SOLVER = VARS[0].getSolver();
                 if (nbools == VARS.length) {
                     if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new Constraint("BoolSum", new PropSumBoolIncr(toBoolVar(tmpV), b, OPERATOR,
+                        return new Constraint("BoolSum", new PropSumBoolIncr(SOLVER.toBoolVar(tmpV), b, OPERATOR,
                                 SOLVER.intVar(RESULT), 0));
                     } else {
-                        return new Constraint("BoolSum", new PropSumBool(toBoolVar(tmpV), b, OPERATOR,
+                        return new Constraint("BoolSum", new PropSumBool(SOLVER.toBoolVar(tmpV), b, OPERATOR,
                                 SOLVER.intVar(RESULT), 0));
                     }
                 }
@@ -264,11 +262,11 @@ public class IntLinCombFactory {
                     // the large domain variable is on the last idx
                     assert COEFFS[VARS.length - 1] == -1;
                     if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new Constraint("BoolSum", new PropSumBoolIncr(VariableFactory.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                        return new Constraint("BoolSum", new PropSumBoolIncr(SOLVER.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     } else {
-                        return new Constraint("BoolSum", new PropSumBool(VariableFactory.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                        return new Constraint("BoolSum", new PropSumBool(SOLVER.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     }

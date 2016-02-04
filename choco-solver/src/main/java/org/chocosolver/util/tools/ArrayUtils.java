@@ -641,4 +641,50 @@ public enum ArrayUtils {
             return p;
         }
     }
+
+    /**
+   	 * Sorts the input array if it is not already sorted,
+   	 * and removes multiple occurrences of the same value
+   	 *
+   	 * @param values array of values
+   	 * @return a sorted array containing each value of values exactly once
+   	 */
+   	public static int[] mergeAndSortIfNot(int[] values) {
+   		int n = values.length;
+   		boolean sorted = true;
+   		boolean noDouble = true;
+   		for (int i = 0; i < n - 1 && sorted; i++) {
+   			if (values[i] > values[i + 1]) {
+   				sorted = false;
+   				noDouble = false;// cannot be sure
+   			}
+   			if (values[i] == values[i + 1]) {
+   				noDouble = false;
+   			}
+   		}
+   		if (!sorted) {
+   			Arrays.sort(values);
+   		}
+   		if (!noDouble) {
+   			int nbVals = 1;
+   			for (int i = 0; i < n - 1; i++) {
+   				assert values[i] <= values[i + 1];
+   				if (values[i] < values[i + 1]) {
+   					nbVals++;
+   				}
+   			}
+   			if (nbVals < n) {
+   				int[] correctValues = new int[nbVals];
+   				int idx = 0;
+   				for (int i = 0; i < n - 1; i++) {
+   					if (values[i] < values[i + 1]) {
+   						correctValues[idx++] = values[i];
+   					}
+   				}
+   				correctValues[idx] = values[n - 1];
+   				return correctValues;
+   			}
+   		}
+   		return values;
+   	}
 }
