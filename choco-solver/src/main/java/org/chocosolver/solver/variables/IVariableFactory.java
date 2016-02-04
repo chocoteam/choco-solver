@@ -35,9 +35,11 @@ import org.chocosolver.util.tools.StringUtils;
 /**
  * Interface to make variables (BoolVar, IntVar, RealVar and SetVar)
  *
+ * A kind of factory relying on interface default implementation to allow (multiple) inheritance
+ *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface Vars {
+public interface IVariableFactory {
 
     /**
      * Simple method to get a solver object

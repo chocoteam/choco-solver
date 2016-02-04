@@ -29,8 +29,8 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.variables.Vars;
-import org.chocosolver.solver.variables.Views;
+import org.chocosolver.solver.variables.IVariableFactory;
+import org.chocosolver.solver.variables.IViewFactory;
 
 /**
  * Interface to ease modeling
@@ -38,6 +38,6 @@ import org.chocosolver.solver.variables.Views;
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface IModeler extends Vars, Views {
+public interface IModeler extends IVariableFactory, IViewFactory {
 
 }

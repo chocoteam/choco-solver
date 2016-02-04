@@ -34,9 +34,11 @@ import org.chocosolver.solver.Solver;
 /**
  * Interface to make views (BoolVar, IntVar, RealVar and SetVar)
  *
+ * A kind of factory relying on interface default implementation to allow (multiple) inheritance
+ *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface Views {
+public interface IViewFactory {
 
     /**
      * Simple method to get a solver object
