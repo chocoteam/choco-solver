@@ -161,7 +161,7 @@ public class RealTest {
             // or x : [1.000000, 1.000000], y : [8.000000, 8.000000]
             // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
 //        rcons.discretize(x,y);
-            solver.post(new RealConstraint("RC", "{0} * {1} = 8", vars));
+            solver.post(solver.realIbexGenericConstraint("{0} * {1} = 8", vars));
             solver.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
             solver.findSolution();
             Assert.assertEquals(x.getValue(), 2);
@@ -178,9 +178,9 @@ public class RealTest {
         RealVar attr = solver.realVar("attr", 0.0, 20.0, 0.1);
 
         // Create and reify constraints to assign values to the real
-        RealConstraint attrEquals1 = new RealConstraint("attrEquals1", "{0}=4.0", Ibex.HC4, attr);
+        RealConstraint attrEquals1 = solver.realIbexGenericConstraint("{0}=4.0", attr);
         BoolVar attrEquals1Reification = attrEquals1.reif();
-        RealConstraint attrEquals2 = new RealConstraint("attrEquals2", "{0}=8.0", Ibex.HC4, attr);
+        RealConstraint attrEquals2 = solver.realIbexGenericConstraint("{0}=8.0", attr);
         BoolVar attrEquals2Reification = attrEquals2.reif();
 
         // Walk and print the solutions
@@ -208,6 +208,25 @@ public class RealTest {
 
         RealConstraint newRange = new RealConstraint("newRange", "1.4142<{0};{0}<3.1416", Ibex.HC4, x);
         solver.post(newRange);
+
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        System.out.printf("%s\n", solver.toString());
+        Chatterbox.printStatistics(solver);
+        solver.getIbex().release();
+    }
+
+    @Test(groups="ignored", timeOut=60000)
+    public void testFreemajb3() {
+        Solver solver = new Solver();
+
+        RealVar x = solver.realVar("x", 0.0, 5.0, 0.001);
+        System.out.println("Before solving:");
+
+        solver.post(solver.realIbexGenericConstraint("1.4142<{0};{0}<3.1416",x));
 
         try {
             solver.propagate();

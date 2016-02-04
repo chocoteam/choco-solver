@@ -74,11 +74,10 @@ public class Grocery extends AbstractProblem {
         itemCost = solver.intVarArray("item", 4, 1, 711, true);
         // views as real variables to be used by Ibex
         realitemCost = solver.realIntViewArray(itemCost, epsilon);
-
-	solver.post(new RealConstraint("Sum", "{0} + {1} + {2} + {3} = 711", Ibex.COMPO, realitemCost));
-	solver.post(new RealConstraint("Product", "{0} * {1}/100 * {2}/100 * {3}/100 = 711", Ibex.HC4, realitemCost));
+        solver.post(solver.realIbexGenericConstraint("{0} + {1} + {2} + {3} = 711", realitemCost));
+        solver.post(solver.realIbexGenericConstraint("{0} * {1}/100 * {2}/100 * {3}/100 = 711", realitemCost));
         // symmetry breaking
-        solver.post(new RealConstraint("SymmetryBreaking","{0} <= {1};{1} <= {2};{2} <= {3}", Ibex.HC4, realitemCost));
+        solver.post(solver.realIbexGenericConstraint("{0} <= {1};{1} <= {2};{2} <= {3}", realitemCost));
     }
 
     @Override
@@ -86,7 +85,6 @@ public class Grocery extends AbstractProblem {
         // choco branching
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
         solver.set(IntStrategyFactory.lexico_UB(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));

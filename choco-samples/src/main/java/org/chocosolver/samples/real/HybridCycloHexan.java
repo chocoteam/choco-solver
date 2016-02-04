@@ -78,12 +78,10 @@ public class HybridCycloHexan extends AbstractProblem {
 		z = solver.realVar("z", -1.0e8, 1.0e8, precision);
 
 		vars = new RealVar[]{x, y, z};
-		solver.post(new RealConstraint(
-				"CycloHexan",
+		solver.post(solver.realIbexGenericConstraint(
 				"{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
 						"{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
 						"{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
-				Ibex.HC4_NEWTON,
 				vars)
 		);
 	}

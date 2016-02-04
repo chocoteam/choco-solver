@@ -94,7 +94,7 @@ public class SantaClaude extends AbstractProblem {
         RealVar[] all_vars = ArrayUtils.append(solver.realIntViewArray(kid_price, precision), new RealVar[]{average});
         String function = funBuilder.toString();
 
-        solver.post(new RealConstraint(function, all_vars));
+        solver.post(solver.realIbexGenericConstraint(function, all_vars));
     }
 
     @Override
