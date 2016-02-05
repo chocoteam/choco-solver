@@ -48,7 +48,7 @@ public class Test_Bools_Sets {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-                Correctness.checkCorrectness(Model.boolSum, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(SetTestModel.boolSum, n, -n / 2, 2 * n, seed, null);
             }
         }
     }
@@ -58,7 +58,7 @@ public class Test_Bools_Sets {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-                Correctness.checkCorrectness(Model.setUnion, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(SetTestModel.setUnion, n, -n / 2, 2 * n, seed, null);
             }
         }
     }
@@ -68,7 +68,7 @@ public class Test_Bools_Sets {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-                Correctness.checkCorrectness(Model.setInter, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(SetTestModel.setInter, n, -n / 2, 2 * n, seed, null);
             }
         }
     }
@@ -78,7 +78,7 @@ public class Test_Bools_Sets {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-                Correctness.checkCorrectness(Model.setDisj, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(SetTestModel.setDisj, n, -n / 2, 2 * n, seed, null);
             }
         }
     }
@@ -88,7 +88,7 @@ public class Test_Bools_Sets {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-                Correctness.checkCorrectness(Model.setDiff, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(SetTestModel.setDiff, n, -n / 2, 2 * n, seed, null);
             }
         }
     }
@@ -98,7 +98,7 @@ public class Test_Bools_Sets {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-                Correctness.checkCorrectness(Model.setSubSet, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(SetTestModel.setSubSet, n, -n / 2, 2 * n, seed, null);
             }
         }
     }
@@ -108,7 +108,7 @@ public class Test_Bools_Sets {
         for (int i = 0; i < 5; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-                Correctness.checkCorrectness(Model.setAllEq, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(SetTestModel.setAllEq, n, -n / 2, 2 * n, seed, null);
             }
         }
     }

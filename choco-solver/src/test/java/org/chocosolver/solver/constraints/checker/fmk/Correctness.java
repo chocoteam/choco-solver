@@ -56,7 +56,7 @@ public class Correctness {
     public static final int BOOL = 1;
     public static final int SET = 2;
 
-    public static void checkCorrectness(Model modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
+    public static void checkCorrectness(SetTestModel modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
         Random r = new Random(seed);
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
         boolean[] homogeneous = {true, false};
@@ -136,7 +136,7 @@ public class Correctness {
 //        System.out.printf("loop: %d\n", loop);
     }
 
-    private static Solver referencePropagation(Model modeler, int nbVar, Variable[] rvars, Domain[] domains, Object parameters) {
+    private static Solver referencePropagation(SetTestModel modeler, int nbVar, Variable[] rvars, Domain[] domains, Object parameters) {
         Solver ref = modeler.model(nbVar, rvars, domains, parameters);
         ref.getEnvironment().worldPush();
         try {
@@ -159,7 +159,7 @@ public class Correctness {
         return ref;
     }
 
-    private static void checkNoSol(Model m, Variable[] rvars, Domain[] _domains, Object parameters, Solver ref, Object[] logObjects) {
+    private static void checkNoSol(SetTestModel m, Variable[] rvars, Domain[] _domains, Object parameters, Solver ref, Object[] logObjects) {
         int nbVar = rvars.length;
         Solver test = m.model(nbVar, rvars, _domains, parameters);
         try {

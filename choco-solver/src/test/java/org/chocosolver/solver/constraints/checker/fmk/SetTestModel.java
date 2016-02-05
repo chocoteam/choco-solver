@@ -29,17 +29,12 @@
  */
 package org.chocosolver.solver.constraints.checker.fmk;
 
-import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import static java.lang.System.arraycopy;
 import static org.chocosolver.solver.Cause.Null;
@@ -51,11 +46,11 @@ import static org.chocosolver.util.tools.ArrayUtils.append;
  * @author Jean-Guillaume Fages
  * @since 01/13
  */
-public interface Model {
+public interface SetTestModel {
 
     Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters);
 
-    Model setUnion = new Model() {
+    SetTestModel setUnion = new SetTestModel() {
         public void fillTypes(int[] types) {
             for (int i = 0; i < types.length; i++)
                 types[i] = Correctness.SET;
@@ -76,7 +71,7 @@ public interface Model {
         }
     };
 
-    Model setInter = new Model() {
+    SetTestModel setInter = new SetTestModel() {
         public void fillTypes(int[] types) {
             for (int i = 0; i < types.length; i++)
                 types[i] = Correctness.SET;
@@ -97,7 +92,7 @@ public interface Model {
         }
     };
 
-    Model setDisj = new Model() {
+    SetTestModel setDisj = new SetTestModel() {
         public void fillTypes(int[] types) {
             for (int i = 0; i < types.length; i++)
                 types[i] = Correctness.SET;
@@ -117,7 +112,7 @@ public interface Model {
         }
     };
 
-    Model setDiff = new Model() {
+    SetTestModel setDiff = new SetTestModel() {
         public void fillTypes(int[] types) {
             for (int i = 0; i < types.length; i++)
                 types[i] = Correctness.SET;
@@ -137,7 +132,7 @@ public interface Model {
         }
     };
 
-    Model setSubSet = new Model() {
+    SetTestModel setSubSet = new SetTestModel() {
         public void fillTypes(int[] types) {
             for (int i = 0; i < types.length; i++)
                 types[i] = Correctness.SET;
@@ -157,7 +152,7 @@ public interface Model {
         }
     };
 
-    Model setAllEq = new Model() {
+    SetTestModel setAllEq = new SetTestModel() {
         public void fillTypes(int[] types) {
             for (int i = 0; i < types.length; i++)
                 types[i] = Correctness.SET;
@@ -177,7 +172,7 @@ public interface Model {
         }
     };
 
-    Model boolSum = new Model() {
+    SetTestModel boolSum = new SetTestModel() {
         public void fillTypes(int[] types) {
             for (int i = 0; i < types.length - 1; i++)
                 types[i] = Correctness.BOOL;
@@ -206,7 +201,7 @@ public interface Model {
         }
     };
 
-    Model modelEqAC = new Model() {
+    SetTestModel modelEqAC = new SetTestModel() {
         public void fillTypes(int[] types) {
         }
 
@@ -227,7 +222,7 @@ public interface Model {
         }
     };
 
-    Model modelInverseChannelingAC = new Model() {
+    SetTestModel modelInverseChannelingAC = new SetTestModel() {
         public void fillTypes(int[] types) {
         }
 
@@ -248,7 +243,7 @@ public interface Model {
         }
     };
 
-    Model modelNValues = new Model() {
+    SetTestModel modelNValues = new SetTestModel() {
         public void fillTypes(int[] types) {
         }
 
