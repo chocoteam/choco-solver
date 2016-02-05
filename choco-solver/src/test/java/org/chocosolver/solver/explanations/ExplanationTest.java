@@ -68,7 +68,7 @@ public class ExplanationTest {
                     model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
                     model.set(lexico_LB(vars));
                     engines[e].plugin(model, ng == 1, false);
-                    assertFalse(model.findSolution());
+                    assertFalse(model.solve());
                     out.printf("\t%s", model.getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
                     if (e > 0) {
@@ -90,7 +90,7 @@ public class ExplanationTest {
 
         learnCBJ(model, false, true);
         LearnCBJ cbj = (LearnCBJ) model.getResolver().getLearn();
-        assertFalse(model.findSolution());
+        assertFalse(model.solve());
         Explanation exp = cbj.getLastExplanation();
         assertEquals(2, exp.nbCauses());
     }
@@ -106,7 +106,7 @@ public class ExplanationTest {
                         model.allDifferent(pigeons, "NEQS").post();
                         model.set(random_value(pigeons, seed));
                         engines[e].plugin(model, ng == 1, false);
-                        assertFalse(model.findSolution());
+                        assertFalse(model.solve());
                         printShortStatistics(model);
                     }
                 }
@@ -162,7 +162,7 @@ public class ExplanationTest {
 
                         engines[e].plugin(model, ng == 1, false);
 //                    SMF.shortlog(solver);
-                        assertEquals(n > 2, model.findSolution());
+                        assertEquals(n > 2, model.solve());
                     }
                 }
             }
@@ -186,7 +186,7 @@ public class ExplanationTest {
                     model.set(random_value(p, seed));
                     engines[e].plugin(model, ng == 1, false);
                     showShortStatistics(model);
-                    assertFalse(model.findSolution());
+                    assertFalse(model.solve());
                 }
             }
         }
@@ -211,7 +211,7 @@ public class ExplanationTest {
                 showStatistics(model);
                 showSolutions(model);
                 showDecisions(model);
-                assertFalse(model.findSolution());
+                assertFalse(model.solve());
             }
         }
     }
@@ -235,7 +235,7 @@ public class ExplanationTest {
                 showStatistics(model);
                 showSolutions(model);
                 showDecisions(model);
-                assertFalse(model.findSolution());
+                assertFalse(model.solve());
             }
         }
     }
@@ -262,7 +262,7 @@ public class ExplanationTest {
             showStatistics(model);
             showSolutions(model);
             showDecisions(model);
-            assertFalse(model.findSolution());
+            assertFalse(model.solve());
         }
     }
 }

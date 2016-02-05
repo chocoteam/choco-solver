@@ -77,14 +77,14 @@ public class CountTest {
     @Test(groups="1s", timeOut=60000)
     public void testMS4() {
         Model model = modelit(4);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMS8() {
         Model model = modelit(8);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
     }
 
@@ -116,7 +116,7 @@ public class CountTest {
             model.count(value, vars, occ).post();
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
-            model.findAllSolutions();
+            model.solveAll();
             assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }
@@ -168,7 +168,7 @@ public class CountTest {
             } else {
                 model.set(random_value(vars, seed));
             }
-            model.findAllSolutions();
+            model.solveAll();
             if (nbsol == -1) {
                 nbsol = model.getMeasures().getSolutionCount();
             } else {
@@ -194,7 +194,7 @@ public class CountTest {
 
         Tuples tuples = new Tuples(true);
         model.set(IntStrategyFactory.lexico_LB(vars));
-        model.findSolution();
+        model.solve();
         do {
             int[] tuple = new int[vars.length];
             for (int i = 0; i < tuple.length; i++) {
@@ -207,7 +207,7 @@ public class CountTest {
             if (checkocc == tuple[tuple.length - 1]) {
                 tuples.add(tuple);
             }
-        } while (model.nextSolution() == Boolean.TRUE);
+        } while (model.solve() == Boolean.TRUE);
 
         IntVar[] newvs = new IntVar[vs.length + 1];
         System.arraycopy(vs, 0, newvs, 0, vs.length);

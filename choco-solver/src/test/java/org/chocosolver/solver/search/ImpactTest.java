@@ -49,10 +49,10 @@ public class ImpactTest {
 		Model s1 = costasArray(7,false);
 		Model s2 = costasArray(7,true);
 
-		s1.findAllSolutions();
+		s1.solveAll();
 		System.out.println(s1.getMeasures().getSolutionCount());
 
-		s2.findAllSolutions();
+		s2.solveAll();
 
 		System.out.println(s2.getMeasures().getSolutionCount());
 		Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());

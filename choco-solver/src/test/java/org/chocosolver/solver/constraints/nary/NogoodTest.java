@@ -57,7 +57,7 @@ public class NogoodTest {
                 new BacktrackCounter(model, 0),
                 new MonotonicRestartStrategy(30), 3);
 //        SMF.limitTime(solver, 2000);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 27);
         Assert.assertEquals(model.getMeasures().getBackTrackCount(), 51);
     }
@@ -72,7 +72,7 @@ public class NogoodTest {
                 new BacktrackCounter(model, 0),
                 new MonotonicRestartStrategy(30), 1000);
         SMF.limitTime(model, 2000);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 64);
         Assert.assertEquals(model.getMeasures().getBackTrackCount(), 121);
     }

@@ -388,7 +388,7 @@ It prints the main statistics of the search (time, nodes, fails, etc.)
 Solving
 -------
 
-Finding if a problem has a solution is made through a call to: ``solver.findSolution()``.
+Finding if a problem has a solution is made through a call to: ``solver.solve()``.
 Looking for the next solution is made thanks to ``nextSolution()``.
 ``findAllSolutions()`` enables to enumerate all solutions of a problem.
 To optimize an objective function, call ``findOptimalSolution(...)``.

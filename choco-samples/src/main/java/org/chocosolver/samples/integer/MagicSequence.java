@@ -85,7 +85,7 @@ public class MagicSequence extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findSolution();
+        model.solve();
     }
 
 
@@ -103,7 +103,7 @@ public class MagicSequence extends AbstractProblem {
 
                 num_solutions++;
 
-            } while (model.nextSolution() == Boolean.TRUE);
+            } while (model.solve() == Boolean.TRUE);
 
             System.out.println("It was " + num_solutions + " solutions.");
 

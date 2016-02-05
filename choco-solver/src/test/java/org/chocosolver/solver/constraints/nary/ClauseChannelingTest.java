@@ -60,7 +60,7 @@ public class ClauseChannelingTest {
                 model.clausesIntChanneling(iv, eqs, lqs).post();
 
                 model.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
-                model.findAllSolutions();
+                model.solveAll();
                 assertEquals(model.getMeasures().getSolutionCount(), i);
             }
         }
@@ -78,7 +78,7 @@ public class ClauseChannelingTest {
                 model.clausesIntChanneling(iv, eqs, lqs).post();
 
                 model.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
-                model.findAllSolutions();
+                model.solveAll();
                 assertEquals(model.getMeasures().getSolutionCount(), i);
             }
         }
@@ -103,7 +103,7 @@ public class ClauseChannelingTest {
                     }
 
                     sr.set(ISF.random_value(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
-                    sr.findAllSolutions();
+                    sr.solveAll();
                 }
                 {
                     IntVar iv = sc.intVar("iv", 1, i, false);
@@ -113,7 +113,7 @@ public class ClauseChannelingTest {
                     sc.clausesIntChanneling(iv, eqs, lqs).post();
 
                     sc.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
-                    sc.findAllSolutions();
+                    sc.solveAll();
                 }
                 Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);
                 Assert.assertEquals(sc.getMeasures().getSolutionCount(), i);
@@ -142,7 +142,7 @@ public class ClauseChannelingTest {
                     }
 
                     sr.set(ISF.random_bound(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
-                    sr.findAllSolutions();
+                    sr.solveAll();
                 }
                 {
                     IntVar iv = sc.intVar("iv", 1, i, true);
@@ -152,7 +152,7 @@ public class ClauseChannelingTest {
                     sc.clausesIntChanneling(iv, eqs, lqs).post();
 
                     sc.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
-                    sc.findAllSolutions();
+                    sc.solveAll();
                 }
                 Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);
                 Assert.assertEquals(sc.getMeasures().getSolutionCount(), i);

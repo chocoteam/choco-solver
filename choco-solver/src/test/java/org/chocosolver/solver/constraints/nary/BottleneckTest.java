@@ -97,7 +97,7 @@ public class BottleneckTest {
             // Heuristic val
             model.set(minDom_LB(allvars));
 
-            model.findSolution();
+            model.solve();
         }
 
 

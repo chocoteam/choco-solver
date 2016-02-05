@@ -67,6 +67,6 @@ public class EnvironmentTest {
 		model.allDifferent(vars, "AC").post();
 		model.allDifferent(vectors, "BC").post();
 		model.set(domOverWDeg(append(vectors, vars), 0));
-		model.findSolution();
+		model.solve();
 	}
 }

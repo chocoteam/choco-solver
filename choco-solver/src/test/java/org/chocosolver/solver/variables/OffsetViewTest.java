@@ -61,7 +61,7 @@ public class OffsetViewTest {
         s.arithm(Y, "!=", 4).post();
 
         s.set(lexico_LB(vars));
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 2);
     }
 
@@ -78,7 +78,7 @@ public class OffsetViewTest {
         s.arithm(Y, "!=", -2).post();
 
         s.set(lexico_LB(vars));
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 4);
     }
 
@@ -124,8 +124,8 @@ public class OffsetViewTest {
 
             Model sb = bijective(low, upp, coeff);
             Model sc = contraint(low, upp, coeff);
-            sb.findAllSolutions();
-            sc.findAllSolutions();
+            sb.solveAll();
+            sc.solveAll();
             Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
             Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
 
@@ -136,8 +136,8 @@ public class OffsetViewTest {
     public void testRandom2() {
         Model sb = bijective(1, 1999, 3);
         Model sc = contraint(1, 1999, 3);
-        sb.findAllSolutions();
-        sc.findAllSolutions();
+        sb.solveAll();
+        sc.solveAll();
         Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
         Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
 
@@ -149,8 +149,8 @@ public class OffsetViewTest {
         for (int i = 1; i < 10; i++) {
             Model sb = bijective(1, N, 3);
             Model sc = contraint(1, N, 3);
-            sb.findAllSolutions();
-            sc.findAllSolutions();
+            sb.solveAll();
+            sc.solveAll();
             Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
             Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
         }

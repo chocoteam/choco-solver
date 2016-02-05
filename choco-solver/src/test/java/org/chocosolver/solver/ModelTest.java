@@ -96,13 +96,13 @@ public class ModelTest {
         for (int i : is) {
             switch (i) {
                 case ONE:
-                    s.findSolution();
+                    s.solve();
                     break;
                 case NEXT:
-                    s.nextSolution();
+                    s.solve();
                     break;
                 case ALL:
-                    s.findAllSolutions();
+                    s.solveAll();
                     break;
                 case OPT:
                     s.setObjectives(MAXIMIZE, (IntVar) s.getVar(0));
@@ -238,7 +238,7 @@ public class ModelTest {
         Model model = new Model();
         BoolVar b = model.boolVar("b");
         model.arithm(b, "=", 2).post();
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.isFeasible(), FALSE);
     }
 
@@ -246,8 +246,8 @@ public class ModelTest {
     public void testJL1() {
         Model s = new Model();
         s.arithm(s.ONE(), "!=", s.ZERO()).post();
-        if (s.findSolution()) {
-            while (s.nextSolution()) ;
+        if (s.solve()) {
+            while (s.solve()) ;
         }
     }
 
@@ -259,7 +259,10 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(false));
         }
-        pares.findSolution();
+        for(Model m:pares.getModels()){
+            m.resetObjectives();
+        }
+        pares.solve();
         Chatterbox.printSolutions(pares.getFinder());
         Assert.assertEquals(pares.getFinder().getMeasures().getSolutionCount(), 1);
     }
@@ -316,7 +319,7 @@ public class ModelTest {
         s.getEngine().flush();
         s.getResolver().reset();
 
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 11);
     }
 
@@ -330,19 +333,19 @@ public class ModelTest {
         IMonitorSolution sm2 = () -> d[0]++;
         model.plugMonitor(sm1);
         model.plugMonitor(sm2);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(2, c[0]);
         Assert.assertEquals(2, d[0]);
         // unplug
         model.unplugMonitor(sm1);
         model.search.reset();
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(2, c[0]);
         Assert.assertEquals(4, d[0]);
         // plug
         model.unplugAllMonitors();
         model.search.reset();
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(2, c[0]);
         Assert.assertEquals(4, d[0]);
     }
@@ -355,17 +358,17 @@ public class ModelTest {
         Criterion c2 = () -> model.getMeasures().getSolutionCount() == 1;
         model.addStopCriterion(c1);
         model.addStopCriterion(c2);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(0, model.getMeasures().getSolutionCount());
         // unplug
         model.removeStopCriterion(c1);
         model.search.reset();
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(1, model.getMeasures().getSolutionCount());
         // plug
         model.removeAllStopCriteria();
         model.search.reset();
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(2, model.getMeasures().getSolutionCount());
     }
 
@@ -378,7 +381,7 @@ public class ModelTest {
         model.arithm(w[0], "!=", w[1]).post();
         model.set(lexico_LB(v));
         model.makeCompleteSearch(true);
-        model.findSolution();
+        model.solve();
         assertEquals(model.isSatisfied(), TRUE);
     }
 
@@ -434,6 +437,6 @@ public class ModelTest {
     @Test(groups="1s", timeOut=60000)
     public void testNextSolution(){
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(8);
-        s.nextSolution(); //  should not throw exception
+        s.solve(); //  should not throw exception
     }
 }

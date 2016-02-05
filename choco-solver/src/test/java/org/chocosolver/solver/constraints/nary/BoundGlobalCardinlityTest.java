@@ -72,7 +72,7 @@ public class BoundGlobalCardinlityTest {
         vars[5].instantiateTo(0, Null);
 
         model.set(lexico_LB(append(vars, card)));
-        model.findAllSolutions();
+        model.solveAll();
         assertTrue(model.getMeasures().getSolutionCount() > 0);
     }
 
@@ -107,8 +107,8 @@ public class BoundGlobalCardinlityTest {
                 ref.set(lexico_LB(append(vars, cards)));
             }
 //            SearchMonitorFactory.log(solver, false, true);
-            model.findAllSolutions();
-            ref.findAllSolutions();
+            model.solveAll();
+            ref.solveAll();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
@@ -144,8 +144,8 @@ public class BoundGlobalCardinlityTest {
                 ref.set(lexico_LB(vars));
             }
 //            SearchMonitorFactory.log(solver, false, true);
-            model.findAllSolutions();
-            ref.findAllSolutions();
+            model.solveAll();
+            ref.solveAll();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }

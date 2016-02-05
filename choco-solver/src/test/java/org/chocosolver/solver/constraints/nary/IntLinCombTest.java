@@ -112,7 +112,7 @@ public class IntLinCombTest {
 
         s.set(lexico_LB(vars));
 
-        s.findAllSolutions();
+        s.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -197,8 +197,8 @@ public class IntLinCombTest {
             Model sum = sum(domains, coeffs, lb, op);
             Model intlincomb = intlincomb(domains, coeffs, lb, op);
 
-            sum.findAllSolutions();
-            intlincomb.findAllSolutions();
+            sum.solveAll();
+            intlincomb.solveAll();
             Assert.assertEquals(sum.getMeasures().getSolutionCount(), intlincomb.getMeasures().getSolutionCount());
             Assert.assertEquals(sum.getMeasures().getNodeCount(), intlincomb.getMeasures().getNodeCount());
         }
@@ -207,7 +207,7 @@ public class IntLinCombTest {
     @Test(groups="1s", timeOut=60000)
     public void testUSum1() {
         Model sumleq = sum(new int[][]{{-2, 3}}, new int[]{-2}, -6, -1);
-        sumleq.findAllSolutions();
+        sumleq.solveAll();
     }
 
     /**
@@ -235,7 +235,7 @@ public class IntLinCombTest {
         BoolVar[] bs = model.boolVarArray("b", 3);
         model.scalar(bs, new int[]{1, 2, 3}, "=", 2).post();
         showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -488,8 +488,8 @@ public class IntLinCombTest {
             BoolVar[] bs = s2.boolVarArray("b", 5);
             s2.sum(bs, "!=", 3).post();
         }
-        s1.findAllSolutions();
-        s2.findAllSolutions();
+        s1.solveAll();
+        s2.solveAll();
         Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
         Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
@@ -518,8 +518,8 @@ public class IntLinCombTest {
             BoolVar[] bs = s2.boolVarArray("b", 5);
             s2.sum(bs, "<=", 3).post();
         }
-        s1.findAllSolutions();
-        s2.findAllSolutions();
+        s1.solveAll();
+        s2.solveAll();
         Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
         Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
@@ -552,8 +552,8 @@ public class IntLinCombTest {
         }
         Chatterbox.showDecisions(s1);
         Chatterbox.showDecisions(s2);
-        s1.findAllSolutions();
-        s2.findAllSolutions();
+        s1.solveAll();
+        s2.solveAll();
         Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
         Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
@@ -577,7 +577,7 @@ public class IntLinCombTest {
         model.scalar(bs, cs, "=", sum).post();
         model.set(lexico_LB(bs));
 //        Chatterbox.showDecisions(solver);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
 
@@ -613,7 +613,7 @@ public class IntLinCombTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 1, 1, 3, false);
         model.scalar(X, new int[]{-1}, "<=", 2).post();
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 3);
 
     }
@@ -695,28 +695,28 @@ public class IntLinCombTest {
     public void testJL1() {
         Model model = new Model();
         model.sum(new IntVar[]{model.intVar(3), model.intVar(-4)}, "<", 0).post();
-        assertTrue(model.findSolution());
+        assertTrue(model.solve());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL2() {
         Model model = new Model();
         model.sum(new IntVar[]{model.intVar(3), model.intVar(-4)}, "<=", 0).post();
-        assertTrue(model.findSolution());
+        assertTrue(model.solve());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL3() {
         Model model = new Model();
         model.sum(new IntVar[]{model.intVar(-3), model.intVar(4)}, ">", 0).post();
-        assertTrue(model.findSolution());
+        assertTrue(model.solve());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL4() {
         Model model = new Model();
         model.sum(new IntVar[]{model.intVar(-3), model.intVar(4)}, ">=", 0).post();
-        assertTrue(model.findSolution());
+        assertTrue(model.solve());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -727,7 +727,7 @@ public class IntLinCombTest {
         model.set(lexico_LB(var));
         showStatistics(model);
         showSolutions(model);
-        model.findSolution();
+        model.solve();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -738,6 +738,6 @@ public class IntLinCombTest {
         model.set(lexico_LB(var));
         showStatistics(model);
         showSolutions(model);
-        model.findSolution();
+        model.solve();
     }
 }

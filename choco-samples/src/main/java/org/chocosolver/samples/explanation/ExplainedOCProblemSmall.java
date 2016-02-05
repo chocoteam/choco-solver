@@ -69,11 +69,11 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
     public void solve() {
         ExplanationFactory.CBJ.plugin(model, false, false);
 
-        if (model.findSolution()) {
+        if (model.solve()) {
             do {
                 this.prettyOut();
             }
-            while (model.nextSolution());
+            while (model.solve());
         }
     }
 

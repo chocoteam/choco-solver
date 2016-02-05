@@ -54,7 +54,7 @@ public class Overview {
         // 4. Define the search strategy
         model.set(lexico_LB(x, y));
         // 5. Launch the resolution process
-        model.findSolution();
+        model.solve();
         //6. Print search statistics
         printStatistics(model);
     }

@@ -63,14 +63,14 @@ public class MagicSquareTest {
         int j = 3;
         sol = modeler(j);
         sol.set(new ImpactBased((IntVar[])sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
-        sol.findAllSolutions();
+        sol.solveAll();
         long nbsol = sol.getMeasures().getSolutionCount();
         long node = sol.getMeasures().getNodeCount();
         for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
             sol = modeler(j);
             sol.set(new ImpactBased((IntVar[])sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
             PropagationEngineFactory.values()[t].make(sol);
-            sol.findAllSolutions();
+            sol.solveAll();
             Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
             Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
         }
@@ -81,13 +81,13 @@ public class MagicSquareTest {
         Model sol;
         for (int j = 3; j < 5; j++) {
             sol = modeler(j);
-            sol.findAllSolutions();
+            sol.solveAll();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
                 sol = modeler(j);
                 PropagationEngineFactory.values()[t].make(sol);
-                sol.findAllSolutions();
+                sol.solveAll();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
             }

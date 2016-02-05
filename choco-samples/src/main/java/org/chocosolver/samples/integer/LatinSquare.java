@@ -82,7 +82,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findSolution();
+        model.solve();
     }
 
     @Override

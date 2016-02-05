@@ -160,7 +160,7 @@ public class CumulativeTest {
 		limitTime(model, 5000);
 		switch (mode) {
 			case 0:
-				model.findSolution();
+				model.solve();
 				if (model.hasReachedLimit()) return -1;
 				return model.getMeasures().getSolutionCount();
 			case 1:
@@ -169,7 +169,7 @@ public class CumulativeTest {
 				if (model.hasReachedLimit()) return -1;
 				return model.getMeasures().getBestSolutionValue().longValue();
 			case 2:
-				model.findAllSolutions();// too many solutions to be used
+				model.solveAll();// too many solutions to be used
 				if (model.hasReachedLimit()) return -1;
 				return model.getMeasures().getSolutionCount();
 			default:

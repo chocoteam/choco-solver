@@ -51,7 +51,7 @@ public class EqTest {
         IntVar two1 = s.intVar(2);
         IntVar two2 = s.intVar(2);
         s.arithm(two1, "=", two2).post();
-        assertTrue(s.findSolution());
+        assertTrue(s.solve());
         assertEquals(TRUE, s.isSatisfied());
     }
 
@@ -62,7 +62,7 @@ public class EqTest {
         IntVar three = s.intVar(3);
         IntVar two = s.intVar(2);
         s.arithm(three, "-", two, "=", 1).post();
-        assertTrue(s.findSolution());
+        assertTrue(s.solve());
         assertEquals(TRUE, s.isSatisfied());
     }
 
@@ -72,7 +72,7 @@ public class EqTest {
         IntVar three = s.intVar(3);
         IntVar two = s.intVar(2);
         s.arithm(three, "=", two, "+", 1).post();
-        assertTrue(s.findSolution());
+        assertTrue(s.solve());
         assertEquals(TRUE, s.isSatisfied());
     }
 }

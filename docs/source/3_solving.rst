@@ -37,7 +37,7 @@ Satisfaction problems
 Finding a solution
 ^^^^^^^^^^^^^^^^^^
 
-A call to ``solver.findSolution()`` launches a resolution which stops on the first solution found, if any.
+A call to ``solver.solve()`` launches a resolution which stops on the first solution found, if any.
 
 .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/Overview.java
    :language: java
@@ -63,21 +63,21 @@ It returns ``true`` if a limit has been reached, ``false`` otherwise.
 Enumerating solutions
 ^^^^^^^^^^^^^^^^^^^^^
 
-Once the resolution has been started by a call to ``solver.findSolution()`` and if the problem is feasible,
-the resolution can be resumed using ``solver.nextSolution()`` from the last solution found.
+Once the resolution has been started by a call to ``solver.solve()`` and if the problem is feasible,
+the resolution can be resumed using ``solver.solve()`` from the last solution found.
 The method returns ``true`` if a new solution is found, ``false`` otherwise (a call to ``solver.hasReachedLimit()`` must confirm the lack of new solution).
-If a solution has been found, alike ``solver.findSolution()``, the resolution stops on this solution,
+If a solution has been found, alike ``solver.solve()``, the resolution stops on this solution,
 each variable is instantiated, and the resolution can be resumed again until there is no more new solution.
 
 One may enumerate all solution like this::
 
- if(solver.findSolution()){
+ if(solver.solve()){
     do{
         // do something, e.g. print out variables' value
-    }while(solver.nextSolution());
+    }while(solver.solve());
  }
 
-``solver.findSolution()`` and  ``solver.nextSolution()`` are the only ways to resume a resolution process which has already began.
+``solver.solve()`` and  ``solver.solve()`` are the only ways to resume a resolution process which has already began.
 
 .. tip::
 
@@ -600,7 +600,7 @@ For instance, one can indicate to print the solutions all resolution long: ::
 
 Or to print the search statistics once the search ends: ::
 
-    solver.findSolution();
+    solver.solve();
     Chatterbox.printStatistics(solver);
 
 

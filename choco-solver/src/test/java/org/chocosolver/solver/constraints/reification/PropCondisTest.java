@@ -67,7 +67,7 @@ public class PropCondisTest {
         Assert.assertEquals(a.getDomainSize(), 2);
         Assert.assertEquals(a.getLB(), 9);
         Assert.assertEquals(a.getUB(), 10);
-        s.findAllSolutions();
+        s.solveAll();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
     }
 
@@ -91,7 +91,7 @@ public class PropCondisTest {
         Assert.assertTrue(Y.contains(1));
         Assert.assertTrue(Y.contains(9));
         Assert.assertTrue(Y.contains(10));
-        s.findAllSolutions();
+        s.solveAll();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 6);
     }
 
@@ -123,10 +123,10 @@ public class PropCondisTest {
                 System.out.printf("Size: %d (%d)\n", n, seed);
                 Model or = modelPb(n, seed, rnd, false);
                 or.set(ISF.random((IntVar[]) or.getHook("decvars"), seed));
-                or.findAllSolutions();
+                or.solveAll();
                 Model cd = modelPb(n, seed, rnd, true);
                 cd.set(ISF.random((IntVar[]) cd.getHook("decvars"), seed));
-                cd.findAllSolutions();
+                cd.solveAll();
                 Assert.assertEquals(cd.getMeasures().getSolutionCount(), or.getMeasures().getSolutionCount(), "wrong nb of solutions");
                 Assert.assertTrue(or.getMeasures().getNodeCount() >= cd.getMeasures().getNodeCount(), "wrong nb of nodes");
             }

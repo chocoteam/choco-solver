@@ -91,36 +91,36 @@ public class NQueenTest {
     @Test(groups="5m", timeOut=300000)
     public void testBinary() {
         Model s = modeler(new NQueenBinary(), size);
-        s.findAllSolutions();
+        s.solveAll();
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testLinBinary() {
         Model s = modeler(new NQueenLinearBinary(), size);
-        s.findAllSolutions();
+        s.solveAll();
         assertIt(s);
-        //s.findSolution();
+        //s.solve();
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testGlobalBinary() {
         Model s = modeler(new NQueenBinaryGlobal(), size);
-        s.findAllSolutions();
+        s.solveAll();
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testGlobal() throws ContradictionException {
         Model s = modeler(new NQueenGlobal(), size);
-        s.findAllSolutions();
+        s.solveAll();
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testDualBinary() {
         Model s = modeler(new NQueenDualBinary(), size);
-        s.findAllSolutions();
+        s.solveAll();
         assertIt(s);
     }
 
@@ -128,7 +128,7 @@ public class NQueenTest {
     @Test(groups="5m", timeOut=300000)
     public void testDualGlobal() {
         Model s = modeler(new NQueenDualGlobal(), size);
-        s.findAllSolutions();
+        s.solveAll();
         assertIt(s);
     }
 
@@ -137,13 +137,13 @@ public class NQueenTest {
         Model sol;
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
-            sol.findAllSolutions();
+            sol.solveAll();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 PropagationEngineFactory.values()[t].make(sol);
-                sol.findAllSolutions();
+                sol.solveAll();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
             }
@@ -155,14 +155,14 @@ public class NQueenTest {
         Model sol;
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
-            sol.findAllSolutions();
+            sol.solveAll();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 // default group
                 PropagationEngineFactory.values()[t].make(sol);
-                sol.findAllSolutions();
+                sol.solveAll();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
             }

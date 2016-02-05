@@ -441,7 +441,7 @@ CBJ and DBT enable retrieving an explanation of the last conflict. ::
     ExplanationEngine ee = new ExplanationEngine(solver, userFeedbackOn);
     ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, nogoodsOn);
     solver.plugMonitor(cbj);
-    if(!solver.findSolution()){
+    if(!solver.solve()){
         // If the problem has no solution, the end-user explanation can be retrieved
         System.out.println(cbj.getLastExplanation());
     }

@@ -101,7 +101,7 @@ public class AmongTest {
             model.set(random_bound(allvars, i));
             model.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
-            model.findAllSolutions();
+            model.solveAll();
             assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }
@@ -119,7 +119,7 @@ public class AmongTest {
             model.among(occ, vars, values).post();
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
-            model.findAllSolutions();
+            model.solveAll();
             assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }
@@ -140,7 +140,7 @@ public class AmongTest {
         } catch (ContradictionException e) {
             fail();
         }
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     public long randomOcc(long nbsol, int seed, boolean enumvar, int nbtest, boolean gac) {
@@ -185,7 +185,7 @@ public class AmongTest {
             } else {
                 model.set(random_value(vars, seed));
             }
-            model.findAllSolutions();
+            model.solveAll();
             if (nbsol == -1) {
                 nbsol = model.getMeasures().getSolutionCount();
             } else {
@@ -243,7 +243,7 @@ public class AmongTest {
 			}else{
 				model.set(IntStrategyFactory.random_value(vars, seed));
 			}
-            model.findAllSolutions();
+            model.solveAll();
             if (nbsol == -1) {
                 nbsol = model.getMeasures().getSolutionCount();
             } else {

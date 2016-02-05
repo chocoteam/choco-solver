@@ -65,7 +65,7 @@ public class SortTest {
         Y[4] = model.intVar("Y5", 14, 18, true);
 
         new Constraint("sort", new PropSort(X, Y)).post();
-        /*if (solver.findSolution()) {
+        /*if (solver.solve()) {
             do {
                 System.out.printf("Solution:\n");
                 for (IntVar x : X) {
@@ -76,9 +76,9 @@ public class SortTest {
                     System.out.printf("%d ", x.getValue());
                 }
                 System.out.printf("\n\n");
-            } while (solver.nextSolution());
+            } while (solver.solve());
         }*/
-        assertEquals(model.findAllSolutions(), 182);
+        assertEquals(model.solveAll(), 182);
 
     }
 

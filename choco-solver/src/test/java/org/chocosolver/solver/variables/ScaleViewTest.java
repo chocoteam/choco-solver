@@ -57,7 +57,7 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
         s.arithm(Y, "!=", 4).post();
         s.set(lexico_LB(vars));
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 2);
     }
 
@@ -73,7 +73,7 @@ public class ScaleViewTest {
         s.arithm(Y, "!=", -2).post();
 
         s.set(lexico_LB(vars));
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 4);
     }
 
@@ -120,8 +120,8 @@ public class ScaleViewTest {
 
             Model sb = bijective(low, upp, coeff);
             Model sc = contraint(low, upp, coeff);
-            sb.findAllSolutions();
-            sc.findAllSolutions();
+            sb.solveAll();
+            sc.solveAll();
             Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
             //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
         }
@@ -131,8 +131,8 @@ public class ScaleViewTest {
     public void testRandom2() {
         Model sb = bijective(1, 9999, 3);
         Model sc = contraint(1, 9999, 3);
-        sb.findAllSolutions();
-        sc.findAllSolutions();
+        sb.solveAll();
+        sc.solveAll();
         Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
         //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
     }

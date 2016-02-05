@@ -31,7 +31,6 @@ package org.chocosolver.samples;
 
 import gnu.trove.list.array.TFloatArrayList;
 import org.chocosolver.samples.integer.Knapsack;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -82,7 +81,7 @@ public class KnapsackTest {
             s.setObjectives(MAXIMIZE, power);
             s.solve();
         } else {
-            s.findAllSolutions();
+            s.solveAll();
         }
         times.add(s.getMeasures().getTimeCount());
     }

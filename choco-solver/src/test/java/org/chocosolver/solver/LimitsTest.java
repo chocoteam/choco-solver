@@ -55,7 +55,7 @@ public class LimitsTest {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long tl = 500;
         SearchMonitorFactory.limitTime(s, tl);
-        s.findAllSolutions();
+        s.solveAll();
         int tc = (int) (s.getMeasures().getTimeCount() * 1000);
         Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
@@ -65,7 +65,7 @@ public class LimitsTest {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long tl = 500;
         SearchMonitorFactory.limitTime(s, tl);
-        s.findAllSolutions();
+        s.solveAll();
         int tc = (int) (s.getMeasures().getTimeCount() * 1000);
         Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
     }
@@ -75,7 +75,7 @@ public class LimitsTest {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long nl = 50;
         SearchMonitorFactory.limitNode(s, nl);
-        s.findAllSolutions();
+        s.solveAll();
         long nc = s.getMeasures().getNodeCount();
         Assert.assertEquals(nc, nl);
     }
@@ -85,7 +85,7 @@ public class LimitsTest {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long bl = 50;
         SearchMonitorFactory.limitBacktrack(s, bl);
-        s.findAllSolutions();
+        s.solveAll();
         long bc = s.getMeasures().getBackTrackCount();
         Assert.assertEquals(bc, bl);
     }
@@ -95,7 +95,7 @@ public class LimitsTest {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long fl = 50;
         SearchMonitorFactory.limitFail(s, fl);
-        s.findAllSolutions();
+        s.solveAll();
         long fc = s.getMeasures().getFailCount();
         Assert.assertEquals(fc, fl);
     }
@@ -105,7 +105,7 @@ public class LimitsTest {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long sl = 50;
         SearchMonitorFactory.limitSolution(s, sl);
-        s.findAllSolutions();
+        s.solveAll();
         long sc = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sc, sl);
     }
@@ -163,7 +163,7 @@ public class LimitsTest {
                 return currentMove.repair(resolver);
             }
         });
-        model.findAllSolutions();
+        model.solveAll();
         long sc = model.getMeasures().getSolutionCount();
         Assert.assertEquals(sc, 11);
     }

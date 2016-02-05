@@ -69,8 +69,8 @@ public class BoolNotViewTest {
                 model.sum(xs, "=", 1).post();
                 model.set(random_bound(xs, seed));
             }
-            ref.findAllSolutions();
-            model.findAllSolutions();
+            ref.solveAll();
+            model.solveAll();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
@@ -111,6 +111,6 @@ public class BoolNotViewTest {
         BoolVar a = model.boolVar("a");
         BoolVar b = model.boolVar("b");
         model.arithm(a, "+", model.boolNotView(b), "=", 2).post();
-        assertTrue(model.findSolution());
+        assertTrue(model.solve());
     }
 }

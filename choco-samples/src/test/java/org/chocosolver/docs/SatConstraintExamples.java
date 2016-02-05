@@ -50,7 +50,7 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         SatFactory.addAtMostNMinusOne(BVARS);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -59,7 +59,7 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         SatFactory.addAtMostOne(BVARS);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -68,7 +68,7 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         SatFactory.addBoolAndArrayEqualFalse(BVARS);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -77,7 +77,7 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         SatFactory.addBoolOrArrayEqualTrue(BVARS);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -88,7 +88,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolAndEqVar(L, R, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -98,7 +98,7 @@ public class SatConstraintExamples {
         BoolVar R = model.boolVar("R");
         SatFactory.addBoolEq(L, R);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -109,7 +109,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolIsEqVar(L, R, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -120,7 +120,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolIsLeVar(L, R, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -131,7 +131,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolIsLtVar(L, R, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -142,7 +142,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolIsNeqVar(L, R, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -152,7 +152,7 @@ public class SatConstraintExamples {
         BoolVar R = model.boolVar("R");
         SatFactory.addBoolLe(L, R);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -162,7 +162,7 @@ public class SatConstraintExamples {
         BoolVar R = model.boolVar("R");
         SatFactory.addBoolLt(L, R);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -172,7 +172,7 @@ public class SatConstraintExamples {
         BoolVar R = model.boolVar("R");
         SatFactory.addBoolNot(L, R);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -182,7 +182,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolAndArrayEqVar(BVARS, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -192,7 +192,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolOrArrayEqVar(BVARS, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -203,7 +203,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolOrEqVar(L, R, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -214,7 +214,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addBoolXorEqVar(L, R, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -228,7 +228,7 @@ public class SatConstraintExamples {
                 LogOp.ifThenElse(LogOp.nand(C1, C2), R, AR),
                 model);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -240,7 +240,7 @@ public class SatConstraintExamples {
         BoolVar N = model.boolVar("N");
         SatFactory.addClauses(new BoolVar[]{P1, P2, P3}, new BoolVar[]{N});
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -249,7 +249,7 @@ public class SatConstraintExamples {
         BoolVar B = model.boolVar("B");
         SatFactory.addFalse(B);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -259,7 +259,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addMaxBoolArrayLessEqVar(BVARS, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -269,7 +269,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addSumBoolArrayGreaterEqVar(BVARS, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -279,7 +279,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         SatFactory.addSumBoolArrayLessEqVar(BVARS, T);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -288,6 +288,6 @@ public class SatConstraintExamples {
         BoolVar B = model.boolVar("B");
         SatFactory.addTrue(B);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 }

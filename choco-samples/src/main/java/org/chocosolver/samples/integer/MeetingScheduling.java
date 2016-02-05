@@ -120,7 +120,7 @@ public class MeetingScheduling extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findSolution();
+        model.solve();
     }
 
     @Override

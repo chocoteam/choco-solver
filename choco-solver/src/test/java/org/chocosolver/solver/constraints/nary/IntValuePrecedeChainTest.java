@@ -67,7 +67,7 @@ public class IntValuePrecedeChainTest {
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 model.intValuePrecedeChain(vars, 1, 2).post();
                 model.set(random(vars, i));
-                model.findAllSolutions();
+                model.solveAll();
                 s1 = model.getMeasures().getSolutionCount();
             }
             {
@@ -75,7 +75,7 @@ public class IntValuePrecedeChainTest {
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 int_value_precede_chain_dec(vars, 1, 2);
                 model.set(ISF.random(vars, i));
-                model.findAllSolutions();
+                model.solveAll();
                 s2 = model.getMeasures().getSolutionCount();
             }
             Assert.assertEquals(s1, s2);

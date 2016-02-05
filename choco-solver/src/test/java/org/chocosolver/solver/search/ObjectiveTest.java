@@ -97,7 +97,7 @@ public class ObjectiveTest {
     private void one(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
-            model.findSolution();
+            model.solve();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
             Assert.assertEquals(model.getMeasures().getNodeCount(), 2);
         }
@@ -107,7 +107,7 @@ public class ObjectiveTest {
     private void all(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
-            model.findAllSolutions();
+            model.solveAll();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), 11);
             Assert.assertEquals(model.getMeasures().getNodeCount(), 21);
         }
@@ -175,16 +175,16 @@ public class ObjectiveTest {
 
                     }
                 }).post();
-        model.findSolution();
+        model.solve();
         assertEquals(iv.getValue(), 2);
 
         model.getResolver().reset();
         model.plugMonitor((IMonitorSolution) () -> model.arithm(iv, ">=", 6).post());
-        model.findSolution();
+        model.solve();
         assertEquals(iv.getValue(), 2);
 
         model.getResolver().reset();
-        model.findSolution();
+        model.solve();
         assertEquals(iv.getValue(), 6);
     }
 
@@ -225,11 +225,11 @@ public class ObjectiveTest {
         model.arithm(b1, "=", bestvalue).post();
         model.set(lexico_LB(new BoolVar[]{b1, b2}));
         int count = 0;
-        if (model.findSolution()) {
+        if (model.solve()) {
             do {
                 count++;
 //                System.out.println(b1 + " " + b2);
-            } while (model.nextSolution());
+            } while (model.solve());
         }
         assertEquals(count, 2);
     }

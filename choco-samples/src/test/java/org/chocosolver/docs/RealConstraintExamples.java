@@ -57,6 +57,6 @@ public class RealConstraintExamples {
                 x, y);
         rc.post();
         showSolutions(model);
-        model.findSolution();
+        model.solve();
     }
 }

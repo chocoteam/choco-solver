@@ -56,7 +56,7 @@ public class SetIntUnion {
         showStatistics(s);
         showSolutions(s);
         s.set(lexico_LB(x));
-        s.findAllSolutions();
+        s.solveAll();
     }
 
 	@Test(groups="1s", timeOut=60000)
@@ -74,7 +74,7 @@ public class SetIntUnion {
         showStatistics(s);
         showSolutions(s);
         s.set(lexico_LB(x));
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 0);
     }
 
@@ -93,7 +93,7 @@ public class SetIntUnion {
         showStatistics(s);
         showSolutions(s);
         s.set(lexico_LB(x));
-        s.findAllSolutions();
+        s.solveAll();
         out.println(values);
         assertEquals(s.getMeasures().getSolutionCount(), 1);
     }

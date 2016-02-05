@@ -138,8 +138,8 @@ public class ViewMinusTest {
                 model.sum(xs, "=", 0).post();
                 model.set(random_bound(xs, seed));
             }
-            ref.findAllSolutions();
-            model.findAllSolutions();
+            ref.solveAll();
+            model.solveAll();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
@@ -166,8 +166,8 @@ public class ViewMinusTest {
                 model.sum(xs, "=", 0).post();
                 model.set(random_value(xs, seed));
             }
-            ref.findAllSolutions();
-            model.findAllSolutions();
+            ref.solveAll();
+            model.solveAll();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }

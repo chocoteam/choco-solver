@@ -85,7 +85,7 @@ public class ReifSample extends AbstractProblem {
 			System.out.println(z);
 			System.out.println();
 		});
-		model.findAllSolutions();
+		model.solveAll();
 	}
 
 	@Override

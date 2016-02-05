@@ -201,7 +201,7 @@ public class SerializableTest {
             e.printStackTrace();
         }
         Assert.assertNotNull(s);
-        s.findAllSolutions();
+        s.solveAll();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 92, "nb sol incorrect");
     }
 

@@ -86,7 +86,7 @@ public class NoGoodOnSolutionTest {
     public void testNormal() {
         // no restarts (ok)
         Model s = makeProblem();
-        s.findAllSolutions();
+        s.solveAll();
         System.out.println(s.getMeasures());
         Assert.assertTrue(s.getMeasures().getSolutionCount() == NB_SOLS);
     }
@@ -96,7 +96,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions (infinite loop)
         Model s = makeProblem();
         SLF.restartOnSolutions(s);
-        s.findAllSolutions();
+        s.solveAll();
         System.out.println(s.getMeasures());
         Assert.assertTrue(s.getMeasures().getSolutionCount() == MAX_NB_SOLS);
     }
@@ -107,7 +107,7 @@ public class NoGoodOnSolutionTest {
         Model s = makeProblem();
         SMF.nogoodRecordingOnSolution(s.retrieveIntVars(true));
         SLF.restartOnSolutions(s);
-        s.findAllSolutions();
+        s.solveAll();
         System.out.println(s.getMeasures());
         Assert.assertTrue(s.getMeasures().getSolutionCount() == NB_SOLS);
     }
@@ -117,7 +117,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails (at activity presolve only) (loop infinitely)
         Model s = makeProblem();
         s.set(ISF.activity(s.retrieveIntVars(true), 0));
-        s.findAllSolutions();
+        s.solveAll();
         System.out.println(s.getMeasures());
         Assert.assertTrue(s.getMeasures().getSolutionCount() == MAX_NB_SOLS);
     }
@@ -130,7 +130,7 @@ public class NoGoodOnSolutionTest {
         s.set(ISF.activity(s.retrieveIntVars(true), 0));
 //        Chatterbox.showDecisions(s);
         Chatterbox.showSolutions(s);
-        s.findAllSolutions();
+        s.solveAll();
         System.out.println(s.getMeasures());
         Assert.assertEquals(s.getMeasures().getSolutionCount(), NB_SOLS);
     }
@@ -154,7 +154,7 @@ public class NoGoodOnSolutionTest {
         model.set(ISF.random_value(vars, 0));
 
         SLF.restartOnSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
         System.out.println(model.getMeasures());
         Assert.assertTrue(model.getMeasures().getSolutionCount() == 92);
     }
@@ -178,7 +178,7 @@ public class NoGoodOnSolutionTest {
         SMF.nogoodRecordingFromRestarts(model);
         model.set(ISF.random_value(vars, 0));
         SLF.restartOnSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
         System.out.println(model.getMeasures());
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
@@ -201,7 +201,7 @@ public class NoGoodOnSolutionTest {
         SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0]});
         Chatterbox.showSolutions(model);
         model.set(ISF.lexico_LB(vars));
-        model.findAllSolutions();
+        model.solveAll();
         System.out.println(model.getMeasures());
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
@@ -225,7 +225,7 @@ public class NoGoodOnSolutionTest {
         Chatterbox.showSolutions(model);
         model.set(ISF.lexico_LB(vars));
 //        Chatterbox.showDecisions(solver);
-        model.findAllSolutions();
+        model.solveAll();
         System.out.println(model.getMeasures());
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 36);
     }

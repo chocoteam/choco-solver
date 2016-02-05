@@ -98,7 +98,7 @@ public class BinPacking extends AbstractProblem{
 			case 0:// to check
 				model.arithm(minLoad, "=", 17).post();
 				model.set(new AllSolutionsRecorder(model));
-				model.findAllSolutions();
+				model.solveAll();
 				break;
 			case 1:// one step approach (could be slow)
 				model.findAllOptimalSolutions(MAXIMIZE, minLoad, false);

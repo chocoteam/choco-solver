@@ -93,8 +93,8 @@ public class EqualXYCExplTest {
             sol.arithm(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3).post();
         }
 
-        ref.findAllSolutions();
-        sol.findAllSolutions();
+        ref.solveAll();
+        sol.solveAll();
 
 
         Assert.assertEquals(sol.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());

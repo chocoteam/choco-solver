@@ -67,7 +67,7 @@ public class CNFTest {
             }
             model.ifThenElse(b, model.arithm(x, ">=", y), model.arithm(x, "<", y));
 //            SearchMonitorFactory.log(solver, true, true);
-            model.findAllSolutions();
+            model.solveAll();
 //            System.out.printf("%d\n", solver.getMeasures().getSolutionCount());
         }
     }

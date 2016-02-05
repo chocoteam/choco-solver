@@ -76,7 +76,7 @@ public class DynamicPostTest {
         final IntVar Y = model.intVar("Y", 1, 2, false);
         final IntVar Z = model.intVar("Z", 1, 2, false);
         model.getResolver().set(engine.make(model));
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
 
@@ -108,7 +108,7 @@ public class DynamicPostTest {
                     }
                 }).post();
         model.getResolver().set(engine.make(model));
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 7);
     }
 
@@ -134,7 +134,7 @@ public class DynamicPostTest {
         Chatterbox.showDecisions(model);
         Chatterbox.showSolutions(model);
         model.getResolver().set(engine.make(model));
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
@@ -151,7 +151,7 @@ public class DynamicPostTest {
         model.unpost(c2);
         model.unpost(c1);
         model.getResolver().set(engine.make(model));
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 8);
         assertEquals(model.getNbCstrs(), 0);
     }
@@ -171,7 +171,7 @@ public class DynamicPostTest {
             model.unpost(c2);
         });
         model.getResolver().set(engine.make(model));
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 5);
         assertEquals(model.getNbCstrs(), 0);
     }
@@ -213,7 +213,7 @@ public class DynamicPostTest {
         // END extra variables/constraints for guided improvement algorithm
         model.set(lexico_LB(a, b, c, lbA, lbB));
         int nbSolution = 0;
-        while (model.findSolution()) {
+        while (model.solve()) {
             int bestA;
             int bestB;
             do {
@@ -224,7 +224,7 @@ public class DynamicPostTest {
                 push(model.arithm(lbA, "=", bestA), stack, model);
                 push(model.arithm(lbB, "=", bestB), stack, model);
                 push(strictlyBetter, stack, model);
-            } while (model.nextSolution());
+            } while (model.solve());
 
             popAll(stack, model);
 
@@ -236,11 +236,11 @@ public class DynamicPostTest {
             model.getEngine().flush();
             model.getResolver().reset();
 
-            if (model.findSolution()) {
+            if (model.solve()) {
                 do {
                     //System.out.println("Found pareto optimal solution: " + a + ", " + b + ", " + c);
                     nbSolution++;
-                } while (model.nextSolution());
+                } while (model.solve());
             }
 
             popAll(stack, model);
@@ -265,7 +265,7 @@ public class DynamicPostTest {
                 model.arithm(x, "<", y),
                 model.arithm(x, "<", z));
         c.post();
-        model.findSolution();
+        model.solve();
         model.unpost(c);
     }
 
@@ -274,10 +274,10 @@ public class DynamicPostTest {
         Model s1 = costasArray(7, false);
         Model s2 = costasArray(7, true);
 
-        s1.findAllSolutions();
+        s1.solveAll();
         System.out.println(s1.getMeasures().getSolutionCount());
 
-        s2.findAllSolutions();
+        s2.solveAll();
 
         System.out.println(s2.getMeasures().getSolutionCount());
         Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());

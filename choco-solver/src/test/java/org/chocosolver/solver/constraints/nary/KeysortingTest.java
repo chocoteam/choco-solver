@@ -80,7 +80,7 @@ public class KeysortingTest {
         Y[3][2] = model.intVar("Y43", 1000, 10006, true);
 
         model.keySort(X, null, Y, 2).post();
-        model.findSolution();
+        model.solve();
         assertEquals(Y[0][0].getValue(), 1);
         assertEquals(Y[0][1].getValue(), 5);
         assertEquals(Y[0][2].getValue(), 1003);
@@ -128,7 +128,7 @@ public class KeysortingTest {
         Y[3][2] = model.intVar("Y43", 1000, 10006, true);
 
         model.keySort(X, null, Y, 1).post();
-        model.findSolution();
+        model.solve();
         assertEquals(Y[0][0].getValue(), 1);
         assertEquals(Y[0][1].getValue(), 5);
         assertEquals(Y[0][2].getValue(), 1003);
@@ -177,7 +177,7 @@ public class KeysortingTest {
         Y[3][2] = model.intVar("Y43", 1000, 10006, true);
 
         model.keySort(X, null, Y, 0).post();
-        model.findSolution();
+        model.solve();
         assertEquals(Y[0][0].getValue(), 2);
         assertEquals(Y[0][1].getValue(), 3);
         assertEquals(Y[0][2].getValue(), 1001);
@@ -213,7 +213,7 @@ public class KeysortingTest {
         Y[2][1] = model.intVar("Y32", 0, 19, true);
 
         model.keySort(X, null, Y, 2).post();
-        model.findSolution();
+        model.solve();
         assertEquals(Y[0][0].getValue(), 15);
         assertEquals(Y[0][1].getValue(), 0);
         assertEquals(Y[1][0].getValue(), 15);
@@ -241,7 +241,7 @@ public class KeysortingTest {
         Y[4][0] = model.intVar("Y5", 14, 18, true);
 
         model.keySort(X, null, Y, 1).post();
-        assertEquals(model.findAllSolutions(), 182);
+        assertEquals(model.solveAll(), 182);
 
     }
 
@@ -342,7 +342,7 @@ public class KeysortingTest {
         model.keySort(X, null, Y, 2).post();
         model.set(lexico_LB(flatten(X)), lexico_LB(flatten(Y)));
         showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 16);
     }
 
@@ -367,7 +367,7 @@ public class KeysortingTest {
         model.keySort(X, null, Y, 1).post();
         model.set(lexico_LB(flatten(X)), lexico_LB(flatten(Y)));
         showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 16);
     }
 }

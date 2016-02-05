@@ -74,7 +74,7 @@ public class DistanceTest {
 //						}
 //					}
 //				});
-                model.findAllSolutions();
+                model.solveAll();
                 nbSol = model.getMeasures().getSolutionCount();
                 nbNod = model.getMeasures().getNodeCount();
             }
@@ -93,7 +93,7 @@ public class DistanceTest {
 //						}
 //					}
 //				});
-                model.findAllSolutions();
+                model.solveAll();
                 assertEquals(model.getMeasures().getSolutionCount(), nbSol);
                 assertTrue(model.getMeasures().getNodeCount() <= nbNod);
             }
@@ -162,7 +162,7 @@ public class DistanceTest {
         model.distance(X, Y, "=", Z).post();
         model.set(lexico_LB(new IntVar[]{Z, X, Y, Z}));
 //        SearchMonitorFactory.log(solver, true, true);
-        model.findAllSolutions();
+        model.solveAll();
 //        System.out.printf("end\n");
     }
 

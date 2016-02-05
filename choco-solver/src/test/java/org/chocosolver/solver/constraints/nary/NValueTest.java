@@ -70,7 +70,7 @@ public class NValueTest {
                 throw new UnsupportedOperationException();
             }
         });
-        model.findAllSolutions();
+        model.solveAll();
     }
 
 	@Test(groups="1s", timeOut=60000)
@@ -97,6 +97,6 @@ public class NValueTest {
                 throw new UnsupportedOperationException();
             }
         });
-        model.findAllSolutions();
+        model.solveAll();
     }
 }

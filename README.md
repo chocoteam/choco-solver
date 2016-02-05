@@ -37,7 +37,7 @@ solver.post(solver.arithm(x, "+", y, "<", 5));
 // 4. Define the search strategy
 solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y}));
 // 5. Launch the resolution process
-solver.findSolution();
+solver.solve();
 //6. Print search statistics
 Chatterbox.printStatistics(solver);
 ```

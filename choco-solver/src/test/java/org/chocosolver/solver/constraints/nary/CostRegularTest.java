@@ -86,7 +86,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 9280);
     }
 
@@ -127,7 +127,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, auto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 9280);
     }
 
@@ -176,7 +176,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 229376);
     }
 
@@ -228,7 +228,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, cauto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 229376);
     }
 
@@ -268,7 +268,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 67584);
 //        assertEquals(124927,s.getNodeCount());
 
@@ -311,7 +311,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, auto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 67584);
 
 //        assertEquals(124927, s.getNodeCount());
@@ -350,7 +350,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 149456);
     }
 
@@ -390,7 +390,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, auto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 149456);
     }
 
@@ -420,7 +420,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, c2, cost.getLB(), cost.getUB())).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 64008);
     }
 }

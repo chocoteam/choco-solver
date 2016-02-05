@@ -30,11 +30,9 @@
 package org.chocosolver.solver.constraints.nary;
 
 
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -61,7 +59,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         SatFactory.addBoolEq(b1, b2);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
@@ -72,7 +70,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         SatFactory.addBoolNot(b1, b2);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
@@ -83,7 +81,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         SatFactory.addBoolLe(b1, b2);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
     }
 
@@ -96,7 +94,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
         SatFactory.addBoolIsEqVar(b1, b2, r);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -108,7 +106,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
         SatFactory.addBoolAndEqVar(b1, b2, r);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -120,7 +118,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
         SatFactory.addBoolOrEqVar(b1, b2, r);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -131,7 +129,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         SatFactory.addBoolLt(b1, b2);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
     }
 
@@ -144,7 +142,7 @@ public class SatTest {
         r = model.boolVar("r");
         SatFactory.addBoolIsLeVar(b1, b2, r);
 //        SMF.log(solver, true, true);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -157,7 +155,7 @@ public class SatTest {
         r = model.boolVar("r");
         SatFactory.addBoolIsLtVar(b1, b2, r);
 //        SMF.log(solver, true, true);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -169,7 +167,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         SatFactory.addTrue(b1);
         //        SMF.log(solver, true, true);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(b1.getBooleanValue(), ESat.TRUE);
     }
@@ -181,7 +179,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         SatFactory.addFalse(b1);
         //        SMF.log(solver, true, true);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(b1.getBooleanValue(), ESat.FALSE);
     }
@@ -195,7 +193,7 @@ public class SatTest {
         SatFactory.addFalse(bs[1]);
         SatFactory.addFalse(bs[2]);
         //        SMF.log(solver, true, true);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 0);
     }
 

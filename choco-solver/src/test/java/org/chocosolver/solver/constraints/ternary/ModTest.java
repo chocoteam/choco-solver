@@ -78,6 +78,6 @@ public class ModTest extends AbstractTernaryTest {
 		IntVar remainder = s.intVar("remainder", 1, 2, false);
 		s.mod(dividend, divisor, remainder).getOpposite().post();
 		s.set(lexico_LB(dividend, divisor, remainder));
-		s.findSolution();
+		s.solve();
 	}
 }

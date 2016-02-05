@@ -77,7 +77,7 @@ public class ReifiedTest {
 
             s.ifThenElse(b, cons, oppCons);
             s.set(IntStrategyFactory.lexico_LB(vars));
-            s.findAllSolutions();
+            s.solveAll();
             long sol = s.getMeasures().getSolutionCount();
             Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
@@ -101,7 +101,7 @@ public class ReifiedTest {
         s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")).post();
 
         s.set(lexico_LB(new IntVar[]{x, y, z}));
-        s.findAllSolutions();
+        s.solveAll();
         long sol = s.getMeasures().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
     }
@@ -125,7 +125,7 @@ public class ReifiedTest {
             s.ifThenElse(b, cons, oppCons);
 
             s.set(IntStrategyFactory.lexico_LB(vars));
-            s.findAllSolutions();
+            s.solveAll();
             long sol = s.getMeasures().getSolutionCount();
             Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
@@ -237,12 +237,12 @@ public class ReifiedTest {
 
                 int[][] values = DomainBuilder.buildFullDomains(i, 1, i, r, d, false);
                 Model s1 = model1(i, values);
-                s1.findAllSolutions();
+                s1.solveAll();
 
                 ////////////////////////
 
                 Model s2 = model2(i, values);
-                s2.findAllSolutions();
+                s2.solveAll();
 
 
                 ////////////////////////
@@ -260,12 +260,12 @@ public class ReifiedTest {
         int[][] values; //= DomainBuilder.buildFullDomains(i, 1, i, r, d, false);
         values = new int[][]{{1, 2}, {1}};
         Model s1 = model1(2, values);
-        s1.findAllSolutions();
+        s1.solveAll();
 
         ////////////////////////
 
         Model s2 = model2(2, values);
-        s2.findAllSolutions();
+        s2.solveAll();
 
 
         ////////////////////////
@@ -338,7 +338,7 @@ public class ReifiedTest {
         int max_abs = 1;
         s.sum(ab, "=", ab.length - max_abs).post();
 
-        s.findAllSolutions();
+        s.solveAll();
 
         assertEquals(s.getMeasures().getSolutionCount(), 2);
 
@@ -374,7 +374,7 @@ public class ReifiedTest {
         int max_abs = 1;
         s.sum(ab, "=", ab.length - max_abs).post();
 
-        s.findAllSolutions();
+        s.solveAll();
 
         assertEquals(s.getMeasures().getSolutionCount(), 2);
 
@@ -411,7 +411,7 @@ public class ReifiedTest {
         s.sum(ab, "=", ab.length - max_abs).post();
 
 //        SearchMonitorFactory.log(s, true, false);
-        s.findAllSolutions();
+        s.solveAll();
 
         assertEquals(s.getMeasures().getSolutionCount(), 2);
 
@@ -448,7 +448,7 @@ public class ReifiedTest {
         s.sum(ab, "=", ab.length - max_abs).post();
 
 //        SearchMonitorFactory.log(s, true, false);
-        s.findAllSolutions();
+        s.solveAll();
 
         assertEquals(s.getMeasures().getSolutionCount(), 5);
 

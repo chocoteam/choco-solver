@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.propagation;
 
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
@@ -68,7 +67,7 @@ public class PropEngineTest {
         model.arithm(x, ">=", y).post();
         model.arithm(x, "<=", 2).post();
 
-        model.findSolution();
+        model.solve();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -77,11 +76,11 @@ public class PropEngineTest {
         IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
         Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
         model.post(CSTR, CSTR);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
         model.getResolver().reset();
         model.unpost(CSTR);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
@@ -116,7 +115,7 @@ public class PropEngineTest {
     public void test3(){
         Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
         model.getResolver().set(new SevenQueuesPropagatorEngine(model));
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
 
@@ -124,7 +123,7 @@ public class PropEngineTest {
     public void test4(){
         Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
         model.getResolver().set(new TwoBucketPropagationEngine(model));
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
 
@@ -180,7 +179,7 @@ public class PropEngineTest {
                 }
             }).post();
             model.set(random(X, i));
-            model.findAllSolutions();
+            model.solveAll();
             assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }

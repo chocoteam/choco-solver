@@ -52,7 +52,7 @@ public class SubcircuitTest {
         Model model = new Model();
         IntVar[] x = model.intVarArray("x", 10, 0, 20, true);
         model.subCircuit(x, 0, model.intVar("length", 0, x.length - 1, true)).post();
-        model.findSolution();
+        model.solve();
         assertEquals(1, model.getMeasures().getSolutionCount());
     }
 
@@ -63,7 +63,7 @@ public class SubcircuitTest {
         IntVar[] y = model.intVarArray("y", 5, 5, 9, true);
         IntVar[] vars = append(x, y);
         model.subCircuit(vars, 0, model.intVar("length", 0, vars.length - 1, true)).post();
-        model.findSolution();
+        model.solve();
         assertTrue(model.getMeasures().getSolutionCount() > 0);
     }
 
@@ -81,7 +81,7 @@ public class SubcircuitTest {
             assertTrue(false);
         }
         model.subCircuit(vars, 0, model.intVar("length", 0, vars.length - 1, true)).post();
-        model.findSolution();
+        model.solve();
         assertTrue(model.getMeasures().getSolutionCount() == 0);
     }
 
@@ -94,7 +94,7 @@ public class SubcircuitTest {
         IntVar[] vars = model.intVarArray("x", n, 0, n, true);
         IntVar nb = model.intVar("size", min, max, true);
         model.subCircuit(vars, 0, nb).post();
-        model.findAllSolutions();
+        model.solveAll();
         int nbSol = 0;
         for (int i = min; i <= max; i++) {
             nbSol += parmi(i, n) * factorial(i - 1);

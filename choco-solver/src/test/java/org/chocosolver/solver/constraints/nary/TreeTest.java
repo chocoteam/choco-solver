@@ -49,8 +49,8 @@ public class TreeTest {
 	public void test1() {
         Model s1 = model(true);
 		Model s2 = model(false);
-		s1.findAllSolutions();
-		s2.findAllSolutions();
+		s1.solveAll();
+		s2.solveAll();
 		Assert.assertEquals(s1.getMeasures().getSolutionCount(),s2.getMeasures().getSolutionCount());
 		Assert.assertEquals(s1.getMeasures().getNodeCount(),s2.getMeasures().getNodeCount());
     }

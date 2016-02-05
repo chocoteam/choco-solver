@@ -87,7 +87,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * for (int i = 0; i < n; i++) {
  *      pares.addModel(modeller());
  * }
- * pares.findSolution();
+ * pares.solve();
  * Chatterbox.printSolutions(pares.getFinder());
  * </code>
  * </pre>
@@ -378,5 +378,18 @@ public class ParallelResolution {
                         "real variable objective optimization problems");
             }
         }
+    }
+
+
+    public boolean solve() {
+        ResolutionPolicy policy = models.get(0).policy;
+        check(policy);
+        setUpResolution(policy);
+        models.parallelStream().forEach(Model::solve);
+        long nsol = 0;
+        for (Model s : models) {
+            nsol += s.getMeasures().getSolutionCount();
+        }
+        return nsol > 0;
     }
 }

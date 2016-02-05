@@ -83,7 +83,7 @@ public class DominatingSetOfQueens {
 
 		pb.set(lexico_LB(X));
 
-		pb.findSolution();
+		pb.solve();
 		out.println("Back  : " + pb.getMeasures().getBackTrackCount());
 		out.println("Time  : " + pb.getMeasures().getTimeCount() + " (sec)");
 

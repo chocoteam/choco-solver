@@ -134,7 +134,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findSolution();
+        model.solve();
     }
 
     @Override

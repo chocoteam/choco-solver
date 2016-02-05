@@ -178,7 +178,7 @@ public class StrategyTest {
         IntValueSelector valsel = new IntDomainMin();
         DecisionOperator assgnt = DecisionOperator.int_eq;
         model.set(new Once(v, varsel, valsel, assgnt));
-        model.findSolution();
+        model.solve();
         Assert.assertTrue(x.getValue() == 1);
     }
 
@@ -189,7 +189,7 @@ public class StrategyTest {
         SetVar y = model.setVar("y", new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
         model.allDifferent(x).post();
         model.member(x[0], y).post();
-        model.findSolution();
+        model.solve();
         AbstractStrategy strat = model.getStrategy();
         assertTrue(strat instanceof LastConflict);
     }
@@ -371,7 +371,7 @@ public class StrategyTest {
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         model.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(true), ISF.split(), X));
         Chatterbox.showDecisions(model);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
@@ -381,7 +381,7 @@ public class StrategyTest {
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         model.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(false), ISF.reverse_split(), X));
         Chatterbox.showDecisions(model);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
@@ -392,7 +392,7 @@ public class StrategyTest {
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         model.set(ISF.dichotomic(ISF.minDomainSize_var_selector(), true, X));
         Chatterbox.showDecisions(model);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
@@ -402,7 +402,7 @@ public class StrategyTest {
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         model.set(ISF.dichotomic(ISF.minDomainSize_var_selector(), false, X));
         Chatterbox.showDecisions(model);
-        model.findAllSolutions();
+        model.solveAll();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 }

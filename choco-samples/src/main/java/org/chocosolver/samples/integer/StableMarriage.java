@@ -335,7 +335,7 @@ public class StableMarriage extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findSolution();
+        model.solve();
     }
 
     @Override
@@ -358,7 +358,7 @@ public class StableMarriage extends AbstractProblem {
 
                 num_sols++;
 
-            } while (model.nextSolution() == Boolean.TRUE);
+            } while (model.solve() == Boolean.TRUE);
 
             System.out.println("It was " + num_sols + " solutions.");
 

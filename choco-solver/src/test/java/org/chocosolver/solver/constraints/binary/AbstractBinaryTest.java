@@ -118,7 +118,7 @@ public abstract class AbstractBinaryTest {
             Model s = modeler(domains, bounded, seed);
 //            SearchMonitorFactory.log(s, false, false);
             try {
-                s.findAllSolutions();
+                s.solveAll();
             } catch (AssertionError ae) {
                 System.err.printf("seed: %d\n", seed);
                 throw ae;

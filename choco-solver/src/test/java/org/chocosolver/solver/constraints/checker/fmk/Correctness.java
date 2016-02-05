@@ -163,7 +163,7 @@ public class Correctness {
         int nbVar = rvars.length;
         Model test = m.model(nbVar, rvars, _domains, parameters);
         try {
-            if (test.findSolution()) {
+            if (test.solve()) {
                 System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
                         logObjects));
                 System.out.println("REF:\n" + ref + "\n");

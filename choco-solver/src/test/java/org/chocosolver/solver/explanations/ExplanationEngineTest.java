@@ -215,7 +215,7 @@ public class ExplanationEngineTest {
             model.set(lexico_LB(vars));
 
             learnCBJ(model, false, false);
-            assertFalse(model.findSolution());
+            assertFalse(model.solve());
 
             assertEquals(model.getMeasures().getNodeCount(), (n - 2) * 2);
             assertEquals(model.getMeasures().getFailCount(), n - 1);
@@ -232,7 +232,7 @@ public class ExplanationEngineTest {
             model.set(lexico_LB(vars));
 
             learnCBJ(model, false, false);
-            assertFalse(model.findSolution());
+            assertFalse(model.solve());
 
             assertEquals(model.getMeasures().getNodeCount(), (n - 2) * 2);
             assertEquals(model.getMeasures().getFailCount(), n - 1);
@@ -249,7 +249,7 @@ public class ExplanationEngineTest {
             }
 
             SLF.learnCBJ(model, false, false);
-            Assert.assertFalse(model.findSolution());
+            Assert.assertFalse(model.solve());
 
             Assert.assertEquals(model.getMeasures().getNodeCount(), 0);
             Assert.assertEquals(model.getMeasures().getFailCount(), 1);
@@ -267,7 +267,7 @@ public class ExplanationEngineTest {
             model.set(ISF.lexico_LB(vars));
 
             SLF.learnCBJ(model, false, false);
-            Assert.assertFalse(model.findSolution());
+            Assert.assertFalse(model.solve());
 
             Assert.assertEquals(model.getMeasures().getNodeCount(), 0);
             Assert.assertEquals(model.getMeasures().getFailCount(), 1);
@@ -293,7 +293,7 @@ public class ExplanationEngineTest {
             learnCBJ(model, false, false);
 
             showShortStatistics(model);
-            assertFalse(model.findSolution());
+            assertFalse(model.solve());
         }
     }
 
@@ -317,7 +317,7 @@ public class ExplanationEngineTest {
         showStatistics(model);
         showSolutions(model);
         showDecisions(model);
-        assertFalse(model.findSolution());
+        assertFalse(model.solve());
 
     }
 
@@ -341,7 +341,7 @@ public class ExplanationEngineTest {
         showStatistics(model);
         showSolutions(model);
         showDecisions(model);
-        assertFalse(model.findSolution());
+        assertFalse(model.solve());
     }
 
 
@@ -398,7 +398,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         Chatterbox.showShortStatistics(model);
         SMF.limitTime(model, "5m");
-        Assert.assertTrue(model.findSolution() || model.hasReachedLimit());
+        Assert.assertTrue(model.solve() || model.hasReachedLimit());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -438,7 +438,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         limitTime(model, "5m");
-        assertTrue(model.findSolution());
+        assertTrue(model.solve());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -514,7 +514,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         limitTime(model, "5m");
-        assertTrue(model.findSolution());
+        assertTrue(model.solve());
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -575,7 +575,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         limitTime(model, "5m");
-        assertTrue(model.findSolution() || model.hasReachedLimit());
+        assertTrue(model.solve() || model.hasReachedLimit());
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -654,7 +654,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         limitTime(model, "5m");
-        assertTrue(model.findSolution() || model.hasReachedLimit());
+        assertTrue(model.solve() || model.hasReachedLimit());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -802,7 +802,7 @@ public class ExplanationEngineTest {
         // logging and solution
         showStatistics(s);
         showSolutions(s);
-        s.findAllSolutions();
+        s.solveAll();
         return s;
     }
 
@@ -837,7 +837,7 @@ public class ExplanationEngineTest {
         learnCBJ(s, false, true);
         LearnCBJ cbj = (LearnCBJ) s.getResolver().getLearn();
         showDecisions(s);
-        assertFalse(s.findSolution());
+        assertFalse(s.solve());
         // If the problem has no solution, the end-user explanation can be retrieved
         out.println(cbj.getLastExplanation());
         assertEquals(cbj.getLastExplanation().nbCauses(), 3);
@@ -857,7 +857,7 @@ public class ExplanationEngineTest {
         model.set(ISF.lexico_UB(B), new Once(X, ISF.lexico_var_selector(), ISF.min_value_selector()));
         Chatterbox.showDecisions(model);
         Chatterbox.showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Test(groups="1s", timeOut=60000)

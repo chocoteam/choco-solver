@@ -79,7 +79,7 @@ public class ClauseTest {
                 SatFactory.addClauses(or, s);
                 s.set(IntStrategyFactory.lexico_LB(bs));
 
-                s.findAllSolutions();
+                s.solveAll();
                 long sol = s.getMeasures().getSolutionCount();
                 Assert.assertEquals(sol, nSol);
             }
@@ -98,7 +98,7 @@ public class ClauseTest {
 
         SatFactory.addClauses(and, s);
         s.set(IntStrategyFactory.lexico_LB(bs));
-        s.findAllSolutions();
+        s.solveAll();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 0);
     }
@@ -116,7 +116,7 @@ public class ClauseTest {
         BoolVar[] bs = new BoolVar[]{b};
         s.set(IntStrategyFactory.lexico_LB(bs));
 //        SMF.log(s, true, true);
-        s.findAllSolutions();
+        s.solveAll();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2);
     }
@@ -221,7 +221,7 @@ public class ClauseTest {
                 SatFactory.addClauses(tree, model);
 
                 model.set(IntStrategyFactory.random_bound(bvars, seed));
-                model.findAllSolutions();
+                model.solveAll();
                 n1 = model.getMeasures().getSolutionCount();
             }
             {
@@ -230,7 +230,7 @@ public class ClauseTest {
                 model.times(bvars[1], bvars[2], bvars[0]).post();
 
                 model.set(random_bound(bvars, seed));
-                model.findAllSolutions();
+                model.solveAll();
                 n2 = model.getMeasures().getSolutionCount();
             }
             Assert.assertEquals(n2, n1, String.format("seed: %d", seed));

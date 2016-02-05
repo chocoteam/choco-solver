@@ -92,7 +92,7 @@ public class CycleLtTest {
                 Model rand = modeler(n);
                 rand.set(nset);
                 PropagationEngineFactory.values()[j].make(rand);
-                rand.findAllSolutions();
+                rand.solveAll();
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
                 st.setLength(0);

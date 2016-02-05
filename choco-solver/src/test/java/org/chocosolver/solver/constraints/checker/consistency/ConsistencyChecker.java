@@ -94,7 +94,7 @@ public class ConsistencyChecker {
 
                             Model test = modeler.model(nbVar, _domains, map, parameters);
                             try {
-                                if (!test.findSolution()) {
+                                if (!test.solve()) {
                                     System.out.println(
                                             String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
                                             ds, ide, h, rvars[d], val, loop, seed));

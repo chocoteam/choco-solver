@@ -92,7 +92,7 @@ public class MemberTest {
 
                 s.set(lexico_LB(vars));
 
-                s.findAllSolutions();
+                s.solveAll();
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
                 assertEquals(sol, unionSize(values[0], values[1]), "nb sol incorrect");
@@ -119,7 +119,7 @@ public class MemberTest {
 
                 s.set(lexico_LB(vars));
 
-                s.findAllSolutions();
+                s.solveAll();
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
                 assertEquals(sol, unionSize(lb, ub, values[1]), "nb sol incorrect");
@@ -137,7 +137,7 @@ public class MemberTest {
         s.member(vars, values).post();
         s.set(lexico_LB(vars));
 
-        s.findAllSolutions();
+        s.solveAll();
 
     }
 

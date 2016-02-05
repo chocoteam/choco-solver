@@ -46,18 +46,15 @@ import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
-import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.propagation.PropagationTrigger;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.Resolver;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.solution.*;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
-import org.chocosolver.solver.variables.observers.FilteringMonitorList;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
 
@@ -911,20 +908,19 @@ public class Model implements Serializable, IModeler{
 
 
 
-
     /**
      * Executes the resolver as configured
      * Default configuration: Computes a feasible solution (SAT) with the default search strategy
      */
-    public void solve(){
-        solve(policy != ResolutionPolicy.SATISFACTION);
+    public boolean solve(){
+        return solve(policy != ResolutionPolicy.SATISFACTION);
     }
 
     /**
      * Executes the resolver as configured
      * Default configuration: Computes a feasible solution (SAT) with the default search strategy
      */
-    public void solve(boolean restoreBestSolution){
+    public boolean solve(boolean restoreBestSolution){
         if(policy == ResolutionPolicy.SATISFACTION){
             getResolver().setStopAtFirstSolution(true);
         }else{
@@ -933,6 +929,7 @@ public class Model implements Serializable, IModeler{
             }
             getResolver().setStopAtFirstSolution(false);
         }
+        long nbsol = getMeasures().getSolutionCount();
         getResolver().launch();
         if(restoreBestSolution){
             try {
@@ -943,9 +940,15 @@ public class Model implements Serializable, IModeler{
                 getEngine().flush();
             }
         }
+        return (getMeasures().getSolutionCount() - nbsol) > 0;
     }
 
-
+    public long solveAll() {
+        resetObjectives();
+        getResolver().setStopAtFirstSolution(false);
+        getResolver().launch();
+        return getMeasures().getSolutionCount();
+    }
 
 
 
@@ -973,49 +976,15 @@ public class Model implements Serializable, IModeler{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Attempts to find the first solution of the declared problem.
-     * Then, following solutions can be found using {@link Model#nextSolution()}.
-     * <p>
-     * An alternative is to call {@link Model#isFeasible()} which tells, whether or not, a solution has been found.
-     *
-     * @return <code>true</code> if and only if a solution has been found.
-     */
-    public boolean findSolution() {
-        resetObjectives();
-        getResolver().setStopAtFirstSolution(true);
-        long nbsol = getMeasures().getSolutionCount();
-        solve();
-        return (getMeasures().getSolutionCount() - nbsol) > 0;
-    }
-
-    /**
-     * Attempts to find all solutions of the declared problem.
-     *
-     * @return the number of found solutions.
-     */
     public long findAllSolutions() {
         resetObjectives();
         getResolver().setStopAtFirstSolution(false);
-        solve();
+        getResolver().launch();
         return getMeasures().getSolutionCount();
     }
+
+
+
 
 
 
@@ -1046,7 +1015,7 @@ public class Model implements Serializable, IModeler{
                 getResolver().reset();
                 arithm(objective, "=", opt).post();
                 set(new AllSolutionsRecorder(this));
-                findAllSolutions();
+                solveAll();
             }
         } else {
             if (policy == ResolutionPolicy.SATISFACTION) {
@@ -1085,6 +1054,19 @@ public class Model implements Serializable, IModeler{
 
 
     /**
+     * Attempts to find the first solution of the declared problem.
+     * Then, following solutions can be found using {@link Model#nextSolution()}.
+     * <p>
+     * An alternative is to call {@link Model#isFeasible()} which tells, whether or not, a solution has been found.
+     *
+     * @return <code>true</code> if and only if a solution has been found.
+     */
+    public boolean findSolution() {
+        resetObjectives();
+        return solve();
+    }
+
+    /**
      * Once {@link Model#findSolution()} has been called once, other solutions can be found using this method.
      * <p>
      * The search is then resume to the last found solution point.
@@ -1098,7 +1080,6 @@ public class Model implements Serializable, IModeler{
     }
 
     // INTS
-
 
     /**
      * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.

@@ -93,7 +93,7 @@ public class CycloHexan extends AbstractProblem {
             System.out.println("CycloHexan");
             System.out.println(st.toString());
         });
-        model.findAllSolutions();
+        model.solveAll();
 		model.getIbex().release();
     }
 

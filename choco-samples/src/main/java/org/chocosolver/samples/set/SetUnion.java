@@ -79,7 +79,7 @@ public class SetUnion extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findAllSolutions();
+        model.solveAll();
     }
 
     @Override

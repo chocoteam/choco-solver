@@ -80,7 +80,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 59049);
     }
 
@@ -122,7 +122,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 25980);
     }
 
@@ -152,7 +152,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 531441);
 //        assertEquals(124927,s.getNodeCount());
 
@@ -183,7 +183,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 1594323);
     }
 
@@ -200,7 +200,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.set(lexico_LB(vars));
 
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 4371696);
     }
 
@@ -218,7 +218,7 @@ public class RegularTest {
         model.set(lexico_LB(vars));
 
         showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 162);
     }
 
@@ -228,7 +228,7 @@ public class RegularTest {
         IntVar[] CS = model.intVarArray("CS", 4, -10, 10, false);
         model.regular(CS, new FiniteAutomaton("<-9>1*")).post();
         showSolutions(model);
-        model.findAllSolutions();
+        model.solveAll();
 
         final List<Solution> solutions = model.getSolutionRecorder().getSolutions();
 
@@ -246,7 +246,7 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
         model.regular(CS, new FiniteAutomaton("[12]*")).post();
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -255,7 +255,7 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
         model.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)).post();
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -266,7 +266,7 @@ public class RegularTest {
         model.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)).post();
         showSolutions(model);
         showDecisions(model);
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 7);
     }
 
@@ -275,7 +275,7 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
         model.regular(CS, new FiniteAutomaton(".*", 0, 3)).post();
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 16);
     }
 
@@ -286,7 +286,7 @@ public class RegularTest {
         model.regular(CS, new FiniteAutomaton("1{2}")).post();
         showSolutions(model);
         showDecisions(model);
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 1);
     }
 
@@ -297,7 +297,7 @@ public class RegularTest {
         model.regular(CS, new FiniteAutomaton("0{2,3}1*")).post();
         showSolutions(model);
         showDecisions(model);
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
@@ -315,7 +315,7 @@ public class RegularTest {
         });
         model.set(lexico_LB(CS));
 //        Chatterbox.showDecisions(solver);
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 84);
     }
 
@@ -326,7 +326,7 @@ public class RegularTest {
         IntVar[] CS = model.intVarArray("CS", 3, new int[]{43, 59, 117});
         model.regular(CS, new FiniteAutomaton("<43><59><117>")).post();
         model.set(lexico_LB(CS));
-        model.findAllSolutions();
+        model.solveAll();
         assertEquals(model.getMeasures().getSolutionCount(), 1);
 
     }

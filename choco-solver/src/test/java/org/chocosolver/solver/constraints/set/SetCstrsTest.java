@@ -60,8 +60,8 @@ public class SetCstrsTest {
 				Assert.assertTrue(v2[i].contains(v));
 			}
 		}
-		v1[0].getModel().findAllSolutions();
-		v2[0].getModel().findAllSolutions();
+		v1[0].getModel().solveAll();
+		v2[0].getModel().solveAll();
 		Assert.assertEquals(
 				v1[0].getModel().getMeasures().getSolutionCount(),
 				v2[0].getModel().getMeasures().getSolutionCount()

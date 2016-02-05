@@ -69,7 +69,7 @@ public class ElementTest {
         } else {
             s.set(random_value(allvars, currentTimeMillis()));
         }
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
 
@@ -146,7 +146,7 @@ public class ElementTest {
             s.arithm(vars[i], ">", vars[i + 1]).post();
         }
 
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
     }
 
@@ -175,7 +175,7 @@ public class ElementTest {
             ref.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3).post();
         }
 
-        ref.findAllSolutions();
+        ref.solveAll();
 
         Assert.assertEquals(ref.getMeasures().getSolutionCount(), nbsols);
     }
@@ -195,7 +195,7 @@ public class ElementTest {
             IntVar R = model.intVar("R", 0, 10, false);
             model.element(R, new int[]{0, 2, 4, 6, 7}, I).post();
             model.set(random_value(new IntVar[]{I, R}, i));
-            model.findAllSolutions();
+            model.solveAll();
             assertEquals(model.getMeasures().getSolutionCount(), 5);
         }
     }
@@ -208,7 +208,7 @@ public class ElementTest {
             IntVar R = model.intVar("R", 0, 10, false);
             model.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
             model.set(random_value(new IntVar[]{I, R}, i));
-            model.findAllSolutions();
+            model.solveAll();
             assertEquals(model.getMeasures().getSolutionCount(), 5);
         }
     }
@@ -221,7 +221,7 @@ public class ElementTest {
             IntVar R = model.intVar("R", 0, 21, false);
             model.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I).post();
             model.set(random_value(new IntVar[]{I, R}, i));
-            model.findAllSolutions();
+            model.solveAll();
             assertEquals(model.getMeasures().getSolutionCount(), 14);
         }
     }
@@ -234,7 +234,7 @@ public class ElementTest {
             IntVar R = model.intVar("R", -1, 0, false);
             model.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1).post();
             model.set(random_bound(new IntVar[]{I, R}, i));
-            model.findAllSolutions();
+            model.solveAll();
             assertEquals(model.getMeasures().getSolutionCount(), 4);
         }
     }
@@ -246,7 +246,7 @@ public class ElementTest {
         Constraint el = detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
         s.or(el.reify()).post();
         // s.post(el);// works instead of previous post
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 1L);
     }
 
@@ -262,7 +262,7 @@ public class ElementTest {
         // !b=> val=2
         Constraint affect = s.arithm(val, "=", 2);
         s.or(b, affect.reify()).post();
-        s.findAllSolutions();
+        s.solveAll();
         assertEquals(s.getMeasures().getSolutionCount(), 2L);
     }
 

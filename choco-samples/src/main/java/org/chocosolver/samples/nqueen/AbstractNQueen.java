@@ -54,7 +54,7 @@ public abstract class AbstractNQueen extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findSolution();
+        model.solve();
     }
 
     @Override

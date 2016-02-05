@@ -89,7 +89,7 @@ public class Eq20 extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findSolution();
+        model.solve();
     }
 
     @Override

@@ -92,7 +92,7 @@ public class TimesTest extends AbstractTernaryTest {
 			IntVar i1 = s.intVar("i1", 0, 465 * i, false);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, false);
 			s.times(i1, 465 * i, i2).post();
-			s.findAllSolutions();
+			s.solveAll();
 			assertEquals(s.getMeasures().getSolutionCount(), 2);
 		}
 	}
@@ -105,7 +105,7 @@ public class TimesTest extends AbstractTernaryTest {
 			IntVar i1 = s.intVar("i1", 0, 465 * i, true);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, true);
 			s.times(i1, 465 * i, i2).post();
-			s.findAllSolutions();
+			s.solveAll();
 			assertEquals(s.getMeasures().getSolutionCount(), 2);
 		}
 	}
@@ -116,7 +116,7 @@ public class TimesTest extends AbstractTernaryTest {
 		IntVar i1 = s.intVar("i1", 0, 465, false);
 		IntVar i2 = s.intVar("i2", 0, 465 * 10000, false);
 		s.times(i1, 10000, i2).post();
-		s.findAllSolutions();
+		s.solveAll();
 		assertEquals(s.getMeasures().getSolutionCount(), 466);
 	}
 	@Test(groups="1s", timeOut=60000)
@@ -125,7 +125,7 @@ public class TimesTest extends AbstractTernaryTest {
 		IntVar i1 = s.intVar("i1", MIN_VALUE / 10, MAX_VALUE / 10, true);
 		IntVar i2 = s.intVar("i2", MIN_VALUE / 10, MAX_VALUE / 10, true);
 		s.times(i1, 10000, i2).post();
-		s.findAllSolutions();
+		s.solveAll();
 		assertEquals(s.getMeasures().getSolutionCount(), MAX_VALUE / 100000 * 2 + 1);
 	}
 

@@ -65,7 +65,7 @@ public class SimpleExplanationTest {
         // configure Solver
         s.set(lexico_LB(vars));
         // solve
-        s.findSolution();
+        s.solve();
         long sol = s.getMeasures().getSolutionCount();
         assertEquals(sol, 1, "nb sol incorrect");
     }
