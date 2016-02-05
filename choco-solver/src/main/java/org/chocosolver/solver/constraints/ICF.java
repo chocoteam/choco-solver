@@ -29,15 +29,13 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.Solver;
+
 /**
- * A short-name version of {@code ICF}
- * <br/>
- * Deprecated : constraint creation should be done through the {@code Solver} object which extends {@code IModeler}
+ * @deprecated : int constraint creation should be done through the {@link Solver} object
+ * which extends {@link org.chocosolver.solver.constraints.IIntConstraintFactory}
  *
- * @author Charles Prud'homme
- * @since 15/05/13
+ * This class will be removed in versions > 3.4.0
  */
 @Deprecated
-public final class ICF extends IntConstraintFactory{
-    // SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
-}
+public final class ICF extends IntConstraintFactory{}

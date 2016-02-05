@@ -41,25 +41,10 @@ import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 
 /**
- * A Factory to declare constraint based on integer variables (only).
- * One can call directly the constructor of constraints, but it is recommended
- * to use the Factory, because signatures and javadoc are ensured to be up-to-date.
- * <br/>
- * As much as possible, the API names of global constraints must match
- * those define in the <a href="http://www.emn.fr/z-info/sdemasse/gccat/index.html">Global Constraint Catalog</a>.
- * <p>
- * Note that, for the sack of readability, the Java naming convention is not respected for methods arguments.
- * <p>
- * Constraints are ordered as the following:
- * 1) Unary	constraints
- * 2) Binary constraints
- * 3) Terary constraints
- * 4) Global constraints
+ * @deprecated : int constraint creation should be done through the {@link Solver} object
+ * which extends {@link org.chocosolver.solver.constraints.IIntConstraintFactory}
  *
- * Deprecated : constraint creation should be done through the {@code Solver} object which extends {@code IModeler}
- *
- * @author Charles Prud'homme
- * @since 21/01/13
+ * This class will be removed in versions > 3.4.0
  */
 @Deprecated
 @SuppressWarnings("UnusedDeclaration")

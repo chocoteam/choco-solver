@@ -29,15 +29,15 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.util.ESat;
 
 /**
+ * @deprecated : logical constraint creation should be done through the {@link Solver} object
+ * which extends {@link org.chocosolver.solver.constraints.ILogicalConstraintFactory}
  *
- * Deprecated : constraint creation should be done through the {@code Solver} object which extends {@code IModeler}
- *
- * Created by IntelliJ IDEA.
- * @author Jean-Guillaume Fages
- * @since 15/05/2013
+ * This class will be removed in versions > 3.4.0
  */
 @Deprecated
 public class LogicalConstraintFactory {
@@ -190,5 +190,79 @@ public class LogicalConstraintFactory {
 	 */
 	public static void reification(BoolVar BVAR, Constraint CSTR){
 		BVAR.getSolver().reification(BVAR,CSTR);
+	}
+
+
+
+	//***********************************************************************************
+	// Reifiable reification constraints
+	//***********************************************************************************
+
+	/**
+	 * Same as ifThenElse, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint ifThenElse_reifiable(Constraint IF, Constraint THEN, Constraint ELSE){
+		return ifThenElse_reifiable(IF.reif(), THEN, ELSE);
+	}
+
+	/**
+	 * Same as ifThenElse, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint ifThenElse_reifiable(BoolVar BVAR, Constraint THEN, Constraint ELSE) {
+		return and(ifThen_reifiable(BVAR,THEN),ifThen_reifiable(BVAR.not(),ELSE));
+	}
+
+	/**
+	 * Same as ifThen, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint ifThen_reifiable(Constraint IF, Constraint THEN) {
+		return ifThen_reifiable(IF.reif(), THEN);
+	}
+
+	/**
+	 * Same as ifThen, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint ifThen_reifiable(BoolVar BVAR, Constraint CSTR) {
+		Solver s = BVAR.getSolver();
+		// PRESOLVE
+		ESat entail = CSTR.isSatisfied();
+		if (BVAR.isInstantiatedTo(0) || (BVAR.isInstantiatedTo(1) && entail == ESat.TRUE)) {
+			return s.TRUE();
+		}else if (BVAR.isInstantiatedTo(1) && entail == ESat.FALSE) {
+			return s.FALSE();
+		}
+		// END PRESOLVE
+		return ICF.arithm(BVAR, "<=", CSTR.reif());
+	}
+
+	/**
+	 * Same as reification, but:
+	 * + can be reified
+	 * - may be slower
+	 */
+	public static Constraint reification_reifiable(BoolVar BVAR, Constraint CSTR) {
+		Solver s = BVAR.getSolver();
+		// PRESOLVE
+		ESat entail = CSTR.isSatisfied();
+		if (BVAR.isInstantiated() && entail != ESat.UNDEFINED) {
+			if ((BVAR.getValue() == 1 && entail == ESat.TRUE)
+					|| (BVAR.getValue() == 0 && entail == ESat.FALSE)) {
+				return s.TRUE();
+			} else {
+				return s.FALSE();
+			}
+		}
+		// END PRESOLVE
+		else {
+			return ICF.arithm(BVAR, "=", CSTR.reify());
+		}
 	}
 }

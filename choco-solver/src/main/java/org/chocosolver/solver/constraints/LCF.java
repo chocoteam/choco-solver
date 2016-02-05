@@ -27,17 +27,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 15/05/13
- * Time: 19:58
- */
 
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.Solver;
+
 /**
- * Deprecated : constraint creation should be done through the {@code Solver} object which extends {@code IModeler}
+ * @deprecated : logical constraint creation should be done through the {@link Solver} object
+ * which extends {@link org.chocosolver.solver.constraints.ILogicalConstraintFactory}
+ *
+ * This class will be removed in versions > 3.4.0
  */
 @Deprecated
 public class LCF extends LogicalConstraintFactory{}
