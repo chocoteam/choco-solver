@@ -72,7 +72,7 @@ public class LogicalConstraintFactory {
 	public static Constraint and(Constraint... CONS){
 		BoolVar[] bools = new BoolVar[CONS.length];
 		for(int i=0;i<CONS.length;i++){
-			bools[i] = CONS[i].reif();
+			bools[i] = CONS[i].reify();
 		}
 		return and(bools);
 	}
@@ -85,7 +85,7 @@ public class LogicalConstraintFactory {
 	public static Constraint or(Constraint... CONS){
 		BoolVar[] bools = new BoolVar[CONS.length];
 		for(int i=0;i<CONS.length;i++){
-			bools[i] = CONS[i].reif();
+			bools[i] = CONS[i].reify();
 		}
 		return or(bools);
 	}
@@ -115,7 +115,7 @@ public class LogicalConstraintFactory {
 	 * @param ELSE a constraint
 	 */
 	public static void ifThenElse(Constraint IF, Constraint THEN, Constraint ELSE){
-		ifThenElse(IF.reif(), THEN, ELSE);
+		ifThenElse(IF.reify(), THEN, ELSE);
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class LogicalConstraintFactory {
 	 * @param THEN a constraint
 	 */
 	public static void ifThen(Constraint IF, Constraint THEN) {
-		ifThen(IF.reif(), THEN);
+		ifThen(IF.reify(), THEN);
 	}
 
 	/**

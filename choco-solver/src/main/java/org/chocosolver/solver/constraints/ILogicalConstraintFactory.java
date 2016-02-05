@@ -80,7 +80,7 @@ public interface ILogicalConstraintFactory {
 	default Constraint and(Constraint... cstrs){
 		BoolVar[] bools = new BoolVar[cstrs.length];
 		for(int i=0;i<cstrs.length;i++){
-			bools[i] = cstrs[i].reif();
+			bools[i] = cstrs[i].reify();
 		}
 		return and(bools);
 	}
@@ -93,7 +93,7 @@ public interface ILogicalConstraintFactory {
 	default Constraint or(Constraint... cstrs){
 		BoolVar[] bools = new BoolVar[cstrs.length];
 		for(int i=0;i<cstrs.length;i++){
-			bools[i] = cstrs[i].reif();
+			bools[i] = cstrs[i].reify();
 		}
 		return or(bools);
 	}
@@ -126,7 +126,7 @@ public interface ILogicalConstraintFactory {
 	 * @param elseCstr a constraint
 	 */
 	default void ifThenElse(Constraint ifCstr, Constraint thenCstr, Constraint elseCstr){
-		ifThenElse(ifCstr.reif(), thenCstr, elseCstr);
+		ifThenElse(ifCstr.reify(), thenCstr, elseCstr);
 	}
 
 	/**
@@ -160,7 +160,7 @@ public interface ILogicalConstraintFactory {
 	 * @param thenCstr a constraint
 	 */
 	default void ifThen(Constraint ifCstr, Constraint thenCstr) {
-		ifThen(ifCstr.reif(), thenCstr);
+		ifThen(ifCstr.reify(), thenCstr);
 	}
 
 	/**
@@ -192,7 +192,7 @@ public interface ILogicalConstraintFactory {
 			}
 			// END OF PRESOLVE
 			else {
-				s.post(s.arithm(ifVar, "<=", thenCstr.reif()));
+				s.post(s.arithm(ifVar, "<=", thenCstr.reify()));
 			}
 		}
 	}
@@ -207,7 +207,7 @@ public interface ILogicalConstraintFactory {
 	 * @param cstr2 a constraint to be satisfied if and only if <i>cstr1</i> is satisfied
 	 */
 	default void ifOnlyIf(Constraint cstr1, Constraint cstr2){
-		reification(cstr1.reif(),cstr2);
+		reification(cstr1.reify(),cstr2);
 	}
 
 	/**

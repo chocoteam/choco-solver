@@ -248,8 +248,8 @@ public class ExplanationTest {
 
             // The false constraints
             BoolVar[] bs = new BoolVar[2];
-            bs[0] = solver.arithm(p[3], "=", p[4]).reif();
-            bs[1] = solver.arithm(p[3], "!=", p[4]).reif();
+            bs[0] = solver.arithm(p[3], "=", p[4]).reify();
+            bs[1] = solver.arithm(p[3], "!=", p[4]).reify();
             solver.post(solver.arithm(bs[0], "=", bs[1]));
 
             solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[2], p[3], p[4]));

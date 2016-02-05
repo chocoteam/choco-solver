@@ -245,7 +245,7 @@ public class ElementTest {
         IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
         Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
-        s.post(s.or(el.reif()));
+        s.post(s.or(el.reify()));
         // s.post(el);// works instead of previous post
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 1L);
@@ -259,10 +259,10 @@ public class ElementTest {
         IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
         Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
-        s.post(s.or(b.not(), el.reif()));
+        s.post(s.or(b.not(), el.reify()));
         // !b=> val=2
         Constraint affect = s.arithm(val, "=", 2);
-        s.post(s.or(b, affect.reif()));
+        s.post(s.or(b, affect.reify()));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 2L);
     }

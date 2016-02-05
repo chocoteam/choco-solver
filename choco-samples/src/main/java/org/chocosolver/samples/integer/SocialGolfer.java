@@ -136,7 +136,7 @@ public class SocialGolfer extends AbstractProblem {
 				for (int l = 0; l < w; l++) {
 					BoolVar[] group = new BoolVar[g];
 					for (int k = 0; k < g; k++) {
-						group[k] = solver.and(P[i][k][l], P[j][k][l]).reif();
+						group[k] = solver.and(P[i][k][l], P[j][k][l]).reify();
 						solver.post(solver.arithm(group[k], "<=", M[i][j][l]));
                     }
 					solver.post(solver.sum(group, "=", M[i][j][l]));

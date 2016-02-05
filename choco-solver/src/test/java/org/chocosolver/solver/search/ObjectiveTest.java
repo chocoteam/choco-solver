@@ -181,7 +181,7 @@ public class ObjectiveTest {
     public void test4() {
         Solver solver = new Solver();
         IntVar iv = solver.intVar("iv", 0, 10, false);
-        BoolVar v = solver.arithm(iv, "<=", 2).reif();
+        BoolVar v = solver.arithm(iv, "<=", 2).reify();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());

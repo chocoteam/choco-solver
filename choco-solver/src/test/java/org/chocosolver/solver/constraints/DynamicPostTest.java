@@ -196,10 +196,10 @@ public class DynamicPostTest {
         List<Constraint> stack = new ArrayList<>();
         IntVar lbA = solver.intVar("lbA", 0, 2, false);
         IntVar lbB = solver.intVar("lbB", 0, 2, false);
-        BoolVar aSBetter = solver.arithm(a, ">", lbA).reif();
-        BoolVar bSBetter = solver.arithm(b, ">", lbB).reif();
-        BoolVar aBetter = solver.arithm(a, ">=", lbA).reif();
-        BoolVar bBetter = solver.arithm(b, ">=", lbB).reif();
+        BoolVar aSBetter = solver.arithm(a, ">", lbA).reify();
+        BoolVar bSBetter = solver.arithm(b, ">", lbB).reify();
+        BoolVar aBetter = solver.arithm(a, ">=", lbA).reify();
+        BoolVar bBetter = solver.arithm(b, ">=", lbB).reify();
         push(solver.arithm(lbA, "=", a), stack, solver);
         push(solver.arithm(lbB, "=", b), stack, solver);
         Constraint strictlyBetter

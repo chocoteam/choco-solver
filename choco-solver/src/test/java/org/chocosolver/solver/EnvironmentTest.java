@@ -58,7 +58,7 @@ public class EnvironmentTest {
 					IntVar k = solver.intVar(randomName(), -20000, 20000, true);
 					solver.post(solver.sum(new IntVar[]{vars[i],k},"=",vars[j]));
 					// just to create many variables
-					solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reif();
+					solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reify();
 					vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
 					idx++;
 				}

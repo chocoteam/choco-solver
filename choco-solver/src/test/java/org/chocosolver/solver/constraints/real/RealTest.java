@@ -179,9 +179,9 @@ public class RealTest {
 
         // Create and reify constraints to assign values to the real
         RealConstraint attrEquals1 = solver.realIbexGenericConstraint("{0}=4.0", attr);
-        BoolVar attrEquals1Reification = attrEquals1.reif();
+        BoolVar attrEquals1Reification = attrEquals1.reify();
         RealConstraint attrEquals2 = solver.realIbexGenericConstraint("{0}=8.0", attr);
-        BoolVar attrEquals2Reification = attrEquals2.reif();
+        BoolVar attrEquals2Reification = attrEquals2.reify();
 
         // Walk and print the solutions
         int numSolutions = 0;

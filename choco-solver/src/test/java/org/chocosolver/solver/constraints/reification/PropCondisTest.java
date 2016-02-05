@@ -57,8 +57,8 @@ public class PropCondisTest {
     public void testCD1() throws ContradictionException {
         Solver s = new Solver();
         IntVar a = s.intVar("A", 0, 10, false);
-        BoolVar b1 = s.arithm(a, "=", 9).reif();
-        BoolVar b2 = s.arithm(a, "=", 10).reif();
+        BoolVar b1 = s.arithm(a, "=", 9).reify();
+        BoolVar b2 = s.arithm(a, "=", 10).reify();
         SatFactory.addConstructiveDisjunction(b1,b2);
         s.propagate();
         Assert.assertEquals(a.getDomainSize(), 2);
@@ -76,7 +76,7 @@ public class PropCondisTest {
         Constraint c1 = s.arithm(X, "-", Y, "<=", -9);
         Constraint c2 = s.arithm(Y, "-", X, "<=", -9);
 
-        SatFactory.addConstructiveDisjunction(c1.reif(),c2.reif());
+        SatFactory.addConstructiveDisjunction(c1.reify(),c2.reify());
         s.propagate();
         Assert.assertEquals(X.getDomainSize(), 4);
         Assert.assertEquals(Y.getDomainSize(), 4);
@@ -152,7 +152,7 @@ public class PropCondisTest {
                 disjunction[j] = solver.and(
                         solver.arithm(OS[i], ">", os[j]),
                         solver.arithm(OS[i], "+", LS[i], "<", os[j] + ls[j])
-                ).reif();
+                ).reify();
             }
             if(cd) {
                 SatFactory.addConstructiveDisjunction(disjunction);

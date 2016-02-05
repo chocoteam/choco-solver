@@ -46,10 +46,10 @@ public class IntValuePrecedeChainTest {
         Solver solver = X[0].getSolver();
         solver.post(solver.arithm(X[0], "!=", T));
         for (int j = 1; j < X.length; j++) {
-            BoolVar bj = solver.arithm(X[j], "=", T).reif();
+            BoolVar bj = solver.arithm(X[j], "=", T).reify();
             BoolVar[] bis = new BoolVar[j];
             for (int i = 0; i < j; i++) {
-                bis[i] = solver.arithm(X[i], "=", S).reif();
+                bis[i] = solver.arithm(X[i], "=", S).reify();
             }
             solver.ifThen(bj, solver.or(bis));
         }

@@ -157,10 +157,10 @@ public class Constraint implements Serializable {
 
     /**
      * Get/make the boolean variable indicating whether the constraint is satisfied or not
-     *
+     * This should not be posted.
      * @return the boolean reifying the constraint
      */
-    public final BoolVar reif() {
+    public final BoolVar reify() {
         if (boolReif == null) {
             Solver s = propagators[0].getSolver();
             boolReif = s.boolVar(randomName());
@@ -176,7 +176,7 @@ public class Constraint implements Serializable {
      * @return the opposite constraint of this
      */
     public final Constraint getOpposite() {
-        reif();
+        reify();
         if (opposite == null) {
             opposite = makeOpposite();
             opposite.opposite = this;

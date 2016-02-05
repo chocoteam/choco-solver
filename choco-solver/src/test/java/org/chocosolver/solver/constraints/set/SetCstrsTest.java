@@ -91,8 +91,8 @@ public class SetCstrsTest {
 		s.post(s.union(new SetVar[]{Xleft, Xright}, xset));
 		s.post(s.union(new SetVar[]{Yleft,Yright},yset));
 		// link to booleans
-		BoolVar b1 = s.notEmpty(Yleft).reif();
-		BoolVar b2 = s.notEmpty(Yright).reif();
+		BoolVar b1 = s.notEmpty(Yleft).reify();
+		BoolVar b2 = s.notEmpty(Yright).reify();
 		// ---
 		SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
 		Chatterbox.showStatistics(s);

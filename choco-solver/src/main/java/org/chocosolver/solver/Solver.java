@@ -951,7 +951,7 @@ public class Solver implements Serializable, IModeler{
             }
             if (cs[i].isReified()) {
                 try {
-                    cs[i].reif().setToTrue(Cause.Null);
+                    cs[i].reify().setToTrue(Cause.Null);
                 } catch (ContradictionException e) {
                     throw new SolverException("post a constraint whose reification BoolVar is already set to false: no solution can exist");
                 }
