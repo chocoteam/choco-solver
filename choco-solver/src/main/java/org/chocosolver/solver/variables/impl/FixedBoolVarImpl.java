@@ -30,7 +30,7 @@
 package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -52,8 +52,8 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     private static final long serialVersionUID = 1L;
     private BoolVar not;
 
-    public FixedBoolVarImpl(String name, int constant, Solver solver) {
-        super(name, constant, solver);
+    public FixedBoolVarImpl(String name, int constant, Model model) {
+        super(name, constant, model);
         assert constant == 0 || constant == 1 : "FixedBoolVarImpl value should be taken in {0,1}";
     }
 
@@ -80,7 +80,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     @Override
     public BoolVar not() {
         if (!hasNot()) {
-            not = solver.boolNotView(this);
+            not = model.boolNotView(this);
             not._setNot(this);
         }
         return not;
@@ -118,7 +118,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public IntVar duplicate() {
-        return solver.intVar(StringUtils.randomName(), this.constante);
+        return model.intVar(StringUtils.randomName(), this.constante);
     }
 
 }

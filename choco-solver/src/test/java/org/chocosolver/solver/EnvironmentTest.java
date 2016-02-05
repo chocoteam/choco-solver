@@ -35,9 +35,7 @@
 package org.chocosolver.solver;
 
 
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.domOverWDeg;
@@ -50,25 +48,25 @@ public class EnvironmentTest {
 	public void testSize() {
 		int n = 14;
 		IntVar[] vars, vectors;
-		Solver solver = new Solver("CostasArrays");
-		vars = solver.intVarArray("v", n, 0, n - 1, false);
+		Model model = new Model("CostasArrays");
+		vars = model.intVarArray("v", n, 0, n - 1, false);
 		vectors = new IntVar[n * n - n];
 		int idx = 0;
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (i != j) {
-					IntVar k = solver.intVar(randomName(), -20000, 20000, true);
-					solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
+					IntVar k = model.intVar(randomName(), -20000, 20000, true);
+					model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
 					// just to create many variables
-					solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reify();
-					vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
+					model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reify();
+					vectors[idx] = model.intOffsetView(k, 2 * n * (j - i));
 					idx++;
 				}
 			}
 		}
-		solver.allDifferent(vars, "AC").post();
-		solver.allDifferent(vectors, "BC").post();
-		solver.set(domOverWDeg(append(vectors, vars), 0));
-		solver.findSolution();
+		model.allDifferent(vars, "AC").post();
+		model.allDifferent(vectors, "BC").post();
+		model.set(domOverWDeg(append(vectors, vars), 0));
+		model.findSolution();
 	}
 }

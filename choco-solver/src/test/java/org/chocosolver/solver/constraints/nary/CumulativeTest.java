@@ -29,12 +29,9 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
-import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.testng.annotations.Test;
@@ -143,37 +140,37 @@ public class CumulativeTest {
 
 	public static long solve(int n, int capamax, int dmin, int hmax, long seed,
 							 boolean graph, int mode) {
-		final Solver solver = new Solver();
+		final Model model = new Model();
 		int dmax = 5 + dmin * 2;
-		final IntVar[] s = solver.intVarArray("s", n, 0, n * dmax, false);
-		final IntVar[] d = solver.intVarArray("d", n, dmin, dmax, false);
-		final IntVar[] e = solver.intVarArray("e", n, 0, n * dmax, false);
-		final IntVar[] h = solver.intVarArray("h", n, 0, hmax, false);
-		final IntVar capa = solver.intVar("capa", 0, capamax, false);
-		final IntVar last = solver.intVar("last", 0, n * dmax, false);
+		final IntVar[] s = model.intVarArray("s", n, 0, n * dmax, false);
+		final IntVar[] d = model.intVarArray("d", n, dmin, dmax, false);
+		final IntVar[] e = model.intVarArray("e", n, 0, n * dmax, false);
+		final IntVar[] h = model.intVarArray("h", n, 0, hmax, false);
+		final IntVar capa = model.intVar("capa", 0, capamax, false);
+		final IntVar last = model.intVar("last", 0, n * dmax, false);
 		Task[] t = new Task[n];
 		for (int i = 0; i < n; i++) {
 			t[i] = new Task(s[i], d[i], e[i]);
-			solver.arithm(e[i], "<=", last).post();
+			model.arithm(e[i], "<=", last).post();
 		}
-		Constraint c = solver.cumulative(t, h, capa, graph);
+		Constraint c = model.cumulative(t, h, capa, graph);
 		c.post();
-		solver.set(random_bound(solver.retrieveIntVars(false), seed));
-		solver.set(lastConflict(solver, solver.getStrategy()));
-		limitTime(solver, 5000);
+		model.set(random_bound(model.retrieveIntVars(false), seed));
+		model.set(lastConflict(model, model.getStrategy()));
+		limitTime(model, 5000);
 		switch (mode) {
 			case 0:
-				solver.findSolution();
-				if (solver.hasReachedLimit()) return -1;
-				return solver.getMeasures().getSolutionCount();
+				model.findSolution();
+				if (model.hasReachedLimit()) return -1;
+				return model.getMeasures().getSolutionCount();
 			case 1:
-				solver.findOptimalSolution(MINIMIZE, last);
-				if (solver.hasReachedLimit()) return -1;
-				return solver.getMeasures().getBestSolutionValue().longValue();
+				model.findOptimalSolution(MINIMIZE, last);
+				if (model.hasReachedLimit()) return -1;
+				return model.getMeasures().getBestSolutionValue().longValue();
 			case 2:
-				solver.findAllSolutions();// too many solutions to be used
-				if (solver.hasReachedLimit()) return -1;
-				return solver.getMeasures().getSolutionCount();
+				model.findAllSolutions();// too many solutions to be used
+				if (model.hasReachedLimit()) return -1;
+				return model.getMeasures().getSolutionCount();
 			default:
 				throw new UnsupportedOperationException();
 		}

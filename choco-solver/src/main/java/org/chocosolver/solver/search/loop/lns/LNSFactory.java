@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
@@ -51,42 +51,42 @@ public class LNSFactory {
     /**
      * Create a random neighborhood
      *
-     * @param solver the solver concerned
+     * @param model the solver concerned
      * @param vars   the pool of variables to choose from
      * @param level  the number of tries for each size of fragment
      * @param seed   a seed for the random selection
      * @return a random neighborhood
      */
-    public static INeighbor random(Solver solver, IntVar[] vars, int level, long seed) {
-        return new RandomNeighborhood(solver, vars, level, seed);
+    public static INeighbor random(Model model, IntVar[] vars, int level, long seed) {
+        return new RandomNeighborhood(model, vars, level, seed);
     }
 
     /**
      * Create a propagation guided neighborhood
      *
-     * @param solver   the solver concerned
+     * @param model   the solver concerned
      * @param vars     the pool of variables to choose from
      * @param fgmtSize fragment size (evaluated against log value)
      * @param listSize size of the list
      * @param seed     a seed for the random selection
      * @return a propagation-guided neighborhood
      */
-    public static INeighbor pg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed) {
-        return new PropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
+    public static INeighbor pg(Model model, IntVar[] vars, int fgmtSize, int listSize, long seed) {
+        return new PropagationGuidedNeighborhood(model, vars, seed, fgmtSize, listSize);
     }
 
     /**
      * Create a reverse propagation guided neighborhood
      *
-     * @param solver    the solver concerned
+     * @param model    the solver concerned
      * @param vars      the pool of variables to choose from
      * @param fgmtSize  the limit size for PG and RPG
      * @param listSize  size of the list
      * @param seed      a seed for the random selection
      * @return a reverse propagation-guided neighborhood
      */
-    public static INeighbor rpg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed) {
-        return new ReversePropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
+    public static INeighbor rpg(Model model, IntVar[] vars, int fgmtSize, int listSize, long seed) {
+        return new ReversePropagationGuidedNeighborhood(model, vars, seed, fgmtSize, listSize);
     }
 
     // PREDEFINED LNS
@@ -94,37 +94,37 @@ public class LNSFactory {
     /**
      * Create a LNS based on a random neighborhood.
      *
-     * @param solver    the solver
+     * @param model    the solver
      * @param vars      the pool of variables to choose from
      * @param level     the number of tries for each size of fragment
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Solver, INeighbor, Criterion)
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Model, INeighbor, Criterion)
      */
-    public static void rlns(Solver solver, IntVar[] vars, int level, long seed, ACounter frcounter) {
-        SLF.lns(solver,
-                new RandomNeighborhood(solver, vars, level, seed),
+    public static void rlns(Model model, IntVar[] vars, int level, long seed, ACounter frcounter) {
+        SLF.lns(model,
+                new RandomNeighborhood(model, vars, level, seed),
                 frcounter);
     }
 
     /**
      * Create a PGLNS, based on "Propagation-Guided LNS", Perronn Shaw and Furnon, CP2004.
      *
-     * @param solver    the solver
+     * @param model    the solver
      * @param vars      the pool of variables to choose from
      * @param fgmtSize  fragment size (evaluated against log value)
      * @param listSize  size of the list
      * @param level     the number of tries for each size of fragment
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Solver, INeighbor, Criterion)
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Model, INeighbor, Criterion)
      */
-    public static void pglns(Solver solver, IntVar[] vars, int fgmtSize, int listSize, int level, long seed, ACounter frcounter) {
-        SLF.lns(solver,
+    public static void pglns(Model model, IntVar[] vars, int fgmtSize, int listSize, int level, long seed, ACounter frcounter) {
+        SLF.lns(model,
                 new SequenceNeighborhood(
-                        pg(solver, vars, fgmtSize, listSize, seed),
-                        rpg(solver, vars, fgmtSize, listSize, seed),
-                        pg(solver, vars, fgmtSize, 0, seed) // <= state of the art configuration
+                        pg(model, vars, fgmtSize, listSize, seed),
+                        rpg(model, vars, fgmtSize, listSize, seed),
+                        pg(model, vars, fgmtSize, 0, seed) // <= state of the art configuration
                 ),
                 frcounter);
     }
@@ -132,21 +132,21 @@ public class LNSFactory {
     /**
      * Create a ELNS, an Explanation based LNS
      *
-     * @param solver the solver
+     * @param model the solver
      * @param vars   the pool of variables to choose from
      * @param level  the number of tries for each size of fragment
      * @param seed   a seed for the random selection
      * @param frcounter a fast restart counter (can be null) for neighborhoods
-     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Solver, INeighbor, Criterion)
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#lns(Model, INeighbor, Criterion)
      */
-    public static void elns(Solver solver, IntVar[] vars, int level, long seed,
+    public static void elns(Model model, IntVar[] vars, int level, long seed,
                             ACounter frcounter) {
-        INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
-        INeighbor neighbor2 = new ExplainingCut(solver, level, seed);
-        INeighbor neighbor3 = new RandomNeighborhood(solver, vars, level, seed);
+        INeighbor neighbor1 = new ExplainingObjective(model, level, seed);
+        INeighbor neighbor2 = new ExplainingCut(model, level, seed);
+        INeighbor neighbor3 = new RandomNeighborhood(model, vars, level, seed);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
-        SLF.lns(solver, neighbor, frcounter);
+        SLF.lns(model, neighbor, frcounter);
     }
 
 

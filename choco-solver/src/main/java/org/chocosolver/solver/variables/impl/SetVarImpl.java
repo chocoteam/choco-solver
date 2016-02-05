@@ -30,7 +30,7 @@
 package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.SetDelta;
@@ -75,10 +75,10 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 * @param envType	data structure of the envelope
 	 * @param ker		initial kernel domain
 	 * @param kerType	data structure of the kernel
-	 * @param solver	solver of the variable.
+	 * @param model	solver of the variable.
 	 */
-	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
-		super(name, solver);
+	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Model model) {
+		super(name, model);
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
 		for(int i:env){
@@ -90,8 +90,8 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 			max = Math.max(max,i);
 		}
 		check(env,ker,max,min);
-		envelope = SetFactory.makeStoredSet(envType, max-min+1, solver);
-		kernel = SetFactory.makeStoredSet(kerType, max-min+1, solver);
+		envelope = SetFactory.makeStoredSet(envType, max-min+1, model);
+		kernel = SetFactory.makeStoredSet(kerType, max-min+1, model);
 		for(int i:env){
 			envelope.add(i-min);
 		}
@@ -108,12 +108,12 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 * @param name		name of the variable
 	 * @param min		first envelope value
 	 * @param max		last envelope value
-	 * @param solver	solver of the variable.
+	 * @param model	solver of the variable.
 	 */
-	public SetVarImpl(String name, int min, int max, Solver solver) {
-		super(name, solver);
-		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, this.solver);
-		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, this.solver);
+	public SetVarImpl(String name, int min, int max, Model model) {
+		super(name, model);
+		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, this.model);
+		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, this.model);
 		for(int i=min; i<=max; i++){
 			envelope.add(i-min);
 		}
@@ -286,7 +286,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         for (int i = getKernelFirst(); i != END; i = getKernelNext()) {
             ker[idx++] = i;
         }
-        return new SetVarImpl(StringUtils.randomName(this.name), env, envelope.getSetType(), ker, kernel.getSetType(), solver);
+        return new SetVarImpl(StringUtils.randomName(this.name), env, envelope.getSetType(), ker, kernel.getSetType(), model);
     }
 
     @Override
@@ -332,7 +332,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     public void createDelta() {
         if (!reactOnModification) {
             reactOnModification = true;
-            delta = new SetDelta(solver.getEnvironment());
+            delta = new SetDelta(model.getEnvironment());
         }
     }
 
@@ -352,6 +352,6 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
-        solver.getEngine().fails(cause, this, message);
+        model.getEngine().fails(cause, this, message);
     }
 }

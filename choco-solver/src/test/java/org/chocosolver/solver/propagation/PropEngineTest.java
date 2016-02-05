@@ -29,25 +29,19 @@
  */
 package org.chocosolver.solver.propagation;
 
-import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
 
 import static java.util.Arrays.sort;
 import static org.chocosolver.solver.Cause.Null;
@@ -68,46 +62,46 @@ public class PropEngineTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        Solver solver = new Solver("t1");
-        IntVar x = solver.intVar("X", 1, 3, true);
-        IntVar y = solver.intVar("Y", 1, 3, true);
-        solver.arithm(x, ">=", y).post();
-        solver.arithm(x, "<=", 2).post();
+        Model model = new Model("t1");
+        IntVar x = model.intVar("X", 1, 3, true);
+        IntVar y = model.intVar("Y", 1, 3, true);
+        model.arithm(x, ">=", y).post();
+        model.arithm(x, "<=", 2).post();
 
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        Solver solver = new Solver();
-        IntVar[] VARS = solver.intVarArray("X", 2, 0, 2, false);
-        Constraint CSTR = solver.arithm(VARS[0], "+", VARS[1], "=", 2);
-        solver.post(CSTR, CSTR);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
-        solver.getSearchLoop().reset();
-        solver.unpost(CSTR);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+        Model model = new Model();
+        IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
+        Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
+        model.post(CSTR, CSTR);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
+        model.getSearchLoop().reset();
+        model.unpost(CSTR);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
     // test clone in propagators
     @Test(groups="1s", timeOut=60000, expectedExceptions = AssertionError.class)
     public void testClone() throws ContradictionException {
-        Solver solver = new Solver();
-        solver.set(new Settings() {
+        Model model = new Model();
+        model.set(new Settings() {
             @Override
             public boolean cloneVariableArrayInPropagator() {
                 return false;
             }
         });
-        IntVar[] vars = solver.intVarArray("V", 3, 0, 4, false);
-        solver.allDifferent(vars).post();
+        IntVar[] vars = model.intVarArray("V", 3, 0, 4, false);
+        model.allDifferent(vars).post();
         sort(vars, (o1, o2) -> o2.getId() - o1.getId());
 
-        solver.propagate();
+        model.propagate();
         vars[0].instantiateTo(0, Null);
-        solver.propagate();
+        model.propagate();
         assertFalse(vars[0].isInstantiatedTo(0));
     }
 
@@ -120,43 +114,43 @@ public class PropEngineTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test3(){
-        Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(8);
-        solver.set(new SevenQueuesPropagatorEngine(solver));
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
+        Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+        model.set(new SevenQueuesPropagatorEngine(model));
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test4(){
-        Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(8);
-        solver.set(new TwoBucketPropagationEngine(solver));
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
+        Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+        model.set(new TwoBucketPropagationEngine(model));
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void test5(){
-        Solver solver = ProblemMaker.makeGolombRuler(10);
-        solver.set(new SevenQueuesPropagatorEngine(solver));
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
+        Model model = ProblemMaker.makeGolombRuler(10);
+        model.set(new SevenQueuesPropagatorEngine(model));
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void test6(){
-        Solver solver = ProblemMaker.makeGolombRuler(10);
-        solver.set(new TwoBucketPropagationEngine(solver));
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal((IntVar)solver.getObjectives()[0]).intValue(), 55);
+        Model model = ProblemMaker.makeGolombRuler(10);
+        model.set(new TwoBucketPropagationEngine(model));
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }
     
     @Test(groups="1s", timeOut=60000)
     public void testGregy41(){
         for(int i = 0 ; i < 20; i++) {
-            Solver solver = new Solver("Propagation condition");
-            IntVar[] X = solver.intVarArray("X", 2, 0, 2, false);
+            Model model = new Model("Propagation condition");
+            IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
             new Constraint("test", new Propagator(X, UNARY, true) {
 
                 @Override
@@ -185,9 +179,9 @@ public class PropEngineTest {
                     return TRUE;
                 }
             }).post();
-            solver.set(random(X, i));
-            solver.findAllSolutions();
-            assertEquals(solver.getMeasures().getSolutionCount(), 9);
+            model.set(random(X, i));
+            model.findAllSolutions();
+            assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }
 }

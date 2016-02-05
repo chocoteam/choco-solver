@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.checker.fmk;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -41,7 +41,7 @@ import java.util.Random;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
-import static org.chocosolver.solver.Solver.writeInFile;
+import static org.chocosolver.solver.Model.writeInFile;
 import static org.chocosolver.solver.constraints.checker.fmk.Domain.*;
 import static org.chocosolver.solver.variables.SetVar.END;
 import static org.testng.Assert.fail;
@@ -83,7 +83,7 @@ public class Correctness {
                         }
                     }
                     Variable[] rvars = new Variable[nbVar];
-                    Solver ref = referencePropagation(modeler, nbVar, rvars, domains, parameters);
+                    Model ref = referencePropagation(modeler, nbVar, rvars, domains, parameters);
                     if (ref == null) break; // no solution found for this generated problem
                     for (int d = 0; d < nbVar; d++) {
                         if (types[d] == INT || types[d] == BOOL) {
@@ -136,8 +136,8 @@ public class Correctness {
 //        System.out.printf("loop: %d\n", loop);
     }
 
-    private static Solver referencePropagation(SetTestModel modeler, int nbVar, Variable[] rvars, Domain[] domains, Object parameters) {
-        Solver ref = modeler.model(nbVar, rvars, domains, parameters);
+    private static Model referencePropagation(SetTestModel modeler, int nbVar, Variable[] rvars, Domain[] domains, Object parameters) {
+        Model ref = modeler.model(nbVar, rvars, domains, parameters);
         ref.getEnvironment().worldPush();
         try {
             ref.propagate();
@@ -159,9 +159,9 @@ public class Correctness {
         return ref;
     }
 
-    private static void checkNoSol(SetTestModel m, Variable[] rvars, Domain[] _domains, Object parameters, Solver ref, Object[] logObjects) {
+    private static void checkNoSol(SetTestModel m, Variable[] rvars, Domain[] _domains, Object parameters, Model ref, Object[] logObjects) {
         int nbVar = rvars.length;
-        Solver test = m.model(nbVar, rvars, _domains, parameters);
+        Model test = m.model(nbVar, rvars, _domains, parameters);
         try {
             if (test.findSolution()) {
                 System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",

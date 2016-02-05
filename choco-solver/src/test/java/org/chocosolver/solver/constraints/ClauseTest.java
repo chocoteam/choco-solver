@@ -31,7 +31,7 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.PropSat;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -58,7 +58,7 @@ public class ClauseTest {
         int nSol = 1;
         for (int n = 1; n < 16; n++) {
             for (int i = 0; i <= n; i++) {
-                Solver s = new Solver();
+                Model s = new Model();
 
                 final BoolVar[] bsource = new BoolVar[n];
                 final BoolVar[] bs = new BoolVar[n];
@@ -89,7 +89,7 @@ public class ClauseTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBothAnd() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         BoolVar[] bs = new BoolVar[1];
         bs[0] = s.boolVar("to be");
@@ -105,7 +105,7 @@ public class ClauseTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBothOr() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         BoolVar b = s.boolVar("to be");
 
@@ -124,16 +124,16 @@ public class ClauseTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        Solver solver = new Solver();
-        BoolVar[] bvars = solver.boolVarArray("b", 2);
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1]);
-        SatFactory.addClauses(tree, solver);
+        SatFactory.addClauses(tree, model);
 
         try {
-            solver.propagate();
+            model.propagate();
             bvars[1].instantiateTo(0, Cause.Null);
             bvars[0].instantiateTo(1, Cause.Null);
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -141,16 +141,16 @@ public class ClauseTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test30() {
-        Solver solver = new Solver();
-        BoolVar[] bvars = solver.boolVarArray("b", 2);
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1]);
-        SatFactory.addClauses(tree, solver);
+        SatFactory.addClauses(tree, model);
 
         try {
-            solver.propagate();
+            model.propagate();
             bvars[1].instantiateTo(1, Cause.Null);
             bvars[0].instantiateTo(0, Cause.Null);
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -158,15 +158,15 @@ public class ClauseTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test31() {
-        Solver solver = new Solver();
-        BoolVar[] bvars = solver.boolVarArray("b", 2);
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not());
-        SatFactory.addClauses(tree, solver);
+        SatFactory.addClauses(tree, model);
 
         try {
-            solver.propagate();
+            model.propagate();
             bvars[0].instantiateTo(0, Cause.Null);
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -175,15 +175,15 @@ public class ClauseTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test32() {
-        Solver solver = new Solver();
-        BoolVar[] bvars = solver.boolVarArray("b", 2);
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not());
-        SatFactory.addClauses(tree, solver);
+        SatFactory.addClauses(tree, model);
 
         try {
-            solver.propagate();
+            model.propagate();
             bvars[1].instantiateTo(1, Cause.Null);
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -192,17 +192,17 @@ public class ClauseTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test33() {
-        Solver solver = new Solver();
-        BoolVar[] bvars = solver.boolVarArray("b", 3);
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b", 3);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not(), bvars[2].not());
-        SatFactory.addClauses(tree, solver);
+        SatFactory.addClauses(tree, model);
 
         try {
-            solver.propagate();
+            model.propagate();
             bvars[0].instantiateTo(0, Cause.Null);
             bvars[2].instantiateTo(0, Cause.Null);
             bvars[1].instantiateTo(1, Cause.Null);
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -213,25 +213,25 @@ public class ClauseTest {
         for (int seed = 0; seed < 2000; seed++) {
             long n1, n2;
             {
-                Solver solver = new Solver();
-                BoolVar[] bvars = solver.boolVarArray("b", 3);
+                Model model = new Model();
+                BoolVar[] bvars = model.boolVarArray("b", 3);
                 LogOp tree = LogOp.ifOnlyIf(
                         LogOp.and(bvars[1], bvars[2]),
                         bvars[0]);
-                SatFactory.addClauses(tree, solver);
+                SatFactory.addClauses(tree, model);
 
-                solver.set(IntStrategyFactory.random_bound(bvars, seed));
-                solver.findAllSolutions();
-                n1 = solver.getMeasures().getSolutionCount();
+                model.set(IntStrategyFactory.random_bound(bvars, seed));
+                model.findAllSolutions();
+                n1 = model.getMeasures().getSolutionCount();
             }
             {
-                Solver solver = new Solver();
-                BoolVar[] bvars = solver.boolVarArray("b", 3);
-                solver.times(bvars[1], bvars[2], bvars[0]).post();
+                Model model = new Model();
+                BoolVar[] bvars = model.boolVarArray("b", 3);
+                model.times(bvars[1], bvars[2], bvars[0]).post();
 
-                solver.set(random_bound(bvars, seed));
-                solver.findAllSolutions();
-                n2 = solver.getMeasures().getSolutionCount();
+                model.set(random_bound(bvars, seed));
+                model.findAllSolutions();
+                n2 = model.getMeasures().getSolutionCount();
             }
             Assert.assertEquals(n2, n1, String.format("seed: %d", seed));
         }
@@ -252,14 +252,14 @@ public class ClauseTest {
             boolean b2 = rand.nextBoolean();
             boolean s1, s2;
             {
-                Solver solver = new Solver();
-                BoolVar[] bvars = solver.boolVarArray("b", 3);
+                Model model = new Model();
+                BoolVar[] bvars = model.boolVarArray("b", 3);
                 LogOp tree = LogOp.ifOnlyIf(
                         LogOp.and(bvars[1], bvars[2]),
                         bvars[0]);
-                SatFactory.addClauses(tree, solver);
+                SatFactory.addClauses(tree, model);
                 try {
-                    solver.propagate();
+                    model.propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);
                     bvars[n2].instantiateTo(b2 ? 1 : 0, Cause.Null);
                     s1 = true;
@@ -268,11 +268,11 @@ public class ClauseTest {
                 }
             }
             {
-                Solver solver = new Solver();
-                BoolVar[] bvars = solver.boolVarArray("b", 3);
-                solver.times(bvars[1], bvars[2], bvars[0]).post();
+                Model model = new Model();
+                BoolVar[] bvars = model.boolVarArray("b", 3);
+                model.times(bvars[1], bvars[2], bvars[0]).post();
                 try {
-                    solver.propagate();
+                    model.propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Null);
                     bvars[n2].instantiateTo(b2 ? 1 : 0, Null);
                     s2 = true;
@@ -288,7 +288,7 @@ public class ClauseTest {
     @Test(groups="1s", timeOut=60000)
     public void test6() throws ContradictionException {
         int n = 10;
-        Solver s = new Solver();
+        Model s = new Model();
         IEnvironment e = s.getEnvironment();
         BoolVar[] bs = new BoolVar[n];
         bs[0] = s.boolVar("b0");

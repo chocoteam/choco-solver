@@ -31,7 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -88,39 +88,36 @@ public class Knapsack extends AbstractProblem {
         }
     }
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Knapsack");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model("Knapsack");
         setUp();
         int nos = energies.length;
         // occurrence of each item
         objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = solver.intVar("o_" + (i + 1), 0, nbOmax[i], true);
+            objects[i] = model.intVar("o_" + (i + 1), 0, nbOmax[i], true);
         }
         // objective variable
-        power = solver.intVar("power", 0, 9999, true);
+        power = model.intVar("power", 0, 9999, true);
 
-        IntVar scalar = solver.intVar("weight", capacites[0] - 1, capacites[1] + 1, true);
+        IntVar scalar = model.intVar("weight", capacites[0] - 1, capacites[1] + 1, true);
 
-        solver.knapsack(objects, scalar, power, volumes, energies).post();
+        model.knapsack(objects, scalar, power, volumes, energies).post();
     }
 
     @Override
     public void configureSearch() {
         AbstractStrategy strat = IntStrategyFactory.lexico_LB(objects);
         // trick : top-down maximization
-        solver.set(ISF.objective_top_bottom(power), strat);
-        Chatterbox.showDecisions(solver);
+        model.set(ISF.objective_top_bottom(power), strat);
+        Chatterbox.showDecisions(model);
     }
 
     @Override
     public void solve() {
-        solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
+        model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
     }
 
     @Override

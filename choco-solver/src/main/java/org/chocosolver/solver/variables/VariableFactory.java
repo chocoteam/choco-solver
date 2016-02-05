@@ -29,11 +29,11 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
- * @deprecated : variable creation should be done through the {@link Solver} object
+ * @deprecated : variable creation should be done through the {@link Model} object
  * which extends {@link org.chocosolver.solver.variables.IVariableFactory}
  *
  * This class will be removed in versions > 3.4.0
@@ -44,21 +44,21 @@ public class VariableFactory {
     VariableFactory() {}
 
     /**
-     * @deprecated : use {@link Solver#CSTE_NAME} instead
+     * @deprecated : use {@link Model#CSTE_NAME} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static final String CSTE_NAME = "cste -- ";
 
     /**
-     * @deprecated : use {@link Solver#MIN_INT_BOUND} instead
+     * @deprecated : use {@link Model#MIN_INT_BOUND} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static final int MIN_INT_BOUND = Integer.MIN_VALUE / 100;
 
     /**
-     * @deprecated : use {@link Solver#MAX_INT_BOUND} instead
+     * @deprecated : use {@link Model#MAX_INT_BOUND} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -69,139 +69,139 @@ public class VariableFactory {
     //*************************************************************************************
 
     /**
-     * @deprecated : use {@link Solver#boolVar(String)} instead
+     * @deprecated : use {@link Model#boolVar(String)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static BoolVar bool(String NAME, Solver SOLVER) {
-        return SOLVER.boolVar(NAME);
+    public static BoolVar bool(String NAME, Model Model) {
+        return Model.boolVar(NAME);
     }
 
     /**
-     * @deprecated : use {@link Solver#boolVarArray(String, int)} instead
+     * @deprecated : use {@link Model#boolVarArray(String, int)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static BoolVar[] boolArray(String NAME, int SIZE, Solver SOLVER) {
-        return SOLVER.boolVarArray(NAME,SIZE);
+    public static BoolVar[] boolArray(String NAME, int SIZE, Model Model) {
+        return Model.boolVarArray(NAME,SIZE);
     }
 
     /**
-     * @deprecated : use {@link Solver#boolVarMatrix(String, int, int)} instead
+     * @deprecated : use {@link Model#boolVarMatrix(String, int, int)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static BoolVar[][] boolMatrix(String NAME, int DIM1, int DIM2, Solver SOLVER) {
-        return SOLVER.boolVarMatrix(NAME,DIM1,DIM2);
+    public static BoolVar[][] boolMatrix(String NAME, int DIM1, int DIM2, Model Model) {
+        return Model.boolVarMatrix(NAME,DIM1,DIM2);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVar(String, int, int)} instead
+     * @deprecated : use {@link Model#intVar(String, int, int)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar integer(String NAME, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVar(NAME,MIN,MAX);
+    public static IntVar integer(String NAME, int MIN, int MAX, Model Model) {
+        return Model.intVar(NAME,MIN,MAX);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVarArray(String, int, int, int)} instead
+     * @deprecated : use {@link Model#intVarArray(String, int, int, int)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar[] integerArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVarArray(NAME,SIZE,MIN,MAX);
+    public static IntVar[] integerArray(String NAME, int SIZE, int MIN, int MAX, Model Model) {
+        return Model.intVarArray(NAME,SIZE,MIN,MAX);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVarMatrix(String, int, int, int, int)} instead
+     * @deprecated : use {@link Model#intVarMatrix(String, int, int, int, int)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar[][] integerMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVarMatrix(NAME,DIM1,DIM2,MIN,MAX);
+    public static IntVar[][] integerMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Model Model) {
+        return Model.intVarMatrix(NAME,DIM1,DIM2,MIN,MAX);
     }
 
 
     /**
-     * @deprecated : use {@link Solver#intVar(String, int, int, boolean)} instead
+     * @deprecated : use {@link Model#intVar(String, int, int, boolean)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar bounded(String NAME, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVar(NAME, MIN, MAX,true);
+    public static IntVar bounded(String NAME, int MIN, int MAX, Model Model) {
+        return Model.intVar(NAME, MIN, MAX,true);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVarArray(int, int, int, boolean)} instead
+     * @deprecated : use {@link Model#intVarArray(int, int, int, boolean)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar[] boundedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVarArray(NAME,SIZE,MIN,MAX,true);
+    public static IntVar[] boundedArray(String NAME, int SIZE, int MIN, int MAX, Model Model) {
+        return Model.intVarArray(NAME,SIZE,MIN,MAX,true);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVarMatrix(String, int, int, int, int, boolean)} instead
+     * @deprecated : use {@link Model#intVarMatrix(String, int, int, int, int, boolean)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar[][] boundedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVarMatrix(NAME,DIM1,DIM2,MIN,MAX,true);
+    public static IntVar[][] boundedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Model Model) {
+        return Model.intVarMatrix(NAME,DIM1,DIM2,MIN,MAX,true);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVar(String, int, int, boolean)} instead
+     * @deprecated : use {@link Model#intVar(String, int, int, boolean)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar enumerated(String NAME, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVar(NAME,MIN,MAX,false);
+    public static IntVar enumerated(String NAME, int MIN, int MAX, Model Model) {
+        return Model.intVar(NAME,MIN,MAX,false);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVarArray(int, int, int, boolean)} instead
+     * @deprecated : use {@link Model#intVarArray(int, int, int, boolean)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar[] enumeratedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVarArray(NAME,SIZE,MIN,MAX,false);
+    public static IntVar[] enumeratedArray(String NAME, int SIZE, int MIN, int MAX, Model Model) {
+        return Model.intVarArray(NAME,SIZE,MIN,MAX,false);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVarMatrix(String, int, int, int, int, boolean)} instead
+     * @deprecated : use {@link Model#intVarMatrix(String, int, int, int, int, boolean)} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
-        return SOLVER.intVarMatrix(NAME,DIM1,DIM2,MIN,MAX,false);
+    public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Model Model) {
+        return Model.intVarMatrix(NAME,DIM1,DIM2,MIN,MAX,false);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVar(String, int[])}  instead
+     * @deprecated : use {@link Model#intVar(String, int[])}  instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar enumerated(String NAME, int[] VALUES, Solver SOLVER) {
-        return SOLVER.intVar(NAME,VALUES);
+    public static IntVar enumerated(String NAME, int[] VALUES, Model Model) {
+        return Model.intVar(NAME,VALUES);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVarArray(String, int, int[])}  instead
+     * @deprecated : use {@link Model#intVarArray(String, int, int[])}  instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar[] enumeratedArray(String NAME, int SIZE, int[] VALUES, Solver SOLVER) {
-        return SOLVER.intVarArray(NAME,SIZE,VALUES);
+    public static IntVar[] enumeratedArray(String NAME, int SIZE, int[] VALUES, Model Model) {
+        return Model.intVarArray(NAME,SIZE,VALUES);
     }
 
     /**
-     * @deprecated : use {@link Solver#intVarMatrix(String, int, int, int[])}  instead
+     * @deprecated : use {@link Model#intVarMatrix(String, int, int, int[])}  instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int[] VALUES, Solver SOLVER) {
-        return SOLVER.intVarMatrix(NAME,DIM1,DIM2,VALUES);
+    public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int[] VALUES, Model Model) {
+        return Model.intVarMatrix(NAME,DIM1,DIM2,VALUES);
     }
 
     //*************************************************************************************
@@ -209,30 +209,30 @@ public class VariableFactory {
     //*************************************************************************************
 
     /**
-     * @deprecated : use {@link Solver#realVar(String, double, double, double)}   instead
+     * @deprecated : use {@link Model#realVar(String, double, double, double)}   instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static RealVar real(String NAME, double MIN, double MAX, double PRECISION, Solver SOLVER) {
-        return SOLVER.realVar(NAME,MIN,MAX,PRECISION);
+    public static RealVar real(String NAME, double MIN, double MAX, double PRECISION, Model Model) {
+        return Model.realVar(NAME,MIN,MAX,PRECISION);
     }
 
     /**
-     * @deprecated : use {@link Solver#realVarArray(String, int, double, double, double)}   instead
+     * @deprecated : use {@link Model#realVarArray(String, int, double, double, double)}   instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static RealVar[] realArray(String NAME, int SIZE, double MIN, double MAX, double PRECISION, Solver SOLVER) {
-        return SOLVER.realVarArray(NAME,SIZE,MIN,MAX,PRECISION);
+    public static RealVar[] realArray(String NAME, int SIZE, double MIN, double MAX, double PRECISION, Model Model) {
+        return Model.realVarArray(NAME,SIZE,MIN,MAX,PRECISION);
     }
 
     /**
-     * @deprecated : use {@link Solver#realVarMatrix(String, int, int, double, double, double)}    instead
+     * @deprecated : use {@link Model#realVarMatrix(String, int, int, double, double, double)}    instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static RealVar[][] realMatrix(String NAME, int DIM1, int DIM2, double MIN, double MAX, double PRECISION, Solver SOLVER) {
-        return SOLVER.realVarMatrix(NAME,DIM1,DIM2,MIN,MAX,PRECISION);
+    public static RealVar[][] realMatrix(String NAME, int DIM1, int DIM2, double MIN, double MAX, double PRECISION, Model Model) {
+        return Model.realVarMatrix(NAME,DIM1,DIM2,MIN,MAX,PRECISION);
     }
 
     //*************************************************************************************
@@ -240,43 +240,43 @@ public class VariableFactory {
     //*************************************************************************************
 
     /**
-     * @deprecated : use {@link Solver#setVar(String, int[], int[])}    instead
+     * @deprecated : use {@link Model#setVar(String, int[], int[])}    instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static SetVar set(String NAME, int[] ENVELOPE, SetType ENV_TYPE, int[] KERNEL, SetType KER_TYPE, Solver SOLVER) {
-        return SOLVER.setVar(NAME,KERNEL,ENVELOPE);
+    public static SetVar set(String NAME, int[] ENVELOPE, SetType ENV_TYPE, int[] KERNEL, SetType KER_TYPE, Model Model) {
+        return Model.setVar(NAME,KERNEL,ENVELOPE);
     }
 
     /**
-     * @deprecated : use {@link Solver#setVar(String, int[], int[])}     instead
+     * @deprecated : use {@link Model#setVar(String, int[], int[])}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static SetVar set(String NAME, int[] ENVELOPE, int[] KERNEL, Solver SOLVER) {
-        return SOLVER.setVar(NAME,KERNEL,ENVELOPE);
+    public static SetVar set(String NAME, int[] ENVELOPE, int[] KERNEL, Model Model) {
+        return Model.setVar(NAME,KERNEL,ENVELOPE);
     }
 
     /**
-     * @deprecated : use {@link Solver#setVar(String, int[], int[])}     instead
+     * @deprecated : use {@link Model#setVar(String, int[], int[])}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static SetVar set(String NAME, int[] ENVELOPE, Solver SOLVER) {
-        return SOLVER.setVar(NAME,new int[]{},ENVELOPE);
+    public static SetVar set(String NAME, int[] ENVELOPE, Model Model) {
+        return Model.setVar(NAME,new int[]{},ENVELOPE);
     }
 
     /**
-     * @deprecated : use {@link Solver#setVar(String, int[], int[])}     instead
+     * @deprecated : use {@link Model#setVar(String, int[], int[])}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Solver SOLVER) {
+    public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Model Model) {
         int[] ENVELOPE = new int[MAX_ELEMENT-MIN_ELEMENT+1];
         for (int i=0;i<ENVELOPE.length;i++){
             ENVELOPE[i] = MIN_ELEMENT+i;
         }
-        return SOLVER.setVar(NAME,new int[]{},ENVELOPE);
+        return Model.setVar(NAME,new int[]{},ENVELOPE);
     }
 
     //*************************************************************************************
@@ -323,30 +323,30 @@ public class VariableFactory {
     }
 
     /**
-     * @deprecated : use {@link Solver#intVar(int)}     instead
+     * @deprecated : use {@link Model#intVar(int)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar fixed(int VALUE, Solver SOLVER) {
-        return SOLVER.intVar(VALUE);
+    public static IntVar fixed(int VALUE, Model Model) {
+        return Model.intVar(VALUE);
     }
 
     /**
-     * @deprecated : use {@link Solver#ZERO()}     instead
+     * @deprecated : use {@link Model#ZERO()}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static BoolVar zero(Solver SOLVER) {
-        return SOLVER.ZERO();
+    public static BoolVar zero(Model Model) {
+        return Model.ZERO();
     }
 
     /**
-     * @deprecated : use {@link Solver#ONE()}     instead
+     * @deprecated : use {@link Model#ONE()}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static BoolVar one(Solver SOLVER) {
-        return SOLVER.ONE();
+    public static BoolVar one(Model Model) {
+        return Model.ONE();
     }
 
     //*************************************************************************************
@@ -354,34 +354,34 @@ public class VariableFactory {
     //*************************************************************************************
 
     /**
-     * @deprecated : use {@link Solver#intVar(String, int)}     instead
+     * @deprecated : use {@link Model#intVar(String, int)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
-        return SOLVER.intVar(NAME, VALUE);
+    public static IntVar fixed(String NAME, int VALUE, Model Model) {
+        return Model.intVar(NAME, VALUE);
     }
 
     /**
-     * @deprecated : use {@link Solver#boolVar(boolean)}     instead
+     * @deprecated : use {@link Model#boolVar(boolean)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static BoolVar fixed(boolean VALUE, Solver SOLVER) {
+    public static BoolVar fixed(boolean VALUE, Model Model) {
         if (VALUE) {
-            return SOLVER.ONE();
+            return Model.ONE();
         } else {
-            return SOLVER.ZERO();
+            return Model.ZERO();
         }
     }
 
     /**
-     * @deprecated : use {@link Solver#setVar(String, int[])}     instead
+     * @deprecated : use {@link Model#setVar(String, int[])}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
-    public static SetVar fixed(String NAME, int[] VALUE, Solver SOLVER) {
-        return SOLVER.setVar(NAME,VALUE);
+    public static SetVar fixed(String NAME, int[] VALUE, Model Model) {
+        return Model.setVar(NAME,VALUE);
     }
 
     //*************************************************************************************
@@ -389,25 +389,25 @@ public class VariableFactory {
     //*************************************************************************************
 
     /**
-     * @deprecated : use {@link Solver#intOffsetView(IntVar, int)}     instead
+     * @deprecated : use {@link Model#intOffsetView(IntVar, int)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static IntVar offset(IntVar VAR, int CSTE) {
-        return VAR.getSolver().intOffsetView(VAR,CSTE);
+        return VAR.getModel().intOffsetView(VAR,CSTE);
     }
 
     /**
-     * @deprecated : use {@link Solver#intEqView(IntVar)}     instead
+     * @deprecated : use {@link Model#intEqView(IntVar)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static IntVar eq(IntVar VAR) {
-        return VAR.getSolver().intEqView(VAR);
+        return VAR.getModel().intEqView(VAR);
     }
 
     /**
-     * @deprecated : use {@link Solver#boolEqView(BoolVar)}     instead
+     * @deprecated : use {@link Model#boolEqView(BoolVar)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -416,60 +416,60 @@ public class VariableFactory {
     }
 
     private static BoolVar eqbool(BoolVar BOOL) {
-        return BOOL.getSolver().boolEqView(BOOL);
+        return BOOL.getModel().boolEqView(BOOL);
     }
 
     /**
-     * @deprecated : use {@link Solver#boolNotView(BoolVar)}     instead
+     * @deprecated : use {@link Model#boolNotView(BoolVar)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static BoolVar not(BoolVar BOOL) {
-        return BOOL.getSolver().boolNotView(BOOL);
+        return BOOL.getModel().boolNotView(BOOL);
     }
 
     /**
-     * @deprecated : use {@link Solver#intMinusView(IntVar)}     instead
+     * @deprecated : use {@link Model#intMinusView(IntVar)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static IntVar minus(IntVar VAR) {
-        return VAR.getSolver().intMinusView(VAR);
+        return VAR.getModel().intMinusView(VAR);
     }
 
     /**
-     * @deprecated : use {@link Solver#intScaleView(IntVar, int)}     instead
+     * @deprecated : use {@link Model#intScaleView(IntVar, int)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static IntVar scale(IntVar VAR, int CSTE) {
-        return VAR.getSolver().intScaleView(VAR,CSTE);
+        return VAR.getModel().intScaleView(VAR,CSTE);
     }
 
     /**
-     * @deprecated : use {@link Solver#intAbsView(IntVar)}     instead
+     * @deprecated : use {@link Model#intAbsView(IntVar)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static IntVar abs(IntVar VAR) {
-        return VAR.getSolver().intAbsView(VAR);
+        return VAR.getModel().intAbsView(VAR);
     }
 
     /**
-     * @deprecated : use {@link Solver#realIntView(IntVar, double)}     instead
+     * @deprecated : use {@link Model#realIntView(IntVar, double)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static RealVar real(IntVar VAR, double PRECISION) {
-        return VAR.getSolver().realIntView(VAR,PRECISION);
+        return VAR.getModel().realIntView(VAR,PRECISION);
     }
 
     /**
-     * @deprecated : use {@link Solver#realIntViewArray(IntVar[], double)}     instead
+     * @deprecated : use {@link Model#realIntViewArray(IntVar[], double)}     instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static RealVar[] real(IntVar[] VARS, double PRECISION) {
-        return VARS[0].getSolver().realIntViewArray(VARS,PRECISION);
+        return VARS[0].getModel().realIntViewArray(VARS,PRECISION);
     }
 }

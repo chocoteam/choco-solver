@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 
@@ -46,7 +46,7 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 	//***********************************************************************************
 
 	AbstractStrategy find, prove;
-	Solver solver;
+	Model model;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -64,7 +64,7 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 		super(vars);
 		this.find = heurToFindASol;
 		this.prove= heurToProveOpt;
-		this.solver = vars[0].getSolver();
+		this.model = vars[0].getModel();
 	}
 
 	//***********************************************************************************
@@ -78,7 +78,7 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 
 	@Override
 	public Decision getDecision() {
-		if (solver.getMeasures().getSolutionCount() == 0) {
+		if (model.getMeasures().getSolutionCount() == 0) {
 			return find.getDecision();
 		}
 		return prove.getDecision();
@@ -86,7 +86,7 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 
 	@Override
 	public Decision<V> computeDecision(V variable) {
-		if (solver.getMeasures().getSolutionCount() == 0) {
+		if (model.getMeasures().getSolutionCount() == 0) {
 			return find.computeDecision(variable);
 		}
 		return prove.computeDecision(variable);

@@ -34,7 +34,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -98,11 +98,11 @@ public class Solution implements Serializable, ICause {
      * Records the current solution of the solver
      * clears all previous recordings
      *
-     * @param solver a solver
+     * @param model a solver
      */
-    public void record(Solver solver) {
+    public void record(Model model) {
         if (empty) {
-            Variable[] _dvars = solver.getStrategy().getVariables();
+            Variable[] _dvars = model.getStrategy().getVariables();
             for (int i = 0; i < _dvars.length; i++) {
                 dvars.add(_dvars[i].getId());
             }
@@ -114,8 +114,8 @@ public class Solution implements Serializable, ICause {
         setmap.clear();
         // solver.getVars() is not called anymore, to reduce memory footprint
         // indeed, it makes a copy of the array.
-        for (int i = 0; i < solver.getNbVars(); i++) {
-            Variable var = solver.getVar(i);
+        for (int i = 0; i < model.getNbVars(); i++) {
+            Variable var = model.getVar(i);
             if ((var.getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
                 int kind = var.getTypeAndKind() & Variable.KIND;
                 if (!var.isInstantiated()) {
@@ -143,7 +143,7 @@ public class Solution implements Serializable, ICause {
                 }
             }
         }
-        if (warn && solver.getSettings().warnUser()) {
+        if (warn && model.getSettings().warnUser()) {
             Chatterbox.err.printf("Some non decision variables are not instantiated in the current solution.");
         }
     }
@@ -154,14 +154,14 @@ public class Solution implements Serializable, ICause {
      * the solution value)
      * <p>
      * BEWARE: A restart might be required so that domains contain the solution values
-     * @param solver solver to restore solution in
+     * @param model solver to restore solution in
      * @throws ContradictionException if solution is not correct with current domain states
      */
-    public void restore(Solver solver) throws ContradictionException {
+    public void restore(Model model) throws ContradictionException {
         if (empty) {
             throw new UnsupportedOperationException("Empty solution. No solution found");
         }
-        Variable[] vars = solver.getVars();
+        Variable[] vars = model.getVars();
         for (int i = 0; i < vars.length; i++) {
             if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
                 int kind = vars[i].getTypeAndKind() & Variable.KIND;
@@ -194,11 +194,11 @@ public class Solution implements Serializable, ICause {
     }
 
     /**
-     * @param solver a solver
+     * @param model a solver
      * @return a string which represent this solution input in the <i>solver</i>
      */
-    public String toString(Solver solver) {
-        Variable[] vars = solver.getVars();
+    public String toString(Model model) {
+        Variable[] vars = model.getVars();
         StringBuilder st = new StringBuilder("Solution: ");
         for (int i = 0; i < vars.length; i++) {
             if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {

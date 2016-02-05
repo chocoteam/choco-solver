@@ -29,12 +29,10 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ESat;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
@@ -54,23 +52,23 @@ public class DivTest extends AbstractTernaryTest {
     }
 
     @Override
-    protected Constraint make(IntVar[] vars, Solver solver) {
-        return solver.div(vars[0], vars[1], vars[2]);
+    protected Constraint make(IntVar[] vars, Model model) {
+        return model.div(vars[0], vars[1], vars[2]);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL() {
-        Solver solver = new Solver();
-        IntVar i = solver.intVar("i", 0, 2, false);
-        solver.div(i, solver.ONE(), solver.ZERO()).getOpposite().post();
+        Model model = new Model();
+        IntVar i = model.intVar("i", 0, 2, false);
+        model.div(i, model.ONE(), model.ZERO()).getOpposite().post();
 //        SMF.log(solver, true, false);
-        solver.findAllSolutions();
+        model.findAllSolutions();
     }
 
     @Test(groups="10s", timeOut=60000)
     public void testJL2() {
         for (int i = 0; i < 100000; i++) {
-            final Solver s = new Solver();
+            final Model s = new Model();
             IntVar a = s.intVar("a", new int[]{0, 2, 3, 4});
             IntVar b = s.intVar("b", new int[]{-1, 1, 3, 4});
             IntVar c = s.intVar("c", new int[]{-3, 1, 4});

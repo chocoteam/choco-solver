@@ -268,7 +268,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return solver.boolNotView(this.var);
+        return model.boolNotView(this.var);
     }
 
     @Override

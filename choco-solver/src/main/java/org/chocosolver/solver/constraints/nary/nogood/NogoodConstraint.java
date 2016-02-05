@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.nogood;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.util.ESat;
@@ -42,8 +42,8 @@ public class NogoodConstraint extends Constraint {
 
     final PropNogoods nogoods;
 
-    public NogoodConstraint(Solver solver) {
-        super("NogoodConstraint", new PropNogoods(solver));
+    public NogoodConstraint(Model model) {
+        super("NogoodConstraint", new PropNogoods(model));
         nogoods = (PropNogoods) propagators[0];
     }
 

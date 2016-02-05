@@ -29,15 +29,11 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.solution.Solution;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -59,12 +55,12 @@ public class RegularTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testSimpleAuto() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 10;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
 
 
@@ -81,21 +77,21 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.regular(vars, auto).post();
-        solver.set(lexico_LB(vars));
+        model.regular(vars, auto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 59049);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 59049);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void ccostregular2() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
 
         // different rules are formulated as patterns that must NOT be matched by x
@@ -123,21 +119,21 @@ public class RegularTest {
         auto.minimize();
         assertEquals(auto.getNbStates(), 54);
 
-        solver.regular(vars, auto).post();
-        solver.set(lexico_LB(vars));
+        model.regular(vars, auto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 25980);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 25980);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void isCorrect() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -153,23 +149,23 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.regular(vars, auto).post();
-        solver.set(lexico_LB(vars));
+        model.regular(vars, auto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 531441);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 531441);
 //        assertEquals(124927,s.getNodeCount());
 
     }
 
     @Test(groups="10s", timeOut=60000)
     public void isCorrect2() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 13;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
         FiniteAutomaton auto = new FiniteAutomaton();
         int start = auto.addState();
@@ -184,11 +180,11 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.regular(vars, auto).post();
-        solver.set(lexico_LB(vars));
+        model.regular(vars, auto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 1594323);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 1594323);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -196,16 +192,16 @@ public class RegularTest {
         int n = 14;
         FiniteAutomaton auto = new FiniteAutomaton("(0|1|2)*(0|1)(0|1)(0|1)(0|1|2)*");
 
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        solver.regular(vars, auto).post();
-        solver.set(lexico_LB(vars));
+        model.regular(vars, auto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 4371696);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 4371696);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -213,28 +209,28 @@ public class RegularTest {
         int n = 5;
         FiniteAutomaton auto = new FiniteAutomaton("(0|<10>|<20>)*(0|<10>)");
 
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, new int[]{0, 10, 20});
+            vars[i] = model.intVar("x_" + i, new int[]{0, 10, 20});
         }
-        solver.regular(vars, auto).post();
-        solver.set(lexico_LB(vars));
+        model.regular(vars, auto).post();
+        model.set(lexico_LB(vars));
 
-        showSolutions(solver);
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 162);
+        showSolutions(model);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 162);
     }
 
     @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
     public void testNeg() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 4, -10, 10, false);
-        solver.regular(CS, new FiniteAutomaton("<-9>1*")).post();
-        showSolutions(solver);
-        solver.findAllSolutions();
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 4, -10, 10, false);
+        model.regular(CS, new FiniteAutomaton("<-9>1*")).post();
+        showSolutions(model);
+        model.findAllSolutions();
 
-        final List<Solution> solutions = solver.getSolutionRecorder().getSolutions();
+        final List<Solution> solutions = model.getSolutionRecorder().getSolutions();
 
         out.println(solutions);
 
@@ -247,91 +243,91 @@ public class RegularTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp1() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.regular(CS, new FiniteAutomaton("[12]*")).post();
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
+        model.regular(CS, new FiniteAutomaton("[12]*")).post();
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp2() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)).post();
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
+        model.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)).post();
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp3() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)).post();
-        showSolutions(solver);
-        showDecisions(solver);
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 7);
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
+        model.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)).post();
+        showSolutions(model);
+        showDecisions(model);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 7);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp4() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.regular(CS, new FiniteAutomaton(".*", 0, 3)).post();
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 16);
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
+        model.regular(CS, new FiniteAutomaton(".*", 0, 3)).post();
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 16);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp5() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.regular(CS, new FiniteAutomaton("1{2}")).post();
-        showSolutions(solver);
-        showDecisions(solver);
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
+        model.regular(CS, new FiniteAutomaton("1{2}")).post();
+        showSolutions(model);
+        showDecisions(model);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp6() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 4, 0, 3, false);
-        solver.regular(CS, new FiniteAutomaton("0{2,3}1*")).post();
-        showSolutions(solver);
-        showDecisions(solver);
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 4, 0, 3, false);
+        model.regular(CS, new FiniteAutomaton("0{2,3}1*")).post();
+        showSolutions(model);
+        showDecisions(model);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp7() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 10, 0, 2, false);
-        solver.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")).post();
-        showSolutions(solver, () -> {
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 10, 0, 2, false);
+        model.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")).post();
+        showSolutions(model, () -> {
             for (int i = 0; i < 10; i++) {
                 out.printf("%d", CS[i].getValue());
             }
 //            System.out.printf("\n");
             return "";
         });
-        solver.set(lexico_LB(CS));
+        model.set(lexico_LB(CS));
 //        Chatterbox.showDecisions(solver);
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 84);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 84);
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp8() {
-        Solver solver = new Solver();
-        IntVar[] CS = solver.intVarArray("CS", 3, new int[]{43, 59, 117});
-        solver.regular(CS, new FiniteAutomaton("<43><59><117>")).post();
-        solver.set(lexico_LB(CS));
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 3, new int[]{43, 59, 117});
+        model.regular(CS, new FiniteAutomaton("<43><59><117>")).post();
+        model.set(lexico_LB(CS));
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 1);
 
     }
 

@@ -32,9 +32,8 @@ package org.chocosolver.samples.integer;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ternary.Max;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.monitors.SMF;
@@ -114,14 +113,9 @@ public class AirPlaneLanding extends AbstractProblem {
 
     IntVar objective;
 
-
-    @Override
-    public void createSolver() {
-        solver = new Solver("Air plane landing");
-    }
-
     @Override
     public void buildModel() {
+        model = new Model("Air plane landing");
         data = parse(mData.source());
         n = data.length;
         planes = new IntVar[n];
@@ -129,9 +123,9 @@ public class AirPlaneLanding extends AbstractProblem {
         earliness = new IntVar[n];
         LLTs = new int[n];
         int obj_ub = 0;
-        IntVar ZERO = solver.intVar(0);
+        IntVar ZERO = model.intVar(0);
         for (int i = 0; i < n; i++) {
-            planes[i] = solver.intVar("p_" + i, data[i][ELT], data[i][LLT], true);
+            planes[i] = model.intVar("p_" + i, data[i][ELT], data[i][LLT], true);
 
 //            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
 //            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
@@ -140,26 +134,26 @@ public class AirPlaneLanding extends AbstractProblem {
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-            earliness[i] = var(ZERO, solver.intOffsetView(solver.intMinusView(planes[i]), data[i][TT]));
-            tardiness[i] = var(ZERO, solver.intOffsetView(planes[i], -data[i][TT]));
+            earliness[i] = var(ZERO, model.intOffsetView(model.intMinusView(planes[i]), data[i][TT]));
+            tardiness[i] = var(ZERO, model.intOffsetView(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<>();
         //disjunctive
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
-                BoolVar boolVar = solver.boolVar("b_" + i + "_" + j);
+                BoolVar boolVar = model.boolVar("b_" + i + "_" + j);
                 booleans.add(boolVar);
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
-                solver.ifThenElse(boolVar, c1, c2);
+                model.ifThenElse(boolVar, c1, c2);
             }
         }
 
         bVars = booleans.toArray(new BoolVar[booleans.size()]);
 
-        objective = solver.intVar("obj", 0, obj_ub, true);
+        objective = model.intVar("obj", 0, obj_ub, true);
 
         // build cost array
         costLAT = new int[2 * n];
@@ -171,25 +165,25 @@ public class AirPlaneLanding extends AbstractProblem {
         }
 
 //        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
-        IntVar obj_e = solver.intVar("obj_e", 0, obj_ub, true);
-        solver.scalar(earliness, copyOfRange(costLAT, 0, n), "=", obj_e).post();
+        IntVar obj_e = model.intVar("obj_e", 0, obj_ub, true);
+        model.scalar(earliness, copyOfRange(costLAT, 0, n), "=", obj_e).post();
 
-        IntVar obj_t = solver.intVar("obj_t", 0, obj_ub, true);
-        solver.scalar(tardiness, copyOfRange(costLAT, n, 2 * n), "=", obj_t).post();
-        solver.sum(new IntVar[]{obj_e, obj_t}, "=", objective).post();
+        IntVar obj_t = model.intVar("obj_t", 0, obj_ub, true);
+        model.scalar(tardiness, copyOfRange(costLAT, n, 2 * n), "=", obj_t).post();
+        model.sum(new IntVar[]{obj_e, obj_t}, "=", objective).post();
 
-        solver.allDifferent(planes, "BC").post();
-        solver.setObjectives(objective);
+        model.allDifferent(planes, "BC").post();
+        model.setObjectives(objective);
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return x.getSolver().arithm(x, "<=", y, "-", duration);
+        return x.getModel().arithm(x, "<=", y, "-", duration);
     }
 
     @Override
     public void configureSearch() {
         Arrays.sort(planes, (o1, o2) -> maxCost.get(o2) - maxCost.get(o1));
-        solver.set(
+        model.set(
                 IntStrategyFactory.random_bound(bVars, seed),
                 IntStrategyFactory.lexico_LB(planes)
         );
@@ -197,17 +191,17 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void solve() {
-        IntVar[] ivars = solver.retrieveIntVars(true);
-        LNSFactory.pglns(solver, ivars, 30, 10, 200, 0, new FailCounter(solver, 100));
-        SMF.limitTime(solver, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        IntVar[] ivars = model.retrieveIntVars(true);
+        LNSFactory.pglns(model, ivars, 30, 10, 200, 0, new FailCounter(model, 100));
+        SMF.limitTime(model, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 
     @Override
     public void prettyOut() {
         System.out.println(String.format("Air plane landing(%s)", mData));
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() != ESat.TRUE) {
+        if (model.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
         } else {
             for (int i = 0; i < n; i++) {

@@ -31,20 +31,16 @@ package org.chocosolver.solver.constraints.checker;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
 import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
-import org.chocosolver.util.tools.ArrayUtils;
-
-import java.util.Arrays;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.copyOfRange;
@@ -60,14 +56,14 @@ import static org.chocosolver.util.tools.ArrayUtils.append;
  */
 public interface Modeler {
 
-    Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters);
+    Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters);
 
     String name();
 
     Modeler modelEqAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("EqAC_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("EqAC_" + n);
             IntVar[] vars = new IntVar[n];
             try {
                 for (int i = 0; i < vars.length; i++) {
@@ -90,8 +86,8 @@ public interface Modeler {
 
     Modeler modelInverseChannelingAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("InverseChannelingAC_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("InverseChannelingAC_" + n);
             IntVar[] X = new IntVar[n / 2];
             IntVar[] Y = new IntVar[n / 2];
             for (int i = 0; i < n / 2; i++) {
@@ -114,8 +110,8 @@ public interface Modeler {
 
     Modeler modelInverseChannelingBounds = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("InverseChannelingBC_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("InverseChannelingBC_" + n);
             for (int i = 0; i < domains.length; i++) {
                 int m = domains[i][0];
                 int M = domains[i][domains[i].length - 1];
@@ -147,8 +143,8 @@ public interface Modeler {
 
     Modeler modelNeqAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("NeqAC_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("NeqAC_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -167,8 +163,8 @@ public interface Modeler {
 
     Modeler modelAllDiffAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("AllDiffAC_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("AllDiffAC_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -187,8 +183,8 @@ public interface Modeler {
 
     Modeler modelAllDiffBC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("AllDiffBC_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("AllDiffBC_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -207,8 +203,8 @@ public interface Modeler {
 
     Modeler modelGCC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("GCC_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("GCC_" + n);
             boolean closed = (Boolean) parameters;
             IntVar[] vars = new IntVar[n / 2];
             for (int i = 0; i < vars.length; i++) {
@@ -235,8 +231,8 @@ public interface Modeler {
 
     Modeler modelTimes = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Times_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Times_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -255,8 +251,8 @@ public interface Modeler {
 
     Modeler modelAbsolute = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Absolute_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Absolute_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -275,8 +271,8 @@ public interface Modeler {
 
     Modeler modelCountBC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Count");
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Count");
             IntVar[] vars = new IntVar[n - 1];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -309,8 +305,8 @@ public interface Modeler {
 
     Modeler modelCountAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Count");
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Count");
             IntVar[] vars = new IntVar[n - 1];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -343,8 +339,8 @@ public interface Modeler {
 
     Modeler modelLexAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Lex");
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Lex");
             IntVar[] X = new IntVar[n / 2];
             for (int i = 0; i < n / 2; i++) {
                 X[i] = s.intVar("X_" + i, domains[i]);
@@ -369,8 +365,8 @@ public interface Modeler {
 
     Modeler modelLexChainAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("LexChain");
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("LexChain");
             IntVar[] X = new IntVar[n / 3];
             for (int i = 0; i < n / 3; i++) {
                 X[i] = s.intVar("X_" + i, domains[i]);
@@ -400,8 +396,8 @@ public interface Modeler {
 
     Modeler modelNthBC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Element_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Element_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -420,8 +416,8 @@ public interface Modeler {
 
     Modeler modelAmongBC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Among");
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Among");
             IntVar[] vars = new IntVar[n - 1];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -443,8 +439,8 @@ public interface Modeler {
 
     Modeler modelAmongAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Among");
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Among");
             IntVar[] vars = new IntVar[n - 1];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -466,8 +462,8 @@ public interface Modeler {
 
     Modeler modelNValues = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("modelNValues_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("modelNValues_" + n);
             IntVar[] vars = new IntVar[n];
             IntVar[] decvars = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {
@@ -506,8 +502,8 @@ public interface Modeler {
 
     Modeler modelGCC_alldiff = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("modelGCC_Fast_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("modelGCC_Fast_" + n);
             IntVar[] vars = new IntVar[n];
             TIntArrayList vals = new TIntArrayList();
             for (int i = 0; i < n; i++) {
@@ -534,8 +530,8 @@ public interface Modeler {
 
     Modeler modelTree = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("tree_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("tree_" + n);
             IntVar[] vars = new IntVar[n];
             IntVar[] succs = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {
@@ -559,8 +555,8 @@ public interface Modeler {
 
     Modeler modelCircuit = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("circuit_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("circuit_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < n; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -579,8 +575,8 @@ public interface Modeler {
 
     Modeler modelPath = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("path_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("path_" + n);
             IntVar[] vars = new IntVar[n - 2];
             for (int i = 0; i < n - 2; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -603,8 +599,8 @@ public interface Modeler {
 
     Modeler modelSubcircuit = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("subcircuit_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("subcircuit_" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < n; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -623,8 +619,8 @@ public interface Modeler {
 
     Modeler modelDiffn = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("diffn_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("diffn_" + n);
             IntVar[] vars = new IntVar[n];
             if (n % 4 != 0) {
                 throw new UnsupportedOperationException();
@@ -657,8 +653,8 @@ public interface Modeler {
 
     Modeler modelCumulative = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver solver = new Solver("Cumulative_" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model model = new Model("Cumulative_" + n);
             IntVar[] vars = new IntVar[n];
             if (n % 4 != 1) {
                 throw new UnsupportedOperationException();
@@ -667,7 +663,7 @@ public interface Modeler {
             IntVar[] h = new IntVar[k];
             Task[] tasks = new Task[k];
             for (int i = 0; i < n; i++) {
-                vars[i] = solver.intVar("v_" + i, domains[i]);
+                vars[i] = model.intVar("v_" + i, domains[i]);
                 if (map != null) map.put(domains[i], vars[i]);
             }
             for (int i = 0; i < k; i++) {
@@ -675,9 +671,9 @@ public interface Modeler {
                 h[i] = vars[i + 3 * k];
             }
             IntVar capa = vars[vars.length - 1];
-            solver.cumulative(tasks, h, capa, true).post();
-            solver.set(random_bound(vars));
-            return solver;
+            model.cumulative(tasks, h, capa, true).post();
+            model.set(random_bound(vars));
+            return model;
         }
 
         @Override
@@ -688,8 +684,8 @@ public interface Modeler {
 
     Modeler modelSortBC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Sort");
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Sort");
 
             IntVar[] X = new IntVar[n / 2];
             for (int i = 0; i < n / 2; i++) {
@@ -716,8 +712,8 @@ public interface Modeler {
 
     Modeler modelmddcAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("mddc_(sum)" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("mddc_(sum)" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -737,8 +733,8 @@ public interface Modeler {
 
     Modeler modelivpcAC = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("ivpc" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("ivpc" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, domains[i]);
@@ -758,8 +754,8 @@ public interface Modeler {
 
     Modeler modelmaxbc = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("max" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("max" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("X_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -779,8 +775,8 @@ public interface Modeler {
 
     Modeler modelminbc = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("min" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("min" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("X_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -800,8 +796,8 @@ public interface Modeler {
 
     Modeler modelmaxbbc = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("maxb" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("maxb" + n);
             BoolVar[] vars = new BoolVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = domains[i].length > 1 ? s.boolVar("X_" + i) :
@@ -822,8 +818,8 @@ public interface Modeler {
 
     Modeler modelminbbc = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("minb" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("minb" + n);
             BoolVar[] vars = new BoolVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = domains[i].length > 1 ? s.boolVar("X_" + i) :
@@ -844,8 +840,8 @@ public interface Modeler {
 
     Modeler modelplusbc = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("plus" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("plus" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("X_" + i, domains[i][0], domains[i][domains[i].length - 1]);
@@ -865,8 +861,8 @@ public interface Modeler {
 
     Modeler modelplusac = new Modeler() {
         @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("plus" + n);
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("plus" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("X_" + i, domains[i]);

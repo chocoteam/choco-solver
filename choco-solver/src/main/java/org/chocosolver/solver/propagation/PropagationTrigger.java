@@ -30,7 +30,7 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -55,7 +55,7 @@ public class PropagationTrigger implements Serializable {
 
     final IPropagationEngine engine; // wrapped engine
     final IEnvironment environment;
-    final Solver solver;
+    final Model model;
     private final boolean DEBUG, COLOR;
 
     // stores the static propagators
@@ -67,20 +67,20 @@ public class PropagationTrigger implements Serializable {
 
     int size;
 
-    public PropagationTrigger(IPropagationEngine engine, Solver solver) {
+    public PropagationTrigger(IPropagationEngine engine, Model model) {
         this.engine = engine;
-        this.environment = solver.getEnvironment();
-        this.solver = solver;
+        this.environment = model.getEnvironment();
+        this.model = model;
         size = 0;
-        this.DEBUG = solver.getSettings().debugPropagation();
-        this.COLOR = solver.getSettings().outputWithANSIColors();
+        this.DEBUG = model.getSettings().debugPropagation();
+        this.COLOR = model.getSettings().outputWithANSIColors();
     }
 
     public void addAll(Propagator... propagators) {
         assert perm_propagators.size() == perm_world.size();
         sta_propagators.addAll(Arrays.asList(propagators));
         size += propagators.length;
-        if(solver.getSettings().sortPropagatorActivationWRTPriority()) {
+        if(model.getSettings().sortPropagatorActivationWRTPriority()) {
             sta_propagators.sort((p1, p2) -> p1.getPriority().priority - p2.getPriority().priority);
         }
     }

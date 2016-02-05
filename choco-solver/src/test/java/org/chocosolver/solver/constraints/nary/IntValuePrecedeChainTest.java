@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -45,15 +45,15 @@ import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random;
 public class IntValuePrecedeChainTest {
 
     public static void int_value_precede_chain_dec(IntVar[] X, int S, int T) {
-        Solver solver = X[0].getSolver();
-        solver.arithm(X[0], "!=", T).post();
+        Model model = X[0].getModel();
+        model.arithm(X[0], "!=", T).post();
         for (int j = 1; j < X.length; j++) {
-            BoolVar bj = solver.arithm(X[j], "=", T).reify();
+            BoolVar bj = model.arithm(X[j], "=", T).reify();
             BoolVar[] bis = new BoolVar[j];
             for (int i = 0; i < j; i++) {
-                bis[i] = solver.arithm(X[i], "=", S).reify();
+                bis[i] = model.arithm(X[i], "=", S).reify();
             }
-            solver.ifThen(bj, solver.or(bis));
+            model.ifThen(bj, model.or(bis));
         }
     }
 
@@ -63,20 +63,20 @@ public class IntValuePrecedeChainTest {
         for (int i = 0; i < 200; i++) {
             long s1, s2;
             {
-                Solver solver = new Solver();
-                IntVar[] vars = solver.intVarArray("X", 5, 0, 5, false);
-                solver.intValuePrecedeChain(vars, 1, 2).post();
-                solver.set(random(vars, i));
-                solver.findAllSolutions();
-                s1 = solver.getMeasures().getSolutionCount();
+                Model model = new Model();
+                IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
+                model.intValuePrecedeChain(vars, 1, 2).post();
+                model.set(random(vars, i));
+                model.findAllSolutions();
+                s1 = model.getMeasures().getSolutionCount();
             }
             {
-                Solver solver = new Solver();
-                IntVar[] vars = solver.intVarArray("X", 5, 0, 5, false);
+                Model model = new Model();
+                IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 int_value_precede_chain_dec(vars, 1, 2);
-                solver.set(ISF.random(vars, i));
-                solver.findAllSolutions();
-                s2 = solver.getMeasures().getSolutionCount();
+                model.set(ISF.random(vars, i));
+                model.findAllSolutions();
+                s2 = model.getMeasures().getSolutionCount();
             }
             Assert.assertEquals(s1, s2);
 

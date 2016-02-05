@@ -30,14 +30,13 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
 
 import static java.util.Arrays.fill;
 
@@ -58,13 +57,10 @@ public class MagicSquare extends AbstractProblem {
 
     IntVar[] vars;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Magic square");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         int ms = n * (n * n + 1) / 2;
 
         IntVar[][] matrix = new IntVar[n][n];
@@ -74,7 +70,7 @@ public class MagicSquare extends AbstractProblem {
         int k = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++, k++) {
-                matrix[i][j] = solver.intVar("square" + i + "," + j, 1, n * n, false);
+                matrix[i][j] = model.intVar("square" + i + "," + j, 1, n * n, false);
                 vars[k] = matrix[i][j];
                 invMatrix[j][i] = matrix[i][j];
             }
@@ -87,32 +83,32 @@ public class MagicSquare extends AbstractProblem {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.allDifferent(vars, "BC").post();
+        model.allDifferent(vars, "BC").post();
 
         int[] coeffs = new int[n];
         fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
-            solver.scalar(matrix[i], coeffs, "=", ms).post();
-            solver.scalar(invMatrix[i], coeffs, "=", ms).post();
+            model.scalar(matrix[i], coeffs, "=", ms).post();
+            model.scalar(invMatrix[i], coeffs, "=", ms).post();
         }
-        solver.scalar(diag1, coeffs, "=", ms).post();
-        solver.scalar(diag2, coeffs, "=", ms).post();
+        model.scalar(diag1, coeffs, "=", ms).post();
+        model.scalar(diag2, coeffs, "=", ms).post();
 
         // Symetries breaking
-        solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
-        solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
-        solver.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
+        model.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
+        model.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
+        model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
     }
 
     @Override
     public void configureSearch() {
-        solver.set(ISF.lexico_LB(vars));
+        model.set(ISF.lexico_LB(vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

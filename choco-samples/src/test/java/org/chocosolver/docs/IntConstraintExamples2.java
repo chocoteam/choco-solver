@@ -29,9 +29,8 @@
  */
 package org.chocosolver.docs;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
@@ -50,43 +49,43 @@ public class IntConstraintExamples2 {
 
     @Test(groups="1s", timeOut=60000)
     public void mddc() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("X", 2, -2, 2, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("X", 2, -2, 2, false);
         Tuples tuples = new Tuples();
         tuples.add(0, -1);
         tuples.add(1, -1);
         tuples.add(0, 1);
-        solver.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-        showSolutions(solver);
-        solver.findAllSolutions();
+        model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
+        showSolutions(model);
+        model.findAllSolutions();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void clause_channeling() {
-        Solver solver = new Solver();
-        IntVar iv = solver.intVar("iv", 1, 3, false);
-        BoolVar[] eqs = solver.boolVarArray("eq", 3);
-        BoolVar[] lqs = solver.boolVarArray("lq", 3);
-        solver.clausesIntChanneling(iv, eqs, lqs).post();
-        showSolutions(solver);
-        solver.findAllSolutions();
+        Model model = new Model();
+        IntVar iv = model.intVar("iv", 1, 3, false);
+        BoolVar[] eqs = model.boolVarArray("eq", 3);
+        BoolVar[] lqs = model.boolVarArray("lq", 3);
+        model.clausesIntChanneling(iv, eqs, lqs).post();
+        showSolutions(model);
+        model.findAllSolutions();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void int_value_precede_chain() {
-        Solver solver = new Solver();
-        IntVar[] X = solver.intVarArray("X", 3, 1, 3, false);
-        solver.intValuePrecedeChain(X, 1, 2).post();
-        showSolutions(solver);
-        solver.findAllSolutions();
+        Model model = new Model();
+        IntVar[] X = model.intVarArray("X", 3, 1, 3, false);
+        model.intValuePrecedeChain(X, 1, 2).post();
+        showSolutions(model);
+        model.findAllSolutions();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void int_value_precede_chain2() {
-        Solver solver = new Solver();
-        IntVar[] X = solver.intVarArray("X", 3, 1, 3, false);
-        solver.intValuePrecedeChain(X, new int[]{2, 3, 1}).post();
-        showSolutions(solver);
-        solver.findAllSolutions();
+        Model model = new Model();
+        IntVar[] X = model.intVarArray("X", 3, 1, 3, false);
+        model.intValuePrecedeChain(X, new int[]{2, 3, 1}).post();
+        showSolutions(model);
+        model.findAllSolutions();
     }
 }

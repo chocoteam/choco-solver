@@ -45,7 +45,7 @@ public class BestSolutionsRecorder extends AllSolutionsRecorder {
 	int lastValue;
 
 	public BestSolutionsRecorder(final IntVar objective){
-		super(objective.getSolver());
+		super(objective.getModel());
 		this.objective = objective;
 	}
 
@@ -57,7 +57,7 @@ public class BestSolutionsRecorder extends AllSolutionsRecorder {
                 solutions.clear();
             }
             Solution solution = new Solution();
-            solution.record(solver);
+            solution.record(model);
             solutions.add(solution);
         };
 	}

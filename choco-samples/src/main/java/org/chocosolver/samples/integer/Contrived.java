@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -62,44 +62,40 @@ public class Contrived extends AbstractProblem {
     IntVar[] v, w;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("Contrived");
-    }
-
-    @Override
     public void buildModel() {
+        model = new Model("Contrived");
         l = max(4, l);
         if (d == 0) {
             d = l + 1;
         }
-        v = solver.intVarArray("v", 5, 1, 50, true);
-        w = solver.intVarArray("v", l, 1, d, true);
+        v = model.intVarArray("v", 5, 1, 50, true);
+        w = model.intVarArray("v", l, 1, d, true);
 
-        solver.allDifferent(v, "BC").post();
-        solver.allDifferent(w, "BC").post();
-        solver.arithm(v[3], "=", v[4]).post();
-        solver.arithm(v[0], "=", w[0]).post();
-        solver.arithm(v[1], "=", w[1]).post();
-        solver.arithm(v[2], "=", w[2]).post();
-        solver.arithm(v[3], "=", w[3]).post();
+        model.allDifferent(v, "BC").post();
+        model.allDifferent(w, "BC").post();
+        model.arithm(v[3], "=", v[4]).post();
+        model.arithm(v[0], "=", w[0]).post();
+        model.arithm(v[1], "=", w[1]).post();
+        model.arithm(v[2], "=", w[2]).post();
+        model.arithm(v[3], "=", w[3]).post();
 
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.domOverWDeg(v, 0));
+        model.set(IntStrategyFactory.domOverWDeg(v, 0));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         System.out.println(String.format("Contrived problem (%d,%d)", l, d));
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             st.append("\tV :");
             for (int i = 0; i < v.length; i++) {
                 st.append(v[i].getValue()).append(" ");

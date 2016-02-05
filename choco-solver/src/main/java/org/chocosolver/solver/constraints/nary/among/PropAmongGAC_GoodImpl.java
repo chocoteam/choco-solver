@@ -82,11 +82,11 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
     public PropAmongGAC_GoodImpl(IntVar[] variables, int[] values) {
         super(variables, PropagatorPriority.LINEAR, true);
         nb_vars = variables.length - 1;
-        IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = model.getEnvironment();
         this.setValues = new TIntHashSet(values);
         this.values = setValues.toArray();
         Arrays.sort(this.values);
-		poss = SetFactory.makeStoredSet(SetType.BIPARTITESET,nb_vars,solver);
+		poss = SetFactory.makeStoredSet(SetType.BIPARTITESET,nb_vars, model);
 		nbSure = environment.makeInt(0);
     }
 

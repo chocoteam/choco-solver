@@ -29,11 +29,8 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
@@ -52,26 +49,26 @@ public class BottleneckTest {
     @Test(groups="5m", timeOut=300000)
     public void testStynes1() {
         for (int n = 100; n < 201; n += 50) {
-            Solver solver = new Solver();
+            Model model = new Model();
 
             IntVar[] nexts = new IntVar[n];
             IntVar[] exps = new IntVar[n];
             IntVar[] bws = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                nexts[i] = solver.intVar("n_" + i, 0, 200, false);
-                exps[i] = solver.intVar("e_" + i, 0, 200, false);
-                bws[i] = solver.intVar("b_" + i, 0, 2000, false);
-                solver.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]).post();
+                nexts[i] = model.intVar("n_" + i, 0, 200, false);
+                exps[i] = model.intVar("e_" + i, 0, 200, false);
+                bws[i] = model.intVar("b_" + i, 0, 2000, false);
+                model.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]).post();
             }
 
-            IntVar sum = solver.intVar("sum", 0, 2000 * n, true);
-            solver.sum(bws, "=", sum).post();
+            IntVar sum = model.intVar("sum", 0, 2000 * n, true);
+            model.sum(bws, "=", sum).post();
 
             IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 
 
-            solver.set(minDom_LB(allvars));
-            solver.findOptimalSolution(MAXIMIZE, sum);
+            model.set(minDom_LB(allvars));
+            model.findOptimalSolution(MAXIMIZE, sum);
         }
     }
 
@@ -79,27 +76,27 @@ public class BottleneckTest {
     public void testStynes2() {
         int n = 10000;
         {
-            Solver solver = new Solver();
+            Model model = new Model();
 
             IntVar[] nexts = new IntVar[n];
             IntVar[] exps = new IntVar[n];
             IntVar[] bws = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                nexts[i] = solver.intVar("n_" + i, 0, 200, false);
-                exps[i] = solver.intVar("e_" + i, 0, 200, false);
-                bws[i] = solver.intVar("b_" + i, 0, 2000, false);
-                solver.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]).post();
+                nexts[i] = model.intVar("n_" + i, 0, 200, false);
+                exps[i] = model.intVar("e_" + i, 0, 200, false);
+                bws[i] = model.intVar("b_" + i, 0, 2000, false);
+                model.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]).post();
             }
 
-            IntVar sum = solver.intVar("sum", 0, 2000 * n, true);
-            solver.sum(bws, "=", sum).post();
+            IntVar sum = model.intVar("sum", 0, 2000 * n, true);
+            model.sum(bws, "=", sum).post();
 
             IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 
             // Heuristic val
-            solver.set(minDom_LB(allvars));
+            model.set(minDom_LB(allvars));
 
-            solver.findSolution();
+            model.findSolution();
         }
 
 

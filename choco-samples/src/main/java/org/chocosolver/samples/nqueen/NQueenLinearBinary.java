@@ -30,6 +30,7 @@
 package org.chocosolver.samples.nqueen;
 
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -42,17 +43,18 @@ public class NQueenLinearBinary extends AbstractNQueen {
 
     @Override
     public void buildModel() {
+        model = new Model("NQueen");
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = solver.intVar("Q_" + i, 1, n, false);
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
         }
 
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.arithm(vars[i], "!=", vars[j]).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
+                model.arithm(vars[i], "!=", vars[j]).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
     }

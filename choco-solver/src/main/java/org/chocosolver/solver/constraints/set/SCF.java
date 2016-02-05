@@ -29,10 +29,10 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 /**
- * @deprecated : set constraint creation should be done through the {@link Solver} object
+ * @deprecated : set constraint creation should be done through the {@link Model} object
  * which extends {@link org.chocosolver.solver.constraints.ISetConstraintFactory}
  *
  * This class will be removed in versions > 3.4.0

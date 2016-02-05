@@ -61,19 +61,19 @@ class FakeEngine implements IPropagationEngine {
     }
 
     public static void checkIdempotency(Propagator lastProp) throws ContradictionException {
-        switch (lastProp.getSolver().getSettings().getIdempotencyStrategy()) {
+        switch (lastProp.getModel().getSettings().getIdempotencyStrategy()) {
             case force:
                 if (lastProp.isActive()) {
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
                 break;
             case error:
-                IPropagationEngine engine = lastProp.getSolver().getEngine();
-                lastProp.getSolver().set(singleton);
+                IPropagationEngine engine = lastProp.getModel().getEngine();
+                lastProp.getModel().set(singleton);
                 if (lastProp.isActive()) {
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
-                lastProp.getSolver().set(engine);
+                lastProp.getModel().set(engine);
                 break;
         }
     }

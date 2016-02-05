@@ -33,7 +33,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -72,8 +72,8 @@ public class ExplainingObjective extends ExplainingCut{
     private final TIntSet tmpValueDeductions;
 
 
-    public ExplainingObjective(Solver aSolver, int level, long seed) {
-        super(aSolver, level, seed);
+    public ExplainingObjective(Model aModel, int level, long seed) {
+        super(aModel, level, seed);
         clusters = new TIntArrayList(16);
         // TEMPORARY DATA STRUCTURES
         tmpDeductions = new TIntArrayList();
@@ -125,15 +125,15 @@ public class ExplainingObjective extends ExplainingCut{
 
     @Override
     public void init() {
-        om = mSolver.getObjectiveManager();
+        om = mModel.getObjectiveManager();
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();
         if (mExplanationEngine == null) {
-            if (mSolver.getExplainer() == null) {
-                mSolver.set(new ExplanationEngine(mSolver, false, false));
+            if (mModel.getExplainer() == null) {
+                mModel.set(new ExplanationEngine(mModel, false, false));
             }
-            this.mExplanationEngine = mSolver.getExplainer();
+            this.mExplanationEngine = mModel.getExplainer();
         }
     }
 

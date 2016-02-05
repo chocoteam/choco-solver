@@ -31,7 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -58,44 +58,41 @@ public class Photo extends AbstractProblem {
     BoolVar[] viols;
     IntVar violations;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Photo");
-    }
 
     @Override
     public void buildModel() {
-        positions = solver.intVarArray("pos", data.people(), 0, data.people() - 1, true);
-        violations = solver.intVar("viol", 0, data.preferences().length, true);
+        model = new Model();
+        positions = model.intVarArray("pos", data.people(), 0, data.people() - 1, true);
+        violations = model.intVar("viol", 0, data.preferences().length, true);
 
-        viols = solver.boolVarArray("b", data.prefPerPeople());
+        viols = model.boolVarArray("b", data.prefPerPeople());
         dist = new IntVar[data.prefPerPeople()];
         for (int i = 0; i < data.prefPerPeople(); i++) {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
 
 
-            IntVar k = solver.intVar(-20000, 20000);
-            solver.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]).post();
-            dist[i] = solver.intAbsView(k);
+            IntVar k = model.intVar(-20000, 20000);
+            model.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]).post();
+            dist[i] = model.intAbsView(k);
 
-            solver.ifThenElse(viols[i],
-                    solver.arithm(dist[i], ">", 1),
-                    solver.arithm(dist[i], "<=", 1));
+            model.ifThenElse(viols[i],
+                    model.arithm(dist[i], ">", 1),
+                    model.arithm(dist[i], "<=", 1));
         }
-        solver.sum(viols, "=", violations).post();
-        solver.allDifferent(positions, "BC").post();
-        solver.arithm(positions[1], ">", positions[0]).post();
+        model.sum(viols, "=", violations).post();
+        model.allDifferent(positions, "BC").post();
+        model.arithm(positions[1], ">", positions[0]).post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(positions));
+        model.set(IntStrategyFactory.minDom_LB(positions));
     }
 
     @Override
     public void solve() {
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, violations);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, violations);
 //        solver.findAllSolutions();
     }
 

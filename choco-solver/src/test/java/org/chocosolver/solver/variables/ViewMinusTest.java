@@ -30,10 +30,9 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
@@ -55,14 +54,14 @@ public class ViewMinusTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
-        IntVar X = solver.intVar("X", 1, 10, false);
-        IntVar Y = solver.intMinusView(X);
+        IntVar X = model.intVar("X", 1, 10, false);
+        IntVar Y = model.intMinusView(X);
 
         try {
-			if(!solver.getSettings().enableViews())
-				solver.propagate();
+			if(!model.getSettings().enableViews())
+				model.propagate();
             Assert.assertFalse(Y.isInstantiated());
             Assert.assertEquals(Y.getLB(), -10);
             Assert.assertEquals(Y.getUB(), -1);
@@ -75,26 +74,26 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.previousValue(-10), Integer.MIN_VALUE);
 
             Y.updateLowerBound(-9, Cause.Null);
-			if(!solver.getSettings().enableViews())
-				solver.propagate();
+			if(!model.getSettings().enableViews())
+				model.propagate();
             Assert.assertEquals(Y.getLB(), -9);
             Assert.assertEquals(X.getUB(), 9);
 
             Y.updateUpperBound(-2, Cause.Null);
-			if(!solver.getSettings().enableViews())
-				solver.propagate();
+			if(!model.getSettings().enableViews())
+				model.propagate();
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 
             Y.removeValue(-4, Cause.Null);
-			if(!solver.getSettings().enableViews())
-				solver.propagate();
+			if(!model.getSettings().enableViews())
+				model.propagate();
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 
             Y.removeInterval(-8, -6, Cause.Null);
-			if(!solver.getSettings().enableViews())
-				solver.propagate();
+			if(!model.getSettings().enableViews())
+				model.propagate();
             Assert.assertFalse(Y.contains(-8));
             Assert.assertFalse(Y.contains(-7));
             Assert.assertFalse(Y.contains(-6));
@@ -106,8 +105,8 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.getDomainSize(), 4);
 
             Y.instantiateTo(-5, Cause.Null);
-			if(!solver.getSettings().enableViews())
-				solver.propagate();
+			if(!model.getSettings().enableViews())
+				model.propagate();
             Assert.assertTrue(X.isInstantiated());
             Assert.assertTrue(Y.isInstantiated());
             Assert.assertEquals(X.getValue(), 5);
@@ -123,7 +122,7 @@ public class ViewMinusTest {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
             random.setSeed(seed);
-            Solver ref = new Solver();
+            Model ref = new Model();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = ref.intVar("x", 1, 15, true);
@@ -131,17 +130,17 @@ public class ViewMinusTest {
                 ref.sum(xs, "=", 0).post();
                 ref.set(random_bound(xs, seed));
             }
-            Solver solver = new Solver();
+            Model model = new Model();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = solver.intVar("x", 1, 15, true);
-                xs[1] = solver.intMinusView(xs[0]);
-                solver.sum(xs, "=", 0).post();
-                solver.set(random_bound(xs, seed));
+                xs[0] = model.intVar("x", 1, 15, true);
+                xs[1] = model.intMinusView(xs[0]);
+                model.sum(xs, "=", 0).post();
+                model.set(random_bound(xs, seed));
             }
             ref.findAllSolutions();
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
     }
@@ -151,7 +150,7 @@ public class ViewMinusTest {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
             random.setSeed(seed);
-            Solver ref = new Solver();
+            Model ref = new Model();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = ref.intVar("x", 1, 15, false);
@@ -159,17 +158,17 @@ public class ViewMinusTest {
                 ref.sum(xs, "=", 0).post();
                 ref.set(random_value(xs, seed));
             }
-            Solver solver = new Solver();
+            Model model = new Model();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = solver.intVar("x", 1, 15, false);
-                xs[1] = solver.intMinusView(xs[0]);
-                solver.sum(xs, "=", 0).post();
-                solver.set(random_value(xs, seed));
+                xs[0] = model.intVar("x", 1, 15, false);
+                xs[1] = model.intMinusView(xs[0]);
+                model.sum(xs, "=", 0).post();
+                model.set(random_value(xs, seed));
             }
             ref.findAllSolutions();
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
     }
@@ -179,10 +178,10 @@ public class ViewMinusTest {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
-            Solver solver = new Solver();
+            Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = solver.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = solver.intMinusView(o);
+            IntVar o = model.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
+            IntVar v = model.intMinusView(o);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(-vit.next()));
@@ -213,13 +212,13 @@ public class ViewMinusTest {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
-            Solver solver = new Solver();
+            Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = solver.intVar("o", domains[0]);
-            IntVar v = solver.intMinusView(o);
-			if(!solver.getSettings().enableViews()){
+            IntVar o = model.intVar("o", domains[0]);
+            IntVar v = model.intMinusView(o);
+			if(!model.getSettings().enableViews()){
 				try {
-					solver.propagate();
+					model.propagate();
 				}catch (Exception e){
 					e.printStackTrace();
 					throw new UnsupportedOperationException();

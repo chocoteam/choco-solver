@@ -64,7 +64,7 @@ public class MoveBinaryDFS implements Move {
         searchLoop.decision = strategy.getDecision();
         if (searchLoop.decision != null) { // null means there is no more decision
             searchLoop.decision.setPrevious(tmp);
-            searchLoop.mSolver.getEnvironment().worldPush();
+            searchLoop.mModel.getEnvironment().worldPush();
             extended = true;
         } else {
             searchLoop.decision = tmp;
@@ -76,7 +76,7 @@ public class MoveBinaryDFS implements Move {
     public boolean repair(SearchLoop searchLoop) {
         searchLoop.mMeasures.incBackTrackCount();
         searchLoop.mMeasures.incDepth();
-        searchLoop.mSolver.getEnvironment().worldPop();
+        searchLoop.mModel.getEnvironment().worldPop();
         return rewind(searchLoop);
     }
 
@@ -100,7 +100,7 @@ public class MoveBinaryDFS implements Move {
         while (!repaired && searchLoop.decision != topDecision) {
             searchLoop.jumpTo--;
             if (searchLoop.jumpTo <= 0 && searchLoop.decision.hasNext()) {
-                searchLoop.mSolver.getEnvironment().worldPush();
+                searchLoop.mModel.getEnvironment().worldPush();
                 repaired = true;
             } else {
                 prevDecision(searchLoop);
@@ -117,7 +117,7 @@ public class MoveBinaryDFS implements Move {
         searchLoop.searchMonitors.afterUpBranch();
         searchLoop.mMeasures.incBackTrackCount();
         searchLoop.mMeasures.decDepth();
-        searchLoop.mSolver.getEnvironment().worldPop();
+        searchLoop.mModel.getEnvironment().worldPop();
         searchLoop.searchMonitors.beforeUpBranch();
     }
 

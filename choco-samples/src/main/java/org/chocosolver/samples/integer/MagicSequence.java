@@ -47,11 +47,10 @@ package org.chocosolver.samples.integer;
  */
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.util.tools.ArrayUtils.zeroToN;
@@ -63,42 +62,37 @@ public class MagicSequence extends AbstractProblem {
 
     IntVar[] x;
 
-
     @Override
     public void buildModel() {
+        model = new Model();
 
         int[] values = zeroToN(n);
 
-        x = solver.intVarArray("x", n, 0, n - 1, false);
+        x = model.intVarArray("x", n, 0, n - 1, false);
 
         boolean closed = true; // restricts domains of VARS to VALUES if set to true
-        solver.globalCardinality(x, values, x, closed).post();
+        model.globalCardinality(x, values, x, closed).post();
 
         // Redundant constraint
-        solver.sum(x, "=", n).post();
+        model.sum(x, "=", n).post();
 
-    }
-
-    @Override
-    public void createSolver() {
-        solver = new Solver("MagicSequence");
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(x));
+        model.set(IntStrategyFactory.lexico_LB(x));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
 
     @Override
     public void prettyOut() {
 
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             int num_solutions = 0;
             do {
 
@@ -109,7 +103,7 @@ public class MagicSequence extends AbstractProblem {
 
                 num_solutions++;
 
-            } while (solver.nextSolution() == Boolean.TRUE);
+            } while (model.nextSolution() == Boolean.TRUE);
 
             System.out.println("It was " + num_solutions + " solutions.");
 

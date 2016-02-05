@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -62,12 +62,12 @@ public class R3 implements R {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public R3(int nbDecVars, Solver solver) {
+    public R3(int nbDecVars, Model model) {
         n = nbDecVars;
         valToRem = new int[31];
         learntEqualities = new ISet[n];
         for (int i = 0; i < n; i++) {
-            learntEqualities[i] = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
+            learntEqualities[i] = SetFactory.makeStoredSet(SetType.BITSET, n, model);
         }
     }
 
@@ -159,7 +159,7 @@ public class R3 implements R {
     }
 
     @Override
-    public R duplicate(Solver solver) {
-        return new R3(n, solver);
+    public R duplicate(Model model) {
+        return new R3(n, model);
     }
 }

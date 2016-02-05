@@ -29,9 +29,10 @@
  */
 package org.chocosolver.samples;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -75,15 +76,29 @@ public abstract class AbstractProblem {
     @Option(name = "-ng", aliases = "--nogoods", usage = "Extract nogoods from explanations (required \"-ee\").", required = false)
     protected boolean ng = false;
 
-    protected Solver solver;
+    protected Model model;
 
     private boolean userInterruption = true;
 
-    public Solver getSolver() {
-        return solver;
+    public Model getModel() {
+        return model;
     }
 
-    public abstract void createSolver();
+    /**
+     * @deprecated : create Model in {@link AbstractProblem#getModel()} instead
+     * This will be removed in versions > 3.4.0
+     */
+    @Deprecated
+    public Model getSolver() {
+        return getModel();
+    }
+
+    /**
+     * @deprecated : create Model in {@link AbstractProblem#buildModel()} instead
+     * This will be removed in versions > 3.4.0
+     */
+    @Deprecated
+    public void createSolver(){}
 
     public abstract void buildModel();
 
@@ -108,8 +123,8 @@ public abstract class AbstractProblem {
     }
 
     protected void overrideExplanation() {
-        if (solver.getExplainer() == null) {
-            expeng.plugin(solver, ng, false);
+        if (model.getExplainer() == null) {
+            expeng.plugin(model, ng, false);
         }
     }
 
@@ -126,16 +141,16 @@ public abstract class AbstractProblem {
             overrideExplanation();
 
             if (level.getLevel() > SILENT.getLevel()) {
-                Chatterbox.showStatistics(solver);
-                if (level.getLevel() > Level.VERBOSE.getLevel()) Chatterbox.showSolutions(solver);
-                if (level.getLevel() > Level.SOLUTION.getLevel()) Chatterbox.showDecisions(solver);
+                Chatterbox.showStatistics(model);
+                if (level.getLevel() > Level.VERBOSE.getLevel()) Chatterbox.showSolutions(model);
+                if (level.getLevel() > Level.SOLUTION.getLevel()) Chatterbox.showDecisions(model);
             }
 
             Thread statOnKill = new Thread() {
                 public void run() {
                     if (userInterruption()) {
                         if (level.getLevel() > SILENT.getLevel()) {
-                            System.out.println(solver.getMeasures().toString());
+                            System.out.println(model.getMeasures().toString());
                         }
                     }
 

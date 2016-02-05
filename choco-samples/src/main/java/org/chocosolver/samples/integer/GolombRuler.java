@@ -31,8 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -58,50 +57,47 @@ public class GolombRuler extends AbstractProblem {
     IntVar[] diffs;
     IntVar[][] m_diffs;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Golomb Ruler");
-    }
 
     @Override
     public void buildModel() {
-        ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        model = new Model("GolombRuler");
+        ticks = model.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
 
-        solver.arithm(ticks[0], "=", 0).post();
+        model.arithm(ticks[0], "=", 0).post();
 
         for (int i = 0; i < m - 1; i++) {
-            solver.arithm(ticks[i + 1], ">", ticks[i]).post();
+            model.arithm(ticks[i + 1], ">", ticks[i]).post();
         }
 
-        diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        diffs = model.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         m_diffs = new IntVar[m][m];
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
                 // <cpru 04/03/12> it is worth adding a constraint instead of a view
-                solver.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]).post();
-                solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
-                solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
-                solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
+                model.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]).post();
+                model.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
+                model.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
+                model.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
                 m_diffs[i][j] = diffs[k];
             }
         }
-        solver.allDifferent(diffs, "BC").post();
+        model.allDifferent(diffs, "BC").post();
 
         // break symetries
         if (m > 2) {
-            solver.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
+            model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(ticks));
+        model.set(IntStrategyFactory.lexico_LB(ticks));
     }
 
     @Override
     public void solve() {
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) solver.getVars()[m - 1]);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) model.getVars()[m - 1]);
     }
 
     @Override

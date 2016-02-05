@@ -29,17 +29,11 @@
  */
 package org.chocosolver.solver.explanations;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.LearnCBJ;
-import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
 
 import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
@@ -68,17 +62,17 @@ public class ExplanationTest {
         for (int n = 500; n < 4501; n += 500) {
             for (int e = 1; e < engines.length; e++) {
                 for (int ng = 0; ng < 2; ng++) {
-                    final Solver solver = new Solver();
-                    IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, true);
-                    solver.arithm(vars[n - 2], "=", vars[n - 1]).post();
-                    solver.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-                    solver.set(lexico_LB(vars));
-                    engines[e].plugin(solver, ng == 1, false);
-                    assertFalse(solver.findSolution());
-                    out.printf("\t%s", solver.getMeasures().toOneShortLineString());
+                    final Model model = new Model();
+                    IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
+                    model.arithm(vars[n - 2], "=", vars[n - 1]).post();
+                    model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
+                    model.set(lexico_LB(vars));
+                    engines[e].plugin(model, ng == 1, false);
+                    assertFalse(model.findSolution());
+                    out.printf("\t%s", model.getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
                     if (e > 0) {
-                        assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
+                        assertEquals(model.getMeasures().getNodeCount(), (n - 2) * 2);
                     }
                 }
             }
@@ -88,15 +82,15 @@ public class ExplanationTest {
     @Test(groups="1s", timeOut=60000)
     public void testUserExpl() {
         int n = 7;
-        final Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, false);
-        solver.arithm(vars[n - 2], "=", vars[n - 1]).post();
-        solver.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-        solver.set(lexico_LB(vars));
+        final Model model = new Model();
+        IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
+        model.arithm(vars[n - 2], "=", vars[n - 1]).post();
+        model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
+        model.set(lexico_LB(vars));
 
-        learnCBJ(solver, false, true);
-        LearnCBJ cbj = (LearnCBJ) solver.getSearchLoop().getLearn();
-        assertFalse(solver.findSolution());
+        learnCBJ(model, false, true);
+        LearnCBJ cbj = (LearnCBJ) model.getSearchLoop().getLearn();
+        assertFalse(model.findSolution());
         Explanation exp = cbj.getLastExplanation();
         assertEquals(2, exp.nbCauses());
     }
@@ -107,13 +101,13 @@ public class ExplanationTest {
             for (long seed = 0; seed < 25; seed++) {
                 for (int e = 0; e < engines.length; e++) {
                     for (int ng = 0; ng < 2; ng++) {
-                        final Solver solver = new Solver();
-                        IntVar[] pigeons = solver.intVarArray("p", n, 0, n - 2, false);
-                        solver.allDifferent(pigeons, "NEQS").post();
-                        solver.set(random_value(pigeons, seed));
-                        engines[e].plugin(solver, ng == 1, false);
-                        assertFalse(solver.findSolution());
-                        printShortStatistics(solver);
+                        final Model model = new Model();
+                        IntVar[] pigeons = model.intVarArray("p", n, 0, n - 2, false);
+                        model.allDifferent(pigeons, "NEQS").post();
+                        model.set(random_value(pigeons, seed));
+                        engines[e].plugin(model, ng == 1, false);
+                        assertFalse(model.findSolution());
+                        printShortStatistics(model);
                     }
                 }
             }
@@ -128,7 +122,7 @@ public class ExplanationTest {
                     for (int ng = 0; ng < 2; ng++) {
                         int ms = n * (n * n + 1) / 2;
 
-                        final Solver solver = new Solver();
+                        final Model model = new Model();
                         IntVar[][] matrix = new IntVar[n][n];
                         IntVar[][] invMatrix = new IntVar[n][n];
                         IntVar[] vars = new IntVar[n * n];
@@ -136,7 +130,7 @@ public class ExplanationTest {
                         int k = 0;
                         for (int i = 0; i < n; i++) {
                             for (int j = 0; j < n; j++, k++) {
-                                matrix[i][j] = solver.intVar("square" + i + "," + j, 1, n * n, false);
+                                matrix[i][j] = model.intVar("square" + i + "," + j, 1, n * n, false);
                                 vars[k] = matrix[i][j];
                                 invMatrix[j][i] = matrix[i][j];
                             }
@@ -149,26 +143,26 @@ public class ExplanationTest {
                             diag2[i] = matrix[(n - 1) - i][i];
                         }
 
-                        solver.allDifferent(vars, "NEQS").post();
+                        model.allDifferent(vars, "NEQS").post();
 
                         int[] coeffs = new int[n];
                         fill(coeffs, 1);
                         for (int i = 0; i < n; i++) {
-                            solver.scalar(matrix[i], coeffs, "=", ms).post();
-                            solver.scalar(invMatrix[i], coeffs, "=", ms).post();
+                            model.scalar(matrix[i], coeffs, "=", ms).post();
+                            model.scalar(invMatrix[i], coeffs, "=", ms).post();
                         }
-                        solver.scalar(diag1, coeffs, "=", ms).post();
-                        solver.scalar(diag2, coeffs, "=", ms).post();
+                        model.scalar(diag1, coeffs, "=", ms).post();
+                        model.scalar(diag2, coeffs, "=", ms).post();
 
                         // Symetries breaking
-                        solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
-                        solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
-                        solver.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
-                        solver.set(random_value(vars, seed));
+                        model.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
+                        model.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
+                        model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
+                        model.set(random_value(vars, seed));
 
-                        engines[e].plugin(solver, ng == 1, false);
+                        engines[e].plugin(model, ng == 1, false);
 //                    SMF.shortlog(solver);
-                        assertEquals(n > 2, solver.findSolution());
+                        assertEquals(n > 2, model.findSolution());
                     }
                 }
             }
@@ -180,19 +174,19 @@ public class ExplanationTest {
         for (long seed = 0; seed < 1; seed++) {
             for (int e = 1; e < engines.length - 1; e++) {
                 for (int ng = 0; ng < 2; ng++) {
-                    final Solver solver = new Solver();
-                    IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
-                    BoolVar[] bs = solver.boolVarArray("b", 2);
-                    solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-                    solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-                    solver.arithm(bs[0], "=", bs[1]).post();
+                    final Model model = new Model();
+                    IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
+                    BoolVar[] bs = model.boolVarArray("b", 2);
+                    model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+                    model.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+                    model.arithm(bs[0], "=", bs[1]).post();
 
-                    solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
-                    solver.arithm(p[9], "+", p[8], ">", 4).post();
-                    solver.set(random_value(p, seed));
-                    engines[e].plugin(solver, ng == 1, false);
-                    showShortStatistics(solver);
-                    assertFalse(solver.findSolution());
+                    model.sum(copyOfRange(p, 0, 8), "=", 5).post();
+                    model.arithm(p[9], "+", p[8], ">", 4).post();
+                    model.set(random_value(p, seed));
+                    engines[e].plugin(model, ng == 1, false);
+                    showShortStatistics(model);
+                    assertFalse(model.findSolution());
                 }
             }
         }
@@ -202,22 +196,22 @@ public class ExplanationTest {
     public void testReif2() { // to test PropagatorActivation, from bs to p
         for (int e = 0; e < engines.length; e++) {
             for (int ng = 0; ng < 2; ng++) {
-                final Solver solver = new Solver();
-                IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
-                BoolVar[] bs = solver.boolVarArray("b", 2);
-                solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-                solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-                solver.arithm(bs[0], "=", bs[1]).post();
+                final Model model = new Model();
+                IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
+                BoolVar[] bs = model.boolVarArray("b", 2);
+                model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+                model.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+                model.arithm(bs[0], "=", bs[1]).post();
 
-                solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
-                solver.arithm(p[9], "+", p[8], ">", 4).post();
+                model.sum(copyOfRange(p, 0, 8), "=", 5).post();
+                model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
-                solver.set(lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
-                engines[e].plugin(solver, ng == 1, false);
-                showStatistics(solver);
-                showSolutions(solver);
-                showDecisions(solver);
-                assertFalse(solver.findSolution());
+                model.set(lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
+                engines[e].plugin(model, ng == 1, false);
+                showStatistics(model);
+                showSolutions(model);
+                showDecisions(model);
+                assertFalse(model.findSolution());
             }
         }
     }
@@ -226,22 +220,22 @@ public class ExplanationTest {
     public void testReif3() { // to test PropagatorActivation, from bs to p
         for (int e = 0; e < engines.length; e++) {
             for (int ng = 0; ng < 2; ng++) {
-                final Solver solver = new Solver();
-                IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
-                BoolVar[] bs = solver.boolVarArray("b", 2);
-                solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-                solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-                solver.arithm(bs[0], "=", bs[1]).post();
+                final Model model = new Model();
+                IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
+                BoolVar[] bs = model.boolVarArray("b", 2);
+                model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+                model.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+                model.arithm(bs[0], "=", bs[1]).post();
 
-                solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
-                solver.arithm(p[9], "+", p[8], ">", 4).post();
+                model.sum(copyOfRange(p, 0, 8), "=", 5).post();
+                model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
-                solver.set(lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
-                engines[e].plugin(solver, ng == 1, false);
-                showStatistics(solver);
-                showSolutions(solver);
-                showDecisions(solver);
-                assertFalse(solver.findSolution());
+                model.set(lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
+                engines[e].plugin(model, ng == 1, false);
+                showStatistics(model);
+                showSolutions(model);
+                showDecisions(model);
+                assertFalse(model.findSolution());
             }
         }
     }
@@ -249,26 +243,26 @@ public class ExplanationTest {
     @Test(groups="1s", timeOut=60000)
     public void testLazy() {
         for (int ng = 0; ng < 2; ng++) {
-            Solver solver = new Solver();
+            Model model = new Model();
             // The set of variables
-            IntVar[] p = solver.intVarArray("p", 5, 0, 4, false);
+            IntVar[] p = model.intVarArray("p", 5, 0, 4, false);
             // The initial constraints
-            solver.sum(copyOfRange(p, 0, 3), ">=", 3).post();
-            solver.arithm(p[2], "+", p[3], ">=", 1).post();
-            solver.arithm(p[3], "+", p[4], ">", 4).post();
+            model.sum(copyOfRange(p, 0, 3), ">=", 3).post();
+            model.arithm(p[2], "+", p[3], ">=", 1).post();
+            model.arithm(p[3], "+", p[4], ">", 4).post();
 
             // The false constraints
             BoolVar[] bs = new BoolVar[2];
-            bs[0] = solver.arithm(p[3], "=", p[4]).reify();
-            bs[1] = solver.arithm(p[3], "!=", p[4]).reify();
-            solver.arithm(bs[0], "=", bs[1]).post();
+            bs[0] = model.arithm(p[3], "=", p[4]).reify();
+            bs[1] = model.arithm(p[3], "!=", p[4]).reify();
+            model.arithm(bs[0], "=", bs[1]).post();
 
-            solver.set(lexico_LB(p[0], p[1], bs[0], p[2], p[3], p[4]));
-            DBT.plugin(solver, ng == 1, false);
-            showStatistics(solver);
-            showSolutions(solver);
-            showDecisions(solver);
-            assertFalse(solver.findSolution());
+            model.set(lexico_LB(p[0], p[1], bs[0], p[2], p[3], p[4]));
+            DBT.plugin(model, ng == 1, false);
+            showStatistics(model);
+            showSolutions(model);
+            showDecisions(model);
+            assertFalse(model.findSolution());
         }
     }
 }

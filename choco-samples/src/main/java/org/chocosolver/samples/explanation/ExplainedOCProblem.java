@@ -31,7 +31,7 @@ package org.chocosolver.samples.explanation;
 
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -48,35 +48,32 @@ public class ExplainedOCProblem extends AbstractProblem {
     int n = 4;
     int vals = n - 1;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver();
-    }
 
     @Override
     public void buildModel() {
-        vars = solver.intVarArray("x", 2 * n, 1, vals, false);
+        model = new Model();
+        vars = model.intVarArray("x", 2 * n, 1, vals, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
-                solver.arithm(vars[2 * i], "!=", vars[2 * j]).post();
+                model.arithm(vars[2 * i], "!=", vars[2 * j]).post();
             }
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        model.set(IntStrategyFactory.lexico_LB(vars));
     }
 
 
     @Override
     public void solve() {
-        ExplanationFactory.CBJ.plugin(solver, false, false);
-        if (solver.findSolution()) {
+        ExplanationFactory.CBJ.plugin(model, false, false);
+        if (model.findSolution()) {
             do {
                 this.prettyOut();
             }
-            while (solver.nextSolution());
+            while (model.nextSolution());
         }
     }
 

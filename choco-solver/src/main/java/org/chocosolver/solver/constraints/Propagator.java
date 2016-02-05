@@ -33,7 +33,7 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.memory.structure.Operation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -156,7 +156,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Reference to the solver declaring this propagator.
      */
-    protected final Solver solver;
+    protected final Model model;
 
     /**
      * List of variables this propagators deal with.
@@ -183,20 +183,20 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
-        this.solver = vars[0].getSolver();
+        this.model = vars[0].getModel();
         this.reactToFineEvt = reactToFineEvt;
         this.state = NEW;
         this.priority = priority;
         // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
         // This is the responsibility of the propagator's developer to take care of that point.
-        if (solver.getSettings().cloneVariableArrayInPropagator()) {
+        if (model.getSettings().cloneVariableArrayInPropagator()) {
             this.vars = vars.clone();
         } else {
             this.vars = vars;
         }
         this.vindices = new int[vars.length];
         this.linkVariables();
-        ID = solver.nextId();
+        ID = model.nextId();
         operations = new Operation[]{
                 new Operation() {
                     @Override
@@ -252,8 +252,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         for (int v = tmp.length; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
         }
-        if (solver.getEngine() != NoPropagationEngine.SINGLETON && solver.getEngine().isInitialized()) {
-            solver.getEngine().updateInvolvedVariables(this);
+        if (model.getEngine() != NoPropagationEngine.SINGLETON && model.getEngine().isInitialized()) {
+            model.getEngine().updateInvolvedVariables(this);
         }
     }
 
@@ -367,7 +367,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws ContradictionException if the propagation encounters inconsistency.
      */
     public final void forcePropagate(PropagatorEventType evt) throws ContradictionException {
-        solver.getEngine().delayedPropagation(this, evt);
+        model.getEngine().delayedPropagation(this, evt);
     }
 
     /**
@@ -376,7 +376,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
-        solver.getEnvironment().save(operations[NEW]);
+        model.getEnvironment().save(operations[NEW]);
     }
 
     /**
@@ -385,7 +385,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setReifiedTrue() {
         assert isReifiedAndSilent() : "the propagator was not in a silent reified state";
         state = ACTIVE;
-        solver.getEnvironment().save(operations[REIFIED]);
+        model.getEnvironment().save(operations[REIFIED]);
     }
 
     /**
@@ -405,9 +405,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         if (!isCompletelyInstantiated()) {// useless call to setPassive if all vars are instantiated
             assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
             state = PASSIVE;
-            solver.getEnvironment().save(operations[ACTIVE]);
+            model.getEnvironment().save(operations[ACTIVE]);
             //TODO: update var mask back
-            solver.getEngine().desactivatePropagator(this);
+            model.getEngine().desactivatePropagator(this);
         }
     }
 
@@ -465,7 +465,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails() throws ContradictionException {
-        solver.getEngine().fails(this, null, null);
+        model.getEngine().fails(this, null, null);
     }
 
     /**
@@ -476,7 +476,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void contradiction(Variable variable, String message) throws ContradictionException {
-        solver.getEngine().fails(this, variable, message);
+        model.getEngine().fails(this, variable, message);
     }
 
     @Override
@@ -496,8 +496,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * @return the solver this propagator is defined in
      */
-    public Solver getSolver() {
-        return solver;
+    public Model getModel() {
+        return model;
     }
 
     @Override

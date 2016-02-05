@@ -36,7 +36,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateDoubleVector;
 import org.chocosolver.memory.IStateIntVector;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.automata.structure.Node;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -644,9 +644,9 @@ public class StoredValuedDirectedMultiGraph {
         inStack.clear(idx);
     }
 
-    public StoredValuedDirectedMultiGraph duplicate(Solver solver) {
+    public StoredValuedDirectedMultiGraph duplicate(Model model) {
         StoredValuedDirectedMultiGraph graph = new StoredValuedDirectedMultiGraph();
-        IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = model.getEnvironment();
         graph.starts = starts.clone();
         graph.offsets = offsets.clone();
         graph.layers = layers.clone();
@@ -669,10 +669,10 @@ public class StoredValuedDirectedMultiGraph {
         graph.GArcs.origs = GArcs.origs.clone();
         graph.GArcs.costs = GArcs.costs.clone();
 
-        graph.inGraph = inGraph.duplicate(solver);
+        graph.inGraph = inGraph.duplicate(model);
 
         for (int i = 0; i < this.supports.length; i++) {
-            graph.supports[i] = this.supports[i].duplicate(solver);
+            graph.supports[i] = this.supports[i].duplicate(model);
         }
 
         int nsize = this.GNodes.outArcs.length;
@@ -696,8 +696,8 @@ public class StoredValuedDirectedMultiGraph {
         for (int n = 0; n < nsize; n++) {
             graph.GNodes.layers[n] = GNodes.layers[n];
             graph.GNodes.states[n] = GNodes.states[n];
-            if (GNodes.outArcs[n] != null) graph.GNodes.outArcs[n] = GNodes.outArcs[n].duplicate(solver);
-            if (GNodes.inArcs[n] != null) graph.GNodes.inArcs[n] = GNodes.inArcs[n].duplicate(solver);
+            if (GNodes.outArcs[n] != null) graph.GNodes.outArcs[n] = GNodes.outArcs[n].duplicate(model);
+            if (GNodes.inArcs[n] != null) graph.GNodes.inArcs[n] = GNodes.inArcs[n].duplicate(model);
         }
 
         graph.initPathInfo();

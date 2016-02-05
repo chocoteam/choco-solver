@@ -29,10 +29,8 @@
  */
 package org.chocosolver.samples.integer;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ESat;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +59,7 @@ public class DominatingSetOfQueens {
 	 */
 	public static List<Integer> dominationQueen(int n, int val) {
 		out.println("Domination queen (Q" + n + ":" + val + ")");
-		Solver pb = new Solver("Introductive Example");
+		Model pb = new Model("Introductive Example");
 		IntVar[] X = new IntVar[n * n];
 		//une variable par case avec pour domaine la reine qui l attaque. (les reines sont ainsi designees par les valeurs, et les cases par les variables)
 		for (int i = 0; i < X.length; i++) {

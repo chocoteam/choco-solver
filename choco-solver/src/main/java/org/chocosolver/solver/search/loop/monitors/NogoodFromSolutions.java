@@ -65,7 +65,7 @@ public class NogoodFromSolutions implements IMonitorSolution {
      */
     public NogoodFromSolutions(IntVar[] vars) {
         decisionVars = vars;
-        png = vars[0].getSolver().getNogoodStore().getPropNogoods();
+        png = vars[0].getModel().getNogoodStore().getPropNogoods();
         ps = new TIntArrayList();
     }
 

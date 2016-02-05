@@ -31,8 +31,7 @@ package org.chocosolver.samples.integer;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.samples.graph.input.HCP_Utils;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -64,13 +63,10 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
         new KnightTourProblem_Circuit().execute(args);
     }
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("solving the Hamiltonian Cycle Problem");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         boolean[][] matrix = generateKingTourInstance(40);
         int n = matrix.length;
         succ = new IntVar[n];
@@ -82,15 +78,15 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
                     values.add(j);
                 }
             }
-            succ[i] = solver.intVar("succ_" + i, values.toArray());
+            succ[i] = model.intVar("succ_" + i, values.toArray());
         }
-        solver.circuit(succ).post();
+        model.circuit(succ).post();
     }
 
     @Override
     public void configureSearch() {
-		SMF.limitTime(solver, limit);
-		solver.set(ISF.custom(
+		SMF.limitTime(model, limit);
+		model.set(ISF.custom(
 				ISF.minDomainSize_var_selector(),
                 var -> {
                     int ub = var.getUB();
@@ -110,7 +106,7 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

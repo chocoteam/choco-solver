@@ -156,6 +156,6 @@ public class RealConstraint extends Constraint {
     protected void finalize() throws Throwable {
         super.finalize();
 		if(propagators.length == 0)throw new UnsupportedOperationException("Empty RealConstraint");
-		propagators[0].getSolver().getIbex().release();
+		propagators[0].getModel().getIbex().release();
     }
 }

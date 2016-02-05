@@ -29,9 +29,7 @@
  */
 package org.chocosolver.docs;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
@@ -47,18 +45,18 @@ public class Overview {
 
     public void overview1() {
         // 1. Create a Solver
-        Solver solver = new Solver("my first problem");
+        Model model = new Model("my first problem");
         // 2. Create variables through the variable factory
-        IntVar x = solver.intVar("X", 0, 5, true);
-        IntVar y = solver.intVar("Y", 0, 5, true);
+        IntVar x = model.intVar("X", 0, 5, true);
+        IntVar y = model.intVar("Y", 0, 5, true);
         // 3. Create and post constraints by using constraint factories
-        solver.arithm(x, "+", y, "<", 5).post();
+        model.arithm(x, "+", y, "<", 5).post();
         // 4. Define the search strategy
-        solver.set(lexico_LB(x, y));
+        model.set(lexico_LB(x, y));
         // 5. Launch the resolution process
-        solver.findSolution();
+        model.findSolution();
         //6. Print search statistics
-        printStatistics(solver);
+        printStatistics(model);
     }
 
     public static void main(String[] args) {

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -49,22 +49,22 @@ public class ProblemMaker {
      * @return a solve-ready solver.
      */
     @SuppressWarnings("Duplicates")
-    public static Solver makeNQueenWithBinaryConstraints(int n){
-        Solver solver = new Solver();
+    public static Model makeNQueenWithBinaryConstraints(int n){
+        Model model = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = solver.intVar("Q_" + i, 1, n, false);
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
         }
-        solver.addHook("vars", vars);
+        model.addHook("vars", vars);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.arithm(vars[i], "!=", vars[j]).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
+                model.arithm(vars[i], "!=", vars[j]).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        return solver;
+        return model;
     }
 
     /**
@@ -75,22 +75,22 @@ public class ProblemMaker {
      * @return a solve-ready solver.
      */
     @SuppressWarnings("Duplicates")
-    public static Solver makeNQueenWithOneAlldifferent(int n) {
-        Solver solver = new Solver();
+    public static Model makeNQueenWithOneAlldifferent(int n) {
+        Model model = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = solver.intVar("Q_" + i, 1, n, false);
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
         }
-        solver.addHook("vars", vars);
-        solver.allDifferent(vars, "AC").post();
+        model.addHook("vars", vars);
+        model.allDifferent(vars, "AC").post();
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        return solver;
+        return model;
     }
 
     /**
@@ -101,31 +101,31 @@ public class ProblemMaker {
      * @return a solve-ready solver
      */
     @SuppressWarnings("Duplicates")
-    public static Solver makeCostasArrays(int n) {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("v", n, 0, n - 1, false);
+    public static Model makeCostasArrays(int n) {
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("v", n, 0, n - 1, false);
         IntVar[] vectors = new IntVar[(n * (n - 1)) / 2];
         IntVar[][] diff = new IntVar[n][n];
         int idx = 0;
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
-                IntVar k = solver.intVar(randomName(), -n, n, false);
-                solver.arithm(k, "!=", 0).post();
-                solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
-                vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
+                IntVar k = model.intVar(randomName(), -n, n, false);
+                model.arithm(k, "!=", 0).post();
+                model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
+                vectors[idx] = model.intOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }
         }
-        solver.addHook("vars", vars);
-        solver.addHook("vectors", vectors);
+        model.addHook("vars", vars);
+        model.addHook("vectors", vectors);
 
-        solver.allDifferent(vars, "AC").post();
-        solver.allDifferent(vectors, "BC").post();
+        model.allDifferent(vars, "AC").post();
+        model.allDifferent(vectors, "BC").post();
 
         // symmetry-breaking
-        solver.arithm(vars[0], "<", vars[n - 1]).post();
-        return solver;
+        model.arithm(vars[0], "<", vars[n - 1]).post();
+        return model;
     }
 
     /**
@@ -135,34 +135,34 @@ public class ProblemMaker {
      * @return a solve-ready solver
      */
     @SuppressWarnings("Duplicates")
-    public static Solver makeGolombRuler(int m) {
-        Solver solver = new Solver();
-        IntVar[] ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
-        solver.addHook("ticks", ticks);
-        IntVar[] diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
-        solver.addHook("diffs", diffs);
-        solver.arithm(ticks[0], "=", 0).post();
+    public static Model makeGolombRuler(int m) {
+        Model model = new Model();
+        IntVar[] ticks = model.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        model.addHook("ticks", ticks);
+        IntVar[] diffs = model.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        model.addHook("diffs", diffs);
+        model.arithm(ticks[0], "=", 0).post();
 
         for (int i = 0; i < m - 1; i++) {
-            solver.arithm(ticks[i + 1], ">", ticks[i]).post();
+            model.arithm(ticks[i + 1], ">", ticks[i]).post();
         }
 
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                solver.arithm(ticks[j], "-", ticks[i], "=", diffs[k]).post();
-                solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
-                solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
-                solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
+                model.arithm(ticks[j], "-", ticks[i], "=", diffs[k]).post();
+                model.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
+                model.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
+                model.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
             }
         }
-        solver.allDifferent(diffs, "BC").post();
+        model.allDifferent(diffs, "BC").post();
         // break symetries
         if (m > 2) {
-            solver.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
+            model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
-        solver.setObjectives(ticks[m - 1]);
-        return solver;
+        model.setObjectives(ticks[m - 1]);
+        return model;
     }
 
 }

@@ -37,7 +37,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -54,47 +54,44 @@ public class ReifSample extends AbstractProblem {
 
 	IntVar x,y,z;
 
-	@Override
-	public void createSolver() {
-		solver = new Solver();
-	}
 
 	@Override
 	public void buildModel() {
-		x = solver.intVar("x", 0, 3, false);
-		y = solver.intVar("y", 0, 3, false);
-		z = solver.intVar("z", 0, 3, false);
-		Constraint imp = solver.and(
-				solver.arithm(x, ">", y),
-				solver.arithm(y, ">", z),
-				solver.arithm(z, ">", x)
+		model = new Model();
+		x = model.intVar("x", 0, 3, false);
+		y = model.intVar("y", 0, 3, false);
+		z = model.intVar("z", 0, 3, false);
+		Constraint imp = model.and(
+				model.arithm(x, ">", y),
+				model.arithm(y, ">", z),
+				model.arithm(z, ">", x)
 		);
-		Constraint ad = solver.allDifferent(new IntVar[]{x, y, z}, "DEFAULT");
-		Constraint nad = solver.not(ad);
-		solver.or(imp, nad).post();
+		Constraint ad = model.allDifferent(new IntVar[]{x, y, z}, "DEFAULT");
+		Constraint nad = model.not(ad);
+		model.or(imp, nad).post();
 	}
 
 	@Override
 	public void configureSearch() {
-		solver.set(ISF.lexico_LB(new IntVar[]{x, y, z}));
+		model.set(ISF.lexico_LB(new IntVar[]{x, y, z}));
 	}
 
 	@Override
 	public void solve() {
-		solver.plugMonitor((IMonitorSolution) () -> {
-            System.out.println("////////////////");
-            System.out.println(x);
-            System.out.println(y);
-            System.out.println(z);
-            System.out.println();
-        });
-		solver.findAllSolutions();
+		model.plugMonitor((IMonitorSolution) () -> {
+			System.out.println("////////////////");
+			System.out.println(x);
+			System.out.println(y);
+			System.out.println(z);
+			System.out.println();
+		});
+		model.findAllSolutions();
 	}
 
 	@Override
 	public void prettyOut() {}
 
 	public static void main(String[] args){
-	    new ReifSample().execute();
+		new ReifSample().execute();
 	}
 }

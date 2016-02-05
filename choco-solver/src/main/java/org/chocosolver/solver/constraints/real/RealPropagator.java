@@ -79,7 +79,7 @@ public class RealPropagator extends Propagator<RealVar> {
      */
     public RealPropagator(String functions, RealVar[] vars, int options) {
         super(vars, PropagatorPriority.LINEAR, false);
-        this.ibex = solver.getIbex();
+        this.ibex = model.getIbex();
         this.functions = functions;
         this.option = options;
         this.contractorIdx = ibex.add_contractor(vars.length, functions, option);

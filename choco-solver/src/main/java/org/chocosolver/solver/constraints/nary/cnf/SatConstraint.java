@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.cnf;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.util.ESat;
 
@@ -43,8 +43,8 @@ public class SatConstraint extends Constraint {
 
 	final PropSat miniSat;
 
-	public SatConstraint(Solver solver) {
-		super("SatConstraint",new PropSat(solver));
+	public SatConstraint(Model model) {
+		super("SatConstraint",new PropSat(model));
 		miniSat = (PropSat) propagators[0];
 	}
 

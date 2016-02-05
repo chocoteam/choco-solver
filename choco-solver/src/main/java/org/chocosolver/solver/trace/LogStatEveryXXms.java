@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.trace;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 
@@ -54,10 +54,10 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
 
     /**
      * Create a monitor which outputs shot-line statistics every <i>duration</i> milliseconds
-     * @param solver the solver to instrument
+     * @param model the solver to instrument
      * @param duration delay between two outputs, in milliseconds
      */
-    public LogStatEveryXXms(final Solver solver, final long duration) {
+    public LogStatEveryXXms(final Model model, final long duration) {
 
         printer = new Thread() {
 
@@ -68,8 +68,8 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
                     sleep(duration);
                     //noinspection InfiniteLoopStatement
                     do {
-                        solver.getMeasures().updateTime();
-                        Chatterbox.out.println(String.format(">> %s", solver.getMeasures().toOneShortLineString()));
+                        model.getMeasures().updateTime();
+                        Chatterbox.out.println(String.format(">> %s", model.getMeasures().toOneShortLineString()));
                         sleep(duration);
                     } while (alive);
                 } catch (InterruptedException ignored) {

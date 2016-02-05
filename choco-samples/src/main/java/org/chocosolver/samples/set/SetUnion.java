@@ -37,7 +37,7 @@
 package org.chocosolver.samples.set;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.variables.SetVar;
 
@@ -57,33 +57,29 @@ public class SetUnion extends AbstractProblem {
     }
 
     @Override
-    public void createSolver() {
-        solver = new Solver("set union sample");
-    }
-
-    @Override
     public void buildModel() {
+        model = new Model();
         // x initial domain
-        x = solver.setVar("x", new int[]{1}, new int[]{1, -2, 3});
+        x = model.setVar("x", new int[]{1}, new int[]{1, -2, 3});
         // y initial domain
-        y = solver.setVar("y", new int[]{}, new int[]{-6, -2, 7});
+        y = model.setVar("y", new int[]{}, new int[]{-6, -2, 7});
         // z initial domain
-        z = solver.setVar("z", new int[]{}, new int[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7});
+        z = model.setVar("z", new int[]{}, new int[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7});
         // set-union constraint
-        solver.union(new SetVar[]{x, y}, z).post();
+        model.union(new SetVar[]{x, y}, z).post();
         if (noEmptySet) {
-            solver.nbEmpty(new SetVar[]{x, y, z}, solver.intVar(0)).post();
+            model.nbEmpty(new SetVar[]{x, y, z}, model.intVar(0)).post();
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(SetStrategyFactory.remove_first(new SetVar[]{x, y, z}));
+        model.set(SetStrategyFactory.remove_first(new SetVar[]{x, y, z}));
     }
 
     @Override
     public void solve() {
-        solver.findAllSolutions();
+        model.findAllSolutions();
     }
 
     @Override

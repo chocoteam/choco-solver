@@ -38,7 +38,7 @@ package org.chocosolver.samples.set;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -52,21 +52,18 @@ import org.chocosolver.solver.variables.SetVar;
  */
 public class Partition extends AbstractProblem {
 
-    private SetVar x, y, z, universe;
-    private IntVar sum;
-    private boolean noEmptySet = true;
+	private SetVar x, y, z, universe;
+	private IntVar sum;
+	private boolean noEmptySet = true;
 
-    public static void main(String[] args) {
-        new Partition().execute(args);
-    }
+	public static void main(String[] args) {
+		new Partition().execute(args);
+	}
 
-    @Override
-    public void createSolver() {
-		solver = new Solver("set union sample");
-    }
 
-    @Override
-    public void buildModel() {
+	@Override
+	public void buildModel() {
+		model = new Model();
 
 		///////////////
 		// VARIABLES //
@@ -75,53 +72,53 @@ public class Partition extends AbstractProblem {
 		// x initial domain
 		int[] x_envelope = new int[]{1, 3, 2, 8}; // not necessarily ordered
 		int[] x_kernel = new int[]{1};
-		x = solver.setVar("x", x_kernel, x_envelope);
+		x = model.setVar("x", x_kernel, x_envelope);
 		// y initial domain
 		int[] y_envelope = new int[]{2, 6, 7};
-		y = solver.setVar("y", new int[]{}, y_envelope);
+		y = model.setVar("y", new int[]{}, y_envelope);
 		// z initial domain
 		int[] z_envelope = new int[]{2, 1, 3, 5, 7, 12};
 		int[] z_kernel = new int[]{2};
-		z = solver.setVar("z", z_kernel, z_envelope);
+		z = model.setVar("z", z_kernel, z_envelope);
 		// universe initial domain (note that the universe is a variable)
 		int[] universe_envelope = new int[]{1, 2, 3, 5, 7, 8, 42};
-		universe = solver.setVar("universe", new int[]{}, universe_envelope);
+		universe = model.setVar("universe", new int[]{}, universe_envelope);
 		// sum variable
-		sum = solver.intVar("sum of universe", 12, 19, true);
+		sum = model.intVar("sum of universe", 12, 19, true);
 
 		/////////////////
 		// CONSTRAINTS //
 		/////////////////
 
 		// partition constraint
-		solver.partition(new SetVar[]{x, y, z}, universe).post();
+		model.partition(new SetVar[]{x, y, z}, universe).post();
 		if (noEmptySet) {
 			// forbid empty sets
-			solver.nbEmpty(new SetVar[]{x, y, z, universe}, solver.intVar(0)).post();
+			model.nbEmpty(new SetVar[]{x, y, z, universe}, model.intVar(0)).post();
 		}
 		// restricts the sum of elements in universe
-		solver.sum(universe, sum, true).post();
+		model.sum(universe, sum, true).post();
 	}
 
-    @Override
-    public void configureSearch() {
+	@Override
+	public void configureSearch() {
 		// set a search strategy
-		solver.set(SetStrategyFactory.force_first(x, y, z, universe));
-    }
+		model.set(SetStrategyFactory.force_first(x, y, z, universe));
+	}
 
-    @Override
-    public void solve() {
+	@Override
+	public void solve() {
 		// find the optimum
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
-    }
+		model.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
+	}
 
-    @Override
-    public void prettyOut() {
-        System.out.println("best solution found");
-        System.out.println(x);
-        System.out.println(y);
-        System.out.println(z);
+	@Override
+	public void prettyOut() {
+		System.out.println("best solution found");
+		System.out.println(x);
+		System.out.println(y);
+		System.out.println(z);
 		System.out.println(universe);
-        System.out.println(sum);
-    }
+		System.out.println(sum);
+	}
 }

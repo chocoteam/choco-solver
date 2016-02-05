@@ -29,8 +29,7 @@
  */
 package org.chocosolver.solver.explanations;
 
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
@@ -40,7 +39,6 @@ import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
@@ -51,8 +49,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
 
 import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
@@ -75,8 +71,8 @@ import static org.testng.Assert.*;
 public class ExplanationEngineTest {
 
 
-    public void model1(Solver solver, int n) {
-        IntVar[] vs = solver.intVarArray("V", n, 1, n - 1, false);
+    public void model1(Model model, int n) {
+        IntVar[] vs = model.intVarArray("V", n, 1, n - 1, false);
         for (int i = 0; i < n - 1; i++) {
             new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)).post();
         }
@@ -90,9 +86,9 @@ public class ExplanationEngineTest {
     public void test1() {
         for (int n = 6; n < 1001; n *= 2) {
             System.out.printf("n = %d : ", n);
-            Solver solver = new Solver();
-            model1(solver, n);
-            Solver expl = new Solver();
+            Model model = new Model();
+            model1(model, n);
+            Model expl = new Model();
             model1(expl, n);
 
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
@@ -108,8 +104,8 @@ public class ExplanationEngineTest {
         }
     }
 
-    private void model2(Solver solver, int n) {
-        IntVar[] vs = solver.intVarArray("V", 2, 0, n, false);
+    private void model2(Model model, int n) {
+        IntVar[] vs = model.intVarArray("V", 2, 0, n, false);
         new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)).post();
         new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)).post();
     }
@@ -121,10 +117,10 @@ public class ExplanationEngineTest {
     public void test2() {
         for (int n = 100; n < 12801; n *= 2) {
             System.out.printf("n = %d : ", n);
-            Solver solver = new Solver();
-            model2(solver, n);
+            Model model = new Model();
+            model2(model, n);
 
-            Solver expl = new Solver();
+            Model expl = new Model();
             model2(expl, n);
 
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
@@ -140,10 +136,10 @@ public class ExplanationEngineTest {
         }
     }
 
-    private void model3(Solver solver, int n) {
-        IntVar[] vs = solver.intVarArray("V", n, 2, n + 2, true);
-        solver.arithm(vs[n - 2], "=", vs[n - 1]).post();
-        solver.arithm(vs[n - 2], "!=", vs[n - 1]).post();
+    private void model3(Model model, int n) {
+        IntVar[] vs = model.intVarArray("V", n, 2, n + 2, true);
+        model.arithm(vs[n - 2], "=", vs[n - 1]).post();
+        model.arithm(vs[n - 2], "!=", vs[n - 1]).post();
     }
 
     /**
@@ -153,9 +149,9 @@ public class ExplanationEngineTest {
     public void test3() {
         for (int n = 3; n < 64000; n *= 2) {
             System.out.printf("n = %d : ", n);
-            Solver solver = new Solver();
-            model3(solver, n);
-            Solver expl = new Solver();
+            Model model = new Model();
+            model3(model, n);
+            Model expl = new Model();
             model3(expl, n);
 
             IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars(false));
@@ -186,20 +182,20 @@ public class ExplanationEngineTest {
     public void test4() {
         int n = 3;
         out.printf("n = %d : ", n);
-        Solver solver = new Solver();
-        IntVar[] vs = solver.intVarArray("V", n, 0, n, false);
+        Model model = new Model();
+        IntVar[] vs = model.intVarArray("V", n, 0, n, false);
         new Constraint((n - 2) + ">" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 2], vs[n - 1]}, 1)).post();
         new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)).post();
 
         IntStrategy is = lexico_LB(vs);
-        ExplanationEngine ee = new ExplanationEngine(solver, true, true);
+        ExplanationEngine ee = new ExplanationEngine(model, true, true);
         Explanation r = null;
         try {
-            solver.propagate();
+            model.propagate();
             for (int i = 0; i < n; i++) {
                 Decision d = is.getDecision();
                 d.apply();
-                solver.propagate();
+                model.propagate();
             }
             fail();
         } catch (ContradictionException e) {
@@ -212,69 +208,69 @@ public class ExplanationEngineTest {
     @Test(groups="10s", timeOut=60000)
     public void testNosol0E() {
         for (int n = 500; n < 4501; n += 500) {
-            final Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, false);
-            solver.arithm(vars[n - 2], "=", vars[n - 1]).post();
-            solver.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-            solver.set(lexico_LB(vars));
+            final Model model = new Model();
+            IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
+            model.arithm(vars[n - 2], "=", vars[n - 1]).post();
+            model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
+            model.set(lexico_LB(vars));
 
-            learnCBJ(solver, false, false);
-            assertFalse(solver.findSolution());
+            learnCBJ(model, false, false);
+            assertFalse(model.findSolution());
 
-            assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
-            assertEquals(solver.getMeasures().getFailCount(), n - 1);
+            assertEquals(model.getMeasures().getNodeCount(), (n - 2) * 2);
+            assertEquals(model.getMeasures().getFailCount(), n - 1);
         }
     }
 
     @Test(groups="10s", timeOut=60000)
     public void testNosol0B() {
         for (int n = 500; n < 4501; n += 500) {
-            final Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, true);
-            solver.arithm(vars[n - 2], "=", vars[n - 1]).post();
-            solver.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-            solver.set(lexico_LB(vars));
+            final Model model = new Model();
+            IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
+            model.arithm(vars[n - 2], "=", vars[n - 1]).post();
+            model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
+            model.set(lexico_LB(vars));
 
-            learnCBJ(solver, false, false);
-            assertFalse(solver.findSolution());
+            learnCBJ(model, false, false);
+            assertFalse(model.findSolution());
 
-            assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
-            assertEquals(solver.getMeasures().getFailCount(), n - 1);
+            assertEquals(model.getMeasures().getNodeCount(), (n - 2) * 2);
+            assertEquals(model.getMeasures().getFailCount(), n - 1);
         }
     }
 
     @Test(groups="10s", timeOut=60000)
     public void testNosol1E() {
         for (int n = 500; n < 4501; n += 500) {
-            final Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, false);
+            final Model model = new Model();
+            IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
             for (int i = 0; i < n - 1; i++) {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
 
-            SLF.learnCBJ(solver, false, false);
-            Assert.assertFalse(solver.findSolution());
+            SLF.learnCBJ(model, false, false);
+            Assert.assertFalse(model.findSolution());
 
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
-            Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
+            Assert.assertEquals(model.getMeasures().getNodeCount(), 0);
+            Assert.assertEquals(model.getMeasures().getFailCount(), 1);
         }
     }
 
     @Test(groups="10s", timeOut=60000)
     public void testNosol1B() {
         for (int n = 500; n < 4501; n += 500) {
-            final Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, true);
+            final Model model = new Model();
+            IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
             for (int i = 0; i < n - 1; i++) {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
-            solver.set(ISF.lexico_LB(vars));
+            model.set(ISF.lexico_LB(vars));
 
-            SLF.learnCBJ(solver, false, false);
-            Assert.assertFalse(solver.findSolution());
+            SLF.learnCBJ(model, false, false);
+            Assert.assertFalse(model.findSolution());
 
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), 0);
-            Assert.assertEquals(solver.getMeasures().getFailCount(), 1);
+            Assert.assertEquals(model.getMeasures().getNodeCount(), 0);
+            Assert.assertEquals(model.getMeasures().getFailCount(), 1);
         }
     }
 
@@ -283,103 +279,103 @@ public class ExplanationEngineTest {
     public void testReif() {
         for (long seed = 0; seed < 10; seed++) {
 
-            final Solver solver = new Solver();
-            IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
-            BoolVar[] bs = solver.boolVarArray("b", 2);
-            solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-            solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-            solver.arithm(bs[0], "=", bs[1]).post();
+            final Model model = new Model();
+            IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
+            BoolVar[] bs = model.boolVarArray("b", 2);
+            model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+            model.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+            model.arithm(bs[0], "=", bs[1]).post();
 
-            solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
-            solver.arithm(p[9], "+", p[8], ">", 4).post();
-            solver.set(random_value(p, seed));
+            model.sum(copyOfRange(p, 0, 8), "=", 5).post();
+            model.arithm(p[9], "+", p[8], ">", 4).post();
+            model.set(random_value(p, seed));
 
-            learnCBJ(solver, false, false);
+            learnCBJ(model, false, false);
 
-            showShortStatistics(solver);
-            assertFalse(solver.findSolution());
+            showShortStatistics(model);
+            assertFalse(model.findSolution());
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testReif2() { // to test PropagatorActivation, from bs to p
 
-        final Solver solver = new Solver();
-        IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
-        BoolVar[] bs = solver.boolVarArray("b", 2);
-        solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-        solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-        solver.arithm(bs[0], "=", bs[1]).post();
+        final Model model = new Model();
+        IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
+        BoolVar[] bs = model.boolVarArray("b", 2);
+        model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+        model.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+        model.arithm(bs[0], "=", bs[1]).post();
 
-        solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
-        solver.arithm(p[9], "+", p[8], ">", 4).post();
+        model.sum(copyOfRange(p, 0, 8), "=", 5).post();
+        model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
-        solver.set(lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
+        model.set(lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
-        learnCBJ(solver, false, false);
+        learnCBJ(model, false, false);
 
-        showStatistics(solver);
-        showSolutions(solver);
-        showDecisions(solver);
-        assertFalse(solver.findSolution());
+        showStatistics(model);
+        showSolutions(model);
+        showDecisions(model);
+        assertFalse(model.findSolution());
 
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testReif3() { // to test PropagatorActivation, from bs to p
 
-        final Solver solver = new Solver();
-        IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
-        BoolVar[] bs = solver.boolVarArray("b", 2);
-        solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-        solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-        solver.arithm(bs[0], "=", bs[1]).post();
+        final Model model = new Model();
+        IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
+        BoolVar[] bs = model.boolVarArray("b", 2);
+        model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+        model.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+        model.arithm(bs[0], "=", bs[1]).post();
 
-        solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
-        solver.arithm(p[9], "+", p[8], ">", 4).post();
+        model.sum(copyOfRange(p, 0, 8), "=", 5).post();
+        model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
-        solver.set(lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
+        model.set(lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
-        learnCBJ(solver, false, false);
+        learnCBJ(model, false, false);
 
-        showStatistics(solver);
-        showSolutions(solver);
-        showDecisions(solver);
-        assertFalse(solver.findSolution());
+        showStatistics(model);
+        showSolutions(model);
+        showDecisions(model);
+        assertFalse(model.findSolution());
     }
 
 
-    private void configure(Solver solver, int conf) {
+    private void configure(Model model, int conf) {
         switch (conf) {
             case 0:
                 System.out.printf("noexp  :");
                 break;
             case 1: {
                 System.out.printf("cbj    :");
-                ExplanationFactory.CBJ.plugin(solver, false, false);
+                ExplanationFactory.CBJ.plugin(model, false, false);
             }
             break;
             case 2: {
                 System.out.printf("cbj+ng :");
-                ExplanationFactory.CBJ.plugin(solver, true, false);
+                ExplanationFactory.CBJ.plugin(model, true, false);
             }
             break;
             case 3: {
                 System.out.printf("dbt    :");
-                ExplanationFactory.DBT.plugin(solver, false, false);
+                ExplanationFactory.DBT.plugin(model, false, false);
             }
             break;
             case 4: {
                 System.out.printf("dbt+ng :");
-                ExplanationFactory.DBT.plugin(solver, true, false);
+                ExplanationFactory.DBT.plugin(model, true, false);
             }
             break;
         }
     }
 
     private void testLS(int m, int a) {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("c", m * m, 0, m - 1, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("c", m * m, 0, m - 1, false);
         // Constraints
         for (int i = 0; i < m; i++) {
             IntVar[] row = new IntVar[m];
@@ -388,10 +384,10 @@ public class ExplanationEngineTest {
                 row[x] = vars[i * m + x];
                 col[x] = vars[x * m + i];
             }
-            solver.allDifferent(col, "FC").post();
-            solver.allDifferent(row, "FC").post();
+            model.allDifferent(col, "FC").post();
+            model.allDifferent(row, "FC").post();
         }
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        model.set(IntStrategyFactory.lexico_LB(vars));
 //        solver.set(IntStrategyFactory.custom(
 //                ISF.lexico_var_selector(),
 //                ISF.min_value_selector(),
@@ -399,10 +395,10 @@ public class ExplanationEngineTest {
 //                vars));
 
 
-        configure(solver, a);
-        Chatterbox.showShortStatistics(solver);
-        SMF.limitTime(solver, "5m");
-        Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
+        configure(model, a);
+        Chatterbox.showShortStatistics(model);
+        SMF.limitTime(model, "5m");
+        Assert.assertTrue(model.findSolution() || model.hasReachedLimit());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -416,33 +412,33 @@ public class ExplanationEngineTest {
     }
 
     private void testCA(int n, int a) {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("c", n, 0, n - 1, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("c", n, 0, n - 1, false);
         IntVar[] vectors = new IntVar[(n * (n - 1)) / 2];
         IntVar[][] diff = new IntVar[n][n];
         int idx = 0;
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
-                IntVar k = solver.intVar(randomName(), -n, n, false);
-                solver.arithm(k, "!=", 0).post();
-                solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
-                vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
+                IntVar k = model.intVar(randomName(), -n, n, false);
+                model.arithm(k, "!=", 0).post();
+                model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
+                vectors[idx] = model.intOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }
         }
-        solver.allDifferent(vars, "FC").post();
-        solver.allDifferent(vectors, "FC").post();
+        model.allDifferent(vars, "FC").post();
+        model.allDifferent(vectors, "FC").post();
 
         // symmetry-breaking
-        solver.arithm(vars[0], "<", vars[n - 1]).post();
+        model.arithm(vars[0], "<", vars[n - 1]).post();
 
-        solver.set(lexico_LB(vars));
+        model.set(lexico_LB(vars));
 
-        configure(solver, a);
-        showShortStatistics(solver);
-        limitTime(solver, "5m");
-        assertTrue(solver.findSolution());
+        configure(model, a);
+        showShortStatistics(model);
+        limitTime(model, "5m");
+        assertTrue(model.findSolution());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -456,41 +452,41 @@ public class ExplanationEngineTest {
     }
 
     private void testGR(int m, int a) {
-        Solver solver = new Solver();
-        IntVar[] ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        Model model = new Model();
+        IntVar[] ticks = model.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
 
-        solver.arithm(ticks[0], "=", 0).post();
+        model.arithm(ticks[0], "=", 0).post();
 
         for (int i = 0; i < m - 1; i++) {
-            solver.arithm(ticks[i + 1], ">", ticks[i]).post();
+            model.arithm(ticks[i + 1], ">", ticks[i]).post();
         }
 
-        IntVar[] diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
+        IntVar[] diffs = model.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         IntVar[][] m_diffs = new IntVar[m][m];
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                solver.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]).post();
-                solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
-                solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
-                solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
+                model.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]).post();
+                model.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
+                model.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
+                model.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
                 m_diffs[i][j] = diffs[k];
             }
         }
-        solver.allDifferent(diffs, "FC").post();
+        model.allDifferent(diffs, "FC").post();
 
         // break symetries
         if (m > 2) {
-            solver.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
+            model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
 
-        solver.set(lexico_LB(ticks));
+        model.set(lexico_LB(ticks));
 
-        configure(solver, a);
-        showShortStatistics(solver);
-        limitTime(solver, "5m");
-        solver.findOptimalSolution(MINIMIZE, ticks[m - 1]);
-        assertTrue(solver.getMeasures().getSolutionCount() > 0);
+        configure(model, a);
+        showShortStatistics(model);
+        limitTime(model, "5m");
+        model.findOptimalSolution(MINIMIZE, ticks[m - 1]);
+        assertTrue(model.getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -504,20 +500,20 @@ public class ExplanationEngineTest {
     }
 
     private void testLN(int n, int k, int a) {
-        Solver solver = new Solver();
-        IntVar[] position = solver.intVarArray("p", n * k, 0, k * n - 1, false);
+        Model model = new Model();
+        IntVar[] position = model.intVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
-                solver.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]).post();
+                model.arithm(model.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]).post();
             }
         }
-        solver.allDifferent(position, "FC").post();
-        solver.set(minDom_UB(position));
+        model.allDifferent(position, "FC").post();
+        model.set(minDom_UB(position));
 
-        configure(solver, a);
-        showShortStatistics(solver);
-        limitTime(solver, "5m");
-        assertTrue(solver.findSolution());
+        configure(model, a);
+        showShortStatistics(model);
+        limitTime(model, "5m");
+        assertTrue(model.findSolution());
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -534,7 +530,7 @@ public class ExplanationEngineTest {
     }
 
     private void testMS(int n, int a) {
-        Solver solver = new Solver();
+        Model model = new Model();
         int ms = n * (n * n + 1) / 2;
 
         IntVar[][] matrix = new IntVar[n][n];
@@ -544,7 +540,7 @@ public class ExplanationEngineTest {
         int k = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++, k++) {
-                matrix[i][j] = solver.intVar("square" + i + "," + j, 1, n * n, false);
+                matrix[i][j] = model.intVar("square" + i + "," + j, 1, n * n, false);
                 vars[k] = matrix[i][j];
                 invMatrix[j][i] = matrix[i][j];
             }
@@ -557,28 +553,28 @@ public class ExplanationEngineTest {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.allDifferent(vars, "FC").post();
+        model.allDifferent(vars, "FC").post();
 
         int[] coeffs = new int[n];
         fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
-            solver.scalar(matrix[i], coeffs, "=", ms).post();
-            solver.scalar(invMatrix[i], coeffs, "=", ms).post();
+            model.scalar(matrix[i], coeffs, "=", ms).post();
+            model.scalar(invMatrix[i], coeffs, "=", ms).post();
         }
-        solver.scalar(diag1, coeffs, "=", ms).post();
-        solver.scalar(diag2, coeffs, "=", ms).post();
+        model.scalar(diag1, coeffs, "=", ms).post();
+        model.scalar(diag2, coeffs, "=", ms).post();
 
         // Symetries breaking
-        solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
-        solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
-        solver.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
+        model.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
+        model.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
+        model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
-        solver.set(minDom_MidValue(true, vars));
+        model.set(minDom_MidValue(true, vars));
 
-        configure(solver, a);
-        showShortStatistics(solver);
-        limitTime(solver, "5m");
-        assertTrue(solver.findSolution() || solver.hasReachedLimit());
+        configure(model, a);
+        showShortStatistics(model);
+        limitTime(model, "5m");
+        assertTrue(model.findSolution() || model.hasReachedLimit());
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -592,20 +588,20 @@ public class ExplanationEngineTest {
     }
 
     private void testPA(int N, int a) {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int size = N / 2;
         IntVar[] x, y;
-        x = solver.intVarArray("x", size, 1, 2 * size, false);
-        y = solver.intVarArray("y", size, 1, 2 * size, false);
+        x = model.intVarArray("x", size, 1, 2 * size, false);
+        y = model.intVarArray("y", size, 1, 2 * size, false);
 
         // break symmetries
         for (int i = 0; i < size - 1; i++) {
-            solver.arithm(x[i], "<", x[i + 1]).post();
-            solver.arithm(y[i], "<", y[i + 1]).post();
+            model.arithm(x[i], "<", x[i + 1]).post();
+            model.arithm(y[i], "<", y[i + 1]).post();
         }
-        solver.arithm(x[0], "<", y[0]).post();
-        solver.arithm(x[0], "=", 1).post();
+        model.arithm(x[0], "<", y[0]).post();
+        model.arithm(x[0], "=", 1).post();
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -624,40 +620,40 @@ public class ExplanationEngineTest {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        solver.scalar(xy, coeffs, "=", 0).post();
+        model.scalar(xy, coeffs, "=", 0).post();
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = solver.intVar("x^", 0, x[i].getUB() * x[i].getUB(), true);
+            sx[i] = model.intVar("x^", 0, x[i].getUB() * x[i].getUB(), true);
             sxy[i] = sx[i];
-            sy[i] = solver.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
+            sy[i] = model.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
             sxy[size + i] = sy[i];
-            solver.times(x[i], x[i], sx[i]).post();
-            solver.times(y[i], y[i], sy[i]).post();
-            solver.member(sx[i], 1, 4 * size * size).post();
-            solver.member(sy[i], 1, 4 * size * size).post();
+            model.times(x[i], x[i], sx[i]).post();
+            model.times(y[i], y[i], sy[i]).post();
+            model.member(sx[i], 1, 4 * size * size).post();
+            model.member(sy[i], 1, 4 * size * size).post();
         }
-        solver.scalar(sxy, coeffs, "=", 0).post();
+        model.scalar(sxy, coeffs, "=", 0).post();
 
         coeffs = new int[size];
         fill(coeffs, 1);
-        solver.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
-        solver.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
-        solver.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
-        solver.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
+        model.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
+        model.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
+        model.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
+        model.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
 
-        solver.allDifferent(xy, "FC").post();
+        model.allDifferent(xy, "FC").post();
 
 
-        solver.set(minDom_LB(Ovars));
+        model.set(minDom_LB(Ovars));
 
-        configure(solver, a);
-        showShortStatistics(solver);
-        limitTime(solver, "5m");
-        assertTrue(solver.findSolution() || solver.hasReachedLimit());
+        configure(model, a);
+        showShortStatistics(model);
+        limitTime(model, "5m");
+        assertTrue(model.findSolution() || model.hasReachedLimit());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -672,22 +668,22 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void testClauses() {
         int n = 4;
-        Solver solver = new Solver();
-        BoolVar[] bs = solver.boolVarArray("B", n);
+        Model model = new Model();
+        BoolVar[] bs = model.boolVarArray("B", n);
         for (int i = 1; i < n; i++) {
             SatFactory.addBoolEq(bs[0], bs[i]);
         }
         SatFactory.addBoolNot(bs[0], bs[n - 1]);
 
-        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
+        ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation r = null;
         try {
-            solver.propagate();
+            model.propagate();
             IntStrategy is = ISF.lexico_LB(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException c) {
             r = ee.explain(c);
         }
@@ -697,22 +693,22 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void testClauses2() {
         int n = 5;
-        Solver solver = new Solver();
-        BoolVar[] bs = solver.boolVarArray("B", n);
+        Model model = new Model();
+        BoolVar[] bs = model.boolVarArray("B", n);
         SatFactory.addBoolOrArrayEqualTrue(bs); // useless
         SatFactory.addBoolIsLeVar(bs[0], bs[1], bs[2]);
         SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
         SatFactory.addBoolNot(bs[0], bs[1]);
 
-        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
+        ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation r = null;
         try {
-            solver.propagate();
+            model.propagate();
             IntStrategy is = ISF.lexico_LB(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException c) {
             r = ee.explain(c);
         }
@@ -722,8 +718,8 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void testClauses3() {
         int n = 12;
-        Solver solver = new Solver();
-        BoolVar[] bs = solver.boolVarArray("B", n);
+        Model model = new Model();
+        BoolVar[] bs = model.boolVarArray("B", n);
         SatFactory.addClauses(new BoolVar[]{bs[0], bs[1], bs[2]}, new BoolVar[]{});
         SatFactory.addClauses(new BoolVar[]{bs[0], bs[1]}, new BoolVar[]{bs[2]});
         // pollution
@@ -731,19 +727,19 @@ public class ExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
         SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
 
-        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
+        ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation r = null;
         try {
-            solver.propagate();
+            model.propagate();
             IntStrategy is = ISF.lexico_LB(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
-            solver.propagate();
+            model.propagate();
             d = is.getDecision();
             d.buildNext();
             d.apply();
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException c) {
             r = ee.explain(c);
         }
@@ -753,24 +749,24 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void testClauses4() {
         int n = 12;
-        Solver solver = new Solver();
-        BoolVar[] bs = solver.boolVarArray("B", n);
+        Model model = new Model();
+        BoolVar[] bs = model.boolVarArray("B", n);
         SatFactory.addClauses(new BoolVar[]{bs[2]}, new BoolVar[]{bs[0], bs[1]});
         SatFactory.addClauses(new BoolVar[]{}, new BoolVar[]{bs[0], bs[1], bs[2]});
 
-        ExplanationEngine ee = new ExplanationEngine(solver, true, false);
+        ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation r = null;
         try {
-            solver.propagate();
+            model.propagate();
             IntStrategy is = ISF.lexico_UB(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
-            solver.propagate();
+            model.propagate();
             d = is.getDecision();
             d.buildNext();
             d.apply();
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException c) {
             r = ee.explain(c);
         }
@@ -781,18 +777,18 @@ public class ExplanationEngineTest {
     public void test01() {
         int n = 6;
         int m = 10;
-        Solver s1 = test(n, m, 1);
-        Solver s2 = test(n, m, 2);
-        Solver s3 = test(n, m, 3);
+        Model s1 = test(n, m, 1);
+        Model s2 = test(n, m, 2);
+        Model s3 = test(n, m, 3);
         Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
         Assert.assertEquals(s1.getMeasures().getSolutionCount(), s3.getMeasures().getSolutionCount());
         Assert.assertTrue(s1.getMeasures().getNodeCount() >= s2.getMeasures().getNodeCount());
         Assert.assertTrue(s2.getMeasures().getNodeCount() >= s3.getMeasures().getNodeCount());
     }
 
-    private Solver test(int n, int m, int expMode) {
+    private Model test(int n, int m, int expMode) {
         // infeasible problem
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] x = s.intVarArray("x", n, 0, m, true);
         s.allDifferent(x, "NEQS").post();
         s.arithm(x[n - 2], "=", x[n - 1]).post();
@@ -812,7 +808,7 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void aTest() {
 
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar one = s.intVar(1);
         IntVar three = s.intVar(3);
@@ -849,52 +845,52 @@ public class ExplanationEngineTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testOnce1(){
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 4;
-        IntVar[] X = solver.intVarArray("X", 4, 1, 2, false);
-        BoolVar[] B = solver.boolVarArray("B", 4);
+        IntVar[] X = model.intVarArray("X", 4, 1, 2, false);
+        BoolVar[] B = model.boolVarArray("B", 4);
         for(int i = 0 ; i < n; i++){
-            solver.arithm(X[i], ">", i).reifyWith(B[i]);
+            model.arithm(X[i], ">", i).reifyWith(B[i]);
         }
-        ExplanationFactory.CBJ.plugin(solver, false, false);
-        solver.set(ISF.lexico_UB(B), new Once(X, ISF.lexico_var_selector(), ISF.min_value_selector()));
-        Chatterbox.showDecisions(solver);
-        Chatterbox.showSolutions(solver);
-        solver.findAllSolutions();
+        ExplanationFactory.CBJ.plugin(model, false, false);
+        model.set(ISF.lexico_UB(B), new Once(X, ISF.lexico_var_selector(), ISF.min_value_selector()));
+        Chatterbox.showDecisions(model);
+        Chatterbox.showSolutions(model);
+        model.findAllSolutions();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testIntSat() throws ContradictionException {
-        Solver solver = new Solver();
-        IntVar x = solver.intVar("x", -2, 3, true);
-        IntVar y = solver.intVar("y", 1, 4, true);
-        IntVar z = solver.intVar("z", -2, 2, true);
+        Model model = new Model();
+        IntVar x = model.intVar("x", -2, 3, true);
+        IntVar y = model.intVar("y", 1, 4, true);
+        IntVar z = model.intVar("z", -2, 2, true);
 
-        solver.scalar(new IntVar[]{x, y, z}, new int[]{1, -3, -3}, "<=", 1).post();
-        solver.scalar(new IntVar[]{x, y, z}, new int[]{-2, 3, 2}, "<=", -2).post();
-        solver.scalar(new IntVar[]{x, y, z}, new int[]{3, -3, 2}, "<=", -1).post();
+        model.scalar(new IntVar[]{x, y, z}, new int[]{1, -3, -3}, "<=", 1).post();
+        model.scalar(new IntVar[]{x, y, z}, new int[]{-2, 3, 2}, "<=", -2).post();
+        model.scalar(new IntVar[]{x, y, z}, new int[]{3, -3, 2}, "<=", -1).post();
 
-        ExplanationEngine ee = new ExplanationEngine(solver, false, false);
+        ExplanationEngine ee = new ExplanationEngine(model, false, false);
 
-        solver.getEnvironment().worldPush();
-        solver.propagate();
+        model.getEnvironment().worldPush();
+        model.propagate();
         assertEquals(x.getLB(), 1);
         assertEquals(y.getUB(), 2);
         assertEquals(z.getUB(), 0);
-        solver.getEnvironment().worldPush();
+        model.getEnvironment().worldPush();
         OnDemandIntStrategy strategy = new OnDemandIntStrategy();
         IntDecision d1 = strategy.makeIntDecision(x, int_split, 2);
         d1.buildNext();
         d1.apply();
-        solver.propagate();
+        model.propagate();
         assertEquals(z.getUB(), -1);
-        solver.getEnvironment().worldPush();
+        model.getEnvironment().worldPush();
         IntDecision d2 = strategy.makeIntDecision(x, int_split, 1);
         d2.buildNext();
         d2.apply();
         ContradictionException c = null;
         try {
-            solver.propagate();
+            model.propagate();
             fail();
         } catch (ContradictionException ce) {
             c = ce;
@@ -904,15 +900,15 @@ public class ExplanationEngineTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test111() throws ContradictionException {
-        Solver solver = new Solver();
-        IntVar x = solver.intVar("x", 0, 1, true);
-        IntVar y = solver.intVar("y", 0, 1, true);
-        IntVar z = solver.intVar("z", 0, 1, true);
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", 0, 1, true);
+        IntVar z = model.intVar("z", 0, 1, true);
 
-        solver.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2).post();
+        model.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2).post();
 
-        solver.propagate();
-        out.printf("%s\n", solver);
+        model.propagate();
+        out.printf("%s\n", model);
     }
 
 }

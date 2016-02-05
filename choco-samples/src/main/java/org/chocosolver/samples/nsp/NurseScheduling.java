@@ -35,7 +35,7 @@
 
 package org.chocosolver.samples.nsp;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -61,17 +61,17 @@ public class NurseScheduling {
             }
         },*/
         INC_DOMWDEG {
-            AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+            AbstractStrategy getGoal(Model s, IntVar[] vars) {
                 return IntStrategyFactory.domOverWDeg(vars, System.currentTimeMillis());
             }
         },
         FORCE_INPUT {
-            AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+            AbstractStrategy getGoal(Model s, IntVar[] vars) {
                 return IntStrategyFactory.minDom_LB(cast(s.getVars()));
             }
         },
         FORCE_DOMWDEG {
-            AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+            AbstractStrategy getGoal(Model s, IntVar[] vars) {
                 return IntStrategyFactory.domOverWDeg(cast(s.getVars()), System.currentTimeMillis());
             }
         },
@@ -81,7 +81,7 @@ public class NurseScheduling {
             }
         },*/
         MIN_DOM {
-            AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+            AbstractStrategy getGoal(Model s, IntVar[] vars) {
                 return IntStrategyFactory.minDom_LB(vars);
             }
         },
@@ -92,14 +92,14 @@ public class NurseScheduling {
             }
         },*/
         RAND {
-            AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+            AbstractStrategy getGoal(Model s, IntVar[] vars) {
                 return IntStrategyFactory.random_bound(vars, 0);
             }
         };
 
 
         //	DOMDDEG { AbstractIntBranchingStrategy getGoal(Solver s, IntVar[] vars) { return BranchingFactory.domDDeg(s, vars, new IncreasingDomain()); }},
-        AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+        AbstractStrategy getGoal(Model s, IntVar[] vars) {
             return null;
         }
 
@@ -154,20 +154,20 @@ public class NurseScheduling {
 
         BranchingStrategy strategy = BranchingStrategy.FORCE_DOMWDEG;
 
-        Solver solver = new Solver();
-        NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, solver);
-        SearchMonitorFactory.limitTime(solver, 180000);
+        Model model = new Model();
+        NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
+        SearchMonitorFactory.limitTime(model, 180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
-        solver.set(strategy.getGoal(solver, vars));
-        if (Boolean.TRUE == solver.findSolution()) {
-            m.printSolution(solver);
+        model.set(strategy.getGoal(model, vars));
+        if (Boolean.TRUE == model.findSolution()) {
+            m.printSolution(model);
             NSChecker checker = new NSChecker(data);
-            if (checker.checkSolution(m.getSolution(solver)))
+            if (checker.checkSolution(m.getSolution(model)))
                 System.out.println("Solution checked.");
         }
         String content =
-                solver.getMeasures().getTimeCount() + " ms,\t " + solver.getMeasures().getNodeCount() + " nodes,\t "
-                        + solver.getMeasures().getBackTrackCount() + " bks,\t "
+                model.getMeasures().getTimeCount() + " ms,\t " + model.getMeasures().getNodeCount() + " nodes,\t "
+                        + model.getMeasures().getBackTrackCount() + " bks,\t "
                         + strategy.name() + "\t " + patternOptions.name() + "\t "
                         + m.getDescription() + "\n";
         System.out.println(content);
@@ -180,16 +180,16 @@ public class NurseScheduling {
         NSCPModelConstrained.ConstraintOptions patternOptions = NSCPModelConstrained.ConstraintOptions.WITH_MCR;
         BranchingStrategy strategy = BranchingStrategy.FORCE_DOMWDEG;
 
-        Solver solver = new Solver();
-        NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, solver);
+        Model model = new Model();
+        NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
 
-        solver.set(strategy.getGoal(solver, vars));
+        model.set(strategy.getGoal(model, vars));
 
-        System.out.printf("%s\n", solver.toString());
-        if (Boolean.TRUE == solver.findSolution()) {
+        System.out.printf("%s\n", model.toString());
+        if (Boolean.TRUE == model.findSolution()) {
             NSChecker checker = new NSChecker(data);
-            if (checker.checkSolution(m.getSolution(solver)))
+            if (checker.checkSolution(m.getSolution(model)))
                 System.out.println("Solution checked.");
         }
     }
@@ -197,29 +197,29 @@ public class NurseScheduling {
 
     public static void runOne(NSData data, BranchingStrategy strategy, NSCPModelConstrained.ConstraintOptions basisOptions, NSCPModelConstrained.ConstraintOptions patternOptions) {
         System.out.println(strategy.name() + "\t " + patternOptions.name() + "\t " + basisOptions.name());
-        Solver solver = new Solver();
-        NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, solver);
-        SearchMonitorFactory.limitTime(solver, 180000);
+        Model model = new Model();
+        NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
+        SearchMonitorFactory.limitTime(model, 180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
-        solver.set(strategy.getGoal(solver, vars));
+        model.set(strategy.getGoal(model, vars));
         String solved = "0";
-        if (Boolean.TRUE == solver.findSolution()) {
-            m.printSolution(solver);
+        if (Boolean.TRUE == model.findSolution()) {
+            m.printSolution(model);
             NSChecker checker = new NSChecker(data);
-            if (checker.checkSolution(m.getSolution(solver)))
+            if (checker.checkSolution(m.getSolution(model)))
                 System.out.println("Solution checked.");
             solved = "1";
         }
         String content =
-                solved + ",\t" + solver.getMeasures().getTimeCount() + " ms,\t "
-                        + solver.getMeasures().getNodeCount() + " nodes,\t "
-                        + solver.getMeasures().getBackTrackCount() + " bks,\t "
+                solved + ",\t" + model.getMeasures().getTimeCount() + " ms,\t "
+                        + model.getMeasures().getNodeCount() + " nodes,\t "
+                        + model.getMeasures().getBackTrackCount() + " bks,\t "
                         + strategy.name() + "\t " + patternOptions.name() + "\t " + basisOptions.name() + "\t "
                         + m.getDescription() + "\n";
         String contentCSV =
-                solved + "," + solver.getMeasures().getTimeCount() + ","
-                        + solver.getMeasures().getNodeCount() + ","
-                        + solver.getMeasures().getBackTrackCount() + ","
+                solved + "," + model.getMeasures().getTimeCount() + ","
+                        + model.getMeasures().getNodeCount() + ","
+                        + model.getMeasures().getBackTrackCount() + ","
                         + strategy.name() + "," + patternOptions.name() + "," + basisOptions.name() + ","
                         + m.getDescription() + "\n";
         System.out.println(content);

@@ -30,14 +30,12 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
-
-import java.util.Arrays;
 
 import static java.util.Arrays.fill;
 
@@ -68,24 +66,20 @@ public class Partition extends AbstractProblem {
     Constraint[] heavy = new Constraint[3];
 
     @Override
-    public void createSolver() {
-        solver = new Solver("Partition " + N);
-    }
-
-    @Override
     public void buildModel() {
+        model = new Model("Partition " + N);
         int size = this.N / 2;
         IntVar[] x, y;
-        x = solver.intVarArray("x", size, 1, 2 * size, false);
-        y = solver.intVarArray("y", size, 1, 2 * size, false);
+        x = model.intVarArray("x", size, 1, 2 * size, false);
+        y = model.intVarArray("y", size, 1, 2 * size, false);
 
 //        break symmetries
         for (int i = 0; i < size - 1; i++) {
-            solver.arithm(x[i], "<", x[i + 1]).post();
-            solver.arithm(y[i], "<", y[i + 1]).post();
+            model.arithm(x[i], "<", x[i + 1]).post();
+            model.arithm(y[i], "<", y[i + 1]).post();
         }
-        solver.arithm(x[0], "<", y[0]).post();
-        solver.arithm(x[0], "=", 1).post();
+        model.arithm(x[0], "<", y[0]).post();
+        model.arithm(x[0], "=", 1).post();
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -104,7 +98,7 @@ public class Partition extends AbstractProblem {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        heavy[0] = solver.scalar(xy, coeffs, "=", 0);
+        heavy[0] = model.scalar(xy, coeffs, "=", 0);
         heavy[0].post();
 
         IntVar[] sxy, sx, sy;
@@ -112,26 +106,26 @@ public class Partition extends AbstractProblem {
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = solver.intVar("x^", 0, x[i].getUB() * x[i].getUB(), true);
+            sx[i] = model.intVar("x^", 0, x[i].getUB() * x[i].getUB(), true);
             sxy[i] = sx[i];
-            sy[i] = solver.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
+            sy[i] = model.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
             sxy[size + i] = sy[i];
-            solver.times(x[i], x[i], sx[i]).post();
-            solver.times(y[i], y[i], sy[i]).post();
-            solver.member(sx[i], 1, 4 * size * size).post();
-            solver.member(sy[i], 1, 4 * size * size).post();
+            model.times(x[i], x[i], sx[i]).post();
+            model.times(y[i], y[i], sy[i]).post();
+            model.member(sx[i], 1, 4 * size * size).post();
+            model.member(sy[i], 1, 4 * size * size).post();
         }
-        heavy[1] = solver.scalar(sxy, coeffs, "=", 0);
+        heavy[1] = model.scalar(sxy, coeffs, "=", 0);
         heavy[1].post();
 
         coeffs = new int[size];
         fill(coeffs, 1);
-        solver.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
-        solver.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
-        solver.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
-        solver.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
+        model.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
+        model.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
+        model.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
+        model.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
 
-        heavy[2] = solver.allDifferent(xy, "BC");
+        heavy[2] = model.allDifferent(xy, "BC");
         heavy[2].post();
 
         vars = xy;
@@ -139,18 +133,18 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(Ovars));
+        model.set(IntStrategyFactory.minDom_LB(Ovars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder();
-        if (ESat.TRUE == solver.isFeasible()) {
+        if (ESat.TRUE == model.isFeasible()) {
             int sum1 = 0, sum2 = 0;
             int i = 0;
             st.append(vars[i].getValue());

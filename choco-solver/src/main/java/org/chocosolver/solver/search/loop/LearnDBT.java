@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -74,13 +74,13 @@ public class LearnDBT extends LearnCBJ {
 
     /**
      * Create a Dynamic Backtracking strategy.
-     * @param mSolver the solver to instrument
+     * @param mModel the solver to instrument
      * @param nogoodFromConflict set to <tt>true</tt> to extract nogoods from explanations.
      * @param userFeedbackOn set to <tt>true</tt> to record causes in explanations (required for user feedback mainly).
      */
-    public LearnDBT(Solver mSolver, boolean nogoodFromConflict, boolean userFeedbackOn) {
-        super(mSolver, nogoodFromConflict, userFeedbackOn);
-        dbTstrategy = new DBTstrategy(mSolver, mExplainer);
+    public LearnDBT(Model mModel, boolean nogoodFromConflict, boolean userFeedbackOn) {
+        super(mModel, nogoodFromConflict, userFeedbackOn);
+        dbTstrategy = new DBTstrategy(mModel, mExplainer);
         mRuleStore = mExplainer.getRuleStore();
         mEventStore = mExplainer.getEventStore();
     }
@@ -95,12 +95,12 @@ public class LearnDBT extends LearnCBJ {
     @Override
     void identifyRefutedDecision(int nworld) {
         dbTstrategy.clear();
-        if (nworld == 1 || mSolver.getEngine().getContradictionException().c == mSolver.getObjectiveManager()) {
+        if (nworld == 1 || mModel.getEngine().getContradictionException().c == mModel.getObjectiveManager()) {
             super.identifyRefutedDecision(nworld);
             return;
         }
         // preliminary : compute where to jump back
-        Decision dup, dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
+        Decision dup, dec = mModel.getSearchLoop().getLastDecision(); // the current decision to undo
         int myworld = nworld;
         while (dec != RootDecision.ROOT && myworld > 1) {
             dec = dec.getPrevious();
@@ -109,7 +109,7 @@ public class LearnDBT extends LearnCBJ {
         Decision jmpBck = dec;
 
         // now we can explicitly enforce the jump
-        dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
+        dec = mModel.getSearchLoop().getLastDecision(); // the current decision to undo
         int decIdx = lastExplanation.getEvtstrIdx(); // index of the decision to refute in the event store
         while (dec != RootDecision.ROOT && nworld > 1) {
 
@@ -183,16 +183,16 @@ public class LearnDBT extends LearnCBJ {
     private static class DBTstrategy extends AbstractStrategy implements IMonitorInitialize {
 
         private final ArrayDeque<Decision<IntVar>> decision_path;
-        private final Solver mSolver;
+        private final Model mModel;
         private final ExplanationEngine mExplainer;
         private AbstractStrategy mainStrategy;
 
-        protected DBTstrategy(Solver solver, ExplanationEngine mExplainer) {
+        protected DBTstrategy(Model model, ExplanationEngine mExplainer) {
             super(new Variable[0]);
             this.decision_path = new ArrayDeque<>();
-            this.mSolver = solver;
+            this.mModel = model;
             this.mExplainer = mExplainer;
-            this.mSolver.plugMonitor(this);
+            this.mModel.plugMonitor(this);
         }
 
         protected void clear() {
@@ -210,15 +210,15 @@ public class LearnDBT extends LearnCBJ {
 
         @Override
         public void afterInitialize() {
-            this.mainStrategy = mSolver.getStrategy();
+            this.mainStrategy = mModel.getStrategy();
             // put this strategy before any other ones.
-            mSolver.set(this);
+            mModel.set(this);
         }
 
         @Override
         public Decision getDecision() {
             if (decision_path.size() > 0) {
-                int wi = mSolver.getEnvironment().getWorldIndex();
+                int wi = mModel.getEnvironment().getWorldIndex();
                 Decision d = decision_path.pollLast();
                 int old = d.getWorldIndex();
 //                System.out.printf("MOVE %s (%d -> %d)\n", d, old, wi);

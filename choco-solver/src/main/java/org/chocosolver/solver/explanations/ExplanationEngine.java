@@ -30,7 +30,7 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.store.ArrayEventStore;
@@ -56,23 +56,23 @@ public class ExplanationEngine implements FilteringMonitor {
     private final RuleStore ruleStore; // set of active rules
     private final boolean saveCauses; // save the clauses in Explanation
     private final boolean enablePartialExplanation;
-    private final Solver mSolver;
+    private final Model mModel;
     PoolManager<Explanation> explanationPool;
 
 
     /**
      * Create an explanation engine based on a rule store
-     * @param solver                   a solver
+     * @param model                   a solver
      * @param partialExplanationsOn set to <tt>true</tt> to enable partial explanations, <tt>false</tt> otherwise
      * @param recordCauses set to <tt>true</tt> to record causes in explanations, <tt>false</tt> otherwise
      */
-    public ExplanationEngine(Solver solver, boolean partialExplanationsOn, boolean recordCauses) {
-        this.mSolver = solver;
+    public ExplanationEngine(Model model, boolean partialExplanationsOn, boolean recordCauses) {
+        this.mModel = model;
         this.saveCauses = recordCauses;
         this.enablePartialExplanation = partialExplanationsOn;
-        eventStore = new ArrayEventStore(solver.getEnvironment());
-        ruleStore = new RuleStore(solver, saveCauses, enablePartialExplanation);
-        solver.set(this);
+        eventStore = new ArrayEventStore(model.getEnvironment());
+        ruleStore = new RuleStore(model, saveCauses, enablePartialExplanation);
+        model.set(this);
         this.explanationPool = new PoolManager<>();
     }
 
@@ -130,8 +130,8 @@ public class ExplanationEngine implements FilteringMonitor {
         return eventStore;
     }
 
-    public Solver getSolver() {
-        return mSolver;
+    public Model getSolver() {
+        return mModel;
     }
 
     /**

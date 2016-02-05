@@ -82,13 +82,13 @@ public abstract class PropConditionnal extends Propagator<Variable> {
     }
 
     private void postTemp(final Constraint c) throws ContradictionException {
-        solver.postTemp(c);
+        model.postTemp(c);
         // the constraint has been added during the resolution.
         // it should be removed on backtrack -> create a new undo operation
-        solver.getEnvironment().save(new Operation() {
+        model.getEnvironment().save(new Operation() {
             @Override
             public void undo() {
-                solver.unpost(c);
+                model.unpost(c);
             }
         });
     }

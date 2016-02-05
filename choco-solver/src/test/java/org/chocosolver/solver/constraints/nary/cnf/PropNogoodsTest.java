@@ -33,7 +33,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -59,9 +59,9 @@ public class PropNogoodsTest {
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() throws Exception {
-        Solver solver = new Solver("nogoods");
-        vars = solver.intVarArray("X", 4, -1, 1, false);
-        PNG = solver.getNogoodStore().getPropNogoods();
+        Model model = new Model("nogoods");
+        vars = model.intVarArray("X", 4, -1, 1, false);
+        PNG = model.getNogoodStore().getPropNogoods();
         lits = new int[6];
         lits[0] = PNG.Literal(vars[0], 0, true);
         lits[1] = PNG.Literal(vars[0], 0, false);
@@ -166,7 +166,7 @@ public class PropNogoodsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testLiteral2() throws Exception {
-        BoolVar[] b = vars[0].getSolver().boolVarArray("B", 100);
+        BoolVar[] b = vars[0].getModel().boolVarArray("B", 100);
         for(int i = 0 ; i < 100; i++){
             PNG.Literal(b[i], 0, true);
             PNG.Literal(b[i], 0, false);
@@ -233,7 +233,7 @@ public class PropNogoodsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testWhy() throws Exception {
-        ExplanationEngine ee = new ExplanationEngine(vars[0].getSolver(), true, false);
+        ExplanationEngine ee = new ExplanationEngine(vars[0].getModel(), true, false);
 
         PNG.propagate(2);
         TIntList list = new TIntArrayList();
@@ -299,7 +299,7 @@ public class PropNogoodsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testDeclareDomainNogood(){
-        IntVar var = vars[0].getSolver().intVar("X4", -1, 1, false);
+        IntVar var = vars[0].getModel().intVar("X4", -1, 1, false);
         PNG.declareDomainNogood(var);
         try{
             PNG.doReduce(13);

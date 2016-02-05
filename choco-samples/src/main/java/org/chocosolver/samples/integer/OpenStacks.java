@@ -31,9 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.SatFactory;
-import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
@@ -83,63 +81,60 @@ public class OpenStacks extends AbstractProblem {
         }
     }
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Open stacks");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         setUp();
-        scheds = solver.intVarArray("s", np, 0, np - 1, false);
-        solver.allDifferent(scheds, "BC").post();
+        scheds = model.intVarArray("s", np, 0, np - 1, false);
+        model.allDifferent(scheds, "BC").post();
         o = new IntVar[nc][np + 1];
         for (int i = 0; i < nc; i++) {
-            o[i] = solver.intVarArray("o_" + i, np + 1, 0, norders[i], false);
+            o[i] = model.intVarArray("o_" + i, np + 1, 0, norders[i], false);
             // no order at t = 0
-            solver.arithm(o[i][0], "=", 0).post();
+            model.arithm(o[i][0], "=", 0).post();
         }
         for (int t = 1; t < np + 1; t++) {
             for (int i = 0; i < nc; i++) {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
-                IntVar value = solver.intVar("val_" + t + "_" + i, 0, norders[i], false);
-                solver.element(value, orders[i], scheds[t - 1], 0).post();
-                solver.sum(new IntVar[]{o[i][t - 1], value}, "=", o[i][t]).post();
+                IntVar value = model.intVar("val_" + t + "_" + i, 0, norders[i], false);
+                model.element(value, orders[i], scheds[t - 1], 0).post();
+                model.sum(new IntVar[]{o[i][t - 1], value}, "=", o[i][t]).post();
             }
         }
-        o2b = solver.boolVarMatrix("b", np, nc);
+        o2b = model.boolVarMatrix("b", np, nc);
         for (int i = 0; i < nc; i++) {
             for (int j = 1; j < np + 1; j++) {
-                BoolVar[] btmp = solver.boolVarArray("bT_" + i + "_" + j, 2);
-                solver.ifThenElse(btmp[0],
-                        solver.arithm(o[i][j - 1], "<", solver.intVar(norders[i])),
-                        solver.arithm(o[i][j - 1], ">=", solver.intVar(norders[i])));
+                BoolVar[] btmp = model.boolVarArray("bT_" + i + "_" + j, 2);
+                model.ifThenElse(btmp[0],
+                        model.arithm(o[i][j - 1], "<", model.intVar(norders[i])),
+                        model.arithm(o[i][j - 1], ">=", model.intVar(norders[i])));
 
-                solver.ifThenElse(btmp[1],
-                        solver.arithm(o[i][j], ">", solver.intVar(0)),
-                        solver.arithm(o[i][j], "<=", solver.intVar(0)));
-                addClauses(ifOnlyIf(o2b[j - 1][i], and(btmp[0], btmp[1])), solver);
+                model.ifThenElse(btmp[1],
+                        model.arithm(o[i][j], ">", model.intVar(0)),
+                        model.arithm(o[i][j], "<=", model.intVar(0)));
+                addClauses(ifOnlyIf(o2b[j - 1][i], and(btmp[0], btmp[1])), model);
             }
         }
-        open = solver.intVarArray("open", np, 0, nc + 1, true);
+        open = model.intVarArray("open", np, 0, nc + 1, true);
         for (int i = 0; i < np; i++) {
-            solver.sum(o2b[i], "=", open[i]).post();
+            model.sum(o2b[i], "=", open[i]).post();
         }
 
 
-        objective = solver.intVar("OBJ", 0, nc * np, true);
-        solver.max(objective, open).post();
+        objective = model.intVar("OBJ", 0, nc * np, true);
+        model.max(objective, open).post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(scheds));
+        model.set(IntStrategyFactory.minDom_LB(scheds));
     }
 
     @Override
     public void solve() {
-        SearchMonitorFactory.limitNode(solver, 200000);
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        SearchMonitorFactory.limitNode(model, 200000);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 
     @Override
@@ -153,7 +148,7 @@ public class OpenStacks extends AbstractProblem {
             st.append("(").append(norders[i]).append(")\n\t");
         }
         st.append("\n\t");
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             for (int j = 0; j < np; j++) {
                 st.append(scheds[j].getValue()).append(" ");
             }

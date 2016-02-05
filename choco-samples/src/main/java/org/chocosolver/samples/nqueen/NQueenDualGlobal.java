@@ -30,6 +30,7 @@
 package org.chocosolver.samples.nqueen;
 
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -42,6 +43,7 @@ public class NQueenDualGlobal extends AbstractNQueen {
 
     @Override
     public void buildModel() {
+        model = new Model("NQueen");
         vars = new IntVar[n];
         IntVar[] diag1 = new IntVar[n];
         IntVar[] diag2 = new IntVar[n];
@@ -51,28 +53,28 @@ public class NQueenDualGlobal extends AbstractNQueen {
         IntVar[] dualdiag2 = new IntVar[n];
 
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("Q_" + i, 1, n, false);
-            diag1[i] = solver.intVar("D1_" + i, 1, 2 * n, false);
-            diag2[i] = solver.intVar("D2_" + i, -n, n, false);
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
+            diag1[i] = model.intVar("D1_" + i, 1, 2 * n, false);
+            diag2[i] = model.intVar("D2_" + i, -n, n, false);
 
-            dualvars[i] = solver.intVar("DQ_" + i, 1, n, false);
-            dualdiag1[i] = solver.intVar("DD1_" + i, 1, 2 * n, false);
-            dualdiag2[i] = solver.intVar("DD2_" + i, -n, n, false);
+            dualvars[i] = model.intVar("DQ_" + i, 1, n, false);
+            dualdiag1[i] = model.intVar("DD1_" + i, 1, 2 * n, false);
+            dualdiag2[i] = model.intVar("DD2_" + i, -n, n, false);
         }
 
         for (int i = 0; i < n; i++) {
-            solver.arithm(diag1[i], "=", vars[i], "+", i).post();
-            solver.arithm(diag2[i], "=", vars[i], "-", i).post();
+            model.arithm(diag1[i], "=", vars[i], "+", i).post();
+            model.arithm(diag2[i], "=", vars[i], "-", i).post();
 
-            solver.arithm(dualdiag1[i], "=", dualvars[i], "+", i).post();
-            solver.arithm(dualdiag2[i], "=", dualvars[i], "-", i).post();
+            model.arithm(dualdiag1[i], "=", dualvars[i], "+", i).post();
+            model.arithm(dualdiag2[i], "=", dualvars[i], "-", i).post();
         }
-        solver.allDifferent(diag1, "BC").post();
-        solver.allDifferent(diag2, "BC").post();
-        solver.allDifferent(dualdiag1, "BC").post();
-        solver.allDifferent(dualdiag2, "BC").post();
+        model.allDifferent(diag1, "BC").post();
+        model.allDifferent(diag2, "BC").post();
+        model.allDifferent(dualdiag1, "BC").post();
+        model.allDifferent(dualdiag2, "BC").post();
 
-        solver.inverseChanneling(vars, dualvars, 1, 1).post();
+        model.inverseChanneling(vars, dualvars, 1, 1).post();
     }
 
 

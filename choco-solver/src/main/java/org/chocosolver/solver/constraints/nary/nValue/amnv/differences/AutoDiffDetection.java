@@ -65,7 +65,7 @@ public class AutoDiffDetection implements D {
     @Override
     public boolean mustBeDifferent(int i1, int i2) {
         // automatic detection of binary disequalities and allDifferent constraints
-        if (DYNAMIC_ADDITIONS || scope[i1].getSolver().getEnvironment().getWorldIndex() <= 1) {
+        if (DYNAMIC_ADDITIONS || scope[i1].getModel().getEnvironment().getWorldIndex() <= 1) {
             for (Propagator p : scope[i1].getPropagators())
                 if (p.isActive())
                     if (p.getClass().getName().contains("PropNotEqualX_Y") || p.getClass().getName().contains("PropAllDiff"))

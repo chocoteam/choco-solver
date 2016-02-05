@@ -31,7 +31,7 @@ package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.delta.IEnumDelta;
@@ -109,11 +109,11 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     /**
      * Create a BoolVar {0,1} or {true, false}
      * @param name name of the variable
-     * @param solver declaring solver
+     * @param model declaring solver
      */
-    public BoolVarImpl(String name, Solver solver) {
-        super(name, solver);
-        notInstanciated = this.solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
+    public BoolVarImpl(String name, Model model) {
+        super(name, model);
+        notInstanciated = this.model.getEnvironment().getSharedBipartiteSetForBooleanVars();
         this.offset = notInstanciated.add();
         mValue = 0;
     }
@@ -184,7 +184,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 hasChanged = instantiateTo(1, cause);
             } else {
                 if (_plugexpl) {
-                    solver.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+                    model.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
                 }
                 this.contradiction(cause, MSG_UNKNOWN);
 
@@ -218,7 +218,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
+                    model.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, MSG_INST);
             }
@@ -233,13 +233,13 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 }
                 mValue = value;
                 if (_plugexpl) {
-                    solver.getEventObserver().instantiateTo(this, value, cause, 0, 1);
+                    model.getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.notifyPropagators(e, cause);
                 return true;
             } else {
                 if (_plugexpl) {
-                    solver.getEventObserver().instantiateTo(this, value, cause, 0, 1);
+                    model.getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.contradiction(cause, MSG_UNKNOWN);
                 return false;
@@ -298,7 +298,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         boolean hasChanged = false;
         if (lb > 1 || ub < 0) {
             if (_plugexpl) {
-                solver.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+                model.getEventObserver().instantiateTo(this, 2, cause, 0, 1);
             }
             this.contradiction(cause, MSG_UNKNOWN);
         } else {
@@ -460,7 +460,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new OneValueDelta(solver.getEnvironment());
+            delta = new OneValueDelta(model.getEnvironment());
             reactOnRemoval = true;
         }
     }
@@ -484,7 +484,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
-        solver.getEngine().fails(cause, this, message);
+        model.getEngine().fails(cause, this, message);
     }
 
     @Override
@@ -495,7 +495,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @SuppressWarnings("unchecked")
     @Override
     public BoolVar duplicate() {
-        return solver.boolVar(randomName(this.name));
+        return model.boolVar(randomName(this.name));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -534,7 +534,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public BoolVar not() {
         if (!hasNot()) {
-            not = solver.boolNotView(this);
+            not = model.boolNotView(this);
             not._setNot(this);
         }
         return not;

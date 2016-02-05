@@ -30,13 +30,11 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -60,13 +58,13 @@ public class TimesTest extends AbstractTernaryTest {
     }
 
     @Override
-    protected Constraint make(IntVar[] vars, Solver solver) {
-        return solver.times(vars[0], vars[1], vars[2]);
+    protected Constraint make(IntVar[] vars, Model model) {
+        return model.times(vars[0], vars[1], vars[2]);
     }
 
 	@Test(groups="1s", timeOut=60000)
 	public void testJL() {
-		Solver s = new Solver();
+		Model s = new Model();
 		IntVar a = s.intVar("a", 0, 3, false);
 		IntVar b = s.intVar("b", -3, 3, false);
 
@@ -90,7 +88,7 @@ public class TimesTest extends AbstractTernaryTest {
 	public void testJL2(){
 		for(int i = 1 ; i < 100001; i*=10) {
 			out.printf("%d\n", 465 * i);
-			Solver s = new Solver();
+			Model s = new Model();
 			IntVar i1 = s.intVar("i1", 0, 465 * i, false);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, false);
 			s.times(i1, 465 * i, i2).post();
@@ -103,7 +101,7 @@ public class TimesTest extends AbstractTernaryTest {
 	public void testJL3(){
 		for(int i = 1 ; i < 1000001; i*=10) {
 			out.printf("%d\n", 465 * i);
-			Solver s = new Solver();
+			Model s = new Model();
 			IntVar i1 = s.intVar("i1", 0, 465 * i, true);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, true);
 			s.times(i1, 465 * i, i2).post();
@@ -114,7 +112,7 @@ public class TimesTest extends AbstractTernaryTest {
 
 	@Test(groups="10s", timeOut=60000)
 	public void testJL4() {
-		Solver s = new Solver();
+		Model s = new Model();
 		IntVar i1 = s.intVar("i1", 0, 465, false);
 		IntVar i2 = s.intVar("i2", 0, 465 * 10000, false);
 		s.times(i1, 10000, i2).post();
@@ -123,7 +121,7 @@ public class TimesTest extends AbstractTernaryTest {
 	}
 	@Test(groups="1s", timeOut=60000)
 	public void testJL5() {
-		Solver s = new Solver();
+		Model s = new Model();
 		IntVar i1 = s.intVar("i1", MIN_VALUE / 10, MAX_VALUE / 10, true);
 		IntVar i2 = s.intVar("i2", MIN_VALUE / 10, MAX_VALUE / 10, true);
 		s.times(i1, 10000, i2).post();
@@ -133,7 +131,7 @@ public class TimesTest extends AbstractTernaryTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testJL6() {
-		Solver s = new Solver();
+		Model s = new Model();
 		s.set(new Settings() {
 			@Override
 			public boolean enableTableSubstitution() {
@@ -148,7 +146,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testJL7() {
-		Solver s = new Solver();
+		Model s = new Model();
 		s.set(new Settings() {
 			@Override
 			public boolean enableTableSubstitution() {

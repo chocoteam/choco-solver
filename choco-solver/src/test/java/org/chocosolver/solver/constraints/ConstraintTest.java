@@ -29,12 +29,10 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
@@ -51,40 +49,40 @@ public class ConstraintTest {
     @Test(groups="1s", timeOut=60000)
     public void testBooleanChannelingJL() {
         //#issue 190
-        Solver solver = new Solver();
-        BoolVar[] bs = solver.boolVarArray("bs", 3);
-        SetVar s1 = solver.setVar("s1", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
-        SetVar s2 = solver.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
-        solver.or(solver.allEqual(new SetVar[]{s1, s2}), solver.setBoolsChanneling(bs, s1, 0)).post();
-        solver.findAllSolutions();
-        assertEquals(2040, solver.getMeasures().getSolutionCount());
+        Model model = new Model();
+        BoolVar[] bs = model.boolVarArray("bs", 3);
+        SetVar s1 = model.setVar("s1", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
+        SetVar s2 = model.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
+        model.or(model.allEqual(new SetVar[]{s1, s2}), model.setBoolsChanneling(bs, s1, 0)).post();
+        model.findAllSolutions();
+        assertEquals(2040, model.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions() {
-        Solver solver = new Solver();
-        IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
-        solver.allDifferent(ivs, "BC").post(); // boundAndInst()
-        solver.arithm(ivs[0], "+", ivs[1], "=", 4).post(); // all()
-        solver.arithm(ivs[0], ">=", ivs[2]).post(); // INST + UB or INST + LB
-        solver.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
+        Model model = new Model();
+        IntVar[] ivs = model.intVarArray("X", 4, 0, 10, false);
+        model.allDifferent(ivs, "BC").post(); // boundAndInst()
+        model.arithm(ivs[0], "+", ivs[1], "=", 4).post(); // all()
+        model.arithm(ivs[0], ">=", ivs[2]).post(); // INST + UB or INST + LB
+        model.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
 
-        solver.set(random_value(ivs, 0));
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 48);
-        assertEquals(solver.getMeasures().getNodeCount(), 100);
+        model.set(random_value(ivs, 0));
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 48);
+        assertEquals(model.getMeasures().getNodeCount(), 100);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions2() {
-        Solver solver = new Solver();
-        IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
-        solver.allDifferent(ivs, "BC").post(); // boundAndInst()
-        solver.arithm(ivs[0], "+", ivs[1], "=", 4).post(); // all()
-        Constraint cr = solver.arithm(ivs[0], ">=", ivs[2]);
+        Model model = new Model();
+        IntVar[] ivs = model.intVarArray("X", 4, 0, 10, false);
+        model.allDifferent(ivs, "BC").post(); // boundAndInst()
+        model.arithm(ivs[0], "+", ivs[1], "=", 4).post(); // all()
+        Constraint cr = model.arithm(ivs[0], ">=", ivs[2]);
         cr.post(); // INST + UB or INST + LB
-        solver.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
-        solver.unpost(cr);
+        model.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
+        model.unpost(cr);
     }
 
 }

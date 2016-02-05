@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -53,7 +53,7 @@ public interface ILogicalConstraintFactory {
 	 * @return a constraint and ensuring that variables in <i>bools</i> are all set to true
 	 */
 	default Constraint and(BoolVar... bools) {
-		Solver s = bools[0].getSolver();
+		Model s = bools[0].getModel();
 		IntVar sum = s.intVar(0, bools.length, true);
 		s.sum(bools, "=", sum).post();
 		return s.arithm(sum, "=", bools.length);
@@ -65,7 +65,7 @@ public interface ILogicalConstraintFactory {
 	 * @return a constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
 	 */
 	default Constraint or(BoolVar... bools) {
-		Solver s = bools[0].getSolver();
+		Model s = bools[0].getModel();
 		IntVar sum = s.intVar(0, bools.length, true);
 		s.sum(bools, "=", sum).post();
 		return s.arithm(sum, ">=", 1);
@@ -184,7 +184,7 @@ public interface ILogicalConstraintFactory {
 	default void ifThen(BoolVar ifVar, Constraint thenCstr) {
 		// PRESOLVE
 		if(ifVar.contains(1)){
-			Solver s = ifVar.getSolver();
+			Model s = ifVar.getModel();
 			if(ifVar.isInstantiated()) {
 				thenCstr.post();
 			}else if(thenCstr.isSatisfied() == ESat.FALSE) {
@@ -222,7 +222,7 @@ public interface ILogicalConstraintFactory {
 	 * @param cstr the constraint to be satisfied if and only if <i>var</i> = 1
 	 */
 	default void reification(BoolVar var, Constraint cstr){
-		Solver s = var.getSolver();
+		Model s = var.getModel();
 		// PRESOLVE
 		ESat entail = cstr.isSatisfied();
 		if(var.isInstantiatedTo(1)) {

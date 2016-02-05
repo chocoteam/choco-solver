@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.SearchLoopFactory;
@@ -69,32 +69,32 @@ public class SearchMonitorFactory {
     /**
      * Branch a luby restart strategy to the solver
      *
-     * @param solver               the solver
+     * @param model               the solver
      * @param scaleFactor          scale factor
      * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
-     * @see SearchLoopFactory#restart(Solver, LongCriterion, IRestartStrategy, int)
+     * @see SearchLoopFactory#restart(Model, LongCriterion, IRestartStrategy, int)
      */
-    public static void luby(Solver solver, int scaleFactor, int geometricalFactor,
+    public static void luby(Model model, int scaleFactor, int geometricalFactor,
                             ICounter restartStrategyLimit, int restartLimit) {
-        SLF.restart(solver, restartStrategyLimit,
+        SLF.restart(model, restartStrategyLimit,
                 new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**
      * Build a geometrical restart strategy
      *
-     * @param solver               the solver
+     * @param model               the solver
      * @param scaleFactor          scale factor
      * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
-     * @see SearchLoopFactory#restart(Solver, LongCriterion, IRestartStrategy, int)
+     * @see SearchLoopFactory#restart(Model, LongCriterion, IRestartStrategy, int)
      */
-    public static void geometrical(Solver solver, int scaleFactor, double geometricalFactor,
+    public static void geometrical(Model model, int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        SLF.restart(solver, restartStrategyLimit,
+        SLF.restart(model, restartStrategyLimit,
                 new GeometricalRestartStrategy(scaleFactor, geometricalFactor),
                 restartLimit);
     }
@@ -103,24 +103,24 @@ public class SearchMonitorFactory {
      * Defines a limit on the number of nodes allowed in the tree search.
      * When the limit is reached, the resolution is stopped.
      *
-     * @param solver the solver to instrument
+     * @param model the solver to instrument
      * @param limit maximal number of nodes to open
      */
-    public static void limitNode(Solver solver, long limit) {
-        NodeCounter counter = new NodeCounter(solver, limit);
-        solver.addStopCriterion(counter);
+    public static void limitNode(Model model, long limit) {
+        NodeCounter counter = new NodeCounter(model, limit);
+        model.addStopCriterion(counter);
     }
 
     /**
      * Defines a limit over the number of solutions found during the resolution.
      * WHen the limit is reached, the resolution is stopped.
      *
-     * @param solver the solver to instrument
+     * @param model the solver to instrument
      * @param limit maximal number of solutions
      */
-    public static void limitSolution(Solver solver, long limit) {
-        SolutionCounter counter = new SolutionCounter(solver, limit);
-        solver.addStopCriterion(counter);
+    public static void limitSolution(Model model, long limit) {
+        SolutionCounter counter = new SolutionCounter(model, limit);
+        model.addStopCriterion(counter);
     }
 
 
@@ -131,12 +131,12 @@ public class SearchMonitorFactory {
      * <br/>
      * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(long)}, that runs the limit in a separated thread.</b>
      *
-     * @param solver the solver subject to the time limit
+     * @param model the solver subject to the time limit
      * @param limit  maximal resolution time in millisecond
      */
-    public static void limitTime(Solver solver, long limit) {
-        TimeCounter counter = new TimeCounter(solver, limit * MILLISECONDS_IN_NANOSECONDS);
-        solver.addStopCriterion(counter);
+    public static void limitTime(Model model, long limit) {
+        TimeCounter counter = new TimeCounter(model, limit * MILLISECONDS_IN_NANOSECONDS);
+        model.addStopCriterion(counter);
     }
 
     /**
@@ -148,12 +148,12 @@ public class SearchMonitorFactory {
      * <p>
      * Based on {@code SearchMonitorFactory.convertInMilliseconds(String duration)}
      *
-     * @param solver the solver to instrument
+     * @param model the solver to instrument
      * @param duration a String which states the duration like "WWd XXh YYm ZZs".
      * @see SearchMonitorFactory#convertInMilliseconds(String)
      */
-    public static void limitTime(Solver solver, String duration) {
-        limitTime(solver, convertInMilliseconds(duration));
+    public static void limitTime(Model model, String duration) {
+        limitTime(model, convertInMilliseconds(duration));
     }
 
     /**
@@ -262,25 +262,25 @@ public class SearchMonitorFactory {
     /**
      * Defines a limit over the number of fails allowed during the resolution.
      * WHen the limit is reached, the resolution is stopped.
-     * @param solver the solver to instrument
+     * @param model the solver to instrument
      * @param limit maximal number of fails
      */
 
-    public static void limitFail(Solver solver, long limit) {
-        FailCounter counter = new FailCounter(solver, limit);
-        solver.addStopCriterion(counter);
+    public static void limitFail(Model model, long limit) {
+        FailCounter counter = new FailCounter(model, limit);
+        model.addStopCriterion(counter);
     }
 
     /**
      * Defines a limit over the number of backtracks allowed during the resolution.
      * WHen the limit is reached, the resolution is stopped.
      *
-     * @param solver the solver to instrument
+     * @param model the solver to instrument
      * @param limit maximal number of backtracks
      */
-    public static void limitBacktrack(Solver solver, long limit) {
-        BacktrackCounter counter = new BacktrackCounter(solver, limit);
-        solver.addStopCriterion(counter);
+    public static void limitBacktrack(Model model, long limit) {
+        BacktrackCounter counter = new BacktrackCounter(model, limit);
+        model.addStopCriterion(counter);
     }
 
     /**
@@ -288,11 +288,11 @@ public class SearchMonitorFactory {
      * When the condition depicted in the criterion is met,
      * the search stops.
      *
-     * @param solver the solver to instrument
+     * @param model the solver to instrument
      * @param aStopCriterion the stop criterion which, when met, stops the search.
      */
-    public static void limitSearch(Solver solver, Criterion aStopCriterion) {
-        solver.addStopCriterion(aStopCriterion);
+    public static void limitSearch(Model model, Criterion aStopCriterion) {
+        model.addStopCriterion(aStopCriterion);
     }
 
     /**
@@ -303,17 +303,17 @@ public class SearchMonitorFactory {
      * @param vars array of decision variables
      */
     public static void nogoodRecordingOnSolution(IntVar[] vars) {
-        vars[0].getSolver().plugMonitor(new NogoodFromSolutions(vars));
+        vars[0].getModel().plugMonitor(new NogoodFromSolutions(vars));
     }
 
     /**
      * * Record nogoods from restart, that is, anytime the search restarts, a nogood is produced, based on the decision path, to prevent from
      * scanning the same sub-search tree.
      *
-     * @param solver the solver to observe
+     * @param model the solver to observe
      */
-    public static void nogoodRecordingFromRestarts(final Solver solver) {
-        solver.plugMonitor(new NogoodFromRestarts(solver));
+    public static void nogoodRecordingFromRestarts(final Model model) {
+        model.plugMonitor(new NogoodFromRestarts(model));
     }
 
     /**
@@ -321,21 +321,21 @@ public class SearchMonitorFactory {
      * and offers more services.
      */
     @Deprecated
-    public static void prepareForParallelResolution(List<Solver> solvers) {
-        if (solvers.get(0).getObjectives() != null &&
-                solvers.get(0).getObjectives().length == 1) {
+    public static void prepareForParallelResolution(List<Model> models) {
+        if (models.get(0).getObjectives() != null &&
+                models.get(0).getObjectives().length == 1) {
             // share the best known bound
-            solvers.stream().forEach(s -> s.plugMonitor(
+            models.stream().forEach(s -> s.plugMonitor(
                     (IMonitorSolution) () -> {
                         synchronized (s.getObjectiveManager()) {
                             switch (s.getObjectiveManager().getPolicy()) {
                                 case MAXIMIZE:
                                     int lb = s.getObjectiveManager().getBestSolutionValue().intValue();
-                                    solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestLB(lb));
+                                    models.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestLB(lb));
                                     break;
                                 case MINIMIZE:
                                     int ub = s.getObjectiveManager().getBestSolutionValue().intValue();
-                                    solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestUB(ub));
+                                    models.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestUB(ub));
                                     break;
                             }
                         }
@@ -343,12 +343,12 @@ public class SearchMonitorFactory {
             ));
         }
         AtomicInteger finishers = new AtomicInteger(0);
-        solvers.stream().forEach(s -> s.addStopCriterion(()->finishers.get()>0));
-        solvers.stream().forEach(s -> s.plugMonitor(new IMonitorClose() {
+        models.stream().forEach(s -> s.addStopCriterion(()->finishers.get()>0));
+        models.stream().forEach(s -> s.plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
                 int count = finishers.addAndGet(1);
-                if(count == solvers.size()){
+                if(count == models.size()){
                     finishers.set(0); //reset the counter to 0
                 }
             }
@@ -358,11 +358,11 @@ public class SearchMonitorFactory {
     /**
      * Connect and send data to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
      * This requires to have installed the library and to start it before launching the resolution.
-     * @param aSolver solver to visualize
+     * @param aModel solver to visualize
      */
     @SuppressWarnings("unused")
-    public static void connectocpprofiler(Solver aSolver){
-        aSolver.plugMonitor(new CPProfiler(aSolver));
+    public static void connectocpprofiler(Model aModel){
+        aModel.plugMonitor(new CPProfiler(aModel));
     }
 
 }

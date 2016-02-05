@@ -30,13 +30,11 @@
 package org.chocosolver.solver.constraints.nary;
 
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -59,56 +57,56 @@ public class LexTest {
     @Test(groups="1s", timeOut=60000)
     public void testLessLexq() {
         for (int seed = 0; seed < 5; seed++) {
-            Solver solver = new Solver();
+            Model model = new Model();
             int n1 = 8;
             int k = 2;
             IntVar[] vs1 = new IntVar[n1 / 2];
             IntVar[] vs2 = new IntVar[n1 / 2];
             for (int i = 0; i < n1 / 2; i++) {
-                vs1[i] = solver.intVar("" + i, 0, k, true);
-                vs2[i] = solver.intVar("" + i, 0, k, true);
+                vs1[i] = model.intVar("" + i, 0, k, true);
+                vs2[i] = model.intVar("" + i, 0, k, true);
             }
-            solver.lexLessEq(vs1, vs2).post();
-            solver.set(random_bound(append(vs1, vs2), seed));
-            solver.findAllSolutions();
+            model.lexLessEq(vs1, vs2).post();
+            model.set(random_bound(append(vs1, vs2), seed));
+            model.findAllSolutions();
             int kpn = (int) pow(k + 1, n1 / 2);
-            assertEquals(solver.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
+            assertEquals(model.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testLex() {
         for (int seed = 0; seed < 5; seed++) {
-            Solver solver = new Solver();
+            Model model = new Model();
             int n1 = 8;
             int k = 2;
             IntVar[] vs1 = new IntVar[n1 / 2];
             IntVar[] vs2 = new IntVar[n1 / 2];
             for (int i = 0; i < n1 / 2; i++) {
-                vs1[i] = solver.intVar("" + i, 0, k, true);
-                vs2[i] = solver.intVar("" + i, 0, k, true);
+                vs1[i] = model.intVar("" + i, 0, k, true);
+                vs2[i] = model.intVar("" + i, 0, k, true);
             }
-            solver.lexLess(vs1, vs2).post();
-            solver.set(random_bound(append(vs1, vs2), seed));
+            model.lexLess(vs1, vs2).post();
+            model.set(random_bound(append(vs1, vs2), seed));
 
-            solver.findAllSolutions();
-            assertEquals(solver.getMeasures().getSolutionCount(), 3240);
+            model.findAllSolutions();
+            assertEquals(model.getMeasures().getSolutionCount(), 3240);
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testLexiSatisfied() {
-        Solver solver = new Solver();
-        IntVar v1 = solver.intVar("v1", 1, 1, true);
-        IntVar v2 = solver.intVar("v2", 2, 2, true);
-        IntVar v3 = solver.intVar("v3", 3, 3, true);
-        Constraint c1 = solver.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
-        Constraint c2 = solver.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
-        Constraint c3 = solver.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
-        Constraint c4 = solver.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
-        Constraint c5 = solver.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
-        Constraint c6 = solver.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
-        solver.post(c1, c2, c3, c4, c5, c6);
+        Model model = new Model();
+        IntVar v1 = model.intVar("v1", 1, 1, true);
+        IntVar v2 = model.intVar("v2", 2, 2, true);
+        IntVar v3 = model.intVar("v3", 3, 3, true);
+        Constraint c1 = model.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
+        Constraint c2 = model.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
+        Constraint c3 = model.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
+        Constraint c4 = model.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
+        Constraint c5 = model.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
+        Constraint c6 = model.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
+        model.post(c1, c2, c3, c4, c5, c6);
         Assert.assertEquals(ESat.TRUE, c1.isSatisfied());
         Assert.assertEquals(ESat.FALSE, c2.isSatisfied());
         Assert.assertEquals(ESat.FALSE, c3.isSatisfied());
@@ -120,151 +118,151 @@ public class LexTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAshish() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] a = new IntVar[2];
         IntVar[] b = new IntVar[2];
 
-        a[0] = solver.intVar("a1", 5, 7, true);
-        a[1] = solver.intVar("a2", 1, 1, true);
+        a[0] = model.intVar("a1", 5, 7, true);
+        a[1] = model.intVar("a2", 1, 1, true);
 
-        b[0] = solver.intVar("b1", 5, 8, true);
-        b[1] = solver.intVar("b2", 0, 0, true);
+        b[0] = model.intVar("b1", 5, 8, true);
+        b[1] = model.intVar("b2", 0, 0, true);
 
 
-        solver.lexLess(a, b).post();
+        model.lexLess(a, b).post();
         try {
-            solver.propagate();
+            model.propagate();
 
         } catch (ContradictionException e) {
             fail();
         }
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.findAllSolutions();
-        assertEquals(6, solver.getMeasures().getSolutionCount());
+        model.findAllSolutions();
+        assertEquals(6, model.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testBug1() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] a = new IntVar[2];
         IntVar[] b = new IntVar[2];
 
-        a[0] = solver.intVar("a2", new int[]{5, 8});
-        a[1] = solver.intVar("a3", new int[]{-2, 0});
+        a[0] = model.intVar("a2", new int[]{5, 8});
+        a[1] = model.intVar("a3", new int[]{-2, 0});
 
-        b[0] = solver.intVar("b2", new int[]{5, 8});
-        b[1] = solver.intVar("b3", new int[]{-3, -2});
+        b[0] = model.intVar("b2", new int[]{5, 8});
+        b[1] = model.intVar("b3", new int[]{-3, -2});
 
-        solver.lexLess(a, b).post();
+        model.lexLess(a, b).post();
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             fail();
         }
         assertEquals(5, a[0].getUB());
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testBug2() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] a = new IntVar[2];
         IntVar[] b = new IntVar[2];
 
-        a[0] = solver.intVar("a1", new int[]{-2, 5});
-        a[1] = solver.intVar("a2", new int[]{-1, 1});
+        a[0] = model.intVar("a1", new int[]{-2, 5});
+        a[1] = model.intVar("a2", new int[]{-1, 1});
 
-        b[0] = solver.intVar("b1", new int[]{3, 5});
-        b[1] = solver.intVar("b2", new int[]{-6, -1});
+        b[0] = model.intVar("b1", new int[]{3, 5});
+        b[1] = model.intVar("b2", new int[]{-6, -1});
 
 
-        solver.lexLess(a, b).post();
+        model.lexLess(a, b).post();
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             fail();
         }
         assertEquals(-2, a[0].getUB());
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 8);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testBug3() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] a = new IntVar[2];
         IntVar[] b = new IntVar[2];
 
-        a[0] = solver.intVar("a1", new int[]{5});
-        a[1] = solver.intVar("a2", new int[]{-1, 1});
+        a[0] = model.intVar("a1", new int[]{5});
+        a[1] = model.intVar("a2", new int[]{-1, 1});
 
-        b[0] = solver.intVar("b1", new int[]{3, 5});
-        b[1] = solver.intVar("b2", new int[]{-6, -1});
+        b[0] = model.intVar("b1", new int[]{3, 5});
+        b[1] = model.intVar("b2", new int[]{-6, -1});
 
 
-        solver.lexLess(a, b).post();
+        model.lexLess(a, b).post();
         try {
-            solver.propagate();
+            model.propagate();
             fail();
         } catch (ContradictionException ignored) {
         }
-        assertEquals(solver.getMeasures().getSolutionCount(), 0);
+        assertEquals(model.getMeasures().getSolutionCount(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testBug4() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] a = new IntVar[5];
         IntVar[] b = new IntVar[5];
 
-        a[0] = solver.intVar("a1", new int[]{2});
-        a[1] = solver.intVar("a2", new int[]{1, 3, 4});
-        a[2] = solver.intVar("a3", new int[]{1, 2, 3, 4, 5});
-        a[3] = solver.intVar("a4", new int[]{1, 2});
-        a[4] = solver.intVar("a5", new int[]{3, 4, 5});
+        a[0] = model.intVar("a1", new int[]{2});
+        a[1] = model.intVar("a2", new int[]{1, 3, 4});
+        a[2] = model.intVar("a3", new int[]{1, 2, 3, 4, 5});
+        a[3] = model.intVar("a4", new int[]{1, 2});
+        a[4] = model.intVar("a5", new int[]{3, 4, 5});
 
-        b[0] = solver.intVar("b1", new int[]{0, 1, 2});
-        b[1] = solver.intVar("b2", new int[]{1});
-        b[2] = solver.intVar("b3", new int[]{0, 1, 2, 3, 4});
-        b[3] = solver.intVar("b4", new int[]{0, 1});
-        b[4] = solver.intVar("b5", new int[]{0, 1, 2});
+        b[0] = model.intVar("b1", new int[]{0, 1, 2});
+        b[1] = model.intVar("b2", new int[]{1});
+        b[2] = model.intVar("b3", new int[]{0, 1, 2, 3, 4});
+        b[3] = model.intVar("b4", new int[]{0, 1});
+        b[4] = model.intVar("b5", new int[]{0, 1, 2});
 
 
-        solver.lexLess(a, b).post();
+        model.lexLess(a, b).post();
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException ignored) {
         }
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 216);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 216);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testBug5() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] a = new IntVar[3];
         IntVar[] b = new IntVar[3];
 
-        a[0] = solver.intVar("a1", new int[]{-10, -3, 2});
-        a[1] = solver.intVar("a2", new int[]{-5, -4, 2});
-        a[2] = solver.intVar("a3", new int[]{2});
+        a[0] = model.intVar("a1", new int[]{-10, -3, 2});
+        a[1] = model.intVar("a2", new int[]{-5, -4, 2});
+        a[2] = model.intVar("a3", new int[]{2});
 
-        b[0] = solver.intVar("b1", new int[]{-10, -1, 3});
-        b[1] = solver.intVar("b2", new int[]{-5});
-        b[2] = solver.intVar("b3", new int[]{-4, 2});
+        b[0] = model.intVar("b1", new int[]{-10, -1, 3});
+        b[1] = model.intVar("b2", new int[]{-5});
+        b[2] = model.intVar("b3", new int[]{-4, 2});
 
 
-        solver.lexLess(a, b).post();
+        model.lexLess(a, b).post();
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             fail();
         }
         assertEquals(-1, b[0].getLB());
 //        SearchMonitorFactory.log(solver, true, false);
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 30);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 30);
     }
 }

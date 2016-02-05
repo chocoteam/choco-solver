@@ -92,7 +92,7 @@ public class PropFullCumulative extends Propagator<IntVar> {
             this.filters[f] = filters[f].make(n, this);
         }
 
-        lastCapaMax = solver.getEnvironment().makeInt(capa.getUB() + 1);
+        lastCapaMax = model.getEnvironment().makeInt(capa.getUB() + 1);
         allTasks = SetFactory.makeFullSet(n);
         super.linkVariables();
     }

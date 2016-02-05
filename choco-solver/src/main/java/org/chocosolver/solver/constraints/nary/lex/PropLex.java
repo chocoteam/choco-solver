@@ -68,7 +68,7 @@ public class PropLex extends Propagator<IntVar> {
 
         this.strict = strict;
         this.n = X.length;
-        IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = model.getEnvironment();
         alpha = environment.makeInt(0);
         beta = environment.makeInt(0);
         entailed = false;

@@ -32,7 +32,7 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
@@ -97,11 +97,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @param name name of the variable
      * @param min lower bound
      * @param max upper bound
-     * @param solver declaring solver
+     * @param model declaring solver
      */
-    public IntervalIntVarImpl(String name, int min, int max, Solver solver) {
-        super(name, solver);
-        IEnvironment env = solver.getEnvironment();
+    public IntervalIntVarImpl(String name, int min, int max, Model model) {
+        super(name, model);
+        IEnvironment env = model.getEnvironment();
         this.LB = env.makeInt(min);
         this.UB = env.makeInt(max);
         this.SIZE = env.makeInt(max - min + 1);
@@ -134,7 +134,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int sup = getUB();
         if (value == inf && value == sup) {
             if (_plugexpl) {
-                solver.getEventObserver().removeValue(this, value, cause);
+                model.getEventObserver().removeValue(this, value, cause);
             }
             this.contradiction(cause, MSG_REMOVE);
         } else if (inf == value || value == sup) {
@@ -161,12 +161,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
                 if (_plugexpl) {
-                    solver.getEventObserver().removeValue(this, value, cause);
+                    model.getEventObserver().removeValue(this, value, cause);
                 }
                 this.contradiction(cause, MSG_EMPTY);
             }
             if (_plugexpl) {
-                solver.getEventObserver().removeValue(this, value, cause);
+                model.getEventObserver().removeValue(this, value, cause);
             }
             return true;
         }
@@ -247,7 +247,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    solver.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
+                    model.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, MSG_INST);
             }
@@ -271,13 +271,13 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             this.SIZE.set(1);
 
             if (_plugexpl) {
-                solver.getEventObserver().instantiateTo(this, value, cause, lb, ub);
+                model.getEventObserver().instantiateTo(this, value, cause, lb, ub);
             }
             this.notifyPropagators(e, cause);
             return true;
         } else {
             if (_plugexpl) {
-                solver.getEventObserver().instantiateTo(this, value, cause, LB.get(), UB.get());
+                model.getEventObserver().instantiateTo(this, value, cause, LB.get(), UB.get());
             }
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
@@ -309,7 +309,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int oub = this.getUB();
             if (oub < value) {
                 if (_plugexpl) {
-                    solver.getEventObserver().updateLowerBound(this, oub + 1, old, cause);
+                    model.getEventObserver().updateLowerBound(this, oub + 1, old, cause);
                 }
                 this.contradiction(cause, MSG_LOW);
             } else {
@@ -326,7 +326,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
 
                 if (_plugexpl) {
-                    solver.getEventObserver().updateLowerBound(this, value, old, cause);
+                    model.getEventObserver().updateLowerBound(this, value, old, cause);
                 }
                 return true;
 
@@ -360,7 +360,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int olb = this.getLB();
             if (olb > value) {
                 if (_plugexpl) {
-                    solver.getEventObserver().updateUpperBound(this, olb - 1, old, cause);
+                    model.getEventObserver().updateUpperBound(this, olb - 1, old, cause);
                 }
                 this.contradiction(cause, MSG_UPP);
             } else {
@@ -377,7 +377,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    solver.getEventObserver().updateUpperBound(this, value, old, cause);
+                    model.getEventObserver().updateUpperBound(this, value, old, cause);
                 }
                 return true;
             }
@@ -418,20 +418,20 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
 
                 if (_plugexpl) {
-                    if (olb < lb) solver.getEventObserver().updateLowerBound(this, lb, olb, cause);
-                    if (oub > ub) solver.getEventObserver().updateUpperBound(this, ub, oub, cause);
+                    if (olb < lb) model.getEventObserver().updateLowerBound(this, lb, olb, cause);
+                    if (oub > ub) model.getEventObserver().updateUpperBound(this, ub, oub, cause);
                 }
                 update = true;
             } else { // fails
                 if (oub < lb) {
                     if (_plugexpl) {
-                        solver.getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
+                        model.getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
                     }
                     this.contradiction(cause, MSG_LOW);
                 } else {
                     //if (olb > ub) {
                     if (_plugexpl) {
-                        solver.getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
+                        model.getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
                     }
                     this.contradiction(cause, MSG_UPP);
                 }
@@ -566,7 +566,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new IntervalDelta(solver.getEnvironment());
+            delta = new IntervalDelta(model.getEnvironment());
             reactOnRemoval = true;
         }
     }
@@ -591,7 +591,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
-        solver.getEngine().fails(cause, this, message);
+        model.getEngine().fails(cause, this, message);
     }
 
     @Override
@@ -602,7 +602,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @SuppressWarnings("unchecked")
     @Override
     public IntVar duplicate() {
-        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), solver);
+        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), model);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

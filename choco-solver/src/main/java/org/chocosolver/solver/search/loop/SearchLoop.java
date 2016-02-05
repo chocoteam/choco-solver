@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
@@ -132,7 +132,7 @@ public final class SearchLoop implements Serializable {
     /**
      * The declaring solver
      */
-    protected Solver mSolver;
+    protected Model mModel;
     /**
      * The objective manager declare
      */
@@ -208,13 +208,13 @@ public final class SearchLoop implements Serializable {
     /**
      * Create a search loop based on three components.
      *
-     * @param aSolver the target solver
+     * @param aModel the target solver
      * @param p       the {@code Propagate} component
      * @param l       the {@code Learn} component
      * @param m       the {@code Move} component
      */
-    public SearchLoop(Solver aSolver, Propagate p, Learn l, Move m) {
-        mSolver = aSolver;
+    public SearchLoop(Model aModel, Propagate p, Learn l, Move m) {
+        mModel = aModel;
         P = p;
         L = l;
         M = m;
@@ -229,7 +229,7 @@ public final class SearchLoop implements Serializable {
         objectivemanager = SAT();
         decision = RootDecision.ROOT;
         action = initialize;
-        mMeasures = mSolver.getMeasures();
+        mMeasures = mModel.getMeasures();
         criteria = new ArrayList<>();
         crit_met = false;
         kill = true;
@@ -251,7 +251,7 @@ public final class SearchLoop implements Serializable {
     public void reset() {
         // if a resolution has already been done
         if (rootWorldIndex > -1) {
-            mSolver.getEnvironment().worldPopUntil(rootWorldIndex);
+            mModel.getEnvironment().worldPopUntil(rootWorldIndex);
             Decision tmp;
             while (decision != ROOT) {
                 tmp = decision;
@@ -263,7 +263,7 @@ public final class SearchLoop implements Serializable {
             searchWorldIndex = -1;
             mMeasures.reset();
             objectivemanager = SAT();
-            mSolver.set(SINGLETON);
+            mModel.set(SINGLETON);
             crit_met = false;
             kill = true;
             entire = false;
@@ -293,7 +293,7 @@ public final class SearchLoop implements Serializable {
                         P.execute(this);
                         action = extend;
                     } catch (ContradictionException ce) {
-                        mSolver.getEngine().flush();
+                        mModel.getEngine().flush();
                         mMeasures.incFailCount();
                         jumpTo = 1;
                         action = repair;
@@ -329,10 +329,10 @@ public final class SearchLoop implements Serializable {
                     }
                     break;
                 case validate:
-                    assert (TRUE.equals(mSolver.isSatisfied())) : fullReport(mSolver);
-                    mSolver.setFeasible(TRUE);
+                    assert (TRUE.equals(mModel.isSatisfied())) : fullReport(mModel);
+                    mModel.setFeasible(TRUE);
                     mMeasures.incSolutionCount();
-                    mSolver.getObjectiveManager().update();
+                    mModel.getObjectiveManager().update();
                     searchMonitors.onSolution();
                     if (stopAtFirst) {
                         action = stop;
@@ -356,7 +356,7 @@ public final class SearchLoop implements Serializable {
                         mMeasures.setObjectiveOptimal(false);
                         sat = UNDEFINED;
                     }
-                    mSolver.setFeasible(sat);
+                    mModel.setFeasible(sat);
                     if (stopAtFirst) { // for the next call, if needed
                         jumpTo = 1;
                         action = repair;
@@ -381,40 +381,40 @@ public final class SearchLoop implements Serializable {
      */
     private void initialize() {
         mMeasures.startStopwatch();
-        rootWorldIndex = mSolver.getEnvironment().getWorldIndex();
-        mSolver.getEnvironment().buildFakeHistoryOn(mSolver.getSettings().getEnvironmentHistorySimulationCondition());
-        mSolver.getEnvironment().worldPush(); // store state before initial propagation; w = 0 -> 1
+        rootWorldIndex = mModel.getEnvironment().getWorldIndex();
+        mModel.getEnvironment().buildFakeHistoryOn(mModel.getSettings().getEnvironmentHistorySimulationCondition());
+        mModel.getEnvironment().worldPush(); // store state before initial propagation; w = 0 -> 1
         try {
             P.execute(this);
             action = extend;
-            mSolver.getEnvironment().worldPush(); // store state after initial propagation; w = 1 -> 2
-            searchWorldIndex = mSolver.getEnvironment().getWorldIndex(); // w = 2
-            mSolver.getEnvironment().worldPush(); // store another time for restart purpose: w = 2 -> 3
+            mModel.getEnvironment().worldPush(); // store state after initial propagation; w = 1 -> 2
+            searchWorldIndex = mModel.getEnvironment().getWorldIndex(); // w = 2
+            mModel.getEnvironment().worldPush(); // store another time for restart purpose: w = 2 -> 3
         } catch (ContradictionException ce) {
-            mSolver.getEngine().flush();
+            mModel.getEngine().flush();
             mMeasures.incFailCount();
             searchMonitors.onContradiction(ce);
             L.record(this);
-            mSolver.getEnvironment().worldPop();
+            mModel.getEnvironment().worldPop();
             action = stop;
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
             defaultSearch = true;
-            ISearchBinder binder = mSolver.getSettings().getSearchBinder();
-            binder.configureSearch(mSolver);
+            ISearchBinder binder = mModel.getSettings().getSearchBinder();
+            binder.configureSearch(mModel);
         }
         if (completeSearch && !defaultSearch) {
             AbstractStrategy<Variable> declared = M.getStrategy();
             DefaultSearchBinder dbinder = new DefaultSearchBinder();
-            AbstractStrategy[] complete = dbinder.getDefault(mSolver);
-            mSolver.set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
+            AbstractStrategy[] complete = dbinder.getDefault(mModel);
+            mModel.set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
         }
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
-            mSolver.getEnvironment().worldPop();
-            mSolver.setFeasible(FALSE);
-            mSolver.getEngine().flush();
-            mSolver.getMeasures().incFailCount();
+            mModel.getEnvironment().worldPop();
+            mModel.setFeasible(FALSE);
+            mModel.getEngine().flush();
+            mModel.getMeasures().incFailCount();
             entire = true;
             action = stop;
         }
@@ -470,8 +470,8 @@ public final class SearchLoop implements Serializable {
      *
      * @return the solver
      */
-    public Solver getSolver() {
-        return mSolver;
+    public Model getSolver() {
+        return mModel;
     }
 
 
@@ -482,8 +482,8 @@ public final class SearchLoop implements Serializable {
     protected void restart() {
         searchMonitors.beforeRestart();
         restoreRootNode();
-        mSolver.getEnvironment().worldPush();
-        mSolver.getMeasures().incRestartCount();
+        mModel.getEnvironment().worldPush();
+        mModel.getMeasures().incRestartCount();
         try {
             objectivemanager.postDynamicCut();
             P.execute(this);
@@ -501,7 +501,7 @@ public final class SearchLoop implements Serializable {
      * Has an immediate effect
      */
     public void restoreRootNode() {
-        mSolver.getEnvironment().worldPopUntil(searchWorldIndex); // restore state after initial propagation
+        mModel.getEnvironment().worldPopUntil(searchWorldIndex); // restore state after initial propagation
         Decision tmp;
         while (decision != ROOT) {
             tmp = decision;
@@ -595,7 +595,7 @@ public final class SearchLoop implements Serializable {
      * @return the current search strategy
      */
     public <V extends Variable>  AbstractStrategy<V> getStrategy() {
-        if(M.getChildMoves().size()>1 && mSolver.getSettings().warnUser()){
+        if(M.getChildMoves().size()>1 && mModel.getSettings().warnUser()){
             Chatterbox.err.print("This search loop is based on a sequential Move, the strategy returned may not reflect the reality.");
         }
         return M.getStrategy();

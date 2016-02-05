@@ -31,7 +31,7 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
@@ -43,8 +43,6 @@ import org.chocosolver.solver.constraints.nary.sum.PropSum;
 import org.chocosolver.solver.constraints.nary.sum.PropSumBool;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -52,7 +50,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.Random;
 
 import static java.util.Arrays.fill;
@@ -98,7 +95,7 @@ public class IntLinCombTest {
 
     public static void testOp(int n, int min, int max, int cMax, int seed, Operator operator) {
         Random random = new Random(seed);
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] vars = new IntVar[n];
         int[] coeffs = new int[n];
         for (int i = 0; i < vars.length; i++) {
@@ -139,11 +136,11 @@ public class IntLinCombTest {
     }
 
 
-    protected Solver sum(int[][] domains, int[] coeffs, int b, int op) {
-        Solver solver = new Solver();
+    protected Model sum(int[][] domains, int[] coeffs, int b, int op) {
+        Model model = new Model();
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
-            bins[i] = solver.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
+            bins[i] = model.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
         }
         String opname = "=";
         if (op != 0) {
@@ -153,18 +150,18 @@ public class IntLinCombTest {
                 opname = "<=";
             }
         }
-        IntVar sum = solver.intVar("scal", -99999999, 99999999, true);
-        solver.scalar(bins, coeffs, "=", sum).post();
-        solver.arithm(sum, opname, b).post();
-        solver.set(lexico_LB(bins));
-        return solver;
+        IntVar sum = model.intVar("scal", -99999999, 99999999, true);
+        model.scalar(bins, coeffs, "=", sum).post();
+        model.arithm(sum, opname, b).post();
+        model.set(lexico_LB(bins));
+        return model;
     }
 
-    protected Solver intlincomb(int[][] domains, int[] coeffs, int b, int op) {
-        Solver solver = new Solver();
+    protected Model intlincomb(int[][] domains, int[] coeffs, int b, int op) {
+        Model model = new Model();
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
-            bins[i] = solver.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
+            bins[i] = model.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
         }
         String opname = "=";
         if (op != 0) {
@@ -174,11 +171,11 @@ public class IntLinCombTest {
                 opname = "<=";
             }
         }
-        IntVar sum = solver.intVar("scal", -99999999, 99999999, true);
-        solver.scalar(bins, coeffs, "=", sum).post();
-        solver.arithm(sum, opname, b).post();
-        solver.set(lexico_LB(bins));
-        return solver;
+        IntVar sum = model.intVar("scal", -99999999, 99999999, true);
+        model.scalar(bins, coeffs, "=", sum).post();
+        model.arithm(sum, opname, b).post();
+        model.set(lexico_LB(bins));
+        return model;
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -197,8 +194,8 @@ public class IntLinCombTest {
             int lb = -50 + rand.nextInt(100);
             int op = -1 + rand.nextInt(3);
 
-            Solver sum = sum(domains, coeffs, lb, op);
-            Solver intlincomb = intlincomb(domains, coeffs, lb, op);
+            Model sum = sum(domains, coeffs, lb, op);
+            Model intlincomb = intlincomb(domains, coeffs, lb, op);
 
             sum.findAllSolutions();
             intlincomb.findAllSolutions();
@@ -209,7 +206,7 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testUSum1() {
-        Solver sumleq = sum(new int[][]{{-2, 3}}, new int[]{-2}, -6, -1);
+        Model sumleq = sum(new int[][]{{-2, 3}}, new int[]{-2}, -6, -1);
         sumleq.findAllSolutions();
     }
 
@@ -220,7 +217,7 @@ public class IntLinCombTest {
      */
     @Test(groups="1s", timeOut=60000)
     public void testUSum2() throws ContradictionException {
-        Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
+        Model sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
         PropagationEngineFactory.DEFAULT.make(sum);
         Variable[] vars = sum.getVars();
         ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
@@ -234,26 +231,26 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testIss237_1() {
-        Solver solver = new Solver();
-        BoolVar[] bs = solver.boolVarArray("b", 3);
-        solver.scalar(bs, new int[]{1, 2, 3}, "=", 2).post();
-        showSolutions(solver);
-        solver.findAllSolutions();
+        Model model = new Model();
+        BoolVar[] bs = model.boolVarArray("b", 3);
+        model.scalar(bs, new int[]{1, 2, 3}, "=", 2).post();
+        showSolutions(model);
+        model.findAllSolutions();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testS1_coeff_null() {
-        Solver solver = new Solver();
-        solver.set(new Settings() {
+        Model model = new Model();
+        model.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
                 return 0;
             }
         });
-        IntVar[] ivars = solver.intVarArray("V", 4, 0, 5, false);
+        IntVar[] ivars = model.intVarArray("V", 4, 0, 5, false);
         int[] coeffs = new int[]{1, 0, 0, 2};
-        IntVar res = solver.intVar("R", 0, 10, false);
-        Constraint c = solver.scalar(ivars, coeffs, "=", res);
+        IntVar res = model.intVar("R", 0, 10, false);
+        Constraint c = model.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropScalar);
@@ -262,18 +259,18 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testS2_coeff_null() {
-        Solver solver = new Solver();
-        solver.set(new Settings() {
+        Model model = new Model();
+        model.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
                 return 0;
             }
         });
-        IntVar[] ivars = solver.intVarArray("V", 4, 0, 5, false);
+        IntVar[] ivars = model.intVarArray("V", 4, 0, 5, false);
         ivars[2] = ivars[1];
         int[] coeffs = new int[]{1, 1, -1, 2};
-        IntVar res = solver.intVar("R", 0, 10, false);
-        Constraint c = solver.scalar(ivars, coeffs, "=", res);
+        IntVar res = model.intVar("R", 0, 10, false);
+        Constraint c = model.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropScalar);
@@ -282,11 +279,11 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD1() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 4, 0, 5, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 4, 0, 5, false);
         int[] coeffs = new int[]{1, 1, 1, 1};
-        IntVar res = solver.intVar("R", 0, 10, false);
-        Constraint c = solver.scalar(ivars, coeffs, "=", res);
+        IntVar res = model.intVar("R", 0, 10, false);
+        Constraint c = model.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSum);
@@ -294,10 +291,10 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD2() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.boolVarArray("V", 4);
+        Model model = new Model();
+        IntVar[] ivars = model.boolVarArray("V", 4);
         int[] coeffs = new int[]{1, 1, 1, 1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -305,10 +302,10 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD3() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.boolVarArray("V", 4);
+        Model model = new Model();
+        IntVar[] ivars = model.boolVarArray("V", 4);
         int[] coeffs = new int[]{-1, -1, -1, -1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -316,10 +313,10 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD4() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.boolVarArray("V", 4);
+        Model model = new Model();
+        IntVar[] ivars = model.boolVarArray("V", 4);
         int[] coeffs = new int[]{1, -1, 1, 1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -327,10 +324,10 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD5() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.boolVarArray("V", 4);
+        Model model = new Model();
+        IntVar[] ivars = model.boolVarArray("V", 4);
         int[] coeffs = new int[]{-1, 1, -1, -1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -338,11 +335,11 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD6() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 4, 0, 1, false);
-        ivars[1] = solver.intVar("X", 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 4, 0, 1, false);
+        ivars[1] = model.intVar("X", 0, 2, false);
         int[] coeffs = new int[]{1, -1, 1, 1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -350,11 +347,11 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD7() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 4, 0, 1, false);
-        ivars[1] = solver.intVar("X", 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 4, 0, 1, false);
+        ivars[1] = model.intVar("X", 0, 2, false);
         int[] coeffs = new int[]{-1, 1, -1, -1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSum);
@@ -362,11 +359,11 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD8() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 4, 0, 1, false);
-        ivars[2] = solver.intVar("X", 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 4, 0, 1, false);
+        ivars[2] = model.intVar("X", 0, 2, false);
         int[] coeffs = new int[]{1, -1, 1, 1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSum);
@@ -374,11 +371,11 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD9() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 4, 0, 1, false);
-        ivars[2] = solver.intVar("X", 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 4, 0, 1, false);
+        ivars[2] = model.intVar("X", 0, 2, false);
         int[] coeffs = new int[]{-1, 1, -1, -1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -386,64 +383,64 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD10() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 2, 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 2, 0, 2, false);
         int[] coeffs = new int[]{1, 1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testD11() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 2, 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 2, 0, 2, false);
         int[] coeffs = new int[]{1, -1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testD12() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 2, 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 2, 0, 2, false);
         int[] coeffs = new int[]{-1, 1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testD13() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 2, 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 2, 0, 2, false);
         int[] coeffs = new int[]{-1, -1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testD14() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 1, 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 1, 0, 2, false);
         int[] coeffs = new int[]{1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testD15() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 1, 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 1, 0, 2, false);
         int[] coeffs = new int[]{-1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
+        Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testD16() {
-        Solver solver = new Solver();
-        IntVar[] ivars = solver.intVarArray("V", 1, 0, 2, false);
+        Model model = new Model();
+        IntVar[] ivars = model.intVarArray("V", 1, 0, 2, false);
         int[] coeffs = new int[]{1};
-        Constraint c = solver.scalar(ivars, coeffs, "=", ivars[0]);
+        Constraint c = model.scalar(ivars, coeffs, "=", ivars[0]);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropTrue);
@@ -451,17 +448,17 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testD20() {
-        Solver solver = new Solver();
-        solver.set(new Settings() {
+        Model model = new Model();
+        model.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
                 return 0;
             }
         });
-        IntVar[] ivars = solver.intVarArray("V", 4, 0, 5, false);
+        IntVar[] ivars = model.intVarArray("V", 4, 0, 5, false);
         int[] coeffs = new int[]{1, 2, 2, 1};
-        IntVar res = solver.intVar("R", 0, 10, false);
-        Constraint c = solver.scalar(ivars, coeffs, "=", res);
+        IntVar res = model.intVar("R", 0, 10, false);
+        Constraint c = model.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropScalar);
@@ -469,7 +466,7 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testExt1() {
-        Solver s1 = new Solver();
+        Model s1 = new Model();
         s1.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
@@ -480,7 +477,7 @@ public class IntLinCombTest {
             BoolVar[] bs = s1.boolVarArray("b", 5);
             s1.sum(bs, "!=", 3).post();
         }
-        Solver s2 = new Solver();
+        Model s2 = new Model();
         s2.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
@@ -499,7 +496,7 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testExt2() {
-        Solver s1 = new Solver();
+        Model s1 = new Model();
         s1.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
@@ -510,7 +507,7 @@ public class IntLinCombTest {
             BoolVar[] bs = s1.boolVarArray("b", 5);
             s1.sum(bs, "<=", 3).post();
         }
-        Solver s2 = new Solver();
+        Model s2 = new Model();
         s2.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
@@ -529,7 +526,7 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testExt3() {
-        Solver s1 = new Solver();
+        Model s1 = new Model();
         s1.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
@@ -541,7 +538,7 @@ public class IntLinCombTest {
             BoolVar r = s1.boolVar("r");
             s1.scalar(bs, new int[]{-1, -1, -1}, "<=",-2).reifyWith(r);
         }
-        Solver s2 = new Solver();
+        Model s2 = new Model();
         s2.set(new Settings() {
             @Override
             public int getMaxTupleSizeForSubstitution() {
@@ -563,49 +560,49 @@ public class IntLinCombTest {
 
     @Test(groups="5m", timeOut=300000)
     public void testB1() {
-        Solver solver = new Solver();
-        solver.set(new Settings() {
+        Model model = new Model();
+        model.set(new Settings() {
             @Override
             public short[] getCoarseEventPriority() {
                 return new short[]{0, 0, 0, 0, 1, 2, 3};
             }
         });
         int n = 23;
-        BoolVar[] bs = solver.boolVarArray("b", n);
+        BoolVar[] bs = model.boolVarArray("b", n);
         int[] cs = new int[n];
         int k = (int) (n * .7);
         fill(cs, 0, n, 1);
         fill(cs, k, n, -1);
-        IntVar sum = solver.intVar("S", -n / 2, n / 2, true);
-        solver.scalar(bs, cs, "=", sum).post();
-        solver.set(lexico_LB(bs));
+        IntVar sum = model.intVar("S", -n / 2, n / 2, true);
+        model.scalar(bs, cs, "=", sum).post();
+        model.set(lexico_LB(bs));
 //        Chatterbox.showDecisions(solver);
-        solver.findAllSolutions();
+        model.findAllSolutions();
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void testB2() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 3;
-        BoolVar[] bs = solver.boolVarArray("b", n);
+        BoolVar[] bs = model.boolVarArray("b", n);
         int[] cs = new int[n];
         fill(cs, 0, n, -1);
-        solver.scalar(bs, cs, "<=", -2).post();
-        solver.propagate();
+        model.scalar(bs, cs, "<=", -2).post();
+        model.propagate();
         bs[2].setToFalse(Null);
         bs[0].setToTrue(Null);
-        solver.propagate();
+        model.propagate();
         assertTrue(bs[1].isInstantiatedTo(1));
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void testB3() {
-        Solver solver = new Solver();
-        solver.scalar(new IntVar[]{solver.intVar(1), solver.intVar(3)}, new int[]{1, -1}, "!=", 0).post();
+        Model model = new Model();
+        model.scalar(new IntVar[]{model.intVar(1), model.intVar(3)}, new int[]{1, -1}, "!=", 0).post();
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             fail();
         }
@@ -613,25 +610,25 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testB4() {
-        Solver solver = new Solver();
-        IntVar[] X = solver.intVarArray("X", 1, 1, 3, false);
-        solver.scalar(X, new int[]{-1}, "<=", 2).post();
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 3);
+        Model model = new Model();
+        IntVar[] X = model.intVarArray("X", 1, 1, 3, false);
+        model.scalar(X, new int[]{-1}, "<=", 2).post();
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 3);
 
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testB5() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] X = new IntVar[3];
-        X[0] = solver.intVar("X1", 6, 46, false);
-        X[1] = solver.intVar("X2", 6, 56, false);
-        X[2] = solver.intVar("X3", -1140, 1140, true);
-        solver.scalar(X, new int[]{1, -1, -1}, "=", 0).post();
-        solver.propagate();
+        X[0] = model.intVar("X1", 6, 46, false);
+        X[1] = model.intVar("X2", 6, 56, false);
+        X[2] = model.intVar("X3", -1140, 1140, true);
+        model.scalar(X, new int[]{1, -1, -1}, "=", 0).post();
+        model.propagate();
         X[1].updateUpperBound(46, Null);
-        solver.propagate();
+        model.propagate();
         assertEquals(X[2].getLB(), -40);
         assertEquals(X[2].getUB(), 40);
 
@@ -640,12 +637,12 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testB6() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] X = new IntVar[2];
-        X[0] = solver.intVar("X1", 1, 3, false);
-        X[1] = solver.intVar("X2", 2, 5, false);
-        solver.scalar(X, new int[]{2, 3}, "<=", 10).post();
-        solver.propagate();
+        X[0] = model.intVar("X1", 1, 3, false);
+        X[1] = model.intVar("X2", 2, 5, false);
+        model.scalar(X, new int[]{2, 3}, "<=", 10).post();
+        model.propagate();
         assertEquals(X[0].getLB(), 1);
         assertEquals(X[0].getUB(), 2);
         assertEquals(X[1].getLB(), 2);
@@ -654,12 +651,12 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testB61() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] X = new IntVar[2];
-        X[0] = solver.intVar("X1", 1, 3, false);
-        X[1] = solver.intVar("X2", 2, 5, false);
-        solver.scalar(X, new int[]{-2, -3}, ">=", -10).post();
-        solver.propagate();
+        X[0] = model.intVar("X1", 1, 3, false);
+        X[1] = model.intVar("X2", 2, 5, false);
+        model.scalar(X, new int[]{-2, -3}, ">=", -10).post();
+        model.propagate();
         assertEquals(X[0].getLB(), 1);
         assertEquals(X[0].getUB(), 2);
         assertEquals(X[1].getLB(), 2);
@@ -668,12 +665,12 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testB7() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] X = new IntVar[2];
-        X[0] = solver.intVar("X1", 0, 3, false);
-        X[1] = solver.intVar("X2", 1, 5, false);
-        solver.scalar(X, new int[]{2, 3}, ">=", 10).post();
-        solver.propagate();
+        X[0] = model.intVar("X1", 0, 3, false);
+        X[1] = model.intVar("X2", 1, 5, false);
+        model.scalar(X, new int[]{2, 3}, ">=", 10).post();
+        model.propagate();
         assertEquals(X[0].getLB(), 0);
         assertEquals(X[0].getUB(), 3);
         assertEquals(X[1].getLB(), 2);
@@ -682,12 +679,12 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testB71() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] X = new IntVar[2];
-        X[0] = solver.intVar("X1", 0, 3, false);
-        X[1] = solver.intVar("X2", 1, 5, false);
-        solver.scalar(X, new int[]{-2, -3}, ">=", -10).post();
-        solver.propagate();
+        X[0] = model.intVar("X1", 0, 3, false);
+        X[1] = model.intVar("X2", 1, 5, false);
+        model.scalar(X, new int[]{-2, -3}, ">=", -10).post();
+        model.propagate();
         assertEquals(X[0].getLB(), 0);
         assertEquals(X[0].getUB(), 3);
         assertEquals(X[1].getLB(), 1);
@@ -696,51 +693,51 @@ public class IntLinCombTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testJL1() {
-        Solver solver = new Solver();
-        solver.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<", 0).post();
-        assertTrue(solver.findSolution());
+        Model model = new Model();
+        model.sum(new IntVar[]{model.intVar(3), model.intVar(-4)}, "<", 0).post();
+        assertTrue(model.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL2() {
-        Solver solver = new Solver();
-        solver.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<=", 0).post();
-        assertTrue(solver.findSolution());
+        Model model = new Model();
+        model.sum(new IntVar[]{model.intVar(3), model.intVar(-4)}, "<=", 0).post();
+        assertTrue(model.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL3() {
-        Solver solver = new Solver();
-        solver.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">", 0).post();
-        assertTrue(solver.findSolution());
+        Model model = new Model();
+        model.sum(new IntVar[]{model.intVar(-3), model.intVar(4)}, ">", 0).post();
+        assertTrue(model.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL4() {
-        Solver solver = new Solver();
-        solver.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">=", 0).post();
-        assertTrue(solver.findSolution());
+        Model model = new Model();
+        model.sum(new IntVar[]{model.intVar(-3), model.intVar(4)}, ">=", 0).post();
+        assertTrue(model.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJG1() {
-        Solver solver = new Solver("TestChoco 3.3.2 Briot");
-        IntVar[] var = solver.intVarArray("var", 3, new int[]{30, 60});
-        solver.sum(new IntVar[]{var[0], var[1], var[2]}, ">=", 60).post();
-        solver.set(lexico_LB(var));
-        showStatistics(solver);
-        showSolutions(solver);
-        solver.findSolution();
+        Model model = new Model("TestChoco 3.3.2 Briot");
+        IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
+        model.sum(new IntVar[]{var[0], var[1], var[2]}, ">=", 60).post();
+        model.set(lexico_LB(var));
+        showStatistics(model);
+        showSolutions(model);
+        model.findSolution();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJG2() {
-        Solver solver = new Solver("TestChoco 3.3.2 Briot");
-        IntVar[] var = solver.intVarArray("var", 3, new int[]{30, 60});
-        solver.sum(new IntVar[]{var[0], var[1], var[2]}, "<=", 120).post();
-        solver.set(lexico_LB(var));
-        showStatistics(solver);
-        showSolutions(solver);
-        solver.findSolution();
+        Model model = new Model("TestChoco 3.3.2 Briot");
+        IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
+        model.sum(new IntVar[]{var[0], var[1], var[2]}, "<=", 120).post();
+        model.set(lexico_LB(var));
+        showStatistics(model);
+        showSolutions(model);
+        model.findSolution();
     }
 }

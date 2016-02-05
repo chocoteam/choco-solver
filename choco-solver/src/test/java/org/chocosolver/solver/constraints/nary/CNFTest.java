@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.variables.BoolVar;
@@ -48,26 +48,26 @@ public class CNFTest {
     public void testJGF() {
         for (int i = 0; i < 2; i++) {
 
-            Solver solver = new Solver();
-            BoolVar a = solver.boolVar("a");
-            BoolVar b = solver.boolVar("b");
-            IntVar x = solver.intVar("x", 0, 24, true);
-            IntVar y = solver.intVar("y", 0, 24, true);
+            Model model = new Model();
+            BoolVar a = model.boolVar("a");
+            BoolVar b = model.boolVar("b");
+            IntVar x = model.intVar("x", 0, 24, true);
+            IntVar y = model.intVar("y", 0, 24, true);
 
             if (i == 0) {
                 SatFactory.addClauses(LogOp.implies(
                         a,
                         b
-                ), solver);
+                ), model);
             } else {
                 SatFactory.addClauses(LogOp.implies(
                         b.not(),
                         a.not()
-                ), solver);
+                ), model);
             }
-            solver.ifThenElse(b, solver.arithm(x, ">=", y), solver.arithm(x, "<", y));
+            model.ifThenElse(b, model.arithm(x, ">=", y), model.arithm(x, "<", y));
 //            SearchMonitorFactory.log(solver, true, true);
-            solver.findAllSolutions();
+            model.findAllSolutions();
 //            System.out.printf("%d\n", solver.getMeasures().getSolutionCount());
         }
     }

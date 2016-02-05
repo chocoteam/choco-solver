@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -69,31 +69,28 @@ public class Nonogram extends AbstractProblem {
 
     BoolVar[][] vars;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Nonogram");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         int nR = data.getR().length;
         int nC = data.getC().length;
         vars = new BoolVar[nR][nC];
         for (int i = 0; i < nR; i++) {
             for (int j = 0; j < nC; j++) {
-                vars[i][j] = solver.boolVar(format("B_%d_%d", i, j));
+                vars[i][j] = model.boolVar(format("B_%d_%d", i, j));
             }
         }
         for (int i = 0; i < nR; i++) {
-            dfa(vars[i], data.getR(i), solver);
+            dfa(vars[i], data.getR(i), model);
         }
         for (int j = 0; j < nC; j++) {
-            dfa(ArrayUtils.getColumn(vars, j), data.getC(j), solver);
+            dfa(ArrayUtils.getColumn(vars, j), data.getC(j), model);
         }
 
     }
 
-    private void dfa(BoolVar[] cells, int[] rest, Solver solver) {
+    private void dfa(BoolVar[] cells, int[] rest, Model model) {
         StringBuilder regexp = new StringBuilder("0*");
         int m = rest.length;
         for (int i = 0; i < m; i++) {
@@ -104,18 +101,18 @@ public class Nonogram extends AbstractProblem {
             regexp.append(i == m - 1 ? '*' : '+');
         }
         IAutomaton auto = new FiniteAutomaton(regexp.toString());
-        solver.regular(cells, auto).post();
+        model.regular(cells, auto).post();
     }
 
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(ArrayUtils.flatten(vars)));
+        model.set(IntStrategyFactory.minDom_LB(ArrayUtils.flatten(vars)));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

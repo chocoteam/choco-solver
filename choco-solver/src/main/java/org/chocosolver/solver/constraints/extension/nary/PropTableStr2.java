@@ -72,9 +72,9 @@ public class PropTableStr2 extends Propagator<IntVar> {
         super(vars_, PropagatorPriority.LINEAR, false);
         str2vars = new str2_var[table[0].length];
         for (int i = 0; i < table[0].length; i++) {
-            str2vars[i] = new str2_var(solver.getEnvironment(), vars_[i], i, table);
+            str2vars[i] = new str2_var(model.getEnvironment(), vars_[i], i, table);
         }
-        tuples = new Set_Std_Swap_Array(solver.getEnvironment(), table.length);
+        tuples = new Set_Std_Swap_Array(model.getEnvironment(), table.length);
         Ssup = new ArrayList<>();
         Sval = new ArrayList<>();
         this.table = table;

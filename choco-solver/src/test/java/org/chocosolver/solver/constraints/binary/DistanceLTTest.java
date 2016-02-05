@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -47,7 +47,7 @@ public class DistanceLTTest extends AbstractBinaryTest {
     }
 
     @Override
-    protected Constraint make(IntVar[] vars, Solver solver) {
-        return solver.distance(vars[0], vars[1], "<", 2);
+    protected Constraint make(IntVar[] vars, Model model) {
+        return model.distance(vars[0], vars[1], "<", 2);
     }
 }

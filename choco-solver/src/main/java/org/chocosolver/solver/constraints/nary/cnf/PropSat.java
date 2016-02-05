@@ -34,7 +34,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -86,17 +86,17 @@ public class PropSat extends Propagator<BoolVar> {
     /**
      * Create a (unique) propagator for clauses recording and propagation.
      *
-     * @param solver the solver that declares the propagator
+     * @param model the solver that declares the propagator
      */
-    public PropSat(Solver solver) {
+    public PropSat(Model model) {
         // this propagator initially has no variable
-        super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
+        super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
         this.vars = new BoolVar[0];    // erase solver.ONE from the variable scope
 
         this.indices_ = new TObjectIntHashMap<>();
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
-        sat_trail_ = solver.getEnvironment().makeInt();
+        sat_trail_ = model.getEnvironment().makeInt();
     }
 
     @Override
@@ -308,7 +308,7 @@ public class PropSat extends Propagator<BoolVar> {
      */
     public void addLearnt(int... lits) {
         sat_.learnClause(lits);
-        this.getSolver().getEngine().propagateOnBacktrack(this); // issue#327
+        this.getModel().getEngine().propagateOnBacktrack(this); // issue#327
         // early deductions of learnt clause may lead to incorrect behavior on backtrack
         // since early deduction is not backtrackable.
     }

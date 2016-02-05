@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -46,6 +46,6 @@ public interface R {
 
 	void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException;
 
-    R duplicate(Solver solver);
+    R duplicate(Model model);
 
 }

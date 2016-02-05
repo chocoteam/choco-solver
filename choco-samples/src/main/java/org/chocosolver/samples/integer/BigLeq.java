@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -50,27 +50,23 @@ public class BigLeq extends AbstractProblem {
     IntVar[] vars;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("BigLeq");
-    }
-
-    @Override
     public void buildModel() {
-        vars = solver.intVarArray("v", m, 0, m - 1, false);
+        model = new Model("BigLeq");
+        vars = model.intVarArray("v", m, 0, m - 1, false);
         for (int i = 0; i < m - 1; i++) {
-            solver.arithm(vars[i], "<=", vars[i + 1]).post();
+            model.arithm(vars[i], "<=", vars[i + 1]).post();
         }
-        solver.allDifferent(vars, "BC").post();
+        model.allDifferent(vars, "BC").post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_MidValue(true, vars));
+        model.set(IntStrategyFactory.minDom_MidValue(true, vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

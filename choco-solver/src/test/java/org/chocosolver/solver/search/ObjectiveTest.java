@@ -31,13 +31,12 @@ package org.chocosolver.solver.search;
 
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
-import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.SMF;
@@ -67,98 +66,98 @@ public class ObjectiveTest {
 
     @Test(groups="10s", timeOut=60000)
     public void test1() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
-        IntVar iv = solver.intVar("iv", -5, 15, false);
-        solver.arithm(iv, ">=", 0).post();
-        solver.arithm(iv, "<=", 10).post();
+        IntVar iv = model.intVar("iv", -5, 15, false);
+        model.arithm(iv, ">=", 0).post();
+        model.arithm(iv, "<=", 10).post();
         Random rnd = new Random();
         for (int i = 0; i < 2000; i++) {
             rnd.setSeed(i);
             int k = rnd.nextInt(4);
             switch (k) {
                 case 0:
-                    one(solver, iv);
+                    one(model, iv);
                     break;
                 case 1:
-                    all(solver, iv);
+                    all(model, iv);
                     break;
                 case 2:
-                    min(solver, iv);
+                    min(model, iv);
                     break;
                 case 3:
-                    max(solver, iv);
+                    max(model, iv);
                     break;
             }
         }
     }
 
     @SuppressWarnings("UnusedParameters")
-    private void one(Solver solver, IntVar iv) {
+    private void one(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            solver.getSearchLoop().reset();
-            solver.findSolution();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), 2);
+            model.getSearchLoop().reset();
+            model.findSolution();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
+            Assert.assertEquals(model.getMeasures().getNodeCount(), 2);
         }
     }
 
     @SuppressWarnings("UnusedParameters")
-    private void all(Solver solver, IntVar iv) {
+    private void all(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            solver.getSearchLoop().reset();
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 11);
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), 21);
+            model.getSearchLoop().reset();
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), 11);
+            Assert.assertEquals(model.getMeasures().getNodeCount(), 21);
         }
     }
 
-    private void min(Solver solver, IntVar iv) {
+    private void min(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            solver.getSearchLoop().reset();
-            solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
-            Assert.assertEquals(solver.getMeasures().getBestSolutionValue(), 0);
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), 2);
+            model.getSearchLoop().reset();
+            model.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
+            Assert.assertEquals(model.getMeasures().getBestSolutionValue(), 0);
+            Assert.assertEquals(model.getMeasures().getNodeCount(), 2);
         }
     }
 
-    private void max(Solver solver, IntVar iv) {
+    private void max(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            solver.getSearchLoop().reset();
-            solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, iv);
-            Assert.assertEquals(solver.getMeasures().getBestSolutionValue(), 10);
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), 21);
+            model.getSearchLoop().reset();
+            model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, iv);
+            Assert.assertEquals(model.getMeasures().getBestSolutionValue(), 10);
+            Assert.assertEquals(model.getMeasures().getNodeCount(), 21);
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        Solver solver = new Solver();
-        IntVar iv = solver.intVar("iv", 0, 10, false);
-        solver.arithm(iv, ">=", 2).post();
+        Model model = new Model();
+        IntVar iv = model.intVar("iv", 0, 10, false);
+        model.arithm(iv, ">=", 2).post();
 
-        solver.findOptimalSolution(MINIMIZE, iv);
-        assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        model.findOptimalSolution(MINIMIZE, iv);
+        assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
 
-        solver.getSearchLoop().reset();
+        model.getSearchLoop().reset();
 
-        solver.findOptimalSolution(MINIMIZE, iv);
-        assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        model.findOptimalSolution(MINIMIZE, iv);
+        assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
-        final Solver solver = new Solver();
-        final IntVar iv = solver.intVar("iv", 0, 10, false);
-        solver.arithm(iv, ">=", 2).post();
+        final Model model = new Model();
+        final IntVar iv = model.intVar("iv", 0, 10, false);
+        model.arithm(iv, ">=", 2).post();
 
         new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{iv},
-                        new Constraint[]{solver.arithm(iv, ">=", 4)},
-                        new Constraint[]{solver.TRUE()}) {
+                        new Constraint[]{model.arithm(iv, ">=", 4)},
+                        new Constraint[]{model.TRUE()}) {
                     @Override
                     public ESat checkCondition() {
-                        int nbNode = (int) solver.getMeasures().getNodeCount();
+                        int nbNode = (int) this.model.getMeasures().getNodeCount();
                         switch (nbNode) {
                             case 0:
                             case 1:
@@ -171,73 +170,73 @@ public class ObjectiveTest {
 
                     }
                 }).post();
-        solver.findSolution();
+        model.findSolution();
         assertEquals(iv.getValue(), 2);
 
-        solver.getSearchLoop().reset();
-        solver.plugMonitor((IMonitorSolution) () -> solver.arithm(iv, ">=", 6).post());
-        solver.findSolution();
+        model.getSearchLoop().reset();
+        model.plugMonitor((IMonitorSolution) () -> model.arithm(iv, ">=", 6).post());
+        model.findSolution();
         assertEquals(iv.getValue(), 2);
 
-        solver.getSearchLoop().reset();
-        solver.findSolution();
+        model.getSearchLoop().reset();
+        model.findSolution();
         assertEquals(iv.getValue(), 6);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-        Solver solver = new Solver();
-        IntVar iv = solver.intVar("iv", 0, 10, false);
-        BoolVar v = solver.arithm(iv, "<=", 2).reify();
+        Model model = new Model();
+        IntVar iv = model.intVar("iv", 0, 10, false);
+        BoolVar v = model.arithm(iv, "<=", 2).reify();
 
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
-        solver.getSearchLoop().reset();
+        model.getSearchLoop().reset();
 
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL1() {
-        Solver solver = new Solver();
-        BoolVar b1 = solver.boolVar("b1");
-        BoolVar b2 = solver.boolVar("b2");
-        solver.arithm(b1, "<=", b2).post();
+        Model model = new Model();
+        BoolVar b1 = model.boolVar("b1");
+        BoolVar b2 = model.boolVar("b2");
+        model.arithm(b1, "<=", b2).post();
 //        SMF.log(solver, true, true);
-        solver.set(new ObjectiveManager<IntVar, Integer>(b1, MINIMIZE, true));
+        model.set(new ObjectiveManager<IntVar, Integer>(b1, MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
-        if (solver.getEngine() == SINGLETON) {
-            solver.set(new SevenQueuesPropagatorEngine(solver));
+        if (model.getEngine() == SINGLETON) {
+            model.set(new SevenQueuesPropagatorEngine(model));
         }
-        solver.getMeasures().setReadingTimeCount(nanoTime());
-        solver.getSearchLoop().launch(false);
+        model.getMeasures().setReadingTimeCount(nanoTime());
+        model.getSearchLoop().launch(false);
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
-        solver.getSearchLoop().reset();
-        solver.arithm(b1, "=", bestvalue).post();
-        solver.set(lexico_LB(new BoolVar[]{b1, b2}));
+        model.getSearchLoop().reset();
+        model.arithm(b1, "=", bestvalue).post();
+        model.set(lexico_LB(new BoolVar[]{b1, b2}));
         int count = 0;
-        if (solver.findSolution()) {
+        if (model.findSolution()) {
             do {
                 count++;
 //                System.out.println(b1 + " " + b2);
-            } while (solver.nextSolution());
+            } while (model.nextSolution());
         }
         assertEquals(count, 2);
     }
 
 	@Test(groups="1s", timeOut=60000)
 	public void testJL2() {
-		Solver solver = new Solver();
-        IntVar a = solver.intVar("a", -2, 2, false);
+		Model model = new Model();
+        IntVar a = model.intVar("a", -2, 2, false);
 
-		solver.set(
+		model.set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),
 				ISF.minDom_LB(a));
 		SMF.nogoodRecordingOnSolution(new IntVar[]{a});
 
-		solver.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, a, false);
-		Assert.assertEquals(solver.hasReachedLimit(),false);
+		model.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, a, false);
+		Assert.assertEquals(model.hasReachedLimit(),false);
 	}
 }

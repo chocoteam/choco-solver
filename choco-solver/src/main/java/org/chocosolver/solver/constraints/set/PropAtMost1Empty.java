@@ -64,7 +64,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
      */
     public PropAtMost1Empty(SetVar[] sets) {
         super(sets, PropagatorPriority.UNARY, true);
-        emptySetIndex = solver.getEnvironment().makeInt(-1);
+        emptySetIndex = model.getEnvironment().makeInt(-1);
     }
 
     //***********************************************************************************

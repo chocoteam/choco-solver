@@ -32,7 +32,7 @@ package org.chocosolver.solver.propagation.hardcoded;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -81,7 +81,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     /**
      * Reference to the solver declaring this propagation engine.
      */
-    protected final Solver solver;
+    protected final Model model;
 
     /**
      * The singleton exception to use (and to configure) when a contradiction is detected.
@@ -202,27 +202,27 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
      * It propagates all fine events first, wrt their increasing priority, before propagating the smallest priority coarse and propagates all fine events again.
      * Iterates like this until failure or fix-point.
      *
-     * @param solver the declaring solver.
+     * @param model the declaring solver.
      */
-    public TwoBucketPropagationEngine(Solver solver) {
+    public TwoBucketPropagationEngine(Model model) {
         this.exception = new ContradictionException();
-        this.environment = solver.getEnvironment();
-        this.trigger = new PropagationTrigger(this, solver);
-        this.idemStrat = solver.getSettings().getIdempotencyStrategy();
-        this.solver = solver;
+        this.environment = model.getEnvironment();
+        this.trigger = new PropagationTrigger(this, model);
+        this.idemStrat = model.getSettings().getIdempotencyStrategy();
+        this.model = model;
 
-        match_f = solver.getSettings().getFineEventPriority();
-        match_c = solver.getSettings().getCoarseEventPriority();
+        match_f = model.getSettings().getFineEventPriority();
+        match_c = model.getSettings().getCoarseEventPriority();
 
-        this.DEBUG = solver.getSettings().debugPropagation();
-        this.COLOR = solver.getSettings().outputWithANSIColors();
+        this.DEBUG = model.getSettings().debugPropagation();
+        this.COLOR = model.getSettings().outputWithANSIColors();
     }
 
     @Override
     public void initialize() {
         if (!init) {
             List<Propagator> _propagators = new ArrayList<>();
-            Constraint[] constraints = solver.getCstrs();
+            Constraint[] constraints = model.getCstrs();
             int nbProp = 0;
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] cprops = constraints[c].getPropagators();

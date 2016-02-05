@@ -445,7 +445,7 @@ public class TuplesFactory {
      * @return a boolean
      */
     public static boolean canBeTupled(IntVar... VARS) {
-        Settings settings = VARS[0].getSolver().getSettings();
+        Settings settings = VARS[0].getModel().getSettings();
         if (!settings.enableTableSubstitution()) {
             return false;
         }

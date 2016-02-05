@@ -68,8 +68,8 @@ public class PropDiffN extends Propagator<IntVar> {
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new UnsupportedOperationException();
         }
-        overlappingBoxes = new UndirectedGraph(solver, n, SetType.LINKED_LIST, true);
-        boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, solver);
+        overlappingBoxes = new UndirectedGraph(model, n, SetType.LINKED_LIST, true);
+        boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, model);
         super.linkVariables();
     }
 

@@ -32,7 +32,7 @@ package org.chocosolver.solver.variables.impl;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.SetVar;
@@ -65,15 +65,15 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
      */
     private int envIndex;
 
-    public FixedSetVarImpl(String name, TIntSet values, Solver solver) {
-        super(name, solver);
+    public FixedSetVarImpl(String name, TIntSet values, Model model) {
+        super(name, model);
         this.values = values.toArray();
         Arrays.sort(this.values);
     }
 
-    public FixedSetVarImpl(String name, int[] values, Solver solver) {
+    public FixedSetVarImpl(String name, int[] values, Model model) {
         // Remove duplicates
-        this(name, new TIntHashSet(values), solver);
+        this(name, new TIntHashSet(values), model);
     }
 
 	@Override
@@ -220,7 +220,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
-        solver.getEngine().fails(cause, this, message);
+        model.getEngine().fails(cause, this, message);
     }
 
     @Override
@@ -230,7 +230,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public SetVar duplicate() {
-        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), solver);
+        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), model);
     }
 
 }

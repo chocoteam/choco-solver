@@ -106,7 +106,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         for (int i = 0; i < listuples.length; i++) {
             listuples[i] = i;
         }
-        last = solver.getEnvironment().makeInt(listuples.length - 1);
+        last = model.getEnvironment().makeInt(listuples.length - 1);
 
         int[][] tt = this.relation.getTupleTable();
         boolean fastBooleanValidCheckAllowed = true;

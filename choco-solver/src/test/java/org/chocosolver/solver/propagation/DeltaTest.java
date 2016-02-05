@@ -30,12 +30,11 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -60,7 +59,7 @@ public class DeltaTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAdd() {
-        Solver sol = new Solver();
+        Model sol = new Model();
         EnumDelta d = new EnumDelta(sol.getEnvironment());
         for (int i = 1; i < 40; i++) {
             d.add(i, Cause.Null);
@@ -70,17 +69,17 @@ public class DeltaTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testEq() throws ContradictionException {
-        Solver solver = new Solver();
-        IntVar x = solver.intVar("X", 1, 6, false);
-        IntVar y = solver.intVar("Y", 1, 6, false);
+        Model model = new Model();
+        IntVar x = model.intVar("X", 1, 6, false);
+        IntVar y = model.intVar("Y", 1, 6, false);
 
-        solver.arithm(x, "=", y).post();
+        model.arithm(x, "=", y).post();
 
-        solver.propagate();
+        model.propagate();
 
         x.removeValue(4, Null);
 
-        solver.propagate();
+        model.propagate();
 
         assertFalse(y.contains(4));
 
@@ -88,25 +87,25 @@ public class DeltaTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testJL() {
-        Solver solver = new Solver();
-        final SetVar s0 = solver.setVar("s0", new int[]{}, new int[]{0, 1});
-        final BoolVar b0 = solver.boolVar("b0");
-        final BoolVar b1 = solver.boolVar("b1");
-        final IntVar i0 = solver.boolVar("i0");
-        solver.set(lexico_LB(i0));
-        solver.setBoolsChanneling(new BoolVar[]{b0, b1}, s0, 0).post();
-        solver.cardinality(s0, solver.intVar(0)).post();
+        Model model = new Model();
+        final SetVar s0 = model.setVar("s0", new int[]{}, new int[]{0, 1});
+        final BoolVar b0 = model.boolVar("b0");
+        final BoolVar b1 = model.boolVar("b1");
+        final IntVar i0 = model.boolVar("i0");
+        model.set(lexico_LB(i0));
+        model.setBoolsChanneling(new BoolVar[]{b0, b1}, s0, 0).post();
+        model.cardinality(s0, model.intVar(0)).post();
 
-        solver.findSolution();
-        solver.getSearchLoop().reset();
-        solver.findSolution();
+        model.findSolution();
+        model.getSearchLoop().reset();
+        model.findSolution();
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void testJL2() {
         for (int k = 0; k < 50; k++) {
-            Solver s = new Solver();
+            Model s = new Model();
             final IntVar i = s.intVar("i", -2, 2, false);
             final IntVar j = s.intVar("j", -2, 2, false);
             //Chatterbox.showDecisions(s);
@@ -120,7 +119,7 @@ public class DeltaTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL3() {
         for (int k = 0; k < 10; k++) {
-            Solver s = new Solver();
+            Model s = new Model();
             final IntVar i = s.intVar("i", -2, 2, true);
             final IntVar j = s.intVar("j", -2, 2, true);
             //Chatterbox.showDecisions(s);
@@ -134,7 +133,7 @@ public class DeltaTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL4() {
         for (int k = 0; k < 10; k++) {
-            Solver s = new Solver();
+            Model s = new Model();
             final IntVar i = s.boolVar("i");
             final IntVar j = s.boolVar("j");
             //Chatterbox.showDecisions(s);

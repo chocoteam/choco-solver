@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.PropReif;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -115,14 +115,14 @@ public class ReificationConstraint extends Constraint {
     //***********************************************************************************
 
     public void activate(int idx) throws ContradictionException {
-        Solver solver = propagators[0].getSolver();
+        Model model = propagators[0].getModel();
         assert bool.isInstantiatedTo(1 - idx);
         for (int p = indices[idx]; p < indices[idx + 1]; p++) {
             assert (propagators[p].isReifiedAndSilent());
             propagators[p].setReifiedTrue();
-            solver.getEventObserver().activePropagator(bool, propagators[p]);
+            model.getEventObserver().activePropagator(bool, propagators[p]);
             propagators[p].propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-            solver.getEngine().onPropagatorExecution(propagators[p]);
+            model.getEngine().onPropagatorExecution(propagators[p]);
         }
     }
 

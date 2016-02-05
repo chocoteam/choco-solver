@@ -31,7 +31,7 @@ package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.RealVar;
@@ -54,10 +54,10 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     IStateDouble LB, UB;
     double precision;
 
-    public RealVarImpl(String name, double lb, double ub, double precision, Solver solver) {
-        super(name, solver);
-        this.LB = solver.getEnvironment().makeFloat(lb);
-        this.UB = solver.getEnvironment().makeFloat(ub);
+    public RealVarImpl(String name, double lb, double ub, double precision, Model model) {
+        super(name, model);
+        this.LB = model.getEnvironment().makeFloat(lb);
+        this.UB = model.getEnvironment().makeFloat(ub);
         this.precision = precision;
     }
 
@@ -182,7 +182,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
-        solver.getEngine().fails(cause, this, message);
+        model.getEngine().fails(cause, this, message);
     }
 
     @Override
@@ -192,7 +192,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public RealVar duplicate() {
-        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, solver);
+        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, model);
     }
 
     @Override

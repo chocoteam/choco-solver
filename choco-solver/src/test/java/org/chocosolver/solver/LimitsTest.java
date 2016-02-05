@@ -52,7 +52,7 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTime() {
-        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long tl = 500;
         SearchMonitorFactory.limitTime(s, tl);
         s.findAllSolutions();
@@ -62,7 +62,7 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testThreadTime() {
-        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long tl = 500;
         SearchMonitorFactory.limitTime(s, tl);
         s.findAllSolutions();
@@ -72,7 +72,7 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testNode() {
-        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long nl = 50;
         SearchMonitorFactory.limitNode(s, nl);
         s.findAllSolutions();
@@ -82,7 +82,7 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBacktrack() {
-        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long bl = 50;
         SearchMonitorFactory.limitBacktrack(s, bl);
         s.findAllSolutions();
@@ -92,7 +92,7 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testFail() {
-        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long fl = 50;
         SearchMonitorFactory.limitFail(s, fl);
         s.findAllSolutions();
@@ -102,7 +102,7 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testSolution() {
-        Solver s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         long sl = 50;
         SearchMonitorFactory.limitSolution(s, sl);
         s.findAllSolutions();
@@ -133,11 +133,11 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testGregy4() {
-        Solver solver = ProblemMaker.makeNQueenWithBinaryConstraints(12);
-        NodeCounter nodeCounter = new NodeCounter(solver, 100);
-        INeighbor rnd = LNSFactory.random(solver, solver.retrieveIntVars(true), 30, 0);
-        Move currentMove = solver.getSearchLoop().getMove();
-        solver.getSearchLoop().setMove(new MoveLNS(currentMove, rnd, new FailCounter(solver, 100)) {
+        Model model = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        NodeCounter nodeCounter = new NodeCounter(model, 100);
+        INeighbor rnd = LNSFactory.random(model, model.retrieveIntVars(true), 30, 0);
+        Move currentMove = model.getSearchLoop().getMove();
+        model.getSearchLoop().setMove(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
             public boolean extend(SearchLoop searchLoop) {
                 if (nodeCounter.isMet()) {
@@ -152,10 +152,10 @@ public class LimitsTest {
                     super.repair(searchLoop);
                 } else if (this.solutions > 0
                         // the second condition is only here for intiale calls, when solutions is not already up to date
-                        || solver.getMeasures().getSolutionCount() > 0) {
+                        || model.getMeasures().getSolutionCount() > 0) {
                     // the detection of a new solution can only be met here
-                    if (solutions < solver.getMeasures().getSolutionCount()) {
-                        assert solutions == solver.getMeasures().getSolutionCount() - 1;
+                    if (solutions < model.getMeasures().getSolutionCount()) {
+                        assert solutions == model.getMeasures().getSolutionCount() - 1;
                         solutions++;
                         neighbor.recordSolution();
                     }
@@ -163,8 +163,8 @@ public class LimitsTest {
                 return currentMove.repair(searchLoop);
             }
         });
-        solver.findAllSolutions();
-        long sc = solver.getMeasures().getSolutionCount();
+        model.findAllSolutions();
+        long sc = model.getMeasures().getSolutionCount();
         Assert.assertEquals(sc, 11);
     }
 }

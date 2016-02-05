@@ -77,8 +77,8 @@ public class PropKLoops extends Propagator<IntVar> {
 		super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), PropagatorPriority.UNARY, true);
 		this.n = succs.length;
 		this.offSet = offSet;
-		IEnvironment environment = solver.getEnvironment();
-		this.possibleLoops = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
+		IEnvironment environment = model.getEnvironment();
+		this.possibleLoops = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, model);
 		this.nbMinLoops = environment.makeInt();
 	}
 

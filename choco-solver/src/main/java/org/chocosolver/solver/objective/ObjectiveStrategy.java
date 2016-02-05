@@ -38,7 +38,7 @@ package org.chocosolver.solver.objective;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -65,7 +65,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     private int coefLB, coefUB;
     private IntVar obj;
     private long nbSols;
-    private Solver solver;
+    private Model model;
     private PoolManager<IntDecision> pool;
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
@@ -100,12 +100,12 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         super(new IntVar[]{objective});
         this.pool = new PoolManager<>();
         this.obj = objective;
-        this.solver = obj.getSolver();
+        this.model = obj.getModel();
         this.firstCall = true;
         this.coefLB = coefs[0];
         this.coefUB = coefs[1];
         this.optPolicy = policy;
-		SLF.restartOnSolutions(solver);
+		SLF.restartOnSolutions(model);
         if (coefLB < 0 || coefUB < 0 || coefLB + coefUB == 0) {
             throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
         }
@@ -151,13 +151,13 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     //***********************************************************************************
 
     public boolean init() {
-        decOperator = getOperator(optPolicy, solver.getObjectiveManager().getPolicy());
+        decOperator = getOperator(optPolicy, model.getObjectiveManager().getPolicy());
         return true;
     }
     @Override
     public Decision getDecision() {
-        if (solver.getMeasures().getSolutionCount() == 0
-                || (nbSols == solver.getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
+        if (model.getMeasures().getSolutionCount() == 0
+                || (nbSols == model.getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
             return null;
         }
         if (obj.isInstantiated()) {
@@ -168,7 +168,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
             globalLB = obj.getLB();
             globalUB = obj.getUB();
         }
-        nbSols = solver.getMeasures().getSolutionCount();
+        nbSols = model.getMeasures().getSolutionCount();
         globalLB = Math.max(globalLB, obj.getLB());//check
         globalUB = Math.min(globalUB, obj.getUB());//check
 //        ObjectiveManager man = solver.getSearchLoop().getObjectiveManager();
@@ -178,7 +178,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
             return null;
         }
 
-        if(solver.getSettings().warnUser()){
+        if(model.getSettings().warnUser()){
             Chatterbox.err.printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
         }
         int target;
@@ -186,7 +186,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         IntDecision dec = pool.getE();
         if (dec == null) dec = new IntDecision(pool);
         dec.set(obj, target, decOperator);
-        if(solver.getSettings().warnUser()){
+        if(model.getSettings().warnUser()){
             Chatterbox.err.printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
         }
         return dec;

@@ -89,7 +89,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
-        IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = model.getEnvironment();
         both = environment.makeBitSet(nb_vars);
         LB = environment.makeInt(0);
         UB = environment.makeInt(0);

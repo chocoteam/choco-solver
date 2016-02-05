@@ -55,7 +55,7 @@ package org.chocosolver.samples.integer; /**
  */
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 
 
@@ -70,25 +70,22 @@ public class SendMoreMoney extends AbstractProblem {
     IntVar S, E, N, D, M, O, R, Y;
     IntVar[] ALL;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("SendMoreMoney");
-    }
 
     @Override
     public void buildModel() {
-        S = solver.intVar("S", 0, 9, false);
-        E = solver.intVar("E", 0, 9, false);
-        N = solver.intVar("N", 0, 9, false);
-        D = solver.intVar("D", 0, 9, false);
-        M = solver.intVar("M", 0, 9, false);
-        O = solver.intVar("0", 0, 9, false);
-        R = solver.intVar("R", 0, 9, false);
-        Y = solver.intVar("Y", 0, 9, false);
+        model = new Model();
+        S = model.intVar("S", 0, 9, false);
+        E = model.intVar("E", 0, 9, false);
+        N = model.intVar("N", 0, 9, false);
+        D = model.intVar("D", 0, 9, false);
+        M = model.intVar("M", 0, 9, false);
+        O = model.intVar("0", 0, 9, false);
+        R = model.intVar("R", 0, 9, false);
+        Y = model.intVar("Y", 0, 9, false);
 
-        solver.arithm(S, "!=", 0).post();
-        solver.arithm(M, "!=", 0).post();
-        solver.allDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC").post();
+        model.arithm(S, "!=", 0).post();
+        model.arithm(M, "!=", 0).post();
+        model.allDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC").post();
 
 
         ALL = new IntVar[]{
@@ -100,7 +97,7 @@ public class SendMoreMoney extends AbstractProblem {
                 1000, 100, 10, 1,
                 -10000, -1000, -100, -10, -1
         };
-        solver.scalar(ALL, COEFFS, "=", 0).post();
+        model.scalar(ALL, COEFFS, "=", 0).post();
     }
 
     @Override
@@ -109,7 +106,7 @@ public class SendMoreMoney extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

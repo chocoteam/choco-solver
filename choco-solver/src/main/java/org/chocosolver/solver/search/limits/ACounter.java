@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.IMeasures;
 
 /**
@@ -44,9 +44,9 @@ public abstract class ACounter implements ICounter {
     protected IMeasures measures;
     protected long max;
 
-    public ACounter(Solver solver, long limit) {
+    public ACounter(Model model, long limit) {
         this.max = limit;
-        this.measures = solver.getMeasures();
+        this.measures = model.getMeasures();
     }
 
     @Override

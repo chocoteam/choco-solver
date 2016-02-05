@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.solution;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 
 import java.util.LinkedList;
@@ -45,12 +45,12 @@ import java.util.List;
 public class LastSolutionRecorder implements ISolutionRecorder {
 
 	Solution solution;
-	Solver solver;
+	Model model;
 
-	public LastSolutionRecorder(final Solution solution,  final Solver solver){
-		this.solver = solver;
+	public LastSolutionRecorder(final Solution solution,  final Model model){
+		this.model = model;
 		this.solution = solution;
-		solver.plugMonitor((IMonitorSolution) () -> solution.record(solver));
+		model.plugMonitor((IMonitorSolution) () -> solution.record(model));
 	}
 
 	@Override

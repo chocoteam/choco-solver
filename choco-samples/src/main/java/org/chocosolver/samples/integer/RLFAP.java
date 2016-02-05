@@ -34,7 +34,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -87,13 +87,10 @@ public class RLFAP extends AbstractProblem {
     int[] freqs;
     int[] rank;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("RLFAP " + dir);
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         _dom = readDOM(dir + File.separator + DOM);
         _var = readVAR(dir + File.separator + VAR);
         _ctr = readCTR(dir + File.separator + CTR);
@@ -109,14 +106,14 @@ public class RLFAP extends AbstractProblem {
             int vidx = _var[i][0] - 1;
             if (vidx > prev) {
                 for (; prev < vidx; ) {
-                    vars[prev++] = solver.intVar(0);
+                    vars[prev++] = model.intVar(0);
                 }
             }
             int didx = _var[i][1];
             if (_var[i].length > 2) {
-                vars[vidx] = solver.intVar(_var[i][2]);
+                vars[vidx] = model.intVar(_var[i][2]);
             } else {
-                vars[vidx] = solver.intVar("v_" + vidx, _dom[didx]);
+                vars[vidx] = model.intVar("v_" + vidx, _dom[didx]);
                 values.addAll(_dom[didx]);
             }
             prev = vidx + 1;
@@ -125,7 +122,7 @@ public class RLFAP extends AbstractProblem {
 
         for (int i = 0; i < _ctr.length; i++) {
             int[] ci = _ctr[i];
-            solver.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3]).post();
+            model.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3]).post();
 
             // MARK BOTH SPOTS IN "PRECEDENCE" GRAPH
             graph[ci[0] - 1][ci[1] - 1] = 1;
@@ -133,14 +130,14 @@ public class RLFAP extends AbstractProblem {
 
         }
         if (opt) {
-            cards = solver.intVarArray("c", values.size(), 0, vars.length, true);
+            cards = model.intVarArray("c", values.size(), 0, vars.length, true);
             freqs = values.toArray();
             sort(freqs);
             for (int i = 0; i < freqs.length; i++) {
-                solver.count(freqs[i], vars, cards[i]).post();
+                model.count(freqs[i], vars, cards[i]).post();
             }
-            nb0 = solver.intVar("nb0", 0, freqs.length, true);
-            solver.count(0, cards, nb0).post();
+            nb0 = model.intVar("nb0", 0, freqs.length, true);
+            model.count(0, cards, nb0).post();
         }
         // RANKING VARIABLES PER LAYER OF DISTINCT SPOT
         rank = new int[n];
@@ -165,24 +162,24 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.domOverWDeg(vars, seed));
-        SearchMonitorFactory.luby(solver, 2, 2, new FailCounter(solver, 2), 25000);
+        model.set(IntStrategyFactory.domOverWDeg(vars, seed));
+        SearchMonitorFactory.luby(model, 2, 2, new FailCounter(model, 2), 25000);
     }
 
     @Override
     public void solve() {
-        SearchMonitorFactory.limitNode(solver, 10000);
+        SearchMonitorFactory.limitNode(model, 10000);
         if (opt)
-            solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
+            model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
         else
-            solver.findSolution();
+            model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         System.out.println(String.format("RLFAP %s", dir));
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             st.append("\t");
             for (int i = 0; i < vars.length; i++) {
                 st.append(vars[i].getValue()).append(" ");

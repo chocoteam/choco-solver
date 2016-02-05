@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.PropOpposite;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
@@ -146,7 +146,7 @@ public class Constraint implements Serializable {
      * @param bool the variable to reify with
      */
     public final void reifyWith(BoolVar bool) {
-        Solver s = propagators[0].getSolver();
+        Model s = propagators[0].getModel();
         if (boolReif == null) {
             boolReif = bool;
             new ReificationConstraint(boolReif, this, getOpposite()).post();
@@ -172,7 +172,7 @@ public class Constraint implements Serializable {
      */
     public final BoolVar reify() {
         if (boolReif == null) {
-            Solver s = propagators[0].getSolver();
+            Model s = propagators[0].getModel();
             boolReif = s.boolVar(randomName());
             new ReificationConstraint(boolReif, this, getOpposite()).post();
         }
@@ -184,7 +184,7 @@ public class Constraint implements Serializable {
      * This should not be reified.
      */
     public final void post(){
-        propagators[0].getSolver().post(this);
+        propagators[0].getModel().post(this);
     }
 
     /**

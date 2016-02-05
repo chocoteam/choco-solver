@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
 import org.chocosolver.solver.variables.IntVar;
@@ -58,11 +58,11 @@ public class RandomNeighborhood implements INeighbor {
 
     protected BitSet fragment;  // index of variable to set unfrozen
     IntMetaDecision decision;
-    Solver mSolver;
+    Model mModel;
 
 
-    public RandomNeighborhood(Solver aSolver, IntVar[] vars, int level, long seed) {
-        this.mSolver = aSolver;
+    public RandomNeighborhood(Model aModel, IntVar[] vars, int level, long seed) {
+        this.mModel = aModel;
         this.n = vars.length;
         this.vars = vars.clone();
         this.level = level;

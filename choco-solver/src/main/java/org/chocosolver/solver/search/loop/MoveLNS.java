@@ -110,7 +110,7 @@ public class MoveLNS implements Move {
                 assert tmp == RootDecision.ROOT;
                 searchLoop.decision = neighbor.fixSomeVariables();
                 searchLoop.decision.setPrevious(tmp);
-                searchLoop.mSolver.getEnvironment().worldPush();
+                searchLoop.mModel.getEnvironment().worldPush();
                 freshRestart = false;
                 extend = true;
             } else {
@@ -170,10 +170,10 @@ public class MoveLNS implements Move {
         boolean repair;
         if(solutions > 0
                 // the second condition is only here for intiale calls, when solutions is not already up to date
-                || searchLoop.mSolver.getMeasures().getSolutionCount() > 0) {
+                || searchLoop.mModel.getMeasures().getSolutionCount() > 0) {
             // the detection of a new solution can only be met here
-            if (solutions < searchLoop.mSolver.getMeasures().getSolutionCount()) {
-                assert solutions == searchLoop.mSolver.getMeasures().getSolutionCount() - 1;
+            if (solutions < searchLoop.mModel.getMeasures().getSolutionCount()) {
+                assert solutions == searchLoop.mModel.getMeasures().getSolutionCount() - 1;
                 solutions++;
                 neighbor.recordSolution();
                 doRestart(searchLoop);

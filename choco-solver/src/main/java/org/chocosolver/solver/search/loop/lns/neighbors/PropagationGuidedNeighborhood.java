@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
@@ -66,11 +66,11 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     protected SortedMap<Integer, Integer> candidate;
     BitSet fragment;  // index of variable to set unfrozen
     IntMetaDecision decision;
-    Solver mSolver;
+    Model mModel;
 
 
-    public PropagationGuidedNeighborhood(Solver solver, IntVar[] vars, long seed, int fgmtSize, int listSize) {
-        this.mSolver = solver;
+    public PropagationGuidedNeighborhood(Model model, IntVar[] vars, long seed, int fgmtSize, int listSize) {
+        this.mModel = model;
 
         this.n = vars.length;
         this.vars = vars.clone();
@@ -108,13 +108,13 @@ public class PropagationGuidedNeighborhood implements INeighbor {
         }
         fgmtSize = (int) (30 * (1 + epsilon));
         fragment.set(0, n); // all variables are frozen
-        mSolver.getEnvironment().worldPush();
+        mModel.getEnvironment().worldPush();
         try {
             update();
         } catch (ContradictionException cex) {
-            mSolver.getEngine().flush();
+            mModel.getEngine().flush();
         }
-        mSolver.getEnvironment().worldPop();
+        mModel.getEnvironment().worldPop();
         epsilon = (.95 * epsilon) + (.05 * (logSum / fgmtSize));
         return decision;
     }
@@ -128,7 +128,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
             // 2. fix it to its solution value
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
                 impose(id);
-                mSolver.propagate();
+                mModel.propagate();
                 fragment.clear(id);
 
                 logSum = 0;

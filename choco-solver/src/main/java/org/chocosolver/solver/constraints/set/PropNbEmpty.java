@@ -79,9 +79,9 @@ public class PropNbEmpty extends Propagator<Variable> {
             this.sets[i] = (SetVar) vars[i];
         }
         this.nbEmpty = (IntVar) vars[n];
-        IEnvironment environment = solver.getEnvironment();
-        this.canBeEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
-        this.isEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, solver);
+        IEnvironment environment = model.getEnvironment();
+        this.canBeEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, model);
+        this.isEmpty = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, model);
         this.nbAlreadyEmpty = environment.makeInt();
         this.nbMaybeEmpty = environment.makeInt();
     }

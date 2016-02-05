@@ -31,7 +31,7 @@ package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
@@ -105,7 +105,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Reference to the solver containing this variable (unique).
      */
-    protected final Solver solver;
+    protected final Model model;
 
     /**
      * Name of the variable.
@@ -167,19 +167,19 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Create the shared data of any type of variable.
      * @param name name of the variable
-     * @param solver solver which declares this variable
+     * @param model solver which declares this variable
      */
-    protected AbstractVariable(String name, Solver solver) {
+    protected AbstractVariable(String name, Model model) {
         this.name = name;
-        this.solver = solver;
+        this.model = model;
         this.views = new IView[2];
         this.monitors = new IVariableMonitor[2];
         this.propagators = new Propagator[8];
         this.pindices = new int[8];
         this.dindices = new int[6];
-        this.ID = this.solver.nextId();
-        this._plugexpl = this.solver.getSettings().plugExplanationIn();
-        this.solver.associates(this);
+        this.ID = this.model.nextId();
+        this._plugexpl = this.model.getSettings().plugExplanationIn();
+        this.model.associates(this);
         int kind = getTypeAndKind() & Variable.KIND;
         switch (kind) {
             case Variable.BOOL:
@@ -324,7 +324,7 @@ public abstract class AbstractVariable implements Variable {
     public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
         notifyMonitors(event);
-        solver.getEngine().onVariableUpdate(this, event, cause);
+        model.getEngine().onVariableUpdate(this, event, cause);
         notifyViews(event, cause);
     }
 
@@ -374,9 +374,8 @@ public abstract class AbstractVariable implements Variable {
         views[vIdx++] = view;
     }
 
-    @Override
-    public Solver getSolver() {
-        return solver;
+    public Model getModel() {
+        return model;
     }
 
     @Override

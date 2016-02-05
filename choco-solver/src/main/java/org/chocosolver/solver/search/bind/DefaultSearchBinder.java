@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.bind;
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.RSF;
@@ -56,17 +56,17 @@ import java.util.List;
 public class DefaultSearchBinder implements ISearchBinder {
 
     @Override
-    public void configureSearch(Solver solver) {
-        if(solver.getSettings().warnUser()) {
+    public void configureSearch(Model model) {
+        if(model.getSettings().warnUser()) {
             Chatterbox.err.printf("No search strategies defined.\nSet to default ones.");
         }
 
-        solver.set(getDefault(solver));
+        model.set(getDefault(model));
         // + last conflict
-        solver.set(ISF.lastConflict(solver));
+        model.set(ISF.lastConflict(model));
     }
 
-    public AbstractStrategy[] getDefault(Solver solver) {
+    public AbstractStrategy[] getDefault(Model model) {
         AbstractStrategy[] strats = new AbstractStrategy[4];
         int nb = 0;
 
@@ -77,7 +77,7 @@ public class DefaultSearchBinder implements ISearchBinder {
         List<SetVar> lsvars = new ArrayList<>();
         // c. real variables.
         List<RealVar> lrvars = new ArrayList<>();
-        Variable[] variables = solver.getVars();
+        Variable[] variables = model.getVars();
         Variable objective = null;
         int n = variables.length;
         for (int i = 0; i < n; i++) {
@@ -104,8 +104,8 @@ public class DefaultSearchBinder implements ISearchBinder {
             }
         }
         // d. extract the objective variable if any
-        if (solver.getSearchLoop().getObjectiveManager().isOptimization()) {
-            objective = solver.getSearchLoop().getObjectiveManager().getObjective();
+        if (model.getSearchLoop().getObjectiveManager().isOptimization()) {
+            objective = model.getSearchLoop().getObjectiveManager().getObjective();
             int kind = objective.getTypeAndKind() & Variable.KIND;
             switch (kind) {
                 case Variable.INT:
@@ -147,7 +147,7 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         // d. lexico LB/UB for the objective variable
         if (objective != null) {
-            boolean max = solver.getSearchLoop().getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
+            boolean max = model.getSearchLoop().getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
             int kind = objective.getTypeAndKind() & Variable.KIND;
             switch (kind) {
                 case Variable.INT:
@@ -172,7 +172,7 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         if (nb == 0) {
             // simply to avoid null pointers in case all variables are instantiated
-            strats[nb++] = ISF.minDom_LB(solver.ONE());
+            strats[nb++] = ISF.minDom_LB(model.ONE());
         }
         return Arrays.copyOf(strats, nb);
     }

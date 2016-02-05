@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.strategy;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -574,7 +574,7 @@ public class IntStrategyFactory {
      */
     public static AbstractStrategy<IntVar> activity(IntVar[] VARS, double GAMMA, double DELTA, int ALPHA,
                                                     int FORCE_SAMPLING, long SEED) {
-        return new ActivityBased(VARS[0].getSolver(), VARS, GAMMA, DELTA, ALPHA, FORCE_SAMPLING, SEED);
+        return new ActivityBased(VARS[0].getModel(), VARS, GAMMA, DELTA, ALPHA, FORCE_SAMPLING, SEED);
     }
 
     /**
@@ -629,34 +629,34 @@ public class IntStrategyFactory {
     /**
      * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
      *
-     * @param SOLVER the solver
+     * @param Model the solver
      * @return last conflict strategy
      */
-    public static AbstractStrategy lastConflict(Solver SOLVER) {
-        return lastConflict(SOLVER, SOLVER.getStrategy());
+    public static AbstractStrategy lastConflict(Model Model) {
+        return lastConflict(Model, Model.getStrategy());
     }
 
     /**
      * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
      *
-     * @param SOLVER the solver
+     * @param Model the solver
      * @param STRAT  the main strategy
      * @return last conflict strategy
      */
-    public static AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT) {
-        return lastKConflicts(SOLVER, 1, STRAT);
+    public static AbstractStrategy lastConflict(Model Model, AbstractStrategy STRAT) {
+        return lastKConflicts(Model, 1, STRAT);
     }
 
     /**
      * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
      * Considers the K last conflicts
      *
-     * @param SOLVER the solver
+     * @param Model the solver
      * @param K number of coblicts to consider
      * @param STRAT  the main strategy
      * @return last conflict strategy
      */
-    public static AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT) {
-        return new LastConflict(SOLVER, STRAT, K);
+    public static AbstractStrategy lastKConflicts(Model Model, int K, AbstractStrategy STRAT) {
+        return new LastConflict(Model, STRAT, K);
     }
 }

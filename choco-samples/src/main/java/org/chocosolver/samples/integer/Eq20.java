@@ -30,12 +30,10 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-
-import java.util.Arrays;
 
 import static java.util.Arrays.copyOfRange;
 
@@ -74,33 +72,30 @@ public class Eq20 extends AbstractProblem {
 
     IntVar[] vars;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Eq20");
-    }
 
     @Override
     public void buildModel() {
-        vars = solver.intVarArray("v", n, 0, 10, true);
+        model = new Model("Eq20");
+        vars = model.intVarArray("v", n, 0, 10, true);
         for (int i = 0; i < coeffs.length; i++) {
-            solver.scalar(vars, copyOfRange(coeffs[i], 1, n + 1), "=", coeffs[i][0]).post();
+            model.scalar(vars, copyOfRange(coeffs[i], 1, n + 1), "=", coeffs[i][0]).post();
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(vars));
+        model.set(IntStrategyFactory.minDom_LB(vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder("20 equations\n");
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(", ");
             }

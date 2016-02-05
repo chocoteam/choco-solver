@@ -79,8 +79,8 @@ public class PropSumBoolIncr extends PropSumBool {
      */
     public PropSumBoolIncr(BoolVar[] variables, int pos, Operator o, IntVar sum, int b) {
         super(variables, pos, o, sum, b, true);
-        this.bLB = solver.getEnvironment().makeInt();
-        this.bUB = solver.getEnvironment().makeInt();
+        this.bLB = model.getEnvironment().makeInt();
+        this.bUB = model.getEnvironment().makeInt();
     }
 
     @Override

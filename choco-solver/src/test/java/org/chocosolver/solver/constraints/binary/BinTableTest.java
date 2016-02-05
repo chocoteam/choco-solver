@@ -29,13 +29,11 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
@@ -52,7 +50,7 @@ public class BinTableTest {
 
     private static String[] ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
 
-    private Solver s;
+    private Model s;
     private IntVar v1, v2;
     Tuples feasible, infeasible;
 
@@ -85,7 +83,7 @@ public class BinTableTest {
     public void testFeas1() {
         setUp();
         for (String a : ALGOS) {
-            s = new Solver();
+            s = new Model();
             v1 = s.intVar("v1", 1, 4, false);
             v2 = s.intVar("v2", 1, 4, false);
             s.table(v1, v2, feasible, a).post();
@@ -101,7 +99,7 @@ public class BinTableTest {
     public void testInfeas1() {
         setUp();
         for (String a : ALGOS) {
-            s = new Solver();
+            s = new Model();
             v1 = s.intVar("v1", 1, 4, false);
             v2 = s.intVar("v2", 1, 4, false);
             s.table(v1, v2, infeasible, a).post();
@@ -115,23 +113,23 @@ public class BinTableTest {
 
     private Constraint absolute(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return v1.getSolver().table(v1, v2, TuplesFactory.absolute(v1, v2), ALGOS[algo]);
+            return v1.getModel().table(v1, v2, TuplesFactory.absolute(v1, v2), ALGOS[algo]);
         } else {
-            return v1.getSolver().absolute(v1, v2);
+            return v1.getModel().absolute(v1, v2);
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testAbsolute() {
-        Solver solver = new Solver();
-        IntVar v1 = solver.intVar("v1", -10, 10, false);
-        IntVar v2 = solver.intVar("v2", -10, 10, false);
+        Model model = new Model();
+        IntVar v1 = model.intVar("v1", -10, 10, false);
+        IntVar v2 = model.intVar("v2", -10, 10, false);
         absolute(v1, v2, -1).post();
-        long nbs = solver.findAllSolutions();
-        long nbn = solver.getMeasures().getNodeCount();
+        long nbs = model.findAllSolutions();
+        long nbn = model.getMeasures().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
-                Solver tsolver = new Solver();
+                Model tsolver = new Model();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 absolute(tv1, tv2, a).post();
@@ -144,23 +142,23 @@ public class BinTableTest {
 
     private static Constraint arithmLT(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return v1.getSolver().table(v1, v2, TuplesFactory.arithm(v1, "<", v2), ALGOS[algo]);
+            return v1.getModel().table(v1, v2, TuplesFactory.arithm(v1, "<", v2), ALGOS[algo]);
         } else {
-            return v1.getSolver().arithm(v1, "<", v2);
+            return v1.getModel().arithm(v1, "<", v2);
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testArithmLT() {
-        Solver solver = new Solver();
-        IntVar v1 = solver.intVar("v1", -10, 10, false);
-        IntVar v2 = solver.intVar("v2", -10, 10, false);
+        Model model = new Model();
+        IntVar v1 = model.intVar("v1", -10, 10, false);
+        IntVar v2 = model.intVar("v2", -10, 10, false);
         arithmLT(v1, v2, -1).post();
-        long nbs = solver.findAllSolutions();
-        long nbn = solver.getMeasures().getNodeCount();
+        long nbs = model.findAllSolutions();
+        long nbn = model.getMeasures().getNodeCount();
         for (int s = 0; s < 20; s++) {
             for (int a = 0; a < ALGOS.length; a++) {
-                Solver tsolver = new Solver();
+                Model tsolver = new Model();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 arithmLT(tv1, tv2, a).post();
@@ -173,23 +171,23 @@ public class BinTableTest {
 
     private static Constraint arithmNQ(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return v1.getSolver().table(v1, v2, TuplesFactory.arithm(v1, "!=", v2), ALGOS[algo]);
+            return v1.getModel().table(v1, v2, TuplesFactory.arithm(v1, "!=", v2), ALGOS[algo]);
         } else {
-            return v1.getSolver().arithm(v1, "!=", v2);
+            return v1.getModel().arithm(v1, "!=", v2);
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testArithmNQ() {
-        Solver solver = new Solver();
-        IntVar v1 = solver.intVar("v1", -10, 10, false);
-        IntVar v2 = solver.intVar("v2", -10, 10, false);
+        Model model = new Model();
+        IntVar v1 = model.intVar("v1", -10, 10, false);
+        IntVar v2 = model.intVar("v2", -10, 10, false);
         arithmNQ(v1, v2, -1).post();
-        long nbs = solver.findAllSolutions();
-        long nbn = solver.getMeasures().getNodeCount();
+        long nbs = model.findAllSolutions();
+        long nbn = model.getMeasures().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
-                Solver tsolver = new Solver();
+                Model tsolver = new Model();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 arithmNQ(tv1, tv2, a).post();
@@ -210,12 +208,12 @@ public class BinTableTest {
                 tuples.add(0, 0);
                 tuples.add(1, 1);
 
-                Solver solver = new Solver();
-                IntVar[] vars = solver.intVarArray("X", 2, -1, 1, false);
-                solver.table(vars[0], vars[1], tuples, a).post();
+                Model model = new Model();
+                IntVar[] vars = model.intVarArray("X", 2, -1, 1, false);
+                model.table(vars[0], vars[1], tuples, a).post();
 
-                solver.set(random_value(vars));
-                assertEquals(solver.findAllSolutions(), 3);
+                model.set(random_value(vars));
+                assertEquals(model.findAllSolutions(), 3);
             }
         }
     }
@@ -230,12 +228,12 @@ public class BinTableTest {
                 tuples.add(0, 0);
                 tuples.add(1, 1);
 
-                Solver solver = new Solver();
-                IntVar[] vars = solver.intVarArray("X", 2, -1, 1, false);
-                solver.table(vars[0], vars[1], tuples, a).post();
+                Model model = new Model();
+                IntVar[] vars = model.intVarArray("X", 2, -1, 1, false);
+                model.table(vars[0], vars[1], tuples, a).post();
 
-                solver.set(random_value(vars));
-                assertEquals(solver.findAllSolutions(), 3);
+                model.set(random_value(vars));
+                assertEquals(model.findAllSolutions(), 3);
             }
         }
     }

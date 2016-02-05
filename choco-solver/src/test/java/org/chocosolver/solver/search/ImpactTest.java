@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -46,8 +46,8 @@ public class ImpactTest {
 
 	@Test(groups="10s", timeOut=60000)
 	public void testCostas() {
-		Solver s1 = costasArray(7,false);
-		Solver s2 = costasArray(7,true);
+		Model s1 = costasArray(7,false);
+		Model s2 = costasArray(7,true);
 
 		s1.findAllSolutions();
 		System.out.println(s1.getMeasures().getSolutionCount());
@@ -58,17 +58,17 @@ public class ImpactTest {
 		Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
 	}
 
-	private Solver costasArray(int n, boolean impact){
-		Solver solver = ProblemMaker.makeCostasArrays(n);
-		IntVar[] vectors = (IntVar[]) solver.getHook("vectors");
-		solver.set(ISF.domOverWDeg(vectors, 0));
-		SMF.limitTime(solver, 20000);
+	private Model costasArray(int n, boolean impact){
+		Model model = ProblemMaker.makeCostasArrays(n);
+		IntVar[] vectors = (IntVar[]) model.getHook("vectors");
+		model.set(ISF.domOverWDeg(vectors, 0));
+		SMF.limitTime(model, 20000);
 
 		if(impact){
-			solver.set(ISF.impact(vectors, 0));
+			model.set(ISF.impact(vectors, 0));
 		}else{
-			solver.set(ISF.domOverWDeg(vectors, 0));
+			model.set(ISF.domOverWDeg(vectors, 0));
 		}
-		return solver;
+		return model;
 	}
 }

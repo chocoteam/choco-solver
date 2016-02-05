@@ -35,7 +35,7 @@
 
 package org.chocosolver.samples.nsp;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
@@ -86,8 +86,8 @@ public class NurseSchedulingProblem {
      *
      * @param data the instance data
      */
-    public NurseSchedulingProblem(NSData data, Solver solver) {
-        this(data, "", solver);
+    public NurseSchedulingProblem(NSData data, Model model) {
+        this(data, "", model);
     }
 
     /**
@@ -95,29 +95,29 @@ public class NurseSchedulingProblem {
      *
      * @param data    the instance data
      * @param options the model configuration
-     * @param solver the solver
+     * @param model the solver
      */
-    public NurseSchedulingProblem(NSData data, String options, Solver solver) {
+    public NurseSchedulingProblem(NSData data, String options, Model model) {
         super();
         this.data = data;
-        this.makeVariables(solver);
+        this.makeVariables(model);
         this.description = "NSCPModel: ";
         this.parseOptions(options);
     }
 
-    private void makeVariables(Solver solver) {
-        this.shifts = solver.intVarMatrix("S", data.nbEmployees(), data.nbDays(), 0, data.nbActivities() - 1, false);
+    private void makeVariables(Model model) {
+        this.shifts = model.intVarMatrix("S", data.nbEmployees(), data.nbDays(), 0, data.nbActivities() - 1, false);
 
         this.occurrences = new IntVar[data.nbEmployees()][data.nbActivities()];
         for (int e = 0; e < data.nbEmployees(); e++) {
             for (int a = 0; a < occurrences[e].length; a++) {
-                occurrences[e][a] = solver.intVar("n" + data.getLiteral(a) + e, data.getCounterLB(e, a), data.getCounterUB(e, a), true);
+                occurrences[e][a] = model.intVar("n" + data.getLiteral(a) + e, data.getCounterLB(e, a), data.getCounterUB(e, a), true);
             }
         }
 
         this.covers = new IntVar[data.nbActivities()][];
         for (int a = 0; a < covers.length; a++) {
-            this.covers[a] = solver.intVarArray("B", data.nbDays(), data.getCoverLB(a), data.getCoverUB(a), true);
+            this.covers[a] = model.intVarArray("B", data.nbDays(), data.getCoverLB(a), data.getCoverUB(a), true);
         }
     }
 
@@ -126,7 +126,7 @@ public class NurseSchedulingProblem {
      *
      * @param s the CPSolver
      */
-    public String solutionToString(Solver s) {
+    public String solutionToString(Model s) {
         if (ESat.TRUE != s.isFeasible()) {
             return null;
         }
@@ -151,7 +151,7 @@ public class NurseSchedulingProblem {
      *
      * @param s the CPSolver
      */
-    public void printSolution(Solver s) {
+    public void printSolution(Model s) {
         if (ESat.TRUE != s.isFeasible()) {
             System.out.println("No solution found.");
             return;
@@ -175,7 +175,7 @@ public class NurseSchedulingProblem {
      * @param s the CPSolver
      * @return the current solver solution as the assignment table [nbEmployees][nbDays] if exists, null otherwise
      */
-    public int[][] getSolution(Solver s) {
+    public int[][] getSolution(Model s) {
         if (ESat.TRUE != s.isFeasible()) {
             return null;
         }

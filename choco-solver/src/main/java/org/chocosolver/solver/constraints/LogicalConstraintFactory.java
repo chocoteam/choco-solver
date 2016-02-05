@@ -29,12 +29,12 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
 
 /**
- * @deprecated : logical constraint creation should be done through the {@link Solver} object
+ * @deprecated : logical constraint creation should be done through the {@link Model} object
  * which extends {@link org.chocosolver.solver.constraints.ILogicalConstraintFactory}
  *
  * This class will be removed in versions > 3.4.0
@@ -47,25 +47,25 @@ public class LogicalConstraintFactory {
 	//***********************************************************************************
 
 	/**
-	 * @deprecated : use {@link Solver#and(BoolVar...)} instead
+	 * @deprecated : use {@link Model#and(BoolVar...)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
 	public static Constraint and(BoolVar... BOOLS){
-		return BOOLS[0].getSolver().and(BOOLS);
+		return BOOLS[0].getModel().and(BOOLS);
 	}
 
 	/**
-	 * @deprecated : use {@link Solver#or(BoolVar...)} instead
+	 * @deprecated : use {@link Model#or(BoolVar...)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
 	public static Constraint or(BoolVar... BOOLS){
-		return BOOLS[0].getSolver().or(BOOLS);
+		return BOOLS[0].getModel().or(BOOLS);
 	}
 
 	/**
-	 * @deprecated : use {@link Solver#and(Constraint...)} instead
+	 * @deprecated : use {@link Model#and(Constraint...)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
@@ -78,7 +78,7 @@ public class LogicalConstraintFactory {
 	}
 
 	/**
-	 * @deprecated : use {@link Solver#or(Constraint...)} instead
+	 * @deprecated : use {@link Model#or(Constraint...)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
@@ -91,7 +91,7 @@ public class LogicalConstraintFactory {
 	}
 
 	/**
-	 * @deprecated : use {@link Solver#not(Constraint)} instead
+	 * @deprecated : use {@link Model#not(Constraint)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
@@ -104,7 +104,7 @@ public class LogicalConstraintFactory {
 	//***********************************************************************************
 
 	/**
-	 * @deprecated : use {@link Solver#ifThenElse(Constraint, Constraint, Constraint)} instead
+	 * @deprecated : use {@link Model#ifThenElse(Constraint, Constraint, Constraint)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
@@ -113,7 +113,7 @@ public class LogicalConstraintFactory {
 	}
 
 	/**
-	 * @deprecated : use {@link Solver#ifThenElse(BoolVar, Constraint, Constraint)} instead
+	 * @deprecated : use {@link Model#ifThenElse(BoolVar, Constraint, Constraint)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
@@ -123,7 +123,7 @@ public class LogicalConstraintFactory {
 	}
 
 	/**
-	 * @deprecated : use {@link Solver#ifThen(Constraint, Constraint)} instead
+	 * @deprecated : use {@link Model#ifThen(Constraint, Constraint)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
@@ -132,21 +132,21 @@ public class LogicalConstraintFactory {
 	}
 
 	/**
-	 * @deprecated : use {@link Solver#ifThen(BoolVar, Constraint)} instead
+	 * @deprecated : use {@link Model#ifThen(BoolVar, Constraint)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
 	public static void ifThen(BoolVar BVAR, Constraint CSTR) {
-		BVAR.getSolver().ifThen(BVAR,CSTR);
+		BVAR.getModel().ifThen(BVAR,CSTR);
 	}
 
 	/**
-	 * @deprecated : use {@link Solver#reification(BoolVar, Constraint)} instead
+	 * @deprecated : use {@link Model#reification(BoolVar, Constraint)} instead
 	 * This will be removed in versions > 3.4.0
 	 */
 	@Deprecated
 	public static void reification(BoolVar BVAR, Constraint CSTR){
-		BVAR.getSolver().reification(BVAR,CSTR);
+		BVAR.getModel().reification(BVAR,CSTR);
 	}
 
 
@@ -184,7 +184,7 @@ public class LogicalConstraintFactory {
 	 */
 	@Deprecated
 	public static Constraint ifThen_reifiable(BoolVar BVAR, Constraint CSTR) {
-		Solver s = BVAR.getSolver();
+		Model s = BVAR.getModel();
 		// PRESOLVE
 		ESat entail = CSTR.isSatisfied();
 		if (BVAR.isInstantiatedTo(0) || (BVAR.isInstantiatedTo(1) && entail == ESat.TRUE)) {
@@ -201,7 +201,7 @@ public class LogicalConstraintFactory {
 	 */
 	@Deprecated
 	public static Constraint reification_reifiable(BoolVar BVAR, Constraint CSTR) {
-		Solver s = BVAR.getSolver();
+		Model s = BVAR.getModel();
 		// PRESOLVE
 		ESat entail = CSTR.isSatisfied();
 		if (BVAR.isInstantiated() && entail != ESat.UNDEFINED) {

@@ -52,11 +52,11 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
     BoolVar[] bvars;
 
     public ParetoSolutionsRecorder(final ResolutionPolicy policy, final IntVar[] objectives) {
-        super(objectives[0].getSolver());
+        super(objectives[0].getModel());
         this.objectives = objectives;
         this.n = objectives.length;
         this.policy = policy;
-        this.psat = solver.getMinisat().getPropSat();
+        this.psat = model.getMinisat().getPropSat();
         vals = new int[n];
         lits = new int[n];
         bvars = new BoolVar[n];
@@ -76,7 +76,7 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
             }
             // store current solution
             Solution solution = new Solution();
-            solution.record(solver);
+            solution.record(model);
             solutions.add(solution);
             // aim at better solutions
             Operator symbol = Operator.GT;
@@ -84,8 +84,8 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
                 symbol = Operator.LT;
             }
             for (int i = 0; i < n; i++) {
-                bvars[i] = solver.boolVar("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")");
-                solver.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
+                bvars[i] = model.boolVar("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")");
+                model.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
                 lits[i] = psat.Literal(bvars[i]);
             }
             psat.addLearnt(lits);

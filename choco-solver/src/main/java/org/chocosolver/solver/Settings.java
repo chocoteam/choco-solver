@@ -37,7 +37,7 @@ import org.chocosolver.solver.search.bind.ISearchBinder;
 import java.io.Serializable;
 
 /**
- * Settings for {@link org.chocosolver.solver.Solver}.
+ * Settings for {@link Model}.
  * Since java8, acts as default settings.
  * <p>
  * Created by cprudhom on 25/11/14.
@@ -95,7 +95,7 @@ public interface Settings extends Serializable {
 
     /**
      * Define the maximum domain size threshold to force integer variable to be enumerated
-     * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, Solver)}.
+     * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, Model)}.
      * @return maximum domain size threshold to force integer variable to be enumerated
      */
     default int getMaxDomSizeForEnumerated() {

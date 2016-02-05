@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
@@ -71,30 +71,30 @@ public class DynamicPostTest {
     @SuppressWarnings("UnusedDeclaration")
     @Test(groups="1s", timeOut=60000)
     public void test0() {
-        final Solver solver = new Solver();
-        final IntVar X = solver.intVar("X", 1, 2, false);
-        final IntVar Y = solver.intVar("Y", 1, 2, false);
-        final IntVar Z = solver.intVar("Z", 1, 2, false);
-        solver.set(engine.make(solver));
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
+        final Model model = new Model();
+        final IntVar X = model.intVar("X", 1, 2, false);
+        final IntVar Y = model.intVar("Y", 1, 2, false);
+        final IntVar Z = model.intVar("Z", 1, 2, false);
+        model.set(engine.make(model));
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        final Solver solver = new Solver();
-        final IntVar X = solver.intVar("X", 1, 2, false);
-        final IntVar Y = solver.intVar("Y", 1, 2, false);
-        final IntVar Z = solver.intVar("Z", 1, 2, false);
+        final Model model = new Model();
+        final IntVar X = model.intVar("X", 1, 2, false);
+        final IntVar Y = model.intVar("Y", 1, 2, false);
+        final IntVar Z = model.intVar("Z", 1, 2, false);
 
         new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{X, Y, Z},
-                        new Constraint[]{solver.arithm(X, "=", Y), solver.arithm(Y, "=", Z)},
+                        new Constraint[]{model.arithm(X, "=", Y), model.arithm(Y, "=", Z)},
                         new Constraint[]{}) {
                     @Override
                     public ESat checkCondition() {
-                        int nbNode = (int) solver.getMeasures().getNodeCount();
+                        int nbNode = (int) this.model.getMeasures().getNodeCount();
                         switch (nbNode) {
                             case 0:
                             case 1:
@@ -107,80 +107,80 @@ public class DynamicPostTest {
 
                     }
                 }).post();
-        solver.set(engine.make(solver));
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 7);
+        model.set(engine.make(model));
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 7);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        final Solver solver = new Solver();
-        final IntVar X = solver.intVar("X", 1, 2, false);
-        final IntVar Y = solver.intVar("Y", 1, 2, false);
-        final IntVar Z = solver.intVar("Z", 1, 2, false);
-        solver.plugMonitor(new IMonitorOpenNode() {
+        final Model model = new Model();
+        final IntVar X = model.intVar("X", 1, 2, false);
+        final IntVar Y = model.intVar("Y", 1, 2, false);
+        final IntVar Z = model.intVar("Z", 1, 2, false);
+        model.plugMonitor(new IMonitorOpenNode() {
             @Override
             public void beforeOpenNode() {
             }
 
             @Override
             public void afterOpenNode() {
-                if (solver.getMeasures().getNodeCount() == 1) {
-                    solver.arithm(X, "=", Y).post();
-                    solver.arithm(Y, "=", Z).post();
+                if (model.getMeasures().getNodeCount() == 1) {
+                    model.arithm(X, "=", Y).post();
+                    model.arithm(Y, "=", Z).post();
                 }
             }
         });
-        Chatterbox.showDecisions(solver);
-        Chatterbox.showSolutions(solver);
-        solver.set(engine.make(solver));
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        Chatterbox.showDecisions(model);
+        Chatterbox.showSolutions(model);
+        model.set(engine.make(model));
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
-        final Solver solver = new Solver();
-        final IntVar X = solver.intVar("X", 1, 2, false);
-        final IntVar Y = solver.intVar("Y", 1, 2, false);
-        final IntVar Z = solver.intVar("Z", 1, 2, false);
-        Constraint c1 = solver.arithm(X, "=", Y);
-        Constraint c2 = solver.arithm(X, "=", Z);
+        final Model model = new Model();
+        final IntVar X = model.intVar("X", 1, 2, false);
+        final IntVar Y = model.intVar("Y", 1, 2, false);
+        final IntVar Z = model.intVar("Z", 1, 2, false);
+        Constraint c1 = model.arithm(X, "=", Y);
+        Constraint c2 = model.arithm(X, "=", Z);
         c1.post();
         c2.post();
-        solver.unpost(c2);
-        solver.unpost(c1);
-        solver.set(engine.make(solver));
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 8);
-        assertEquals(solver.getNbCstrs(), 0);
+        model.unpost(c2);
+        model.unpost(c1);
+        model.set(engine.make(model));
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getNbCstrs(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-        final Solver solver = new Solver();
-        final IntVar X = solver.intVar("X", 1, 2, false);
-        final IntVar Y = solver.intVar("Y", 1, 2, false);
-        final IntVar Z = solver.intVar("Z", 1, 2, false);
-        final Constraint c1 = solver.arithm(X, "=", Y);
-        final Constraint c2 = solver.arithm(X, "=", Z);
+        final Model model = new Model();
+        final IntVar X = model.intVar("X", 1, 2, false);
+        final IntVar Y = model.intVar("Y", 1, 2, false);
+        final IntVar Z = model.intVar("Z", 1, 2, false);
+        final Constraint c1 = model.arithm(X, "=", Y);
+        final Constraint c2 = model.arithm(X, "=", Z);
         c1.post();
         c2.post();
-        solver.plugMonitor((IMonitorSolution) () -> {
-            solver.unpost(c1);
-            solver.unpost(c2);
+        model.plugMonitor((IMonitorSolution) () -> {
+            model.unpost(c1);
+            model.unpost(c2);
         });
-        solver.set(engine.make(solver));
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 5);
-        assertEquals(solver.getNbCstrs(), 0);
+        model.set(engine.make(model));
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 5);
+        assertEquals(model.getNbCstrs(), 0);
     }
 
-    private static void popAll(List<Constraint> stack, Solver solver) {
-        stack.forEach(solver::unpost);
+    private static void popAll(List<Constraint> stack, Model model) {
+        stack.forEach(model::unpost);
     }
 
-    private static void push(Constraint constraint, List<Constraint> stack, Solver solver) {
+    private static void push(Constraint constraint, List<Constraint> stack, Model model) {
         stack.add(constraint);
         constraint.post();
     }
@@ -189,90 +189,90 @@ public class DynamicPostTest {
     @Test(groups="1s", timeOut=60000)
     public void testJLpareto() {
         // Objectives are to maximize "a" and maximize "b".
-        Solver solver = new Solver();
-        IntVar a = solver.intVar("a", 0, 2, false);
-        IntVar b = solver.intVar("b", 0, 2, false);
-        IntVar c = solver.intVar("c", 0, 2, false);
+        Model model = new Model();
+        IntVar a = model.intVar("a", 0, 2, false);
+        IntVar b = model.intVar("b", 0, 2, false);
+        IntVar c = model.intVar("c", 0, 2, false);
 
-        solver.arithm(a, "+", b, "<", 3).post();
+        model.arithm(a, "+", b, "<", 3).post();
 
         // START extra variables/constraints for guided improvement algorithm
         List<Constraint> stack = new ArrayList<>();
-        IntVar lbA = solver.intVar("lbA", 0, 2, false);
-        IntVar lbB = solver.intVar("lbB", 0, 2, false);
-        BoolVar aSBetter = solver.arithm(a, ">", lbA).reify();
-        BoolVar bSBetter = solver.arithm(b, ">", lbB).reify();
-        BoolVar aBetter = solver.arithm(a, ">=", lbA).reify();
-        BoolVar bBetter = solver.arithm(b, ">=", lbB).reify();
-        push(solver.arithm(lbA, "=", a), stack, solver);
-        push(solver.arithm(lbB, "=", b), stack, solver);
+        IntVar lbA = model.intVar("lbA", 0, 2, false);
+        IntVar lbB = model.intVar("lbB", 0, 2, false);
+        BoolVar aSBetter = model.arithm(a, ">", lbA).reify();
+        BoolVar bSBetter = model.arithm(b, ">", lbB).reify();
+        BoolVar aBetter = model.arithm(a, ">=", lbA).reify();
+        BoolVar bBetter = model.arithm(b, ">=", lbB).reify();
+        push(model.arithm(lbA, "=", a), stack, model);
+        push(model.arithm(lbB, "=", b), stack, model);
         Constraint strictlyBetter
-                = solver.or(
-                solver.and(aSBetter, bBetter),
-                solver.and(aBetter, bSBetter));
+                = model.or(
+                model.and(aSBetter, bBetter),
+                model.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
-        solver.set(lexico_LB(a, b, c, lbA, lbB));
+        model.set(lexico_LB(a, b, c, lbA, lbB));
         int nbSolution = 0;
-        while (solver.findSolution()) {
+        while (model.findSolution()) {
             int bestA;
             int bestB;
             do {
                 bestA = a.getValue();
                 bestB = b.getValue();
 
-                popAll(stack, solver);
-                push(solver.arithm(lbA, "=", bestA), stack, solver);
-                push(solver.arithm(lbB, "=", bestB), stack, solver);
-                push(strictlyBetter, stack, solver);
-            } while (solver.nextSolution());
+                popAll(stack, model);
+                push(model.arithm(lbA, "=", bestA), stack, model);
+                push(model.arithm(lbB, "=", bestB), stack, model);
+                push(strictlyBetter, stack, model);
+            } while (model.nextSolution());
 
-            popAll(stack, solver);
+            popAll(stack, model);
 
-            push(solver.arithm(a, "=", bestA), stack, solver);
-            push(solver.arithm(b, "=", bestB), stack, solver);
-            push(solver.arithm(lbA, "=", bestA), stack, solver);
-            push(solver.arithm(lbB, "=", bestB), stack, solver);
+            push(model.arithm(a, "=", bestA), stack, model);
+            push(model.arithm(b, "=", bestB), stack, model);
+            push(model.arithm(lbA, "=", bestA), stack, model);
+            push(model.arithm(lbB, "=", bestB), stack, model);
 
-            solver.getEngine().flush();
-            solver.getSearchLoop().reset();
+            model.getEngine().flush();
+            model.getSearchLoop().reset();
 
-            if (solver.findSolution()) {
+            if (model.findSolution()) {
                 do {
                     //System.out.println("Found pareto optimal solution: " + a + ", " + b + ", " + c);
                     nbSolution++;
-                } while (solver.nextSolution());
+                } while (model.nextSolution());
             }
 
-            popAll(stack, solver);
+            popAll(stack, model);
 
-            solver.getEngine().flush();
-            solver.getSearchLoop().reset();
+            model.getEngine().flush();
+            model.getSearchLoop().reset();
 
-            solver.or(
-                    solver.arithm(a, ">", bestA),
-                    solver.arithm(b, ">", bestB)).post();
+            model.or(
+                    model.arithm(a, ">", bestA),
+                    model.arithm(b, ">", bestB)).post();
         }
         assertEquals(9, nbSolution);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testIssue214() {
-        Solver solver = new Solver();
-        IntVar x = solver.intVar("x", 1, 2, false);
-        IntVar y = solver.intVar("y", 1, 2, false);
-        IntVar z = solver.intVar("z", 1, 2, false);
-        Constraint c = solver.or(
-                solver.arithm(x, "<", y),
-                solver.arithm(x, "<", z));
+        Model model = new Model();
+        IntVar x = model.intVar("x", 1, 2, false);
+        IntVar y = model.intVar("y", 1, 2, false);
+        IntVar z = model.intVar("z", 1, 2, false);
+        Constraint c = model.or(
+                model.arithm(x, "<", y),
+                model.arithm(x, "<", z));
         c.post();
-        solver.findSolution();
-        solver.unpost(c);
+        model.findSolution();
+        model.unpost(c);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void testCostas() {
-        Solver s1 = costasArray(7, false);
-        Solver s2 = costasArray(7, true);
+        Model s1 = costasArray(7, false);
+        Model s2 = costasArray(7, true);
 
         s1.findAllSolutions();
         System.out.println(s1.getMeasures().getSolutionCount());
@@ -283,15 +283,15 @@ public class DynamicPostTest {
         Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
     }
 
-    private Solver costasArray(int n, boolean dynamic) {
-        Solver solver = ProblemMaker.makeCostasArrays(n);
-        IntVar[] vectors = (IntVar[]) solver.getHook("vectors");
-        solver.set(ISF.domOverWDeg(vectors, 0));
+    private Model costasArray(int n, boolean dynamic) {
+        Model model = ProblemMaker.makeCostasArrays(n);
+        IntVar[] vectors = (IntVar[]) model.getHook("vectors");
+        model.set(ISF.domOverWDeg(vectors, 0));
 
         if (dynamic) {
             // should not change anything (the constraint is already posted)
-            solver.plugMonitor((IMonitorSolution) () -> solver.allDifferent(vectors, "BC").post());
+            model.plugMonitor((IMonitorSolution) () -> model.allDifferent(vectors, "BC").post());
         }
-        return solver;
+        return model;
     }
 }

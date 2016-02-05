@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     the other ones are eagerly stopped.
  *     Moreover, when dealing with an optimization problem, cut on the objective variable's value is propagated
  *     to all solvers on solution.
- *     It is essential to eagerly declare the objective variable(s) with {@link Solver#setObjectives(Variable...)}.
+ *     It is essential to eagerly declare the objective variable(s) with {@link Model#setObjectives(Variable...)}.
  *
  * </p>
  * <p>
@@ -106,9 +106,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ParallelResolution {
 
     /**
-     * List of {@link Solver}s to be executed in parallel.
+     * List of {@link Model}s to be executed in parallel.
      */
-    private final List<Solver> solvers;
+    private final List<Model> models;
 
     /**
      * Integer which stores the number of ending solvers.
@@ -121,7 +121,7 @@ public class ParallelResolution {
      * This class stores the solvers to be executed in parallel in a {@link LinkedList} initially empty.
      */
     public ParallelResolution() {
-        this.solvers = new LinkedList<>();
+        this.models = new LinkedList<>();
     }
 
     /**
@@ -137,15 +137,15 @@ public class ParallelResolution {
      *  </li>
      *  <li>
      *      when dealing with optimization problems, the objective variables <b>HAVE</b> to be declared eagerly with
-     *      {@link Solver#setObjectives(Variable...)}.
+     *      {@link Model#setObjectives(Variable...)}.
      *  </li>
      *  </ul>
      *
      * </p>
-     * @param solver a solver to add
+     * @param model a solver to add
      */
-    public void addSolver(Solver solver){
-        this.solvers.add(solver);
+    public void addSolver(Model model){
+        this.models.add(model);
     }
 
     /**
@@ -157,10 +157,10 @@ public class ParallelResolution {
      *     stop {@link org.chocosolver.util.criteria.Criterion} and a {@link IMonitorClose}
      *     added before solving a problem.
      * </p>
-     * @param solver a solver to remove
+     * @param model a solver to remove
      */
-    public void removeSolver(Solver solver){
-        this.solvers.remove(solver);
+    public void removeSolver(Model model){
+        this.models.remove(model);
     }
 
     /**
@@ -171,8 +171,8 @@ public class ParallelResolution {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    public Solver getSolver(int index){
-        return solvers.get(index);
+    public Model getSolver(int index){
+        return models.get(index);
     }
 
     /**
@@ -183,7 +183,7 @@ public class ParallelResolution {
      * @return the number of solvers in this parallel resolution helper.
      */
     public int size(){
-        return solvers.size();
+        return models.size();
     }
 
     /**
@@ -192,29 +192,29 @@ public class ParallelResolution {
      * When dealing with optimization problem, add {@link IMonitorSolution} to share cuts.
      */
     private void setUpResolution(ResolutionPolicy policy){
-        solvers.stream().forEach(s -> s.addStopCriterion(()->finishers.get()>0));
-        solvers.stream().forEach(s -> s.plugMonitor(new IMonitorClose() {
+        models.stream().forEach(s -> s.addStopCriterion(()->finishers.get()>0));
+        models.stream().forEach(s -> s.plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
                 int count = finishers.addAndGet(1);
-                if(count == solvers.size()){
+                if(count == models.size()){
                     finishers.set(0); //reset the counter to 0
                 }
             }
         }));
         if(policy != ResolutionPolicy.SATISFACTION){
             // share the best known bound
-            solvers.stream().forEach(s -> s.plugMonitor(
+            models.stream().forEach(s -> s.plugMonitor(
                     (IMonitorSolution) () -> {
                         synchronized (s.getObjectiveManager()) {
                             switch (s.getObjectiveManager().getPolicy()) {
                                 case MAXIMIZE:
                                     Number lb = s.getObjectiveManager().getBestSolutionValue();
-                                    solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestLB(lb));
+                                    models.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestLB(lb));
                                     break;
                                 case MINIMIZE:
                                 int ub = s.getObjectiveManager().getBestSolutionValue().intValue();
-                                solvers.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestUB(ub));
+                                models.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestUB(ub));
                                 break;
                                 case SATISFACTION:
                                     break;
@@ -243,9 +243,9 @@ public class ParallelResolution {
     public boolean findSolution() {
         check(ResolutionPolicy.SATISFACTION);
         setUpResolution(ResolutionPolicy.SATISFACTION);
-        solvers.parallelStream().forEach(Solver::findSolution);
+        models.parallelStream().forEach(Model::findSolution);
         long nsol = 0;
-        for (Solver s : solvers) {
+        for (Model s : models) {
             nsol += s.getMeasures().getSolutionCount();
         }
         return nsol > 0;
@@ -283,14 +283,14 @@ public class ParallelResolution {
     public void findOptimalSolution(ResolutionPolicy policy) {
         check(policy);
         setUpResolution(policy);
-        solvers.parallelStream().forEach(s -> s.findOptimalSolution(policy, true));
+        models.parallelStream().forEach(s -> s.findOptimalSolution(policy, true));
     }
 
     /**
      * @return the (mutable!) list of solvers used in this parallel resolution helper.
      */
-    public List<Solver> getSolvers(){
-        return solvers;
+    public List<Model> getModels(){
+        return models;
     }
 
     /**
@@ -308,21 +308,21 @@ public class ParallelResolution {
      *
      * @return the first solver which finds a solution (or the best one) or <tt>null</tt> if no such solver exists.
      */
-    public Solver getFinder(){
-        ResolutionPolicy policy = solvers.get(0).getObjectiveManager().getPolicy();
+    public Model getFinder(){
+        ResolutionPolicy policy = models.get(0).getObjectiveManager().getPolicy();
         check(policy);
         if (policy == ResolutionPolicy.SATISFACTION) {
-            for (Solver s : solvers) {
+            for (Model s : models) {
                 if (s.getMeasures().getSolutionCount() > 0) {
                     return s;
                 }
             }
             return null;
         }else{
-            boolean min = solvers.get(0).getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
-            Solver best = null;
+            boolean min = models.get(0).getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
+            Model best = null;
             int cost = 0;
-            for (Solver s : solvers) {
+            for (Model s : models) {
                 if (s.getMeasures().getSolutionCount() > 0) {
                     int solVal = s.getSolutionRecorder().getLastSolution().getIntVal((IntVar)s.getObjectives()[0]);
                     if (best == null
@@ -338,11 +338,11 @@ public class ParallelResolution {
     }
 
     private void check(ResolutionPolicy policy){
-        if (solvers.size() <= 1) {
-            throw new SolverException("Try to run " + solvers.size() + " solver in parallel (should be >1).");
+        if (models.size() <= 1) {
+            throw new SolverException("Try to run " + models.size() + " solver in parallel (should be >1).");
         }
         if(policy != ResolutionPolicy.SATISFACTION) {
-            Variable[] os = solvers.get(0).getObjectives();
+            Variable[] os = models.get(0).getObjectives();
             if (os == null) {
                 throw new UnsupportedOperationException("No objective has been defined");
             }

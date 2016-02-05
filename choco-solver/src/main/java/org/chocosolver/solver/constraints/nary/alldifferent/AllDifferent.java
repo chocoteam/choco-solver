@@ -52,7 +52,7 @@ public class AllDifferent extends Constraint {
 
     private static Propagator[] createPropagators(IntVar[] VARS, String consistency) {
         if (VARS.length <= 1) {
-            return new Propagator[]{VARS[0].getSolver().TRUE().getPropagator(0)};
+            return new Propagator[]{VARS[0].getModel().TRUE().getPropagator(0)};
         }
         switch (consistency) {
             case NEQS: {

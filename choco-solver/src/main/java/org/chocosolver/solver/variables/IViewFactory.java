@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
 import org.chocosolver.solver.variables.view.*;
 
@@ -49,7 +49,7 @@ public interface IViewFactory {
      * Should not be called by the user
      * @return a solver object
      */
-    Solver _me();
+    Model _me();
 
     //*************************************************************************************
     // BOOLEAN VARIABLES

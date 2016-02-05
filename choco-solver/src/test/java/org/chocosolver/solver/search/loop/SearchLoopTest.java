@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.monitors.SMF;
@@ -53,175 +53,175 @@ public class SearchLoopTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1DFS() {
-        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(true)));
-        Chatterbox.showSolutions(solver);
-        solver.findSolution();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 24);
+        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
+        dfs(model, ISF.lexico_LB(model.retrieveIntVars(true)));
+        Chatterbox.showSolutions(model);
+        model.findSolution();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getMeasures().getNodeCount(), 24);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test1LDS() {
-        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        lds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 4);
-        solver.findSolution();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 144);
+        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
+        lds(model, ISF.lexico_LB(model.retrieveIntVars(false)), 4);
+        model.findSolution();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getMeasures().getNodeCount(), 144);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test1DDS() {
-        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        dds(solver, ISF.lexico_LB(solver.retrieveIntVars(true)), 4);
-        solver.findSolution();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 70);
+        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
+        dds(model, ISF.lexico_LB(model.retrieveIntVars(true)), 4);
+        model.findSolution();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getMeasures().getNodeCount(), 70);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void test1HBFS() {
-        Solver solver = ProblemMaker.makeGolombRuler(8);
-        hbfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), .05, .1, 32);
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 7522);
+        Model model = ProblemMaker.makeGolombRuler(8);
+        hbfs(model, ISF.lexico_LB(model.retrieveIntVars(false)), .05, .1, 32);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 7);
+        Assert.assertEquals(model.getMeasures().getNodeCount(), 7522);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DFS() {
-        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(true)));
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 480);
+        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
+        dfs(model, ISF.lexico_LB(model.retrieveIntVars(true)));
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
+        Assert.assertEquals(model.getMeasures().getNodeCount(), 480);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2LDS() {
-        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        lds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 4);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 205);
+        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
+        lds(model, ISF.lexico_LB(model.retrieveIntVars(false)), 4);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 7);
+        Assert.assertEquals(model.getMeasures().getNodeCount(), 205);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DDS() {
-        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        dds(solver, ISF.lexico_LB(solver.retrieveIntVars(false)), 5);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 130);
+        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
+        dds(model, ISF.lexico_LB(model.retrieveIntVars(false)), 5);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
+        Assert.assertEquals(model.getMeasures().getNodeCount(), 130);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DDS2() {
-        Solver solver = new Solver();
-        IntVar[] bs = solver.boolVarArray("b", 4);
-        dds(solver, ISF.lexico_LB(bs), 3);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
+        Model model = new Model();
+        IntVar[] bs = model.boolVarArray("b", 4);
+        dds(model, ISF.lexico_LB(bs), 3);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
-        Solver solver = ProblemMaker.makeGolombRuler(6);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
-        Chatterbox.printShortStatistics(solver);
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 16);
+        Model model = ProblemMaker.makeGolombRuler(6);
+        dfs(model, ISF.lexico_LB(model.retrieveIntVars(false)));
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Chatterbox.printShortStatistics(model);
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
+        Assert.assertEquals(model.getMeasures().getNodeCount(), 16);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-        Solver solver = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
-        restart(solver,
-                limit -> solver.getMeasures().getNodeCount() >= limit,
+        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
+        dfs(model, ISF.lexico_LB(model.retrieveIntVars(false)));
+        restart(model,
+                limit -> model.getMeasures().getNodeCount() >= limit,
                 new LubyRestartStrategy(2, 2), 2);
-        solver.findAllSolutions();
-        Chatterbox.printShortStatistics(solver);
-        Assert.assertEquals(solver.getMeasures().getRestartCount(), 2);
+        model.findAllSolutions();
+        Chatterbox.printShortStatistics(model);
+        Assert.assertEquals(model.getMeasures().getRestartCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test5() {
-        Solver solver = ProblemMaker.makeGolombRuler(5);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
-        lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(false), 15, 0),
-                new NodeCounter(solver, 10));
-        SMF.limitSearch(solver, () -> solver.getMeasures().getNodeCount() >= 1000);
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
-        Chatterbox.printShortStatistics(solver);
-        Assert.assertEquals(solver.getMeasures().getRestartCount(), 314);
+        Model model = ProblemMaker.makeGolombRuler(5);
+        dfs(model, ISF.lexico_LB(model.retrieveIntVars(false)));
+        lns(model, new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0),
+                new NodeCounter(model, 10));
+        SMF.limitSearch(model, () -> model.getMeasures().getNodeCount() >= 1000);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Chatterbox.printShortStatistics(model);
+        Assert.assertEquals(model.getMeasures().getRestartCount(), 314);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test6() {
-        Solver solver = ProblemMaker.makeGolombRuler(6);
-        dfs(solver, ISF.lexico_LB(solver.retrieveIntVars(false)));
-        lns(solver, new RandomNeighborhood(solver, solver.retrieveIntVars(false), 15, 0),
-                new NodeCounter(solver, 10));
-        solver.addStopCriterion(() -> solver.getMeasures().getNodeCount() >= 1000);
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE);
-        Chatterbox.printShortStatistics(solver);
-        Assert.assertEquals(solver.getMeasures().getRestartCount(), 972);
+        Model model = ProblemMaker.makeGolombRuler(6);
+        dfs(model, ISF.lexico_LB(model.retrieveIntVars(false)));
+        lns(model, new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0),
+                new NodeCounter(model, 10));
+        model.addStopCriterion(() -> model.getMeasures().getNodeCount() >= 1000);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        Chatterbox.printShortStatistics(model);
+        Assert.assertEquals(model.getMeasures().getRestartCount(), 972);
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void test7() {
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 3;
-        BoolVar[] B = solver.boolVarArray("b", n - 1);
-        SLF.lds(solver, ISF.lexico_UB(B), 1);
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        BoolVar[] B = model.boolVarArray("b", n - 1);
+        SLF.lds(model, ISF.lexico_UB(B), 1);
+        Chatterbox.showSolutions(model);
+        Chatterbox.showDecisions(model);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
 
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test8() {
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 3;
-        IntVar[] X = solver.intVarArray("X", n, 0, n, false);
-        BoolVar[] B = solver.boolVarArray("b", n - 1);
+        IntVar[] X = model.intVarArray("X", n, 0, n, false);
+        BoolVar[] B = model.boolVarArray("b", n - 1);
         for (int i = 0; i < n - 1; i++) {
-            solver.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
+            model.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
-        SLF.lds(solver, ISF.sequencer(ISF.lexico_UB(B), ISF.once(ISF.lexico_var_selector(), ISF.min_value_selector(), X)), 1);
-        Chatterbox.showSolutions(solver);
+        SLF.lds(model, ISF.sequencer(ISF.lexico_UB(B), ISF.once(ISF.lexico_var_selector(), ISF.min_value_selector(), X)), 1);
+        Chatterbox.showSolutions(model);
 //        Chatterbox.showDecisions(solver);
-        SMF.limitSolution(solver, 10);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        SMF.limitSolution(model, 10);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
 
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test9() {
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 3;
-        IntVar[] X = solver.intVarArray("X", n, 0, n, false);
-        BoolVar[] B = solver.boolVarArray("b", n - 1);
+        IntVar[] X = model.intVarArray("X", n, 0, n, false);
+        BoolVar[] B = model.boolVarArray("b", n - 1);
         for (int i = 0; i < n - 1; i++) {
-            solver.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
+            model.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
-        SLF.seq(solver,
-                new MoveBinaryLDS(ISF.lexico_UB(B), 1, solver.getEnvironment()),
+        SLF.seq(model,
+                new MoveBinaryLDS(ISF.lexico_UB(B), 1, model.getEnvironment()),
                 new MoveBinaryDFS(
                         // ISF.lexico_LB(X)
                         ISF.once(ISF.lexico_var_selector(), ISF.min_value_selector(), X)
                 ));
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
-        SMF.limitSolution(solver, 10);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        Chatterbox.showSolutions(model);
+        Chatterbox.showDecisions(model);
+        SMF.limitSolution(model, 10);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
 
     }
 

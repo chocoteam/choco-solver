@@ -34,7 +34,7 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -47,28 +47,28 @@ public class TreeTest {
 
 	@Test(groups="10s", timeOut=60000)
 	public void test1() {
-        Solver s1 = model(true);
-		Solver s2 = model(false);
+        Model s1 = model(true);
+		Model s2 = model(false);
 		s1.findAllSolutions();
 		s2.findAllSolutions();
 		Assert.assertEquals(s1.getMeasures().getSolutionCount(),s2.getMeasures().getSolutionCount());
 		Assert.assertEquals(s1.getMeasures().getNodeCount(),s2.getMeasures().getNodeCount());
     }
 
-	private Solver model(boolean defaultCstr) {
-		Solver solver = new Solver();
-		IntVar[] VS = solver.intVarArray("VS", 6, -1, 6, false);
-		IntVar NT = solver.intVar("NT", 2, 3, false);
+	private Model model(boolean defaultCstr) {
+		Model model = new Model();
+		IntVar[] VS = model.intVarArray("VS", 6, -1, 6, false);
+		IntVar NT = model.intVar("NT", 2, 3, false);
 		if(defaultCstr) {
-			solver.tree(VS, NT, 0).post();
+			model.tree(VS, NT, 0).post();
 		}else {
 			new Constraint("tree",
 					new PropAntiArborescences(VS, 0, false),
 					new PropKLoops(VS, 0, NT)
 			).post();
 		}
-		solver.set(ISF.random(VS,0));
-		Chatterbox.showShortStatistics(solver);
-		return solver;
+		model.set(ISF.random(VS,0));
+		Chatterbox.showShortStatistics(model);
+		return model;
 	}
 }

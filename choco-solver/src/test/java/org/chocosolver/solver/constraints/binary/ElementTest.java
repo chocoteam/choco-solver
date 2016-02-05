@@ -30,11 +30,8 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.binary.element.ElementFactory;
-import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -42,8 +39,6 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import static java.lang.System.currentTimeMillis;
@@ -62,7 +57,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class ElementTest {
 
-    private static void model(Solver s, IntVar index, int[] values, IntVar var,
+    private static void model(Model s, IntVar index, int[] values, IntVar var,
                               int offset, int nbSol) {
 
         s.element(var, values, index, offset).post();
@@ -81,7 +76,7 @@ public class ElementTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        Solver s = new Solver();
+        Model s = new Model();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = s.intVar("v_0", -3, 10, false);
         IntVar var = s.intVar("v_1", -20, 20, false);
@@ -90,7 +85,7 @@ public class ElementTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        Solver s = new Solver();
+        Model s = new Model();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = s.intVar("v_0", 2, 10, false);
         IntVar var = s.intVar("v_1", -20, 20, false);
@@ -101,7 +96,7 @@ public class ElementTest {
     public void test3() {
         for (int j = 0; j < 100; j++) {
             Random r = new Random(j);
-            Solver s = new Solver();
+            Model s = new Model();
             IntVar index = s.intVar("v_0", 23, 25, false);
             IntVar val = s.intVar("v_1", 0, 1, true);
             int[] values = new int[24];
@@ -114,7 +109,7 @@ public class ElementTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-        Solver s = new Solver();
+        Model s = new Model();
         int[] values = new int[]{0, 0, 1};
         IntVar index = s.intVar("v_0", 1, 3, false);
         IntVar var = s.intVar("v_1", 0, 1, false);
@@ -123,7 +118,7 @@ public class ElementTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test5() {
-        Solver s = new Solver();
+        Model s = new Model();
         s.set(new Settings() {
             @Override
             public boolean plugExplanationIn() {
@@ -164,7 +159,7 @@ public class ElementTest {
         }
 
 
-        Solver ref = new Solver();
+        Model ref = new Model();
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
 
@@ -195,57 +190,57 @@ public class ElementTest {
     @Test(groups="1s", timeOut=60000)
     public void testInc1() {
         for (int i = 0; i < 20; i++) {
-            Solver solver = new Solver();
-            IntVar I = solver.intVar("I", 0, 5, false);
-            IntVar R = solver.intVar("R", 0, 10, false);
-            solver.element(R, new int[]{0, 2, 4, 6, 7}, I).post();
-            solver.set(random_value(new IntVar[]{I, R}, i));
-            solver.findAllSolutions();
-            assertEquals(solver.getMeasures().getSolutionCount(), 5);
+            Model model = new Model();
+            IntVar I = model.intVar("I", 0, 5, false);
+            IntVar R = model.intVar("R", 0, 10, false);
+            model.element(R, new int[]{0, 2, 4, 6, 7}, I).post();
+            model.set(random_value(new IntVar[]{I, R}, i));
+            model.findAllSolutions();
+            assertEquals(model.getMeasures().getSolutionCount(), 5);
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testDec1() {
         for (int i = 0; i < 20; i++) {
-            Solver solver = new Solver();
-            IntVar I = solver.intVar("I", 0, 5, false);
-            IntVar R = solver.intVar("R", 0, 10, false);
-            solver.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
-            solver.set(random_value(new IntVar[]{I, R}, i));
-            solver.findAllSolutions();
-            assertEquals(solver.getMeasures().getSolutionCount(), 5);
+            Model model = new Model();
+            IntVar I = model.intVar("I", 0, 5, false);
+            IntVar R = model.intVar("R", 0, 10, false);
+            model.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
+            model.set(random_value(new IntVar[]{I, R}, i));
+            model.findAllSolutions();
+            assertEquals(model.getMeasures().getSolutionCount(), 5);
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testReg1() {
         for (int i = 0; i < 20; i++) {
-            Solver solver = new Solver();
-            IntVar I = solver.intVar("I", 0, 13, false);
-            IntVar R = solver.intVar("R", 0, 21, false);
-            solver.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I).post();
-            solver.set(random_value(new IntVar[]{I, R}, i));
-            solver.findAllSolutions();
-            assertEquals(solver.getMeasures().getSolutionCount(), 14);
+            Model model = new Model();
+            IntVar I = model.intVar("I", 0, 13, false);
+            IntVar R = model.intVar("R", 0, 21, false);
+            model.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I).post();
+            model.set(random_value(new IntVar[]{I, R}, i));
+            model.findAllSolutions();
+            assertEquals(model.getMeasures().getSolutionCount(), 14);
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testTAR1(){
         for (int i = 1; i < 20; i++) {
-            Solver solver = new Solver();
-            IntVar I = solver.intVar("I", 0, 3, true);
-            IntVar R = solver.intVar("R", -1, 0, false);
-            solver.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1).post();
-            solver.set(random_bound(new IntVar[]{I, R}, i));
-            solver.findAllSolutions();
-            assertEquals(solver.getMeasures().getSolutionCount(), 4);
+            Model model = new Model();
+            IntVar I = model.intVar("I", 0, 3, true);
+            IntVar R = model.intVar("R", -1, 0, false);
+            model.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1).post();
+            model.set(random_bound(new IntVar[]{I, R}, i));
+            model.findAllSolutions();
+            assertEquals(model.getMeasures().getSolutionCount(), 4);
         }
     }
     @Test
     public void testSolverOrMin() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
         Constraint el = detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
@@ -258,7 +253,7 @@ public class ElementTest {
 
     @Test
     public void testSolverOrFull() {
-        Solver s = new Solver();
+        Model s = new Model();
         BoolVar b = s.boolVar("b");
         IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]

@@ -76,7 +76,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
-        IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = model.getEnvironment();
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);

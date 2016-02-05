@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.set.*;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -107,7 +107,7 @@ public interface ISetConstraintFactory {
 	 * @return A constraint ensuring that |<i>sets</i>| = <i>card</i>
 	 */
 	default Constraint cardinality(SetVar set, int card) {
-		return cardinality(set, set.getSolver().intVar(card));
+		return cardinality(set, set.getModel().intVar(card));
 	}
 
 	/**
@@ -130,7 +130,7 @@ public interface ISetConstraintFactory {
 	 * @return A constraint ensuring that |{s in <i>sets</i> where |s|=0}| = <i>nbEmpty</i>
 	 */
 	default Constraint nbEmpty(SetVar[] sets, int nbEmpty) {
-		return nbEmpty(sets, sets[0].getSolver().intVar(nbEmpty));
+		return nbEmpty(sets, sets[0].getModel().intVar(nbEmpty));
 	}
 
 	/**
@@ -490,7 +490,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that <i>set</i> belongs to <i>sets</i>
 	 */
 	default Constraint member(SetVar[] sets, SetVar set) {
-		IntVar index = set.getSolver().intVar("idx_tmp", 0, sets.length - 1, false);
+		IntVar index = set.getModel().intVar("idx_tmp", 0, sets.length - 1, false);
 		return element(index, sets, 0, set);
 	}
 
@@ -523,7 +523,7 @@ public interface ISetConstraintFactory {
 	default Constraint notMember(final IntVar intVar, final SetVar set) {
 		IntVar integer = intVar;
 		if (!intVar.hasEnumeratedDomain()) {
-			Solver s = intVar.getSolver();
+			Model s = intVar.getModel();
 			integer = s.intVar("enumViewOf(" + intVar.getName() + ")", intVar.getLB(), intVar.getUB(), false);
 			s.arithm(integer, "=", intVar).post();
 		}

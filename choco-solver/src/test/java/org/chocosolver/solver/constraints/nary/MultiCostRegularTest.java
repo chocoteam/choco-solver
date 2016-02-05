@@ -29,13 +29,10 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -51,15 +48,15 @@ import static org.chocosolver.util.tools.ArrayUtils.append;
  */
 public class MultiCostRegularTest {
 
-    private Solver make(int period, long seed) {
+    private Model make(int period, long seed) {
 
-        Solver solver = new Solver();
-        IntVar[] sequence = solver.intVarArray("x", period, 0, 2, false);
+        Model model = new Model();
+        IntVar[] sequence = model.intVarArray("x", period, 0, 2, false);
         IntVar[] bounds = new IntVar[4];
-        bounds[0] = solver.intVar("z_0", 0, 80, true);
-        bounds[1] = solver.intVar("day", 0, 28, true);
-        bounds[2] = solver.intVar("night", 0, 28, true);
-        bounds[3] = solver.intVar("rest", 0, 28, true);
+        bounds[0] = model.intVar("z_0", 0, 80, true);
+        bounds[1] = model.intVar("day", 0, 28, true);
+        bounds[2] = model.intVar("night", 0, 28, true);
+        bounds[3] = model.intVar("rest", 0, 28, true);
 
         FiniteAutomaton auto = new FiniteAutomaton();
         int idx = auto.addState();
@@ -100,10 +97,10 @@ public class MultiCostRegularTest {
             }
         }
         ICostAutomaton costAutomaton = makeMultiResources(auto, costMatrix, bounds);
-        solver.multiCostRegular(sequence, bounds, costAutomaton).post();
+        model.multiCostRegular(sequence, bounds, costAutomaton).post();
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
-        solver.set(random_bound(append(sequence, bounds), seed));
-        return solver;
+        model.set(random_bound(append(sequence, bounds), seed));
+        return model;
     }
 
 
@@ -111,9 +108,9 @@ public class MultiCostRegularTest {
     public void test1() {
         long seed = 0;
         for (int i = 0; i < 2000; i++) {
-            Solver solver = make(5, i + seed);
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4, "seed:" + (seed + i));
+            Model model = make(5, i + seed);
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), 4, "seed:" + (seed + i));
         }
     }
 
@@ -121,9 +118,9 @@ public class MultiCostRegularTest {
     public void test2() {
         long seed = 0;
         for (int i = 0; i < 2000; i++) {
-            Solver solver = make(7, i);
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 6, "seed:" + (seed + i));
+            Model model = make(7, i);
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), 6, "seed:" + (seed + i));
         }
     }
 
@@ -131,9 +128,9 @@ public class MultiCostRegularTest {
     public void test3() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
-            Solver solver = make(14, i);
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 141, "seed:" + (seed + i));
+            Model model = make(14, i);
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), 141, "seed:" + (seed + i));
         }
     }
 
@@ -141,9 +138,9 @@ public class MultiCostRegularTest {
     public void test4() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
-            Solver solver = make(21, i);
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 85, "seed:" + (seed + i));
+            Model model = make(21, i);
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), 85, "seed:" + (seed + i));
         }
     }
 

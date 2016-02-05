@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -63,20 +63,17 @@ public class Grocery extends AbstractProblem {
 
     IntVar[] itemCost;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Grocery");
-    }
 
     @Override
     public void buildModel() {
-        itemCost = solver.intVarArray("item", 4, 1, 711, false);
-        solver.sum(itemCost, "=", 711).post();
+        model = new Model("Grocery");
+        itemCost = model.intVarArray("item", 4, 1, 711, false);
+        model.sum(itemCost, "=", 711).post();
 
         // intermediary products
-        IntVar[] tmp = solver.intVarArray("tmp", 2, 1, 71100, true);
-        solver.times(itemCost[0], itemCost[1], tmp[0]).post();
-        solver.times(itemCost[2], itemCost[3], tmp[1]).post();
+        IntVar[] tmp = model.intVarArray("tmp", 2, 1, 71100, true);
+        model.times(itemCost[0], itemCost[1], tmp[0]).post();
+        model.times(itemCost[2], itemCost[3], tmp[1]).post();
 
         // the global product itemCost[0]*itemCost[1]*itemCost[2]*itemCost[3] (equal to tmp[0]*tmp[1])
         // is too large to be used within integer ranges. Thus, we will set up a dedicated constraint
@@ -85,19 +82,19 @@ public class Grocery extends AbstractProblem {
         new Constraint("LargeProduct", new PropLargeProduct(tmp, 711000000)).post();
 
         // symmetry breaking
-        solver.arithm(itemCost[0], "<=", itemCost[1]).post();
-        solver.arithm(itemCost[1], "<=", itemCost[2]).post();
-        solver.arithm(itemCost[2], "<=", itemCost[3]).post();
+        model.arithm(itemCost[0], "<=", itemCost[1]).post();
+        model.arithm(itemCost[1], "<=", itemCost[2]).post();
+        model.arithm(itemCost[2], "<=", itemCost[3]).post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_UB(itemCost));
+        model.set(IntStrategyFactory.lexico_UB(itemCost));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

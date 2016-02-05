@@ -29,22 +29,16 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.search.limits.ICounter;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingObjective;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
-import static org.chocosolver.solver.search.limits.ICounter.Impl;
 import static org.chocosolver.solver.search.limits.ICounter.Impl.None;
 import static org.chocosolver.solver.search.loop.SearchLoopFactory.lns;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
@@ -59,24 +53,24 @@ import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 public class ELNSTest {
 
     private void small(long seed) {
-        Solver solver = new Solver();
-        final IntVar[] vars = solver.intVarArray("var", 6, 0, 4, true);
-        final IntVar obj = solver.intVar("obj", 0, 6, true);
+        Model model = new Model();
+        final IntVar[] vars = model.intVarArray("var", 6, 0, 4, true);
+        final IntVar obj = model.intVar("obj", 0, 6, true);
 
-        solver.sum(vars, "=", obj).post();
-        solver.arithm(vars[0], "+", vars[1], "<", 2).post();
-        solver.arithm(vars[4], "+", vars[5], ">", 3).post();
+        model.sum(vars, "=", obj).post();
+        model.arithm(vars[0], "+", vars[1], "<", 2).post();
+        model.arithm(vars[4], "+", vars[5], ">", 3).post();
 
-        CBJ.plugin(solver, false, false);
+        CBJ.plugin(model, false, false);
 
-        lns(solver,
+        lns(model,
                 new SequenceNeighborhood(
-                        new ExplainingObjective(solver, 200, 123456L),
-                        new ExplainingCut(solver, 200, 123456L),
-                        new RandomNeighborhood(solver, vars, 200, 123456L)
+                        new ExplainingObjective(model, 200, 123456L),
+                        new ExplainingCut(model, 200, 123456L),
+                        new RandomNeighborhood(model, vars, 200, 123456L)
                 ),
                 None);
-        solver.set(random_bound(vars, seed));
+        model.set(random_bound(vars, seed));
 
 
 //        SMF.log(solver, true, true, new IMessage() {
@@ -85,8 +79,8 @@ public class ELNSTest {
 //                return Arrays.toString(vars) + " o:" + obj;
 //            }
 //        });
-        showSolutions(solver);
-        solver.findOptimalSolution(MINIMIZE, obj);
+        showSolutions(model);
+        model.findOptimalSolution(MINIMIZE, obj);
     }
 
 

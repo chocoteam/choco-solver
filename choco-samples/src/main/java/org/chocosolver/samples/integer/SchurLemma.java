@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
@@ -61,18 +61,15 @@ public class SchurLemma extends AbstractProblem {
 
     BoolVar[][] M;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver();
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
 
-        M = solver.boolVarMatrix("b", n, k); // M_ij is true iff ball i is in box j
+        M = model.boolVarMatrix("b", n, k); // M_ij is true iff ball i is in box j
 
         for (int i = 0; i < n; i++) {
-            solver.sum(M[i], "=", 1).post();
+            model.sum(M[i], "=", 1).post();
         }
 
         for (int i = 0; i < k; i++) {
@@ -80,7 +77,7 @@ public class SchurLemma extends AbstractProblem {
                 for (int y = 1; y <= n; y++) {
                     for (int z = 1; z <= n; z++) {
                         if (x + y == z)
-                            solver.sum(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, "=", solver.intVar("sum", 0, 2, true)).post();
+                            model.sum(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, "=", model.intVar("sum", 0, 2, true)).post();
                     }
                 }
             }
@@ -89,19 +86,19 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(ArrayUtils.flatten(M)));
+        model.set(IntStrategyFactory.lexico_LB(ArrayUtils.flatten(M)));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         System.out.println(String.format("Schur's lemma (%d,%d)", n, k));
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < k; i++) {
                 st.append("\tBox #").append(i + 1).append(": ");
                 for (int j = 0; j < n; j++) {

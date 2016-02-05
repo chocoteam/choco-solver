@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
@@ -49,32 +49,32 @@ public class NogoodTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        final Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 3, 0, 2, false);
-        SMF.nogoodRecordingFromRestarts(solver);
-        solver.set(ISF.random_value(vars, 29091981L));
-        SLF.restart(solver,
-                new BacktrackCounter(solver, 0),
+        final Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 3, 0, 2, false);
+        SMF.nogoodRecordingFromRestarts(model);
+        model.set(ISF.random_value(vars, 29091981L));
+        SLF.restart(model,
+                new BacktrackCounter(model, 0),
                 new MonotonicRestartStrategy(30), 3);
 //        SMF.limitTime(solver, 2000);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 27);
-        Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 51);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 27);
+        Assert.assertEquals(model.getMeasures().getBackTrackCount(), 51);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        final Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 3, 0, 3, false);
-        SMF.nogoodRecordingFromRestarts(solver);
-        solver.set(ISF.random_value(vars, 29091981L));
-        SLF.restart(solver,
-                new BacktrackCounter(solver, 0),
+        final Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 3, 0, 3, false);
+        SMF.nogoodRecordingFromRestarts(model);
+        model.set(ISF.random_value(vars, 29091981L));
+        SLF.restart(model,
+                new BacktrackCounter(model, 0),
                 new MonotonicRestartStrategy(30), 1000);
-        SMF.limitTime(solver, 2000);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 64);
-        Assert.assertEquals(solver.getMeasures().getBackTrackCount(), 121);
+        SMF.limitTime(model, 2000);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 64);
+        Assert.assertEquals(model.getMeasures().getBackTrackCount(), 121);
     }
 
 }

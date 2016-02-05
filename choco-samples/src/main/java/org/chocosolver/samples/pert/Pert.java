@@ -31,7 +31,7 @@ package org.chocosolver.samples.pert;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -71,16 +71,13 @@ public class Pert extends AbstractProblem {
         this.horizon = n - 1;
     }
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Pert");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         setUp();
 
-        vars = solver.intVarArray("task", n, 0, horizon, true);
+        vars = model.intVarArray("task", n, 0, horizon, true);
 
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
@@ -96,17 +93,17 @@ public class Pert extends AbstractProblem {
             for (int k = 0, j = disjoint.nextSetBit(0); j >= 0; j = disjoint.nextSetBit(j + 1), k++) {
                 tvars[k] = vars[j];
             }
-            solver.allDifferent(tvars, "BC").post();
+            model.allDifferent(tvars, "BC").post();
         }
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return x.getSolver().arithm(x, "<=", y, "-", duration);
+        return x.getModel().arithm(x, "<=", y, "-", duration);
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        model.set(IntStrategyFactory.lexico_LB(vars));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];
@@ -131,7 +128,7 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, vars[n - 1]);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, vars[n - 1]);
     }
 
     @Override

@@ -68,8 +68,8 @@ public class PropClauseChanneling extends Propagator<IntVar> {
         this.lqs = lb;
         this.OFFSET = iv.getLB();
         this.LENGTH = iv.getUB() - iv.getLB() + 1;
-        this.LB = solver.getEnvironment().makeInt();
-        this.UB = solver.getEnvironment().makeInt(LENGTH);
+        this.LB = model.getEnvironment().makeInt();
+        this.UB = model.getEnvironment().makeInt(LENGTH);
         this.dm = iv.hasEnumeratedDomain() ? iv.monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         if (eb.length != LENGTH || lb.length != LENGTH) {
             throw new SolverException("BoolVar[] wrong dimension");

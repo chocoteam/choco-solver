@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StringUtils;
@@ -54,16 +54,12 @@ public class LatinSquare extends AbstractProblem {
     IntVar[] vars;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("Latin square");
-    }
-
-    @Override
     public void buildModel() {
+        model = new Model("Latin square");
         vars = new IntVar[m * m];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < m; j++) {
-                vars[i * m + j] = solver.intVar("C" + i + "_" + j, 0, m - 1, false);
+                vars[i * m + j] = model.intVar("C" + i + "_" + j, 0, m - 1, false);
             }
         }
         // Constraints
@@ -74,19 +70,19 @@ public class LatinSquare extends AbstractProblem {
                 row[x] = vars[i * m + x];
                 col[x] = vars[x * m + i];
             }
-            solver.allDifferent(col, "AC").post();
-            solver.allDifferent(row, "AC").post();
+            model.allDifferent(col, "AC").post();
+            model.allDifferent(row, "AC").post();
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        model.set(IntStrategyFactory.lexico_LB(vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -47,11 +47,11 @@ public abstract class G extends UndirectedGraph{
 
 	/**
 	 * Creates a backtrackable undirected graph of nbNodes nodes
-	 * @param solver	solver providing the backtracking environment
+	 * @param model	solver providing the backtracking environment
 	 * @param nbNodes	size of the graph (number of nodes)
 	 */
-	public G(Solver solver, int nbNodes) {
-		super(solver, nbNodes, SetType.BIPARTITESET, true);
+	public G(Model model, int nbNodes) {
+		super(model, nbNodes, SetType.BIPARTITESET, true);
 	}
 
 	//***********************************************************************************

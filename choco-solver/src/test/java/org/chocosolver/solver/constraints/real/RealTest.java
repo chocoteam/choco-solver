@@ -29,12 +29,11 @@
  */
 package org.chocosolver.solver.constraints.real;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -156,41 +155,41 @@ public class RealTest {
     @Test(groups="ignored", timeOut=60000)
     public void test4() {
         for(int i=0;i<10;i++) {
-            Solver solver = new Solver();
+            Model model = new Model();
             double precision = 0.00000001;
-            IntVar x = solver.intVar("x", 0, 9, true);
-            IntVar y = solver.intVar("y", 0, 9, true);
-            RealVar[] vars = solver.realIntViewArray(new IntVar[]{x, y}, precision);
+            IntVar x = model.intVar("x", 0, 9, true);
+            IntVar y = model.intVar("y", 0, 9, true);
+            RealVar[] vars = model.realIntViewArray(new IntVar[]{x, y}, precision);
             // Actually ,we need the calculated result like these :
             // x : [2.000000, 2.000000], y : [4.000000, 4.000000]
             // or x : [1.000000, 1.000000], y : [8.000000, 8.000000]
             // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
 //        rcons.discretize(x,y);
-            solver.realIbexGenericConstraint("{0} * {1} = 8", vars).post();
-            solver.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
-            solver.findSolution();
+            model.realIbexGenericConstraint("{0} * {1} = 8", vars).post();
+            model.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
+            model.findSolution();
             assertEquals(x.getValue(), 2);
             assertEquals(y.getValue(), 4);
-            solver.getIbex().release();
+            model.getIbex().release();
         }
     }
 
     @Test(groups="ignored", timeOut=60000)
     public void testFreemajb1() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         // Declare variables
-        RealVar attr = solver.realVar("attr", 0.0, 20.0, 0.1);
+        RealVar attr = model.realVar("attr", 0.0, 20.0, 0.1);
 
         // Create and reify constraints to assign values to the real
-        RealConstraint attrEquals1 = solver.realIbexGenericConstraint("{0}=4.0", attr);
+        RealConstraint attrEquals1 = model.realIbexGenericConstraint("{0}=4.0", attr);
         BoolVar attrEquals1Reification = attrEquals1.reify();
-        RealConstraint attrEquals2 = solver.realIbexGenericConstraint("{0}=8.0", attr);
+        RealConstraint attrEquals2 = model.realIbexGenericConstraint("{0}=8.0", attr);
         BoolVar attrEquals2Reification = attrEquals2.reify();
 
         // Walk and print the solutions
         int numSolutions = 0;
-        boolean foundSolution = solver.findSolution();
+        boolean foundSolution = model.findSolution();
         while (foundSolution) {
             numSolutions++;
             System.out.println(String.format("Solution #%d:", numSolutions));
@@ -199,47 +198,47 @@ public class RealTest {
             System.out.println("attr: [" + attr.getLB() + ", " + attr.getUB() + "]");
             System.out.println();
 
-            foundSolution = solver.nextSolution();
+            foundSolution = model.nextSolution();
         }
-        solver.getIbex().release();
+        model.getIbex().release();
     }
 
     @Test(groups="ignored", timeOut=60000)
     public void testFreemajb2() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
-        RealVar x = solver.realVar("x", 0.0, 5.0, 0.001);
+        RealVar x = model.realVar("x", 0.0, 5.0, 0.001);
         out.println("Before solving:");
 
         RealConstraint newRange = new RealConstraint("newRange", "1.4142<{0};{0}<3.1416", HC4, x);
         newRange.post();
 
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        out.printf("%s\n", solver.toString());
-        printStatistics(solver);
-        solver.getIbex().release();
+        out.printf("%s\n", model.toString());
+        printStatistics(model);
+        model.getIbex().release();
     }
 
     @Test(groups="ignored", timeOut=60000)
     public void testFreemajb3() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
-        RealVar x = solver.realVar("x", 0.0, 5.0, 0.001);
+        RealVar x = model.realVar("x", 0.0, 5.0, 0.001);
         out.println("Before solving:");
 
-        solver.realIbexGenericConstraint("1.4142<{0};{0}<3.1416", x).post();
+        model.realIbexGenericConstraint("1.4142<{0};{0}<3.1416", x).post();
 
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        out.printf("%s\n", solver.toString());
-        printStatistics(solver);
-        solver.getIbex().release();
+        out.printf("%s\n", model.toString());
+        printStatistics(model);
+        model.getIbex().release();
     }
 }

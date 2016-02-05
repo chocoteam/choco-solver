@@ -30,18 +30,14 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
@@ -56,7 +52,7 @@ import static org.testng.Assert.assertEquals;
 public class AllDifferentTest {
 
     public static void model(boolean simple, int n, int nbSol) {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -110,7 +106,7 @@ public class AllDifferentTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
 
-        Solver s = new Solver();
+        Model s = new Model();
 
         int n = 4;
         IntVar[] vars = new IntVar[n];
@@ -139,7 +135,7 @@ public class AllDifferentTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-        Solver s = new Solver();
+        Model s = new Model();
         int n = 5;
         IntVar[] vars = new IntVar[n];
         vars[0] = s.intVar("v_0", 5);
@@ -166,20 +162,20 @@ public class AllDifferentTest {
                         int n = 1 + rand.nextInt(5);
                         int[][] domains = DomainBuilder.buildFullDomains(n, 1, 2 * n, rand, d, h == 0);
 
-                        Solver neqs = alldiffs(domains, 0, b == 0);
+                        Model neqs = alldiffs(domains, 0, b == 0);
                         neqs.findAllSolutions();
 
-                        Solver clique = alldiffs(domains, 1, b == 0);
+                        Model clique = alldiffs(domains, 1, b == 0);
                         clique.findAllSolutions();
                         Assert.assertEquals(clique.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
                         Assert.assertEquals(clique.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
 
-                        Solver bc = alldiffs(domains, 2, b == 0);
+                        Model bc = alldiffs(domains, 2, b == 0);
                         bc.findAllSolutions();
                         Assert.assertEquals(bc.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
                         Assert.assertTrue(bc.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
 
-                        Solver ac = alldiffs(domains, 3, b == 0);
+                        Model ac = alldiffs(domains, 3, b == 0);
                         ac.findAllSolutions();
                         Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
                         Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
@@ -190,8 +186,8 @@ public class AllDifferentTest {
     }
 
 
-    protected Solver alldiffs(int[][] domains, int c, boolean bounded) {
-        Solver s = new Solver();
+    protected Model alldiffs(int[][] domains, int c, boolean bounded) {
+        Model s = new Model();
 
         IntVar[] vars = new IntVar[domains.length];
         if (bounded) {
@@ -228,15 +224,15 @@ public class AllDifferentTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testXX() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] ts = new IntVar[4];
-        ts[0] = solver.intVar("t0", new int[]{2, 3, 4});
-        ts[1] = solver.intVar("t1", new int[]{-3, -2, -1, 1, 2});
-        ts[2] = solver.intVar("t2", new int[]{-3, -2, -1, 1, 2, 3});
-        ts[3] = solver.intVar("t3", new int[]{-3, -2, -1, 1, 2, 3});
+        ts[0] = model.intVar("t0", new int[]{2, 3, 4});
+        ts[1] = model.intVar("t1", new int[]{-3, -2, -1, 1, 2});
+        ts[2] = model.intVar("t2", new int[]{-3, -2, -1, 1, 2, 3});
+        ts[3] = model.intVar("t3", new int[]{-3, -2, -1, 1, 2, 3});
 
         try {
-            solver.propagate();
+            model.propagate();
             ts[0].removeValue(2, Cause.Null);
             ts[1].removeValue(2, Cause.Null);
             ts[0].removeValue(3, Cause.Null);
@@ -245,7 +241,7 @@ public class AllDifferentTest {
             ts[2].removeValue(3, Cause.Null);
             ts[3].removeValue(-3, Cause.Null);
             ts[3].removeValue(3, Cause.Null);
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException ignored) {
 
         }
@@ -256,88 +252,88 @@ public class AllDifferentTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testXXX() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] ts = new IntVar[3];
-        ts[0] = solver.intVar("t0", 2, 2, false);
-        ts[1] = solver.intVar("t1", 1, 3, false);
-        ts[2] = solver.intVar("t2", 1, 3, false);
+        ts[0] = model.intVar("t0", 2, 2, false);
+        ts[1] = model.intVar("t1", 1, 3, false);
+        ts[2] = model.intVar("t2", 1, 3, false);
 
-        solver.allDifferent(ts, "BC").post();
+        model.allDifferent(ts, "BC").post();
 
-        solver.propagate();
+        model.propagate();
         assertEquals(ts[1].getDomainSize(), 2);
         assertEquals(ts[2].getDomainSize(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testB() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] ts = new IntVar[3];
-        ts[0] = solver.intVar("t0", 2, 4, true);
-        ts[1] = solver.intVar("t1", 1, 3, true);
-        ts[2] = solver.intVar("t2", 1, 3, true);
+        ts[0] = model.intVar("t0", 2, 4, true);
+        ts[1] = model.intVar("t1", 1, 3, true);
+        ts[2] = model.intVar("t2", 1, 3, true);
 
-        solver.allDifferent(ts, "FC").post();
+        model.allDifferent(ts, "FC").post();
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 10);
-        assertEquals(solver.getMeasures().getNodeCount(), 23);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 10);
+        assertEquals(model.getMeasures().getNodeCount(), 23);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testE() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] ts = new IntVar[3];
-        ts[0] = solver.intVar("t0", 2, 4, false);
-        ts[1] = solver.intVar("t1", 1, 3, false);
-        ts[2] = solver.intVar("t2", 1, 3, false);
+        ts[0] = model.intVar("t0", 2, 4, false);
+        ts[1] = model.intVar("t1", 1, 3, false);
+        ts[2] = model.intVar("t2", 1, 3, false);
 
-        solver.allDifferent(ts, "FC").post();
+        model.allDifferent(ts, "FC").post();
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 10);
-        assertEquals(solver.getMeasures().getNodeCount(), 19);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 10);
+        assertEquals(model.getMeasures().getNodeCount(), 19);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testB1() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] X = new IntVar[32];
-        X[0] = solver.intVar("V0", new int[]{-1, 19, 24, 25});
-        X[1] = solver.intVar("V1", new int[]{-13, 1, 12});
-        X[2] = solver.intVar("V2", new int[]{-9, -8, 9, 19});
-        X[3] = solver.intVar("V3", new int[]{6});
-        X[4] = solver.intVar("V4", new int[]{-3, 4, 11, 12});
-        X[5] = solver.intVar("V5", new int[]{-6, 25});
-        X[6] = solver.intVar("V6", new int[]{7, 12, 21});
-        X[7] = solver.intVar("V7", new int[]{4, 7, 11, 12});
-        X[8] = solver.intVar("V8", new int[]{-8, -4, 0, 21});
-        X[9] = solver.intVar("V9", new int[]{-3, 12});
-        X[10] = solver.intVar("X10", new int[]{0});
-        X[11] = solver.intVar("X11", new int[]{-15, -3, 3});
-        X[12] = solver.intVar("X12", new int[]{-5, 3, 21, 24});
-        X[13] = solver.intVar("X13", new int[]{3});
-        X[14] = solver.intVar("X14", new int[]{-16, 13, 16});
-        X[15] = solver.intVar("X15", new int[]{-14, -12, 0, 20});
-        X[16] = solver.intVar("X16", new int[]{-9, 11});
-        X[17] = solver.intVar("X17", new int[]{-15, 13});
-        X[18] = solver.intVar("X18", new int[]{-12, -4, 21});
-        X[19] = solver.intVar("X19", new int[]{-1});
-        X[20] = solver.intVar("X20", new int[]{2, 11, 14});
-        X[21] = solver.intVar("X21", new int[]{-9, 7, 21});
-        X[22] = solver.intVar("X22", new int[]{-16, 10, 15});
-        X[23] = solver.intVar("X23", new int[]{20, 24});
-        X[24] = solver.intVar("X24", new int[]{23});
-        X[25] = solver.intVar("X25", new int[]{-7, 5});
-        X[26] = solver.intVar("X26", new int[]{-2, 1, 10, 12});
-        X[27] = solver.intVar("X27", new int[]{-16, -6, 12, 15});
-        X[28] = solver.intVar("X28", new int[]{-9});
-        X[29] = solver.intVar("X29", new int[]{-6, -4});
-        X[30] = solver.intVar("X30", new int[]{-15, -2, -1, 3});
-        X[31] = solver.intVar("X31", new int[]{1, 10, 14});
+        X[0] = model.intVar("V0", new int[]{-1, 19, 24, 25});
+        X[1] = model.intVar("V1", new int[]{-13, 1, 12});
+        X[2] = model.intVar("V2", new int[]{-9, -8, 9, 19});
+        X[3] = model.intVar("V3", new int[]{6});
+        X[4] = model.intVar("V4", new int[]{-3, 4, 11, 12});
+        X[5] = model.intVar("V5", new int[]{-6, 25});
+        X[6] = model.intVar("V6", new int[]{7, 12, 21});
+        X[7] = model.intVar("V7", new int[]{4, 7, 11, 12});
+        X[8] = model.intVar("V8", new int[]{-8, -4, 0, 21});
+        X[9] = model.intVar("V9", new int[]{-3, 12});
+        X[10] = model.intVar("X10", new int[]{0});
+        X[11] = model.intVar("X11", new int[]{-15, -3, 3});
+        X[12] = model.intVar("X12", new int[]{-5, 3, 21, 24});
+        X[13] = model.intVar("X13", new int[]{3});
+        X[14] = model.intVar("X14", new int[]{-16, 13, 16});
+        X[15] = model.intVar("X15", new int[]{-14, -12, 0, 20});
+        X[16] = model.intVar("X16", new int[]{-9, 11});
+        X[17] = model.intVar("X17", new int[]{-15, 13});
+        X[18] = model.intVar("X18", new int[]{-12, -4, 21});
+        X[19] = model.intVar("X19", new int[]{-1});
+        X[20] = model.intVar("X20", new int[]{2, 11, 14});
+        X[21] = model.intVar("X21", new int[]{-9, 7, 21});
+        X[22] = model.intVar("X22", new int[]{-16, 10, 15});
+        X[23] = model.intVar("X23", new int[]{20, 24});
+        X[24] = model.intVar("X24", new int[]{23});
+        X[25] = model.intVar("X25", new int[]{-7, 5});
+        X[26] = model.intVar("X26", new int[]{-2, 1, 10, 12});
+        X[27] = model.intVar("X27", new int[]{-16, -6, 12, 15});
+        X[28] = model.intVar("X28", new int[]{-9});
+        X[29] = model.intVar("X29", new int[]{-6, -4});
+        X[30] = model.intVar("X30", new int[]{-15, -2, -1, 3});
+        X[31] = model.intVar("X31", new int[]{1, 10, 14});
 
-        solver.allDifferent(X, "AC").post();
-        solver.propagate();
+        model.allDifferent(X, "AC").post();
+        model.propagate();
         assertEquals(X[14].getUB(), 16);
         assertEquals(X[14].getLB(), -16);
         assertEquals(X[14].getDomainSize(), 2);

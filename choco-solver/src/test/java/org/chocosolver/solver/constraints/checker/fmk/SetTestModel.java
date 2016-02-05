@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.checker.fmk;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -48,7 +48,7 @@ import static org.chocosolver.util.tools.ArrayUtils.append;
  */
 public interface SetTestModel {
 
-    Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters);
+    Model model(int n, Variable[] rvars, Domain[] domains, Object parameters);
 
     SetTestModel setUnion = new SetTestModel() {
         public void fillTypes(int[] types) {
@@ -56,8 +56,8 @@ public interface SetTestModel {
                 types[i] = Correctness.SET;
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("boolSum_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
@@ -77,8 +77,8 @@ public interface SetTestModel {
                 types[i] = Correctness.SET;
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("boolSum_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
@@ -98,8 +98,8 @@ public interface SetTestModel {
                 types[i] = Correctness.SET;
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("boolSum_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
@@ -118,8 +118,8 @@ public interface SetTestModel {
                 types[i] = Correctness.SET;
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("boolSum_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
@@ -138,8 +138,8 @@ public interface SetTestModel {
                 types[i] = Correctness.SET;
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("boolSum_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
@@ -158,8 +158,8 @@ public interface SetTestModel {
                 types[i] = Correctness.SET;
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("boolSum_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("boolSum_" + n);
             SetVar[] vars = new SetVar[n];
             for (int i = 0; i < n; i++) {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
@@ -178,8 +178,8 @@ public interface SetTestModel {
                 types[i] = Correctness.BOOL;
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("boolSum_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("boolSum_" + n);
             IntVar[] vars = new IntVar[n];
             BoolVar[] bools = new BoolVar[n - 1];
             vars[n - 1] = s.intVar("sum", domains[n - 1].getIntDom());
@@ -205,8 +205,8 @@ public interface SetTestModel {
         public void fillTypes(int[] types) {
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("EqAC_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("EqAC_" + n);
             IntVar[] vars = new IntVar[n];
             try {
                 for (int i = 0; i < vars.length; i++) {
@@ -226,8 +226,8 @@ public interface SetTestModel {
         public void fillTypes(int[] types) {
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("InverseChannelingAC_" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("InverseChannelingAC_" + n);
             IntVar[] X = new IntVar[n / 2];
             IntVar[] Y = new IntVar[n / 2];
             for (int i = 0; i < n / 2; i++) {
@@ -247,8 +247,8 @@ public interface SetTestModel {
         public void fillTypes(int[] types) {
         }
 
-        public Solver model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
-            Solver s = new Solver("modelNValues" + n);
+        public Model model(int n, Variable[] rvars, Domain[] domains, Object parameters) {
+            Model s = new Model("modelNValues" + n);
             IntVar[] vars = new IntVar[n];
             IntVar[] decvars = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {

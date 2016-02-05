@@ -31,7 +31,7 @@ package org.chocosolver.solver.constraints.nary;
 
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -51,169 +51,169 @@ public class SatTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
         SatFactory.addBoolEq(b1, b2);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
         SatFactory.addBoolNot(b1, b2);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
         SatFactory.addBoolLe(b1, b2);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2, r;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
-        r = solver.boolVar("r");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
+        r = model.boolVar("r");
         SatFactory.addBoolIsEqVar(b1, b2, r);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test5() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2, r;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
-        r = solver.boolVar("r");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
+        r = model.boolVar("r");
         SatFactory.addBoolAndEqVar(b1, b2, r);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test6() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2, r;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
-        r = solver.boolVar("r");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
+        r = model.boolVar("r");
         SatFactory.addBoolOrEqVar(b1, b2, r);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test7() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
         SatFactory.addBoolLt(b1, b2);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test8() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2, r;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
-        r = solver.boolVar("r");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
+        r = model.boolVar("r");
         SatFactory.addBoolIsLeVar(b1, b2, r);
 //        SMF.log(solver, true, true);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test9() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1, b2, r;
-        b1 = solver.boolVar("b1");
-        b2 = solver.boolVar("b2");
-        r = solver.boolVar("r");
+        b1 = model.boolVar("b1");
+        b2 = model.boolVar("b2");
+        r = model.boolVar("r");
         SatFactory.addBoolIsLtVar(b1, b2, r);
 //        SMF.log(solver, true, true);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void test10() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1;
-        b1 = solver.boolVar("b1");
+        b1 = model.boolVar("b1");
         SatFactory.addTrue(b1);
         //        SMF.log(solver, true, true);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(b1.getBooleanValue(), ESat.TRUE);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test11() {
-        Solver solver = new Solver();
+        Model model = new Model();
         BoolVar b1;
-        b1 = solver.boolVar("b1");
+        b1 = model.boolVar("b1");
         SatFactory.addFalse(b1);
         //        SMF.log(solver, true, true);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(b1.getBooleanValue(), ESat.FALSE);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test12() {
-        Solver solver = new Solver();
-        BoolVar[] bs = solver.boolVarArray("b", 3);
+        Model model = new Model();
+        BoolVar[] bs = model.boolVarArray("b", 3);
         SatFactory.addBoolOrArrayEqualTrue(bs);
         SatFactory.addFalse(bs[0]);
         SatFactory.addFalse(bs[1]);
         SatFactory.addFalse(bs[2]);
         //        SMF.log(solver, true, true);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testAlexLoboda() throws ContradictionException {
-        Solver solver = new Solver();
+        Model model = new Model();
         // VARS
-        IntVar var = solver.intVar("var", new int[]{0, 2});
-        BoolVar eq2 = solver.boolVar("eq2");
-        BoolVar bvar = solver.boolVar("already");
-        BoolVar bvar2 = solver.boolVar("bvar2");
-        BoolVar cond = solver.boolVar("cond");
+        IntVar var = model.intVar("var", new int[]{0, 2});
+        BoolVar eq2 = model.boolVar("eq2");
+        BoolVar bvar = model.boolVar("already");
+        BoolVar bvar2 = model.boolVar("bvar2");
+        BoolVar cond = model.boolVar("cond");
         // CSTRS
         SatFactory.addFalse(bvar);
-        solver.arithm(var, "=", 2).reifyWith(eq2);
+        model.arithm(var, "=", 2).reifyWith(eq2);
         SatFactory.addBoolAndArrayEqVar(new BoolVar[]{eq2, bvar.not()}, cond);
         SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
         SatFactory.addBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
         // SEARCH
-        solver.set(ISF.lexico_LB(var));
+        model.set(ISF.lexico_LB(var));
 
-        solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, var);
-        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(var).intValue(), 2);
+        model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, var);
+        Assert.assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(var).intValue(), 2);
 
     }
 }

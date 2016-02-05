@@ -31,7 +31,7 @@ package org.chocosolver.solver.explanations;
 
 import gnu.trove.set.TIntSet;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.store.IEventStore;
@@ -108,7 +108,7 @@ public class RuleStore {
     /**
      * The observed solver
      */
-    private final Solver mSolver;
+    private final Model mModel;
 
     /**
      * Local-like parameter.
@@ -130,12 +130,12 @@ public class RuleStore {
     /**
      * Instantiate a rule store to compute explanations
      *
-     * @param solver                   the solver to observe
+     * @param model                   the solver to observe
      * @param saveCauses               does it keep trace of the constraints in conflict ?
      * @param enablePartialExplanation do explanations need to be complete (for DBT or nogood extraction) ?
      */
-    public RuleStore(Solver solver, boolean saveCauses, boolean enablePartialExplanation) {
-        this.mSolver = solver;
+    public RuleStore(Model model, boolean saveCauses, boolean enablePartialExplanation) {
+        this.mModel = model;
         this.saveCauses = saveCauses;
         this.enablePartialExplanation = enablePartialExplanation;
         decRefut = new Explanation[16];
@@ -148,7 +148,7 @@ public class RuleStore {
     public void init(Explanation expl) {
         this.cRules = expl.getRules();
         preemptedStop = false;
-        swi = mSolver.getSearchLoop().getSearchWorldIndex();
+        swi = mModel.getSearchLoop().getSearchWorldIndex();
     }
 
     /**

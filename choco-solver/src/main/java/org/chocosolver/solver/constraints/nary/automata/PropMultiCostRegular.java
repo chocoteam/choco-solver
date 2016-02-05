@@ -219,7 +219,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      */
     public PropMultiCostRegular(IntVar[] variables, final IntVar[] costvariables, ICostAutomaton cauto) {
         super(ArrayUtils.append(variables, costvariables), PropagatorPriority.CUBIC, true);
-        _MCR_DECIMAL_PREC = solver.getSettings().getMCRDecimalPrecision();
+        _MCR_DECIMAL_PREC = model.getSettings().getMCRDecimalPrecision();
         this.vs = Arrays.copyOfRange(vars, 0, variables.length);
         this.offset = vs.length;
         this.z = Arrays.copyOfRange(vars, offset, vars.length);
@@ -484,7 +484,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         intLayer[n + 1] = new int[]{tink.id};
 
         if (intLayer[0].length > 0) {
-            IEnvironment environment = solver.getEnvironment();
+            IEnvironment environment = model.getEnvironment();
             this.graph = new StoredDirectedMultiGraph(environment, graph, intLayer, starts, offsets, totalSizes, pi, z);
             this.graph.makePathFinder();
         }
@@ -736,9 +736,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     protected void checkWorld() throws ContradictionException {
-        int currentworld = solver.getEnvironment().getWorldIndex();
-        long currentbt = solver.getMeasures().getBackTrackCount();
-        long currentrestart = solver.getMeasures().getRestartCount();
+        int currentworld = model.getEnvironment().getWorldIndex();
+        long currentbt = model.getMeasures().getBackTrackCount();
+        long currentrestart = model.getMeasures().getRestartCount();
         //System.err.println("TIME STAMP : "+currentbt+"   BT COUNT : "+solver.getBackTrackCount());
         // assert (currentbt == solver.getBackTrackCount());
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
@@ -856,9 +856,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     public final boolean needPropagation() {
-        int currentworld = solver.getEnvironment().getWorldIndex();
-        long currentbt = solver.getMeasures().getBackTrackCount();
-        long currentrestart = solver.getMeasures().getRestartCount();
+        int currentworld = model.getEnvironment().getWorldIndex();
+        long currentbt = model.getMeasures().getBackTrackCount();
+        long currentrestart = model.getMeasures().getRestartCount();
 
         return (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts);
 

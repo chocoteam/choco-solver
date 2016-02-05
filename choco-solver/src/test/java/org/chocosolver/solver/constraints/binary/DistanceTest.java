@@ -30,11 +30,10 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -58,14 +57,14 @@ public class DistanceTest {
         for (int i = 0; i < 100; i++) {
             long nbSol, nbNod;
             {
-                final Solver solver = new Solver();
-                IntVar X = solver.intVar("X", 1, 10, false);
-                IntVar Y = solver.intVar("Y", 1, 10, false);
-                IntVar diff = solver.intVar("X-Y", -9, 9, true);
-                solver.sum(new IntVar[]{Y, diff}, "=", X).post();
-                IntVar Z = solver.intAbsView(diff);
-                solver.arithm(Z, "=", 5).post();
-                solver.set(random_value(new IntVar[]{X, Y}, i));
+                final Model model = new Model();
+                IntVar X = model.intVar("X", 1, 10, false);
+                IntVar Y = model.intVar("Y", 1, 10, false);
+                IntVar diff = model.intVar("X-Y", -9, 9, true);
+                model.sum(new IntVar[]{Y, diff}, "=", X).post();
+                IntVar Z = model.intAbsView(diff);
+                model.arithm(Z, "=", 5).post();
+                model.set(random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
 //					public void onSolution() {
@@ -75,16 +74,16 @@ public class DistanceTest {
 //						}
 //					}
 //				});
-                solver.findAllSolutions();
-                nbSol = solver.getMeasures().getSolutionCount();
-                nbNod = solver.getMeasures().getNodeCount();
+                model.findAllSolutions();
+                nbSol = model.getMeasures().getSolutionCount();
+                nbNod = model.getMeasures().getNodeCount();
             }
             {
-                final Solver solver = new Solver();
-                IntVar X = solver.intVar("X", 1, 10, false);
-                IntVar Y = solver.intVar("Y", 1, 10, false);
-                solver.distance(X, Y, "=", 5).post();
-                solver.set(random_value(new IntVar[]{X, Y}, i));
+                final Model model = new Model();
+                IntVar X = model.intVar("X", 1, 10, false);
+                IntVar Y = model.intVar("Y", 1, 10, false);
+                model.distance(X, Y, "=", 5).post();
+                model.set(random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
 //					public void onSolution() {
@@ -94,9 +93,9 @@ public class DistanceTest {
 //						}
 //					}
 //				});
-                solver.findAllSolutions();
-                assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
-                assertTrue(solver.getMeasures().getNodeCount() <= nbNod);
+                model.findAllSolutions();
+                assertEquals(model.getMeasures().getSolutionCount(), nbSol);
+                assertTrue(model.getMeasures().getNodeCount() <= nbNod);
             }
         }
     }
@@ -104,7 +103,7 @@ public class DistanceTest {
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         for (int k = 4; k < 400; k *= 2) {
-            Solver s1 = new Solver(), s2 = new Solver();
+            Model s1 = new Model(), s2 = new Model();
             IntVar[] vs1, vs2;
             Propagator p2;
             {
@@ -156,14 +155,14 @@ public class DistanceTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
-        Solver solver = new Solver();
-        IntVar X = solver.intVar("X", -5, 5, true);
-        IntVar Y = solver.intVar("Y", -5, 5, true);
-        IntVar Z = solver.intVar("Z", 0, 10, true);
-        solver.distance(X, Y, "=", Z).post();
-        solver.set(lexico_LB(new IntVar[]{Z, X, Y, Z}));
+        Model model = new Model();
+        IntVar X = model.intVar("X", -5, 5, true);
+        IntVar Y = model.intVar("Y", -5, 5, true);
+        IntVar Z = model.intVar("Z", 0, 10, true);
+        model.distance(X, Y, "=", Z).post();
+        model.set(lexico_LB(new IntVar[]{Z, X, Y, Z}));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.findAllSolutions();
+        model.findAllSolutions();
 //        System.out.printf("end\n");
     }
 

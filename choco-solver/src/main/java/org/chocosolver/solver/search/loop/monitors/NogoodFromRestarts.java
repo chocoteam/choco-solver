@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -74,10 +74,10 @@ public class NogoodFromRestarts implements IMonitorRestart {
      * - Only works for integer variables
      * - Only works if branching decisions are assignments (neither domain split nor value removal)
      *
-     * @param solver solver to observe
+     * @param model solver to observe
      */
-    public NogoodFromRestarts(Solver solver) {
-        png = solver.getNogoodStore().getPropNogoods();
+    public NogoodFromRestarts(Model model) {
+        png = model.getNogoodStore().getPropNogoods();
         decisions = new CircularQueue<>(16);
     }
 
@@ -88,8 +88,8 @@ public class NogoodFromRestarts implements IMonitorRestart {
 
     @SuppressWarnings("unchecked")
     private void extractNogoodFromPath() {
-        int d = (int) png.getSolver().getMeasures().getNodeCount();
-        Decision<IntVar> decision = png.getSolver().getSearchLoop().getLastDecision();
+        int d = (int) png.getModel().getMeasures().getNodeCount();
+        Decision<IntVar> decision = png.getModel().getSearchLoop().getLastDecision();
         while (decision != RootDecision.ROOT) {
             decisions.addLast(decision);
             decision = decision.getPrevious();

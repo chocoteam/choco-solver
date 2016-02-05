@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.util.ESat;
 
@@ -49,10 +49,10 @@ public class CondisConstraint extends Constraint{
 
     /**
      * A constraint to deal with constructive disjunction (unique in a solver instance)
-     * @param solver declaring solver
+     * @param model declaring solver
      */
-    public CondisConstraint(Solver solver) {
-        super("CondisConstraint",new PropCondis(solver));
+    public CondisConstraint(Model model) {
+        super("CondisConstraint",new PropCondis(model));
         condissol = (PropCondis) propagators[0];
     }
 

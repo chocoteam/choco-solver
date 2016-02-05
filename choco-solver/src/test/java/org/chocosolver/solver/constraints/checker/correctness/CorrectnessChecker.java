@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.checker.correctness;
 
 import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.checker.Modeler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -41,7 +41,7 @@ import java.util.Random;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
-import static org.chocosolver.solver.Solver.writeInFile;
+import static org.chocosolver.solver.Model.writeInFile;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
 import static org.testng.Assert.fail;
 
@@ -66,7 +66,7 @@ public class CorrectnessChecker {
                 for (int h = 0; h < homogeneous.length; h++) {
                     map.clear();
                     int[][] domains = buildFullDomains(nbVar, lowerB, ds, r, densities[ide], homogeneous[h]);
-                    Solver ref = referencePropagation(modeler, nbVar, domains, map, parameters);
+                    Model ref = referencePropagation(modeler, nbVar, domains, map, parameters);
                     if (ref == null) break; // no solution found for this generated problem
                     // otherwise, link original domains with reference one.
                     IntVar[] rvars = new IntVar[nbVar];
@@ -84,7 +84,7 @@ public class CorrectnessChecker {
                             _domains[d] = new int[]{val};
                             arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
 
-                            Solver test = modeler.model(nbVar, _domains, null, parameters);
+                            Model test = modeler.model(nbVar, _domains, null, parameters);
                             try {
                                 if (test.findSolution()) {
                                     System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
@@ -123,8 +123,8 @@ public class CorrectnessChecker {
 //        System.out.printf("loop: %d\n", loop);
     }
 
-    private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-        Solver ref = modeler.model(nbVar, domains, map, parameters);
+    private static Model referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+        Model ref = modeler.model(nbVar, domains, map, parameters);
         ref.getEnvironment().worldPush();
         try {
             ref.propagate();

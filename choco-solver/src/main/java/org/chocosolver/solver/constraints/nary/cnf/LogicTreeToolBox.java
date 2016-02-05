@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.cnf;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 
 import java.util.ArrayList;
@@ -57,10 +57,10 @@ public class LogicTreeToolBox {
      * - (lit OR lit ... OR lit) AND (lit OR lit ... OR lit) ... AND (lit OR lit ... OR lit)
      *
      * @param logOp logical operator
-     * @param solver the solver in which the logical expression will be added, useful since the expression may only be made of TRUE and FALSE.
+     * @param model the solver in which the logical expression will be added, useful since the expression may only be made of TRUE and FALSE.
      * @return a CNF logical expression
      */
-    public static ILogical toCNF(LogOp logOp, Solver solver) {
+    public static ILogical toCNF(LogOp logOp, Model model) {
         expandNot(logOp);
         logOp = distribute(logOp);
         // sort children of each clause with positive literals first
@@ -76,8 +76,8 @@ public class LogicTreeToolBox {
                 }
             }
         }
-        ILogical l = simplify(logOp, solver);
-        l = simplifySingleton(l, solver);
+        ILogical l = simplify(logOp, model);
+        l = simplifySingleton(l, model);
         l = orderAndReduce(l);
         if (!l.isLit()) ((LogOp) l).cleanFlattenBoolVar();
         return l;
@@ -203,10 +203,10 @@ public class LogicTreeToolBox {
     /**
      * Detects tautologies and contradictions from <code>t</code>
      * @param t a logical expression
-     * @param solver to get {@link Solver#ONE} and {@link Solver#ZERO}.
+     * @param model to get {@link Model#ONE} and {@link Model#ZERO}.
      * @return simplified logical expression
      */
-    public static ILogical simplify(ILogical t, Solver solver) {
+    public static ILogical simplify(ILogical t, Model model) {
         if (t.isLit()) return t;
         // else
         LogOp n = (LogOp) t;
@@ -220,7 +220,7 @@ public class LogicTreeToolBox {
                 if (lits.containsKey(var)) {
                     ILogical prev = lits.get(var);
                     if (prev.isNot() != children[i].isNot()) {
-                        return solver.ONE();
+                        return model.ONE();
                     }
                 } else {
                     lits.put(var, children[i]);
@@ -238,7 +238,7 @@ public class LogicTreeToolBox {
                 if (lits.containsKey(var)) {
                     ILogical prev = lits.get(var);
                     if (prev.isNot() != children[i].isNot()) {
-                        return solver.ZERO();
+                        return model.ZERO();
                     }
                 } else {
                     lits.put(var, children[i]);
@@ -250,7 +250,7 @@ public class LogicTreeToolBox {
         } else {
             for (int i = 0; i < children.length; i++) {
                 if (!children[i].isLit()) {
-                    children[i] = simplify(children[i], solver);
+                    children[i] = simplify(children[i], model);
                 }
             }
         }
@@ -261,16 +261,16 @@ public class LogicTreeToolBox {
     /**
      * Remove tautologies from <code>l</code>
      * @param l logical expression
-     * @param solver to get {@link Solver#ONE} and {@link Solver#ZERO}.
+     * @param model to get {@link Model#ONE} and {@link Model#ZERO}.
      * @return simplified logical expression
      */
-    public static ILogical simplifySingleton(ILogical l, Solver solver) {
+    public static ILogical simplifySingleton(ILogical l, Model model) {
         if (l.isLit()) return l;
         LogOp t = (LogOp) l;
         ILogical[] children = t.getChildren();
         ArrayList<ILogical> toRemove = new ArrayList<>();
         for (int i = 0; i < children.length; i++) {
-            if (solver.ONE().equals(children[i])) {
+            if (model.ONE().equals(children[i])) {
                 toRemove.add(children[i]);
             }
         }

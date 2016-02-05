@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.tools;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -92,12 +92,12 @@ public class ArrayUtilsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testGetColumn1() throws Exception {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[][] n = new IntVar[2][2];
-        n[0][0] = solver.intVar("X1", 0, 2, false);
-        n[0][1] = solver.intVar("C1", 3);
-        n[1][0] = solver.intVar("C2", 4);
-        n[1][1] = solver.intVar("X2", -2, 0, false);
+        n[0][0] = model.intVar("X1", 0, 2, false);
+        n[0][1] = model.intVar("C1", 3);
+        n[1][0] = model.intVar("C2", 4);
+        n[1][1] = model.intVar("X2", -2, 0, false);
         IntVar[] nn = ArrayUtils.getColumn(n, 1);
         Assert.assertEquals(nn, new IntVar[]{n[0][1], n[1][1]});
     }

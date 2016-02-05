@@ -29,11 +29,7 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.propagation.PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE;
@@ -53,7 +49,7 @@ public class TestSolveur {
             int m = (kk * (kk - 1)) / 2;
             int min = 1;
             nbSol *= kk;
-            Solver s = new Solver();
+            Model s = new Model();
             IntVar[] vars = new IntVar[kk];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, min, kk, false);
@@ -79,7 +75,7 @@ public class TestSolveur {
             int m = 1;
             int min = 1;
             nbSol *= k;
-            Solver s = new Solver();
+            Model s = new Model();
             IntVar[] vars = new IntVar[k];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, min, k, false);
@@ -97,7 +93,7 @@ public class TestSolveur {
 
         int min = 1;
         int max = k - 1;
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] vars = new IntVar[k];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, min, max, false);
@@ -134,7 +130,7 @@ public class TestSolveur {
             int m = k - 1;
             int min = 1;
             int max = 2 * k;
-            Solver s = new Solver();
+            Model s = new Model();
             IntVar[] vars = new IntVar[k];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("v_" + i, min, max, false);
@@ -159,7 +155,7 @@ public class TestSolveur {
         int m = n - 1;
         int min = 1;
         int max = k - 2;
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, min, max, false);
@@ -195,7 +191,7 @@ public class TestSolveur {
         int n = (2 * k);
         int min = 1;
         int max = k - 2;
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, min, max, false);
@@ -228,19 +224,19 @@ public class TestSolveur {
     @Test(groups="1s", timeOut=60000)
     public void fakePigeonHolesTest() {
         int n = 5;
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("p", n, 0, n, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("p", n, 0, n, false);
 
         for (int i = 0; i < n - 1; i++) {
-            solver.arithm(vars[i], "<", vars[i + 1]).post();
+            model.arithm(vars[i], "<", vars[i + 1]).post();
         }
-        solver.arithm(vars[0], "=", vars[n - 1]).post();
+        model.arithm(vars[0], "=", vars[n - 1]).post();
 
-        solver.set(lexico_LB(vars));
-        TWOBUCKETPROPAGATIONENGINE.make(solver);
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");
-        assertEquals(solver.getMeasures().getNodeCount(), 0, "nb nod");
+        model.set(lexico_LB(vars));
+        TWOBUCKETPROPAGATIONENGINE.make(model);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 0, "nb sol");
+        assertEquals(model.getMeasures().getNodeCount(), 0, "nb nod");
     }
 
 

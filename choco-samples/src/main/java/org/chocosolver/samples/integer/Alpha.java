@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -49,37 +49,33 @@ public class Alpha extends AbstractProblem {
     IntVar[] letters;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("Alpha");
-    }
-
-    @Override
     public void buildModel() {
+        model = new Model("Alpha");
         letters = new IntVar[26];
         for (int i = 0; i < 26; i++) {
-            letters[i] = solver.intVar("" + (char) (97 + i), 1, 26, true);
+            letters[i] = model.intVar("" + (char) (97 + i), 1, 26, true);
         }
-        solver.sum(extract("ballet"), "=", 45).post();
-        solver.sum(extract("cello"), "=", 43).post();
-        solver.sum(extract("concert"), "=", 74).post();
-        solver.sum(extract("flute"), "=", 30).post();
-        solver.sum(extract("fugue"), "=", 50).post();
-        solver.sum(extract("glee"), "=", 66).post();
-        solver.sum(extract("jazz"), "=", 58).post();
-        solver.sum(extract("lyre"), "=", 47).post();
-        solver.sum(extract("oboe"), "=", 53).post();
-        solver.sum(extract("opera"), "=", 65).post();
-        solver.sum(extract("polka"), "=", 59).post();
-        solver.sum(extract("quartet"), "=", 50).post();
-        solver.sum(extract("saxophone"), "=", 134).post();
-        solver.sum(extract("scale"), "=", 51).post();
-        solver.sum(extract("solo"), "=", 37).post();
-        solver.sum(extract("song"), "=", 61).post();
-        solver.sum(extract("soprano"), "=", 82).post();
-        solver.sum(extract("theme"), "=", 72).post();
-        solver.sum(extract("violin"), "=", 100).post();
-        solver.sum(extract("waltz"), "=", 34).post();
-        solver.allDifferent(letters, "BC").post();
+        model.sum(extract("ballet"), "=", 45).post();
+        model.sum(extract("cello"), "=", 43).post();
+        model.sum(extract("concert"), "=", 74).post();
+        model.sum(extract("flute"), "=", 30).post();
+        model.sum(extract("fugue"), "=", 50).post();
+        model.sum(extract("glee"), "=", 66).post();
+        model.sum(extract("jazz"), "=", 58).post();
+        model.sum(extract("lyre"), "=", 47).post();
+        model.sum(extract("oboe"), "=", 53).post();
+        model.sum(extract("opera"), "=", 65).post();
+        model.sum(extract("polka"), "=", 59).post();
+        model.sum(extract("quartet"), "=", 50).post();
+        model.sum(extract("saxophone"), "=", 134).post();
+        model.sum(extract("scale"), "=", 51).post();
+        model.sum(extract("solo"), "=", 37).post();
+        model.sum(extract("song"), "=", 61).post();
+        model.sum(extract("soprano"), "=", 82).post();
+        model.sum(extract("theme"), "=", 72).post();
+        model.sum(extract("violin"), "=", 100).post();
+        model.sum(extract("waltz"), "=", 34).post();
+        model.allDifferent(letters, "BC").post();
     }
 
     private IntVar[] extract(String word) {
@@ -92,12 +88,12 @@ public class Alpha extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(letters));
+        model.set(IntStrategyFactory.minDom_LB(letters));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

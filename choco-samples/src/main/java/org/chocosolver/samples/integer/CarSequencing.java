@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -71,16 +71,12 @@ public class CarSequencing extends AbstractProblem {
 
 
     @Override
-    public void createSolver() {
-        solver = new Solver("CarSequencing");
-    }
-
-    @Override
     public void buildModel() {
+        model = new Model("CarSequencing");
         parse(data.source());
         prepare();
         int max = nClasses - 1;
-        cars = solver.intVarArray("cars", nCars, 0, max, false);
+        cars = model.intVarArray("cars", nCars, 0, max, false);
 
         IntVar[] expArray = new IntVar[nClasses];
 
@@ -93,24 +89,24 @@ public class CarSequencing extends AbstractProblem {
                 IntVar[] atMost = new IntVar[nbConf];
                 for (int i = 0; i < nbConf; i++) {
                     // optfreq[optNum][0] times AT MOST
-                    atMost[i] = solver.intVar("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], true);
+                    atMost[i] = model.intVar("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], true);
                 }
-                solver.globalCardinality(carSequence, options[optNum], atMost, false).post();
-                IntVar[] atLeast = solver.intVarArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, true);
-                solver.globalCardinality(carSequence, idleConfs[optNum], atLeast, false).post();
+                model.globalCardinality(carSequence, options[optNum], atMost, false).post();
+                IntVar[] atLeast = model.intVarArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, true);
+                model.globalCardinality(carSequence, idleConfs[optNum], atLeast, false).post();
 
                 // all others configurations may be chosen
-                IntVar sum = solver.intVar("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, true);
-                solver.sum(atLeast, "=", sum).post();
+                IntVar sum = model.intVar("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, true);
+                model.sum(atLeast, "=", sum).post();
             }
         }
 
         int[] values = new int[expArray.length];
         for (int i = 0; i < expArray.length; i++) {
-            expArray[i] = solver.intVar("var_" + i, 0, demands[i], false);
+            expArray[i] = model.intVar("var_" + i, 0, demands[i], false);
             values[i] = i;
         }
-        solver.globalCardinality(cars, values, expArray, false).post();
+        model.globalCardinality(cars, values, expArray, false).post();
     }
 
     private static IntVar[] extractor(IntVar[] cars, int initialNumber, int amount) {
@@ -124,12 +120,12 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(cars));
+        model.set(IntStrategyFactory.lexico_LB(cars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

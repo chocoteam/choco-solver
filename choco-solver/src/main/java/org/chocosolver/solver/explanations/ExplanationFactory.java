@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.explanations;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.SLF;
 
 /**
@@ -45,40 +45,40 @@ public enum ExplanationFactory {
 
     NONE {
         @Override
-        public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
+        public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
             //DO NOTHING
         }
     },
     /**
      * add a Conflict-based Backjumping policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
-     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#learnCBJ(Solver, boolean, boolean)
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#learnCBJ(Model, boolean, boolean)
      */
     CBJ {
         @Override
-        public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
-            SLF.learnCBJ(solver, nogoodsOn, userFeedbackOn);
+        public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
+            SLF.learnCBJ(model, nogoodsOn, userFeedbackOn);
         }
     },
     /**
      * add a Dynamic-Backtracking policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
-     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#learnDBT(Solver, boolean, boolean)
+     * @see org.chocosolver.solver.search.loop.SearchLoopFactory#learnDBT(Model, boolean, boolean)
      */
     DBT {
         @Override
-        public void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn) {
-            SLF.learnDBT(solver, nogoodsOn, userFeedbackOn);
+        public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
+            SLF.learnDBT(model, nogoodsOn, userFeedbackOn);
         }
     };
 
     /**
      * Plug explanations into coe<code>solver</code>.
      *
-     * @param solver         the solver to observe
+     * @param model         the solver to observe
      * @param nogoodsOn      extract nogoods from conflict
      * @param userFeedbackOn user feedback on: propagators in conflict are available for consultation
      */
-    public abstract void plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn);
+    public abstract void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn);
 
 }

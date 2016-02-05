@@ -34,12 +34,9 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
@@ -52,7 +49,7 @@ public class SetIntUnion {
 
 	@Test(groups="1s", timeOut=60000)
 	public void test1() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] x = s.intVarArray("ints", 4, 0, 5, false);
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.union(x, values).post();
@@ -64,7 +61,7 @@ public class SetIntUnion {
 
 	@Test(groups="1s", timeOut=60000)
 	public void test2() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] x = new IntVar[]{
                 s.intVar(0)
                 , s.intVar(2)
@@ -83,7 +80,7 @@ public class SetIntUnion {
 
 	@Test(groups="1s", timeOut=60000)
 	public void test3() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] x = new IntVar[]{
                 s.intVar(0)
                 , s.intVar(2)

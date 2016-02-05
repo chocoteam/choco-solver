@@ -32,7 +32,7 @@ package org.chocosolver.solver.search.loop.monitors;
 import com.github.cpprofiler.Connector;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.trace.IMessage;
@@ -52,7 +52,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
 
     public static boolean DEBUG = false;
 
-    Solver mSolver;
+    Model mModel;
 
     // Stacks of 'Parent Id' and 'Alternative' used when backtrack
     TIntStack pid_stack = new TIntArrayStack();
@@ -70,7 +70,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
         @Override
         public String print() {
             StringBuilder s = new StringBuilder(32);
-            for (Variable v : mSolver.getVars()) {
+            for (Variable v : mModel.getVars()) {
                 s.append(v).append(' ');
             }
             return s.toString();
@@ -80,20 +80,20 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     /**
      * Create a bridge to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
      *
-     * @param aSolver solver to observe resolution
+     * @param aModel solver to observe resolution
      */
-    public CPProfiler(Solver aSolver) {
-        this.mSolver = aSolver;
+    public CPProfiler(Model aModel) {
+        this.mModel = aModel;
     }
 
     /**
      * Create a bridge to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
      *
-     * @param aSolver         solver to observe resolution
+     * @param aModel         solver to observe resolution
      * @param solutionMessage to send to cp-profiler when a solution is found
      */
-    public CPProfiler(Solver aSolver, IMessage solutionMessage) {
-        this.mSolver = aSolver;
+    public CPProfiler(Model aModel, IMessage solutionMessage) {
+        this.mModel = aModel;
         this.solutionMessage = solutionMessage;
     }
 
@@ -101,7 +101,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     public void afterInitialize() {
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
-                mSolver.getMeasures().getRestartCount());
+                mModel.getMeasures().getRestartCount());
         connector.connect(6565); // 6565 is the port used by cpprofiler by default
         connector.restart(0); // starting a new tree (also used in case of a restart)
         alt_stack.push(-1); // -1 is alt for the root node
@@ -112,7 +112,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     @Override
     public void beforeDownBranch(boolean left) {
         if (left) {
-            Decision dec = mSolver.getSearchLoop().getLastDecision();
+            Decision dec = mModel.getSearchLoop().getLastDecision();
             String pdec = pretty(dec.getPrevious());
             int ari = dec.getArity();
             send(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, Connector.NodeStatus.BRANCH, pdec, "");
@@ -140,13 +140,13 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
 
     @Override
     public void onSolution() {
-        String dec = pretty(mSolver.getSearchLoop().getLastDecision());
+        String dec = pretty(mModel.getSearchLoop().getLastDecision());
         send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.SOLVED, dec, solutionMessage.print());
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        String dec = pretty(mSolver.getSearchLoop().getLastDecision());
+        String dec = pretty(mModel.getSearchLoop().getLastDecision());
         send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.FAILED, dec, cex.toString());
     }
 
@@ -154,7 +154,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     public void afterRestart() {
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
-                mSolver.getMeasures().getRestartCount());
+                mModel.getMeasures().getRestartCount());
         connector.restart(++rid);
         pid_stack.clear();
         alt_stack.clear();

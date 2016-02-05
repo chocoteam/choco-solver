@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
@@ -53,7 +53,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     /**
      * The target solver
      */
-    protected Solver solver;
+    protected Model model;
 
     /**
      * The main strategy declared in the solver
@@ -81,16 +81,16 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     /**
      * Creates a last conflict heuristic
-     * @param solver the solver to attach this to
+     * @param model the solver to attach this to
      * @param mainStrategy the main strategy declared
      * @param k the maximum number of conflicts to store
      */
-    public LastConflict(Solver solver, AbstractStrategy<Variable> mainStrategy, int k) {
+    public LastConflict(Model model, AbstractStrategy<Variable> mainStrategy, int k) {
         super(mainStrategy.vars);
         assert k > 0 : "parameter K of last conflict must be strictly positive!";
-        this.solver = solver;
+        this.model = model;
         this.mainStrategy = mainStrategy;
-        solver.plugMonitor(this);
+        model.plugMonitor(this);
         conflictingVariables = new Variable[k];
         nbCV = 0;
         active = false;
@@ -127,7 +127,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        Variable curDecVar = (Variable) solver.getSearchLoop().getLastDecision().getDecisionVariables();
+        Variable curDecVar = (Variable) model.getSearchLoop().getLastDecision().getDecisionVariables();
         if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
         if (inScope(curDecVar)) {
             if (nbCV < conflictingVariables.length) {

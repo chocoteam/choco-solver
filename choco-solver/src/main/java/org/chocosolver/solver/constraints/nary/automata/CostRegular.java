@@ -64,7 +64,7 @@ public class CostRegular extends Constraint {
     }
 
     private static StoredValuedDirectedMultiGraph initGraph(IntVar[] vars, ICostAutomaton pi) {
-		IEnvironment environment = vars[0].getSolver().getEnvironment();
+		IEnvironment environment = vars[0].getModel().getEnvironment();
         int aid = 0;
         int nid = 0;
 

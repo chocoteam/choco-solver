@@ -53,7 +53,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     protected final double precision;
 
     public RealView(IntVar var, double precision) {
-        super("(real)" + var.getName(), var.getSolver());
+        super("(real)" + var.getName(), var.getModel());
         this.var = var;
         this.precision = precision;
         this.var.subscribeView(this);
@@ -168,7 +168,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
-        solver.getEngine().fails(cause, this, message);
+        model.getEngine().fails(cause, this, message);
     }
 
     @Override
@@ -178,7 +178,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
 
     @Override
     public RealVar duplicate() {
-        return solver.realIntView(this.var, this.precision);
+        return model.realIntView(this.var, this.precision);
     }
 
 }

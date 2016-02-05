@@ -32,7 +32,7 @@ package org.chocosolver.util.objects;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.structure.IndexedObject;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.iterators.DisposableIntIterator;
 
@@ -370,11 +370,11 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */ {
         }
     }
 
-    public StoredIndexedBipartiteSet duplicate(Solver solver) {
+    public StoredIndexedBipartiteSet duplicate(Model model) {
         StoredIndexedBipartiteSet copy = new StoredIndexedBipartiteSet();
         copy.list = list.clone();
         copy.position = position.clone();
-        copy.last = solver.getEnvironment().makeInt(list.length - 1);
+        copy.last = model.getEnvironment().makeInt(list.length - 1);
         if (this.idxToObjects != null) {
             copy.idxToObjects = new IndexedObject[position.length];
             for (int i = 0; i < idxToObjects.length; i++) {

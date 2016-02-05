@@ -30,6 +30,7 @@
 package org.chocosolver.samples.nqueen;
 
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -43,24 +44,25 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void buildModel() {
+        model = new Model("NQueen");
         vars = new IntVar[n];
         IntVar[] diag1 = new IntVar[n];
         IntVar[] diag2 = new IntVar[n];
 
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("Q_" + i, 1, n, false);
-            diag1[i] = solver.intOffsetView(vars[i], i);
-            diag2[i] = solver.intOffsetView(vars[i], -i);
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
+            diag1[i] = model.intOffsetView(vars[i], i);
+            diag2[i] = model.intOffsetView(vars[i], -i);
         }
 
-        solver.allDifferent(vars, "BC").post();
-        solver.allDifferent(diag1, "BC").post();
-        solver.allDifferent(diag2, "BC").post();
+        model.allDifferent(vars, "BC").post();
+        model.allDifferent(diag1, "BC").post();
+        model.allDifferent(diag2, "BC").post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(vars));
+        model.set(IntStrategyFactory.minDom_LB(vars));
     }
 
     public static void main(String[] args) {

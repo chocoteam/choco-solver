@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.restart;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
@@ -56,7 +56,7 @@ public class NoGoodOnSolutionTest {
     final static int NB_SOLS = 5;
     final static int MAX_NB_SOLS = 10;
 
-    public static Solver makeProblem() {
+    public static Model makeProblem() {
         int n = N;
         Random rd = new Random(0);
         int[][] costs = new int[n][n];
@@ -65,7 +65,7 @@ public class NoGoodOnSolutionTest {
                 costs[i][j] = rd.nextInt(100);
             }
         }
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar z = s.intVar("z", Z, Z + 10, true);
         IntVar[] vars = s.intVarArray("x", n, 0, n - 1, false);
         IntVar[] costOf = new IntVar[n];
@@ -85,7 +85,7 @@ public class NoGoodOnSolutionTest {
     @Test(groups="1s", timeOut=60000)
     public void testNormal() {
         // no restarts (ok)
-        Solver s = makeProblem();
+        Model s = makeProblem();
         s.findAllSolutions();
         System.out.println(s.getMeasures());
         Assert.assertTrue(s.getMeasures().getSolutionCount() == NB_SOLS);
@@ -94,7 +94,7 @@ public class NoGoodOnSolutionTest {
     @Test(groups="1s", timeOut=60000)
     public void testRoS() {
         // restarts on solutions (infinite loop)
-        Solver s = makeProblem();
+        Model s = makeProblem();
         SLF.restartOnSolutions(s);
         s.findAllSolutions();
         System.out.println(s.getMeasures());
@@ -104,7 +104,7 @@ public class NoGoodOnSolutionTest {
     @Test(groups="1s", timeOut=60000)
     public void testRoSNG() {
         // restarts on solutions with no goods on solutions (ok)
-        Solver s = makeProblem();
+        Model s = makeProblem();
         SMF.nogoodRecordingOnSolution(s.retrieveIntVars(true));
         SLF.restartOnSolutions(s);
         s.findAllSolutions();
@@ -115,7 +115,7 @@ public class NoGoodOnSolutionTest {
     @Test(groups="1s", timeOut=60000)
     public void testA() {
         // restarts on solutions and on fails (at activity presolve only) (loop infinitely)
-        Solver s = makeProblem();
+        Model s = makeProblem();
         s.set(ISF.activity(s.retrieveIntVars(true), 0));
         s.findAllSolutions();
         System.out.println(s.getMeasures());
@@ -125,7 +125,7 @@ public class NoGoodOnSolutionTest {
     @Test(groups="10s", timeOut=60000)
     public void testANG() {
         // restarts on solutions and on fails with restarts on solutions (ok)
-        Solver s = makeProblem();
+        Model s = makeProblem();
         SMF.nogoodRecordingOnSolution(s.retrieveIntVars(true));
         s.set(ISF.activity(s.retrieveIntVars(true), 0));
 //        Chatterbox.showDecisions(s);
@@ -138,95 +138,95 @@ public class NoGoodOnSolutionTest {
     @Test(groups="1s", timeOut=60000)
     public void testNQ() {
         // restarts on solutions and on fails with restarts on solutions (ok)
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 8;
-        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
+        IntVar[] vars = model.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = model.arithm(vars[i], "!=", vars[j]);
                 neq.post();
-                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        SMF.nogoodRecordingOnSolution(solver.retrieveIntVars(true));
-        solver.set(ISF.random_value(vars, 0));
+        SMF.nogoodRecordingOnSolution(model.retrieveIntVars(true));
+        model.set(ISF.random_value(vars, 0));
 
-        SLF.restartOnSolutions(solver);
-        solver.findAllSolutions();
-        System.out.println(solver.getMeasures());
-        Assert.assertTrue(solver.getMeasures().getSolutionCount() == 92);
+        SLF.restartOnSolutions(model);
+        model.findAllSolutions();
+        System.out.println(model.getMeasures());
+        Assert.assertTrue(model.getMeasures().getSolutionCount() == 92);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testNQ2() {
         // restarts on solutions and on fails with restarts on solutions (ok)
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 8;
-        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
+        IntVar[] vars = model.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = model.arithm(vars[i], "!=", vars[j]);
                 neq.post();
-                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        SMF.nogoodRecordingOnSolution(solver.retrieveIntVars(false));
-        SMF.nogoodRecordingFromRestarts(solver);
-        solver.set(ISF.random_value(vars, 0));
-        SLF.restartOnSolutions(solver);
-        solver.findAllSolutions();
-        System.out.println(solver.getMeasures());
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
+        SMF.nogoodRecordingOnSolution(model.retrieveIntVars(false));
+        SMF.nogoodRecordingFromRestarts(model);
+        model.set(ISF.random_value(vars, 0));
+        SLF.restartOnSolutions(model);
+        model.findAllSolutions();
+        System.out.println(model.getMeasures());
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testNQ3() { //issue 327
         // restarts on solutions and on fails with restarts on solutions (ok)
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 8;
-        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
+        IntVar[] vars = model.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = model.arithm(vars[i], "!=", vars[j]);
                 neq.post();
-                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0]});
-        Chatterbox.showSolutions(solver);
-        solver.set(ISF.lexico_LB(vars));
-        solver.findAllSolutions();
-        System.out.println(solver.getMeasures());
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
+        Chatterbox.showSolutions(model);
+        model.set(ISF.lexico_LB(vars));
+        model.findAllSolutions();
+        System.out.println(model.getMeasures());
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testNQ4() { //issue 327
         // restarts on solutions and on fails with restarts on solutions (ok)
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 8;
-        IntVar[] vars = solver.intVarArray("Q", n, 1, n, false);
+        IntVar[] vars = model.intVarArray("Q", n, 1, n, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = model.arithm(vars[i], "!=", vars[j]);
                 neq.post();
-                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0], vars[1]});
-        Chatterbox.showSolutions(solver);
-        solver.set(ISF.lexico_LB(vars));
+        Chatterbox.showSolutions(model);
+        model.set(ISF.lexico_LB(vars));
 //        Chatterbox.showDecisions(solver);
-        solver.findAllSolutions();
-        System.out.println(solver.getMeasures());
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 36);
+        model.findAllSolutions();
+        System.out.println(model.getMeasures());
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 36);
     }
 }

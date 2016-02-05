@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.impl.*;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -64,7 +64,7 @@ public interface IVariableFactory {
      * Should not be called by the user
      * @return a solver object
      */
-    Solver _me();
+    Model _me();
 
     //*************************************************************************************
     // BOOLEAN VARIABLES

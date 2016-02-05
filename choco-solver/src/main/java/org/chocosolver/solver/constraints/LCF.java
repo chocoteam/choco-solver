@@ -30,10 +30,10 @@
 
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 /**
- * @deprecated : logical constraint creation should be done through the {@link Solver} object
+ * @deprecated : logical constraint creation should be done through the {@link Model} object
  * which extends {@link org.chocosolver.solver.constraints.ILogicalConstraintFactory}
  *
  * This class will be removed in versions > 3.4.0

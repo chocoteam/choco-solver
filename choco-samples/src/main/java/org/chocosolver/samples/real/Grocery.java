@@ -30,7 +30,7 @@
 package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
@@ -60,38 +60,35 @@ public class Grocery extends AbstractProblem {
     IntVar[] itemCost;
     RealVar[] realitemCost;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Grocery");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         double epsilon = 0.000001d;
         // 4 integer variables (price in cents)
-        itemCost = solver.intVarArray("item", 4, 1, 711, true);
+        itemCost = model.intVarArray("item", 4, 1, 711, true);
         // views as real variables to be used by Ibex
-        realitemCost = solver.realIntViewArray(itemCost, epsilon);
-        solver.realIbexGenericConstraint("{0} + {1} + {2} + {3} = 711", realitemCost).post();
-        solver.realIbexGenericConstraint("{0} * {1}/100 * {2}/100 * {3}/100 = 711", realitemCost).post();
+        realitemCost = model.realIntViewArray(itemCost, epsilon);
+        model.realIbexGenericConstraint("{0} + {1} + {2} + {3} = 711", realitemCost).post();
+        model.realIbexGenericConstraint("{0} * {1}/100 * {2}/100 * {3}/100 = 711", realitemCost).post();
         // symmetry breaking
-        solver.realIbexGenericConstraint("{0} <= {1};{1} <= {2};{2} <= {3}", realitemCost).post();
+        model.realIbexGenericConstraint("{0} <= {1};{1} <= {2};{2} <= {3}", realitemCost).post();
     }
 
     @Override
     public void configureSearch() {
         // choco branching
-        Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
-        solver.set(IntStrategyFactory.lexico_UB(itemCost));
+        Chatterbox.showStatistics(model);
+        Chatterbox.showSolutions(model);
+        model.set(IntStrategyFactory.lexico_UB(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
-        solver.getIbex().release();
+        model.findSolution();
+        model.getIbex().release();
     }
 
     @Override

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -53,12 +53,12 @@ public class FailPerPropagator implements IMonitorContradiction {
     /**
      * Create an observer on propagators failures, based on the constraints in input
      * @param constraints set of constraints to observe
-     * @param solver the target solver
+     * @param model the target solver
      */
-    public FailPerPropagator(Constraint[] constraints, Solver solver) {
+    public FailPerPropagator(Constraint[] constraints, Model model) {
         p2w = new IntMap(10, 0);
         init(constraints);
-        solver.plugMonitor(this);
+        model.plugMonitor(this);
     }
 
     private void init(Constraint[] constraints) {

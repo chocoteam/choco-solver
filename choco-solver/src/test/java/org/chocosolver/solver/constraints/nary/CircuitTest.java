@@ -36,10 +36,8 @@
 
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.util.tools.ArrayUtils.append;
@@ -49,41 +47,41 @@ public class CircuitTest {
 
     @Test(groups="1s", timeOut=60000)
     public static void test1() {
-        Solver solver = new Solver();
-        IntVar[] x = solver.intVarArray("x", 10, 0, 20, true);
-        solver.circuit(x).post();
-        solver.findSolution();
-        assertEquals(1, solver.getMeasures().getSolutionCount());
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 10, 0, 20, true);
+        model.circuit(x).post();
+        model.findSolution();
+        assertEquals(1, model.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
     public static void test2() {
-        Solver solver = new Solver();
-        IntVar[] x = solver.intVarArray("x", 10, 0, 10, false);
-        solver.circuit(x).post();
-        solver.findSolution();
-        assertEquals(1, solver.getMeasures().getSolutionCount());
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 10, 0, 10, false);
+        model.circuit(x).post();
+        model.findSolution();
+        assertEquals(1, model.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
     public static void test3() {
-        Solver solver = new Solver();
-        IntVar[] x = solver.intVarArray("x", 5, 0, 4, true);
-        IntVar[] y = solver.intVarArray("y", 5, 5, 9, true);
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 5, 0, 4, true);
+        IntVar[] y = model.intVarArray("y", 5, 5, 9, true);
         IntVar[] vars = append(x, y);
-        solver.circuit(vars).post();
-        solver.findSolution();
-        assertEquals(0, solver.getMeasures().getSolutionCount());
+        model.circuit(vars).post();
+        model.findSolution();
+        assertEquals(0, model.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
     public static void test4() {
         for (int n = 2; n < 8; n++) {
-            Solver solver = new Solver();
-            IntVar[] x = solver.intVarArray("x", n, 0, n - 1, true);
-            solver.circuit(x).post();
-            solver.findAllSolutions();
-            assertEquals(factorial(n - 1), solver.getMeasures().getSolutionCount());
+            Model model = new Model();
+            IntVar[] x = model.intVarArray("x", n, 0, n - 1, true);
+            model.circuit(x).post();
+            model.findAllSolutions();
+            assertEquals(factorial(n - 1), model.getMeasures().getSolutionCount());
         }
     }
 

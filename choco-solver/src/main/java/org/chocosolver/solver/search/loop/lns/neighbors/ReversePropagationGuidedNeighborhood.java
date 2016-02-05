@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -45,8 +45,8 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeighborhood {
 
-    public ReversePropagationGuidedNeighborhood(Solver solver, IntVar[] vars, long seed, int fgmtSize, int listSize) {
-        super(solver, vars, seed, fgmtSize, listSize);
+    public ReversePropagationGuidedNeighborhood(Model model, IntVar[] vars, long seed, int fgmtSize, int listSize) {
+        super(model, vars, seed, fgmtSize, listSize);
     }
 
     @Override
@@ -59,9 +59,9 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
             // 2. fix it to its solution value
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
 
-                mSolver.getEnvironment().worldPush();
+                mModel.getEnvironment().worldPush();
                 vars[id].instantiateTo(bestSolution[id], Cause.Null);
-                mSolver.propagate();
+                mModel.propagate();
                 fragment.clear(id);
 
                 for (int i = 0; i < n; i++) {
@@ -78,7 +78,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                         }
                     }
                 }
-                mSolver.getEnvironment().worldPop();
+                mModel.getEnvironment().worldPop();
                 candidate.clear();
                 int k = 1;
                 while (!all.isEmpty() && candidate.size() < listSize) {
@@ -102,7 +102,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                 impose(i);
             }
         }
-        mSolver.propagate();
+        mModel.propagate();
 
         logSum = 0;
         for (int i = 0; i < n; i++) {

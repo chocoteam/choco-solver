@@ -31,7 +31,7 @@ package org.chocosolver.samples;
 
 import org.chocosolver.samples.integer.GolombRuler;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -49,18 +49,18 @@ public class GolombRulerTest {
             {5, 11}, {6, 17}, {7, 25}, {8, 34}, {9, 44}, {10, 55}//, {11, 72}
     };
 
-    protected Solver modeler(int m) {
+    protected Model modeler(int m) {
         GolombRuler pb = new GolombRuler();
         pb.readArgs("-m", Integer.toString(m));
         pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
-        return pb.getSolver();
+        return pb.getModel();
     }
 
     @Test(groups="10s", timeOut=60000)
     public void testAll() {
-        Solver sol;
+        Model sol;
         for (int j = 0; j < OPTIMAL_RULER.length; j++) {
             sol = modeler(OPTIMAL_RULER[j][0]);
             sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);

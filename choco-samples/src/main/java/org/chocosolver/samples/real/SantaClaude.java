@@ -30,12 +30,11 @@
 package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Random;
 
@@ -59,31 +58,28 @@ public class SantaClaude extends AbstractProblem {
     IntVar total_cost;
     RealVar average;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Santa Claude");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         Random rand = new Random(29091981);
         double precision = 1.e-6;
 
-        kid_gift = solver.intVarArray("g2k", n_kids, 0, n_gifts, false);
-        kid_price = solver.intVarArray("p2k", n_kids, 0, max_price, false);
-        total_cost = solver.intVar("total cost", 0, max_price * n_kids, true);
-        average = solver.realVar("average", 0, max_price * n_kids, precision);
+        kid_gift = model.intVarArray("g2k", n_kids, 0, n_gifts, false);
+        kid_price = model.intVarArray("p2k", n_kids, 0, max_price, false);
+        total_cost = model.intVar("total cost", 0, max_price * n_kids, true);
+        average = model.realVar("average", 0, max_price * n_kids, precision);
 
 
         gift_price = new int[n_gifts];
         for (int i = 0; i < n_gifts; i++) {
             gift_price[i] = rand.nextInt(max_price) + 1;
         }
-        solver.allDifferent(kid_gift, "BC").post();
+        model.allDifferent(kid_gift, "BC").post();
         for (int i = 0; i < n_kids; i++) {
-            solver.element(kid_price[i], gift_price, kid_gift[i], 0).post();
+            model.element(kid_price[i], gift_price, kid_gift[i], 0).post();
         }
-        solver.sum(kid_price, "=", total_cost).post();
+        model.sum(kid_price, "=", total_cost).post();
 
         StringBuilder funBuilder = new StringBuilder("(");
         for (int i = 0; i < n_kids; i++) {
@@ -91,20 +87,20 @@ public class SantaClaude extends AbstractProblem {
         }
         funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
-        RealVar[] all_vars = append(solver.realIntViewArray(kid_price, precision), new RealVar[]{average});
+        RealVar[] all_vars = append(model.realIntViewArray(kid_price, precision), new RealVar[]{average});
         String function = funBuilder.toString();
 
-        solver.realIbexGenericConstraint(function, all_vars).post();
+        model.realIbexGenericConstraint(function, all_vars).post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.random_value(kid_gift, 29091981));
+        model.set(IntStrategyFactory.random_value(kid_gift, 29091981));
     }
 
     @Override
     public void solve() {
-        solver.plugMonitor((IMonitorSolution) () -> {
+        model.plugMonitor((IMonitorSolution) () -> {
             System.out.println("*******************");
             for (int i = 0; i < n_kids; i++) {
                 System.out.println(String.format("Kids #%d has received the gift #%d at a cost of %d euros",
@@ -113,12 +109,12 @@ public class SantaClaude extends AbstractProblem {
             System.out.println(String.format("Total cost: %d euros", total_cost.getValue()));
             System.out.println(String.format("Average: [%.3f,%.3f] euros", average.getLB(), average.getUB()));
         });
-        solver.findAllSolutions();
+        model.findAllSolutions();
     }
 
     @Override
     public void prettyOut() {
-        solver.getIbex().release();
+        model.getIbex().release();
     }
 
     public static void main(String[] args) {

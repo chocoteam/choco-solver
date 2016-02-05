@@ -34,7 +34,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -125,10 +125,10 @@ public class PropNogoods extends Propagator<IntVar> {
     /**
      * Create a (unique) propagator for no-goods recording and propagation.
      *
-     * @param solver the solver that declares the propagator
+     * @param model the solver that declares the propagator
      */
-    public PropNogoods(Solver solver) {
-        super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, true);
+    public PropNogoods(Model model) {
+        super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, true);
         this.vars = new IntVar[0];// erase solver.ONE from the variable scope
 
         int k = 16;
@@ -142,7 +142,7 @@ public class PropNogoods extends Propagator<IntVar> {
         //TODO: one satsolver per solver...
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
-        sat_trail_ = solver.getEnvironment().makeInt();
+        sat_trail_ = model.getEnvironment().makeInt();
         test_eq = new BitSet();
         fp = new ArrayDeque<>();
     }
@@ -521,7 +521,7 @@ public class PropNogoods extends Propagator<IntVar> {
         sat_.learnClause(lits);
         // early deductions of learnt clause may lead to incorrect behavior on backtrack
         // since early deduction is not backtrackable.
-        this.getSolver().getEngine().propagateOnBacktrack(this); // issue#327
+        this.getModel().getEngine().propagateOnBacktrack(this); // issue#327
         // compare the current clauses with the previous stored one,
         // just in case the current one dominates the previous none
         if (sat_.nLearnt() > 1) {

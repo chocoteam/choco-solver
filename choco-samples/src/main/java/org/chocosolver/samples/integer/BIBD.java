@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
@@ -79,12 +79,8 @@ public class BIBD extends AbstractProblem {
     BoolVar[][] vars, _vars;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("BIBD");
-    }
-
-    @Override
     public void buildModel() {
+        model = new Model("BIBD");
         if (b == -1) {
             b = (v * (v - 1) * l) / (k * (k - 1));
         }
@@ -95,28 +91,28 @@ public class BIBD extends AbstractProblem {
         _vars = new BoolVar[b][v];
         for (int i = 0; i < v; i++) {
             for (int j = 0; j < b; j++) {
-                vars[i][j] = solver.boolVar("V(" + i + "," + j + ")");
+                vars[i][j] = model.boolVar("V(" + i + "," + j + ")");
                 _vars[j][i] = vars[i][j];
             }
 
         }
         // r ones per row
         for (int i = 0; i < v; i++) {
-            solver.sum(vars[i], "=", r).post();
+            model.sum(vars[i], "=", r).post();
         }
         // k ones per column
         for (int j = 0; j < b; j++) {
-            solver.sum(_vars[j], "=", k).post();
+            model.sum(_vars[j], "=", k).post();
         }
 
         // Exactly l ones in scalar product between two different rows
         for (int i1 = 0; i1 < v; i1++) {
             for (int i2 = i1 + 1; i2 < v; i2++) {
-                BoolVar[] score = solver.boolVarArray(format("row(%d,%d)", i1, i2), b);
+                BoolVar[] score = model.boolVarArray(format("row(%d,%d)", i1, i2), b);
                 for (int j = 0; j < b; j++) {
-                    solver.times(_vars[j][i1], _vars[j][i2], score[j]).post();
+                    model.times(_vars[j][i1], _vars[j][i2], score[j]).post();
                 }
-                solver.sum(score, "=", l).post();
+                model.sum(score, "=", l).post();
             }
         }
         // Symmetry breaking
@@ -124,30 +120,30 @@ public class BIBD extends AbstractProblem {
         for (int i = 0; i < v; i++) {
             rev[i] = vars[v - 1 - i];
         }
-        solver.lexChainLessEq(rev).post();
+        model.lexChainLessEq(rev).post();
         BoolVar[][] _rev = new BoolVar[b][];
         for (int i = 0; i < b; i++) {
             _rev[i] = _vars[b - 1 - i];
         }
-        solver.lexChainLessEq(_rev).post();
+        model.lexChainLessEq(_rev).post();
     }
 
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(ArrayUtils.flatten(vars)));
+        model.set(IntStrategyFactory.lexico_LB(ArrayUtils.flatten(vars)));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         System.out.println(String.format("BIBD(%d,%d,%d,%d,%d)", v, b, r, k, l));
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < v; i++) {
                 st.append("\t");
                 for (int j = 0; j < b; j++) {

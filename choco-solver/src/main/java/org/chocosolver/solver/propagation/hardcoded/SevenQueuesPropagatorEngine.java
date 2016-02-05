@@ -32,7 +32,7 @@ package org.chocosolver.solver.propagation.hardcoded;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -85,7 +85,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     /**
      * The solver declaring this engine
      */
-    private final Solver solver;
+    private final Model model;
     /**
      * Backtrackable environment attached to this solver
      */
@@ -144,18 +144,18 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      * Each of the seven queues deals with on priority.
      * When a propagator needs to be executed, it is scheduled in the queue corresponding to its priority.
      * The lowest priority queue is emptied before one element of the second lowest queue is popped, etc.
-     * @param solver the declaring solver
+     * @param model the declaring solver
      */
-    public SevenQueuesPropagatorEngine(Solver solver) {
+    public SevenQueuesPropagatorEngine(Model model) {
         this.exception = new ContradictionException();
-        this.environment = solver.getEnvironment();
-        this.trigger = new PropagationTrigger(this, solver);
-        this.idemStrat = solver.getSettings().getIdempotencyStrategy();
-        this.solver = solver;
+        this.environment = model.getEnvironment();
+        this.trigger = new PropagationTrigger(this, model);
+        this.idemStrat = model.getSettings().getIdempotencyStrategy();
+        this.model = model;
         //noinspection unchecked
         this.pro_queue = new CircularQueue[8];
-        this.DEBUG = solver.getSettings().debugPropagation();
-        this.COLOR = solver.getSettings().outputWithANSIColors();
+        this.DEBUG = model.getSettings().debugPropagation();
+        this.COLOR = model.getSettings().outputWithANSIColors();
 
     }
 
@@ -173,7 +173,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     public void initialize() {
         if (!init) {
             List<Propagator> _propagators = new ArrayList<>();
-            Constraint[] constraints = solver.getCstrs();
+            Constraint[] constraints = model.getCstrs();
             int nbProp = 0;
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] cprops = constraints[c].getPropagators();

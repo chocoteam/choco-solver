@@ -29,12 +29,10 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.checker.DomainBuilder;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -88,12 +86,12 @@ public class MemberSetTest {
             for (int d = 0; d < 11; d++) {
                 for (int h = 0; h < 2; h++) {
                     doms = buildFullDomains(2, -4, 5, random, d / 10.d, h == 0);
-                    Solver solver = new Solver();
-                    SetVar s = solver.setVar("s", new int[]{}, doms[0]);
-                    IntVar i = solver.intVar("i", doms[1]);
-                    solver.member(i, s).post();
+                    Model model = new Model();
+                    SetVar s = model.setVar("s", new int[]{}, doms[0]);
+                    IntVar i = model.intVar("i", doms[1]);
+                    model.member(i, s).post();
                     //Chatterbox.showSolutions(solver);
-                    assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
+                    assertEquals(model.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
                             Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
                 }
             }
@@ -117,12 +115,12 @@ public class MemberSetTest {
                     for (int j = 0; j < doms[1].length; j++) {
                         doms[1][j] = lb + j;
                     }
-                    Solver solver = new Solver();
-                    SetVar s = solver.setVar("s", new int[]{}, doms[0]);
-                    IntVar i = solver.intVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
-                    solver.member(i, s).post();
+                    Model model = new Model();
+                    SetVar s = model.setVar("s", new int[]{}, doms[0]);
+                    IntVar i = model.intVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
+                    model.member(i, s).post();
                     //Chatterbox.showSolutions(solver);
-                    assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
+                    assertEquals(model.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
                             Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
                 }
             }

@@ -29,11 +29,8 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
@@ -54,7 +51,7 @@ public class ScaleViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar X = s.intVar("X", 1, 3, false);
         IntVar Y = s.intScaleView(X, 2);
         IntVar[] vars = {X, Y};
@@ -67,7 +64,7 @@ public class ScaleViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar X = s.intVar("X", 1, 4, false);
         IntVar Y = s.intScaleView(X, 3);
@@ -80,8 +77,8 @@ public class ScaleViewTest {
         assertEquals(s.getMeasures().getSolutionCount(), 4);
     }
 
-    private Solver bijective(int low, int upp, int coeff) {
-        Solver s = new Solver();
+    private Model bijective(int low, int upp, int coeff) {
+        Model s = new Model();
 
         IntVar X = s.intVar("X", low, upp, false);
         IntVar Y = s.intScaleView(X, coeff);
@@ -95,8 +92,8 @@ public class ScaleViewTest {
         return s;
     }
 
-    private Solver contraint(int low, int upp, int coeff) {
-        Solver s = new Solver();
+    private Model contraint(int low, int upp, int coeff) {
+        Model s = new Model();
 
         IntVar X = s.intVar("X", low, upp, false);
         IntVar C = s.intVar("C", coeff);
@@ -121,8 +118,8 @@ public class ScaleViewTest {
             int upp = low + rand.nextInt(1000);
             int coeff = rand.nextInt(5);
 
-            Solver sb = bijective(low, upp, coeff);
-            Solver sc = contraint(low, upp, coeff);
+            Model sb = bijective(low, upp, coeff);
+            Model sc = contraint(low, upp, coeff);
             sb.findAllSolutions();
             sc.findAllSolutions();
             Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
@@ -132,8 +129,8 @@ public class ScaleViewTest {
 
     @Test(groups="10s", timeOut=60000)
     public void testRandom2() {
-        Solver sb = bijective(1, 9999, 3);
-        Solver sc = contraint(1, 9999, 3);
+        Model sb = bijective(1, 9999, 3);
+        Model sc = contraint(1, 9999, 3);
         sb.findAllSolutions();
         sc.findAllSolutions();
         Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
@@ -145,10 +142,10 @@ public class ScaleViewTest {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
-            Solver solver = new Solver();
+            Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = solver.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = solver.intScaleView(o, 2);
+            IntVar o = model.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
+            IntVar v = model.intScaleView(o, 2);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(vit.next() / 2));
@@ -179,15 +176,15 @@ public class ScaleViewTest {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
-            Solver solver = new Solver();
+            Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = solver.intVar("o", domains[0]);
-            IntVar v = solver.intScaleView(o, 2);
-			if(!solver.getSettings().enableViews()){
+            IntVar o = model.intVar("o", domains[0]);
+            IntVar v = model.intScaleView(o, 2);
+			if(!model.getSettings().enableViews()){
 				try {
 					// currently, the propagation is not sufficient (bound)
 					// could be fixed with an extension filtering
-					solver.propagate();
+					model.propagate();
 				}catch (Exception e){
 					e.printStackTrace();
 					throw new UnsupportedOperationException();

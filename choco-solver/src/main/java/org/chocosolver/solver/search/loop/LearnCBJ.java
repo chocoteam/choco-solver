@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.loop;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -70,14 +70,14 @@ public class LearnCBJ extends LearnExplained {
 
     /**
      * Create a Conflict-based Backjumping strategy.
-     * @param mSolver the solver to instrument
+     * @param mModel the solver to instrument
      * @param nogoodFromConflict set to <tt>true</tt> to extract nogoods from explanations.
      * @param userFeedbackOn set to <tt>true</tt> to record causes in explanations (required for user feedback mainly).
      */
-    public LearnCBJ(Solver mSolver, boolean nogoodFromConflict, boolean userFeedbackOn) {
-        super(mSolver, !nogoodFromConflict, userFeedbackOn);
+    public LearnCBJ(Model mModel, boolean nogoodFromConflict, boolean userFeedbackOn) {
+        super(mModel, !nogoodFromConflict, userFeedbackOn);
         if(this.nogoodFromConflict = nogoodFromConflict) {
-            this.ngstore = mSolver.getNogoodStore().getPropNogoods();
+            this.ngstore = mModel.getNogoodStore().getPropNogoods();
             this.ps = new TIntArrayList();
         }
     }
@@ -88,7 +88,7 @@ public class LearnCBJ extends LearnExplained {
      * @param nworld index of the world to backtrack to
      */
     void identifyRefutedDecision(int nworld) {
-        Decision dec = mSolver.getSearchLoop().getLastDecision(); // the current decision to undo
+        Decision dec = mModel.getSearchLoop().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
             mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
             dec = dec.getPrevious();
@@ -109,7 +109,7 @@ public class LearnCBJ extends LearnExplained {
         if (this.nogoodFromConflict) {
             postNogood();
         }
-        int upto = compute(mSolver.getEnvironment().getWorldIndex());
+        int upto = compute(mModel.getEnvironment().getWorldIndex());
         assert upto > 0;
         searchLoop.jumpTo = upto;
         identifyRefutedDecision(upto);
@@ -122,8 +122,8 @@ public class LearnCBJ extends LearnExplained {
     @SuppressWarnings("unchecked")
     private void postNogood() {
         if (lastExplanation.isComplete()) {
-            Solver mSolver = ngstore.getSolver();
-            Decision<IntVar> decision = mSolver.getSearchLoop().getLastDecision();
+            Model mModel = ngstore.getModel();
+            Decision<IntVar> decision = mModel.getSearchLoop().getLastDecision();
             ps.clear();
             while (decision != RootDecision.ROOT) {
                 if (lastExplanation.getDecisions().get(decision.getWorldIndex())) {

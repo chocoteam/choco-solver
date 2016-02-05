@@ -31,7 +31,7 @@ package org.chocosolver.samples;
 
 import org.chocosolver.samples.integer.MagicSquare;
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
@@ -48,18 +48,18 @@ import org.testng.annotations.Test;
  */
 public class MagicSquareTest {
 
-    protected Solver modeler(int n) {
+    protected Model modeler(int n) {
         MagicSquare pb = new MagicSquare();
         pb.readArgs("-n", Integer.toString(n));
         pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
-        return pb.getSolver();
+        return pb.getModel();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testImpact() {
-        Solver sol;
+        Model sol;
         int j = 3;
         sol = modeler(j);
         sol.set(new ImpactBased((IntVar[])sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
@@ -78,7 +78,7 @@ public class MagicSquareTest {
 
     @Test(groups="5m", timeOut=300000)
     public void testAll() {
-        Solver sol;
+        Model sol;
         for (int j = 3; j < 5; j++) {
             sol = modeler(j);
             sol.findAllSolutions();
@@ -101,9 +101,9 @@ public class MagicSquareTest {
         // square2,0={1,2,5,7,8,9...,15} square2,1={5,7} square2,2=11 square2,3={2,5,7,8,9,10...,15}
         // square3,0={14,15} square3,1={5,7} square3,2={8,9,10} square3,3=4
         //== >square0,2  ==  12 (0)
-        Solver solver = modeler(4);
-        Variable[] vars = solver.getVars();
-        solver.propagate();
+        Model model = modeler(4);
+        Variable[] vars = model.getVars();
+        model.propagate();
 		int offset = 0;
         ((IntVar) vars[offset]).instantiateTo(3, Cause.Null);
         ((IntVar) vars[15+offset]).instantiateTo(4, Cause.Null);
@@ -112,10 +112,10 @@ public class MagicSquareTest {
         ((IntVar) vars[9+offset]).removeInterval(1, 2, Cause.Null);
         ((IntVar) vars[13+offset]).removeInterval(1, 2, Cause.Null);
         ((IntVar) vars[1+offset]).instantiateTo(6, Cause.Null);
-        solver.propagate();
+        model.propagate();
         ((IntVar) vars[2+offset]).instantiateTo(12, Cause.Null);
         try {
-            solver.propagate();
+            model.propagate();
             Assert.fail("should fail");
         } catch (ContradictionException ignored) {}
     }
@@ -127,23 +127,23 @@ public class MagicSquareTest {
         // square2,0={4,5,6,7,8,9...,14} square2,1={6,7,8,9,10,11...,12} square2,2={4,5,6,7,8,9...,10} square2,3={1,4,5,6,7,8...,15}
         // square3,0={14,15} square3,1={1,4,5,6,7,8...,8} square3,2={4,5,6,7,8,9...,10} square3,3={8,9,10,11,12,14...,15}
         //[R]!square3,0  ==  14 (1)
-        Solver solver = modeler(4);
-        solver.propagate();
+        Model model = modeler(4);
+        model.propagate();
 		int offset = 0;
-        Variable[] vars = solver.getVars();
+        Variable[] vars = model.getVars();
         ((IntVar) vars[offset]).instantiateTo(2, Cause.Null);
-        solver.propagate();
+        model.propagate();
         ((IntVar) vars[3+offset]).instantiateTo(3, Cause.Null);
-        solver.propagate();
+        model.propagate();
         ((IntVar) vars[1+offset]).instantiateTo(13, Cause.Null);
-        solver.propagate();
+        model.propagate();
 
         ((IntVar) vars[6+offset]).removeValue(1, Cause.Null);
-        solver.propagate();
+        model.propagate();
         ((IntVar) vars[14+offset]).removeValue(1, Cause.Null);
-        solver.propagate();
+        model.propagate();
         ((IntVar) vars[12+offset]).removeInterval(9, 14, Cause.Null);
-        solver.propagate();
+        model.propagate();
         Assert.assertTrue(((IntVar) vars[13+offset]).isInstantiatedTo(1));
     }
 }

@@ -66,7 +66,7 @@ public class PropBinAC2001 extends PropBinCSP {
         offset1 = y.getLB();
         currentSupport0 = new IStateInt[x.getUB() - offset0 + 1];
         currentSupport1 = new IStateInt[y.getUB() - offset1 + 1];
-        IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = model.getEnvironment();
         for (int i = 0; i < currentSupport0.length; i++) {
             currentSupport0[i] = environment.makeInt();
             currentSupport0[i].set(-1);

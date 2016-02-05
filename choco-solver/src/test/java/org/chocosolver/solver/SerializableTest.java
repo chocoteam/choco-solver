@@ -76,25 +76,25 @@ public class SerializableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testEmptySolver() {
-        Solver solver = new Solver();
+        Model model = new Model();
         File file = null;
         try {
-            file = write(solver);
+            file = write(model);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        solver = null;
+        model = null;
         try {
-            solver = (Solver) read(file);
+            model = (Model) read(file);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        Assert.assertNotNull(solver);
+        Assert.assertNotNull(model);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testEngine1() {
-        IPropagationEngine eng = new TwoBucketPropagationEngine(new Solver());
+        IPropagationEngine eng = new TwoBucketPropagationEngine(new Model());
         File file = null;
         try {
             file = write(eng);
@@ -112,7 +112,7 @@ public class SerializableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testEngine2() {
-        IPropagationEngine eng = new SevenQueuesPropagatorEngine(new Solver());
+        IPropagationEngine eng = new SevenQueuesPropagatorEngine(new Model());
         File file = null;
         try {
             file = write(eng);
@@ -130,7 +130,7 @@ public class SerializableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testIntegerVariable() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar var = s.intVar("v", 1, 10, false);
         File file = null;
         try {
@@ -149,7 +149,7 @@ public class SerializableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testConstraint() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar var = s.intVar("v", 1, 10, false);
         Constraint c = s.arithm(var, "=", 0);
         File file = null;
@@ -169,7 +169,7 @@ public class SerializableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testNQueen() {
-        Solver s = new Solver();
+        Model s = new Model();
         int n = 8;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
@@ -196,7 +196,7 @@ public class SerializableTest {
         }
         s = null;
         try {
-            s = (Solver) read(file);
+            s = (Model) read(file);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

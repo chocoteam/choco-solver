@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.measure;
 
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 /**
  * Object which stores resolution information to get statistics
  *
@@ -106,20 +106,20 @@ public final class MeasuresRecorder implements IMeasures {
     /**
      * The solver to measure
      */
-    protected Solver solver;
+    protected Model model;
 
     /**
      * Create a measures recorder observing a <code>solver</code>
-     * @param solver the solver to observe
+     * @param model the solver to observe
      */
-    public MeasuresRecorder(Solver solver) {
+    public MeasuresRecorder(Model model) {
         super();
-        this.solver = solver;
+        this.model = model;
     }
 
     @Override
     public MeasuresRecorder duplicate() {
-        MeasuresRecorder mr = new MeasuresRecorder(solver);
+        MeasuresRecorder mr = new MeasuresRecorder(model);
         mr.hasObjective = hasObjective;
         mr.objectiveOptimal = objectiveOptimal;
         mr.solutionCount = solutionCount;
@@ -233,7 +233,7 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public Number getBestSolutionValue() {
-        return solver.getObjectiveManager().getBestSolutionValue();
+        return model.getObjectiveManager().getBestSolutionValue();
     }
 
     @Override
@@ -315,10 +315,10 @@ public final class MeasuresRecorder implements IMeasures {
     public String toOneLineString() {
         updateTime();
         StringBuilder st = new StringBuilder(256);
-        st.append("Solver[").append(solver.getName()).append("], ");
+        st.append("Solver[").append(model.getName()).append("], ");
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
-            st.append(solver.getObjectiveManager()).append(", ");
+            st.append(model.getObjectiveManager()).append(", ");
         }
         st.append(String.format("Building time : %,.3fs, " +
                         "Resolution time %,.3fs, " +
@@ -340,10 +340,10 @@ public final class MeasuresRecorder implements IMeasures {
     public String toOneShortLineString() {
         updateTime();
         StringBuilder st = new StringBuilder(256);
-        st.append("Solver[").append(solver.getName()).append("], ");
+        st.append("Solver[").append(model.getName()).append("], ");
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
-            st.append(solver.getObjectiveManager()).append(", ");
+            st.append(model.getObjectiveManager()).append(", ");
         }
         st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
                 getTimeCount(),
@@ -360,9 +360,9 @@ public final class MeasuresRecorder implements IMeasures {
         updateTime();
         StringBuilder st = new StringBuilder(256);
 //        st.append("- Search statistics\n");
-        if (solver.hasReachedLimit()) {
+        if (model.hasReachedLimit()) {
             st.append("- Incomplete search - Limit reached.\n");
-        } else if (solver.getSearchLoop().hasEndedUnexpectedly()) {
+        } else if (model.getSearchLoop().hasEndedUnexpectedly()) {
             st.append("- Incomplete search - Unexpected interruption.\n");
         } else {
             st.append("- Complete search - ");
@@ -375,10 +375,10 @@ public final class MeasuresRecorder implements IMeasures {
             }
             st.append('\n');
         }
-        st.append("\tSolver[").append(solver.getName()).append("]\n");
+        st.append("\tSolver[").append(model.getName()).append("]\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
-            st.append("\t").append(solver.getObjectiveManager()).append(",\n");
+            st.append("\t").append(model.getObjectiveManager()).append(",\n");
         }
         st.append(String.format("\tBuilding time : %,.3fs" +
                         "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
@@ -390,8 +390,8 @@ public final class MeasuresRecorder implements IMeasures {
                 getBackTrackCount(),
                 getFailCount(),
                 getRestartCount(),
-                solver.getNbVars(),
-                solver.getNbCstrs()
+                model.getNbVars(),
+                model.getNbCstrs()
         ));
         return st.toString();
     }

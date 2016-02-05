@@ -30,7 +30,7 @@
 package org.chocosolver.samples;
 
 import org.chocosolver.samples.integer.Partition;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -42,14 +42,14 @@ import org.testng.annotations.Test;
  */
 public class PartitionTest {
 
-    protected Solver modeler(int size) {
+    protected Model modeler(int size) {
         Partition pb;
         pb = new Partition();
         pb.readArgs("-n", Integer.toString(size));
         pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
-        return pb.getSolver();
+        return pb.getModel();
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -59,7 +59,7 @@ public class PartitionTest {
 //        int[] nodes = {3, 22, 189, 1739, 17889, 189944};
 
         for (int i = 0; i < size.length; i++) {
-            Solver sol = modeler(size[i]);
+            Model sol = modeler(size[i]);
             sol.findAllSolutions();
             Assert.assertEquals(sol.getMeasures().getSolutionCount(), sols[i]);
 //            Assert.assertEquals(sol.getMeasures().getNodeCount(), nodes[i]);
@@ -73,7 +73,7 @@ public class PartitionTest {
 //        int[] nodes = {633, 760, 2250, 6331, 19832, 19592, 60477, 139296, 180302};
 
         for (int i = 0; i < size.length; i++) {
-            Solver sol = modeler(size[i]);
+            Model sol = modeler(size[i]);
             sol.findSolution();
             Assert.assertEquals(sol.getMeasures().getSolutionCount(), sols[i]);
 //            Assert.assertEquals(sol.getMeasures().getNodeCount(), nodes[i]);

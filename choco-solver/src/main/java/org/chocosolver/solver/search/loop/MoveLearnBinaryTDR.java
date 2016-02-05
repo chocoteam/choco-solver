@@ -32,7 +32,7 @@ package org.chocosolver.solver.search.loop;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -101,12 +101,12 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
     boolean stop = false;
 
     /**
-     * @param aSolver
+     * @param aModel
      * @param move
      * @param tabuListSize
      */
-    private MoveLearnBinaryTDR(Solver aSolver, Move move, int tabuListSize) {
-        super(aSolver, false, false);
+    private MoveLearnBinaryTDR(Model aModel, Move move, int tabuListSize) {
+        super(aModel, false, false);
         this.move = move;
         this.s = tabuListSize;
         this.gamma = new ArrayList<>();
@@ -124,9 +124,9 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
             Decision tmp = searchLoop.decision;
             searchLoop.decision = neighbor[current++];
             assert searchLoop.decision != null;
-            searchLoop.decision.setWorldIndex(searchLoop.mSolver.getEnvironment().getWorldIndex());
+            searchLoop.decision.setWorldIndex(searchLoop.mModel.getEnvironment().getWorldIndex());
             searchLoop.decision.setPrevious(tmp);
-            searchLoop.mSolver.getEnvironment().worldPush();
+            searchLoop.mModel.getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
             // TODO: incomplete, have to deal with gamma when extending
@@ -276,7 +276,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
 
     private IntMetaDecision extractConlict(SearchLoop searchLoop, Explanation lastExplanation) {
         int offset = searchLoop.searchWorldIndex;
-        int wi = mSolver.getEnvironment().getWorldIndex() - 1;
+        int wi = mModel.getEnvironment().getWorldIndex() - 1;
         int k = wi - offset;
         int size = lastExplanation.getDecisions().cardinality();
         double w = 1d / size;

@@ -30,10 +30,8 @@
 package org.chocosolver.samples;
 
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StringUtils;
 import org.testng.annotations.Test;
@@ -49,10 +47,10 @@ import static org.chocosolver.util.tools.StatisticUtils.*;
  */
 public class CycleLtTest {
 
-    public Solver modeler(int n) {
+    public Model modeler(int n) {
         int m = n - 1;
         int min = 1;
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, min, n, false);
@@ -91,7 +89,7 @@ public class CycleLtTest {
             st.setLength(0);
             st.append("-- ").append(j).append(" ------------------------------------------------------------------------------------\n");
             for (int i = 0; i < nbIt; i++) {
-                Solver rand = modeler(n);
+                Model rand = modeler(n);
                 rand.set(nset);
                 PropagationEngineFactory.values()[j].make(rand);
                 rand.findAllSolutions();

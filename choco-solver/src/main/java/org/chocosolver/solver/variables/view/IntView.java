@@ -67,7 +67,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     protected DisposableRangeIterator _riterator;
 
     public IntView(String name, IntVar var) {
-        super(name, var.getSolver());
+        super(name, var.getModel());
         this.var = var;
         this.delta = NoDelta.singleton;
         this.var.subscribeView(this);
@@ -138,7 +138,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
-        solver.getEngine().fails(cause, this, message);
+        model.getEngine().fails(cause, this, message);
     }
 
 

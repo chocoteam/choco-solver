@@ -30,7 +30,7 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -62,8 +62,8 @@ public class EqualXYCExplTest {
         };
 
 
-        Solver ref = new Solver();
-        Solver sol = new Solver();
+        Model ref = new Model();
+        Model sol = new Model();
         ref.set(nset);
         sol.set(nset);
 

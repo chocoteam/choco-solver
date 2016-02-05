@@ -30,7 +30,7 @@
 package org.chocosolver.samples;
 
 import org.chocosolver.samples.integer.*;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.testng.Assert;
 
@@ -92,22 +92,22 @@ public class PropagationEnginesTest {
                 for (PropagationEngineFactory pe : engines) {
 //                    System.out.printf(".");
                     problem.createSolver();
-                    Solver solver = problem.getSolver();
+                    Model model = problem.getModel();
                     problem.buildModel();
                     problem.configureSearch();
-                    solver.set(pe.make(solver));
+                    model.set(pe.make(model));
                     //SMF.toCSV(solver, problem.getClass().getCanonicalName() + ";" + pe.name(), "/Users/kyzrsoze/Sandbox/pren/pe.csv");
                     problem.solve();
                     switch (pe) {
                         case PROPAGATORDRIVEN_7QD:
-                            stats[0][0] = problem.solver.getMeasures().getSolutionCount();
-                            stats[0][1] = problem.solver.getMeasures().getNodeCount();
-                            stats[0][2] = problem.solver.getMeasures().getFailCount();
+                            stats[0][0] = problem.model.getMeasures().getSolutionCount();
+                            stats[0][1] = problem.model.getMeasures().getNodeCount();
+                            stats[0][2] = problem.model.getMeasures().getFailCount();
                             break;
                         case TWOBUCKETPROPAGATIONENGINE:
-                            stats[1][0] = problem.solver.getMeasures().getSolutionCount();
-                            stats[1][1] = problem.solver.getMeasures().getNodeCount();
-                            stats[1][2] = problem.solver.getMeasures().getFailCount();
+                            stats[1][0] = problem.model.getMeasures().getSolutionCount();
+                            stats[1][1] = problem.model.getMeasures().getNodeCount();
+                            stats[1][2] = problem.model.getMeasures().getFailCount();
                             break;
                     }
                 }

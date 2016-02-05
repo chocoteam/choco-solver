@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -53,26 +53,22 @@ public class Donald extends AbstractProblem {
     IntVar[] letters;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("Donald");
-    }
-
-    @Override
     public void buildModel() {
-        d = solver.intVar("d", 1, 9, true);
-        o = solver.intVar("o", 0, 9, true);
-        n = solver.intVar("n", 0, 9, true);
-        a = solver.intVar("a", 0, 9, true);
-        l = solver.intVar("l", 0, 9, true);
-        g = solver.intVar("g", 1, 9, true);
-        e = solver.intVar("e", 0, 9, true);
-        r = solver.intVar("r", 1, 9, true);
-        b = solver.intVar("b", 0, 9, true);
-        t = solver.intVar("t", 0, 9, true);
+        model = new Model("Donald");
+        d = model.intVar("d", 1, 9, true);
+        o = model.intVar("o", 0, 9, true);
+        n = model.intVar("n", 0, 9, true);
+        a = model.intVar("a", 0, 9, true);
+        l = model.intVar("l", 0, 9, true);
+        g = model.intVar("g", 1, 9, true);
+        e = model.intVar("e", 0, 9, true);
+        r = model.intVar("r", 1, 9, true);
+        b = model.intVar("b", 0, 9, true);
+        t = model.intVar("t", 0, 9, true);
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
-        solver.allDifferent(letters, "BC").post();
-        solver.scalar(new IntVar[]{d, o, n, a, l, d,
+        model.allDifferent(letters, "BC").post();
+        model.scalar(new IntVar[]{d, o, n, a, l, d,
                 g, e, r, a, l, d,
                 r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,
                 100000, 10000, 1000, 100, 10, 1,
@@ -84,12 +80,12 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_UB(letters));
+        model.set(IntStrategyFactory.minDom_UB(letters));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

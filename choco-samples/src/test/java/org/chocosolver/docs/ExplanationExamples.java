@@ -29,7 +29,7 @@
  */
 package org.chocosolver.docs;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -51,28 +51,28 @@ public class ExplanationExamples {
 
     @Test(groups="1s", timeOut=60000)
     public void dummy() {
-        Solver solver = new Solver();
-        BoolVar[] bvars = solver.boolVarArray("B", 4);
-        solver.arithm(bvars[2], "=", bvars[3]).post();
-        solver.arithm(bvars[2], "!=", bvars[3]).post();
-        solver.set(lexico_LB(bvars));
-        CBJ.plugin(solver, false, false);
-        showStatistics(solver);
-        solver.findAllSolutions();
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("B", 4);
+        model.arithm(bvars[2], "=", bvars[3]).post();
+        model.arithm(bvars[2], "!=", bvars[3]).post();
+        model.set(lexico_LB(bvars));
+        CBJ.plugin(model, false, false);
+        showStatistics(model);
+        model.findAllSolutions();
     }
 
     @Test(groups="1s", timeOut=60000)
     public void pigeon() {
-        Solver solver = new Solver();
-        IntVar[] pigeon = solver.intVarArray("p", 5, 1, 4, false);
+        Model model = new Model();
+        IntVar[] pigeon = model.intVarArray("p", 5, 1, 4, false);
         for (int i = 0; i < 4; i++) {
             for (int j = i + 1; j < 5; j++) {
-                solver.arithm(pigeon[i], "!=", pigeon[j]).post();
+                model.arithm(pigeon[i], "!=", pigeon[j]).post();
             }
         }
-        solver.set(ISF.lexico_LB(pigeon));
-        ExplanationFactory.CBJ.plugin(solver, false, false);
-        Chatterbox.showStatistics(solver);
-        solver.findAllSolutions();
+        model.set(ISF.lexico_LB(pigeon));
+        ExplanationFactory.CBJ.plugin(model, false, false);
+        Chatterbox.showStatistics(model);
+        model.findAllSolutions();
     }
 }

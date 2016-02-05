@@ -29,17 +29,15 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -58,36 +56,36 @@ import static org.testng.Assert.assertEquals;
  */
 public class CountTest {
 
-    protected static Solver modelit(int n) {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("var", n, 0, n - 1, true);
+    protected static Model modelit(int n) {
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("var", n, 0, n - 1, true);
         for (int i = 0; i < n; i++) {
-            solver.count(i, vars, vars[i]).post();
+            model.count(i, vars, vars[i]).post();
         }
-        solver.sum(vars, "=", n).post(); // cstr redundant 1
+        model.sum(vars, "=", n).post(); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.scalar(vs2, coeff2, "=", n).post(); // cstr redundant 1
-        return solver;
+        model.scalar(vs2, coeff2, "=", n).post(); // cstr redundant 1
+        return model;
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void testMS4() {
-        Solver solver = modelit(4);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        Model model = modelit(4);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMS8() {
-        Solver solver = modelit(8);
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Model model = modelit(8);
+        model.findAllSolutions();
+        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -109,17 +107,17 @@ public class CountTest {
     public void test2() {
         int n = 2;
         for (int i = 0; i < 200; i++) {
-            Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("o", n, 0, n, true);
+            Model model = new Model();
+            IntVar[] vars = model.intVarArray("o", n, 0, n, true);
             int value = 1;
-            IntVar occ = solver.intVar("oc", 0, n, true);
+            IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            solver.set(random_bound(allvars, i));
-            solver.count(value, vars, occ).post();
+            model.set(random_bound(allvars, i));
+            model.count(value, vars, occ).post();
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
-            solver.findAllSolutions();
-            assertEquals(solver.getMeasures().getSolutionCount(), 9);
+            model.findAllSolutions();
+            assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -130,12 +128,12 @@ public class CountTest {
             int sizeDom = 4;
             int sizeOccurence = 4;
 
-            Solver solver = new Solver();
+            Model model = new Model();
             IntVar[] vars;
             if (enumvar) {
-                vars = solver.intVarArray("e", nbVar, 0, sizeDom, false);
+                vars = model.intVarArray("e", nbVar, 0, sizeDom, false);
             } else {
-                vars = solver.intVarArray("e", nbVar, 0, sizeDom, true);
+                vars = model.intVarArray("e", nbVar, 0, sizeDom, true);
             }
 
             List<IntVar> lvs = new LinkedList<>();
@@ -154,10 +152,10 @@ public class CountTest {
                 if (gac) {
                     getTableForOccurence(vs, ivc, val, sizeDom).post();
                 } else {
-                    solver.count(val, vs, ivc).post();
+                    model.count(val, vs, ivc).post();
                 }
             }
-            solver.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0).post();
+            model.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0).post();
 
             //s.setValIntSelector(new RandomIntValSelector(interseed));
             //s.setVarIntSelector(new RandomIntVarSelector(s, interseed + 10));
@@ -166,15 +164,15 @@ public class CountTest {
 //            }
 
             if (!enumvar) {
-                solver.set(random_bound(vars, seed));
+                model.set(random_bound(vars, seed));
             } else {
-                solver.set(random_value(vars, seed));
+                model.set(random_value(vars, seed));
             }
-            solver.findAllSolutions();
+            model.findAllSolutions();
             if (nbsol == -1) {
-                nbsol = solver.getMeasures().getSolutionCount();
+                nbsol = model.getMeasures().getSolutionCount();
             } else {
-                assertEquals(solver.getMeasures().getSolutionCount(), nbsol);
+                assertEquals(model.getMeasures().getSolutionCount(), nbsol);
             }
 
         }
@@ -191,12 +189,12 @@ public class CountTest {
      * @return Constraint
      */
     public Constraint getTableForOccurence(IntVar[] vs, IntVar occ, int val, int ub) {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("e", vs.length + 1, 0, ub, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("e", vs.length + 1, 0, ub, false);
 
         Tuples tuples = new Tuples(true);
-        solver.set(IntStrategyFactory.lexico_LB(vars));
-        solver.findSolution();
+        model.set(IntStrategyFactory.lexico_LB(vars));
+        model.findSolution();
         do {
             int[] tuple = new int[vars.length];
             for (int i = 0; i < tuple.length; i++) {
@@ -209,13 +207,13 @@ public class CountTest {
             if (checkocc == tuple[tuple.length - 1]) {
                 tuples.add(tuple);
             }
-        } while (solver.nextSolution() == Boolean.TRUE);
+        } while (model.nextSolution() == Boolean.TRUE);
 
         IntVar[] newvs = new IntVar[vs.length + 1];
         System.arraycopy(vs, 0, newvs, 0, vs.length);
         newvs[vs.length] = occ;
 
-        return solver.table(newvs, tuples);
+        return model.table(newvs, tuples);
     }
 
     /**
@@ -226,13 +224,13 @@ public class CountTest {
      * @param val value
      * @return Constraint
      */
-    public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int val) {
-        BoolVar[] bs = solver.boolVarArray("b", vs.length);
-        IntVar vval = solver.intVar(val);
+    public Constraint getDecomposition(Model model, IntVar[] vs, IntVar occ, int val) {
+        BoolVar[] bs = model.boolVarArray("b", vs.length);
+        IntVar vval = model.intVar(val);
         for (int i = 0; i < vs.length; i++) {
-            solver.ifThenElse(bs[i], solver.arithm(vs[i], "=", vval), solver.arithm(vs[i], "!=", vval));
+            model.ifThenElse(bs[i], model.arithm(vs[i], "=", vval), model.arithm(vs[i], "!=", vval));
         }
-        return solver.sum(bs, "=", occ);
+        return model.sum(bs, "=", occ);
     }
 
 }

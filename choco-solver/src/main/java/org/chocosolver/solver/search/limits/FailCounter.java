@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 /**
  * Set a limit over the number of fails allowed during the search.
@@ -41,8 +41,8 @@ import org.chocosolver.solver.Solver;
  */
 public final class FailCounter extends ACounter{
 
-    public FailCounter(Solver solver, long faillimit) {
-        super(solver, faillimit);
+    public FailCounter(Model model, long faillimit) {
+        super(model, faillimit);
     }
 
     @Override

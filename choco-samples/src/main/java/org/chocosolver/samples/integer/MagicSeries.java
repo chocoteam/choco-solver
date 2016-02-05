@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -54,44 +54,41 @@ public class MagicSeries extends AbstractProblem {
 
     Constraint[] counts;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Magic series");
-    }
 
     @Override
     public void buildModel() {
-        vars = solver.intVarArray("var", n, 0, n - 1, true);
+        model = new Model();
+        vars = model.intVarArray("var", n, 0, n - 1, true);
         counts = new Constraint[n];
         for (int i = 0; i < n; i++) {
-            counts[i] = solver.count(i, vars, vars[i]);
+            counts[i] = model.count(i, vars, vars[i]);
             counts[i].post();
         }
-        solver.sum(vars, "=", n).post(); // cstr redundant 1
+        model.sum(vars, "=", n).post(); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.scalar(vs2, coeff2, "=", n).post(); // cstr redundant 1
+        model.scalar(vs2, coeff2, "=", n).post(); // cstr redundant 1
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_UB(vars));
+        model.set(IntStrategyFactory.lexico_UB(vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         System.out.println(String.format("Magic series(%d)", n));
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             st.append("\t");
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(" ");

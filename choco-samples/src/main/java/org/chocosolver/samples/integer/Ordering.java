@@ -30,8 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
@@ -49,16 +48,13 @@ public class Ordering extends AbstractProblem {
 
     IntVar[] vars;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Ordering " + n);
-    }
 
     @Override
     public void buildModel() {
-        vars = solver.intVarArray("v", n, 1, n, true);
+        model = new Model();
+        vars = model.intVarArray("v", n, 1, n, true);
         for (int i = 0; i < n - 1; i++) {
-            solver.arithm(vars[i], "<", vars[i + 1]).post();
+            model.arithm(vars[i], "<", vars[i + 1]).post();
         }
     }
 
@@ -68,7 +64,7 @@ public class Ordering extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

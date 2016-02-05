@@ -31,7 +31,7 @@ package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -56,7 +56,7 @@ import java.util.List;
  * This propagator declares an internal propagation engine which run propagation triggered by forcing a reifying variable.
  * <p>
  * <p>
- * There can be only one instance of this propagator in a {@link Solver} to avoid unexpected side-effects, this is maintained
+ * There can be only one instance of this propagator in a {@link Model} to avoid unexpected side-effects, this is maintained
  * by the factory
  * <p>
  * <p>
@@ -121,10 +121,10 @@ public class PropCondis extends Propagator<BoolVar> {
 
     /**
      * A propagator to deal with constructive disjunction
-     * @param solver a solver
+     * @param model a solver
      */
-    public PropCondis(Solver solver) {
-        super(new BoolVar[]{solver.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds solver.ONE to fit to the super constructor
+    public PropCondis(Model model) {
+        super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds solver.ONE to fit to the super constructor
         this.vars = new BoolVar[0];    // erase solver.ONE from the variable scope
         domains = new TIntObjectHashMap<>();
         toUnion = new BitSet();
@@ -176,7 +176,7 @@ public class PropCondis extends Propagator<BoolVar> {
                     for (int i = 0; i < disjunctions.size(); i++) {
                         BoolVar[] boolVars = disjunctions.get(i);
                         // change the propagation engine
-                        solver.set(internalEngine);
+                        model.set(internalEngine);
                         toZero.clear();
                         toUnion.clear();
                         for (int b = 0; b < boolVars.length; b++) {
@@ -196,7 +196,7 @@ public class PropCondis extends Propagator<BoolVar> {
                             }
                         }
                         // restore the propagation before applying the deductions
-                        solver.set(masterEngine);
+                        model.set(masterEngine);
                         change |= applyDeductions(boolVars);
                     }
                 }
@@ -266,7 +266,7 @@ public class PropCondis extends Propagator<BoolVar> {
      */
     private void forceReification(BoolVar bvar, int idxDisj) {
         // make a backup world
-        solver.getEnvironment().worldPush();
+        model.getEnvironment().worldPush();
 //        System.out.printf("%sTry %s for %s\n", pad("", solver.getEnvironment().getWorldIndex(), "."), vars[b].getName(), this);
         try {
             bvar.instantiateTo(1, this);
@@ -280,7 +280,7 @@ public class PropCondis extends Propagator<BoolVar> {
             toZero.set(idxDisj);
         }
         // restore backup world
-        solver.getEnvironment().worldPop();
+        model.getEnvironment().worldPop();
     }
 
     /**
@@ -291,24 +291,24 @@ public class PropCondis extends Propagator<BoolVar> {
     private boolean firstPropagation() {
         firstAwake = true;
         // initialize this
-        allvars = new IntVar[solver.getNbVars()];
+        allvars = new IntVar[model.getNbVars()];
         int k = 0;
-        for (int i = 0; i < solver.getNbVars(); i++) {
-            if (((solver.getVar(i).getTypeAndKind() & Variable.KIND) == Variable.INT
-                    || (solver.getVar(i).getTypeAndKind() & Variable.KIND) == Variable.BOOL)
-                    && (solver.getVar(i).getTypeAndKind() & Variable.TYPE) == Variable.VAR) {
-                allvars[k++] = (IntVar) solver.getVar(i);
+        for (int i = 0; i < model.getNbVars(); i++) {
+            if (((model.getVar(i).getTypeAndKind() & Variable.KIND) == Variable.INT
+                    || (model.getVar(i).getTypeAndKind() & Variable.KIND) == Variable.BOOL)
+                    && (model.getVar(i).getTypeAndKind() & Variable.TYPE) == Variable.VAR) {
+                allvars[k++] = (IntVar) model.getVar(i);
             }
         }
         allvars = Arrays.copyOf(allvars, k);
         cardinalities = new int[k];
         // get a copy of the current propagation engine
-        masterEngine = solver.getEngine();
+        masterEngine = model.getEngine();
         // create internalEngine
-        internalEngine = new SevenQueuesPropagatorEngine(solver);
+        internalEngine = new SevenQueuesPropagatorEngine(model);
         internalEngine.initialize();
 
-        solver.set(internalEngine);
+        model.set(internalEngine);
         boolean ok = true;
         try {
             internalEngine.propagate();
@@ -316,7 +316,7 @@ public class PropCondis extends Propagator<BoolVar> {
             internalEngine.flush();
             ok = false;
         }
-        solver.set(masterEngine);
+        model.set(masterEngine);
         return ok;
     }
 

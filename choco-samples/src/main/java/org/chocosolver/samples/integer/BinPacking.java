@@ -30,8 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.AllSolutionsRecorder;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -65,28 +64,24 @@ public class BinPacking extends AbstractProblem{
 	//***********************************************************************************
 
 	@Override
-	public void createSolver() {
-		solver = new Solver("bin packing sample");
-	}
-
-	@Override
 	public void buildModel() {
+		model = new Model("bin packing sample");
 		// input
 		nbItems = d1_w.length;
 		weights = d1_w;
 		nbBins = d1_nb;
 		// variables
-		bins = solver.intVarArray("bin", nbItems, 0, nbBins - 1, false);
-		loads = solver.intVarArray("load", nbBins, 0, 1000, true);
-		minLoad = solver.intVar("minLoad", 0, 1000, true);
-		solver.binPacking(bins, weights, loads, 0).post();
-		solver.min(minLoad, loads).post();
+		bins = model.intVarArray("bin", nbItems, 0, nbBins - 1, false);
+		loads = model.intVarArray("load", nbBins, 0, 1000, true);
+		minLoad = model.intVar("minLoad", 0, 1000, true);
+		model.binPacking(bins, weights, loads, 0).post();
+		model.min(minLoad, loads).post();
 	}
 
 	@Override
 	public void configureSearch() {
-		solver.set(ISF.random_value(bins, 0));
-		solver.plugMonitor((IMonitorSolution) () -> {
+		model.set(ISF.random_value(bins, 0));
+		model.plugMonitor((IMonitorSolution) () -> {
             String s = minLoad+" : ";
             for(IntVar l:loads){
                 s+=" "+l.getValue();
@@ -101,15 +96,15 @@ public class BinPacking extends AbstractProblem{
 		int mode = 2;
 		switch (mode) {
 			case 0:// to check
-				solver.arithm(minLoad, "=", 17).post();
-				solver.set(new AllSolutionsRecorder(solver));
-				solver.findAllSolutions();
+				model.arithm(minLoad, "=", 17).post();
+				model.set(new AllSolutionsRecorder(model));
+				model.findAllSolutions();
 				break;
 			case 1:// one step approach (could be slow)
-				solver.findAllOptimalSolutions(MAXIMIZE, minLoad, false);
+				model.findAllOptimalSolutions(MAXIMIZE, minLoad, false);
 				break;
 			case 2:// two step approach (find and prove optimum, then enumerate)
-				solver.findAllOptimalSolutions(MAXIMIZE, minLoad, true);
+				model.findAllOptimalSolutions(MAXIMIZE, minLoad, true);
 				break;
 			default:
 				throw new UnsupportedOperationException();
@@ -118,7 +113,7 @@ public class BinPacking extends AbstractProblem{
 
 	@Override
 	public void prettyOut() {
-		System.out.println("There are "+solver.getSolutionRecorder().getSolutions().size()+" optimal solutions");
+		System.out.println("There are "+ model.getSolutionRecorder().getSolutions().size()+" optimal solutions");
 	}
 
 	//***********************************************************************************

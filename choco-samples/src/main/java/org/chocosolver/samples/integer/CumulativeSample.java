@@ -38,7 +38,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -59,41 +59,37 @@ public class CumulativeSample extends AbstractProblem{
 	//***********************************************************************************
 
 	@Override
-	public void createSolver() {
-		solver = new Solver("Cumulative example: makespan minimisation");
-	}
-
-	@Override
 	public void buildModel() {
-		IntVar capa = solver.intVar(6);
+		model = new Model("Cumulative example: makespan minimisation");
+		IntVar capa = model.intVar(6);
 		int n = 10;
 		int max = 1000;
-		makespan = solver.intVar("makespan", 0, max, true);
-		start = solver.intVarArray("start", n, 0, max, true);
+		makespan = model.intVar("makespan", 0, max, true);
+		start = model.intVarArray("start", n, 0, max, true);
 		IntVar[] end = new IntVar[n];
 		IntVar[] duration = new IntVar[n];
 		IntVar[] height = new IntVar[n];
 		Task[] task = new Task[n];
 		Random rd = new Random(0);
 		for (int i = 0; i < n; i++) {
-			duration[i] = solver.intVar(rd.nextInt(20) + 1);
-			height[i] = solver.intVar(rd.nextInt(5) + 1);
-			end[i] = solver.intOffsetView(start[i], duration[i].getValue());
+			duration[i] = model.intVar(rd.nextInt(20) + 1);
+			height[i] = model.intVar(rd.nextInt(5) + 1);
+			end[i] = model.intOffsetView(start[i], duration[i].getValue());
 			task[i] = new Task(start[i], duration[i], end[i]);
 		}
-		solver.cumulative(task, height, capa, true).post();
-		solver.max(makespan, end).post();
+		model.cumulative(task, height, capa, true).post();
+		model.max(makespan, end).post();
 	}
 
 	@Override
 	public void configureSearch() {
-		solver.set(ISF.minDom_LB(start));
-		solver.set(ISF.lastConflict(solver,solver.getStrategy()));
+		model.set(ISF.minDom_LB(start));
+		model.set(ISF.lastConflict(model, model.getStrategy()));
 	}
 
 	@Override
 	public void solve() {
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,makespan);
+		model.findOptimalSolution(ResolutionPolicy.MINIMIZE,makespan);
 	}
 
 	@Override

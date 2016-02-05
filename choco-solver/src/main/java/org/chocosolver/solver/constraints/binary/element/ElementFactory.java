@@ -85,7 +85,7 @@ public class ElementFactory {
         int st = sawtooth(TABLE);
         if (st == -1) { // all values from TABLE are the same OR TABLE only contains one value
             assert TABLE[0] == TABLE[TABLE.length - 1];
-            return VALUE.getSolver().arithm(VALUE, "=", TABLE[0]);
+            return VALUE.getModel().arithm(VALUE, "=", TABLE[0]);
         }
         return new Constraint("Element", new PropElement(VALUE, TABLE, INDEX, OFFSET));
     }

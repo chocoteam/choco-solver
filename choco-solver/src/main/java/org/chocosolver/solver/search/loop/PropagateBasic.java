@@ -44,6 +44,6 @@ public class PropagateBasic implements Propagate {
         cd.buildNext();
         searchLoop.objectivemanager.apply(cd);
         searchLoop.objectivemanager.postDynamicCut();
-        searchLoop.mSolver.getEngine().propagate();
+        searchLoop.mModel.getEngine().propagate();
     }
 }

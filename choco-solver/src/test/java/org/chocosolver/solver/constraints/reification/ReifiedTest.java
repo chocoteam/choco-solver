@@ -30,8 +30,7 @@
 package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -65,7 +64,7 @@ public class ReifiedTest {
         for (int seed = 0; seed < 200; seed++) {
             Random r = new Random(seed);
             double d = r.nextDouble() / 2 + 0.5;
-            Solver s = new Solver();
+            Model s = new Model();
 
             BoolVar b = s.boolVar("b");
             int[][] values = DomainBuilder.buildFullDomains(2, 0, 15, r, d, false);
@@ -86,7 +85,7 @@ public class ReifiedTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testRandomMember() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         BoolVar a = s.boolVar("a");
         BoolVar b = s.boolVar("b");
@@ -112,7 +111,7 @@ public class ReifiedTest {
         for (int seed = 0; seed < 200; seed++) {
             Random r = new Random(seed);
             double d = r.nextDouble() / 2 + 0.5;
-            Solver s = new Solver();
+            Model s = new Model();
 
             BoolVar b = s.boolVar("b");
             int[][] values = DomainBuilder.buildFullDomains(2, 0, 15, r, d, false);
@@ -143,8 +142,8 @@ public class ReifiedTest {
     }
 
 
-    private Solver model1(int i, int[][] values) {
-        Solver s1 = new Solver();
+    private Model model1(int i, int[][] values) {
+        Model s1 = new Model();
 
         IntVar[] vars1 = new IntVar[i];
         for (int j = 0; j < i; j++) {
@@ -157,8 +156,8 @@ public class ReifiedTest {
         return s1;
     }
 
-    private Solver model2(int i, int[][] values) {
-        Solver s2 = new Solver();
+    private Model model2(int i, int[][] values) {
+        Model s2 = new Model();
 
 
         IntVar[] X = new IntVar[i];
@@ -237,12 +236,12 @@ public class ReifiedTest {
             for (double d = 1.0; d <= 1.0; d += 0.125) {
 
                 int[][] values = DomainBuilder.buildFullDomains(i, 1, i, r, d, false);
-                Solver s1 = model1(i, values);
+                Model s1 = model1(i, values);
                 s1.findAllSolutions();
 
                 ////////////////////////
 
-                Solver s2 = model2(i, values);
+                Model s2 = model2(i, values);
                 s2.findAllSolutions();
 
 
@@ -260,12 +259,12 @@ public class ReifiedTest {
 
         int[][] values; //= DomainBuilder.buildFullDomains(i, 1, i, r, d, false);
         values = new int[][]{{1, 2}, {1}};
-        Solver s1 = model1(2, values);
+        Model s1 = model1(2, values);
         s1.findAllSolutions();
 
         ////////////////////////
 
-        Solver s2 = model2(2, values);
+        Model s2 = model2(2, values);
         s2.findAllSolutions();
 
 
@@ -278,31 +277,31 @@ public class ReifiedTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBACP() {
-        Solver solver = new Solver();
-        IntVar cp = solver.intVar("cp", 1, 10, false);
-        BoolVar[] bv = solver.boolVarArray("b1", 10);
+        Model model = new Model();
+        IntVar cp = model.intVar("cp", 1, 10, false);
+        BoolVar[] bv = model.boolVarArray("b1", 10);
         for (int i = 1; i <= 10; i++) {
-            solver.ifThenElse(bv[i - 1],
-                    solver.arithm(cp, "=", i),
-                    solver.arithm(cp, "!=", i));
+            model.ifThenElse(bv[i - 1],
+                    model.arithm(cp, "=", i),
+                    model.arithm(cp, "!=", i));
         }
 
-        IntVar cp2 = solver.intVar("cp27", 1, 10, false);
-        solver.arithm(cp2, ">=", cp).post();
+        IntVar cp2 = model.intVar("cp27", 1, 10, false);
+        model.arithm(cp2, ">=", cp).post();
 
-        BoolVar[] bv2 = solver.boolVarArray("b2", 10);
+        BoolVar[] bv2 = model.boolVarArray("b2", 10);
         for (int i = 1; i <= 10; i++) {
-            solver.ifThenElse(bv2[i - 1],
-                    solver.arithm(solver.intVar(i), "<", cp),
-                    solver.arithm(solver.intVar(i), ">=", cp));
+            model.ifThenElse(bv2[i - 1],
+                    model.arithm(model.intVar(i), "<", cp),
+                    model.arithm(model.intVar(i), ">=", cp));
         }
 
         try {
-            solver.propagate();
+            model.propagate();
             cp.updateUpperBound(5, Null);
-            solver.propagate();
+            model.propagate();
             bv[0].instantiateTo(1, Null);
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -311,7 +310,7 @@ public class ReifiedTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test_wellaweg1() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar row[] = new IntVar[3];
         row[0] = s.intVar(2);
@@ -347,7 +346,7 @@ public class ReifiedTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test_wellaweg3() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar row[] = new IntVar[3];
         row[0] = s.intVar(2);
@@ -383,7 +382,7 @@ public class ReifiedTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test_wellaweg4() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar row[] = new IntVar[3];
         row[0] = s.intVar(20);
@@ -420,7 +419,7 @@ public class ReifiedTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test_wellaweg5() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar row[] = new IntVar[3];
         row[0] = s.intVar(100);

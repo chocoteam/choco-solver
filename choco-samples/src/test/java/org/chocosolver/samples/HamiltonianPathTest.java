@@ -31,17 +31,14 @@ package org.chocosolver.samples;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.samples.graph.input.GraphGenerator;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
@@ -82,7 +79,7 @@ public class HamiltonianPathTest {
 	}
 
 	private static void testInt(boolean[][] matrix, long seed, boolean rd, boolean enumerated) {
-		Solver solver = new Solver();
+		Model model = new Model();
 		int n = matrix.length;
 		// build model
 		IntVar[] succ = new IntVar[n];
@@ -97,30 +94,30 @@ public class HamiltonianPathTest {
 			}
 			if (l.isEmpty()) throw new UnsupportedOperationException();
 			if (enumerated) {
-				succ[i] = solver.intVar("suc", l.toArray());
+				succ[i] = model.intVar("suc", l.toArray());
 			} else {
-				succ[i] = solver.intVar("suc", offset, n + offset, true);
-				solver.member(succ[i], l.toArray()).post();
+				succ[i] = model.intVar("suc", offset, n + offset, true);
+				model.member(succ[i], l.toArray()).post();
 			}
 		}
-		succ[n - 1] = solver.intVar(n + offset);
-		solver.path(succ, solver.intVar(offset), solver.intVar(n - 1 + offset), offset).post();
+		succ[n - 1] = model.intVar(n + offset);
+		model.path(succ, model.intVar(offset), model.intVar(n - 1 + offset), offset).post();
 		// configure solver
 		if (rd) {
 			if (enumerated) {
-				solver.set(random_value(succ, seed));
+				model.set(random_value(succ, seed));
 			} else {
-				solver.set(random_bound(succ, seed));
+				model.set(random_bound(succ, seed));
 			}
 		} else {
-			solver.set(new ConstructorIntHeur(succ, offset));
+			model.set(new ConstructorIntHeur(succ, offset));
 		}
-		limitTime(solver, TIME_LIMIT);
-		solver.findSolution();
-		IMeasures mes = solver.getMeasures();
+		limitTime(model, TIME_LIMIT);
+		model.findSolution();
+		IMeasures mes = model.getMeasures();
 		// the problem has at least one solution
-		assertTrue(mes.getSolutionCount() == 1 || solver.hasReachedLimit(),
-				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + solver.hasReachedLimit());
+		assertTrue(mes.getSolutionCount() == 1 || model.hasReachedLimit(),
+				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + model.hasReachedLimit());
 	}
 
 	private static boolean[][] transformMatrix(boolean[][] m) {

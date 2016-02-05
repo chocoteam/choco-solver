@@ -63,7 +63,7 @@ public class MoveBinaryDDS extends MoveBinaryLDS {
         searchLoop.decision = strategy.getDecision();
         if (searchLoop.decision != null) { // null means there is no more decision
             searchLoop.decision.setPrevious(tmp);
-            searchLoop.mSolver.getEnvironment().worldPush();
+            searchLoop.mModel.getEnvironment().worldPush();
             if (dis.get() == 1) {
                 searchLoop.decision.buildNext();
             }

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 /**
  * Set a limit over the number of found solutions allowed during the search.
@@ -42,8 +42,8 @@ import org.chocosolver.solver.Solver;
  */
 public class SolutionCounter extends ACounter{
 
-    public SolutionCounter(Solver solver, long solutionlimit) {
-        super(solver, solutionlimit);
+    public SolutionCounter(Model model, long solutionlimit) {
+        super(model, solutionlimit);
     }
 
     @Override

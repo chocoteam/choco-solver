@@ -70,7 +70,7 @@ public class IntDecision extends Decision<IntVar> {
     }
 
     public void set(IntVar v, int value, DecisionOperator<IntVar> assignment) {
-        super.set(v, v.getSolver().getEnvironment().getWorldIndex());
+        super.set(v, v.getModel().getEnvironment().getWorldIndex());
         this.value = value;
         this.assignment = assignment;
     }

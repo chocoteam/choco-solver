@@ -31,13 +31,12 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Random;
 
@@ -134,13 +133,10 @@ public class MarioKart extends AbstractProblem {
 
 	// METHODS
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("Mario's Path Finder");
-	}
 
 	@Override
-	public void buildModel() {
+ public void buildModel() {
+		model = new Model();
 		data();
 		variables();
 		constraints();
@@ -150,7 +146,7 @@ public class MarioKart extends AbstractProblem {
 	@Override
 	public void configureSearch() {
 		/* Listeners */
-		solver.plugMonitor(new IMonitorSolution() {
+		model.plugMonitor(new IMonitorSolution() {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void onSolution() {
@@ -159,13 +155,13 @@ public class MarioKart extends AbstractProblem {
 		});
 		/* Heuristic choices */
 		AbstractStrategy strat = IntStrategyFactory.minDom_LB(next);
-		solver.set(IntStrategyFactory.lastConflict(solver,strat));
+		model.set(IntStrategyFactory.lastConflict(model,strat));
 //		solver.set(strat);
 	}
 
 	@Override
 	public void solve() {
-		solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, goldFound);
+		model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, goldFound);
 		printInputData();
 	}
 
@@ -232,40 +228,40 @@ public class MarioKart extends AbstractProblem {
 	/** Creation of CP variables */
 	private void variables() {
 		/* Choco variables */
-		fuelConsumed = solver.intVar("Fuel Consumption", 0, FUEL, true);
-		goldFound = solver.intVar("Gold Found", 0, CITY_SIZE * MAX_GOLD, true);
+		fuelConsumed = model.intVar("Fuel Consumption", 0, FUEL, true);
+		goldFound = model.intVar("Gold Found", 0, CITY_SIZE * MAX_GOLD, true);
 		/* Initialisation of the boolean matrix */
-		edges = solver.boolVarMatrix("edges", n, n);
+		edges = model.boolVarMatrix("edges", n, n);
 		/* Initialisation of all the next value for each house */
-		next = solver.intVarArray("next", n, 0, n - 1, false);
+		next = model.intVarArray("next", n, 0, n - 1, false);
 		/* Initialisation of the size variable */
-		size = solver.intVar("size", 2, n, true);
+		size = model.intVar("size", 2, n, true);
 	}
 
 	/** Post all the constraints of the problem */
 	private void constraints() {
 		/* The scalar constraint to compute global consumption of the kart to perform the path */
-		solver.scalar(flatten(edges), flatten(consumptions), "=", fuelConsumed).post();
+		model.scalar(flatten(edges), flatten(consumptions), "=", fuelConsumed).post();
 
 		/* The scalar constraint to compute the amount of gold founded by Mario in the path. With our model if a
 		 * node isn't used then his next value is equals to his id. Then the boolean edges[i][i] is equals to true */
 		BoolVar[] used = new BoolVar[n];
 		for (int i = 0; i < used.length; i++)
 			used[i] = edges[i][i].not();
-		solver.scalar(used, gold, "=", goldFound).post();
+		model.scalar(used, gold, "=", goldFound).post();
 
 		/* The subCircuit constraint. This forces all the next value to form a circuit which the overall size is equals
 		 * to the size variable. This constraint check if the path contains any sub circles. */
-		solver.subCircuit(next, 0, size).post();
+		model.subCircuit(next, 0, size).post();
 
 		/* The path has to end on the t node. This constraint doesn't create a path, but a circle or a circuit. So we
 		 * force the edge (t,s) then all the other node of the circuit will form a starting from s and ending at t */
-		solver.arithm(next[t], "=", s).post();
+		model.arithm(next[t], "=", s).post();
 
 		/* The boolean channeling constraint. Enforce the relation between the next values and the edges values in the
 		 * graph boolean variable matrix */
 		for (int i = 0; i < n; i++) {
-			solver.boolsIntChanneling(edges[i], next[i], 0).post();
+			model.boolsIntChanneling(edges[i], next[i], 0).post();
 		}
 	}
 
@@ -275,10 +271,10 @@ public class MarioKart extends AbstractProblem {
 		 * identifies the min/max fuel consumption involved by visiting each house */
 		IntVar[] fuelHouse = new IntVar[HOUSE_NUMBER];
 		for (int i = 0; i < HOUSE_NUMBER; i++) {
-			fuelHouse[i] = solver.intVar("fuelHouse", 0, FUEL, false);
-			solver.element(fuelHouse[i], consumptions[i], next[i], 0).post();
+			fuelHouse[i] = model.intVar("fuelHouse", 0, FUEL, false);
+			model.element(fuelHouse[i], consumptions[i], next[i], 0).post();
 		}
-		solver.sum(fuelHouse, "=", fuelConsumed).post();
+		model.sum(fuelHouse, "=", fuelConsumed).post();
 
 		/* GOLD RELATED FILTERING
 		* This problem can be seen has a knapsack problem where are trying to found the set of edges that contains the
@@ -288,7 +284,7 @@ public class MarioKart extends AbstractProblem {
 		for (int i = 0; i < goldMatrix.length; i++)
 			for (int j = 0; j < goldMatrix.length; j++)
 				goldMatrix[i][j] = (i == j) ? 0 : gold[i];
-		solver.knapsack(flatten(edges), solver.intVar(FUEL),
+		model.knapsack(flatten(edges), model.intVar(FUEL),
 				goldFound, flatten(consumptions), flatten(goldMatrix)).post();
 	}
 

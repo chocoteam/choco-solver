@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -78,12 +78,12 @@ public class ExplainingCut implements INeighbor {
     int nbCall, limit;
     final int level; // relaxing factor
 
-    Solver mSolver;
+    Model mModel;
     IntMetaDecision decision;
     PoolManager<IntDecision> decisionPool;
 
-    public ExplainingCut(Solver aSolver, int level, long seed) {
-        this.mSolver = aSolver;
+    public ExplainingCut(Model aModel, int level, long seed) {
+        this.mModel = aModel;
         this.level = level;
         this.random = new Random(seed);
         path = new IntMetaDecision();
@@ -102,10 +102,10 @@ public class ExplainingCut implements INeighbor {
     @Override
     public void recordSolution() {
         if (mExplanationEngine == null) {
-            if (mSolver.getExplainer() == null) {
-                mSolver.set(new ExplanationEngine(mSolver, false, false));
+            if (mModel.getExplainer() == null) {
+                mModel.set(new ExplanationEngine(mModel, false, false));
             }
-            this.mExplanationEngine = mSolver.getExplainer();
+            this.mExplanationEngine = mModel.getExplainer();
         }
         clonePath();
         forceCft = true;
@@ -121,7 +121,7 @@ public class ExplainingCut implements INeighbor {
         decision.free();
         // then fix variables
         _fixVar();
-        assert mSolver.getSearchLoop().getLastDecision() == RootDecision.ROOT;
+        assert mModel.getSearchLoop().getLastDecision() == RootDecision.ROOT;
         // add unrelated
         notFrozen.or(unrelated);
         for (int id = notFrozen.nextSetBit(0); id >= 0; id = notFrozen.nextSetBit(id + 1)) {
@@ -179,7 +179,7 @@ public class ExplainingCut implements INeighbor {
      */
     void clonePath() {
         path.free();
-        Decision dec = mSolver.getSearchLoop().getLastDecision();
+        Decision dec = mModel.getSearchLoop().getLastDecision();
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
             dec = dec.getPrevious();
@@ -220,12 +220,12 @@ public class ExplainingCut implements INeighbor {
         // Goal: force the failure to get the set of decisions related to the cut
         forceCft = false;
         // 1. make a backup
-        mSolver.getEnvironment().worldPush();
+        mModel.getEnvironment().worldPush();
         IntDecision d;
         int i = 0;
         try {
 
-            Decision previous = mSolver.getSearchLoop().getLastDecision();
+            Decision previous = mModel.getSearchLoop().getLastDecision();
             assert previous == RootDecision.ROOT;
             // 2. apply the decisions
             mExplanationEngine.getSolver().getObjectiveManager().postDynamicCut();
@@ -237,7 +237,7 @@ public class ExplainingCut implements INeighbor {
                 d.setPrevious(previous);
                 d.buildNext();
                 d.apply();
-                mSolver.propagate();
+                mModel.propagate();
                 previous = d;
             }
             //mSolver.propagate();
@@ -249,8 +249,8 @@ public class ExplainingCut implements INeighbor {
                 Explanation explanation = mExplanationEngine.explain(cex);
                 if (explanation.getDecisions().isEmpty()) {
                     isTerminated = true;
-                    mSolver.getEnvironment().worldPop();
-                    mSolver.getEngine().flush();
+                    mModel.getEnvironment().worldPop();
+                    mModel.getEngine().flush();
                     return;
                 }
 
@@ -269,8 +269,8 @@ public class ExplainingCut implements INeighbor {
                 throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
             }
         }
-        mSolver.getEnvironment().worldPop();
-        mSolver.getEngine().flush();
+        mModel.getEnvironment().worldPop();
+        mModel.getEngine().flush();
 
         nbFixedVariables = related.cardinality() - 1;
         nbCall = 0;

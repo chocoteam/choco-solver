@@ -30,6 +30,7 @@
 package org.chocosolver.samples.nqueen;
 
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -42,29 +43,30 @@ public class NQueenDualBinary extends AbstractNQueen {
 
     @Override
     public void buildModel() {
+        model = new Model("NQueen");
         vars = new IntVar[n];
         IntVar[] dualvars = new IntVar[n];
 
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("Q_" + i, 1, n, false);
-            dualvars[i] = solver.intVar("QD_" + i, 1, n, false);
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
+            dualvars[i] = model.intVar("QD_" + i, 1, n, false);
         }
 
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.arithm(dualvars[i], "!=", dualvars[j], "+", -k).post();
-                solver.arithm(dualvars[i], "!=", dualvars[j], "+", k).post();
+                model.arithm(dualvars[i], "!=", dualvars[j], "+", -k).post();
+                model.arithm(dualvars[i], "!=", dualvars[j], "+", k).post();
             }
         }
-        solver.inverseChanneling(vars, dualvars, 1, 1).post();
+        model.inverseChanneling(vars, dualvars, 1, 1).post();
     }
 
 

@@ -30,7 +30,7 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.ternary.Max;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -49,8 +49,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBool1() {
-        Solver solver = new Solver();
-        BoolVar var = solver.boolVar("b");
+        Model model = new Model();
+        BoolVar var = model.boolVar("b");
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(0, vit.next());
@@ -61,8 +61,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBool2() {
-        Solver solver = new Solver();
-        BoolVar var = solver.boolVar("b");
+        Model model = new Model();
+        BoolVar var = model.boolVar("b");
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(1, vit.previous());
@@ -73,8 +73,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBool3() {
-        Solver solver = new Solver();
-        BoolVar var = solver.boolVar("b");
+        Model model = new Model();
+        BoolVar var = model.boolVar("b");
         DisposableRangeIterator rit = var.getRangeIterator(true);
         Assert.assertTrue(rit.hasNext());
         Assert.assertEquals(0, rit.min());
@@ -85,8 +85,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBool4() {
-        Solver solver = new Solver();
-        BoolVar var = solver.boolVar("b");
+        Model model = new Model();
+        BoolVar var = model.boolVar("b");
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(0, vit.min());
@@ -97,8 +97,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBound1() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar("b", 1, 3, true);
+        Model model = new Model();
+        IntVar var = model.intVar("b", 1, 3, true);
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
@@ -111,8 +111,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBound2() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar("b", 1, 3, true);
+        Model model = new Model();
+        IntVar var = model.intVar("b", 1, 3, true);
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(3, vit.previous());
@@ -125,8 +125,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBound3() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar("b", 1, 3, true);
+        Model model = new Model();
+        IntVar var = model.intVar("b", 1, 3, true);
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -137,8 +137,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBound4() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar("b", 1, 3, true);
+        Model model = new Model();
+        IntVar var = model.intVar("b", 1, 3, true);
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(1, vit.min());
@@ -149,8 +149,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testEnum1() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar("b", new int[]{1, 2, 4});
+        Model model = new Model();
+        IntVar var = model.intVar("b", new int[]{1, 2, 4});
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
@@ -163,8 +163,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testEnum2() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar("b", new int[]{1, 2, 4});
+        Model model = new Model();
+        IntVar var = model.intVar("b", new int[]{1, 2, 4});
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.previous());
@@ -177,8 +177,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testEnum3() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar("b", new int[]{1, 2, 4});
+        Model model = new Model();
+        IntVar var = model.intVar("b", new int[]{1, 2, 4});
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -193,8 +193,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testEnum4() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar("b", new int[]{1, 2, 4});
+        Model model = new Model();
+        IntVar var = model.intVar("b", new int[]{1, 2, 4});
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.min());
@@ -209,8 +209,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testCste1() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar(8);
+        Model model = new Model();
+        IntVar var = model.intVar(8);
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(8, vit.next());
@@ -219,8 +219,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testCste2() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar(8);
+        Model model = new Model();
+        IntVar var = model.intVar(8);
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.previous());
@@ -229,8 +229,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testCste3() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar(8);
+        Model model = new Model();
+        IntVar var = model.intVar(8);
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(8, vit.min());
@@ -241,8 +241,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testCste4() {
-        Solver solver = new Solver();
-        IntVar var = solver.intVar(8);
+        Model model = new Model();
+        IntVar var = model.intVar(8);
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.min());
@@ -253,11 +253,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testOffset1() {
-        Solver solver = new Solver();
-        IntVar var = solver.intOffsetView(solver.intVar("b", new int[]{1, 2, 4}), 2);
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -275,11 +275,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testOffset2() {
-        Solver solver = new Solver();
-        IntVar var = solver.intOffsetView(solver.intVar("b", new int[]{1, 2, 4}), 2);
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -297,11 +297,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testOffset3() {
-        Solver solver = new Solver();
-        IntVar var = solver.intOffsetView(solver.intVar("b", new int[]{1, 2, 4}), 2);
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -321,11 +321,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testOffset4() {
-        Solver solver = new Solver();
-        IntVar var = solver.intOffsetView(solver.intVar("b", new int[]{1, 2, 4}), 2);
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -345,11 +345,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testScale1() {
-        Solver solver = new Solver();
-        IntVar var = solver.intScaleView(solver.intVar("b", 1, 4, true), 2);
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intScaleView(model.intVar("b", 1, 4, true), 2);
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -361,13 +361,13 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testScale2() {
-        Solver solver = new Solver();
-        IntVar var = solver.intScaleView(solver.intVar("b", new int[]{1, 2, 4}), 2);
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intScaleView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
                 // could be fixed with an extension filtering
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -385,13 +385,13 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testScale3() {
-        Solver solver = new Solver();
-        IntVar var = solver.intScaleView(solver.intVar("b", new int[]{1, 2, 4}), 2);
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intScaleView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
                 // could be fixed with an extension filtering
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -415,13 +415,13 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testScale4() {
-        Solver solver = new Solver();
-        IntVar var = solver.intScaleView(solver.intVar("b", new int[]{1, 2, 4}), 2);
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intScaleView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
                 // could be fixed with an extension filtering
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -445,11 +445,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMinus1() {
-        Solver solver = new Solver();
-        IntVar var = solver.intMinusView(solver.intVar("b", new int[]{1, 2, 4}));
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -467,11 +467,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMinus2() {
-        Solver solver = new Solver();
-        IntVar var = solver.intMinusView(solver.intVar("b", new int[]{1, 2, 4}));
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -489,11 +489,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMinus3() {
-        Solver solver = new Solver();
-        IntVar var = solver.intMinusView(solver.intVar("b", new int[]{1, 2, 4}));
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -513,11 +513,11 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMinus4() {
-        Solver solver = new Solver();
-        IntVar var = solver.intMinusView(solver.intVar("b", new int[]{1, 2, 4}));
-        if (!solver.getSettings().enableViews()) {
+        Model model = new Model();
+        IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
+        if (!model.getSettings().enableViews()) {
             try {
-                solver.propagate();
+                model.propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -537,10 +537,10 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAbs1() {
-        Solver solver = new Solver();
-        IntVar var = solver.intAbsView(solver.intVar("b", new int[]{-2, 1, 4}));
+        Model model = new Model();
+        IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -556,10 +556,10 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAbs2() {
-        Solver solver = new Solver();
-        IntVar var = solver.intAbsView(solver.intVar("b", new int[]{-2, 1, 4}));
+        Model model = new Model();
+        IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -575,10 +575,10 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAbs3() {
-        Solver solver = new Solver();
-        IntVar var = solver.intAbsView(solver.intVar("b", new int[]{-2, 1, 4}));
+        Model model = new Model();
+        IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -596,10 +596,10 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAbs4() {
-        Solver solver = new Solver();
-        IntVar var = solver.intAbsView(solver.intVar("b", new int[]{-2, 1, 4}));
+        Model model = new Model();
+        IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
         try {
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -617,8 +617,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMax1() {
-        Solver solver = new Solver();
-        IntVar var = Max.var(solver.intVar("a", new int[]{3, 4}), solver.intVar("b", new int[]{2, 5}));
+        Model model = new Model();
+        IntVar var = Max.var(model.intVar("a", new int[]{3, 4}), model.intVar("b", new int[]{2, 5}));
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.next());
@@ -631,8 +631,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMax2() {
-        Solver solver = new Solver();
-        IntVar var = Max.var(solver.intVar("a", new int[]{3, 4}), solver.intVar("b", new int[]{2, 5}));
+        Model model = new Model();
+        IntVar var = Max.var(model.intVar("a", new int[]{3, 4}), model.intVar("b", new int[]{2, 5}));
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(5, vit.previous());
@@ -645,8 +645,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMax3() {
-        Solver solver = new Solver();
-        IntVar var = Max.var(solver.intVar("a", new int[]{3, 4}), solver.intVar("b", new int[]{2, 5}));
+        Model model = new Model();
+        IntVar var = Max.var(model.intVar("a", new int[]{3, 4}), model.intVar("b", new int[]{2, 5}));
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.min());
@@ -657,8 +657,8 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMax4() {
-        Solver solver = new Solver();
-        IntVar var = Max.var(solver.intVar("a", new int[]{3, 4}), solver.intVar("b", new int[]{2, 5}));
+        Model model = new Model();
+        IntVar var = Max.var(model.intVar("a", new int[]{3, 4}), model.intVar("b", new int[]{2, 5}));
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(3, vit.min());
@@ -669,7 +669,7 @@ public class IteratorTest {
 
     @Test(groups="1s", timeOut=60000)
     public void JLiangWaterlooTest() throws ContradictionException {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar ivar = s.intVar("ivar", new int[]{1, 2, 3, 888, 1000, 2000});
         ivar.removeValue(1000, Cause.Null);
 

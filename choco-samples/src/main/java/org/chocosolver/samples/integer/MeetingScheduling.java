@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
@@ -84,15 +84,12 @@ public class MeetingScheduling extends AbstractProblem {
 
     IntVar[] meetingTime;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("MSP");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model("MSP");
         mspdata = parse(mData.source());
-        meetingTime = solver.intVarArray("ts", mspdata.numberOfMeetings, 0, mspdata.domainSize - 1, false);
+        meetingTime = model.intVarArray("ts", mspdata.numberOfMeetings, 0, mspdata.domainSize - 1, false);
         boolean[][] conflicts = new boolean[mspdata.numberOfMeetings][mspdata.numberOfMeetings];
         for (int i = 0; i < mspdata.numberOfAgents; i++) { // for each pair of meeting
             for (int j = 0; j < mspdata.agentMeetings[i].length; j++) {
@@ -110,7 +107,7 @@ public class MeetingScheduling extends AbstractProblem {
         for (int i = 0; i < mspdata.numberOfMeetings - 1; i++) { // for each pair of meeting
             for (int j = i + 1; j < mspdata.numberOfMeetings; j++) {
                 if (conflicts[i][j]) {
-                    solver.distance(meetingTime[i], meetingTime[j], ">", mspdata.betweenMeetingsDistance[i][j]).post();
+                    model.distance(meetingTime[i], meetingTime[j], ">", mspdata.betweenMeetingsDistance[i][j]).post();
                 }
             }
         }
@@ -123,7 +120,7 @@ public class MeetingScheduling extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
@@ -131,7 +128,7 @@ public class MeetingScheduling extends AbstractProblem {
         System.out.println(String.format("Meeting Scheduling Problem (%s)", mData));
 
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() != ESat.TRUE) {
+        if (model.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
         } else {
             for (int i = 0; i < mspdata.numberOfMeetings; i++) {

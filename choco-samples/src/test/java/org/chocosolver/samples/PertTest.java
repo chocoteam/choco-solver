@@ -31,10 +31,9 @@ package org.chocosolver.samples;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -52,21 +51,21 @@ public class PertTest {
     int horizon = 29;
     IntVar objective;
 
-    protected Solver modeler() {
-        Solver solver = new Solver();
+    protected Model modeler() {
+        Model model = new Model();
 
         IntVar masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden;
-        masonry = solver.intVar("masonry", 0, horizon, true);
-        carpentry = solver.intVar("carpentry", 0, horizon, false);
-        plumbing = solver.intVar("plumbing", 0, horizon, false);
-        ceiling = solver.intVar("ceiling", 0, horizon, false);
-        roofing = solver.intVar("roofing", 0, horizon, false);
-        painting = solver.intVar("painting", 0, horizon, false);
-        windows = solver.intVar("windows", 0, horizon, false);
-        facade = solver.intVar("facade", 0, horizon, false);
-        garden = solver.intVar("garden", 0, horizon, false);
-        objective = solver.intVar("moving", 0, horizon - 1, false);
+        masonry = model.intVar("masonry", 0, horizon, true);
+        carpentry = model.intVar("carpentry", 0, horizon, false);
+        plumbing = model.intVar("plumbing", 0, horizon, false);
+        ceiling = model.intVar("ceiling", 0, horizon, false);
+        roofing = model.intVar("roofing", 0, horizon, false);
+        painting = model.intVar("painting", 0, horizon, false);
+        windows = model.intVar("windows", 0, horizon, false);
+        facade = model.intVar("facade", 0, horizon, false);
+        garden = model.intVar("garden", 0, horizon, false);
+        objective = model.intVar("moving", 0, horizon - 1, false);
 
         precedence(masonry, 7, carpentry).post();
         precedence(masonry, 7, plumbing).post();
@@ -83,9 +82,9 @@ public class PertTest {
         precedence(garden, 1, objective).post();
         precedence(painting, 2, objective).post();
 
-        solver.set(minDom_LB(new IntVar[]{masonry, carpentry, plumbing, ceiling,
+        model.set(minDom_LB(new IntVar[]{masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden, objective}));
-        return solver;
+        return model;
 
     }
 
@@ -93,12 +92,12 @@ public class PertTest {
      * x + d < y
      */
     private static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return x.getSolver().arithm(x.getSolver().intOffsetView(x, duration), "<", y);
+        return x.getModel().arithm(x.getModel().intOffsetView(x, duration), "<", y);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testAll() {
-        Solver sol;
+        Model sol;
         sol = modeler();
         sol.set(new Settings() {
             @Override

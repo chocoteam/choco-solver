@@ -115,7 +115,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
         n2 = idx;
         fifo = new int[n2];
-        digraph = new DirectedGraph(solver, n2 + 2, SetType.LINKED_LIST, false);
+        digraph = new DirectedGraph(model, n2 + 2, SetType.LINKED_LIST, false);
         free = new BitSet(n2);
         remProc = new DirectedRemProc();
         father = new int[n2];

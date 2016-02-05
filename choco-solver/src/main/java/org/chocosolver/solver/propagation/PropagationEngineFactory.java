@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.propagation;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 
@@ -51,8 +51,8 @@ public enum PropagationEngineFactory {
      */
     PROPAGATORDRIVEN_7QD() {
         @Override
-        public IPropagationEngine make(Solver solver) {
-            return new SevenQueuesPropagatorEngine(solver);
+        public IPropagationEngine make(Model model) {
+            return new SevenQueuesPropagatorEngine(model);
         }
     },
 
@@ -61,17 +61,17 @@ public enum PropagationEngineFactory {
      */
     TWOBUCKETPROPAGATIONENGINE() {
         @Override
-        public IPropagationEngine make(Solver solver) {
-            return new TwoBucketPropagationEngine(solver);
+        public IPropagationEngine make(Model model) {
+            return new TwoBucketPropagationEngine(model);
         }
     },
 
     DEFAULT() {
         @Override
-        public IPropagationEngine make(Solver solver) {
-            return PROPAGATORDRIVEN_7QD.make(solver);
+        public IPropagationEngine make(Model model) {
+            return PROPAGATORDRIVEN_7QD.make(model);
         }
     };
 
-    public abstract IPropagationEngine make(Solver solver);
+    public abstract IPropagationEngine make(Model model);
 }

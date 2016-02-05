@@ -76,7 +76,7 @@ public class PropRegular extends Propagator<IntVar> {
         }
         rem_proc = new RemProc(this);
         this.automaton = automaton;
-        graph = initGraph(solver.getEnvironment(), vars, automaton);
+        graph = initGraph(model.getEnvironment(), vars, automaton);
     }
 
     @Override

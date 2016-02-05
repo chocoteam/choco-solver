@@ -31,7 +31,7 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -266,7 +266,7 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      *
      * @return a Solver object
      */
-    Solver getSolver();
+    Model getModel();
 
     /**
      * Return a MASK composed of 2 main information: TYPE and KIND.

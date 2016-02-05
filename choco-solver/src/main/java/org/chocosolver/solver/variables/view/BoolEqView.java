@@ -69,7 +69,7 @@ public final class BoolEqView extends EqView implements BoolVar {
 
     @Override
     public BoolVar duplicate() {
-        return solver.boolEqView(this.var);
+        return model.boolEqView(this.var);
     }
 
     @Override

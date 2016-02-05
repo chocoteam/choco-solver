@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -56,21 +56,18 @@ public class OrthoLatinSquare extends AbstractProblem {
     IntVar[] square1, square2, vars;
     Constraint[] ALLDIFFS;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Ortho Latin square " + m);
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         int mm = m * m;
-        square1 = solver.intVarArray("s1", mm, 1, m, true);
-        square2 = solver.intVarArray("s2", mm, 1, m, true);
-        vars = solver.intVarArray("vars", mm, 0, mm - 1, false);
+        square1 = model.intVarArray("s1", mm, 1, m, true);
+        square2 = model.intVarArray("s2", mm, 1, m, true);
+        vars = model.intVarArray("vars", mm, 0, mm - 1, false);
 
         List<Constraint> ADS = new ArrayList<>();
 
-        Constraint cc = solver.allDifferent(vars, "AC");
+        Constraint cc = model.allDifferent(vars, "AC");
         cc.post();
         ADS.add(cc);
 
@@ -83,20 +80,20 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
         }
         for (int i = 0; i < mm; i++) {
-            solver.element(square1[i], mod, vars[i], 0).post();
-            solver.element(square2[i], div, vars[i], 0).post();
+            model.element(square1[i], mod, vars[i], 0).post();
+            model.element(square2[i], div, vars[i], 0).post();
         }
 
         // Rows
         for (int i = 0; i < m; i++) {
             IntVar[] ry = new IntVar[m];
             arraycopy(square1, i * m, ry, 0, m);
-            cc = solver.allDifferent(ry, "BC");
+            cc = model.allDifferent(ry, "BC");
             cc.post();
             ADS.add(cc);
             ry = new IntVar[m];
             arraycopy(square2, i * m, ry, 0, m);
-            cc = solver.allDifferent(ry, "BC");
+            cc = model.allDifferent(ry, "BC");
             cc.post();
             ADS.add(cc);
         }
@@ -105,14 +102,14 @@ public class OrthoLatinSquare extends AbstractProblem {
             for (int i = 0; i < m; i++) {
                 cy[i] = square1[i * m + j];
             }
-            cc = solver.allDifferent(cy, "BC");
+            cc = model.allDifferent(cy, "BC");
             cc.post();
             ADS.add(cc);
             cy = new IntVar[m];
             for (int i = 0; i < m; i++) {
                 cy[i] = square2[i * m + j];
             }
-            cc = solver.allDifferent(cy, "BC");
+            cc = model.allDifferent(cy, "BC");
             cc.post();
             ADS.add(cc);
         }
@@ -126,18 +123,18 @@ public class OrthoLatinSquare extends AbstractProblem {
                 ry1[j] = square1[(i - 1) * m + j];
                 ry2[j] = square2[i * m + j];
             }
-            solver.lexLess(ry1, ry2).post();
+            model.lexLess(ry1, ry2).post();
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_MidValue(true,vars));
+        model.set(IntStrategyFactory.minDom_MidValue(true,vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -99,9 +99,9 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
     public DomOverWDeg(IntVar[] variables, long seed, IntValueSelector valueSelector) {
         super(variables);
         this.variables = variables.clone();
-        Solver solver = variables[0].getSolver();
-        counter = new FailPerPropagator(solver.getCstrs(), solver);
-        pid2arity = new IntMap(solver.getCstrs().length * 3 / 2 + 1, -1);
+        Model model = variables[0].getModel();
+        counter = new FailPerPropagator(model.getCstrs(), model);
+        pid2arity = new IntMap(model.getCstrs().length * 3 / 2 + 1, -1);
         bests = new TIntArrayList();
         this.valueSelector = valueSelector;
         decisionPool = new PoolManager<>();

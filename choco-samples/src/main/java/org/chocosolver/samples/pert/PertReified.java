@@ -29,7 +29,7 @@
  */
 package org.chocosolver.samples.pert;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -48,16 +48,13 @@ public class PertReified extends Pert {
 
     BoolVar[] bvars;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("PertReified");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         setUp();
 
-        vars = solver.intVarArray("task", n, 0, horizon, true);
+        vars = model.intVarArray("task", n, 0, horizon, true);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
@@ -76,9 +73,9 @@ public class PertReified extends Pert {
             }
             for (int l = 0; l < _vars.length - 1; l++) {
                 for (int m = l + 1; m < _vars.length; m++) {
-                    BoolVar bvar = solver.boolVar("b" + l + "_" + m);
+                    BoolVar bvar = model.boolVar("b" + l + "_" + m);
                     lbvars.add(bvar);
-                    solver.ifThenElse(bvar, precedence(_vars[l], _durs[l], _vars[m]), precedence(_vars[m], _durs[m], _vars[l]));
+                    model.ifThenElse(bvar, precedence(_vars[l], _durs[l], _vars[m]), precedence(_vars[m], _durs[m], _vars[l]));
                 }
             }
         }
@@ -87,7 +84,7 @@ public class PertReified extends Pert {
 
     @Override
     public void configureSearch() {
-        solver.set(
+        model.set(
 				IntStrategyFactory.lexico_LB(bvars),
 				IntStrategyFactory.lexico_LB(vars)
         );

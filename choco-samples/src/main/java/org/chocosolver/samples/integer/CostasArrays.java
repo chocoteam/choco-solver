@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -61,38 +61,34 @@ public class CostasArrays extends AbstractProblem {
     IntVar[] vars, vectors;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("CostasArrays");
-    }
-
-	@Override
 	public void buildModel() {
-		vars = solver.intVarArray("v", n, 0, n - 1, false);
+		model = new Model("CostasArrays");
+		vars = model.intVarArray("v", n, 0, n - 1, false);
 		vectors = new IntVar[(n * (n - 1)) / 2];
 		for (int i = 0, k = 0; i < n; i++) {
 			for (int j = i + 1; j < n; j++, k++) {
-				IntVar d = solver.intVar(randomName(), -n, n, false);
-				solver.arithm(d, "!=", 0).post();
-				solver.sum(new IntVar[]{vars[i], d}, "=", vars[j]).post();
-				vectors[k] = solver.intOffsetView(d, 2 * n * (j - i));
+				IntVar d = model.intVar(randomName(), -n, n, false);
+				model.arithm(d, "!=", 0).post();
+				model.sum(new IntVar[]{vars[i], d}, "=", vars[j]).post();
+				vectors[k] = model.intOffsetView(d, 2 * n * (j - i));
 			}
 		}
-		solver.allDifferent(vars, "AC").post();
-		solver.allDifferent(vectors, "BC").post();
+		model.allDifferent(vars, "AC").post();
+		model.allDifferent(vectors, "BC").post();
 
 		// symmetry-breaking
-		solver.arithm(vars[0], "<", vars[n - 1]).post();
+		model.arithm(vars[0], "<", vars[n - 1]).post();
 	}
 
 	@Override
 	public void configureSearch() {
-		SMF.limitTime(solver,"20s");
-		solver.set(ISF.lexico_LB(vectors));
+		SMF.limitTime(model,"20s");
+		model.set(ISF.lexico_LB(vectors));
 	}
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

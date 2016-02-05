@@ -29,12 +29,8 @@
  */
 package org.chocosolver.solver.explanations;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
@@ -55,7 +51,7 @@ public class SimpleExplanationTest {
      */
     public static void test(boolean enumerated) {
         // initialize
-        Solver s = new Solver();
+        Model s = new Model();
         // set varriables
         IntVar[] vars = new IntVar[3];
         for (int i = 0; i < vars.length; i++) {

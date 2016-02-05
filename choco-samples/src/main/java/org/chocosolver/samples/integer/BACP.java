@@ -31,7 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -82,40 +82,36 @@ public class BACP extends AbstractProblem {
 
 
     @Override
-    public void createSolver() {
-        solver = new Solver("BACP");
-    }
-
-    @Override
     public void buildModel() {
+        model = new Model("BACP");
         // period is assigned to
-        course_period = solver.intVarArray("c_p", n_courses, 0, n_periods, false);
+        course_period = model.intVarArray("c_p", n_courses, 0, n_periods, false);
         // whether period i has a course j assigned
-        x = solver.boolVarMatrix("X", n_periods, n_courses);
+        x = model.boolVarMatrix("X", n_periods, n_courses);
         // total load for each period
-        load = solver.intVarArray("load", n_periods, 0, load_per_period_ub - load_per_period_lb + 1, false);
+        load = model.intVarArray("load", n_periods, 0, load_per_period_ub - load_per_period_lb + 1, false);
         // opt. target
-        objective = solver.intVar("objective", load_per_period_lb, load_per_period_ub, true);
+        objective = model.intVar("objective", load_per_period_lb, load_per_period_ub, true);
         // sum variable
-        IntVar sum = solver.intVar("courses_per_period", courses_per_period_lb, courses_per_period_ub, true);
+        IntVar sum = model.intVar("courses_per_period", courses_per_period_lb, courses_per_period_ub, true);
         // constraints
         for (int i = 0; i < n_periods; i++) {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\
             for (int j = 0; j < n_courses; j++) {
-                solver.ifThenElse(x[i][j],
-                        solver.arithm(course_period[j], "=", i),
-                        solver.arithm(course_period[j], "!=", i)
+                model.ifThenElse(x[i][j],
+                        model.arithm(course_period[j], "=", i),
+                        model.arithm(course_period[j], "!=", i)
                 );
             }
             // sum(i in courses) (x[p, i])>=courses_per_period_lb /\
             // sum(i in courses) (x[p, i])<=courses_per_period_ub /\
-            solver.sum(x[i], "=", sum).post();
+            model.sum(x[i], "=", sum).post();
             //  load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
-            solver.scalar(x[i], course_load, "=", load[i]).post();
+            model.scalar(x[i], course_load, "=", load[i]).post();
             //  load[p] >= load_per_period_lb /\
-            solver.arithm(load[i], ">=", load_per_period_lb).post();
+            model.arithm(load[i], ">=", load_per_period_lb).post();
             //  load[p] <= objective
-            solver.arithm(load[i], "<=", objective).post();
+            model.arithm(load[i], "<=", objective).post();
         }
 
         prerequisite(3, 1);
@@ -188,7 +184,7 @@ public class BACP extends AbstractProblem {
     }
 
     private void prerequisite(int a, int b) {
-        solver.arithm(course_period[b - 1], "<", course_period[a - 1]).post();
+        model.arithm(course_period[b - 1], "<", course_period[a - 1]).post();
     }
 
 
@@ -198,7 +194,7 @@ public class BACP extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 
     @Override

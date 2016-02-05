@@ -30,7 +30,7 @@
 package org.chocosolver.samples.explanation;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -48,32 +48,27 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     int vals = n + 1;
 
     @Override
-    public void createSolver() {
-        solver = new Solver();
-    }
-
-
-    @Override
     public void buildModel() {
-        vars = solver.intVarArray("x", n, 1, vals, false);
+        model = new Model();
+        vars = model.intVarArray("x", n, 1, vals, false);
         for (int i = 0; i < vars.length - 1; i++) {
-            solver.arithm(vars[i], ">", vars[i + 1]).post();
+            model.arithm(vars[i], ">", vars[i + 1]).post();
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(vars));
+        model.set(IntStrategyFactory.minDom_LB(vars));
     }
 
     @Override
     public void solve() {
-        ExplanationFactory.CBJ.plugin(solver, false, false);
-        if (solver.findSolution()) {
+        ExplanationFactory.CBJ.plugin(model, false, false);
+        if (model.findSolution()) {
             do {
                 this.prettyOut();
             }
-            while (solver.nextSolution());
+            while (model.nextSolution());
         }
     }
 

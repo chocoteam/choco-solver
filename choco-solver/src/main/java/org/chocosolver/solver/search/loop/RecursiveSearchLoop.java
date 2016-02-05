@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -49,85 +49,85 @@ class RecursiveSearchLoop {
     RecursiveSearchLoop() {
     }
 
-    public static int dfs(Solver solver, AbstractStrategy strategy) {
+    public static int dfs(Model model, AbstractStrategy strategy) {
         // some preprocess for the first call
         int c = 0;
         try {
-            solver.getEngine().propagate();
+            model.getEngine().propagate();
         } catch (ContradictionException e) {
             return c;
         }
         Decision dec = strategy.getDecision();
         if (dec != null) {
             // apply the decision
-            solver.getEnvironment().worldPush();
+            model.getEnvironment().worldPush();
             try {
                 dec.buildNext();
                 dec.apply();
-                c += dfs(solver, strategy);
+                c += dfs(model, strategy);
             } catch (ContradictionException cex) {
-                solver.getEngine().flush();
+                model.getEngine().flush();
             }
-            solver.getEnvironment().worldPop();
-            solver.getEnvironment().worldPush();
+            model.getEnvironment().worldPop();
+            model.getEnvironment().worldPush();
             try {
                 dec.buildNext();
                 dec.apply();
-                c += dfs(solver, strategy);
+                c += dfs(model, strategy);
             } catch (ContradictionException cex) {
-                solver.getEngine().flush();
+                model.getEngine().flush();
             }
-            solver.getEnvironment().worldPop();
+            model.getEnvironment().worldPop();
         } else {
-            assert solver.isSatisfied() == ESat.TRUE;
+            assert model.isSatisfied() == ESat.TRUE;
             c++;
-            System.out.printf("Solution: %s\n", Arrays.toString(solver.getVars()));
+            System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
         return c;
     }
 
-    public static int lds(Solver solver, AbstractStrategy strategy, int dis) {
+    public static int lds(Model model, AbstractStrategy strategy, int dis) {
         int c = 0;
         try {
-            solver.getEngine().propagate();
+            model.getEngine().propagate();
         } catch (ContradictionException e) {
             return c;
         }
         Decision dec = strategy.getDecision();
         if (dec != null) {
             // apply the decision
-            solver.getEnvironment().worldPush();
+            model.getEnvironment().worldPush();
             try {
                 dec.buildNext();
                 dec.apply();
-                c += lds(solver, strategy, dis);
+                c += lds(model, strategy, dis);
             } catch (ContradictionException cex) {
-                solver.getEngine().flush();
+                model.getEngine().flush();
             }
-            solver.getEnvironment().worldPop();
+            model.getEnvironment().worldPop();
             if (dis > 0) {
-                solver.getEnvironment().worldPush();
+                model.getEnvironment().worldPush();
                 try {
                     dec.buildNext();
                     dec.apply();
-                    c += lds(solver, strategy, dis - 1);
+                    c += lds(model, strategy, dis - 1);
                 } catch (ContradictionException cex) {
-                    solver.getEngine().flush();
+                    model.getEngine().flush();
                 }
-                solver.getEnvironment().worldPop();
+                model.getEnvironment().worldPop();
             }
         } else {
-            assert solver.isSatisfied() == ESat.TRUE;
+            assert model.isSatisfied() == ESat.TRUE;
             c++;
-            System.out.printf("Solution: %s\n", Arrays.toString(solver.getVars()));
+            System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
         return c;
     }
 
-    public static int dds(Solver solver, AbstractStrategy strategy, int dis, int dep) {
+    public static int dds(Model model, AbstractStrategy strategy, int dis, int dep) {
         int c = 0;
         try {
-            solver.getEngine().propagate();
+            model.getEngine().propagate();
         } catch (ContradictionException e) {
             return c;
         }
@@ -135,42 +135,42 @@ class RecursiveSearchLoop {
         if (dec != null) {
             // apply the decision
             if (dep >= dis) {
-                solver.getEnvironment().worldPush();
+                model.getEnvironment().worldPush();
                 try {
                     dec.buildNext();
                     dec.apply();
-                    c += ilds(solver, strategy, dis, dep - 1);
+                    c += ilds(model, strategy, dis, dep - 1);
                 } catch (ContradictionException cex) {
-                    solver.getEngine().flush();
+                    model.getEngine().flush();
                 }
-                solver.getEnvironment().worldPop();
+                model.getEnvironment().worldPop();
             } else {
                 dec.buildNext();
             }
             if (dis > 0) {
-                solver.getEnvironment().worldPush();
+                model.getEnvironment().worldPush();
                 try {
                     dec.buildNext();
                     dec.apply();
-                    c += ilds(solver, strategy, dis - 1, dep);
+                    c += ilds(model, strategy, dis - 1, dep);
                 } catch (ContradictionException cex) {
-                    solver.getEngine().flush();
+                    model.getEngine().flush();
                 }
-                solver.getEnvironment().worldPop();
+                model.getEnvironment().worldPop();
             }
         } else if (dis == 0) {
-            assert solver.isSatisfied() == ESat.TRUE;
+            assert model.isSatisfied() == ESat.TRUE;
             c++;
-            System.out.printf("Solution: %s\n", Arrays.toString(solver.getVars()));
+            System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
         return c;
     }
 
 
-    public static int ilds(Solver solver, AbstractStrategy strategy, int dis, int dep) {
+    public static int ilds(Model model, AbstractStrategy strategy, int dis, int dep) {
         int c = 0;
         try {
-            solver.getEngine().propagate();
+            model.getEngine().propagate();
         } catch (ContradictionException e) {
             return c;
         }
@@ -178,45 +178,45 @@ class RecursiveSearchLoop {
         if (dec != null) {
             // apply the decision
             if (dep >= dis) {
-                solver.getEnvironment().worldPush();
+                model.getEnvironment().worldPush();
                 try {
                     dec.buildNext();
                     dec.apply();
-                    c += ilds(solver, strategy, dis, dep - 1);
+                    c += ilds(model, strategy, dis, dep - 1);
                 } catch (ContradictionException cex) {
-                    solver.getEngine().flush();
+                    model.getEngine().flush();
                 }
-                solver.getEnvironment().worldPop();
+                model.getEnvironment().worldPop();
             } else {
                 dec.buildNext();
             }
             if (dis > 0) {
-                solver.getEnvironment().worldPush();
+                model.getEnvironment().worldPush();
                 try {
                     dec.buildNext();
                     dec.apply();
-                    c += ilds(solver, strategy, dis - 1, dep);
+                    c += ilds(model, strategy, dis - 1, dep);
                 } catch (ContradictionException cex) {
-                    solver.getEngine().flush();
+                    model.getEngine().flush();
                 }
-                solver.getEnvironment().worldPop();
+                model.getEnvironment().worldPop();
             }
         } else if (dis == 0) {
-            assert solver.isSatisfied() == ESat.TRUE;
+            assert model.isSatisfied() == ESat.TRUE;
             c++;
-            System.out.printf("Solution: %s\n", Arrays.toString(solver.getVars()));
+            System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
         return c;
     }
 
     public static void main(String[] args) {
-        Solver solver = new Solver();
-        IntVar[] X = solver.intVarArray("X", 3, 0, 2, false);
+        Model model = new Model();
+        IntVar[] X = model.intVarArray("X", 3, 0, 2, false);
 //        solver.post(solver.allDifferent(X));
-        solver.set(new SevenQueuesPropagatorEngine(solver));
-        solver.getEngine().initialize();
+        model.set(new SevenQueuesPropagatorEngine(model));
+        model.getEngine().initialize();
 //        System.out.printf("%d solutions\n", dfs(solver, ISF.lexico_LB(X)));
-        System.out.printf("%d solutions\n", lds(solver, ISF.lexico_LB(X), 3));
+        System.out.printf("%d solutions\n", lds(model, ISF.lexico_LB(X), 3));
 //        for (int d = 2; d < 3; d++) {
 //            System.out.printf("%d solutions\n", ilds(solver, ISF.lexico_LB(X), d, X.length));
 //        }

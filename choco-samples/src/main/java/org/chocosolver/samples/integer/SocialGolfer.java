@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -78,24 +78,21 @@ public class SocialGolfer extends AbstractProblem {
 
     BoolVar[][][] P, M;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Social golfer " + g + "-" + w + "-" + s);
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         int p = g * s;  // number of players
 
         P = new BoolVar[p][g][w];
         // p plays in group g in week w
         for (int i = 0; i < p; i++) {
-            P[i] = solver.boolVarMatrix("p_" + i, g, w);
+            P[i] = model.boolVarMatrix("p_" + i, g, w);
         }
         M = new BoolVar[p][p][w];
         // i meets j in week w (i<j)
         for (int i = 0; i < p; i++) {
-            M[i] = solver.boolVarMatrix("m_" + i, p, w);
+            M[i] = model.boolVarMatrix("m_" + i, p, w);
         }
 
         // each player is part of exactly one group in each week
@@ -105,7 +102,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int j = 0; j < g; j++) {
                     player[j] = P[i][j][k];
                 }
-                solver.sum(player, "=", 1).post();
+                model.sum(player, "=", 1).post();
             }
         }
 
@@ -116,7 +113,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int i = 0; i < p; i++) {
                     group[i] = P[i][j][k];
                 }
-                solver.sum(group, "=", s).post();
+                model.sum(group, "=", s).post();
             }
         }
 
@@ -124,9 +121,9 @@ public class SocialGolfer extends AbstractProblem {
 		for (int i = 0; i < p; i++) {
 			for (int l = 0; l < w; l++) {
                 for (int j = i + 1; j < p; j++) {
-                    solver.arithm(M[i][j][l], "=", M[j][i][l]).post();
+                    model.arithm(M[i][j][l], "=", M[j][i][l]).post();
                 }
-                solver.arithm(M[i][i][l], "=", 1).post();
+                model.arithm(M[i][i][l], "=", 1).post();
             }
 		}
 
@@ -136,10 +133,10 @@ public class SocialGolfer extends AbstractProblem {
 				for (int l = 0; l < w; l++) {
                     BoolVar[] group = new BoolVar[g];
                     for (int k = 0; k < g; k++) {
-                        group[k] = solver.and(P[i][k][l], P[j][k][l]).reify();
-                        solver.arithm(group[k], "<=", M[i][j][l]).post();
+                        group[k] = model.and(P[i][k][l], P[j][k][l]).reify();
+                        model.arithm(group[k], "<=", M[i][j][l]).post();
                     }
-                    solver.sum(group, "=", M[i][j][l]).post();
+                    model.sum(group, "=", M[i][j][l]).post();
                 }
             }
         }
@@ -147,32 +144,32 @@ public class SocialGolfer extends AbstractProblem {
         // each pair of players only meets once
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
-                solver.sum(M[i][j], "=", solver.boolVar("sum")).post();
+                model.sum(M[i][j], "=", model.boolVar("sum")).post();
             }
         }
 
         // break symmetries on first group
         for (int i = 1; i < p; i++) {
-            solver.lexLessEq(P[i][0], P[i - 1][0]).post();
+            model.lexLessEq(P[i][0], P[i - 1][0]).post();
         }
     }
 
     @Override
     public void configureSearch() {
         BoolVar[] vars = ArrayUtils.flatten(P);
-        solver.set(IntStrategyFactory.lexico_UB(vars));
+        model.set(IntStrategyFactory.lexico_UB(vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         System.out.println(String.format("Social golfer(%d,%d,%d)", g, s, w));
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             int p = g * s;
             for (int i = 0; i < w; i++) {
                 st.append("\tWeek ").append(i + 1).append("\n");

@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -57,9 +57,9 @@ public class MoveSeq implements Move {
     AbstractStrategy seqStrat;
     TransitionDecision[] tds;
 
-    public MoveSeq(Solver solver, Move... moves) {
+    public MoveSeq(Model model, Move... moves) {
         this.moves = Arrays.asList(moves);
-        this.index = solver.getEnvironment().makeInt(0);
+        this.index = model.getEnvironment().makeInt(0);
         AbstractStrategy[] strats = new AbstractStrategy[moves.length];
         for (int i = 0; i < moves.length; i++) {
             strats[i] = moves[i].getStrategy();
@@ -95,7 +95,7 @@ public class MoveSeq implements Move {
             Decision tmp = searchLoop.decision;
             searchLoop.decision = tds[i - 1];
             searchLoop.decision.setPrevious(tmp);
-            searchLoop.mSolver.getEnvironment().worldPush();
+            searchLoop.mModel.getEnvironment().worldPush();
             moves.get(i).setTopDecision(tds[i - 1]);
             extend = moves.get(i).extend(searchLoop);
         }

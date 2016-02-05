@@ -31,7 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.Solution;
@@ -65,13 +65,10 @@ public class SMPTSP extends AbstractProblem {
 	// METHODS
 	// ***********************************************************************************
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("Shift Minimization Personnel Task Scheduling Problem");
-	}
 
 	@Override
 	public void buildModel() {
+		model = new Model();
 		// Input
 		nbTasks = 5;
 		nbAvailableShifts = 5;
@@ -85,49 +82,49 @@ public class SMPTSP extends AbstractProblem {
 		};
 
 		// Variables
-		nbValues = solver.intVar("nb shifts", 0, nbAvailableShifts, true);
+		nbValues = model.intVar("nb shifts", 0, nbAvailableShifts, true);
 		assignment = new IntVar[nbTasks];
 		for (int i = 0; i < nbTasks; i++) {
-			assignment[i] = solver.intVar("t" + (i + 1), skilledShifts[i]);
+			assignment[i] = model.intVar("t" + (i + 1), skilledShifts[i]);
 		}
 
 		// Constraints
 		for (int t1 = 0; t1 < nbTasks; t1++) {
 			for (int t2 = t1 + 1; t2 < nbTasks; t2++) {
 				if (taskOverlaps[t1][t2]) {
-					solver.arithm(assignment[t1], "!=", assignment[t2]).post();
+					model.arithm(assignment[t1], "!=", assignment[t2]).post();
 				}
 			}
 		}
-		solver.nValues(assignment, nbValues).post();
+		model.nValues(assignment, nbValues).post();
 	}
 
 	@Override
 	public void configureSearch() {
 		// bottom-up optimisation, then classical branching
-		solver.set(ISF.lexico_LB(nbValues), ISF.minDom_LB(assignment));
+		model.set(ISF.lexico_LB(nbValues), ISF.minDom_LB(assignment));
 		// displays the root lower bound
-		solver.plugMonitor(new IMonitorInitialize() {
+		model.plugMonitor(new IMonitorInitialize() {
 			@Override
 			public void afterInitialize() {
 				System.out.println("bound after initial propagation : " + nbValues);
 			}
 		});
-		solver.plugMonitor((IMonitorSolution) () -> {
-            bestObj = nbValues.getValue();
-            System.out.println("Solution found! Objective = "+bestObj);
-        });
+		model.plugMonitor((IMonitorSolution) () -> {
+			bestObj = nbValues.getValue();
+			System.out.println("Solution found! Objective = "+bestObj);
+		});
 	}
 
 	@Override
 	public void solve() {
-		solver.findAllOptimalSolutions(ResolutionPolicy.MINIMIZE, nbValues, false);
+		model.findAllOptimalSolutions(ResolutionPolicy.MINIMIZE, nbValues, false);
 	}
 
 	@Override
 	public void prettyOut() {
 		int nb = 1;
-		for(Solution s:solver.getSolutionRecorder().getSolutions()){
+		for(Solution s: model.getSolutionRecorder().getSolutions()){
 			System.out.println("Optimal solution : "+nb);
 			for(int i=0;i<5;i++){
 				System.out.println(assignment[i].getName()+" = "+s.getIntVal(assignment[i]));
@@ -136,6 +133,6 @@ public class SMPTSP extends AbstractProblem {
 	}
 
 	public static void main(String[] args){
-	    new SMPTSP().execute(args);
+		new SMPTSP().execute(args);
 	}
 }

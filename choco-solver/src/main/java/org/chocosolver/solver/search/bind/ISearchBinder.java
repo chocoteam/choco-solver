@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.bind;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 /**
  * Define a search binder to configure or override the search strategies.
@@ -48,7 +48,7 @@ public interface ISearchBinder {
     /**
      * Configure or override the search strategies of the given solver.
      *
-     * @param solver a solver
+     * @param model a solver
      */
-    void configureSearch(Solver solver);
+    void configureSearch(Model model);
 }

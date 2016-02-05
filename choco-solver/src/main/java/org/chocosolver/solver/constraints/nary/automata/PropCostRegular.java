@@ -82,7 +82,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         }
         this.zIdx = vars.length - 1;
         this.rem_proc = new RemProc(this);
-        IEnvironment environment = solver.getEnvironment();
+        IEnvironment environment = model.getEnvironment();
         this.toRemove = new TIntArrayStack();
         this.boundChange = environment.makeBool(false);
         this.graph = graph;
@@ -216,9 +216,9 @@ public class PropCostRegular extends Propagator<IntVar> {
     }
 
     private void checkWorld() {
-        int currentworld = solver.getEnvironment().getWorldIndex();
-        long currentbt = solver.getMeasures().getBackTrackCount();
-        long currentrestart = solver.getMeasures().getRestartCount();
+        int currentworld = model.getEnvironment().getWorldIndex();
+        long currentbt = model.getMeasures().getBackTrackCount();
+        long currentrestart = model.getMeasures().getRestartCount();
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
             this.toRemove.clear();
             this.graph.inStack.clear();

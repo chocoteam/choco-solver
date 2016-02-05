@@ -30,8 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -64,45 +63,41 @@ public class AllIntervalSeries extends AbstractProblem {
     IntVar[] dist;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("AllIntervalSeries");
-    }
-
-    @Override
     public void buildModel() {
-        vars = solver.intVarArray("v", m, 0, m - 1, false);
+        model = new Model("AllIntervalSeries");
+        vars = model.intVarArray("v", m, 0, m - 1, false);
         dist = new IntVar[m - 1];
 
         if (!use_views) {
-            dist = solver.intVarArray("dist", m - 1, 1, m - 1, false);
+            dist = model.intVarArray("dist", m - 1, 1, m - 1, false);
             for (int i = 0; i < m - 1; i++) {
-                solver.distance(vars[i + 1], vars[i], "=", dist[i]).post();
+                model.distance(vars[i + 1], vars[i], "=", dist[i]).post();
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
-                IntVar k = solver.intVar(randomName(), -20000, 20000, true);
-                solver.sum(new IntVar[]{vars[i], k}, "=", vars[i + 1]).post();
-                dist[i] = solver.intAbsView(k);
-                solver.member(dist[i], 1, m - 1).post();
+                IntVar k = model.intVar(randomName(), -20000, 20000, true);
+                model.sum(new IntVar[]{vars[i], k}, "=", vars[i + 1]).post();
+                dist[i] = model.intAbsView(k);
+                model.member(dist[i], 1, m - 1).post();
             }
         }
 
-        solver.allDifferent(vars, "BC").post();
-        solver.allDifferent(dist, "BC").post();
+        model.allDifferent(vars, "BC").post();
+        model.allDifferent(dist, "BC").post();
 
         // break symetries
-        solver.arithm(vars[1], ">", vars[0]).post();
-        solver.arithm(dist[0], ">", dist[m - 2]).post();
+        model.arithm(vars[1], ">", vars[0]).post();
+        model.arithm(dist[0], ">", dist[m - 2]).post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(vars));
+        model.set(IntStrategyFactory.minDom_LB(vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

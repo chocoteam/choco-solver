@@ -33,7 +33,7 @@ import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.samples.integer.AllIntervalSeries;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.testng.Assert;
@@ -84,8 +84,8 @@ public class AllTest {
     @Test(groups="5m", timeOut=300000)
     public void mainTest() {
         prob.readArgs(args);
-        prob.solver = new Solver(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
-        prob.solver.set(new Settings() {
+        prob.model = new Model(environment, prob.getClass().getSimpleName()); // required for testing, to pass properties
+        prob.model.set(new Settings() {
             @Override
             public boolean plugExplanationIn() {
                 return true;
@@ -93,10 +93,10 @@ public class AllTest {
         });
         prob.buildModel();
         prob.configureSearch();
-        efact.plugin(prob.solver, false, false);
-        prob.solver.findAllSolutions();
+        efact.plugin(prob.model, false, false);
+        prob.model.findAllSolutions();
 
-        Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
+        Assert.assertEquals(nbSol, prob.getModel().getMeasures().getSolutionCount(), "incorrect nb solutions");
     }
 
     @Override

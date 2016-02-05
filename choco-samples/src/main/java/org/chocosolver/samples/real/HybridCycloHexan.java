@@ -30,7 +30,7 @@
 package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
@@ -53,13 +53,10 @@ public class HybridCycloHexan extends AbstractProblem {
 	RealVar x, y, z;
 	IntVar intx;
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("HybridCycloHexan");
-	}
 
 	@Override
 	public void buildModel() {
+		model = new Model();
 		out.println("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n"
 				+ "It is decribed with a system of three non linear equations : \n"
 				+ " y^2 * (1 + z^2) + z * (z - 24 * y) = -13 \n" +
@@ -71,14 +68,14 @@ public class HybridCycloHexan extends AbstractProblem {
 
 		double precision = 1.0e-3;
 		// finite domain
-		intx = solver.intVar("x", new int[]{-10, -9, 0, 2, 42});
+		intx = model.intVar("x", new int[]{-10, -9, 0, 2, 42});
 		// continuous view
-		x = solver.realIntView(intx, precision);
-		y = solver.realVar("y", -1.0e8, 1.0e8, precision);
-		z = solver.realVar("z", -1.0e8, 1.0e8, precision);
+		x = model.realIntView(intx, precision);
+		y = model.realVar("y", -1.0e8, 1.0e8, precision);
+		z = model.realVar("z", -1.0e8, 1.0e8, precision);
 
 		vars = new RealVar[]{x, y, z};
-		solver.realIbexGenericConstraint(
+		model.realIbexGenericConstraint(
 				"{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
 						"{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
 						"{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
@@ -87,18 +84,18 @@ public class HybridCycloHexan extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		solver.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
-		SearchMonitorFactory.limitTime(solver,10000);
+		model.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
+		SearchMonitorFactory.limitTime(model,10000);
 	}
 
 	@Override
 	public void solve() {
-		solver.findSolution();
+		model.findSolution();
 	}
 
 	@Override
 	public void prettyOut() {
-		solver.getIbex().release();
+		model.getIbex().release();
 	}
 
 	public static void main(String[] args) {

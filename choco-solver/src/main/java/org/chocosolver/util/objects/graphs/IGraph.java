@@ -30,7 +30,7 @@
 package org.chocosolver.util.objects.graphs;
 
 import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -122,5 +122,5 @@ public interface IGraph extends Serializable {
      */
     boolean isDirected();
 
-    void duplicate(Solver solver, THashMap<Object, Object> identitymap);
+    void duplicate(Model model, THashMap<Object, Object> identitymap);
 }

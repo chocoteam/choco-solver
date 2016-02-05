@@ -30,7 +30,7 @@
 package org.chocosolver.util.objects.graphs;
 
 import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -60,22 +60,22 @@ public class UndirectedGraph implements IGraph {
      * Allocates memory for n nodes (but they should then be added explicitly,
      * unless allNodes is true).
      *
-     * @param solver   solver providing the backtracking environment
+     * @param model   solver providing the backtracking environment
      * @param n        max number of nodes
      * @param type     data structure storing for node neighbors
      * @param allNodes true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(Solver solver, int n, SetType type, boolean allNodes) {
+    public UndirectedGraph(Model model, int n, SetType type, boolean allNodes) {
         this.type = type;
         this.n = n;
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeStoredSet(type, n, solver);
+            neighbors[i] = SetFactory.makeStoredSet(type, n, model);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeFullSet(n);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, solver);
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, model);
         }
     }
 
@@ -250,7 +250,7 @@ public class UndirectedGraph implements IGraph {
     }
 
     @Override
-    public void duplicate(Solver solver, THashMap<Object, Object> identitymap) {
+    public void duplicate(Model model, THashMap<Object, Object> identitymap) {
         throw new UnsupportedOperationException("Cannot duplicate DirectedGraph yet");
     }
 }

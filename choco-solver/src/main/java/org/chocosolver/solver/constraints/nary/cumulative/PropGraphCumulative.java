@@ -119,8 +119,8 @@ public class PropGraphCumulative extends PropFullCumulative {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (timestamp != solver.getEnvironment().getWorldIndex()) {
-            timestamp = solver.getEnvironment().getWorldIndex();
+        if (timestamp != model.getEnvironment().getWorldIndex()) {
+            timestamp = model.getEnvironment().getWorldIndex();
             toCompute.clear();
         }
         if (varIdx < 4 * n) {

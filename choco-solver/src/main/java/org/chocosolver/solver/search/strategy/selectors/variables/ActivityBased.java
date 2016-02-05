@@ -33,7 +33,7 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.Move;
 import org.chocosolver.solver.search.loop.MoveRestart;
@@ -116,7 +116,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     //////////////////////////////
     //////////////////////////////
 
-    final Solver solver;
+    final Model model;
     final IntMap v2i;
     final IntVar[] vars;
 
@@ -148,9 +148,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     Move rfMove;
 
-    public ActivityBased(final Solver solver, IntVar[] vars, double g, double d, int a, int samplingIterationForced, long seed) {
+    public ActivityBased(final Model model, IntVar[] vars, double g, double d, int a, int samplingIterationForced, long seed) {
         super(vars);
-        this.solver = solver;
+        this.model = model;
         this.vars = vars;
         A = new double[vars.length];
         mA = new double[vars.length];
@@ -175,15 +175,15 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
-        SLF.restartOnSolutions(solver);
+        SLF.restartOnSolutions(model);
         if(restartAfterEachFail){
-            rfMove = new MoveRestart(solver.getSearchLoop().getMove(),
+            rfMove = new MoveRestart(model.getSearchLoop().getMove(),
                     new MonotonicRestartStrategy(1),
-                    new FailCounter(solver.getSearchLoop().getSolver(), 1),
+                    new FailCounter(model.getSearchLoop().getSolver(), 1),
                     Integer.MAX_VALUE);
-            solver.getSearchLoop().setMove(rfMove);
+            model.getSearchLoop().setMove(rfMove);
         }
-        solver.plugMonitor(this);
+        model.plugMonitor(this);
         decisionPool = new PoolManager<>();
 //        init(vars);
     }
@@ -376,7 +376,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
                 if(restartAfterEachFail){
-                    SearchLoop sl = solver.getSearchLoop();
+                    SearchLoop sl = model.getSearchLoop();
                     Move m = sl.getMove();
                     if(m == rfMove){
                         sl.setMove(rfMove.getChildMoves().get(0));

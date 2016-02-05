@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
@@ -47,17 +47,17 @@ import java.util.Random;
  */
 public class MaxViewTest {
 
-    public void maxref(Solver solver, IntVar x, IntVar y, IntVar z) {
-        BoolVar[] bs = solver.boolVarArray("b", 3);
-        solver.ifThenElse(bs[0], solver.arithm(z, "=", x), solver.arithm(z, "!=", x));
-        solver.ifThenElse(bs[1], solver.arithm(z, "=", y), solver.arithm(z, "!=", y));
-        solver.ifThenElse(bs[2], solver.arithm(x, ">=", y), solver.arithm(x, "<", y));
+    public void maxref(Model model, IntVar x, IntVar y, IntVar z) {
+        BoolVar[] bs = model.boolVarArray("b", 3);
+        model.ifThenElse(bs[0], model.arithm(z, "=", x), model.arithm(z, "!=", x));
+        model.ifThenElse(bs[1], model.arithm(z, "=", y), model.arithm(z, "!=", y));
+        model.ifThenElse(bs[2], model.arithm(x, ">=", y), model.arithm(x, "<", y));
         SatFactory.addClauses(LogOp.or(LogOp.and(bs[0], bs[2]),
-                LogOp.and(bs[1], bs[2].not())), solver);
+                LogOp.and(bs[1], bs[2].not())), model);
     }
 
-    public void max(Solver solver, IntVar x, IntVar y, IntVar z) {
-        solver.max(z, x, y).post();
+    public void max(Model model, IntVar x, IntVar y, IntVar z) {
+        model.max(z, x, y).post();
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -66,7 +66,7 @@ public class MaxViewTest {
         for (int seed = 1; seed < 9999; seed++) {
             random.setSeed(seed);
             int[][] domains = DomainBuilder.buildFullDomains(3, 1, 15);
-            Solver ref = new Solver();
+            Model ref = new Model();
             {
                 IntVar[] xs = new IntVar[3];
                 xs[0] = ref.intVar("x", domains[0][0], domains[0][1], true);
@@ -76,20 +76,20 @@ public class MaxViewTest {
 //                SearchMonitorFactory.log(ref, true, true);
                 ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
-            Solver solver = new Solver();
+            Model model = new Model();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = solver.intVar("x", domains[0][0], domains[0][1], true);
-                xs[1] = solver.intVar("y", domains[1][0], domains[1][1], true);
-                xs[2] = solver.intVar("z", domains[1][0], domains[2][1], true);
-                max(solver, xs[0], xs[1], xs[2]);
+                xs[0] = model.intVar("x", domains[0][0], domains[0][1], true);
+                xs[1] = model.intVar("y", domains[1][0], domains[1][1], true);
+                xs[2] = model.intVar("z", domains[1][0], domains[2][1], true);
+                max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(IntStrategyFactory.random_bound(xs, seed));
+                model.set(IntStrategyFactory.random_bound(xs, seed));
             }
             ref.findAllSolutions();
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
-            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            Assert.assertTrue(model.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 
@@ -99,7 +99,7 @@ public class MaxViewTest {
         for (int seed = 169; seed < 9999; seed++) {
             random.setSeed(seed);
             int[][] domains = DomainBuilder.buildFullDomains(3, 1, 15, random, random.nextDouble(), random.nextBoolean());
-            Solver ref = new Solver();
+            Model ref = new Model();
             {
                 IntVar[] xs = new IntVar[3];
                 xs[0] = ref.intVar("x", domains[0]);
@@ -109,19 +109,19 @@ public class MaxViewTest {
 //                SearchMonitorFactory.log(ref, true, true);
                 ref.set(IntStrategyFactory.random_value(xs, seed));
             }
-            Solver solver = new Solver();
+            Model model = new Model();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = solver.intVar("x", domains[0]);
-                xs[1] = solver.intVar("y", domains[1]);
-                xs[2] = solver.intVar("z", domains[2]);
-                max(solver, xs[0], xs[1], xs[2]);
+                xs[0] = model.intVar("x", domains[0]);
+                xs[1] = model.intVar("y", domains[1]);
+                xs[2] = model.intVar("z", domains[2]);
+                max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(IntStrategyFactory.random_value(xs, seed));
+                model.set(IntStrategyFactory.random_value(xs, seed));
             }
             ref.findAllSolutions();
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
             // BEWARE: MAX does not ensure AC, unlike reformulation; so nb of nodes can be different...
 //            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + "): "
 //                    + solver.getMeasures().getNodeCount() + " vs. " + ref.getMeasures().getNodeCount());

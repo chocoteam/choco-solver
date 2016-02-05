@@ -29,10 +29,9 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -75,10 +74,10 @@ public abstract class AbstractTernaryTest {
 
     protected abstract int validTuple(int vx, int vy, int vz);
 
-    protected abstract Constraint make(IntVar[] vars, Solver solver);
+    protected abstract Constraint make(IntVar[] vars, Model model);
 
-    public Solver modeler(int[][] domains, boolean bounded, long seed) {
-        Solver s = new Solver();
+    public Model modeler(int[][] domains, boolean bounded, long seed) {
+        Model s = new Model();
         IntVar[] vars = new IntVar[3];
         for (int i = 0; i < 3; i++) {
             if (bounded) {
@@ -118,7 +117,7 @@ public abstract class AbstractTernaryTest {
             }
             // total number of solutions: brut force algorithm
             long base = brutForceTest(domains, bounded);
-            Solver s = modeler(domains, bounded, seed);
+            Model s = modeler(domains, bounded, seed);
 //            SearchMonitorFactory.log(s, false, false);
             try {
                 s.findAllSolutions();

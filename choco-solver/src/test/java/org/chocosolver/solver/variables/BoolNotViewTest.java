@@ -29,8 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.Model;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
@@ -54,7 +53,7 @@ public class BoolNotViewTest {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
             random.setSeed(seed);
-            Solver ref = new Solver();
+            Model ref = new Model();
             {
                 BoolVar[] xs = new BoolVar[2];
                 xs[0] = ref.boolVar("x");
@@ -62,24 +61,24 @@ public class BoolNotViewTest {
                 ref.sum(xs, "=", 1).post();
                 ref.set(random_bound(xs, seed));
             }
-            Solver solver = new Solver();
+            Model model = new Model();
             {
                 BoolVar[] xs = new BoolVar[2];
-                xs[0] = solver.boolVar("x");
-                xs[1] = solver.boolNotView(xs[0]);
-                solver.sum(xs, "=", 1).post();
-                solver.set(random_bound(xs, seed));
+                xs[0] = model.boolVar("x");
+                xs[1] = model.boolNotView(xs[0]);
+                model.sum(xs, "=", 1).post();
+                model.set(random_bound(xs, seed));
             }
             ref.findAllSolutions();
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testIt() {
-        Solver ref = new Solver();
+        Model ref = new Model();
         BoolVar o = ref.boolVar("b");
         BoolVar v = ref.boolNotView(o);
         DisposableValueIterator vit = v.getValueIterator(true);
@@ -108,10 +107,10 @@ public class BoolNotViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testPrevNext() {
-        Solver solver = new Solver();
-        BoolVar a = solver.boolVar("a");
-        BoolVar b = solver.boolVar("b");
-        solver.arithm(a, "+", solver.boolNotView(b), "=", 2).post();
-        assertTrue(solver.findSolution());
+        Model model = new Model();
+        BoolVar a = model.boolVar("a");
+        BoolVar b = model.boolVar("b");
+        model.arithm(a, "+", model.boolNotView(b), "=", 2).post();
+        assertTrue(model.findSolution());
     }
 }

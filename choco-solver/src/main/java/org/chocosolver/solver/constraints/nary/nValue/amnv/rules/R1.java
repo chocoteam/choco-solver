@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -50,7 +50,7 @@ public class R1 implements R {
 	}
 
 	@Override
-	public R duplicate(Solver solver) {
+	public R duplicate(Model model) {
 		return new R1();
 	}
 }

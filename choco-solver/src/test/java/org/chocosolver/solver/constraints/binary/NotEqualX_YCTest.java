@@ -29,12 +29,9 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.Cause.Null;
@@ -53,7 +50,7 @@ public class NotEqualX_YCTest {
     public void test1() {
         int n = 2;
 
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
@@ -72,7 +69,7 @@ public class NotEqualX_YCTest {
     public void test2() {
         int n = 2;
 
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
@@ -90,7 +87,7 @@ public class NotEqualX_YCTest {
     public void test3() {
         int n = 2;
 
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {

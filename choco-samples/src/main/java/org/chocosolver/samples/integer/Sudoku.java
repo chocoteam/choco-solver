@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -55,13 +55,10 @@ public class Sudoku extends AbstractProblem {
     private final int n = 9;
     IntVar[][] rows, cols, carres;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Sudoku");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
 
         rows = new IntVar[n][n];
         cols = new IntVar[n][n];
@@ -69,9 +66,9 @@ public class Sudoku extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (data.grid(i, j) > 0) {
-                    rows[i][j] = solver.intVar(data.grid(i, j));
+                    rows[i][j] = model.intVar(data.grid(i, j));
                 } else {
-                    rows[i][j] = solver.intVar("c_" + i + "_" + j, 1, n, false);
+                    rows[i][j] = model.intVar("c_" + i + "_" + j, 1, n, false);
                 }
                 cols[j][i] = rows[i][j];
             }
@@ -88,9 +85,9 @@ public class Sudoku extends AbstractProblem {
         }
 
         for (int i = 0; i < n; i++) {
-            solver.allDifferent(rows[i], "AC").post();
-            solver.allDifferent(cols[i], "AC").post();
-            solver.allDifferent(carres[i], "AC").post();
+            model.allDifferent(rows[i], "AC").post();
+            model.allDifferent(cols[i], "AC").post();
+            model.allDifferent(carres[i], "AC").post();
         }
 
 
@@ -98,13 +95,13 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(ArrayUtils.append(rows)));
+        model.set(IntStrategyFactory.minDom_LB(ArrayUtils.append(rows)));
 
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

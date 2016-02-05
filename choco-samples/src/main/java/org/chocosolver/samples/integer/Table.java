@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -59,11 +59,13 @@ public class Table extends AbstractProblem {
 	// METHODS
 	//***********************************************************************************
 
+
 	@Override
 	public void buildModel() {
+		model = new Model();
 		vars = new IntVar[n];
 		for (int i = 0; i < vars.length; i++) {
-			vars[i] = solver.intVar("Q_" + i, lowB, upB, false);
+			vars[i] = model.intVar("Q_" + i, lowB, upB, false);
 		}
 		Random rand = new Random(12);
 		Tuples tuples = new Tuples(true);
@@ -77,17 +79,12 @@ public class Table extends AbstractProblem {
 			tuples.add(tuple);
 			out.println();
 		}
-		solver.table(vars, tuples).post();
-	}
-
-	@Override
-	public void createSolver(){
-		solver = new Solver("Table sample");
+		model.table(vars, tuples).post();
 	}
 
 	@Override
 	public void configureSearch() {
-		solver.set(ISF.minDom_LB(vars));
+		model.set(ISF.minDom_LB(vars));
 	}
 
 	@Override
@@ -95,7 +92,7 @@ public class Table extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		solver.findAllSolutions();
+		model.findAllSolutions();
 	}
 
 	//***********************************************************************************
@@ -103,6 +100,6 @@ public class Table extends AbstractProblem {
 	//***********************************************************************************
 
 	public static void main(String[] args){
-	    new Table().execute(args);
+		new Table().execute(args);
 	}
 }

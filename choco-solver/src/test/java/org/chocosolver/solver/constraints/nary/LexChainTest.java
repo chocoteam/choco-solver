@@ -37,8 +37,7 @@ package org.chocosolver.solver.constraints.nary;
  * LexChain test file
  */
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
@@ -47,7 +46,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -66,7 +64,7 @@ public class LexChainTest {
 
     @Test(groups="10s", timeOut=60000)
     public void lexChainTest1() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar[] ar1 = s.intVarArray("v1", 3, 0, 10, true);
         IntVar[] ar2 = s.intVarArray("v2", 3, -1, 9, true);
@@ -83,56 +81,56 @@ public class LexChainTest {
     }
 
 
-    private ILogical reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
-        BoolVar b1 = solver.boolVar("A" + i);
-        solver.ifThenElse(b1, solver.arithm(Y[i], ">", X[i]), solver.arithm(Y[i], "<=", X[i]));
+    private ILogical reformulate(int i, IntVar[] X, IntVar[] Y, Model model) {
+        BoolVar b1 = model.boolVar("A" + i);
+        model.ifThenElse(b1, model.arithm(Y[i], ">", X[i]), model.arithm(Y[i], "<=", X[i]));
         if (i == X.length - 1) {
             return b1;
         } else {
-            BoolVar b2 = solver.boolVar("B" + i);
-            solver.ifThenElse(b2, solver.arithm(Y[i], "=", X[i]), solver.arithm(X[i], "!=", Y[i]));
-            return LogOp.or(b1, LogOp.and(b2, reformulate(i + 1, X, Y, solver)));
+            BoolVar b2 = model.boolVar("B" + i);
+            model.ifThenElse(b2, model.arithm(Y[i], "=", X[i]), model.arithm(X[i], "!=", Y[i]));
+            return LogOp.or(b1, LogOp.and(b2, reformulate(i + 1, X, Y, model)));
         }
     }
 
-    private Solver reformulate(int n, int m, int k, int seed, boolean bounded) {
-        Solver solver = new Solver();
+    private Model reformulate(int n, int m, int k, int seed, boolean bounded) {
+        Model model = new Model();
         IntVar[][] X = new IntVar[n][m];
         for (int i = 0; i < n; i++) {
             X[i] = bounded ?
-                    solver.intVarArray("X_" + i, m, 0, k, true) :
-                    solver.intVarArray("X_" + i, m, 0, k, false);
+                    model.intVarArray("X_" + i, m, 0, k, true) :
+                    model.intVarArray("X_" + i, m, 0, k, false);
         }
         ILogical[] trees = new ILogical[n - 1];
         for (int i = 0; i < n - 1; i++) {
-            trees[i] = reformulate(0, X[i], X[i + 1], solver);
+            trees[i] = reformulate(0, X[i], X[i + 1], model);
             //refor.post(new SatConstraint(reformulate(0, X[i], X[i + 1], refor), refor));
         }
 
-        SatFactory.addClauses(LogOp.and(trees), solver);
+        SatFactory.addClauses(LogOp.and(trees), model);
 		if(bounded){
-			solver.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
+			model.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
 		}else{
-			solver.set(IntStrategyFactory.random_value(ArrayUtils.flatten(X), seed));
+			model.set(IntStrategyFactory.random_value(ArrayUtils.flatten(X), seed));
 		}
-        return solver;
+        return model;
     }
 
-    private Solver lex(int n, int m, int k, int seed, boolean bounded) {
-        Solver solver = new Solver();
+    private Model lex(int n, int m, int k, int seed, boolean bounded) {
+        Model model = new Model();
         IntVar[][] X = new IntVar[n][m];
         for (int i = 0; i < n; i++) {
             X[i] = bounded ?
-                    solver.intVarArray("X_" + i, m, 0, k, true) :
-                    solver.intVarArray("X_" + i, m, 0, k, false);
+                    model.intVarArray("X_" + i, m, 0, k, true) :
+                    model.intVarArray("X_" + i, m, 0, k, false);
         }
-        solver.lexChainLess(X).post();
+        model.lexChainLess(X).post();
         if (bounded) {
-            solver.set(random_bound(flatten(X), seed));
+            model.set(random_bound(flatten(X), seed));
         } else {
-            solver.set(random_value(flatten(X), seed));
+            model.set(random_value(flatten(X), seed));
         }
-        return solver;
+        return model;
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -144,8 +142,8 @@ public class LexChainTest {
             int m = 2 + random.nextInt(2);
             int k = 1 + random.nextInt(2);
 
-            Solver refor = reformulate(n, m, k, seed, false);
-            Solver lex = lex(n, m, k, seed, false);
+            Model refor = reformulate(n, m, k, seed, false);
+            Model lex = lex(n, m, k, seed, false);
 
             refor.findAllSolutions();
             lex.findAllSolutions();
@@ -163,8 +161,8 @@ public class LexChainTest {
             int m = 2 + random.nextInt(2);
             int k = 1 + random.nextInt(2);
 
-            Solver refor = reformulate(n, m, k, seed, true);
-            Solver lex = lex(n, m, k, seed, true);
+            Model refor = reformulate(n, m, k, seed, true);
+            Model lex = lex(n, m, k, seed, true);
 
             refor.findAllSolutions();
             lex.findAllSolutions();
@@ -176,8 +174,8 @@ public class LexChainTest {
     @Test(groups="1s", timeOut=60000)
     public void testB1() {
         int n = 3, m = 2, k = 2, seed = 47;
-        Solver refor = reformulate(n, m, k, seed, true);
-        Solver lex = lex(n, m, k, seed, true);
+        Model refor = reformulate(n, m, k, seed, true);
+        Model lex = lex(n, m, k, seed, true);
         refor.findAllSolutions();
         lex.findAllSolutions();
         Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
@@ -185,24 +183,24 @@ public class LexChainTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testB2() {
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[][] X = new IntVar[3][2];
         for (int i = 0; i < 3; i++) {
-            X[i] = solver.intVarArray("X_" + i, 2, 0, 2, true);
+            X[i] = model.intVarArray("X_" + i, 2, 0, 2, true);
         }
 
-        solver.lexChainLess(X).post();
+        model.lexChainLess(X).post();
 
 
         try {
-            solver.propagate();
+            model.propagate();
             X[0][0].updateLowerBound(1, Null);
             X[0][1].updateLowerBound(1, Null);
             X[1][0].updateLowerBound(1, Null);
             X[2][1].updateLowerBound(1, Null);
-            solver.propagate();
+            model.propagate();
             X[2][1].instantiateTo(1, Null);
-            solver.propagate();
+            model.propagate();
         } catch (ContradictionException e) {
             fail();
         }

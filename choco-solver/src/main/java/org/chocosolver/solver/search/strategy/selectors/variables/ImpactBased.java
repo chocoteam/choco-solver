@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
@@ -79,7 +79,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     PoolManager<IntDecision> decisionPool;
 
-    protected Solver solver;
+    protected Model model;
 
     protected boolean asgntFailed; // does the assignment leads to a failure
 
@@ -103,14 +103,14 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      */
     public ImpactBased(IntVar[] ivariables, int alpha, int split, int nodeImpact, long seed, boolean initOnly) { //TODO: node impacts
         super(ivariables);
-        this.solver = ivariables[0].getSolver();
+        this.model = ivariables[0].getModel();
         this.aging = alpha;
         this.split = (int) Math.pow(2, split);
-        this.searchSpaceSize = solver.getEnvironment().makeFloat();
+        this.searchSpaceSize = model.getEnvironment().makeFloat();
         random = new Random(seed);
         decisionPool = new PoolManager<>();
         this.nodeImpact = nodeImpact;
-        if (!initOnly) solver.plugMonitor(this);
+        if (!initOnly) model.plugMonitor(this);
     }
 
     @Override
@@ -263,7 +263,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 //            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
             return false;
         } else if (System.currentTimeMillis() > tl) {
-            if(solver.getSettings().warnUser()) Chatterbox.err.printf("impact Search stops its init phase -- reach time limit!");
+            if(model.getSettings().warnUser()) Chatterbox.err.printf("impact Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
                 IntVar v = vars[i];
                 int offset = v.getLB();
@@ -340,29 +340,29 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      * @return the impact I(v = a)
      */
     private double computeImpact(IntVar v, int a, double before) {
-        solver.getEnvironment().worldPush();
+        model.getEnvironment().worldPush();
         double after;
         try {
             v.instantiateTo(a, this);
-            solver.getEngine().propagate();
+            model.getEngine().propagate();
             after = searchSpaceSize();
             return 1.0d - (after / before);
         } catch (ContradictionException e) {
-            solver.getEngine().flush();
-            solver.getEnvironment().worldPop();
-            solver.getEnvironment().worldPush();
+            model.getEngine().flush();
+            model.getEnvironment().worldPop();
+            model.getEnvironment().worldPush();
             // if the value leads to fail, then the value can be removed from the domain
             try {
                 v.removeValue(a, this);
-                solver.getEngine().propagate();
+                model.getEngine().propagate();
             } catch (ContradictionException ex) {
                 learnsAndFails = true;
                 lAfVar = v;
-                solver.getEngine().flush();
+                model.getEngine().flush();
             }
             return 1.0d;
         }finally {
-            solver.getEnvironment().worldPop();
+            model.getEnvironment().worldPop();
         }
     }
 
@@ -399,7 +399,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     protected void reevaluateImpact() {
-        if (nodeImpact > 0 && solver.getMeasures().getNodeCount() % nodeImpact == 0) {
+        if (nodeImpact > 0 && model.getMeasures().getNodeCount() % nodeImpact == 0) {
             double before = searchSpaceSize.get();
             learnsAndFails = false;
             for (int i = 0; i < vars.length; i++) {

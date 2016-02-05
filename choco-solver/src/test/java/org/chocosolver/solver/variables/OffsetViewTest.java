@@ -29,11 +29,8 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
@@ -54,7 +51,7 @@ public class OffsetViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar X = s.intVar("X", 1, 3, false);
         IntVar Y = s.intOffsetView(X, 2);
@@ -71,7 +68,7 @@ public class OffsetViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        Solver s = new Solver();
+        Model s = new Model();
 
         IntVar X = s.intVar("X", 1, 4, false);
         IntVar Y = s.intOffsetView(X, 3);
@@ -85,8 +82,8 @@ public class OffsetViewTest {
         assertEquals(s.getMeasures().getSolutionCount(), 4);
     }
 
-    private Solver bijective(int low, int upp, int coeff) {
-        Solver s = new Solver();
+    private Model bijective(int low, int upp, int coeff) {
+        Model s = new Model();
 
         IntVar X = s.intVar("X", low, upp, false);
         IntVar Y = s.intOffsetView(X, coeff);
@@ -100,8 +97,8 @@ public class OffsetViewTest {
         return s;
     }
 
-    private Solver contraint(int low, int upp, int coeff) {
-        Solver s = new Solver();
+    private Model contraint(int low, int upp, int coeff) {
+        Model s = new Model();
 
         IntVar X = s.intVar("X", low, upp, false);
         IntVar Y = s.intVar("Y", low + coeff, upp + coeff, false);
@@ -125,8 +122,8 @@ public class OffsetViewTest {
             int upp = low + rand.nextInt(1000);
             int coeff = rand.nextInt(50);
 
-            Solver sb = bijective(low, upp, coeff);
-            Solver sc = contraint(low, upp, coeff);
+            Model sb = bijective(low, upp, coeff);
+            Model sc = contraint(low, upp, coeff);
             sb.findAllSolutions();
             sc.findAllSolutions();
             Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
@@ -137,8 +134,8 @@ public class OffsetViewTest {
 
     @Test(groups="10s", timeOut=60000)
     public void testRandom2() {
-        Solver sb = bijective(1, 1999, 3);
-        Solver sc = contraint(1, 1999, 3);
+        Model sb = bijective(1, 1999, 3);
+        Model sc = contraint(1, 1999, 3);
         sb.findAllSolutions();
         sc.findAllSolutions();
         Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
@@ -150,8 +147,8 @@ public class OffsetViewTest {
     public void testRandom3() {
         int N = 9999;
         for (int i = 1; i < 10; i++) {
-            Solver sb = bijective(1, N, 3);
-            Solver sc = contraint(1, N, 3);
+            Model sb = bijective(1, N, 3);
+            Model sc = contraint(1, N, 3);
             sb.findAllSolutions();
             sc.findAllSolutions();
             Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
@@ -165,10 +162,10 @@ public class OffsetViewTest {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
-            Solver solver = new Solver();
+            Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = solver.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = solver.intOffsetView(o, 2);
+            IntVar o = model.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
+            IntVar v = model.intOffsetView(o, 2);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(vit.next() - 2));
@@ -199,13 +196,13 @@ public class OffsetViewTest {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
-            Solver solver = new Solver();
+            Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
-            IntVar o = solver.intVar("o", domains[0]);
-            IntVar v = solver.intOffsetView(o, 2);
-			if(!solver.getSettings().enableViews()){
+            IntVar o = model.intVar("o", domains[0]);
+            IntVar v = model.intOffsetView(o, 2);
+			if(!model.getSettings().enableViews()){
 				try {
-					solver.propagate();
+					model.propagate();
 				}catch (Exception e){
 					e.printStackTrace();
 					throw new UnsupportedOperationException();

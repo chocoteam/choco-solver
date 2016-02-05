@@ -29,10 +29,8 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ESat;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.util.ESat.TRUE;
@@ -49,7 +47,7 @@ public class EqTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar two1 = s.intVar(2);
         IntVar two2 = s.intVar(2);
         s.arithm(two1, "=", two2).post();
@@ -60,7 +58,7 @@ public class EqTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar three = s.intVar(3);
         IntVar two = s.intVar(2);
         s.arithm(three, "-", two, "=", 1).post();
@@ -70,7 +68,7 @@ public class EqTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar three = s.intVar(3);
         IntVar two = s.intVar(2);
         s.arithm(three, "=", two, "+", 1).post();

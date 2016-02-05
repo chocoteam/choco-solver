@@ -29,7 +29,7 @@
  */
 package org.chocosolver.samples;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
@@ -53,16 +53,12 @@ public class DecomposedAllDifferent extends AbstractProblem {
     IntVar[] X;
     BoolVar[] B;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Decomp allDiff");
-    }
-
 
     @Override
     public void buildModel() {
+        model = new Model();
         int i = n;
-        X = solver.intVarArray("v", n, 0, n, false);
+        X = model.intVarArray("v", n, 0, n, false);
         int[] union = new int[n];
         for (int j = 0; j < i; j++) {
             union[j] = j;
@@ -73,29 +69,22 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
         BoolVar[][][] mA = new BoolVar[i][][];
         List<BoolVar> listA = new ArrayList<>();
-//                List<BoolVar> Blist = new ArrayList<BoolVar>();
         for (int j = 0; j < i; j++) {
             mA[j] = new BoolVar[u - l + 1][];
             for (int p = l; p <= u; p++) {
                 mA[j][p - l] = new BoolVar[u - p + 1];
-//                        BoolVar b = VariableFactory.bool("B" + j + "_" + p, solver);
-//                        Blist.add(b);
-//                        Constraint cB = ConstraintFactory.leq(X[j], l, solver, eng2);
-//                        Constraint ocB = ConstraintFactory.geq(X[j], l + 1, solver, eng2);
-//                        lcstrs.add(new ReifiedConstraint(b, cB, ocB, solver, eng2));
                 for (int q = p; q <= u; q++) {
-                    BoolVar a = solver.boolVar("A" + j + "_" + p + "_" + q);
+                    BoolVar a = model.boolVar("A" + j + "_" + p + "_" + q);
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
-                    Constraint cA = solver.member(X[j], p, q);
-                    Constraint ocA = solver.notMember(X[j], p, q);
+                    Constraint cA = model.member(X[j], p, q);
+                    Constraint ocA = model.notMember(X[j], p, q);
 
-                    solver.ifThenElse(a, cA, ocA);
+                    model.ifThenElse(a, cA, ocA);
                 }
             }
         }
-//                BoolVar[] B =  Blist.toArray(new BoolVar[Blist.size()]);
 
         ArrayList<ArrayList<ArrayList<BoolVar>>> apmA = new ArrayList<>();
 
@@ -116,7 +105,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.sum(ai, "=", solver.intVar("scal", 0, q - p + 1, true)).post();
+                model.sum(ai, "=", model.intVar("scal", 0, q - p + 1, true)).post();
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);
@@ -124,7 +113,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(X));
+        model.set(IntStrategyFactory.lexico_LB(X));
         /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
@@ -144,8 +133,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void solve() {
-        //solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) solver.getVars()[m - 1]);
-        solver.findAllSolutions();
+        model.findAllSolutions();
     }
 
     @Override

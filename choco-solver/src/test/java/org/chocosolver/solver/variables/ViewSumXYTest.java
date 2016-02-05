@@ -29,10 +29,8 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -56,15 +54,15 @@ public class ViewSumXYTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
-        IntVar X = solver.intVar("X", 1, 10, false);
-        IntVar Y = solver.intVar("Y", 3, 8, false);
-        IntVar Z = solver.intVar("Z", 0, 200, false);
-        solver.sum(new IntVar[]{X, Y}, "=", Z).post();
+        IntVar X = model.intVar("X", 1, 10, false);
+        IntVar Y = model.intVar("Y", 3, 8, false);
+        IntVar Z = model.intVar("Z", 0, 200, false);
+        model.sum(new IntVar[]{X, Y}, "=", Z).post();
 
         try {
-            solver.propagate();
+            model.propagate();
             assertFalse(Z.isInstantiated());
             assertEquals(Z.getLB(), 4);
             assertEquals(Z.getUB(), 18);
@@ -77,24 +75,24 @@ public class ViewSumXYTest {
             assertEquals(Z.previousValue(4), MIN_VALUE);
 
             Z.updateLowerBound(12, Null);
-            solver.propagate();
+            model.propagate();
             assertEquals(X.getLB(), 4);
             assertEquals(X.getUB(), 10);
             assertEquals(Y.getLB(), 3);
             assertEquals(Y.getUB(), 8);
 
             Y.updateUpperBound(-2, Null);
-            solver.propagate();
+            model.propagate();
             assertEquals(Y.getUB(), -2);
             assertEquals(X.getLB(), 2);
 
             Y.removeValue(-4, Null);
-            solver.propagate();
+            model.propagate();
             assertFalse(Y.contains(-4));
             assertFalse(X.contains(4));
 
             Y.removeInterval(-8, -6, Null);
-            solver.propagate();
+            model.propagate();
             assertFalse(Y.contains(-8));
             assertFalse(Y.contains(-7));
             assertFalse(Y.contains(-6));
@@ -106,7 +104,7 @@ public class ViewSumXYTest {
             assertEquals(Y.getDomainSize(), 4);
 
             Y.instantiateTo(-5, Null);
-            solver.propagate();
+            model.propagate();
             assertTrue(X.isInstantiated());
             assertTrue(Y.isInstantiated());
             assertEquals(X.getValue(), 5);
@@ -121,7 +119,7 @@ public class ViewSumXYTest {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
             random.setSeed(seed);
-            Solver ref = new Solver();
+            Model ref = new Model();
             {
                 IntVar[] xs = new IntVar[3];
                 xs[0] = ref.intVar("x", 1, 5, true);
@@ -130,19 +128,19 @@ public class ViewSumXYTest {
                 ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
                 ref.set(random_bound(xs, seed));
             }
-            Solver solver = new Solver();
+            Model model = new Model();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = solver.intVar("x", 1, 5, true);
-                xs[1] = solver.intVar("y", 1, 5, true);
-                IntVar Z = solver.intVar("Z", 0, 200, false);
-                solver.sum(xs, "=", Z).post();
+                xs[0] = model.intVar("x", 1, 5, true);
+                xs[1] = model.intVar("y", 1, 5, true);
+                IntVar Z = model.intVar("Z", 0, 200, false);
+                model.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(random_bound(xs, seed));
+                model.set(random_bound(xs, seed));
             }
             ref.findAllSolutions();
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }
@@ -152,7 +150,7 @@ public class ViewSumXYTest {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
             random.setSeed(seed);
-            Solver ref = new Solver();
+            Model ref = new Model();
             {
                 IntVar[] xs = new IntVar[3];
                 xs[0] = ref.intVar("x", 1, 5, false);
@@ -161,19 +159,19 @@ public class ViewSumXYTest {
                 ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
                 ref.set(random_value(xs, seed));
             }
-            Solver solver = new Solver();
+            Model model = new Model();
             {
                 IntVar[] xs = new IntVar[2];
-                xs[0] = solver.intVar("x", 1, 5, false);
-                xs[1] = solver.intVar("y", 1, 5, false);
-                IntVar Z = solver.intVar("Z", 0, 200, false);
-                solver.sum(xs, "=", Z).post();
+                xs[0] = model.intVar("x", 1, 5, false);
+                xs[1] = model.intVar("y", 1, 5, false);
+                IntVar Z = model.intVar("Z", 0, 200, false);
+                model.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(random_value(xs, seed));
+                model.set(random_value(xs, seed));
             }
             ref.findAllSolutions();
-            solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
+            model.findAllSolutions();
+            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }

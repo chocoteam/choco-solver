@@ -34,9 +34,8 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
@@ -49,14 +48,14 @@ public class NValueTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testAtLeast() {
-        Solver solver = new Solver();
-        final IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
-        final IntVar N = solver.intVar("N", 2, 3, false);
-        solver.atLeastNValues(XS, N, false).post();
-        showStatistics(solver);
-        showSolutions(solver);
+        Model model = new Model();
+        final IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
+        final IntVar N = model.intVar("N", 2, 3, false);
+        model.atLeastNValues(XS, N, false).post();
+        showStatistics(model);
+        showSolutions(model);
         final BitSet values = new BitSet(3);
-        solver.plugMonitor((IMonitorSolution) () -> {
+        model.plugMonitor((IMonitorSolution) () -> {
             values.clear();
             for (IntVar v : XS) {
                 if (!v.isInstantiated()) {
@@ -71,19 +70,19 @@ public class NValueTest {
                 throw new UnsupportedOperationException();
             }
         });
-        solver.findAllSolutions();
+        model.findAllSolutions();
     }
 
 	@Test(groups="1s", timeOut=60000)
 	public void testAtMost() {
-        Solver solver = new Solver();
-        final IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
-        final IntVar N = solver.intVar("N", 2, 3, false);
-        solver.atMostNVvalues(XS, N, false).post();
-        showStatistics(solver);
-        showSolutions(solver);
+        Model model = new Model();
+        final IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
+        final IntVar N = model.intVar("N", 2, 3, false);
+        model.atMostNVvalues(XS, N, false).post();
+        showStatistics(model);
+        showSolutions(model);
         final BitSet values = new BitSet(3);
-        solver.plugMonitor((IMonitorSolution) () -> {
+        model.plugMonitor((IMonitorSolution) () -> {
             values.clear();
             for (IntVar v : XS) {
                 if (!v.isInstantiated()) {
@@ -98,6 +97,6 @@ public class NValueTest {
                 throw new UnsupportedOperationException();
             }
         });
-        solver.findAllSolutions();
+        model.findAllSolutions();
     }
 }

@@ -29,10 +29,10 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 /**
- * @deprecated : variable creation should be done through the {@link Solver} object
+ * @deprecated : variable creation should be done through the {@link Model} object
  * which extends {@link org.chocosolver.solver.variables.IVariableFactory}
  *
  * This class will be removed in versions > 3.4.0

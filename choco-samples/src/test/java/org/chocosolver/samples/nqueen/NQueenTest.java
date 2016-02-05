@@ -30,7 +30,7 @@
 package org.chocosolver.samples.nqueen;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -75,29 +75,29 @@ public class NQueenTest {
         return "(s:" + size + " pe:" + peType + " pi:" + piType + " sl:" + slType + ")";
     }
 
-    private void assertIt(Solver s) {
+    private void assertIt(Model s) {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), NB_QUEENS_SOLUTION[size], "nb sol incorrect");
     }
 
-    protected Solver modeler(AbstractNQueen nq, int size) {
+    protected Model modeler(AbstractNQueen nq, int size) {
         nq.readArgs("-q", Integer.toString(size));
         nq.createSolver();
         nq.buildModel();
         nq.configureSearch();
-        return nq.getSolver();
+        return nq.getModel();
     }
 
 
     @Test(groups="5m", timeOut=300000)
     public void testBinary() {
-        Solver s = modeler(new NQueenBinary(), size);
+        Model s = modeler(new NQueenBinary(), size);
         s.findAllSolutions();
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testLinBinary() {
-        Solver s = modeler(new NQueenLinearBinary(), size);
+        Model s = modeler(new NQueenLinearBinary(), size);
         s.findAllSolutions();
         assertIt(s);
         //s.findSolution();
@@ -105,21 +105,21 @@ public class NQueenTest {
 
     @Test(groups="5m", timeOut=300000)
     public void testGlobalBinary() {
-        Solver s = modeler(new NQueenBinaryGlobal(), size);
+        Model s = modeler(new NQueenBinaryGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testGlobal() throws ContradictionException {
-        Solver s = modeler(new NQueenGlobal(), size);
+        Model s = modeler(new NQueenGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testDualBinary() {
-        Solver s = modeler(new NQueenDualBinary(), size);
+        Model s = modeler(new NQueenDualBinary(), size);
         s.findAllSolutions();
         assertIt(s);
     }
@@ -127,14 +127,14 @@ public class NQueenTest {
 
     @Test(groups="5m", timeOut=300000)
     public void testDualGlobal() {
-        Solver s = modeler(new NQueenDualGlobal(), size);
+        Model s = modeler(new NQueenDualGlobal(), size);
         s.findAllSolutions();
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testAll1() {
-        Solver sol;
+        Model sol;
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
             sol.findAllSolutions();
@@ -152,7 +152,7 @@ public class NQueenTest {
 
     @Test(groups="5m", timeOut=300000)
     public void testAll2() {
-        Solver sol;
+        Model sol;
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
             sol.findAllSolutions();
@@ -174,10 +174,10 @@ public class NQueenTest {
     @Test(groups="1s", timeOut=60000)
     public void testBug1() throws ContradictionException {
 //        "a corriger!!!, ca doit etre du a prop cond des propagators";
-        Solver solver = modeler(new NQueenBinaryGlobal(), 16);
-        solver.propagate();
+        Model model = modeler(new NQueenBinaryGlobal(), 16);
+        model.propagate();
 		int offset = 2;
-        Variable[] vars = solver.getVars();
+        Variable[] vars = model.getVars();
         ((IntVar) vars[offset]).instantiateTo(1, Cause.Null);
         ((IntVar) vars[1+offset]).instantiateTo(3, Cause.Null);
         ((IntVar) vars[2+offset]).instantiateTo(5, Cause.Null);
@@ -185,11 +185,11 @@ public class NQueenTest {
         ((IntVar) vars[4+offset]).instantiateTo(12, Cause.Null);
         ((IntVar) vars[5+offset]).instantiateTo(16, Cause.Null);
         ((IntVar) vars[6+offset]).instantiateTo(4, Cause.Null);
-        solver.propagate();
+        model.propagate();
 //        System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7+offset]).instantiateTo(7, Cause.Null);
         try {
-            solver.propagate();
+            model.propagate();
             Assert.fail();
         } catch (ContradictionException ex) {
 //            System.out.printf("%s\n", ex.getMessage());

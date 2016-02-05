@@ -34,8 +34,7 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
@@ -72,22 +71,22 @@ public class TableTest {
             tuples.add(2, 2, 2);
             tuples.add(3, 3, 3);
 
-            Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("X", 3, 1, 2, false);
-            Constraint tableConstraint = solver.table(vars, tuples, a);
+            Model model = new Model();
+            IntVar[] vars = model.intVarArray("X", 3, 1, 2, false);
+            Constraint tableConstraint = model.table(vars, tuples, a);
             tableConstraint.post();
 
-            solver.findSolution();
+            model.findSolution();
         }
     }
 
 
-    private void allEquals(Solver solver, IntVar[] vars, int algo) {
+    private void allEquals(Model model, IntVar[] vars, int algo) {
         if (algo > -1) {
-            solver.table(vars, TuplesFactory.allEquals(vars), ALGOS[algo]).post();
+            model.table(vars, TuplesFactory.allEquals(vars), ALGOS[algo]).post();
         } else {
             for (int i = 1; i < vars.length; i++) {
-                solver.arithm(vars[0], "=", vars[i]).post();
+                model.arithm(vars[0], "=", vars[i]).post();
             }
         }
     }
@@ -96,15 +95,15 @@ public class TableTest {
     public void testAllEquals() {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {10, 2, 4}, {5, 0, 20}};
         for (int p = 0; p < params.length; p++) {
-            Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
-            allEquals(solver, vars, -1);
-            long nbs = solver.findAllSolutions();
-            long nbn = solver.getMeasures().getNodeCount();
+            Model model = new Model();
+            IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
+            allEquals(model, vars, -1);
+            long nbs = model.findAllSolutions();
+            long nbn = model.getMeasures().getNodeCount();
 //            System.out.printf("%s\n", solver.getMeasures().toOneLineString());
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 10; s++) {
-                    Solver tsolver = new Solver(ALGOS[a]);
+                    Model tsolver = new Model(ALGOS[a]);
                     IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                     allEquals(tsolver, tvars, a);
                     tsolver.set(ISF.random_value(tvars, s));
@@ -116,11 +115,11 @@ public class TableTest {
         }
     }
 
-    private void allDifferent(Solver solver, IntVar[] vars, int algo) {
+    private void allDifferent(Model model, IntVar[] vars, int algo) {
         if (algo > -1) {
-            solver.table(vars, TuplesFactory.allDifferent(vars), ALGOS[algo]).post();
+            model.table(vars, TuplesFactory.allDifferent(vars), ALGOS[algo]).post();
         } else {
-            solver.allDifferent(vars, "AC").post();
+            model.allDifferent(vars, "AC").post();
         }
     }
 
@@ -129,15 +128,15 @@ public class TableTest {
         int[][] params = {{5, 2, 9}, {5, -2, 3}, {7, 0, 7}};
 
         for (int p = 2; p < params.length; p++) {
-            Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
-            allDifferent(solver, vars, -1);
-            long nbs = solver.findAllSolutions();
-            long nbn = solver.getMeasures().getNodeCount();
+            Model model = new Model();
+            IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
+            allDifferent(model, vars, -1);
+            long nbs = model.findAllSolutions();
+            long nbn = model.getMeasures().getNodeCount();
 //            System.out.printf("%s\n===\n", solver.getMeasures().toOneLineString());
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 1; s++) {
-                    Solver tsolver = new Solver(ALGOS[a]);
+                    Model tsolver = new Model(ALGOS[a]);
                     IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                     allDifferent(tsolver, tvars, a);
                     tsolver.set(ISF.random_value(tvars, s));
@@ -156,15 +155,15 @@ public class TableTest {
     }
 
     public static void test(String type) {
-        Solver solver;
+        Model model;
         IntVar[] vars;
         IntVar sum;
         IntVar[] reified;
-        solver = new Solver();
-        vars = solver.intVarArray("vars", 6, new int[]{1, 2, 3, 4, 5, 6, 10, 45, 57});
-        reified = solver.intVarArray("rei", vars.length, new int[]{0, 1});
-        sum = solver.intVar("sum", 0, reified.length, true);
-        solver.allDifferent(vars, "AC").post();
+        model = new Model();
+        vars = model.intVarArray("vars", 6, new int[]{1, 2, 3, 4, 5, 6, 10, 45, 57});
+        reified = model.intVarArray("rei", vars.length, new int[]{0, 1});
+        sum = model.intVar("sum", 0, reified.length, true);
+        model.allDifferent(vars, "AC").post();
         Tuples tuples = new Tuples(true);
         tuples.add(1, 0);
         tuples.add(2, 1);
@@ -177,22 +176,22 @@ public class TableTest {
         tuples.add(57, 1);
 
         for (int i = 0; i < vars.length; i++) {
-            Constraint c = solver.table(vars[i], reified[i], tuples, type);
+            Constraint c = model.table(vars[i], reified[i], tuples, type);
             c.post();
         }
-        solver.sum(reified, "=", sum).post();
-        solver.findOptimalSolution(MINIMIZE, sum);
-        if (solver.getMeasures().getSolutionCount() > 0) {
+        model.sum(reified, "=", sum).post();
+        model.findOptimalSolution(MINIMIZE, sum);
+        if (model.getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
-                out.print(solver.getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");
+                out.print(model.getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");
             }
             out.println("");
             for (int i = 0; i < reified.length; i++) {
                 out.print(reified[i].getValue() + "\t");
             }
-            out.println("\n" + "obj = " + solver.getSolutionRecorder().getLastSolution().getIntVal(sum) + ", backtracks = " + solver.getMeasures().getBackTrackCount());
+            out.println("\n" + "obj = " + model.getSolutionRecorder().getLastSolution().getIntVal(sum) + ", backtracks = " + model.getMeasures().getBackTrackCount());
         }
-        assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
+        assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -206,38 +205,38 @@ public class TableTest {
     public static void testThierry1() {
         String[] ALGOS = {"FC", "GAC2001", "GAC3rm"};
         for(String s : ALGOS) {
-            Solver solver = new Solver();
-            IntVar[] vars = solver.intVarArray("vars", 10, 0, 100, false);
+            Model model = new Model();
+            IntVar[] vars = model.intVarArray("vars", 10, 0, 100, false);
             Tuples t = new Tuples(false);
             t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
             t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
-            solver.table(vars, t, s).post();
-            solver.findSolution();
+            model.table(vars, t, s).post();
+            model.findSolution();
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMDD1() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("X", 3, 0, 1, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("X", 3, 0, 1, false);
         Tuples tuples = new Tuples();
         tuples.add(0, 0, 0);
         tuples.add(1, 1, 1);
-        solver.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMDD2() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("X", 3, 0, 2, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("X", 3, 0, 2, false);
         Tuples tuples = new Tuples();
         tuples.add(0, 1, 2);
         tuples.add(2, 1, 0);
-        solver.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
 
@@ -247,19 +246,19 @@ public class TableTest {
         final Random rnd = new Random();
         for (int p = 0; p < params.length; p++) {
             for (long seed = 0; seed < 10; seed++) {
-                Solver solver = new Solver();
-                IntVar[] vars = solver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
+                Model model = new Model();
+                IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                 rnd.setSeed(seed);
                 Tuples tuples = generateTuples(values -> rnd.nextBoolean(), true, vars);
-                solver.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-                solver.set(random_value(vars, seed));
-                long nbs = solver.findAllSolutions();
-                long nbn = solver.getMeasures().getNodeCount();
+                model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
+                model.set(random_value(vars, seed));
+                long nbs = model.findAllSolutions();
+                long nbn = model.getMeasures().getNodeCount();
                 for (int a = 0; a < ALGOS.length; a++) {
                     for (int s = 0; s < 1; s++) {
-                        Solver tsolver = new Solver(ALGOS[a]);
+                        Model tsolver = new Model(ALGOS[a]);
                         IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
-                        solver.table(tvars, tuples, ALGOS[a]).post();
+                        model.table(tvars, tuples, ALGOS[a]).post();
                         tsolver.set(random_value(tvars, s));
                         assertEquals(tsolver.findAllSolutions(), nbs);
                         if (a > 1) assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
@@ -271,8 +270,8 @@ public class TableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTuplesTable1() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 4, 0, 3, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 4, 0, 3, false);
         Tuples t = new Tuples(true);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -290,8 +289,8 @@ public class TableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTuplesTable2() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 4, 0, 3, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 4, 0, 3, false);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -309,8 +308,8 @@ public class TableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTuplesLargeTable1() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 4, 0, 3, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 4, 0, 3, false);
         Tuples t = new Tuples(true);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -328,8 +327,8 @@ public class TableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTuplesLargeTable2() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 4, 0, 3, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 4, 0, 3, false);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -347,8 +346,8 @@ public class TableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTuplesVeryLargeTable1() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 4, 0, 3, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 4, 0, 3, false);
         Tuples t = new Tuples(true);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -366,8 +365,8 @@ public class TableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTuplesVeryLargeTable2() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 4, 0, 3, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 4, 0, 3, false);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -385,8 +384,8 @@ public class TableTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTuplesVeryLargeTableDuplicate() {
-        Solver solver = new Solver();
-        IntVar[] vars = solver.intVarArray("vars", 4, 0, 3, false);
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 4, 0, 3, false);
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1);
         t.add(1, 1, 2, 1);
@@ -407,15 +406,15 @@ public class TableTest {
     @Test(groups="1s", timeOut=60000)
     public void testPDav() {
         for (String a : ALGOS) {
-            Solver solver = new Solver();
+            Model model = new Model();
             IntVar x, y, z;
-            x = solver.intVar("x", 1, 3, false);
-            y = solver.intVar("y", 0, 3, false);
-            z = solver.intVar("z", 0, 1, false);
+            x = model.intVar("x", 1, 3, false);
+            y = model.intVar("y", 0, 3, false);
+            z = model.intVar("z", 0, 1, false);
             Tuples ts = scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
-            solver.table(new IntVar[]{x, z, z, y}, ts, a).post();
-            solver.findAllSolutions();
-            assertEquals(1, solver.getMeasures().getSolutionCount());
+            model.table(new IntVar[]{x, z, z, y}, ts, a).post();
+            model.findAllSolutions();
+            assertEquals(1, model.getMeasures().getSolutionCount());
         }
     }
 }

@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.nary.globalcardinality;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.BoolVar;
@@ -66,15 +66,15 @@ public class GlobalCardinality extends Constraint {
 		return new PropFastGCC(vars, values, map, cards);
 	}
 
-    public static Constraint reformulate(IntVar[] vars, IntVar[] card, Solver solver) {
+    public static Constraint reformulate(IntVar[] vars, IntVar[] card, Model model) {
         List<Constraint> cstrs = new ArrayList<>();
         for (int i = 0; i < card.length; i++) {
-			IntVar cste = solver.intVar(i);
-			BoolVar[] bs = solver.boolVarArray("b_" + i, vars.length);
+			IntVar cste = model.intVar(i);
+			BoolVar[] bs = model.boolVarArray("b_" + i, vars.length);
             for (int j = 0; j < vars.length; j++) {
-				solver.ifThenElse(bs[j], solver.arithm(vars[j], "=", cste), solver.arithm(vars[j], "!=", cste));
+				model.ifThenElse(bs[j], model.arithm(vars[j], "=", cste), model.arithm(vars[j], "!=", cste));
             }
-            cstrs.add(solver.sum(bs, "=", card[i]));
+            cstrs.add(model.sum(bs, "=", card[i]));
         }
         return Constraint.merge("reformulatedGCC",cstrs.toArray(new Constraint[0]));
     }

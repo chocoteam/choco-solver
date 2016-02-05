@@ -301,7 +301,7 @@ public class EqView extends IntView {
 
     @Override
     public IntVar duplicate() {
-        return solver.intEqView(this.var);
+        return model.intEqView(this.var);
     }
 
     @Override

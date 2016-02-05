@@ -31,15 +31,12 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
-
-import java.util.Arrays;
 
 import static java.util.Arrays.fill;
 import static org.chocosolver.util.tools.ArrayUtils.append;
@@ -90,62 +87,59 @@ public class WarehouseLocation extends AbstractProblem {
         }
     }
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("WarehouseLocation");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         setUp();
-        suppliers = solver.intVarArray("sup", nS, 0, nWH - 1, false);
-        open = solver.boolVarArray("o", nWH);
-        costPerStore = solver.intVarArray("cPs", nS, 0, 9999, true);
-        totCost = solver.intVar("cost", 0, 99999, true);
+        suppliers = model.intVarArray("sup", nS, 0, nWH - 1, false);
+        open = model.boolVarArray("o", nWH);
+        costPerStore = model.intVarArray("cPs", nS, 0, 9999, true);
+        totCost = model.intVar("cost", 0, 99999, true);
 
         // A warehouse is open, if it supplies to a store
-        IntVar ONE = solver.intVar(1);
+        IntVar ONE = model.intVar(1);
         for (int s = 0; s < nS; s++) {
-            solver.element(ONE, open, suppliers[s], 0).post();
+            model.element(ONE, open, suppliers[s], 0).post();
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.element(costPerStore[s], c_supply[s], suppliers[s], 0).post();
+            model.element(costPerStore[s], c_supply[s], suppliers[s], 0).post();
         }
         for (int w = 0; w < nWH; w++) {
-            IntVar tmp = solver.intVar("occur_" + w, 0, suppliers.length, true);
-            solver.count(w, suppliers, tmp).post();
-            solver.arithm(tmp, ">=", open[w]).post();
+            IntVar tmp = model.intVar("occur_" + w, 0, suppliers.length, true);
+            model.count(w, suppliers, tmp).post();
+            model.arithm(tmp, ">=", open[w]).post();
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
-            IntVar tmp = solver.intVar("occur_" + w, 0, capacity[w], true);
-            solver.count(w, suppliers, tmp).post();
+            IntVar tmp = model.intVar("occur_" + w, 0, capacity[w], true);
+            model.count(w, suppliers, tmp).post();
         }
 
         int[] coeffs = new int[nWH + nS];
         fill(coeffs, 0, nWH, cost);
         fill(coeffs, nWH, nWH + nS, 1);
-        solver.scalar(append(open, costPerStore), coeffs, "=", totCost).post();
+        model.scalar(append(open, costPerStore), coeffs, "=", totCost).post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(suppliers),
+        model.set(IntStrategyFactory.lexico_LB(suppliers),
 				IntStrategyFactory.maxReg_LB(costPerStore)
 		);
     }
 
     @Override
     public void solve() {
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totCost);
+        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, totCost);
     }
 
     @Override
     public void prettyOut() {
         System.out.println("Warehouse location problem");
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < nWH; i++) {
                 if (open[i].getValue() > 0) {
                     st.append(String.format("\tw#%d:\n\t", i));

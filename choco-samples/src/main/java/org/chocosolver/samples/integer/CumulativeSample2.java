@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -48,38 +48,34 @@ public class CumulativeSample2 extends AbstractProblem {
 	IntVar maxEnd;
 
 	@Override
-	public void createSolver(){
-		solver = new Solver("schedule");
-	}
-
-	@Override
 	public void buildModel() {
+		model = new Model("schedule");
 		// build variables
 		starts = new IntVar[NUM_OF_TASKS];
 		ends = new IntVar[NUM_OF_TASKS];
-		IntVar duration = solver.intVar(10);
-		maxEnd = solver.intVar("maxEnd", 0, HORIZON, true);
+		IntVar duration = model.intVar(10);
+		maxEnd = model.intVar("maxEnd", 0, HORIZON, true);
 		IntVar[] res = new IntVar[NUM_OF_TASKS];
 		Task[] tasks = new Task[NUM_OF_TASKS];
 		for (int iTask = 0; iTask < NUM_OF_TASKS; ++iTask) {
-			starts[iTask] = solver.intVar("start" + iTask, 0, HORIZON, true);
-			ends[iTask] = solver.intVar("ends" + iTask, 0, HORIZON, true);
+			starts[iTask] = model.intVar("start" + iTask, 0, HORIZON, true);
+			ends[iTask] = model.intVar("ends" + iTask, 0, HORIZON, true);
 			tasks[iTask] = new Task(starts[iTask], duration, ends[iTask]);
-			res[iTask] = solver.intVar(1);
+			res[iTask] = model.intVar(1);
 		}
 
 		// post a cumulative constraint
-		solver.cumulative(tasks, res, solver.intVar(1), false).post();
+		model.cumulative(tasks, res, model.intVar(1), false).post();
 
 		// maintain makespan
-		solver.max(maxEnd, ends).post();
+		model.max(maxEnd, ends).post();
 
 		// add precedences
 		int prevIdx = -1;
 		for (int iTask = 999; iTask >= 0; --iTask) {
 			if (prevIdx != -1) {
 				if (iTask % 2 == 0 || iTask % 3 == 0) {
-					solver.arithm(starts[iTask], ">=", ends[prevIdx]).post();
+					model.arithm(starts[iTask], ">=", ends[prevIdx]).post();
 				}
 			}
 			prevIdx = iTask;
@@ -88,17 +84,17 @@ public class CumulativeSample2 extends AbstractProblem {
 
 	@Override
 	public void configureSearch(){
-		solver.set(IntStrategyFactory.lexico_LB(starts));
+		model.set(IntStrategyFactory.lexico_LB(starts));
 	}
 
 	@Override
 	public void solve(){
-		solver.findSolution();
+		model.findSolution();
 	}
 
 	@Override
 	public void prettyOut(){
-		if (solver.isFeasible() == ESat.TRUE) {
+		if (model.isFeasible() == ESat.TRUE) {
 			System.out.println("solution found");
 		}
 	}

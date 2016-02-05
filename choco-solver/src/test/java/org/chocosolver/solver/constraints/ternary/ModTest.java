@@ -29,12 +29,10 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
@@ -55,17 +53,17 @@ public class ModTest extends AbstractTernaryTest {
 	}
 
 	@Override
-	protected Constraint make(IntVar[] vars, Solver s) {
+	protected Constraint make(IntVar[] vars, Model s) {
 		return s.mod(vars[0], vars[1], vars[2]);
 	}
 
 	@Test(groups="1s", timeOut=60000)
 	public void test2() {
-		Solver solver = new Solver();
-		IntVar res = solver.intVar("r", 1, 2, true);
-		solver.mod(res, solver.intVar(2), solver.intVar(1)).post();
+		Model model = new Model();
+		IntVar res = model.intVar("r", 1, 2, true);
+		model.mod(res, model.intVar(2), model.intVar(1)).post();
 		try {
-			solver.propagate();
+			model.propagate();
 			assertTrue(res.isInstantiatedTo(1));
 		} catch (ContradictionException e) {
 			fail();
@@ -74,7 +72,7 @@ public class ModTest extends AbstractTernaryTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testJL() {
-		Solver s = new Solver();
+		Model s = new Model();
 		IntVar dividend = s.intVar("dividend", 2, 3, false);
 		IntVar divisor = s.intVar(1);
 		IntVar remainder = s.intVar("remainder", 1, 2, false);

@@ -29,15 +29,13 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.Counter;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.CounterState;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -57,14 +55,14 @@ public class CostRegularTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testSimpleAuto() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 10;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", 3, 4, true);
+        IntVar cost = model.intVar("z", 3, 4, true);
 
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -85,23 +83,23 @@ public class CostRegularTest {
             costs[i][0][1] = 1;
             costs[i][1][1] = 1;
         }
-        solver.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 9280);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 9280);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testSimpleAutoCostAutomaton() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 10;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", 3, 4, true);
+        IntVar cost = model.intVar("z", 3, 4, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -126,23 +124,23 @@ public class CostRegularTest {
 
         auto.addCounter(c);
 
-        solver.costRegular(vars, cost, auto).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, auto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 9280);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 9280);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void ccostregular2() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 28;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", 0, 4, true);
+        IntVar cost = model.intVar("z", 0, 4, true);
 
         // different rules are formulated as patterns that must NOT be matched by x
         List<String> forbiddenRegExps = new ArrayList<>();
@@ -175,23 +173,23 @@ public class CostRegularTest {
             costs[i][1] = 1;
         }
 
-        solver.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 229376);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 229376);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void ccostregular2WithCostAutomaton() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 28;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", 0, 4, true);
+        IntVar cost = model.intVar("z", 0, 4, true);
 
         // different rules are formulated as patterns that must NOT be matched by x
         List<String> forbiddenRegExps = new ArrayList<>();
@@ -227,23 +225,23 @@ public class CostRegularTest {
         ICounter c = new Counter(costs, 0, 4);
         CostAutomaton cauto = new CostAutomaton(auto, c);
 
-        solver.costRegular(vars, cost, cauto).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, cauto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 229376);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 229376);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void isCorrect() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", 10, 10, true);
+        IntVar cost = model.intVar("z", 10, 10, true);
 
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -267,25 +265,25 @@ public class CostRegularTest {
             }
         }
 
-        solver.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 67584);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 67584);
 //        assertEquals(124927,s.getNodeCount());
 
     }
 
     @Test(groups="10s", timeOut=60000)
     public void isCorrectWithCostAutomaton() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 12;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", 10, 10, true);
+        IntVar cost = model.intVar("z", 10, 10, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -310,25 +308,25 @@ public class CostRegularTest {
 
         auto.addCounter(new CounterState(costs, 10, 10));
 
-        solver.costRegular(vars, cost, auto).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, auto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 67584);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 67584);
 
 //        assertEquals(124927, s.getNodeCount());
     }
 
     @Test(groups="10s", timeOut=60000)
     public void isCorrect2() {
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 13;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", 4, 6, true);
+        IntVar cost = model.intVar("z", 4, 6, true);
 
         FiniteAutomaton auto = new FiniteAutomaton();
         int start = auto.addState();
@@ -349,24 +347,24 @@ public class CostRegularTest {
             costs[i][1][1] = 1;
         }
 
-        solver.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 149456);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 149456);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void isCorrect2WithCostAutomaton() {
 
-        Solver solver = new Solver();
+        Model model = new Model();
 
         int n = 13;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", 4, 6, true);
+        IntVar cost = model.intVar("z", 4, 6, true);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -389,11 +387,11 @@ public class CostRegularTest {
 
         auto.addCounter(new CounterState(costs, 4, 6));
 
-        solver.costRegular(vars, cost, auto).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, auto).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 149456);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 149456);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -412,17 +410,17 @@ public class CostRegularTest {
             }
         }
 
-        Solver solver = new Solver();
+        Model model = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            vars[i] = solver.intVar("x_" + i, 0, 2, false);
+            vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
-        IntVar cost = solver.intVar("z", n / 2, n / 2 + 1, true);
+        IntVar cost = model.intVar("z", n / 2, n / 2 + 1, true);
 
-        solver.costRegular(vars, cost, makeSingleResource(auto, c2, cost.getLB(), cost.getUB())).post();
-        solver.set(lexico_LB(vars));
+        model.costRegular(vars, cost, makeSingleResource(auto, c2, cost.getLB(), cost.getUB())).post();
+        model.set(lexico_LB(vars));
 
-        solver.findAllSolutions();
-        assertEquals(solver.getMeasures().getSolutionCount(), 64008);
+        model.findAllSolutions();
+        assertEquals(model.getMeasures().getSolutionCount(), 64008);
     }
 }

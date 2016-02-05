@@ -36,11 +36,8 @@
 
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.Cause.Null;
@@ -52,29 +49,29 @@ public class SubcircuitTest {
 
     @Test(groups="1s", timeOut=60000)
     public static void test1() {
-        Solver solver = new Solver();
-        IntVar[] x = solver.intVarArray("x", 10, 0, 20, true);
-        solver.subCircuit(x, 0, solver.intVar("length", 0, x.length - 1, true)).post();
-        solver.findSolution();
-        assertEquals(1, solver.getMeasures().getSolutionCount());
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 10, 0, 20, true);
+        model.subCircuit(x, 0, model.intVar("length", 0, x.length - 1, true)).post();
+        model.findSolution();
+        assertEquals(1, model.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
     public static void test2() {
-        Solver solver = new Solver();
-        IntVar[] x = solver.intVarArray("x", 5, 0, 4, true);
-        IntVar[] y = solver.intVarArray("y", 5, 5, 9, true);
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 5, 0, 4, true);
+        IntVar[] y = model.intVarArray("y", 5, 5, 9, true);
         IntVar[] vars = append(x, y);
-        solver.subCircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)).post();
-        solver.findSolution();
-        assertTrue(solver.getMeasures().getSolutionCount() > 0);
+        model.subCircuit(vars, 0, model.intVar("length", 0, vars.length - 1, true)).post();
+        model.findSolution();
+        assertTrue(model.getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="1s", timeOut=60000)
     public static void test3() {
-        Solver solver = new Solver();
-        IntVar[] x = solver.intVarArray("x", 5, 0, 4, false);
-        IntVar[] y = solver.intVarArray("y", 5, 5, 9, false);
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 5, 0, 4, false);
+        IntVar[] y = model.intVarArray("y", 5, 5, 9, false);
         final IntVar[] vars = append(x, y);
         try {
             vars[1].removeValue(1, Null);
@@ -83,26 +80,26 @@ public class SubcircuitTest {
             e.printStackTrace();
             assertTrue(false);
         }
-        solver.subCircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)).post();
-        solver.findSolution();
-        assertTrue(solver.getMeasures().getSolutionCount() == 0);
+        model.subCircuit(vars, 0, model.intVar("length", 0, vars.length - 1, true)).post();
+        model.findSolution();
+        assertTrue(model.getMeasures().getSolutionCount() == 0);
     }
 
     @Test(groups="1s", timeOut=60000)
     public static void test4() {
-        Solver solver = new Solver();
+        Model model = new Model();
         int n = 6;
         int min = 2;
         int max = 4;
-        IntVar[] vars = solver.intVarArray("x", n, 0, n, true);
-        IntVar nb = solver.intVar("size", min, max, true);
-        solver.subCircuit(vars, 0, nb).post();
-        solver.findAllSolutions();
+        IntVar[] vars = model.intVarArray("x", n, 0, n, true);
+        IntVar nb = model.intVar("size", min, max, true);
+        model.subCircuit(vars, 0, nb).post();
+        model.findAllSolutions();
         int nbSol = 0;
         for (int i = min; i <= max; i++) {
             nbSol += parmi(i, n) * factorial(i - 1);
         }
-        assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
+        assertEquals(model.getMeasures().getSolutionCount(), nbSol);
     }
 
     private static int factorial(int n) {

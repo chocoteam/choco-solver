@@ -32,7 +32,7 @@ package org.chocosolver.samples;
 import gnu.trove.list.array.TFloatArrayList;
 import org.chocosolver.samples.integer.Knapsack;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -48,7 +48,7 @@ import java.io.IOException;
 public class KnapsackTest {
     private final static TFloatArrayList times = new TFloatArrayList();
 
-    public Solver modelIt(String data, int n) throws IOException {
+    public Model modelIt(String data, int n) throws IOException {
         Knapsack pb = new Knapsack();
         pb.readArgs("-d", data, "-n", "" + n);
         pb.createSolver();
@@ -59,10 +59,10 @@ public class KnapsackTest {
                 throw new UnsupportedOperationException();
             }
         }
-        return pb.getSolver();
+        return pb.getModel();
     }
 
-    public void solveIt(Solver s, boolean optimize) {
+    public void solveIt(Model s, boolean optimize) {
         if (optimize) {
             // BEWARE trick to find power variable
             IntVar power = null;
@@ -97,7 +97,7 @@ public class KnapsackTest {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
-            Solver s = ks.modelIt("k10", 3);
+            Model s = ks.modelIt("k10", 3);
             ks.solveIt(s, true);
             Assert.assertEquals(s.getMeasures().getBestSolutionValue().intValue(), 1078, "obj val");
             Assert.assertEquals(s.getMeasures().getSolutionCount(), 3, "nb sol");
@@ -110,7 +110,7 @@ public class KnapsackTest {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
-            Solver s = ks.modelIt("k10", 10);
+            Model s = ks.modelIt("k10", 10);
             ks.solveIt(s, true);
             Assert.assertEquals(s.getMeasures().getBestSolutionValue().intValue(), 1078, "obj val");
             Assert.assertEquals(s.getMeasures().getSolutionCount(), 3, "nb sol");
@@ -121,7 +121,7 @@ public class KnapsackTest {
     @Test(groups={"1s"})
     public void testOPT13() throws IOException {
         KnapsackTest ks = new KnapsackTest();
-        Solver s = ks.modelIt("k20", 13);
+        Model s = ks.modelIt("k20", 13);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getMeasures().getBestSolutionValue().intValue(), 2657, "obj val");
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 29, "nb sol");
@@ -131,7 +131,7 @@ public class KnapsackTest {
     @Test(groups={"1s"})
     public void testOPT14() throws IOException {
         KnapsackTest ks = new KnapsackTest();
-        Solver s = ks.modelIt("k20", 14);
+        Model s = ks.modelIt("k20", 14);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getMeasures().getBestSolutionValue().intValue(), 2657, "obj val");
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 29, "nb sol");
@@ -141,7 +141,7 @@ public class KnapsackTest {
     @Test(groups={"1s"})
     public void testOPT15() throws IOException {
         KnapsackTest ks = new KnapsackTest();
-        Solver s = ks.modelIt("k20", 15);
+        Model s = ks.modelIt("k20", 15);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getMeasures().getBestSolutionValue().intValue(), 2657, "obj val");
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 29, "nb sol");

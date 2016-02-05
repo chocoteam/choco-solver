@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
@@ -83,7 +83,7 @@ public class IntLinCombFactory {
      */
     public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR) {
         // 0. normalize data
-        Solver SOLVER = SCALAR.getSolver();
+        Model Model = SCALAR.getModel();
         IntVar[] NVARS;
         int[] NCOEFFS;
         int RESULT = 0;
@@ -135,17 +135,17 @@ public class IntLinCombFactory {
         if (k == 0) {
             switch (OPERATOR) {
                 case EQ:
-                    return RESULT == 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                    return RESULT == 0 ? Model.TRUE() : Model.FALSE();
                 case NQ:
-                    return RESULT != 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                    return RESULT != 0 ? Model.TRUE() : Model.FALSE();
                 case LE:
-                    return RESULT >= 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                    return RESULT >= 0 ? Model.TRUE() : Model.FALSE();
                 case LT:
-                    return RESULT > 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                    return RESULT > 0 ? Model.TRUE() : Model.FALSE();
                 case GE:
-                    return RESULT <= 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                    return RESULT <= 0 ? Model.TRUE() : Model.FALSE();
                 case GT:
-                    return RESULT < 0 ? SOLVER.TRUE() : SOLVER.FALSE();
+                    return RESULT < 0 ? Model.TRUE() : Model.FALSE();
             }
         }
         // 2. resize NVARS and NCOEFFS
@@ -183,7 +183,7 @@ public class IntLinCombFactory {
     public static Constraint selectSum(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT, int nbools) {
         // if the operator is "="
         // 4. detect and return small arity constraints
-        Solver s = VARS[0].getSolver();
+        Model s = VARS[0].getModel();
         switch (VARS.length) {
             case 1:
                 if (COEFFS[0] == 1) {
@@ -247,25 +247,25 @@ public class IntLinCombFactory {
                     RESULT--;
                 }
                 //TODO: deal with clauses and reification
-                Solver SOLVER = VARS[0].getSolver();
+                Model Model = VARS[0].getModel();
                 if (nbools == VARS.length) {
-                    if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new Constraint("BoolSum", new PropSumBoolIncr(SOLVER.toBoolVar(tmpV), b, OPERATOR,
-                                SOLVER.intVar(RESULT), 0));
+                    if (Model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
+                        return new Constraint("BoolSum", new PropSumBoolIncr(Model.toBoolVar(tmpV), b, OPERATOR,
+                                Model.intVar(RESULT), 0));
                     } else {
-                        return new Constraint("BoolSum", new PropSumBool(SOLVER.toBoolVar(tmpV), b, OPERATOR,
-                                SOLVER.intVar(RESULT), 0));
+                        return new Constraint("BoolSum", new PropSumBool(Model.toBoolVar(tmpV), b, OPERATOR,
+                                Model.intVar(RESULT), 0));
                     }
                 }
                 if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool()) {
                     // the large domain variable is on the last idx
                     assert COEFFS[VARS.length - 1] == -1;
-                    if (SOLVER.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new Constraint("BoolSum", new PropSumBoolIncr(SOLVER.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                    if (Model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
+                        return new Constraint("BoolSum", new PropSumBoolIncr(Model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     } else {
-                        return new Constraint("BoolSum", new PropSumBool(SOLVER.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                        return new Constraint("BoolSum", new PropSumBool(Model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     }
@@ -284,7 +284,7 @@ public class IntLinCombFactory {
      * @return a constraint
      */
     public static Constraint selectScalar(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT) {
-        Solver s = VARS[0].getSolver();
+        Model s = VARS[0].getModel();
         if (VARS.length == 1 && OPERATOR == Operator.EQ) {
             return s.times(VARS[0], COEFFS[0], s.intVar(RESULT));
         }

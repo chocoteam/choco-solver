@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -47,7 +47,7 @@ class LearnExplained implements Learn {
     /**
      * The solver to explain.
      */
-    final Solver mSolver;
+    final Model mModel;
 
     /**
      * The explanation engine, which computes and returns explanation of a state.
@@ -73,22 +73,22 @@ class LearnExplained implements Learn {
 
     /**
      * Equips the solver with an explanation engine, which is able to explain failures and solutions.
-     * @param mSolver the solver to equip
+     * @param mModel the solver to equip
      * @param partialExplanationsOn set to <tt>true</tt> to enable partial explanations, <tt>false</tt> otherwise
      * @param recordCauses set to <tt>true</tt> to record causes in explanations, <tt>false</tt> otherwise
      */
-    public LearnExplained(Solver mSolver, boolean partialExplanationsOn, boolean recordCauses) {
-        this.mSolver = mSolver;
-        if (mSolver.getExplainer() == null) {
-            mSolver.set(new ExplanationEngine(mSolver, partialExplanationsOn, recordCauses));
+    public LearnExplained(Model mModel, boolean partialExplanationsOn, boolean recordCauses) {
+        this.mModel = mModel;
+        if (mModel.getExplainer() == null) {
+            mModel.set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));
         }
-        this.mExplainer = mSolver.getExplainer();
+        this.mExplainer = mModel.getExplainer();
         this.saveCauses = recordCauses;
     }
 
     @Override
     public void record(SearchLoop searchLoop) {
-        if (nbsol == searchLoop.mSolver.getMeasures().getSolutionCount()) {
+        if (nbsol == searchLoop.mModel.getMeasures().getSolutionCount()) {
             onFailure(searchLoop);
         } else {
             nbsol++;
@@ -107,7 +107,7 @@ class LearnExplained implements Learn {
      */
     void onSolution(SearchLoop searchLoop){
         // we need to prepare a "false" backtrack on this decision
-        Decision dec = mSolver.getSearchLoop().getLastDecision();
+        Decision dec = mModel.getSearchLoop().getLastDecision();
         while ((dec != ROOT) && (!dec.hasNext())) {
             dec = dec.getPrevious();
         }
@@ -130,7 +130,7 @@ class LearnExplained implements Learn {
      * Actions to do when a failure is met.
      */
     void onFailure(SearchLoop searchLoop){
-        ContradictionException cex = mSolver.getEngine().getContradictionException();
+        ContradictionException cex = mModel.getEngine().getContradictionException();
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
         lastExplanation = mExplainer.explain(cex);
     }

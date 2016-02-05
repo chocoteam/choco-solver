@@ -32,7 +32,7 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -173,7 +173,7 @@ public interface IIntConstraintFactory {
 	 * Creates an absolute value constraint: var1 = |var2|
 	 */
 	default Constraint absolute(IntVar var1, IntVar var2) {
-		assert var1.getSolver() == var2.getSolver();
+		assert var1.getModel() == var2.getModel();
 		return new Constraint("Absolute", new PropAbsolute(var1, var2));
 	}
 
@@ -229,7 +229,7 @@ public interface IIntConstraintFactory {
 	 * where op can take its value among {"=", ">", "<", "!="}
 	 */
 	default Constraint distance(IntVar var1, IntVar var2, String op, int cste) {
-		assert var1.getSolver() == var2.getSolver();
+		assert var1.getModel() == var2.getModel();
 		return new DistanceXYC(var1, var2, Operator.get(op), cste);
 	}
 
@@ -260,7 +260,7 @@ public interface IIntConstraintFactory {
 	 * Creates a square constraint: var1 = var2^2
 	 */
 	default Constraint square(IntVar var1, IntVar var2) {
-		assert var1.getSolver() == var2.getSolver();
+		assert var1.getModel() == var2.getModel();
 		return new Constraint("Square", new PropSquare(var1, var2));
 	}
 
@@ -319,7 +319,7 @@ public interface IIntConstraintFactory {
 		} else if (Y == 1) {
 			return arithm(X, "=", Z);
 		} else if (Y < 0) {
-			return times(X.getSolver().intMinusView(X), -Y, Z);
+			return times(X.getModel().intMinusView(X), -Y, Z);
 		} else {
 			return new Constraint("Times", new PropScale(X, Y, Z));
 		}
@@ -426,9 +426,9 @@ public interface IIntConstraintFactory {
 		int xl = abs(X.getLB());
 		int xu = abs(X.getUB());
 		int b = Math.max(xl, xu);
-		Solver solver = X.getSolver();
-		IntVar t1 = solver.intVar(randomName(), -b, b, true);
-		IntVar t2 = solver.intVar(randomName(), -b, b, true);
+		Model model = X.getModel();
+		IntVar t1 = model.intVar(randomName(), -b, b, true);
+		IntVar t2 = model.intVar(randomName(), -b, b, true);
 		div(X, Y, t1).post();
 		times(t1, Y, t2).post();
 		return sum(new IntVar[]{Z, t2}, "=", X);
@@ -590,7 +590,7 @@ public interface IIntConstraintFactory {
 		TIntArrayList vals = getDomainUnion(vars);
 		if (STRONG) {
 			Gci gci = new Gci(vars, new AutoDiffDetection(vars));
-			R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getSolver())};
+			R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
 			return new Constraint("AtMostNValues", new PropAtMostNValues(vars, vals, nValues),
 					new PropAMNV(vars, nValues, gci, new MDRk(gci), rules));
 		} else {
@@ -614,7 +614,7 @@ public interface IIntConstraintFactory {
 	default Constraint binPacking(IntVar[] itemBin, int[] itemSize, IntVar[] binLoad, int offset) {
 		int nbBins = binLoad.length;
 		int nbItems = itemBin.length;
-		Solver s = itemBin[0].getSolver();
+		Model s = itemBin[0].getModel();
 		BoolVar[][] xbi = s.boolVarMatrix("xbi", nbBins, nbItems);
 		int sum = 0;
 		for (int is : itemSize) {
@@ -647,7 +647,7 @@ public interface IIntConstraintFactory {
 		if (var.hasEnumeratedDomain()) {
 			return new Constraint("DomainChanneling", new PropEnumDomainChanneling(bVars, var, offset));
 		} else {
-			IntVar enumV = var.getSolver().intVar(var.getName() + "_enumImage", var.getLB(), var.getUB(), false);
+			IntVar enumV = var.getModel().intVar(var.getName() + "_enumImage", var.getLB(), var.getUB(), false);
 			return new Constraint("BoolChanneling",
 					new PropEnumDomainChanneling(bVars, enumV, offset),
 					new PropEqualX_Y(var, enumV)
@@ -804,7 +804,7 @@ public interface IIntConstraintFactory {
 		} else if (value.hasEnumeratedDomain()) {
 			return new Constraint("Count", new PropCountVar(vars, value, limit));
 		} else {
-			IntVar Evalue = value.getSolver().intVar(randomName(), value.getLB(), value.getUB(), false);
+			IntVar Evalue = value.getModel().intVar(randomName(), value.getLB(), value.getUB(), false);
 			return new Constraint("Count",
 					new PropEqualX_Y(Evalue, value),
 					new PropCountVar(vars, Evalue, limit));
@@ -883,7 +883,7 @@ public interface IIntConstraintFactory {
 	 * @return a non-overlapping constraint
 	 */
 	default Constraint diffN(IntVar[] X, IntVar[] Y, IntVar[] width, IntVar[] height, boolean addCumulativeReasoning) {
-		Solver solver = X[0].getSolver();
+		Model model = X[0].getModel();
 		Constraint diffNCons = new Constraint(
 				"DiffN",
 				new PropDiffN(X, Y, width, height, false),
@@ -899,8 +899,8 @@ public interface IIntConstraintFactory {
 			int miny = Integer.MAX_VALUE / 2;
 			int maxy = Integer.MIN_VALUE / 2;
 			for (int i = 0; i < X.length; i++) {
-				EX[i] = solver.intVar(randomName("diffN"), X[i].getLB() + width[i].getLB(), X[i].getUB() + width[i].getUB(), true);
-				EY[i] = solver.intVar(randomName("diffN"), Y[i].getLB() + height[i].getLB(), Y[i].getUB() + height[i].getUB(), true);
+				EX[i] = model.intVar(randomName("diffN"), X[i].getLB() + width[i].getLB(), X[i].getUB() + width[i].getUB(), true);
+				EY[i] = model.intVar(randomName("diffN"), Y[i].getLB() + height[i].getLB(), Y[i].getUB() + height[i].getUB(), true);
 				TX[i] = new Task(X[i], width[i], EX[i]);
 				TY[i] = new Task(Y[i], height[i], EY[i]);
 				minx = Math.min(minx, X[i].getLB());
@@ -908,12 +908,12 @@ public interface IIntConstraintFactory {
 				maxx = Math.max(maxx, X[i].getUB() + width[i].getUB());
 				maxy = Math.max(maxy, Y[i].getUB() + height[i].getUB());
 			}
-			IntVar maxX = solver.intVar(randomName("diffN"), minx, maxx, true);
-			IntVar minX = solver.intVar(randomName("diffN"), minx, maxx, true);
-			IntVar diffX = solver.intVar(randomName("diffN"), 0, maxx - minx, true);
-			IntVar maxY = solver.intVar(randomName("diffN"), miny, maxy, true);
-			IntVar minY = solver.intVar(randomName("diffN"), miny, maxy, true);
-			IntVar diffY = solver.intVar(randomName("diffN"), 0, maxy - miny, true);
+			IntVar maxX = model.intVar(randomName("diffN"), minx, maxx, true);
+			IntVar minX = model.intVar(randomName("diffN"), minx, maxx, true);
+			IntVar diffX = model.intVar(randomName("diffN"), 0, maxx - minx, true);
+			IntVar maxY = model.intVar(randomName("diffN"), miny, maxy, true);
+			IntVar minY = model.intVar(randomName("diffN"), miny, maxy, true);
+			IntVar diffY = model.intVar(randomName("diffN"), 0, maxy - miny, true);
 			return Constraint.merge("DiffNWithCumulative",
 					diffNCons,
 					min(minX, X), max(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
@@ -983,7 +983,7 @@ public interface IIntConstraintFactory {
 				System.arraycopy(occurrences, 0, cards, 0, values.length);
 				for (int i = values.length; i < n2; i++) {
 					v2[i] = toAdd.get(i - values.length);
-					cards[i] = vars[0].getSolver().intVar(0);
+					cards[i] = vars[0].getModel().intVar(0);
 				}
 				return new GlobalCardinality(vars, v2, cards);
 			} else {
@@ -1076,7 +1076,7 @@ public interface IIntConstraintFactory {
 			}
 			return new Constraint("int_value_precede", ps);
 		} else {
-			return X[0].getSolver().TRUE();
+			return X[0].getModel().TRUE();
 		}
 	}
 
@@ -1139,7 +1139,7 @@ public interface IIntConstraintFactory {
 			int n = vars.length;
 			PERMvars = new IntVar[n];
 			for (int p = 0; p < n; p++) {
-				PERMvars[p] = vars[0][0].getSolver().intVar("p_" + (p + 1), 1, n, true);
+				PERMvars[p] = vars[0][0].getModel().intVar("p_" + (p + 1), 1, n, true);
 			}
 		}
 		return new Constraint("keySort", new PropKeysorting(vars, SORTEDvars, PERMvars, K));
@@ -1325,12 +1325,12 @@ public interface IIntConstraintFactory {
 				);
 			default:
 				if (start == end) {
-					return start.getSolver().FALSE();
+					return start.getModel().FALSE();
 				} else {
 					return Constraint.merge("path",
 							arithm(start, "!=", end),
 							circuit(ArrayUtils.append(vars, new IntVar[]{start}), offset),
-							element(end.getSolver().intVar(vars.length + offset), vars, end, offset)
+							element(end.getModel().intVar(vars.length + offset), vars, end, offset)
 					);
 				}
 		}
@@ -1361,7 +1361,7 @@ public interface IIntConstraintFactory {
 	 */
 	default Constraint scalar(IntVar[] vars, int[] coeffs, String operator, int scalar) {
 		assert vars.length>0;
-		Solver s = vars[0].getSolver();
+		Model s = vars[0].getModel();
 		IntVar scalarVar = s.intVar(scalar);
 		return scalar(vars,coeffs,operator,scalarVar);
 	}
@@ -1424,8 +1424,8 @@ public interface IIntConstraintFactory {
 	 */
 	default Constraint subCircuit(IntVar[] vars, int offset, IntVar subCircuitLength) {
 		int n = vars.length;
-		Solver solver = vars[0].getSolver();
-		IntVar nbLoops = solver.intVar("nLoops", 0, n, true);
+		Model model = vars[0].getModel();
+		IntVar nbLoops = model.intVar("nLoops", 0, n, true);
 		return new Constraint("SubCircuit", ArrayUtils.append(
 				allDifferent(vars).getPropagators(),
 				ArrayUtils.toArray(
@@ -1471,8 +1471,8 @@ public interface IIntConstraintFactory {
 			default:
 				return Constraint.merge("subPath",
 						arithm(start, "<", vars.length + offset),
-						subCircuit(ArrayUtils.append(vars, new IntVar[]{start}), offset, end.getSolver().intOffsetView(SIZE, 1)),
-						element(end.getSolver().intVar(vars.length + offset), vars, end, offset)
+						subCircuit(ArrayUtils.append(vars, new IntVar[]{start}), offset, end.getModel().intOffsetView(SIZE, 1)),
+						element(end.getModel().intVar(vars.length + offset), vars, end, offset)
 				);
 		}
 	}
@@ -1488,7 +1488,7 @@ public interface IIntConstraintFactory {
 	 */
 	default Constraint sum(IntVar[] vars, String operator, int sum) {
 		assert vars.length>0;
-		Solver s = vars[0].getSolver();
+		Model s = vars[0].getModel();
 		IntVar sumVar = s.intVar(sum);
 		return IntLinCombFactory.reduce(vars, Operator.get(operator), sumVar);
 	}
@@ -1516,7 +1516,7 @@ public interface IIntConstraintFactory {
 	 */
 	default Constraint sum(BoolVar[] vars, String operator, int sum) {
 		assert vars.length>0;
-		Solver s = vars[0].getSolver();
+		Model s = vars[0].getModel();
 		IntVar sumVar = s.intVar(sum);
 		return sum(vars,operator,sumVar);
 	}
@@ -1539,7 +1539,7 @@ public interface IIntConstraintFactory {
 			lb += v.getLB();
 			ub += v.getUB();
 		}
-		IntVar p = sum.getSolver().intVar(randomName(), lb, ub, true);
+		IntVar p = sum.getModel().intVar(randomName(), lb, ub, true);
 		sum(vars, "=", p).post();
 		return arithm(p, operator, sum);
 	}

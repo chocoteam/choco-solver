@@ -39,7 +39,7 @@ package org.chocosolver.util.objects.setDataStructures;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.linkedlist.*;
 import org.chocosolver.util.objects.setDataStructures.matrix.Set_Array;
 import org.chocosolver.util.objects.setDataStructures.matrix.Set_BitSet;
@@ -70,11 +70,11 @@ public class SetFactory {
      *
      * @param type        of set data structure
      * @param maximumSize of the set (maximum value -1)
-     * @param solver	  solver providing the backtracking environment
+     * @param model	  solver providing the backtracking environment
      * @return a new set which can be restored during search, after some backtracks
      */
-    public static ISet makeStoredSet(SetType type, int maximumSize, Solver solver) {
-		IEnvironment environment = solver.getEnvironment();
+    public static ISet makeStoredSet(SetType type, int maximumSize, Model model) {
+		IEnvironment environment = model.getEnvironment();
         if (HARD_CODED)
             switch (type) {
                 case BIPARTITESET:

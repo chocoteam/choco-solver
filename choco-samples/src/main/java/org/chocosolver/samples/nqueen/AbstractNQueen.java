@@ -30,7 +30,7 @@
 package org.chocosolver.samples.nqueen;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -48,19 +48,13 @@ public abstract class AbstractNQueen extends AbstractProblem {
     IntVar[] vars;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("NQueen");
-    }
-
-    @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(vars));
+        model.set(IntStrategyFactory.minDom_LB(vars));
     }
-
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

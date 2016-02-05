@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.limits;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 /**
  * A limit over run time.
@@ -42,11 +42,11 @@ import org.chocosolver.solver.Solver;
 public class TimeCounter extends ACounter {
 
     /**
-     * @param solver the solver to instrument
+     * @param model the solver to instrument
      * @param timeLimitInNano in nanosecond
      */
-    public TimeCounter(Solver solver, long timeLimitInNano) {
-        super(solver, timeLimitInNano);
+    public TimeCounter(Model model, long timeLimitInNano) {
+        super(model, timeLimitInNano);
     }
 
     @Override

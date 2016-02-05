@@ -29,12 +29,8 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.checker.DomainBuilder;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
@@ -86,7 +82,7 @@ public class MemberTest {
             Random r = new Random(i);
             for (double d = 0.0; d <= 1.0; d += 0.125) {
 
-                Solver s = new Solver();
+                Model s = new Model();
 
                 IntVar[] vars = new IntVar[1];
                 int[][] values = buildFullDomains(2, 0, i, r, d, false);
@@ -111,7 +107,7 @@ public class MemberTest {
             Random r = new Random(i);
             for (double d = 0.0; d <= 1.0; d += 0.125) {
 
-                Solver s = new Solver();
+                Model s = new Model();
                 IntVar[] vars = new IntVar[1];
                 int[][] values = buildFullDomains(2, 0, i, r, d, false);
                 int lb = values[0][0];
@@ -134,7 +130,7 @@ public class MemberTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test_alxpgr() {
-        Solver s = new Solver();
+        Model s = new Model();
         IntVar vars = s.intVar("v", 0, 10, false);
         int[] values = new int[]{0, 2, 4, 6, 8};
 

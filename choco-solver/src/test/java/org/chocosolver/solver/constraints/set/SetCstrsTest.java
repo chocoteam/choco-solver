@@ -29,11 +29,9 @@
  */
 package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -62,16 +60,16 @@ public class SetCstrsTest {
 				Assert.assertTrue(v2[i].contains(v));
 			}
 		}
-		v1[0].getSolver().findAllSolutions();
-		v2[0].getSolver().findAllSolutions();
+		v1[0].getModel().findAllSolutions();
+		v2[0].getModel().findAllSolutions();
 		Assert.assertEquals(
-				v1[0].getSolver().getMeasures().getSolutionCount(),
-				v2[0].getSolver().getMeasures().getSolutionCount()
+				v1[0].getModel().getMeasures().getSolutionCount(),
+				v2[0].getModel().getMeasures().getSolutionCount()
 		);
 	}
 
 	public static IntVar[] eqFilter(String mode) {
-		Solver s = new Solver();
+		Model s = new Model();
 		IntVar x = s.intVar("x", 0, 10, false);
 		IntVar y = s.intVar("y", 0, 10, false);
 		// set view of A
@@ -116,9 +114,9 @@ public class SetCstrsTest {
 
 	public static Constraint eq(SetVar x, SetVar y, String mode){
 		switch (mode){
-			case "offset":return x.getSolver().offSet(x, y, 0);
+			case "offset":return x.getModel().offSet(x, y, 0);
 			default:
-			case "allEqual":return x.getSolver().allEqual(x, y);
+			case "allEqual":return x.getModel().allEqual(x, y);
 		}
 	}
 }

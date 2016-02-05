@@ -29,12 +29,8 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
@@ -53,7 +49,7 @@ import static org.chocosolver.solver.trace.Chatterbox.printSolutions;
  */
 public class LNSTest {
 
-    Solver solver;
+    Model model;
     IntVar[] vars;
 
     private void knapsack20(final int lns) {
@@ -61,69 +57,69 @@ public class LNSTest {
         int[] volumes = {54, 12, 47, 33, 30, 65, 56, 57, 91, 88, 77, 99, 29, 23, 39, 86, 12, 85, 22, 64};
         int[] energies = {38, 57, 69, 90, 79, 89, 28, 70, 38, 71, 46, 41, 49, 43, 36, 68, 92, 33, 84, 90};
 
-        solver = new Solver();
+        model = new Model();
         int nos = 20;
         // occurrence of each item
         IntVar[] objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = solver.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1] / volumes[i]), true);
+            objects[i] = model.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1] / volumes[i]), true);
         }
-        final IntVar power = solver.intVar("power", 0, 99999, true);
-        IntVar scalar = solver.intVar("weight", capacities[0], capacities[1], true);
-        solver.scalar(objects, volumes, "=", scalar).post();
-        solver.scalar(objects, energies, "=", power).post();
-        solver.knapsack(objects, scalar, power, volumes, energies).post();
-        solver.set(lexico_LB(objects));
+        final IntVar power = model.intVar("power", 0, 99999, true);
+        IntVar scalar = model.intVar("weight", capacities[0], capacities[1], true);
+        model.scalar(objects, volumes, "=", scalar).post();
+        model.scalar(objects, energies, "=", power).post();
+        model.knapsack(objects, scalar, power, volumes, energies).post();
+        model.set(lexico_LB(objects));
 //        SearchMonitorFactory.log(solver, true, false);
         switch (lns) {
             case 0:
                 break;
             case 1:
-                lns(solver, new RandomNeighborhood(solver, objects, 200, 123456L));
-                limitTime(solver, 10000);
+                lns(model, new RandomNeighborhood(model, objects, 200, 123456L));
+                limitTime(model, 10000);
                 break;
             case 2:
-                lns(solver, new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10));
-                limitTime(solver, 10000);
+                lns(model, new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10));
+                limitTime(model, 10000);
                 break;
             case 3:
-                lns(solver,
+                lns(model,
                         new SequenceNeighborhood(
-                                new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
-                                new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10)
+                                new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
+                                new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10)
                         ));
-                limitTime(solver, 10000);
+                limitTime(model, 10000);
                 break;
             case 4:
-                lns(solver,
+                lns(model,
                         new SequenceNeighborhood(
-                                new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
-                                new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
-                                new RandomNeighborhood(solver, objects, 200, 123456L)
+                                new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
+                                new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
+                                new RandomNeighborhood(model, objects, 200, 123456L)
                         ));
-                limitTime(solver, 10000);
+                limitTime(model, 10000);
                 break;
             case 5:
-                lns(solver,
-                        new ExplainingCut(solver, 200, 123456L));
-                limitTime(solver, 10000);
+                lns(model,
+                        new ExplainingCut(model, 200, 123456L));
+                limitTime(model, 10000);
                 break;
             case 6:
-                lns(solver,
-                        new ExplainingObjective(solver, 200, 123456L));
-                limitTime(solver, 10000);
+                lns(model,
+                        new ExplainingObjective(model, 200, 123456L));
+                limitTime(model, 10000);
                 break;
             case 7:
-                lns(solver, new SequenceNeighborhood(
-                        new ExplainingObjective(solver, 200, 123456L),
-                        new ExplainingCut(solver, 200, 123456L),
-                        new RandomNeighborhood(solver, objects, 200, 123456L)));
-                limitTime(solver, 10000);
+                lns(model, new SequenceNeighborhood(
+                        new ExplainingObjective(model, 200, 123456L),
+                        new ExplainingCut(model, 200, 123456L),
+                        new RandomNeighborhood(model, objects, 200, 123456L)));
+                limitTime(model, 10000);
                 break;
         }
 //        Chatterbox.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());
-        solver.findOptimalSolution(MAXIMIZE, power);
-        printSolutions(solver);
+        model.findOptimalSolution(MAXIMIZE, power);
+        printSolutions(model);
     }
 
 

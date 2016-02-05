@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -48,32 +48,28 @@ public class BigSum extends AbstractProblem {
     IntVar[] vars;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("BigSum");
-    }
-
-    @Override
     public void buildModel() {
-        vars = solver.intVarArray("v", n, 0, 5000, true);
-        solver.sum(vars, "=", 500000).post();
-        solver.allDifferent(vars, "BC").post();
+        model = new Model("BigSum");
+        vars = model.intVarArray("v", n, 0, 5000, true);
+        model.sum(vars, "=", 500000).post();
+        model.allDifferent(vars, "BC").post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        model.set(IntStrategyFactory.lexico_LB(vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         System.out.println("big sum");
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(", ");
             }

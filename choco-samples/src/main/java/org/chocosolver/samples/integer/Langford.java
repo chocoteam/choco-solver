@@ -30,8 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -69,43 +68,40 @@ public class Langford extends AbstractProblem {
 
     IntVar[] position;
 
-    @Override
-    public void createSolver() {
-        solver = new Solver("Langford number");
-    }
 
     @Override
     public void buildModel() {
+        model = new Model();
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
-        position = solver.intVarArray("p", n * k, 0, k * n - 1, false);
+        position = model.intVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
-                solver.arithm(
-                        solver.intOffsetView(position[i + j * n], i + 2),
+                model.arithm(
+                        model.intOffsetView(position[i + j * n], i + 2),
                         "=",
                         position[i + (j + 1) * n]
                 ).post();
             }
         }
-        solver.arithm(position[0], "<", position[n * k - 1]).post();
-        solver.allDifferent(position, "AC").post();
+        model.arithm(position[0], "<", position[n * k - 1]).post();
+        model.allDifferent(position, "AC").post();
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_UB(position));
+        model.set(IntStrategyFactory.minDom_UB(position));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder(String.format("Langford's number (%s,%s)\n", k, n));
-        if (solver.isFeasible() == ESat.TRUE) {
+        if (model.isFeasible() == ESat.TRUE) {
             int[] values = new int[k * n];
             for (int i = 0; i < k; i++) {
                 for (int j = 0; j < n; j++) {

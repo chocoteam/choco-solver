@@ -30,7 +30,7 @@
 
 package org.chocosolver.samples;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
  */
 public class AbstractProblemTest {
 
-	boolean model, search, solve, pretty;
+	boolean modelBuilt, search, solve, pretty;
 
 	@Test(groups="1s", timeOut=60000)
 	public void testAP() {
@@ -51,49 +51,46 @@ public class AbstractProblemTest {
 	}
 
 	private void test(boolean silent){
-		model = false;
+		modelBuilt = false;
 		search = false;
 		solve = false;
 		pretty = false;
-		Solver stest = new Solver("test");
+		Model stest = new Model("test");
 		AbstractProblem ap = new AbstractProblem() {
 			@Override
-			public void createSolver() {
+			public void buildModel() {
 				if(silent){
 					level = Level.SILENT;
 				}
-				solver = stest;
-			}
-			@Override
-			public void buildModel() {
-				model = true;
-				Assert.assertTrue(solver != null && solver.getName().equals("test"));
+				model = stest;
+				modelBuilt = true;
+				Assert.assertTrue(model != null && model.getName().equals("test"));
 				Assert.assertFalse(search || solve || pretty);
 			}
 			@Override
 			public void configureSearch() {
 				search = true;
-				Assert.assertTrue(model);
+				Assert.assertTrue(modelBuilt);
 				Assert.assertFalse(solve || pretty);
 			}
 			@Override
 			public void solve() {
 				solve = true;
-				Assert.assertTrue(model && search);
+				Assert.assertTrue(modelBuilt && search);
 				Assert.assertFalse(pretty);
 
 			}
 			@Override
 			public void prettyOut() {
-				Assert.assertTrue(model && search && solve);
+				Assert.assertTrue(modelBuilt && search && solve);
 				pretty = true;
 			}
 		};
 		ap.execute();
-		Assert.assertTrue(model && search && solve);
+		Assert.assertTrue(modelBuilt && search && solve);
 		Assert.assertEquals(ap.level.level, ap.level.getLevel());
 		Assert.assertEquals(pretty, !silent);
-		Assert.assertEquals(stest,ap.getSolver());
+		Assert.assertEquals(stest,ap.getModel());
 		Assert.assertEquals(ap.level,silent?AbstractProblem.Level.SILENT:AbstractProblem.Level.SOLUTION);
 		Assert.assertTrue(AbstractProblem.Level.SILENT.getLevel()<AbstractProblem.Level.QUIET.getLevel());
 		Assert.assertTrue(AbstractProblem.Level.QUIET.getLevel()<AbstractProblem.Level.VERBOSE.getLevel());

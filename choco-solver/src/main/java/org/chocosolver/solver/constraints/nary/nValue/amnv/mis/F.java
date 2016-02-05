@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
 import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 import java.util.BitSet;
 
@@ -58,5 +58,5 @@ public interface F {
 	 */
 	BitSet getMIS();
 
-	void duplicate(Solver solver, THashMap<Object, Object> identitymap);
+	void duplicate(Model model, THashMap<Object, Object> identitymap);
 }

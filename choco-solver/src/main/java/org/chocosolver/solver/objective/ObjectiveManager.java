@@ -197,7 +197,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
         if (isOptimization()) {
             if (intOrReal) {
                 int offset = 0;
-                if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
+                if (objective.getModel().getMeasures().getSolutionCount() > 0 && strict) {
                     offset = 1;
                 }
                 IntVar io = (IntVar) objective;
@@ -208,7 +208,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
                 }
             } else {
                 double offset = 0;
-                if (objective.getSolver().getMeasures().getSolutionCount() > 0 && strict) {
+                if (objective.getModel().getMeasures().getSolutionCount() > 0 && strict) {
                     offset = precision;
                 }
                 RealVar io = (RealVar) objective;

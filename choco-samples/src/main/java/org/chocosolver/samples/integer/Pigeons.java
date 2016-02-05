@@ -30,7 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -49,29 +49,25 @@ public class Pigeons extends AbstractProblem {
     IntVar[] vars;
 
     @Override
-    public void createSolver() {
-        solver = new Solver("Pigeons");
-    }
-
-    @Override
     public void buildModel() {
-        vars = solver.intVarArray("p", n, 1, n - 1, false);
+        model = new Model();
+        vars = model.intVarArray("p", n, 1, n - 1, false);
 
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
-                solver.arithm(vars[i], "!=", vars[j]).post();
+                model.arithm(vars[i], "!=", vars[j]).post();
             }
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDom_LB(vars));
+        model.set(IntStrategyFactory.minDom_LB(vars));
     }
 
     @Override
     public void solve() {
-        solver.findSolution();
+        model.findSolution();
     }
 
     @Override

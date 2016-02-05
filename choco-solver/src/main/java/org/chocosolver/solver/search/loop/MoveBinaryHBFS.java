@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -118,12 +118,12 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * The owner solver.
      */
-    Solver mSolver;
+    Model mModel;
 
-    public MoveBinaryHBFS(Solver solver, AbstractStrategy strategy, double a, double b, long N) {
+    public MoveBinaryHBFS(Model model, AbstractStrategy strategy, double a, double b, long N) {
         super(strategy);
-        this.mSolver = solver;
-        this.dfslimit = new BacktrackCounter(solver, N);
+        this.mModel = model;
+        this.dfslimit = new BacktrackCounter(model, N);
         this.opens = new PriorityQueue<>();
         this.copen = new Decision[0];
         this.current = 0;
@@ -138,7 +138,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     @Override
     public boolean init() {
         boolean init = super.init();
-        ObjectiveManager<IntVar, Integer> om = mSolver.getObjectiveManager();
+        ObjectiveManager<IntVar, Integer> om = mModel.getObjectiveManager();
         this.objectiveManager = om;
         if (objectiveManager.getPolicy() == ResolutionPolicy.SATISFACTION) {
             throw new UnsupportedOperationException("HBFS is not adapted to satisfaction problems.");
@@ -156,7 +156,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             searchLoop.decision = copen[current++];
             assert searchLoop.decision != null;
             searchLoop.decision.setPrevious(tmp);
-            searchLoop.mSolver.getEnvironment().worldPush();
+            searchLoop.mModel.getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
             extend = super.extend(searchLoop);
@@ -247,7 +247,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     private void extractOB(SearchLoop searchLoop, int i) {
         Decision stopAt = _unkopen.get(i).getPrevious();
         // then, goes up in the search tree, and detect open nodes
-        searchLoop.mSolver.getEnvironment().worldPop();
+        searchLoop.mModel.getEnvironment().worldPop();
         Decision decision = searchLoop.decision;
         int bound;
         while (decision != stopAt) {
@@ -260,7 +260,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             searchLoop.decision = searchLoop.decision.getPrevious();
             decision.free();
             decision = searchLoop.decision;
-            searchLoop.mSolver.getEnvironment().worldPop();
+            searchLoop.mModel.getEnvironment().worldPop();
         }
     }
 
