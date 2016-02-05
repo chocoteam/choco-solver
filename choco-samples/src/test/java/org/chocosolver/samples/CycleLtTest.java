@@ -32,7 +32,6 @@ package org.chocosolver.samples;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -60,9 +59,9 @@ public class CycleLtTest {
         Constraint[] cstrs = new Constraint[m + 1];
         int i;
         for (i = 0; i < n - 1; i++) {
-            cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
+            cstrs[i] = s.arithm(vars[i], "<", vars[i + 1]);
         }
-        cstrs[i] = IntConstraintFactory.arithm(vars[n - 1], "<", vars[0]);
+        cstrs[i] = s.arithm(vars[n - 1], "<", vars[0]);
 
         s.post(cstrs);
         s.set(IntStrategyFactory.lexico_LB(vars));

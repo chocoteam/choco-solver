@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StringUtils;
@@ -86,21 +85,21 @@ public class MagicSquare extends AbstractProblem {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
+        solver.post(solver.allDifferent(vars, "BC"));
 
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
-            solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, "=", ms));
-            solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, "=", ms));
+            solver.post(solver.scalar(matrix[i], coeffs, "=", ms));
+            solver.post(solver.scalar(invMatrix[i], coeffs, "=", ms));
         }
-        solver.post(IntConstraintFactory.scalar(diag1, coeffs, "=", ms));
-        solver.post(IntConstraintFactory.scalar(diag2, coeffs, "=", ms));
+        solver.post(solver.scalar(diag1, coeffs, "=", ms));
+        solver.post(solver.scalar(diag2, coeffs, "=", ms));
 
         // Symetries breaking
-        solver.post(IntConstraintFactory.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
-        solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
-        solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][0]));
+        solver.post(solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
+        solver.post(solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
+        solver.post(solver.arithm(matrix[0][0], "<", matrix[n - 1][0]));
 
     }
 

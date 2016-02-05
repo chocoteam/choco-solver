@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -58,11 +57,11 @@ public class BottleneckTest {
                 nexts[i] = solver.intVar("n_" + i, 0, 200, false);
                 exps[i] = solver.intVar("e_" + i, 0, 200, false);
                 bws[i] = solver.intVar("b_" + i, 0, 2000, false);
-                solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
+                solver.post(solver.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
             }
 
             IntVar sum = solver.intVar("sum", 0, 2000 * n, true);
-			solver.post(IntConstraintFactory.sum(bws, "=", sum));
+			solver.post(solver.sum(bws, "=", sum));
 
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
@@ -85,11 +84,11 @@ public class BottleneckTest {
                 nexts[i] = solver.intVar("n_" + i, 0, 200, false);
                 exps[i] = solver.intVar("e_" + i, 0, 200, false);
                 bws[i] = solver.intVar("b_" + i, 0, 2000, false);
-				solver.post(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
+				solver.post(solver.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
             }
 
             IntVar sum = solver.intVar("sum", 0, 2000 * n, true);
-			solver.post(IntConstraintFactory.sum(bws, "=", sum));
+			solver.post(solver.sum(bws, "=", sum));
 
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 

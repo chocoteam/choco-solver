@@ -56,7 +56,6 @@ package org.chocosolver.samples.integer; /**
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 
@@ -87,9 +86,9 @@ public class SendMoreMoney extends AbstractProblem {
         R = solver.intVar("R", 0, 9, false);
         Y = solver.intVar("Y", 0, 9, false);
 
-        solver.post(IntConstraintFactory.arithm(S, "!=", 0));
-        solver.post(IntConstraintFactory.arithm(M, "!=", 0));
-        solver.post(IntConstraintFactory.alldifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC"));
+        solver.post(solver.arithm(S, "!=", 0));
+        solver.post(solver.arithm(M, "!=", 0));
+        solver.post(solver.allDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC"));
 
 
         ALL = new IntVar[]{
@@ -101,7 +100,7 @@ public class SendMoreMoney extends AbstractProblem {
                 1000, 100, 10, 1,
                 -10000, -1000, -100, -10, -1
         };
-        solver.post(IntConstraintFactory.scalar(ALL, COEFFS, "=", 0));
+        solver.post(solver.scalar(ALL, COEFFS, "=", 0));
     }
 
     @Override

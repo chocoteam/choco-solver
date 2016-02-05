@@ -32,7 +32,6 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -58,9 +57,9 @@ public class DistanceTest {
                 IntVar X = solver.intVar("X", 1, 10, false);
                 IntVar Y = solver.intVar("Y", 1, 10, false);
                 IntVar diff = solver.intVar("X-Y", -9, 9, true);
-				solver.post(IntConstraintFactory.sum(new IntVar[]{Y,diff}, "=", X));
+				solver.post(solver.sum(new IntVar[]{Y,diff}, "=", X));
                 IntVar Z = solver.intAbsView(diff);
-                solver.post(IntConstraintFactory.arithm(Z, "=", 5));
+                solver.post(solver.arithm(Z, "=", 5));
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
@@ -79,7 +78,7 @@ public class DistanceTest {
                 final Solver solver = new Solver();
                 IntVar X = solver.intVar("X", 1, 10, false);
                 IntVar Y = solver.intVar("Y", 1, 10, false);
-                solver.post(IntConstraintFactory.distance(X, Y, "=", 5));
+                solver.post(solver.distance(X, Y, "=", 5));
                 solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
@@ -107,14 +106,14 @@ public class DistanceTest {
                 IntVar X = s1.intVar("X", 1, k, false);
                 IntVar Y = s1.intVar("Y", 1, k, false);
                 vs1 = new IntVar[]{X, Y};
-                Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2);
+                Constraint c = s1.distance(X, Y, "=", k / 2);
                 s1.post(c);
             }
             {
                 IntVar X = s2.intVar("X", 1, k, false);
                 IntVar Y = s2.intVar("Y", 1, k, false);
                 vs2 = new IntVar[]{X, Y};
-                Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2);
+                Constraint c = s2.distance(X, Y, "=", k / 2);
                 s2.post(c);
                 p2 = c.getPropagator(0);
             }
@@ -156,7 +155,7 @@ public class DistanceTest {
         IntVar X = solver.intVar("X", -5, 5, true);
         IntVar Y = solver.intVar("Y", -5, 5, true);
         IntVar Z = solver.intVar("Z", 0, 10, true);
-        solver.post(IntConstraintFactory.distance(X, Y, "=", Z));
+        solver.post(solver.distance(X, Y, "=", Z));
         solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{Z, X, Y, Z}));
 //        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();

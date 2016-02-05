@@ -32,7 +32,6 @@ package org.chocosolver.solver.search;
 import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -87,8 +86,8 @@ public class ParetoTest {
         IntVar totalProfit_2 = s.intVar("totalProfit_2", 0, maxProfit_2, true);
 
         // --- Posts constraints
-        s.post(IntConstraintFactory.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1));
-        s.post(IntConstraintFactory.knapsack(occurrences, totalWeight, totalProfit_2, weights, profits_2));
+        s.post(s.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1));
+        s.post(s.knapsack(occurrences, totalWeight, totalProfit_2, weights, profits_2));
         // --- Monitor
         s.plugMonitor((IMonitorSolution) () -> bestProfit1 = Math.max(bestProfit1, totalProfit_1.getValue()));
         // --- solve

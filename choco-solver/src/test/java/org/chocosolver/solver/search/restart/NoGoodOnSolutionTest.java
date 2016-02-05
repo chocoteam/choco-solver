@@ -31,8 +31,6 @@ package org.chocosolver.solver.search.restart;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -67,7 +65,15 @@ public class NoGoodOnSolutionTest {
         Solver s = new Solver();
         IntVar z = s.intVar("z", Z, Z + 10, true);
         IntVar[] vars = s.intVarArray("x", n, 0, n - 1, false);
-        s.post(ICF.tsp(vars, z, costs));
+        IntVar[] costOf = new IntVar[n];
+        for (int i = 0; i < n; i++) {
+            costOf[i] = s.intVar("costOf(" + i + ")", costs[i]);
+        }
+        for (int i = 0; i < n; i++) {
+            s.post(s.element(costOf[i], costs[i], vars[i]));
+        }
+        s.post(s.sum(costOf, "=", z));
+        s.post(s.circuit(vars, 0));
         s.set(ISF.random_value(vars));
         SMF.limitSolution(s, MAX_NB_SOLS);
         return s;
@@ -135,10 +141,10 @@ public class NoGoodOnSolutionTest {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
                 solver.post(neq);
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
         SMF.nogoodRecordingOnSolution(solver.retrieveIntVars(true));
@@ -159,10 +165,10 @@ public class NoGoodOnSolutionTest {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
                 solver.post(neq);
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
         SMF.nogoodRecordingOnSolution(solver.retrieveIntVars(false));
@@ -183,10 +189,10 @@ public class NoGoodOnSolutionTest {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
                 solver.post(neq);
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
         SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0]});
@@ -206,10 +212,10 @@ public class NoGoodOnSolutionTest {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
                 solver.post(neq);
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
         SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0], vars[1]});

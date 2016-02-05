@@ -32,8 +32,6 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -59,7 +57,7 @@ public class ElementTest {
     private static void model(Solver s, IntVar index, int[] values, IntVar var,
                               int offset, int nbSol) {
 
-        s.post(IntConstraintFactory.element(var, values, index, offset, "detect"));
+        s.post(s.element(var, values, index, offset));
 
         IntVar[] allvars = ArrayUtils.toArray(index, var);
 
@@ -139,11 +137,11 @@ public class ElementTest {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, 0, 10, false);
             indices[i] = s.intVar("i_" + i, 0, values.length - 1, false);
-            lcstrs.add(IntConstraintFactory.element(vars[i], values, indices[i], 0, "detect"));
+            lcstrs.add(s.element(vars[i], values, indices[i], 0));
         }
 
         for (int i = 0; i < vars.length - 1; i++) {
-            lcstrs.add(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
+            lcstrs.add(s.arithm(vars[i], ">", vars[i + 1]));
         }
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
@@ -165,7 +163,6 @@ public class ElementTest {
         Solver ref = new Solver();
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
-        List<Constraint> lcstrsr = new ArrayList<>(1);
 
         for (int i = 0; i < varsr.length; i++) {
             varsr[i] = ref.intVar("v_" + i, 0, nbvars, false);
@@ -175,12 +172,9 @@ public class ElementTest {
         ref.set(IntStrategyFactory.random_value(allvarsr, seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
-            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0, "detect"));
-            lcstrsr.add(IntConstraintFactory.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
+            ref.post(ref.element(varsr[i], values, indicesr[i], 0));
+            ref.post(ref.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
         }
-
-        Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);
-        ref.post(cstrsr);
 
         ref.findAllSolutions();
 
@@ -200,7 +194,7 @@ public class ElementTest {
             Solver solver = new Solver();
             IntVar I = solver.intVar("I", 0, 5, false);
             IntVar R = solver.intVar("R", 0, 10, false);
-            solver.post(ICF.element(R, new int[]{0, 2, 4, 6, 7}, I));
+            solver.post(solver.element(R, new int[]{0, 2, 4, 6, 7}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 5);
@@ -213,7 +207,7 @@ public class ElementTest {
             Solver solver = new Solver();
             IntVar I = solver.intVar("I", 0, 5, false);
             IntVar R = solver.intVar("R", 0, 10, false);
-            solver.post(ICF.element(R, new int[]{7, 6, 4, 2, 0}, I));
+            solver.post(solver.element(R, new int[]{7, 6, 4, 2, 0}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 5);
@@ -226,7 +220,7 @@ public class ElementTest {
             Solver solver = new Solver();
             IntVar I = solver.intVar("I", 0, 13, false);
             IntVar R = solver.intVar("R", 0, 21, false);
-            solver.post(ICF.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I));
+            solver.post(solver.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I));
             solver.set(ISF.random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 14);
@@ -239,7 +233,7 @@ public class ElementTest {
             Solver solver = new Solver();
             IntVar I = solver.intVar("I", 0, 3, true);
             IntVar R = solver.intVar("R", -1, 0, false);
-            solver.post(ICF.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1, "detect"));
+            solver.post(solver.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1));
             solver.set(ISF.random_bound(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
@@ -267,7 +261,7 @@ public class ElementTest {
         Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
         s.post(s.or(b.not(), el.reif()));
         // !b=> val=2
-        Constraint affect = ICF.arithm(val, "=", 2);
+        Constraint affect = s.arithm(val, "=", 2);
         s.post(s.or(b, affect.reif()));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 2L);

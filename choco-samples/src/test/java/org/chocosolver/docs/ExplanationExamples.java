@@ -30,7 +30,6 @@
 package org.chocosolver.docs;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -50,8 +49,8 @@ public class ExplanationExamples {
     public void dummy() {
         Solver solver = new Solver();
         BoolVar[] bvars = solver.boolVarArray("B", 4);
-        solver.post(ICF.arithm(bvars[2], "=", bvars[3]));
-        solver.post(ICF.arithm(bvars[2], "!=", bvars[3]));
+        solver.post(solver.arithm(bvars[2], "=", bvars[3]));
+        solver.post(solver.arithm(bvars[2], "!=", bvars[3]));
         solver.set(ISF.lexico_LB(bvars));
         ExplanationFactory.CBJ.plugin(solver, false, false);
         Chatterbox.showStatistics(solver);
@@ -64,7 +63,7 @@ public class ExplanationExamples {
         IntVar[] pigeon = solver.intVarArray("p", 5, 1, 4, false);
         for (int i = 0; i < 4; i++) {
             for (int j = i + 1; j < 5; j++) {
-                solver.post(ICF.arithm(pigeon[i], "!=", pigeon[j]));
+                solver.post(solver.arithm(pigeon[i], "!=", pigeon[j]));
             }
         }
         solver.set(ISF.lexico_LB(pigeon));

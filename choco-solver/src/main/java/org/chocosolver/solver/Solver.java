@@ -33,7 +33,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
@@ -1250,7 +1249,7 @@ public class Solver implements Serializable, IModeler{
                 int opt = getObjectiveManager().getBestSolutionValue().intValue();
                 getEngine().flush();
                 search.reset();
-                post(ICF.arithm(objective, "=", opt));
+                post(arithm(objective, "=", opt));
                 set(new AllSolutionsRecorder(this));
                 findAllSolutions();
             }

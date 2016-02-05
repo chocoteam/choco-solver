@@ -29,7 +29,7 @@
  */
 package org.chocosolver.samples.nqueen;
 
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -48,12 +48,12 @@ public class NQueenBinaryGlobal extends AbstractNQueen {
             vars[i] = solver.intVar("Q_" + i, 1, n, false);
         }
 
-        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
+        solver.post(solver.allDifferent(vars, "BC"));
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
     }

@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -49,6 +48,6 @@ public class DistanceGTTest extends AbstractBinaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return IntConstraintFactory.distance(vars[0], vars[1], ">", 2);
+        return solver.distance(vars[0], vars[1], ">", 2);
     }
 }

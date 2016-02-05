@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.unary.PropEqualXC;
 import org.chocosolver.solver.constraints.unary.PropGreaterOrEqualXC;
@@ -190,14 +191,15 @@ public class Arithmetic extends Constraint {
 
 	@Override
 	public Constraint makeOpposite(){
+		Solver solver = vars[0].getSolver();
 		if(vars.length==1){
-			return ICF.arithm(vars[0],Operator.getOpposite(op1).toString(),cste);
+			return solver.arithm(vars[0],Operator.getOpposite(op1).toString(),cste);
 		}else{
 			assert vars.length==2;
 			if(op1==Operator.PL || op1==Operator.MN){
-				return ICF.arithm(vars[0],op1.toString(),vars[1],Operator.getOpposite(op2).toString(),cste);
+				return solver.arithm(vars[0],op1.toString(),vars[1],Operator.getOpposite(op2).toString(),cste);
 			}else{
-				return ICF.arithm(vars[0],Operator.getOpposite(op1).toString(),vars[1],op2.toString(),cste);
+				return solver.arithm(vars[0],Operator.getOpposite(op1).toString(),vars[1],op2.toString(),cste);
 			}
 		}
 	}

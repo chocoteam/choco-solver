@@ -32,7 +32,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -63,7 +62,7 @@ public class LexTest {
                 vs1[i] = solver.intVar("" + i, 0, k, true);
                 vs2[i] = solver.intVar("" + i, 0, k, true);
             }
-            solver.post(IntConstraintFactory.lex_less_eq(vs1, vs2));
+            solver.post(solver.lexLessEq(vs1, vs2));
             solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(vs1, vs2), seed));
             solver.findAllSolutions();
             int kpn = (int) Math.pow(k + 1, n1 / 2);
@@ -83,7 +82,7 @@ public class LexTest {
                 vs1[i] = solver.intVar("" + i, 0, k, true);
                 vs2[i] = solver.intVar("" + i, 0, k, true);
             }
-            solver.post(IntConstraintFactory.lex_less(vs1, vs2));
+            solver.post(solver.lexLess(vs1, vs2));
             solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(vs1, vs2), seed));
 
             solver.findAllSolutions();
@@ -97,12 +96,12 @@ public class LexTest {
         IntVar v1 = solver.intVar("v1", 1, 1, true);
         IntVar v2 = solver.intVar("v2", 2, 2, true);
         IntVar v3 = solver.intVar("v3", 3, 3, true);
-        Constraint c1 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
-        Constraint c2 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
-        Constraint c3 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
-        Constraint c4 = IntConstraintFactory.lex_less_eq(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
-        Constraint c5 = IntConstraintFactory.lex_less_eq(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
-        Constraint c6 = IntConstraintFactory.lex_less_eq(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
+        Constraint c1 = solver.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
+        Constraint c2 = solver.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
+        Constraint c3 = solver.lexLess(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
+        Constraint c4 = solver.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
+        Constraint c5 = solver.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
+        Constraint c6 = solver.lexLessEq(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
         solver.post(c1, c2, c3, c4, c5, c6);
         Assert.assertEquals(ESat.TRUE, c1.isSatisfied());
         Assert.assertEquals(ESat.FALSE, c2.isSatisfied());
@@ -126,7 +125,7 @@ public class LexTest {
         b[1] = solver.intVar("b2", 0, 0, true);
 
 
-        solver.post(IntConstraintFactory.lex_less(a, b));
+        solver.post(solver.lexLess(a, b));
         try {
             solver.propagate();
 
@@ -151,7 +150,7 @@ public class LexTest {
         b[1] = solver.intVar("b3", new int[]{-3, -2});
 
 
-        solver.post(IntConstraintFactory.lex_less(a, b));
+        solver.post(solver.lexLess(a, b));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -176,7 +175,7 @@ public class LexTest {
         b[1] = solver.intVar("b2", new int[]{-6, -1});
 
 
-        solver.post(IntConstraintFactory.lex_less(a, b));
+        solver.post(solver.lexLess(a, b));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -200,7 +199,7 @@ public class LexTest {
         b[1] = solver.intVar("b2", new int[]{-6, -1});
 
 
-        solver.post(IntConstraintFactory.lex_less(a, b));
+        solver.post(solver.lexLess(a, b));
         try {
             solver.propagate();
             Assert.fail();
@@ -228,7 +227,7 @@ public class LexTest {
         b[4] = solver.intVar("b5", new int[]{0, 1, 2});
 
 
-        solver.post(IntConstraintFactory.lex_less(a, b));
+        solver.post(solver.lexLess(a, b));
         try {
             solver.propagate();
         } catch (ContradictionException ignored) {
@@ -252,7 +251,7 @@ public class LexTest {
         b[2] = solver.intVar("b3", new int[]{-4, 2});
 
 
-        solver.post(IntConstraintFactory.lex_less(a, b));
+        solver.post(solver.lexLess(a, b));
         try {
             solver.propagate();
         } catch (ContradictionException e) {

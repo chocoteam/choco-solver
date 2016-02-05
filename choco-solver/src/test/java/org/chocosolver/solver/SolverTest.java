@@ -30,8 +30,6 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.memory.Environments;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -79,8 +77,8 @@ public class SolverTest {
         for (int i = 0; i < n; i++) {
             objects[i] = s.intVar("v_" + i, 0, nbOmax[i], false);
         }
-        s.post(IntConstraintFactory.scalar(objects, volumes, "=", s.intVar("capa", capacites[0], capacites[1], true)));
-        s.post(IntConstraintFactory.scalar(objects, energies, "=", power));
+        s.post(s.scalar(objects, volumes, "=", s.intVar("capa", capacites[0], capacites[1], true)));
+        s.post(s.scalar(objects, energies, "=", power));
         s.setObjectives(power);
         s.set(IntStrategyFactory.lexico_LB(objects));
         Chatterbox.showShortStatistics(s);
@@ -235,7 +233,7 @@ public class SolverTest {
     public void testFH2() {
         Solver solver = new Solver();
         BoolVar b = solver.boolVar("b");
-        solver.post(ICF.arithm(b, "=", 2));
+        solver.post(solver.arithm(b, "=", 2));
         solver.findAllSolutions();
         Assert.assertEquals(solver.isFeasible(), ESat.FALSE);
     }
@@ -243,7 +241,7 @@ public class SolverTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL1() {
         Solver s = new Solver();
-        s.post(ICF.arithm(s.ONE(), "!=", s.ZERO()));
+        s.post(s.arithm(s.ONE(), "!=", s.ZERO()));
         if (s.findSolution()) {
             while (s.nextSolution()) ;
         }
@@ -371,8 +369,8 @@ public class SolverTest {
         Solver solver = new Solver();
         IntVar[] v = solver.boolVarArray("v", 2);
         IntVar[] w = solver.boolVarArray("w", 2);
-        solver.post(ICF.arithm(v[0], "!=", v[1]));
-        solver.post(ICF.arithm(w[0], "!=", w[1]));
+        solver.post(solver.arithm(v[0], "!=", v[1]));
+        solver.post(solver.arithm(w[0], "!=", w[1]));
         solver.set(ISF.lexico_LB(v));
         solver.makeCompleteSearch(true);
         solver.findSolution();
@@ -396,7 +394,7 @@ public class SolverTest {
     public void testRestore() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] v = solver.boolVarArray("v", 2);
-        solver.post(ICF.arithm(v[0], "!=", v[1]));
+        solver.post(solver.arithm(v[0], "!=", v[1]));
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, v[0]);
         solver.restoreLastSolution();
         Assert.assertTrue(v[0].isInstantiated());

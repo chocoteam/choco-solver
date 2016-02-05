@@ -30,8 +30,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.solution.Solution;
@@ -77,7 +75,7 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(IntConstraintFactory.regular(vars, auto));
+        solver.post(solver.regular(vars, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -119,7 +117,7 @@ public class RegularTest {
         auto.minimize();
         Assert.assertEquals(auto.getNbStates(), 54);
 
-        solver.post(IntConstraintFactory.regular(vars, auto));
+        solver.post(solver.regular(vars, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -149,7 +147,7 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(IntConstraintFactory.regular(vars, auto));
+        solver.post(solver.regular(vars, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -180,7 +178,7 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(IntConstraintFactory.regular(vars, auto));
+        solver.post(solver.regular(vars, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -197,7 +195,7 @@ public class RegularTest {
         for (int i = 0; i < n; i++) {
             vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        solver.post(IntConstraintFactory.regular(vars, auto));
+        solver.post(solver.regular(vars, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -214,7 +212,7 @@ public class RegularTest {
         for (int i = 0; i < n; i++) {
             vars[i] = solver.intVar("x_" + i, new int[]{0, 10, 20});
         }
-        solver.post(IntConstraintFactory.regular(vars, auto));
+        solver.post(solver.regular(vars, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         Chatterbox.showSolutions(solver);
@@ -226,7 +224,7 @@ public class RegularTest {
     public void testNeg() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 4, -10, 10, false);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("<-9>1*")));
+        solver.post(solver.regular(CS, new FiniteAutomaton("<-9>1*")));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
 
@@ -245,7 +243,7 @@ public class RegularTest {
     public void testregExp1() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("[12]*")));
+        solver.post(solver.regular(CS, new FiniteAutomaton("[12]*")));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
@@ -254,7 +252,7 @@ public class RegularTest {
     public void testregExp2() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)));
+        solver.post(solver.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
@@ -263,7 +261,7 @@ public class RegularTest {
     public void testregExp3() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)));
+        solver.post(solver.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)));
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -274,7 +272,7 @@ public class RegularTest {
     public void testregExp4() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(ICF.regular(CS, new FiniteAutomaton(".*", 0, 3)));
+        solver.post(solver.regular(CS, new FiniteAutomaton(".*", 0, 3)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
     }
@@ -283,7 +281,7 @@ public class RegularTest {
     public void testregExp5() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("1{2}")));
+        solver.post(solver.regular(CS, new FiniteAutomaton("1{2}")));
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -294,7 +292,7 @@ public class RegularTest {
     public void testregExp6() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 4, 0, 3, false);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("0{2,3}1*")));
+        solver.post(solver.regular(CS, new FiniteAutomaton("0{2,3}1*")));
         Chatterbox.showSolutions(solver);
         Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -305,7 +303,7 @@ public class RegularTest {
     public void testregExp7() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 10, 0, 2, false);
-        solver.post(ICF.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")));
+        solver.post(solver.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")));
         Chatterbox.showSolutions(solver, () -> {
             for (int i = 0; i < 10; i++) {
                 System.out.printf("%d", CS[i].getValue());
@@ -324,7 +322,7 @@ public class RegularTest {
     public void testregExp8() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 3, new int[]{43, 59, 117});
-        solver.post(ICF.regular(CS, new FiniteAutomaton("<43><59><117>")));
+        solver.post(solver.regular(CS, new FiniteAutomaton("<43><59><117>")));
         solver.set(ISF.lexico_LB(CS));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);

@@ -33,7 +33,6 @@ package org.chocosolver.solver.search;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
@@ -64,8 +63,8 @@ public class ObjectiveTest {
         Solver solver = new Solver();
 
         IntVar iv = solver.intVar("iv", -5, 15, false);
-        solver.post(ICF.arithm(iv, ">=", 0));
-        solver.post(ICF.arithm(iv, "<=", 10));
+        solver.post(solver.arithm(iv, ">=", 0));
+        solver.post(solver.arithm(iv, "<=", 10));
         Random rnd = new Random();
         for (int i = 0; i < 2000; i++) {
             rnd.setSeed(i);
@@ -129,7 +128,7 @@ public class ObjectiveTest {
     public void test2() {
         Solver solver = new Solver();
         IntVar iv = solver.intVar("iv", 0, 10, false);
-        solver.post(ICF.arithm(iv, ">=", 2));
+        solver.post(solver.arithm(iv, ">=", 2));
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
         Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
@@ -144,11 +143,11 @@ public class ObjectiveTest {
     public void test3() {
         final Solver solver = new Solver();
         final IntVar iv = solver.intVar("iv", 0, 10, false);
-        solver.post(ICF.arithm(iv, ">=", 2));
+        solver.post(solver.arithm(iv, ">=", 2));
 
         solver.post(new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{iv},
-                        new Constraint[]{ICF.arithm(iv, ">=", 4)},
+                        new Constraint[]{solver.arithm(iv, ">=", 4)},
                         new Constraint[]{solver.TRUE()}) {
                     @Override
                     public ESat checkCondition() {
@@ -169,7 +168,7 @@ public class ObjectiveTest {
         Assert.assertEquals(iv.getValue(), 2);
 
         solver.getSearchLoop().reset();
-        solver.plugMonitor((IMonitorSolution) () -> solver.post(ICF.arithm(iv, ">=", 6)));
+        solver.plugMonitor((IMonitorSolution) () -> solver.post(solver.arithm(iv, ">=", 6)));
         solver.findSolution();
         Assert.assertEquals(iv.getValue(), 2);
 
@@ -182,7 +181,7 @@ public class ObjectiveTest {
     public void test4() {
         Solver solver = new Solver();
         IntVar iv = solver.intVar("iv", 0, 10, false);
-        BoolVar v = ICF.arithm(iv, "<=", 2).reif();
+        BoolVar v = solver.arithm(iv, "<=", 2).reif();
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
@@ -197,7 +196,7 @@ public class ObjectiveTest {
         Solver solver = new Solver();
         BoolVar b1 = solver.boolVar("b1");
         BoolVar b2 = solver.boolVar("b2");
-        solver.post(ICF.arithm(b1, "<=", b2));
+        solver.post(solver.arithm(b1, "<=", b2));
 //        SMF.log(solver, true, true);
         solver.set(new ObjectiveManager<IntVar, Integer>(b1, ResolutionPolicy.MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
@@ -209,7 +208,7 @@ public class ObjectiveTest {
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         solver.getSearchLoop().reset();
-        solver.post(ICF.arithm(b1, "=", bestvalue));
+        solver.post(solver.arithm(b1, "=", bestvalue));
         solver.set(ISF.lexico_LB(new BoolVar[]{b1, b2}));
         int count = 0;
         if (solver.findSolution()) {

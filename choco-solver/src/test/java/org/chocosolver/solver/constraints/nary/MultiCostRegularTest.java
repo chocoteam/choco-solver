@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -97,7 +96,7 @@ public class MultiCostRegularTest {
             }
         }
         ICostAutomaton costAutomaton = CostAutomaton.makeMultiResources(auto, costMatrix, bounds);
-        solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, costAutomaton));
+        solver.post(solver.multiCostRegular(sequence, bounds, costAutomaton));
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
         solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(sequence, bounds), seed));
         return solver;

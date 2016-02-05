@@ -58,7 +58,7 @@ public class PropCondAllDiff_AC extends Propagator<IntVar> {
      *
      * @param variables array of integer variables
      * @param condition defines the subset of variables which is considered by the
-     *                  alldifferent constraint
+     *                  allDifferent constraint
      */
     public PropCondAllDiff_AC(IntVar[] variables, Condition condition) {
         super(variables, PropagatorPriority.QUADRATIC, false);

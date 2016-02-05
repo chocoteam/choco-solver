@@ -31,8 +31,6 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -54,14 +52,14 @@ public class ModTest extends AbstractTernaryTest {
 
 	@Override
 	protected Constraint make(IntVar[] vars, Solver s) {
-		return IntConstraintFactory.mod(vars[0], vars[1], vars[2]);
+		return s.mod(vars[0], vars[1], vars[2]);
 	}
 
 	@Test(groups="1s", timeOut=60000)
 	public void test2() {
 		Solver solver = new Solver();
 		IntVar res = solver.intVar("r", 1, 2, true);
-		solver.post(IntConstraintFactory.mod(res, solver.intVar(2), solver.intVar(1)));
+		solver.post(solver.mod(res, solver.intVar(2), solver.intVar(1)));
 		try {
 			solver.propagate();
 			Assert.assertTrue(res.isInstantiatedTo(1));
@@ -76,7 +74,7 @@ public class ModTest extends AbstractTernaryTest {
 		IntVar dividend = s.intVar("dividend", 2, 3, false);
 		IntVar divisor = s.intVar(1);
 		IntVar remainder = s.intVar("remainder", 1, 2, false);
-		s.post(ICF.mod(dividend, divisor, remainder).getOpposite());
+		s.post(s.mod(dividend, divisor, remainder).getOpposite());
 		s.set(ISF.lexico_LB(dividend, divisor, remainder));
 		s.findSolution();
 	}

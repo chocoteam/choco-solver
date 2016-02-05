@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StringUtils;
@@ -75,8 +74,8 @@ public class LatinSquare extends AbstractProblem {
                 row[x] = vars[i * m + x];
                 col[x] = vars[x * m + i];
             }
-            solver.post(IntConstraintFactory.alldifferent(col, "AC"));
-            solver.post(IntConstraintFactory.alldifferent(row, "AC"));
+            solver.post(solver.allDifferent(col, "AC"));
+            solver.post(solver.allDifferent(row, "AC"));
         }
     }
 

@@ -222,10 +222,10 @@ public class LogicTreeTest {
 
         solver.ifThen(
 						rows[0],
-						IntConstraintFactory.arithm(rows[1], "+", rows[2], "=", 2));
+						solver.arithm(rows[1], "+", rows[2], "=", 2));
         solver.ifThen(
 						rows[0].not(),
-						IntConstraintFactory.arithm(rows[1], "+", rows[2], "<=", 1));
+						solver.arithm(rows[1], "+", rows[2], "<=", 1));
         //SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         long nbSol = solver.getMeasures().getSolutionCount();
@@ -287,8 +287,8 @@ public class LogicTreeTest {
         IntVar a = solver.intVar("a", -1, 1, false);
         BoolVar b1 = solver.boolVar("b1");
         BoolVar b2 = solver.boolVar("b2");
-        ICF.arithm(a,"=",0).reifyWith(b1);
-        ICF.arithm(a,">",0).reifyWith(b2);
+        solver.arithm(a,"=",0).reifyWith(b1);
+        solver.arithm(a,">",0).reifyWith(b2);
 
         LogOp l = LogOp.or(
                 LogOp.and(b1, b2.not()),
@@ -313,8 +313,8 @@ public class LogicTreeTest {
         IntVar a = solver.intVar("a", -1, 1, false);
         BoolVar b1 = solver.boolVar("b1");
         BoolVar b2 = solver.boolVar("b2");
-        ICF.arithm(a,"=",0).reifyWith(b1);
-        ICF.arithm(a,">",0).reifyWith(b2);
+        solver.arithm(a,"=",0).reifyWith(b1);
+        solver.arithm(a,">",0).reifyWith(b2);
 
         LogOp l = LogOp.or(b1.not(), b2.not());
         SatFactory.addClauses(l, solver);
@@ -336,8 +336,8 @@ public class LogicTreeTest {
         IntVar a = solver.intVar("a", -1, 1, false);
         BoolVar b1 = solver.boolVar("b1");
         BoolVar b2 = solver.boolVar("b2");
-        ICF.arithm(a,"=",0).reifyWith(b1);
-        ICF.arithm(a,">",0).reifyWith(b2);
+        solver.arithm(a,"=",0).reifyWith(b1);
+        solver.arithm(a,">",0).reifyWith(b2);
 
         SatFactory.addClauses(new BoolVar[0], new BoolVar[]{b1, b2});
         try {

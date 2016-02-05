@@ -31,8 +31,6 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -54,14 +52,14 @@ public class DivTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return IntConstraintFactory.eucl_div(vars[0], vars[1], vars[2]);
+        return solver.div(vars[0], vars[1], vars[2]);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL() {
         Solver solver = new Solver();
         IntVar i = solver.intVar("i", 0, 2, false);
-        solver.post(ICF.eucl_div(i, solver.ONE(), solver.ZERO()).getOpposite());
+        solver.post(solver.div(i, solver.ONE(), solver.ZERO()).getOpposite());
 //        SMF.log(solver, true, false);
         solver.findAllSolutions();
     }
@@ -73,7 +71,7 @@ public class DivTest extends AbstractTernaryTest {
             IntVar a = s.intVar("a", new int[]{0, 2, 3, 4});
             IntVar b = s.intVar("b", new int[]{-1, 1, 3, 4});
             IntVar c = s.intVar("c", new int[]{-3, 1, 4});
-            s.post(ICF.eucl_div(a, b, c));
+            s.post(s.div(a, b, c));
             s.set(ISF.random_value(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);
             s.plugMonitor((IMonitorSolution) () -> {

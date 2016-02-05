@@ -30,8 +30,6 @@
 package org.chocosolver.util;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -61,16 +59,16 @@ public class ProblemMaker {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j]));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j]));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
         return solver;
     }
 
     /**
-     * Creates a n-Queen problem with one alldifferent constraint and binary constraints.
+     * Creates a n-Queen problem with one allDifferent constraint and binary constraints.
      * n queens must be placed on a nxn chessboard.
      * The variables can be accessed though the hook name "vars".
      * @param n number of queens (or size of the chessboard)
@@ -84,12 +82,12 @@ public class ProblemMaker {
             vars[i] = solver.intVar("Q_" + i, 1, n, false);
         }
         solver.addHook("vars", vars);
-        solver.post(ICF.alldifferent(vars, "AC"));
+        solver.post(solver.allDifferent(vars, "AC"));
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
         return solver;
@@ -112,8 +110,8 @@ public class ProblemMaker {
         for (int i = 0; i < n; i++) {
             for (int j = i+1; j < n; j++) {
                 IntVar k = solver.intVar(randomName(), -n, n, false);
-                solver.post(ICF.arithm(k,"!=",0));
-                solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
+                solver.post(solver.arithm(k,"!=",0));
+                solver.post(solver.sum(new IntVar[]{vars[i],k},"=",vars[j]));
                 vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
@@ -122,11 +120,11 @@ public class ProblemMaker {
         solver.addHook("vars", vars);
         solver.addHook("vectors", vectors);
 
-        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
-        solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
+        solver.post(solver.allDifferent(vars, "AC"));
+        solver.post(solver.allDifferent(vectors, "BC"));
 
         // symmetry-breaking
-        solver.post(ICF.arithm(vars[0],"<",vars[n-1]));
+        solver.post(solver.arithm(vars[0],"<",vars[n-1]));
         return solver;
     }
 
@@ -143,25 +141,25 @@ public class ProblemMaker {
         solver.addHook("ticks", ticks);
         IntVar[] diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         solver.addHook("diffs", diffs);
-        solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
+        solver.post(solver.arithm(ticks[0], "=", 0));
 
         for (int i = 0; i < m - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
+            solver.post(solver.arithm(ticks[i + 1], ">", ticks[i]));
         }
 
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                solver.post(IntConstraintFactory.arithm(ticks[j],"-", ticks[i], "=", diffs[k]));
-                solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                solver.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.post(solver.arithm(ticks[j],"-", ticks[i], "=", diffs[k]));
+                solver.post(solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
+                solver.post(solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.post(solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
             }
         }
-        solver.post(IntConstraintFactory.alldifferent(diffs, "BC"));
+        solver.post(solver.allDifferent(diffs, "BC"));
         // break symetries
         if (m > 2) {
-            solver.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+            solver.post(solver.arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
         solver.setObjectives(ticks[m-1]);
         return solver;

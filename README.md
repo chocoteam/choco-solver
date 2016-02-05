@@ -33,7 +33,7 @@ Solver solver = new Solver("my first problem");
 IntVar x = VariableFactory.bounded("X", 0, 5, solver);
 IntVar y = VariableFactory.bounded("Y", 0, 5, solver);
 // 3. Create and post constraints by using constraint factories
-solver.post(IntConstraintFactory.arithm(x, "+", y, "<", 5));
+solver.post(solver.arithm(x, "+", y, "<", 5));
 // 4. Define the search strategy
 solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y}));
 // 5. Launch the resolution process

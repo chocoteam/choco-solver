@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.constraints.extension;
 
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -318,7 +319,7 @@ public class TuplesFactory {
     }
 
     /**
-     * Generate valid tuples for lex_chain_less constraint
+     * Generate valid tuples for lexChainLess constraint
      *
      * @param VARS concerned variables
      * @return a Tuples object, reserved for a table constraint
@@ -333,7 +334,7 @@ public class TuplesFactory {
     }
 
     /**
-     * Generate valid tuples for lex_chain_less_eq constraint
+     * Generate valid tuples for lexChainLessEq constraint
      *
      * @param VARS concerned variables
      * @return a Tuples object, reserved for a table constraint
@@ -437,4 +438,24 @@ public class TuplesFactory {
         }, true, ArrayUtils.append(VARS, new IntVar[]{SUM}));
     }
 
+    /**
+     * Check whether the intension constraint to extension constraint substitution is enabled and can be achieved
+     *
+     * @param VARS list of variables involved
+     * @return a boolean
+     */
+    public static boolean canBeTupled(IntVar... VARS) {
+        Settings settings = VARS[0].getSolver().getSettings();
+        if (!settings.enableTableSubstitution()) {
+            return false;
+        }
+        long doms = 1;
+        for (int i = 0; i < VARS.length && doms < settings.getMaxTupleSizeForSubstitution(); i++) {
+            if (!VARS[i].hasEnumeratedDomain()) {
+                return false;
+            }
+            doms *= VARS[i].getDomainSize();
+        }
+        return (doms < settings.getMaxTupleSizeForSubstitution());
+    }
 }

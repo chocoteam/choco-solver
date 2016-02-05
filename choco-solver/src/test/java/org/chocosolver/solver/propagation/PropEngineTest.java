@@ -33,7 +33,9 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.*;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
@@ -60,8 +62,8 @@ public class PropEngineTest {
         Solver solver = new Solver("t1");
         IntVar x = solver.intVar("X", 1, 3, true);
         IntVar y = solver.intVar("Y", 1, 3, true);
-        solver.post(IntConstraintFactory.arithm(x, ">=", y));
-        solver.post(IntConstraintFactory.arithm(x, "<=", 2));
+        solver.post(solver.arithm(x, ">=", y));
+        solver.post(solver.arithm(x, "<=", 2));
 
         solver.findSolution();
     }
@@ -70,7 +72,7 @@ public class PropEngineTest {
     public void test2() {
         Solver solver = new Solver();
         IntVar[] VARS = solver.intVarArray("X", 2, 0, 2, false);
-        Constraint CSTR = ICF.arithm(VARS[0], "+", VARS[1], "=", 2);
+        Constraint CSTR = solver.arithm(VARS[0], "+", VARS[1], "=", 2);
         solver.post(CSTR, CSTR);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
@@ -91,7 +93,7 @@ public class PropEngineTest {
             }
         });
         IntVar[] vars = solver.intVarArray("V", 3, 0, 4, false);
-        solver.post(ICF.alldifferent(vars));
+        solver.post(solver.allDifferent(vars));
         Arrays.sort(vars, (o1, o2) -> o2.getId() - o1.getId());
 
         solver.propagate();

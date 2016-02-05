@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -45,12 +44,12 @@ public class IntValuePrecedeChainTest {
 
     public static void int_value_precede_chain_dec(IntVar[] X, int S, int T) {
         Solver solver = X[0].getSolver();
-        solver.post(ICF.arithm(X[0], "!=", T));
+        solver.post(solver.arithm(X[0], "!=", T));
         for (int j = 1; j < X.length; j++) {
-            BoolVar bj = ICF.arithm(X[j], "=", T).reif();
+            BoolVar bj = solver.arithm(X[j], "=", T).reif();
             BoolVar[] bis = new BoolVar[j];
             for (int i = 0; i < j; i++) {
-                bis[i] = ICF.arithm(X[i], "=", S).reif();
+                bis[i] = solver.arithm(X[i], "=", S).reif();
             }
             solver.ifThen(bj, solver.or(bis));
         }
@@ -64,7 +63,7 @@ public class IntValuePrecedeChainTest {
             {
                 Solver solver = new Solver();
                 IntVar[] vars = solver.intVarArray("X", 5, 0, 5, false);
-                solver.post(ICF.int_value_precede_chain(vars, 1, 2));
+                solver.post(solver.intValuePrecedeChain(vars, 1, 2));
                 solver.set(ISF.random(vars, i));
                 solver.findAllSolutions();
                 s1 = solver.getMeasures().getSolutionCount();

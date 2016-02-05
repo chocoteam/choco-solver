@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -61,7 +60,7 @@ public class BoundGlobalCardinlityTest {
         for (int i = 0; i < values.length; i++) {
             values[i] = i;
         }
-        solver.post(IntConstraintFactory.global_cardinality(vars, values, card, false));
+        solver.post(solver.globalCardinality(vars, values, card, false));
 
         vars[0].instantiateTo(0, Cause.Null);
         vars[1].instantiateTo(1, Cause.Null);
@@ -93,7 +92,7 @@ public class BoundGlobalCardinlityTest {
             {
                 IntVar[] vars = solver.intVarArray("vars", n, 0, m - 1, true);
                 IntVar[] cards = solver.intVarArray("cards", m, 0, n, true);
-                solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
+                solver.post(solver.globalCardinality(vars, values, cards, false));
 //              solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
                 solver.set(IntStrategyFactory.lexico_LB(ArrayUtils.append(vars, cards)));
             }
@@ -130,7 +129,7 @@ public class BoundGlobalCardinlityTest {
             {
                 IntVar[] vars = solver.intVarArray("vars", n, 0, m - 1, true);
                 IntVar[] cards = solver.intVarArray("cards", m, 0, n, true);
-                solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
+                solver.post(solver.globalCardinality(vars, values, cards, false));
 //                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
                 solver.set(IntStrategyFactory.lexico_LB(vars));
             }

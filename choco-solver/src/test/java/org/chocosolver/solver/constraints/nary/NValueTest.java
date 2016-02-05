@@ -35,7 +35,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
@@ -50,7 +49,7 @@ public class NValueTest {
         Solver solver = new Solver();
         final IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
         final IntVar N = solver.intVar("N", 2, 3, false);
-        solver.post(ICF.atleast_nvalues(XS, N, false));
+        solver.post(solver.atLeastNValues(XS, N, false));
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         final BitSet values = new BitSet(3);
@@ -77,7 +76,7 @@ public class NValueTest {
         Solver solver = new Solver();
         final IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
         final IntVar N = solver.intVar("N", 2, 3, false);
-        solver.post(ICF.atmost_nvalues(XS, N, false));
+        solver.post(solver.atMostNVvalues(XS, N, false));
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
         final BitSet values = new BitSet(3);

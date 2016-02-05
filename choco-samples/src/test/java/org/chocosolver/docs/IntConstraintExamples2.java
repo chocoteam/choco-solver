@@ -30,7 +30,6 @@
 package org.chocosolver.docs;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
@@ -55,7 +54,7 @@ public class IntConstraintExamples2 {
         tuples.add(0, -1);
         tuples.add(1, -1);
         tuples.add(0, 1);
-        solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+        solver.post(solver.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -66,7 +65,7 @@ public class IntConstraintExamples2 {
         IntVar iv = solver.intVar("iv", 1, 3, false);
         BoolVar[] eqs = solver.boolVarArray("eq", 3);
         BoolVar[] lqs = solver.boolVarArray("lq", 3);
-        solver.post(ICF.clause_channeling(iv, eqs, lqs));
+        solver.post(solver.clausesIntChanneling(iv, eqs, lqs));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -75,7 +74,7 @@ public class IntConstraintExamples2 {
     public void int_value_precede_chain() {
         Solver solver = new Solver();
         IntVar[] X = solver.intVarArray("X", 3, 1, 3, false);
-        solver.post(ICF.int_value_precede_chain(X, 1, 2));
+        solver.post(solver.intValuePrecedeChain(X, 1, 2));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -84,7 +83,7 @@ public class IntConstraintExamples2 {
     public void int_value_precede_chain2() {
         Solver solver = new Solver();
         IntVar[] X = solver.intVarArray("X", 3, 1, 3, false);
-        solver.post(ICF.int_value_precede_chain(X, new int[]{2,3,1}));
+        solver.post(solver.intValuePrecedeChain(X, new int[]{2,3,1}));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }

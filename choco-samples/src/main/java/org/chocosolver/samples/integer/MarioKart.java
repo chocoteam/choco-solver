@@ -30,10 +30,8 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.samples.graph.input.TSP_Utils;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -206,7 +204,7 @@ public class MarioKart extends AbstractProblem {
 	/** Creation of the problem instance */
 	private void data() {
 		/* Data of the town */
-		int[][] distances = TSP_Utils.generateRandomCosts(HOUSE_NUMBER, SEED, CITY_SIZE);
+		int[][] distances = generateRandomCosts(HOUSE_NUMBER, SEED, CITY_SIZE);
 		consumptions = computeConsumptions(distances);
 		gold = generateGolds(HOUSE_NUMBER, SEED, MAX_GOLD);
 
@@ -247,27 +245,27 @@ public class MarioKart extends AbstractProblem {
 	/** Post all the constraints of the problem */
 	private void constraints() {
 		/* The scalar constraint to compute global consumption of the kart to perform the path */
-		solver.post(ICF.scalar(ArrayUtils.flatten(edges), ArrayUtils.flatten(consumptions), "=", fuelConsumed));
+		solver.post(solver.scalar(ArrayUtils.flatten(edges), ArrayUtils.flatten(consumptions), "=", fuelConsumed));
 
 		/* The scalar constraint to compute the amount of gold founded by Mario in the path. With our model if a
 		 * node isn't used then his next value is equals to his id. Then the boolean edges[i][i] is equals to true */
 		BoolVar[] used = new BoolVar[n];
 		for (int i = 0; i < used.length; i++)
 			used[i] = edges[i][i].not();
-		solver.post(ICF.scalar(used, gold, "=", goldFound));
+		solver.post(solver.scalar(used, gold, "=", goldFound));
 
-		/* The subcircuit constraint. This forces all the next value to form a circuit which the overall size is equals
+		/* The subCircuit constraint. This forces all the next value to form a circuit which the overall size is equals
 		 * to the size variable. This constraint check if the path contains any sub circles. */
-		solver.post(ICF.subcircuit(next, 0, size));
+		solver.post(solver.subCircuit(next, 0, size));
 
 		/* The path has to end on the t node. This constraint doesn't create a path, but a circle or a circuit. So we
 		 * force the edge (t,s) then all the other node of the circuit will form a starting from s and ending at t */
-		solver.post(ICF.arithm(next[t], "=", s));
+		solver.post(solver.arithm(next[t], "=", s));
 
 		/* The boolean channeling constraint. Enforce the relation between the next values and the edges values in the
 		 * graph boolean variable matrix */
 		for (int i = 0; i < n; i++){
-			solver.post(ICF.boolean_channeling(edges[i], next[i],0));
+			solver.post(solver.boolsIntChanneling(edges[i], next[i],0));
 		}
 	}
 
@@ -278,9 +276,9 @@ public class MarioKart extends AbstractProblem {
 		IntVar[] fuelHouse = new IntVar[HOUSE_NUMBER];
 		for(int i=0;i<HOUSE_NUMBER;i++){
 			fuelHouse[i] = solver.intVar("fuelHouse", 0, FUEL, false);
-			solver.post(ICF.element(fuelHouse[i],consumptions[i],next[i],0,"none"));
+			solver.post(solver.element(fuelHouse[i], consumptions[i], next[i], 0));
 		}
-		solver.post(ICF.sum(fuelHouse,"=",fuelConsumed));
+		solver.post(solver.sum(fuelHouse,"=",fuelConsumed));
 
 		/* GOLD RELATED FILTERING
 		* This problem can be seen has a knapsack problem where are trying to found the set of edges that contains the
@@ -290,7 +288,7 @@ public class MarioKart extends AbstractProblem {
 		for (int i = 0; i < goldMatrix.length; i++)
 			for (int j = 0; j < goldMatrix.length; j++)
 				goldMatrix[i][j] = (i == j) ? 0 : gold[i];
-		solver.post(ICF.knapsack(flatten(edges), solver.intVar(FUEL),
+		solver.post(solver.knapsack(flatten(edges), solver.intVar(FUEL),
 				goldFound, flatten(consumptions), flatten(goldMatrix)));
 	}
 
@@ -362,4 +360,15 @@ public class MarioKart extends AbstractProblem {
 			return conso / 10d;
 		}
 	}
+
+	private static int[][] generateRandomCosts(int n, int s, int max) {
+	        Random rd = new Random(s);
+	        int[][] costs = new int[n][n];
+	        for (int i = 0; i < n; i++) {
+	            for (int j = i + 1; j < n; j++) {
+	                costs[j][i] = costs[i][j] = rd.nextInt(max);
+	            }
+	        }
+	        return costs;
+	    }
 }

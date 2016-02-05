@@ -30,7 +30,6 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -60,7 +59,7 @@ public class TestSolveur {
             for (int i = 0; i < kk - 1; i++) {
                 for (int j = i + 1; j < kk; j++) {
                     //System.out.print("C"+k+" :: "+ vars[i]+ " != " + vars[j]);
-                    cstrs[k] = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                    cstrs[k] = s.arithm(vars[i], "!=", vars[j]);
                     //System.out.println(cstrs[k]+ " ");
                     k++;
                 }
@@ -87,7 +86,7 @@ public class TestSolveur {
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
-                cstrs[i] = IntConstraintFactory.alldifferent(vars, "BC");
+                cstrs[i] = s.allDifferent(vars, "BC");
             }
 
             s.post(cstrs);
@@ -110,10 +109,10 @@ public class TestSolveur {
         int i;
         for (i = 0; i < k - 1; i++) {
             //System.out.println("C("+vars[i]+","+vars[i+1]+")");
-            cstrs[i] = IntConstraintFactory.arithm(vars[i], "!=", vars[i + 1]);
+            cstrs[i] = s.arithm(vars[i], "!=", vars[i + 1]);
         }
         //System.out.println("C("+vars[n-1]+","+vars[0]+")");
-        cstrs[i] = IntConstraintFactory.arithm(vars[k - 1], "!=", vars[0]);
+        cstrs[i] = s.arithm(vars[k - 1], "!=", vars[0]);
 
         s.post(cstrs);
         s.set(IntStrategyFactory.lexico_LB(vars));
@@ -151,10 +150,10 @@ public class TestSolveur {
             int i;
             for (i = 0; i < k - 1; i++) {
                 //System.out.println("C("+vars[i]+","+vars[i+1]+")");
-                cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
+                cstrs[i] = s.arithm(vars[i], "<", vars[i + 1]);
             }
             //System.out.println("C("+vars[n-1]+","+vars[0]+")");
-            cstrs[i] = IntConstraintFactory.arithm(vars[k - 1], "<", vars[0]);
+            cstrs[i] = s.arithm(vars[k - 1], "<", vars[0]);
 
             s.post(cstrs);
             s.set(IntStrategyFactory.lexico_LB(vars));
@@ -179,14 +178,14 @@ public class TestSolveur {
         int i;
         for (i = 0; i < (n / 2) - 1; i++) {
             //System.out.println("<("+vars[i]+","+vars[i+1]+")");
-            cstrs[i] = IntConstraintFactory.arithm(vars[i], "!=", vars[i + 1]);
+            cstrs[i] = s.arithm(vars[i], "!=", vars[i + 1]);
             //System.out.println(cstrs[i]);
             int j = (n / 2);
             //System.out.println("<("+vars[i+j]+","+vars[i+j+1]+")");
-            cstrs[i + j] = IntConstraintFactory.arithm(vars[i + j], "!=", vars[i + j + 1]);
+            cstrs[i + j] = s.arithm(vars[i + j], "!=", vars[i + j + 1]);
             //System.out.println(cstrs[i+j]);
         }
-        cstrs[(n / 2) - 1] = IntConstraintFactory.arithm(vars[(n / 2) - 1], "<", vars[n / 2]);
+        cstrs[(n / 2) - 1] = s.arithm(vars[(n / 2) - 1], "<", vars[n / 2]);
         //System.out.println(cstrs[(n/2)-1]);
 
         s.post(cstrs);
@@ -216,11 +215,11 @@ public class TestSolveur {
         }
         int i;
         for (i = 0; i < (n / 2) - 1; i++) {
-            s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[i + 1]));
+            s.post(s.arithm(vars[i], "!=", vars[i + 1]));
             int j = (n / 2);
-            s.post(IntConstraintFactory.arithm(vars[i + j], "!=", vars[i + j + 1]));
+            s.post(s.arithm(vars[i + j], "!=", vars[i + j + 1]));
         }
-        s.post(IntConstraintFactory.arithm(vars[(n / 2) - 1], "<", vars[n / 2]));
+        s.post(s.arithm(vars[(n / 2) - 1], "<", vars[n / 2]));
 
         s.set(IntStrategyFactory.lexico_LB(vars));
         s.findAllSolutions();
@@ -246,9 +245,9 @@ public class TestSolveur {
         IntVar[] vars = solver.intVarArray("p", n, 0, n, false);
 
         for (int i = 0; i < n - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]));
+            solver.post(solver.arithm(vars[i], "<", vars[i + 1]));
         }
-        solver.post(IntConstraintFactory.arithm(vars[0], "=", vars[n - 1]));
+        solver.post(solver.arithm(vars[0], "=", vars[n - 1]));
 
         solver.set(IntStrategyFactory.lexico_LB(vars));
         PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE.make(solver);

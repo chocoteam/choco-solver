@@ -32,8 +32,6 @@ package org.chocosolver.solver.search.restart;
 import org.chocosolver.memory.Environments;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.SLF;
@@ -63,10 +61,10 @@ public class RestartTest {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
                 solver.post(neq);
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
         solver.set(ISF.lexico_LB(vars));
@@ -134,9 +132,9 @@ public class RestartTest {
             Solver solver = new Solver(Environments.TRAIL.make(), "Test");
             IntVar[] X = solver.intVarArray("X", n, 1, n, false);
             IntVar[] Y = solver.intVarArray("Y", n, n + 1, 2 * (n + 1), false);
-            solver.post(ICF.alldifferent(X));
+            solver.post(solver.allDifferent(X));
             for (int i = 0; i < n; i++) {
-                solver.post(ICF.arithm(Y[i], "=", X[i], "+", n));
+                solver.post(solver.arithm(Y[i], "=", X[i], "+", n));
             }
             SLF.restartOnSolutions(solver);
             solver.set(ISF.lexico_LB(X));

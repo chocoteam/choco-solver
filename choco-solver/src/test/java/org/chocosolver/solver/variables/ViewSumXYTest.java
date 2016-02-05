@@ -31,7 +31,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.testng.Assert;
@@ -55,7 +54,7 @@ public class ViewSumXYTest {
         IntVar X = solver.intVar("X", 1, 10, false);
         IntVar Y = solver.intVar("Y", 3, 8, false);
         IntVar Z = solver.intVar("Z", 0, 200, false);
-		solver.post(IntConstraintFactory.sum(new IntVar[]{X,Y}, "=", Z));
+		solver.post(solver.sum(new IntVar[]{X,Y}, "=", Z));
 
         try {
             solver.propagate();
@@ -120,7 +119,7 @@ public class ViewSumXYTest {
                 xs[0] = ref.intVar("x", 1, 5, true);
                 xs[1] = ref.intVar("y", 1, 5, true);
                 xs[2] = ref.intVar("z", 2, 10, true);
-                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
+                ref.post(ref.scalar(xs, new int[]{1, 1, -1}, "=", 0));
                 ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
@@ -129,7 +128,7 @@ public class ViewSumXYTest {
                 xs[0] = solver.intVar("x", 1, 5, true);
                 xs[1] = solver.intVar("y", 1, 5, true);
                 IntVar Z = solver.intVar("Z", 0, 200, false);
-				solver.post(IntConstraintFactory.sum(xs, "=", Z));
+				solver.post(solver.sum(xs, "=", Z));
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
@@ -151,7 +150,7 @@ public class ViewSumXYTest {
                 xs[0] = ref.intVar("x", 1, 5, false);
                 xs[1] = ref.intVar("y", 1, 5, false);
                 xs[2] = ref.intVar("z", 2, 10, false);
-                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
+                ref.post(ref.scalar(xs, new int[]{1, 1, -1}, "=", 0));
                 ref.set(IntStrategyFactory.random_value(xs, seed));
             }
             Solver solver = new Solver();
@@ -160,7 +159,7 @@ public class ViewSumXYTest {
                 xs[0] = solver.intVar("x", 1, 5, false);
                 xs[1] = solver.intVar("y", 1, 5, false);
                 IntVar Z = solver.intVar("Z", 0, 200, false);
-				solver.post(IntConstraintFactory.sum(xs, "=", Z));
+				solver.post(solver.sum(xs, "=", Z));
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(IntStrategyFactory.random_value(xs, seed));
             }

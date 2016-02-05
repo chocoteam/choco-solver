@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -60,27 +59,27 @@ public class Alpha extends AbstractProblem {
         for (int i = 0; i < 26; i++) {
             letters[i] = solver.intVar("" + (char) (97 + i), 1, 26, true);
         }
-        solver.post(IntConstraintFactory.sum(extract("ballet"), "=", 45));
-        solver.post(IntConstraintFactory.sum(extract("cello"), "=", 43));
-        solver.post(IntConstraintFactory.sum(extract("concert"), "=", 74));
-        solver.post(IntConstraintFactory.sum(extract("flute"), "=", 30));
-        solver.post(IntConstraintFactory.sum(extract("fugue"), "=", 50));
-        solver.post(IntConstraintFactory.sum(extract("glee"), "=", 66));
-        solver.post(IntConstraintFactory.sum(extract("jazz"), "=", 58));
-        solver.post(IntConstraintFactory.sum(extract("lyre"), "=", 47));
-        solver.post(IntConstraintFactory.sum(extract("oboe"), "=", 53));
-        solver.post(IntConstraintFactory.sum(extract("opera"), "=", 65));
-        solver.post(IntConstraintFactory.sum(extract("polka"), "=", 59));
-        solver.post(IntConstraintFactory.sum(extract("quartet"), "=", 50));
-        solver.post(IntConstraintFactory.sum(extract("saxophone"), "=", 134));
-        solver.post(IntConstraintFactory.sum(extract("scale"), "=", 51));
-        solver.post(IntConstraintFactory.sum(extract("solo"), "=", 37));
-        solver.post(IntConstraintFactory.sum(extract("song"), "=", 61));
-        solver.post(IntConstraintFactory.sum(extract("soprano"), "=", 82));
-        solver.post(IntConstraintFactory.sum(extract("theme"), "=", 72));
-        solver.post(IntConstraintFactory.sum(extract("violin"), "=", 100));
-        solver.post(IntConstraintFactory.sum(extract("waltz"), "=", 34));
-        solver.post(IntConstraintFactory.alldifferent(letters, "BC"));
+        solver.post(solver.sum(extract("ballet"), "=", 45));
+        solver.post(solver.sum(extract("cello"), "=", 43));
+        solver.post(solver.sum(extract("concert"), "=", 74));
+        solver.post(solver.sum(extract("flute"), "=", 30));
+        solver.post(solver.sum(extract("fugue"), "=", 50));
+        solver.post(solver.sum(extract("glee"), "=", 66));
+        solver.post(solver.sum(extract("jazz"), "=", 58));
+        solver.post(solver.sum(extract("lyre"), "=", 47));
+        solver.post(solver.sum(extract("oboe"), "=", 53));
+        solver.post(solver.sum(extract("opera"), "=", 65));
+        solver.post(solver.sum(extract("polka"), "=", 59));
+        solver.post(solver.sum(extract("quartet"), "=", 50));
+        solver.post(solver.sum(extract("saxophone"), "=", 134));
+        solver.post(solver.sum(extract("scale"), "=", 51));
+        solver.post(solver.sum(extract("solo"), "=", 37));
+        solver.post(solver.sum(extract("song"), "=", 61));
+        solver.post(solver.sum(extract("soprano"), "=", 82));
+        solver.post(solver.sum(extract("theme"), "=", 72));
+        solver.post(solver.sum(extract("violin"), "=", 100));
+        solver.post(solver.sum(extract("waltz"), "=", 34));
+        solver.post(solver.allDifferent(letters, "BC"));
     }
 
     private IntVar[] extract(String word) {

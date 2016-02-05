@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -96,13 +95,13 @@ public class CarSequencing extends AbstractProblem {
                     // optfreq[optNum][0] times AT MOST
                     atMost[i] = solver.intVar("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], true);
                 }
-                solver.post(IntConstraintFactory.global_cardinality(carSequence, options[optNum], atMost, false));
+                solver.post(solver.globalCardinality(carSequence, options[optNum], atMost, false));
                 IntVar[] atLeast = solver.intVarArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, true);
-                solver.post(IntConstraintFactory.global_cardinality(carSequence, idleConfs[optNum], atLeast, false));
+                solver.post(solver.globalCardinality(carSequence, idleConfs[optNum], atLeast, false));
 
                 // all others configurations may be chosen
                 IntVar sum = solver.intVar("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, true);
-                solver.post(IntConstraintFactory.sum(atLeast, "=", sum));
+                solver.post(solver.sum(atLeast, "=", sum));
             }
         }
 
@@ -111,7 +110,7 @@ public class CarSequencing extends AbstractProblem {
             expArray[i] = solver.intVar("var_" + i, 0, demands[i], false);
             values[i] = i;
         }
-        solver.post(IntConstraintFactory.global_cardinality(cars, values, expArray, false));
+        solver.post(solver.globalCardinality(cars, values, expArray, false));
     }
 
     private static IntVar[] extractor(IntVar[] cars, int initialNumber, int amount) {

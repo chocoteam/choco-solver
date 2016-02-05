@@ -33,7 +33,6 @@ import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.samples.graph.input.HCP_Utils;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -83,7 +82,7 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
             }
             succ[i] = solver.intVar("succ_" + i, values.toArray());
         }
-        solver.post(ICF.circuit(succ,0));
+        solver.post(solver.circuit(succ,0));
     }
 
     @Override

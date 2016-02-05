@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -79,7 +78,7 @@ public class KeysortingTest {
         Y[3][1] = solver.intVar("Y42", 2, 6, true);
         Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
-        solver.post(ICF.keysorting(X, null, Y, 2));
+        solver.post(solver.keySort(X, null, Y, 2));
         solver.findSolution();
         Assert.assertEquals(Y[0][0].getValue(), 1);
         Assert.assertEquals(Y[0][1].getValue(), 5);
@@ -127,7 +126,7 @@ public class KeysortingTest {
         Y[3][1] = solver.intVar("Y42", 2, 6, true);
         Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
-        solver.post(ICF.keysorting(X, null, Y, 1));
+        solver.post(solver.keySort(X, null, Y, 1));
         solver.findSolution();
         Assert.assertEquals(Y[0][0].getValue(), 1);
         Assert.assertEquals(Y[0][1].getValue(), 5);
@@ -176,7 +175,7 @@ public class KeysortingTest {
         Y[3][1] = solver.intVar("Y42", 2, 6, true);
         Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
-        solver.post(ICF.keysorting(X, null, Y, 0));
+        solver.post(solver.keySort(X, null, Y, 0));
         solver.findSolution();
         Assert.assertEquals(Y[0][0].getValue(), 2);
         Assert.assertEquals(Y[0][1].getValue(), 3);
@@ -212,7 +211,7 @@ public class KeysortingTest {
         Y[2][0] = solver.intVar("Y31", 14, 16, true);
         Y[2][1] = solver.intVar("Y32", 0, 19, true);
 
-        solver.post(ICF.keysorting(X, null, Y, 2));
+        solver.post(solver.keySort(X, null, Y, 2));
         solver.findSolution();
         Assert.assertEquals(Y[0][0].getValue(), 15);
         Assert.assertEquals(Y[0][1].getValue(), 0);
@@ -240,7 +239,7 @@ public class KeysortingTest {
         Y[3][0] = solver.intVar("Y4", 13, 16, true);
         Y[4][0] = solver.intVar("Y5", 14, 18, true);
 
-        solver.post(ICF.keysorting(X, null, Y, 1));
+        solver.post(solver.keySort(X, null, Y, 1));
         Assert.assertEquals(solver.findAllSolutions(), 182);
 
     }
@@ -259,7 +258,7 @@ public class KeysortingTest {
         Y[0][1] = solver.intVar("Y2", 0, 0, true);
         Y[0][2] = solver.intVar("Y3", 1, 1, true);
 
-        solver.post(ICF.keysorting(X, null, Y, 1));
+        solver.post(solver.keySort(X, null, Y, 1));
         try {
             solver.propagate();
             Assert.assertEquals(X[0][1].getValue(), 0);
@@ -282,7 +281,7 @@ public class KeysortingTest {
         Y[0][1] = solver.intVar("Y2", 0, 0, true);
         Y[0][2] = solver.intVar("Y3", 2, 2, true);
 
-        solver.post(ICF.keysorting(X, null, Y, 1));
+        solver.post(solver.keySort(X, null, Y, 1));
         try {
             solver.propagate();
             Assert.assertEquals(X[0][1].getValue(), 0);
@@ -305,7 +304,7 @@ public class KeysortingTest {
         Y[0][1] = solver.intVar("Y2", 1, 9, true);
         Y[0][2] = solver.intVar("Y3", 7, 9, true);
 
-        solver.post(ICF.keysorting(X, null, Y, 1));
+        solver.post(solver.keySort(X, null, Y, 1));
         try {
             solver.propagate();
             Assert.assertEquals(X[0][0].getValue(), 7);
@@ -339,7 +338,7 @@ public class KeysortingTest {
         Y[3][1] = solver.intVar("Y52", 1, 4, true);
 
 
-        solver.post(ICF.keysorting(X, null, Y, 2));
+        solver.post(solver.keySort(X, null, Y, 2));
         solver.set(ISF.lexico_LB(ArrayUtils.flatten(X)), ISF.lexico_LB(ArrayUtils.flatten(Y)));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
@@ -364,7 +363,7 @@ public class KeysortingTest {
         Y[0][3] = solver.intVar("Y51", 1, 4, true);
 
 
-        solver.post(ICF.keysorting(X, null, Y, 1));
+        solver.post(solver.keySort(X, null, Y, 1));
         solver.set(ISF.lexico_LB(ArrayUtils.flatten(X)), ISF.lexico_LB(ArrayUtils.flatten(Y)));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();

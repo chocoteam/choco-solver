@@ -33,7 +33,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -72,7 +71,7 @@ public interface Modeler {
             } catch (ArrayIndexOutOfBoundsException ce) {
 //                System.out.printf("");
             }
-            s.post(ICF.arithm(vars[0], "=", vars[1]));
+            s.post(s.arithm(vars[0], "=", vars[1]));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -96,7 +95,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i + (n / 2)], Y[i]);
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
-            s.post(ICF.inverse_channeling(X, Y, 0, 0));
+            s.post(s.inverseChanneling(X, Y, 0, 0));
             s.set(ISF.random_value(allvars));
             return s;
         }
@@ -129,7 +128,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i + (n / 2)], Y[i]);
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
-            s.post(ICF.inverse_channeling(X, Y, 0, 0));
+            s.post(s.inverseChanneling(X, Y, 0, 0));
             s.set(ISF.random_bound(allvars));
             return s;
         }
@@ -149,7 +148,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i]);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.arithm(vars[0], "!=", vars[1]));
+            s.post(s.arithm(vars[0], "!=", vars[1]));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -169,7 +168,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i]);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.alldifferent(vars, "AC"));
+            s.post(s.allDifferent(vars, "AC"));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -189,7 +188,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.alldifferent(vars, "BC"));
+            s.post(s.allDifferent(vars, "BC"));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -217,7 +216,7 @@ public interface Modeler {
                 cards[i] = s.intVar("c_" + i, domains[i + n / 2]);
                 if (map != null) map.put(domains[i + n / 2], cards[i]);
             }
-            s.post(ICF.global_cardinality(vars, values, cards, closed));
+            s.post(s.globalCardinality(vars, values, cards, closed));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -237,7 +236,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i]);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.times(vars[0], vars[1], vars[2]));
+            s.post(s.times(vars[0], vars[1], vars[2]));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -257,7 +256,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i]);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.absolute(vars[0], vars[1]));
+            s.post(s.absolute(vars[0], vars[1]));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -291,8 +290,8 @@ public interface Modeler {
             }
             IntVar tmp = s.intVar("occ", 0, vars.length, true);
             s.post(
-                    ICF.arithm(tmp, ro, occVar),
-                    ICF.count(params[1], vars, tmp)
+                    s.arithm(tmp, ro, occVar),
+                    s.count(params[1], vars, tmp)
             );
             s.set(ISF.random_bound(vars));
             return s;
@@ -327,8 +326,8 @@ public interface Modeler {
             }
             IntVar tmp = s.intVar("occ", 0, vars.length, true);
             s.post(
-                    ICF.count(params[1], vars, tmp),
-                    ICF.arithm(tmp, ro, occVar)
+                    s.count(params[1], vars, tmp),
+                    s.arithm(tmp, ro, occVar)
             );
             s.set(ISF.random_bound(vars));
             return s;
@@ -354,7 +353,7 @@ public interface Modeler {
                 Y[i - n / 2] = s.intVar("Y_" + i, domains[i]);
                 if (map != null) map.put(domains[i], Y[i - n / 2]);
             }
-            Constraint ctr = (Boolean) parameters ? ICF.lex_less(X, Y) : ICF.lex_less_eq(X, Y);
+            Constraint ctr = (Boolean) parameters ? s.lexLess(X, Y) : s.lexLessEq(X, Y);
             s.post(ctr);
             s.set(ISF.random_value(ArrayUtils.append(X, Y)));
             return s;
@@ -385,7 +384,7 @@ public interface Modeler {
                 Z[i - 2 * n / 3] = s.intVar("Z_" + i, domains[i]);
                 if (map != null) map.put(domains[i], Z[i - 2 * n / 3]);
             }
-            Constraint ctr = (Boolean) parameters ? ICF.lex_chain_less(X, Y, Z) : ICF.lex_chain_less_eq(X, Y, Z);
+            Constraint ctr = (Boolean) parameters ? s.lexChainLess(X, Y, Z) : s.lexChainLessEq(X, Y, Z);
             s.post(ctr);
             s.set(ISF.random_value(ArrayUtils.append(X, Y, Z)));
             return s;
@@ -406,7 +405,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0, "detect"));
+            s.post(s.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -429,7 +428,7 @@ public interface Modeler {
             IntVar occVar = s.intVar("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], false);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            s.post(ICF.among(occVar, vars, params));
+            s.post(s.among(occVar, vars, params));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -452,7 +451,7 @@ public interface Modeler {
             IntVar occVar = s.intVar("ovar", domains[n - 1]);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            s.post(ICF.among(occVar, vars, params));
+            s.post(s.among(occVar, vars, params));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -476,8 +475,8 @@ public interface Modeler {
                     decvars[i] = vars[i];
                 }
             }
-            s.post(ICF.atleast_nvalues(decvars, vars[n - 1], false));
-            s.post(ICF.atmost_nvalues(decvars, vars[n - 1], false));
+            s.post(s.atLeastNValues(decvars, vars[n - 1], false));
+            s.post(s.atMostNVvalues(decvars, vars[n - 1], false));
             for (String st : (String[]) parameters) {
                 switch (st) {
                     case "at_least_AC":
@@ -487,7 +486,7 @@ public interface Modeler {
                         s.post(new Constraint("atMostBC", new PropAtMostNValues_BC(decvars, vars[n - 1])));
                         break;
                     case "at_most_greedy":
-                        s.post(ICF.nvalues(decvars, vars[n - 1]));
+                        s.post(s.nValues(decvars, vars[n - 1]));
                         break;
                     default:
                         throw new UnsupportedOperationException();
@@ -520,7 +519,7 @@ public interface Modeler {
             }
             int[] values = vals.toArray();
             IntVar[] cards = s.boolVarArray("cards", values.length);
-            s.post(ICF.global_cardinality(vars, values, cards, false));
+            s.post(s.globalCardinality(vars, values, cards, false));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -545,7 +544,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             IntVar nbRoots = vars[n - 1];
-            s.post(ICF.tree(succs, nbRoots, 0));
+            s.post(s.tree(succs, nbRoots, 0));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -565,7 +564,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i]);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.circuit(vars, 0));
+            s.post(s.circuit(vars, 0));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -589,7 +588,7 @@ public interface Modeler {
             if (map != null) map.put(domains[n - 2], from);
             IntVar to = s.intVar("v_" + (n - 1), domains[n - 1]);
             if (map != null) map.put(domains[n - 1], to);
-            s.post(ICF.path(vars, from, to, 0));
+            s.post(s.path(vars, from, to, 0));
             s.set(ISF.random_value(ArrayUtils.append(vars, new IntVar[]{from, to})));
             return s;
         }
@@ -609,7 +608,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i]);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.post(ICF.subcircuit(vars, 0, s.intVar("length", 0, vars.length - 1, true)));
+            s.post(s.subCircuit(vars, 0, s.intVar("length", 0, vars.length - 1, true)));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -643,7 +642,7 @@ public interface Modeler {
                 dx[i] = vars[i + 2 * k];
                 dy[i] = vars[i + 3 * k];
             }
-            s.post(ICF.diffn(x, y, dx, dy, true));
+            s.post(s.diffN(x, y, dx, dy, true));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -674,7 +673,7 @@ public interface Modeler {
                 h[i] = vars[i + 3 * k];
             }
             IntVar capa = vars[vars.length - 1];
-            solver.post(ICF.cumulative(tasks, h, capa, true));
+            solver.post(solver.cumulative(tasks, h, capa, true));
             solver.set(ISF.random_bound(vars));
             return solver;
         }
@@ -700,7 +699,7 @@ public interface Modeler {
                 Y[i - n / 2] = s.intVar("Y_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
                 if (map != null) map.put(domains[i], Y[i - n / 2]);
             }
-            s.post(ICF.sort(X, Y));
+            s.post(s.sort(X, Y));
 
             AbstractStrategy strategy = IntStrategyFactory.random_bound(ArrayUtils.append(X, Y), System.currentTimeMillis());
             s.set(strategy);
@@ -723,7 +722,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.mddc(vars, (MultivaluedDecisionDiagram) parameters));
+            s.post(s.mddc(vars, (MultivaluedDecisionDiagram) parameters));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -744,7 +743,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.int_value_precede_chain(vars, 1, 2));
+            s.post(s.intValuePrecedeChain(vars, 1, 2));
             s.set(ISF.random_value(vars));
             return s;
         }
@@ -765,7 +764,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.maximum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.post(s.max(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -786,7 +785,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.minimum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.post(s.min(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -808,7 +807,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.maximum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.post(s.max(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -830,7 +829,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.minimum(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
+            s.post(s.min(vars[0], Arrays.copyOfRange(vars, 1, vars.length)));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -851,7 +850,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.arithm(vars[0], "+", vars[1], "=", vars[2]));
+            s.post(s.arithm(vars[0], "+", vars[1], "=", vars[2]));
             s.set(ISF.random_bound(vars));
             return s;
         }
@@ -872,7 +871,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
 
-            s.post(ICF.arithm(vars[0], "+", vars[1], "=", vars[2]));
+            s.post(s.arithm(vars[0], "+", vars[1], "=", vars[2]));
             s.set(ISF.random_bound(vars));
             return s;
         }

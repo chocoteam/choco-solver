@@ -30,8 +30,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -58,7 +56,7 @@ public class BoolNotViewTest {
                 BoolVar[] xs = new BoolVar[2];
                 xs[0] = ref.boolVar("x");
                 xs[1] = ref.boolVar("y");
-                ref.post(IntConstraintFactory.sum(xs, "=", 1));
+                ref.post(ref.sum(xs, "=", 1));
                 ref.set(IntStrategyFactory.random_bound(xs, seed));
             }
             Solver solver = new Solver();
@@ -66,7 +64,7 @@ public class BoolNotViewTest {
                 BoolVar[] xs = new BoolVar[2];
                 xs[0] = solver.boolVar("x");
                 xs[1] = solver.boolNotView(xs[0]);
-                solver.post(IntConstraintFactory.sum(xs, "=", 1));
+                solver.post(solver.sum(xs, "=", 1));
                 solver.set(IntStrategyFactory.random_bound(xs, seed));
             }
             ref.findAllSolutions();
@@ -110,7 +108,7 @@ public class BoolNotViewTest {
         Solver solver = new Solver();
         BoolVar a = solver.boolVar("a");
         BoolVar b = solver.boolVar("b");
-        solver.post(ICF.arithm(a, "+", solver.boolNotView(b), "=", 2));
+        solver.post(solver.arithm(a, "+", solver.boolNotView(b), "=", 2));
         Assert.assertTrue(solver.findSolution());
     }
 }

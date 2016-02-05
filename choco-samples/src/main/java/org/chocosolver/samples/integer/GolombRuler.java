@@ -33,7 +33,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -72,11 +71,11 @@ public class GolombRuler extends AbstractProblem {
     public void buildModel() {
         ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
 
-        solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
+        solver.post(solver.arithm(ticks[0], "=", 0));
 
         lex = new Constraint[m - 1];
         for (int i = 0; i < m - 1; i++) {
-            lex[i] = IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]);
+            lex[i] = solver.arithm(ticks[i + 1], ">", ticks[i]);
         }
         solver.post(lex);
 
@@ -87,20 +86,20 @@ public class GolombRuler extends AbstractProblem {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
                 // <cpru 04/03/12> it is worth adding a constraint instead of a view
-                distances[k] = IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]);
+                distances[k] = solver.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]);
                 solver.post(distances[k]);
-                solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                solver.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.post(solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
+                solver.post(solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.post(solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
                 m_diffs[i][j] = diffs[k];
             }
         }
-        alldiff = IntConstraintFactory.alldifferent(diffs, "BC");
+        alldiff = solver.allDifferent(diffs, "BC");
         solver.post(alldiff);
 
         // break symetries
         if (m > 2) {
-            solver.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+            solver.post(solver.arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
     }
 

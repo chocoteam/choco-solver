@@ -31,8 +31,6 @@ package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.real.RealConstraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -79,11 +77,11 @@ public class SantaClaude extends AbstractProblem {
         for (int i = 0; i < n_gifts; i++) {
             gift_price[i] = rand.nextInt(max_price) + 1;
         }
-        solver.post(IntConstraintFactory.alldifferent(kid_gift, "BC"));
+        solver.post(solver.allDifferent(kid_gift, "BC"));
         for (int i = 0; i < n_kids; i++) {
-            solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i], 0, "detect"));
+            solver.post(solver.element(kid_price[i], gift_price, kid_gift[i], 0));
         }
-        solver.post(IntConstraintFactory.sum(kid_price, "=", total_cost));
+        solver.post(solver.sum(kid_price, "=", total_cost));
 
         StringBuilder funBuilder = new StringBuilder("(");
         for (int i = 0; i < n_kids; i++) {

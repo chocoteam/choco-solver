@@ -36,7 +36,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -61,7 +60,7 @@ public class TreeTest {
 		IntVar[] VS = solver.intVarArray("VS", 6, -1, 6, false);
 		IntVar NT = solver.intVar("NT", 2, 3, false);
 		if(defaultCstr) {
-			solver.post(ICF.tree(VS, NT, 0));
+			solver.post(solver.tree(VS, NT, 0));
 		}else{
 			solver.post(new Constraint("tree",
 					new PropAntiArborescences(VS, 0, false),

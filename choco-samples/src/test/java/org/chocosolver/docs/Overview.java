@@ -30,7 +30,6 @@
 package org.chocosolver.docs;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
@@ -50,7 +49,7 @@ public class Overview {
         IntVar x = solver.intVar("X", 0, 5, true);
         IntVar y = solver.intVar("Y", 0, 5, true);
         // 3. Create and post constraints by using constraint factories
-        solver.post(IntConstraintFactory.arithm(x, "+", y, "<", 5));
+        solver.post(solver.arithm(x, "+", y, "<", 5));
         // 4. Define the search strategy
         solver.set(IntStrategyFactory.lexico_LB(x, y));
         // 5. Launch the resolution process

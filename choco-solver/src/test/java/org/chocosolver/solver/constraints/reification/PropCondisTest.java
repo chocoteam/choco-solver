@@ -32,7 +32,6 @@ package org.chocosolver.solver.constraints.reification;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -58,8 +57,8 @@ public class PropCondisTest {
     public void testCD1() throws ContradictionException {
         Solver s = new Solver();
         IntVar a = s.intVar("A", 0, 10, false);
-        BoolVar b1 = ICF.arithm(a, "=", 9).reif();
-        BoolVar b2 = ICF.arithm(a, "=", 10).reif();
+        BoolVar b1 = s.arithm(a, "=", 9).reif();
+        BoolVar b2 = s.arithm(a, "=", 10).reif();
         SatFactory.addConstructiveDisjunction(b1,b2);
         s.propagate();
         Assert.assertEquals(a.getDomainSize(), 2);
@@ -74,8 +73,8 @@ public class PropCondisTest {
         Solver s = new Solver();
         IntVar X = s.intVar("X", 0, 10, false);
         IntVar Y = s.intVar("Y", 0, 10, false);
-        Constraint c1 = ICF.arithm(X, "-", Y, "<=", -9);
-        Constraint c2 = ICF.arithm(Y, "-", X, "<=", -9);
+        Constraint c1 = s.arithm(X, "-", Y, "<=", -9);
+        Constraint c2 = s.arithm(Y, "-", X, "<=", -9);
 
         SatFactory.addConstructiveDisjunction(c1.reif(),c2.reif());
         s.propagate();
@@ -145,14 +144,14 @@ public class PropCondisTest {
         IntVar[] OS = solver.intVarArray("O", size, 0, os[2 * size - 1] + ls[2 * size - 1], false);
         IntVar[] LS = solver.intVarArray("L", size, 1, 10, false);
         for (int i = 0; i < size - 1; i++) {
-            solver.post(ICF.sum(new IntVar[]{OS[i], LS[i]}, "<", OS[i + 1]));
+            solver.post(solver.sum(new IntVar[]{OS[i], LS[i]}, "<", OS[i + 1]));
         }
         for (int i = 0; i < size; i++) {
             BoolVar[] disjunction = new BoolVar[os.length];
             for (int j = 0; j < os.length; j++) {
                 disjunction[j] = solver.and(
-                        ICF.arithm(OS[i], ">", os[j]),
-                        ICF.arithm(OS[i], "+", LS[i], "<", os[j] + ls[j])
+                        solver.arithm(OS[i], ">", os[j]),
+                        solver.arithm(OS[i], "+", LS[i], "<", os[j] + ls[j])
                 ).reif();
             }
             if(cd) {
@@ -162,12 +161,10 @@ public class PropCondisTest {
             }
         }
         IntVar horizon = solver.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);
-        solver.post(ICF.sum(new IntVar[]{OS[size-1],LS[size-1]},horizon));
+        solver.post(solver.sum(new IntVar[]{OS[size-1],LS[size-1]},"=",horizon));
         solver.setObjectives(horizon);
         solver.addHook("decvars", ArrayUtils.append(OS, LS));
         Chatterbox.showShortStatistics(solver);
         return solver;
     }
-
-
 }

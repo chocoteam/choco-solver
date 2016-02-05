@@ -396,7 +396,7 @@ A list of constraints available through factories is given in :ref:`List of avai
 
 
 
-If we want an integer variable ``sum`` to be equal to the sum of values of variables in the set ``atLeast``, we can use the ``IntConstraintFactory.sum`` constraint:
+If we want an integer variable ``sum`` to be equal to the sum of values of variables in the set ``atLeast``, we can use the ``ICF.sum`` constraint:
 
 .. literalinclude:: /../../choco-samples/src/main/java/org/chocosolver/samples/integer/CarSequencing.java
    :language: java
@@ -632,8 +632,8 @@ in the ``LogicalConstraintFactory`` are **automatically posted** (the factory me
 
 For instance, we can represent the constraint "either ``x<0`` or ``y>42``" as the following: ::
 
- Constraint a = IntConstraintFactory.arithm(x,"<",0);
- Constraint b = IntConstraintFactory.arithm(y,">",42);
+ Constraint a = ICF.arithm(x,"<",0);
+ Constraint b = ICF.arithm(y,">",42);
  Constraint c = LogicalConstraintFactory.or(a,b);
  solver.post(c);
 
@@ -642,8 +642,8 @@ Note that only the constraint ``c`` is posted.
 
 As a second reification example, let us consider "if ``x<0`` then ``y>42``": ::
 
- Constraint a = IntConstraintFactory.arithm(x,"<",0);
- Constraint b = IntConstraintFactory.arithm(y,">",42);
+ Constraint a = ICF.arithm(x,"<",0);
+ Constraint b = ICF.arithm(y,">",42);
  LogicalConstraintFactory.ifThen(a,b);
 
 This time the ``LogicalConstraintFactory.ifThen`` returns void, meaning that the constraint is automatically posted.

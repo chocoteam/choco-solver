@@ -30,7 +30,6 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -64,7 +63,7 @@ public class DominatingSetOfQueens {
 			X[i] = pb.intVar("Q" + i, 1, n * n, false);
 		}
 		IntVar N = pb.intVar(val);
-		pb.post(IntConstraintFactory.nvalues(X,N));
+		pb.post(pb.nValues(X,N));
 		//i appartient a la variable j ssi la case i est sur une ligne/colonne/diagonale de j
 		for (int i = 1; i <= n; i++) {
 			for (int j = 1; j <= n; j++) {
@@ -72,7 +71,7 @@ public class DominatingSetOfQueens {
 				for (int k = 1; k <= n; k++) {
 					for (int l = 1; l <= n; l++) {
 						if (!(k == i || l == j || Math.abs(i - k) == Math.abs(j - l))) {
-							pb.post(IntConstraintFactory.arithm(X[n * (i - 1) + j - 1], "!=", (k - 1) * n + l));
+							pb.post(pb.arithm(X[n * (i - 1) + j - 1], "!=", (k - 1) * n + l));
 						}
 					}
 				}

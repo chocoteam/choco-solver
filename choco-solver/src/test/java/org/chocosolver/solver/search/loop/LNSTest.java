@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -66,9 +65,9 @@ public class LNSTest {
         }
         final IntVar power = solver.intVar("power", 0, 99999, true);
         IntVar scalar = solver.intVar("weight", capacities[0], capacities[1], true);
-        solver.post(IntConstraintFactory.scalar(objects, volumes, "=", scalar));
-        solver.post(IntConstraintFactory.scalar(objects, energies, "=", power));
-        solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
+        solver.post(solver.scalar(objects, volumes, "=", scalar));
+        solver.post(solver.scalar(objects, energies, "=", power));
+        solver.post(solver.knapsack(objects, scalar, power, volumes, energies));
         solver.set(IntStrategyFactory.lexico_LB(objects));
 //        SearchMonitorFactory.log(solver, true, false);
         switch (lns) {

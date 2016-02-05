@@ -31,8 +31,6 @@ package org.chocosolver.solver.constraints.unary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -90,7 +88,7 @@ public class MemberTest {
                 int[][] values = DomainBuilder.buildFullDomains(2, 0, i, r, d, false);
                 vars[0] = s.intVar("v", values[0]);
 
-                Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
+                Constraint[] cstrs = new Constraint[]{s.member(vars[0], values[1])};
 
                 s.post(cstrs);
                 s.set(IntStrategyFactory.lexico_LB(vars));
@@ -118,7 +116,7 @@ public class MemberTest {
 
                 vars[0] = s.intVar("v", lb, ub, true);
 
-                Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
+                Constraint[] cstrs = new Constraint[]{s.member(vars[0], values[1])};
 
                 s.post(cstrs);
                 s.set(IntStrategyFactory.lexico_LB(vars));
@@ -138,7 +136,7 @@ public class MemberTest {
         IntVar vars = s.intVar("v", 0, 10, false);
         int[] values = new int[]{0, 2, 4, 6, 8};
 
-        s.post(ICF.member(vars, values));
+        s.post(s.member(vars, values));
         s.set(IntStrategyFactory.lexico_LB(vars));
 
         s.findAllSolutions();

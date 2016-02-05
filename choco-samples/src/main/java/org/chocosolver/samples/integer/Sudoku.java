@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -89,9 +88,9 @@ public class Sudoku extends AbstractProblem {
         }
 
         for (int i = 0; i < n; i++) {
-            solver.post(IntConstraintFactory.alldifferent(rows[i], "AC"));
-            solver.post(IntConstraintFactory.alldifferent(cols[i], "AC"));
-            solver.post(IntConstraintFactory.alldifferent(carres[i], "AC"));
+            solver.post(solver.allDifferent(rows[i], "AC"));
+            solver.post(solver.allDifferent(cols[i], "AC"));
+            solver.post(solver.allDifferent(carres[i], "AC"));
         }
 
 

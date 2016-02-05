@@ -33,8 +33,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.LogicalConstraintFactory;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -48,8 +46,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static org.chocosolver.solver.constraints.IntConstraintFactory.member;
-import static org.chocosolver.solver.constraints.IntConstraintFactory.not_member;
 
 /**
  * <br/>
@@ -73,8 +69,8 @@ public class ReifiedTest {
             IntVar y = s.intVar("y", values[1]);
             IntVar[] vars = new IntVar[]{b, x, y};
 
-            Constraint cons = IntConstraintFactory.arithm(x, "=", y);
-            Constraint oppCons = IntConstraintFactory.arithm(x, "!=", y);
+            Constraint cons = s.arithm(x, "=", y);
+            Constraint oppCons = s.arithm(x, "!=", y);
 
             s.ifThenElse(b, cons, oppCons);
             s.set(IntStrategyFactory.lexico_LB(vars));
@@ -95,11 +91,11 @@ public class ReifiedTest {
         IntVar y = s.intVar("y", 1, 1, false);
         IntVar z = s.intVar("z", 1, 2, false);
 
-        s.ifThenElse(a, member(x, new int[]{1, 1}), not_member(x, new int[]{1, 1}));
-        s.ifThenElse(b, member(y, new int[]{1, 1}), not_member(y, new int[]{1, 1}));
-        s.ifThenElse(c, member(z, new int[]{1, 1}), not_member(z, new int[]{1, 1}));
+        s.ifThenElse(a, s.member(x, new int[]{1, 1}), s.notMember(x, new int[]{1, 1}));
+        s.ifThenElse(b, s.member(y, new int[]{1, 1}), s.notMember(y, new int[]{1, 1}));
+        s.ifThenElse(c, s.member(z, new int[]{1, 1}), s.notMember(z, new int[]{1, 1}));
 
-        s.post(IntConstraintFactory.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")));
+        s.post(s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")));
 
         s.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y, z}));
         s.findAllSolutions();
@@ -120,8 +116,8 @@ public class ReifiedTest {
             IntVar y = s.intVar("y", values[1]);
             IntVar[] vars = new IntVar[]{b, x, y};
 
-            Constraint cons = IntConstraintFactory.arithm(x, "!=", y);
-            Constraint oppCons = IntConstraintFactory.arithm(x, "=", y);
+            Constraint cons = s.arithm(x, "!=", y);
+            Constraint oppCons = s.arithm(x, "=", y);
 
             s.ifThenElse(b, cons, oppCons);
 
@@ -151,7 +147,7 @@ public class ReifiedTest {
             vars1[j] = s1.intVar("v_" + j, values[j]);
         }
 
-        s1.post(IntConstraintFactory.alldifferent(vars1, "AC"));
+        s1.post(s1.allDifferent(vars1, "AC"));
 
         s1.set(IntStrategyFactory.lexico_LB(vars1));
         return s1;
@@ -187,8 +183,8 @@ public class ReifiedTest {
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
-                    Constraint cA = member(X[j], p, q);
-                    Constraint ocA = not_member(X[j], p, q);
+                    Constraint cA = s2.member(X[j], p, q);
+                    Constraint ocA = s2.notMember(X[j], p, q);
 
                     s2.ifThenElse(a, cA, ocA);
                 }
@@ -215,7 +211,7 @@ public class ReifiedTest {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                s2.post(IntConstraintFactory.sum(ai, "=", s2.intVar("sum", 0, q - p + 1, true)));
+                s2.post(s2.sum(ai, "=", s2.intVar("sum", 0, q - p + 1, true)));
             }
         }
 
@@ -283,18 +279,18 @@ public class ReifiedTest {
         BoolVar[] bv = solver.boolVarArray("b1", 10);
         for (int i = 1; i <= 10; i++) {
             solver.ifThenElse(bv[i - 1],
-                    IntConstraintFactory.arithm(cp, "=", i),
-                    IntConstraintFactory.arithm(cp, "!=", i));
+                    solver.arithm(cp, "=", i),
+                    solver.arithm(cp, "!=", i));
         }
 
         IntVar cp2 = solver.intVar("cp27", 1, 10, false);
-        solver.post(IntConstraintFactory.arithm(cp2, ">=", cp));
+        solver.post(solver.arithm(cp2, ">=", cp));
 
         BoolVar[] bv2 = solver.boolVarArray("b2", 10);
         for (int i = 1; i <= 10; i++) {
             solver.ifThenElse(bv2[i - 1],
-                    IntConstraintFactory.arithm(solver.intVar(i), "<", cp),
-                    IntConstraintFactory.arithm(solver.intVar(i), ">=", cp));
+                    solver.arithm(solver.intVar(i), "<", cp),
+                    solver.arithm(solver.intVar(i), ">=", cp));
         }
 
         try {
@@ -321,13 +317,13 @@ public class ReifiedTest {
         IntVar calc[] = new IntVar[2];
         calc[0] = s.intOffsetView(row[0], 2);
         calc[1] = s.intVar("C", 0, 80, true);
-        s.post(IntConstraintFactory.sum(new IntVar[]{row[0], row[1]}, "=", calc[1]));
+        s.post(s.sum(new IntVar[]{row[0], row[1]}, "=", calc[1]));
 
         Constraint[] constraints = new Constraint[4];
-        constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
-        constraints[1] = IntConstraintFactory.arithm(row[1], "!=", calc[0]);
-        constraints[2] = IntConstraintFactory.arithm(row[2], "=", calc[1]);
-        constraints[3] = IntConstraintFactory.arithm(row[2], "!=", calc[1]);
+        constraints[0] = s.arithm(row[1], "=", calc[0]);
+        constraints[1] = s.arithm(row[1], "!=", calc[0]);
+        constraints[2] = s.arithm(row[2], "=", calc[1]);
+        constraints[3] = s.arithm(row[2], "!=", calc[1]);
 
         BoolVar[] ab = s.boolVarArray("A", 2);
 
@@ -337,7 +333,7 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(IntConstraintFactory.sum(ab, "=", ab.length - max_abs));
+        s.post(s.sum(ab, "=", ab.length - max_abs));
 
         s.findAllSolutions();
 
@@ -357,13 +353,13 @@ public class ReifiedTest {
         IntVar calc[] = new IntVar[2];
         calc[0] = s.intScaleView(row[0], 2);
         calc[1] = s.intVar("C", 0, 1600, true);
-        s.post(IntConstraintFactory.times(row[0], row[1], calc[1]));
+        s.post(s.times(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
-        constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
-        constraints[1] = IntConstraintFactory.arithm(row[1], "!=", calc[0]);
-        constraints[2] = IntConstraintFactory.arithm(row[2], "=", calc[1]);
-        constraints[3] = IntConstraintFactory.arithm(row[2], "!=", calc[1]);
+        constraints[0] = s.arithm(row[1], "=", calc[0]);
+        constraints[1] = s.arithm(row[1], "!=", calc[0]);
+        constraints[2] = s.arithm(row[2], "=", calc[1]);
+        constraints[3] = s.arithm(row[2], "!=", calc[1]);
 
         BoolVar[] ab = s.boolVarArray("A", 2);
 
@@ -373,7 +369,7 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(IntConstraintFactory.sum(ab, "=", ab.length - max_abs));
+        s.post(s.sum(ab, "=", ab.length - max_abs));
 
         s.findAllSolutions();
 
@@ -392,14 +388,14 @@ public class ReifiedTest {
 
         IntVar calc[] = s.intVarArray("C", 2, 0, 100, true);
 
-        s.post(IntConstraintFactory.eucl_div(row[0], s.intVar(2), calc[0]));
-        s.post(IntConstraintFactory.eucl_div(row[0], row[1], calc[1]));
+        s.post(s.div(row[0], s.intVar(2), calc[0]));
+        s.post(s.div(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
-        constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
-        constraints[1] = IntConstraintFactory.arithm(row[1], "!=", calc[0]);
-        constraints[2] = IntConstraintFactory.arithm(row[2], "=", calc[1]);
-        constraints[3] = IntConstraintFactory.arithm(row[2], "!=", calc[1]);
+        constraints[0] = s.arithm(row[1], "=", calc[0]);
+        constraints[1] = s.arithm(row[1], "!=", calc[0]);
+        constraints[2] = s.arithm(row[2], "=", calc[1]);
+        constraints[3] = s.arithm(row[2], "!=", calc[1]);
 
         BoolVar[] ab = s.boolVarArray("A", 2);
 
@@ -409,7 +405,7 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(IntConstraintFactory.sum(ab,"=",ab.length - max_abs));
+        s.post(s.sum(ab,"=",ab.length - max_abs));
 
 //        SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
@@ -429,14 +425,14 @@ public class ReifiedTest {
 
         IntVar calc[] = s.intVarArray("C", 2, 0, 100, true);
 
-        s.post(IntConstraintFactory.eucl_div(row[0], s.intVar(25), calc[0]));
-        s.post(IntConstraintFactory.eucl_div(row[0], row[1], calc[1]));
+        s.post(s.div(row[0], s.intVar(25), calc[0]));
+        s.post(s.div(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
-        constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
-        constraints[1] = IntConstraintFactory.arithm(row[1], "!=", calc[0]);
-        constraints[2] = IntConstraintFactory.arithm(row[2], "=", calc[1]);
-        constraints[3] = IntConstraintFactory.arithm(row[2], "!=", calc[1]);
+        constraints[0] = s.arithm(row[1], "=", calc[0]);
+        constraints[1] = s.arithm(row[1], "!=", calc[0]);
+        constraints[2] = s.arithm(row[2], "=", calc[1]);
+        constraints[3] = s.arithm(row[2], "!=", calc[1]);
 
         BoolVar[] ab = s.boolVarArray("A", 2);
 
@@ -446,7 +442,7 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(IntConstraintFactory.sum(ab, "=", ab.length - max_abs));
+        s.post(s.sum(ab, "=", ab.length - max_abs));
 
 //        SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
@@ -454,20 +450,4 @@ public class ReifiedTest {
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 5);
 
     }
-
-    @Test(groups="1s", timeOut=60000)
-    public void test_boussard1() {
-        Solver solver = new Solver();
-        BoolVar a = solver.boolVar("a");
-        BoolVar b = solver.boolVar("b");
-        BoolVar c = solver.boolVar("c");
-
-        solver.ifThen(
-                a,
-                LogicalConstraintFactory.ifThen_reifiable(b, IntConstraintFactory.arithm(c, "=", 1)));
-        solver.set(IntStrategyFactory.minDom_LB(new BoolVar[]{a, b, c}));
-        solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
-    }
-
 }

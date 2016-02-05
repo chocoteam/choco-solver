@@ -30,7 +30,6 @@
 package org.chocosolver.samples.nqueen;
 
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -58,11 +57,11 @@ public class NQueenBinary extends AbstractNQueen {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
                 solver.post(neq);
                 set.add(neq);
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
     }

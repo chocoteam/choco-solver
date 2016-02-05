@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.AllSolutionsRecorder;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -78,8 +77,8 @@ public class BinPacking extends AbstractProblem{
 		bins = solver.intVarArray("bin", nbItems, 0, nbBins - 1, false);
 		loads = solver.intVarArray("load", nbBins, 0, 1000, true);
 		minLoad = solver.intVar("minLoad", 0, 1000, true);
-		solver.post(ICF.bin_packing(bins,weights,loads,0));
-		solver.post(ICF.minimum(minLoad,loads));
+		solver.post(solver.binPacking(bins,weights,loads,0));
+		solver.post(solver.min(minLoad,loads));
 	}
 
 	@Override
@@ -100,7 +99,7 @@ public class BinPacking extends AbstractProblem{
 		int mode = 2;
 		switch (mode){
 			case 0:// to check
-				solver.post(ICF.arithm(minLoad,"=",17));
+				solver.post(solver.arithm(minLoad,"=",17));
 				solver.set(new AllSolutionsRecorder(solver));
 				solver.findAllSolutions();
 				break;

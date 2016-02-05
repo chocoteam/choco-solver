@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.variables.BoolVar;
@@ -66,7 +65,7 @@ public class CNFTest {
                         a.not()
                 ), solver);
             }
-            solver.ifThenElse(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y));
+            solver.ifThenElse(b, solver.arithm(x, ">=", y), solver.arithm(x, "<", y));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
 //            System.out.printf("%d\n", solver.getMeasures().getSolutionCount());

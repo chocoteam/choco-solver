@@ -32,7 +32,6 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -150,9 +149,9 @@ public class CumulativeTest {
 		Task[] t = new Task[n];
 		for(int i=0;i<n;i++){
 			t[i] = new Task(s[i],d[i],e[i]);
-			solver.post(ICF.arithm(e[i],"<=",last));
+			solver.post(solver.arithm(e[i],"<=",last));
 		}
-		Constraint c = ICF.cumulative(t,h,capa,graph);
+		Constraint c = solver.cumulative(t,h,capa,graph);
 		solver.post(c);
 		solver.set(ISF.random_bound(solver.retrieveIntVars(false), seed));
 		solver.set(ISF.lastConflict(solver,solver.getStrategy()));

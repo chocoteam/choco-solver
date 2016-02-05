@@ -31,8 +31,6 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -53,7 +51,7 @@ public class MinTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return IntConstraintFactory.minimum(vars[0], vars[1], vars[2]);
+        return solver.min(vars[0], vars[1], vars[2]);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -66,7 +64,7 @@ public class MinTest extends AbstractTernaryTest {
         X[2] = solver.intVar("2", -5, -2, true);
         X[3] = solver.intVar(-3);
 
-        solver.post(ICF.minimum(min, X));
+        solver.post(solver.min(min, X));
         solver.propagate();
         Assert.assertEquals(X[2].getUB(), -5);
     }

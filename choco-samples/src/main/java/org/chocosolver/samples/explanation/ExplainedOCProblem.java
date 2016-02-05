@@ -32,7 +32,6 @@ package org.chocosolver.samples.explanation;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -58,14 +57,14 @@ public class ExplainedOCProblem extends AbstractProblem {
     public void buildModel() {
         vars = solver.intVarArray("x", 2 * n, 1, vals, false);
         for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++)
-                solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));
+            for (int j = i + 1; j < n; j++) {
+                solver.post(solver.arithm(vars[2 * i], "!=", vars[2 * j]));
+            }
         }
     }
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
         solver.set(IntStrategyFactory.lexico_LB(vars));
     }
 
@@ -73,7 +72,6 @@ public class ExplainedOCProblem extends AbstractProblem {
     @Override
     public void solve() {
         ExplanationFactory.CBJ.plugin(solver, false, false);
-
         if (solver.findSolution()) {
             do {
                 this.prettyOut();
@@ -83,9 +81,7 @@ public class ExplainedOCProblem extends AbstractProblem {
     }
 
     @Override
-    public void prettyOut() {
-
-    }
+    public void prettyOut() {}
 
     public static void main(String[] args) {
         new ExplainedOCProblem().execute(args);

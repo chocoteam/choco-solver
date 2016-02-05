@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -105,7 +104,7 @@ public class Nonogram extends AbstractProblem {
             regexp.append(i == m - 1 ? '*' : '+');
         }
         IAutomaton auto = new FiniteAutomaton(regexp.toString());
-        solver.post(IntConstraintFactory.regular(cells, auto));
+        solver.post(solver.regular(cells, auto));
     }
 
 

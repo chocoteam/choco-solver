@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -88,7 +87,7 @@ public class BinTableTest {
             s = new Solver();
             v1 = s.intVar("v1", 1, 4, false);
             v2 = s.intVar("v2", 1, 4, false);
-            s.post(ICF.table(v1, v2, feasible, a));
+            s.post(s.table(v1, v2, feasible, a));
 
             s.findAllSolutions();
             assertEquals(5, s.getMeasures().getSolutionCount());
@@ -104,7 +103,7 @@ public class BinTableTest {
             s = new Solver();
             v1 = s.intVar("v1", 1, 4, false);
             v2 = s.intVar("v2", 1, 4, false);
-            s.post(ICF.table(v1, v2, infeasible, a));
+            s.post(s.table(v1, v2, infeasible, a));
 
             s.findAllSolutions();
             assertEquals((16 - 5), s.getMeasures().getSolutionCount());
@@ -115,9 +114,9 @@ public class BinTableTest {
 
     private Constraint absolute(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return ICF.table(v1, v2, TuplesFactory.absolute(v1, v2), ALGOS[algo]);
+            return v1.getSolver().table(v1, v2, TuplesFactory.absolute(v1, v2), ALGOS[algo]);
         } else {
-            return ICF.absolute(v1, v2);
+            return v1.getSolver().absolute(v1, v2);
         }
     }
 
@@ -144,9 +143,9 @@ public class BinTableTest {
 
     private Constraint arithmLT(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return ICF.table(v1, v2, TuplesFactory.arithm(v1, "<", v2), ALGOS[algo]);
+            return s.table(v1, v2, TuplesFactory.arithm(v1, "<", v2), ALGOS[algo]);
         } else {
-            return ICF.arithm(v1, "<", v2);
+            return s.arithm(v1, "<", v2);
         }
     }
 
@@ -173,9 +172,9 @@ public class BinTableTest {
 
     private Constraint arithmNQ(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return ICF.table(v1, v2, TuplesFactory.arithm(v1, "!=", v2), ALGOS[algo]);
+            return s.table(v1, v2, TuplesFactory.arithm(v1, "!=", v2), ALGOS[algo]);
         } else {
-            return ICF.arithm(v1, "!=", v2);
+            return s.arithm(v1, "!=", v2);
         }
     }
 
@@ -212,7 +211,7 @@ public class BinTableTest {
 
                 Solver solver = new Solver();
                 IntVar[] vars = solver.intVarArray("X", 2, -1, 1, false);
-                solver.post(ICF.table(vars[0], vars[1], tuples, a));
+                solver.post(solver.table(vars[0], vars[1], tuples, a));
 
                 solver.set(ISF.random_value(vars));
                 Assert.assertEquals(solver.findAllSolutions(), 3);
@@ -232,7 +231,7 @@ public class BinTableTest {
 
                 Solver solver = new Solver();
                 IntVar[] vars = solver.intVarArray("X", 2, -1, 1, false);
-                solver.post(ICF.table(vars[0], vars[1], tuples, a));
+                solver.post(solver.table(vars[0], vars[1], tuples, a));
 
                 solver.set(ISF.random_value(vars));
                 Assert.assertEquals(solver.findAllSolutions(), 3);

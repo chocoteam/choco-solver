@@ -69,7 +69,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
     //***********************************************************************************
 
     /**
-     * Ensures that graph has no subcircuit, with Caseaux/Laburthe/Pesant algorithm
+     * Ensures that graph has no subCircuit, with Caseaux/Laburthe/Pesant algorithm
      * runs incrementally in O(1) per instantiation event
      *
      * @param variables array of integer variables

@@ -31,7 +31,6 @@ package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -62,9 +61,9 @@ public class SimpleExplanationTest {
         }
         // post constraints
         Constraint[] lcstrs = new Constraint[3];
-        lcstrs[0] = IntConstraintFactory.arithm(vars[0], "<", vars[1]);
-        lcstrs[1] = IntConstraintFactory.arithm(vars[1], "<", vars[2]);
-        lcstrs[2] = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
+        lcstrs[0] = s.arithm(vars[0], "<", vars[1]);
+        lcstrs[1] = s.arithm(vars[1], "<", vars[2]);
+        lcstrs[2] = s.arithm(vars[0], "!=", vars[1]);
         // configure Solver
         AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
         s.post(lcstrs);

@@ -29,70 +29,16 @@
  */
 package org.chocosolver.solver.constraints;
 
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.binary.*;
-import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
-import org.chocosolver.solver.constraints.extension.TuplesFactory;
-import org.chocosolver.solver.constraints.extension.binary.*;
-import org.chocosolver.solver.constraints.extension.nary.*;
-import org.chocosolver.solver.constraints.nary.PropDiffN;
-import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
-import org.chocosolver.solver.constraints.nary.PropKLoops;
-import org.chocosolver.solver.constraints.nary.PropKnapsack;
-import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
-import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
-import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
-import org.chocosolver.solver.constraints.nary.among.PropAmongGAC_GoodImpl;
-import org.chocosolver.solver.constraints.nary.automata.CostRegular;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
-import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
-import org.chocosolver.solver.constraints.nary.automata.PropRegular;
-import org.chocosolver.solver.constraints.nary.channeling.*;
-import org.chocosolver.solver.constraints.nary.circuit.*;
-import org.chocosolver.solver.constraints.nary.count.PropCountVar;
-import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
-import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
-import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
-import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
-import org.chocosolver.solver.constraints.nary.lex.PropLex;
-import org.chocosolver.solver.constraints.nary.lex.PropLexChain;
-import org.chocosolver.solver.constraints.nary.min_max.PropBoolMax;
-import org.chocosolver.solver.constraints.nary.min_max.PropBoolMin;
-import org.chocosolver.solver.constraints.nary.min_max.PropMax;
-import org.chocosolver.solver.constraints.nary.min_max.PropMin;
-import org.chocosolver.solver.constraints.nary.nValue.PropAMNV;
-import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues;
-import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
-import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.graph.Gci;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.MDRk;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R1;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R3;
-import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
-import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
-import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
-import org.chocosolver.solver.constraints.ternary.*;
-import org.chocosolver.solver.constraints.unary.Member;
-import org.chocosolver.solver.constraints.unary.NotMember;
-import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
-import org.chocosolver.util.tools.ArrayUtils;
-
-import java.util.Arrays;
-
-import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -110,13 +56,15 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
  * 3) Terary constraints
  * 4) Global constraints
  *
+ * Deprecated : constraint creation should be done through the {@code Solver} object which extends {@code IModeler}
+ *
  * @author Charles Prud'homme
  * @since 21/01/13
  */
+@Deprecated
 @SuppressWarnings("UnusedDeclaration")
 public class IntConstraintFactory {
-    IntConstraintFactory() {
-    }
+    IntConstraintFactory() {}
 
     // BEWARE: PLEASE, keep signatures sorted by increasing arity and alphabetical order!!
 
@@ -156,8 +104,7 @@ public class IntConstraintFactory {
      * @param CSTE a constant
      */
     public static Constraint arithm(IntVar VAR, String OP, int CSTE) {
-        Operator op = Operator.get(OP);
-        return new Arithmetic(VAR, op, CSTE);
+        return VAR.getSolver().arithm(VAR,OP,CSTE);
     }
 
     /**
@@ -167,7 +114,7 @@ public class IntConstraintFactory {
      * @param TABLE an array of values
      */
     public static Constraint member(IntVar VAR, int[] TABLE) {
-        return new Member(VAR, TABLE);
+        return VAR.getSolver().member(VAR,TABLE);
     }
 
     /**
@@ -178,7 +125,7 @@ public class IntConstraintFactory {
      * @param UB  the upper bound of the interval
      */
     public static Constraint member(IntVar VAR, int LB, int UB) {
-        return new Member(VAR, LB, UB);
+        return VAR.getSolver().member(VAR,LB,UB);
     }
 
     /**
@@ -188,7 +135,7 @@ public class IntConstraintFactory {
      * @param TABLE an array of values
      */
     public static Constraint not_member(IntVar VAR, int[] TABLE) {
-        return new NotMember(VAR, TABLE);
+        return VAR.getSolver().notMember(VAR,TABLE);
     }
 
     /**
@@ -199,7 +146,7 @@ public class IntConstraintFactory {
      * @param UB  the upper bound of the interval
      */
     public static Constraint not_member(IntVar VAR, int LB, int UB) {
-        return new NotMember(VAR, LB, UB);
+        return VAR.getSolver().notMember(VAR,LB,UB);
     }
 
     //##################################################################################################################
@@ -210,8 +157,7 @@ public class IntConstraintFactory {
      * Enforces VAR1 = |VAR2|
      */
     public static Constraint absolute(IntVar VAR1, IntVar VAR2) {
-        assert VAR1.getSolver() == VAR2.getSolver();
-        return new Constraint("Absolute", new PropAbsolute(VAR1, VAR2));
+        return VAR1.getSolver().absolute(VAR1,VAR2);
     }
 
     /**
@@ -222,13 +168,7 @@ public class IntConstraintFactory {
      * @param VAR2 second variable
      */
     public static Constraint arithm(IntVar VAR1, String OP, IntVar VAR2) {
-        if (VAR2.isInstantiated()) {
-            return arithm(VAR1, OP, VAR2.getValue());
-        }
-        if (VAR1.isInstantiated()) {
-            return arithm(VAR2, Operator.getFlip(OP), VAR1.getValue());
-        }
-        return new Arithmetic(VAR1, Operator.get(OP), VAR2);
+        return VAR1.getSolver().arithm(VAR1,OP,VAR2);
     }
 
     /**
@@ -241,23 +181,7 @@ public class IntConstraintFactory {
      * @param CSTE an operator
      */
     public static Constraint arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
-        if (VAR2.isInstantiated()) {
-            if (OP1.equals("+")) {
-                return arithm(VAR1, OP2, CSTE - VAR2.getValue());
-            } else if (OP1.equals("-")) {
-                return arithm(VAR1, OP2, CSTE + VAR2.getValue());
-            }
-        }
-        if (VAR1.isInstantiated()) {
-            if (OP1.equals("+")) {
-                return arithm(VAR2, OP2, CSTE - VAR1.getValue());
-            } else if (OP1.equals("-")) {
-                return arithm(VAR2, Operator.getFlip(OP2), VAR1.getValue() - CSTE);
-            }
-        }
-        Operator op1 = Operator.get(OP1);
-        Operator op2 = Operator.get(OP2);
-        return new Arithmetic(VAR1, op1, VAR2, op2, CSTE);
+        return VAR1.getSolver().arithm(VAR1,OP1,VAR2,OP2,CSTE);
     }
 
     /**
@@ -267,8 +191,7 @@ public class IntConstraintFactory {
      * where OP can take its value among {"=", ">", "<", "!="}
      */
     public static Constraint distance(IntVar VAR1, IntVar VAR2, String OP, int CSTE) {
-        assert VAR1.getSolver() == VAR2.getSolver();
-        return new DistanceXYC(VAR1, VAR2, Operator.get(OP), CSTE);
+        return VAR1.getSolver().distance(VAR1,VAR2,OP,CSTE);
     }
 
     /**
@@ -278,14 +201,9 @@ public class IntConstraintFactory {
      * @param TABLE  an array of integer values
      * @param INDEX  an integer variable representing the value of VALUE in TABLE
      * @param OFFSET offset matching INDEX.LB and TABLE[0] (Generally 0)
-     * @param SORT   defines ordering properties of TABLE:
-     *               <p/> "none" if TABLE is not sorted
-     *               <p/> "asc" if TABLE is sorted in the increasing order
-     *               <p/> "desc" if TABLE is sorted in the decreasing order
-     *               <p/> "detect" Let the constraint detects the ordering of TABLE, if any
      */
-    public static Constraint element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET, String SORT) {
-        return ElementFactory.detect(VALUE, TABLE, INDEX, OFFSET);
+    public static Constraint element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET) {
+        return VALUE.getSolver().element(VALUE, TABLE, INDEX, OFFSET);
     }
 
     /**
@@ -296,15 +214,14 @@ public class IntConstraintFactory {
      * @param INDEX an integer variable representing the value of VALUE in TABLE
      */
     public static Constraint element(IntVar VALUE, int[] TABLE, IntVar INDEX) {
-        return element(VALUE, TABLE, INDEX, 0, "detect");
+        return VALUE.getSolver().element(VALUE,TABLE,INDEX);
     }
 
     /**
      * Enforces VAR1 = VAR2^2
      */
     public static Constraint square(IntVar VAR1, IntVar VAR2) {
-        assert VAR1.getSolver() == VAR2.getSolver();
-        return new Constraint("Square", new PropSquare(VAR1, VAR2));
+        return VAR1.getSolver().square(VAR1,VAR2);
     }
 
     /**
@@ -332,21 +249,7 @@ public class IntConstraintFactory {
      * @param TUPLES the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "FC"}
      */
     public static Constraint table(IntVar VAR1, IntVar VAR2, Tuples TUPLES, String ALGORITHM) {
-        Propagator p;
-        switch (ALGORITHM) {
-            case "AC2001": p = new PropBinAC2001(VAR1, VAR2, TUPLES);
-                break;
-            case "FC": p = new PropBinFC(VAR1, VAR2, TUPLES);
-                break;
-            case "AC3": p = new PropBinAC3(VAR1, VAR2, TUPLES);
-                break;
-            case "AC3rm": p = new PropBinAC3rm(VAR1, VAR2, TUPLES);
-                break;
-            case "AC3bit+rm": p = new PropBinAC3bitrm(VAR1, VAR2, TUPLES);
-                break;
-            default: throw new SolverException("Table algorithm "+ALGORITHM+" is unkown");
-        }
-        return new Constraint("TableBin(" + ALGORITHM + ")", p);
+        return VAR1.getSolver().table(VAR1,VAR2,TUPLES,ALGORITHM);
     }
 
     //##################################################################################################################
@@ -363,21 +266,7 @@ public class IntConstraintFactory {
      * @param VAR3 third variable
      */
     public static Constraint arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, IntVar VAR3) {
-        switch (OP1) {
-            case "+":
-                return scalar(new IntVar[]{VAR1, VAR2}, new int[]{1, 1}, OP2, VAR3);
-            case "-":
-                return scalar(new IntVar[]{VAR1, VAR2}, new int[]{1, -1}, OP2, VAR3);
-            default:
-                switch (OP2) {
-                    case "+":
-                        return scalar(new IntVar[]{VAR1, VAR3}, new int[]{1, -1}, OP1, VAR2);
-                    case "-":
-                        return scalar(new IntVar[]{VAR1, VAR3}, new int[]{1, 1}, OP1, VAR2);
-                }
-                break;
-        }
-        throw new SolverException("Unknown operators for arithm constraint");
+        return VAR1.getSolver().arithm(VAR1,OP1,VAR2,OP2,VAR3);
     }
 
     /**
@@ -392,7 +281,7 @@ public class IntConstraintFactory {
      * @param VAR3 resulting variable
      */
     public static Constraint distance(IntVar VAR1, IntVar VAR2, String OP, IntVar VAR3) {
-        return new DistanceXYZ(VAR1, VAR2, Operator.get(OP), VAR3);
+        return VAR1.getSolver().distance(VAR1,VAR2,OP,VAR3);
     }
 
     /**
@@ -404,7 +293,7 @@ public class IntConstraintFactory {
      * @param RESULT   result
      */
     public static Constraint eucl_div(IntVar DIVIDEND, IntVar DIVISOR, IntVar RESULT) {
-        return new Constraint("DivisionEucl", new PropDivXYZ(DIVIDEND, DIVISOR, RESULT));
+        return RESULT.getSolver().div(DIVIDEND,DIVISOR,RESULT);
     }
 
     /**
@@ -416,7 +305,7 @@ public class IntConstraintFactory {
      * @param VAR2 a variable
      */
     public static Constraint maximum(IntVar MAX, IntVar VAR1, IntVar VAR2) {
-        return new Constraint("Max", new PropMaxBC(MAX, VAR1, VAR2));
+        return MAX.getSolver().max(MAX,VAR1,VAR2);
     }
 
     /**
@@ -428,7 +317,7 @@ public class IntConstraintFactory {
      * @param VAR2 first variable
      */
     public static Constraint minimum(IntVar MIN, IntVar VAR1, IntVar VAR2) {
-        return new Constraint("Min", new PropMinBC(MIN, VAR1, VAR2));
+        return MIN.getSolver().min(MIN,VAR1,VAR2);
     }
 
     /**
@@ -445,15 +334,7 @@ public class IntConstraintFactory {
      * @param Z result
      */
     public static Constraint mod(IntVar X, IntVar Y, IntVar Z) {
-        int xl = Math.abs(X.getLB());
-        int xu = Math.abs(X.getUB());
-        int b = Math.max(xl, xu);
-        Solver solver = X.getSolver();
-        IntVar t1 = solver.intVar(randomName(), -b, b, true);
-        IntVar t2 = solver.intVar(randomName(), -b, b, true);
-        solver.post(eucl_div(X, Y, t1));
-        solver.post(times(t1, Y, t2));
-        return sum(new IntVar[]{Z, t2}, "=", X);
+        return X.getSolver().mod(X,Y,Z);
     }
 
     /**
@@ -465,15 +346,7 @@ public class IntConstraintFactory {
      */
     @SuppressWarnings("SuspiciousNameCombination")
     public static Constraint times(IntVar X, IntVar Y, IntVar Z) {
-        if (Y.isInstantiated()) {
-            return times(X, Y.getValue(), Z);
-        } else if (X.isInstantiated()) {
-            return times(Y, X.getValue(), Z);
-        } else if (tupleIt(X, Y, Z)) {
-            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
-        } else {
-            return new Times(X, Y, Z);
-        }
+        return X.getSolver().times(X,Y,Z);
     }
 
     /**
@@ -484,15 +357,7 @@ public class IntConstraintFactory {
      * @param Z result variable
      */
     public static Constraint times(IntVar X, int Y, IntVar Z) {
-        if (Y == 0) {
-            return arithm(Z, "=", 0);
-        } else if (Y == 1) {
-            return arithm(X, "=", Z);
-        } else if (Y < 0) {
-            return times(X.getSolver().intMinusView(X), -Y, Z);
-        } else {
-            return new Constraint("Times", new PropScale(X, Y, Z));
-        }
+        return X.getSolver().times(X,Y,Z);
     }
 
     //##################################################################################################################
@@ -529,7 +394,7 @@ public class IntConstraintFactory {
      *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      */
     public static Constraint alldifferent(IntVar[] VARS, String CONSISTENCY) {
-        return new AllDifferent(VARS, CONSISTENCY);
+        return VARS[0].getSolver().allDifferent(VARS,CONSISTENCY);
     }
 
     /**
@@ -540,13 +405,7 @@ public class IntConstraintFactory {
      * @param AC        specifies is AC filtering should be established
      */
     public static Constraint alldifferent_conditionnal(IntVar[] VARS, Condition CONDITION, boolean AC) {
-        if (AC) {
-            return new Constraint("AllDifferent" + CONDITION,
-                    new PropCondAllDiffInst(VARS, CONDITION),
-                    new PropCondAllDiff_AC(VARS, CONDITION)
-            );
-        }
-        return new Constraint("AllDifferent" + CONDITION, new PropCondAllDiffInst(VARS, CONDITION));
+        return VARS[0].getSolver().allDifferentUnderCondition(VARS,CONDITION,AC);
     }
 
     /**
@@ -582,9 +441,7 @@ public class IntConstraintFactory {
      * @param VALUES set of values
      */
     public static Constraint among(IntVar NVAR, IntVar[] VARS, int[] VALUES) {
-        int[] values = new TIntHashSet(VALUES).toArray(); // remove double occurrences
-        Arrays.sort(values);                              // sort
-        return new Constraint("Among", new PropAmongGAC_GoodImpl(ArrayUtils.append(VARS, new IntVar[]{NVAR}), values));
+        return VARS[0].getSolver().among(NVAR,VARS,VALUES);
     }
 
     /**
@@ -599,12 +456,7 @@ public class IntConstraintFactory {
      * @param AC      additional filtering algorithm, domain filtering algorithm derivated from (Soft)AllDifferent
      */
     public static Constraint atleast_nvalues(IntVar[] VARS, IntVar NVALUES, boolean AC) {
-        TIntArrayList vals = getDomainUnion(VARS);
-        if (AC) {
-            return new Constraint("AtLeastNValues", new PropAtLeastNValues(VARS, vals, NVALUES), new PropAtLeastNValues_AC(VARS, NVALUES));
-        } else {
-            return new Constraint("AtLeastNValues", new PropAtLeastNValues(VARS, vals, NVALUES));
-        }
+        return VARS[0].getSolver().atLeastNValues(VARS,NVALUES,AC);
     }
 
     /**
@@ -618,19 +470,11 @@ public class IntConstraintFactory {
      * @param NVALUES limit variable
      * @param STRONG  "AMNV<Gci|MDRk|R13>" Filters the conjunction of AtMostNValue and disequalities
      *                (see Fages and Lap&egrave;gue Artificial Intelligence 2014)
-     *                automatically detects disequalities and alldifferent constraints.
+     *                automatically detects disequalities and allDifferent constraints.
      *                Presumably useful when NVALUES must be minimized.
      */
     public static Constraint atmost_nvalues(IntVar[] VARS, IntVar NVALUES, boolean STRONG) {
-        TIntArrayList vals = getDomainUnion(VARS);
-        if (STRONG) {
-            Gci gci = new Gci(VARS, new AutoDiffDetection(VARS));
-            R[] rules = new R[]{new R1(), new R3(VARS.length, NVALUES.getSolver())};
-            return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES),
-                    new PropAMNV(VARS, NVALUES, gci, new MDRk(gci), rules));
-        } else {
-            return new Constraint("AtMostNValues", new PropAtMostNValues(VARS, vals, NVALUES));
-        }
+        return VARS[0].getSolver().atMostNVvalues(VARS,NVALUES,STRONG);
     }
 
     /**
@@ -645,26 +489,8 @@ public class IntConstraintFactory {
      * @param OFFSET    0 by default but typically 1 if used within MiniZinc
      *                  (which counts from 1 to n instead of from 0 to n-1)
      */
-    public static Constraint[] bin_packing(IntVar[] ITEM_BIN, int[] ITEM_SIZE, IntVar[] BIN_LOAD, int OFFSET) {
-        int nbBins = BIN_LOAD.length;
-        int nbItems = ITEM_BIN.length;
-        Solver s = ITEM_BIN[0].getSolver();
-        BoolVar[][] xbi = s.boolVarMatrix("xbi", nbBins, nbItems);
-        int sum = 0;
-        for (int is : ITEM_SIZE) {
-            sum += is;
-        }
-        IntVar sumView = s.intVar(sum);
-        // constraints
-        Constraint[] bpcons = new Constraint[nbItems + nbBins + 1];
-        for (int i = 0; i < nbItems; i++) {
-            bpcons[i] = ICF.boolean_channeling(ArrayUtils.getColumn(xbi, i), ITEM_BIN[i], OFFSET);
-        }
-        for (int b = 0; b < nbBins; b++) {
-            bpcons[nbItems + b] = ICF.scalar(xbi[b], ITEM_SIZE, "=", BIN_LOAD[b]);
-        }
-        bpcons[nbItems + nbBins] = ICF.sum(BIN_LOAD, "=", sumView);
-        return bpcons;
+    public static Constraint bin_packing(IntVar[] ITEM_BIN, int[] ITEM_SIZE, IntVar[] BIN_LOAD, int OFFSET) {
+        return ITEM_BIN[0].getSolver().binPacking(ITEM_BIN,ITEM_SIZE,BIN_LOAD,OFFSET);
     }
 
     /**
@@ -677,15 +503,7 @@ public class IntConstraintFactory {
      *               (which counts from 1 to n instead of from 0 to n-1)
      */
     public static Constraint boolean_channeling(BoolVar[] BVARS, IntVar VAR, int OFFSET) {
-        if (VAR.hasEnumeratedDomain()) {
-            return new Constraint("DomainChanneling", new PropEnumDomainChanneling(BVARS, VAR, OFFSET));
-        } else {
-            IntVar enumV = VAR.getSolver().intVar(VAR.getName() + "_enumImage", VAR.getLB(), VAR.getUB(), false);
-            return new Constraint("BoolChanneling",
-                    new PropEnumDomainChanneling(BVARS, enumV, OFFSET),
-                    new PropEqualX_Y(VAR, enumV)
-            );
-        }
+        return VAR.getSolver().boolsIntChanneling(BVARS,VAR,OFFSET);
     }
 
     /**
@@ -700,7 +518,7 @@ public class IntConstraintFactory {
      * @param VAR  the numeric value
      */
     public static Constraint bit_channeling(BoolVar[] BITS, IntVar VAR) {
-        return new Constraint("bit_channeling", new PropBitChanneling(VAR, BITS));
+        return VAR.getSolver().bitsIntChanneling(BITS,VAR);
     }
 
     /**
@@ -715,7 +533,7 @@ public class IntConstraintFactory {
      * @param LVARS array of LQ boolean variables
      */
     public static Constraint clause_channeling(IntVar VAR, BoolVar[] EVARS, BoolVar[] LVARS) {
-        return new Constraint("clause_channeling", new PropClauseChanneling(VAR, EVARS, LVARS));
+        return VAR.getSolver().clausesIntChanneling(VAR,EVARS,LVARS);
     }
 
     /**
@@ -737,18 +555,7 @@ public class IntConstraintFactory {
      * @return a circuit constraint
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET, CircuitConf CONF) {
-        Propagator[] props;
-        if (CONF == CircuitConf.LIGHT) {
-            props = new Propagator[]{new PropNoSubtour(VARS, OFFSET)};
-        } else {
-            props = new Propagator[]{
-                    new PropNoSubtour(VARS, OFFSET),
-                    new PropCircuit_ArboFiltering(VARS, OFFSET, CONF),
-                    new PropCircuit_AntiArboFiltering(VARS, OFFSET, CONF),
-                    new PropCircuitSCC(VARS, OFFSET, CONF)
-            };
-        }
-        return new Constraint("Circuit", ArrayUtils.append(alldifferent(VARS, "AC").propagators, props));
+        return VARS[0].getSolver().circuit(VARS,OFFSET,CONF);
     }
 
     /**
@@ -783,7 +590,7 @@ public class IntConstraintFactory {
      *                   Can be built with method CostAutomaton.makeSingleResource(...)
      */
     public static Constraint cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton CAUTOMATON) {
-        return new CostRegular(VARS, COST, CAUTOMATON);
+        return VARS[0].getSolver().costRegular(VARS,COST,CAUTOMATON);
     }
 
     /**
@@ -796,7 +603,7 @@ public class IntConstraintFactory {
      * @param LIMIT a variable
      */
     public static Constraint count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
-        return new Constraint("Count", new PropCount_AC(VARS, VALUE, LIMIT));
+        return VARS[0].getSolver().count(VALUE,VARS,LIMIT);
     }
 
     /**
@@ -809,16 +616,7 @@ public class IntConstraintFactory {
      * @param LIMIT a variable
      */
     public static Constraint count(IntVar VALUE, IntVar[] VARS, IntVar LIMIT) {
-        if (VALUE.isInstantiated()) {
-            return count(VALUE.getValue(), VARS, LIMIT);
-        } else if (VALUE.hasEnumeratedDomain()) {
-            return new Constraint("Count", new PropCountVar(VARS, VALUE, LIMIT));
-        } else {
-            IntVar EVALUE = VALUE.getSolver().intVar(randomName(), VALUE.getLB(), VALUE.getUB(), false);
-            return new Constraint("Count",
-                    new PropEqualX_Y(EVALUE, VALUE),
-                    new PropCountVar(VARS, EVALUE, LIMIT));
-        }
+        return VARS[0].getSolver().count(VALUE,VARS,LIMIT);
     }
 
     /**
@@ -847,38 +645,7 @@ public class IntConstraintFactory {
      * @return a cumulative constraint
      */
     public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY, boolean INCREMENTAL) {
-        // Cumulative.Filter.HEIGHTS is useless if all HEIGHTS are already instantiated
-        boolean addHeights = false;
-        int nbUseFull = 0;
-        for (int h = 0; h < HEIGHTS.length; h++) {
-            if (!HEIGHTS[h].isInstantiated()) {
-                addHeights = true;
-            }
-            if (!(HEIGHTS[h].isInstantiatedTo(0) || TASKS[h].getDuration().isInstantiatedTo(0))) {
-                nbUseFull++;
-            }
-        }
-        // remove tasks which have no impact on resource
-        if (nbUseFull < TASKS.length) {
-            if (nbUseFull == 0) return arithm(CAPACITY, ">=", 0);
-            Task[] T2 = new Task[nbUseFull];
-            IntVar[] H2 = new IntVar[nbUseFull];
-            int idx = 0;
-            for (int h = 0; h < HEIGHTS.length; h++) {
-                if (!(HEIGHTS[h].isInstantiatedTo(0) || TASKS[h].getDuration().isInstantiatedTo(0))) {
-                    T2[idx] = TASKS[h];
-                    H2[idx] = HEIGHTS[h];
-                    idx++;
-                }
-            }
-            TASKS = T2;
-            HEIGHTS = H2;
-        }
-        Cumulative.Filter[] filters = new Cumulative.Filter[]{Cumulative.Filter.TIME, Cumulative.Filter.NRJ};
-        if (addHeights) {
-            filters = ArrayUtils.append(filters, new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
-        }
-        return new Cumulative(TASKS, HEIGHTS, CAPACITY, INCREMENTAL, filters);
+        return CAPACITY.getSolver().cumulative(TASKS,HEIGHTS,CAPACITY,INCREMENTAL);
     }
 
     /**
@@ -892,47 +659,8 @@ public class IntConstraintFactory {
      * @param USE_CUMUL indicates whether or not redundant cumulative constraints should be put on each dimension (advised)
      * @return a non-overlapping constraint
      */
-    public static Constraint[] diffn(IntVar[] X, IntVar[] Y, IntVar[] WIDTH, IntVar[] HEIGHT, boolean USE_CUMUL) {
-        Solver solver = X[0].getSolver();
-        Constraint diffNCons = new Constraint(
-                "DiffN",
-                new PropDiffN(X, Y, WIDTH, HEIGHT, false),
-                new PropDiffN(X, Y, WIDTH, HEIGHT, false)
-        );
-        if (USE_CUMUL) {
-            IntVar[] EX = new IntVar[X.length];
-            IntVar[] EY = new IntVar[X.length];
-            Task[] TX = new Task[X.length];
-            Task[] TY = new Task[X.length];
-            int minx = Integer.MAX_VALUE / 2;
-            int maxx = Integer.MIN_VALUE / 2;
-            int miny = Integer.MAX_VALUE / 2;
-            int maxy = Integer.MIN_VALUE / 2;
-            for (int i = 0; i < X.length; i++) {
-                EX[i] = solver.intVar(randomName("diffn"), X[i].getLB() + WIDTH[i].getLB(), X[i].getUB() + WIDTH[i].getUB(), true);
-                EY[i] = solver.intVar(randomName("diffn"), Y[i].getLB() + HEIGHT[i].getLB(), Y[i].getUB() + HEIGHT[i].getUB(), true);
-                TX[i] = new Task(X[i], WIDTH[i], EX[i]);
-                TY[i] = new Task(Y[i], HEIGHT[i], EY[i]);
-                minx = Math.min(minx, X[i].getLB());
-                miny = Math.min(miny, Y[i].getLB());
-                maxx = Math.max(maxx, X[i].getUB() + WIDTH[i].getUB());
-                maxy = Math.max(maxy, Y[i].getUB() + HEIGHT[i].getUB());
-            }
-            IntVar maxX = solver.intVar(randomName("diffn"), minx, maxx, true);
-            IntVar minX = solver.intVar(randomName("diffn"), minx, maxx, true);
-            IntVar diffX = solver.intVar(randomName("diffn"), 0, maxx - minx, true);
-            IntVar maxY = solver.intVar(randomName("diffn"), miny, maxy, true);
-            IntVar minY = solver.intVar(randomName("diffn"), miny, maxy, true);
-            IntVar diffY = solver.intVar(randomName("diffn"), 0, maxy - miny, true);
-            return new Constraint[]{
-                    diffNCons,
-                    minimum(minX, X), maximum(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
-                    cumulative(TX, HEIGHT, diffY, true),
-                    minimum(minY, Y), maximum(maxY, EY), scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, "=", diffY),
-                    cumulative(TY, WIDTH, diffX, true)
-            };
-        }
-        return new Constraint[]{diffNCons};
+    public static Constraint diffn(IntVar[] X, IntVar[] Y, IntVar[] WIDTH, IntVar[] HEIGHT, boolean USE_CUMUL) {
+        return X[0].getSolver().diffN(X,Y,WIDTH,HEIGHT,USE_CUMUL);
     }
 
     /**
@@ -944,11 +672,7 @@ public class IntConstraintFactory {
      * @param OFFSET int offset, generally 0
      */
     public static Constraint element(IntVar VALUE, IntVar[] TABLE, IntVar INDEX, int OFFSET) {
-        // uses two propagator to perform a fix point
-        return new Constraint(
-                "Element",
-                new PropElementV_fast(VALUE, TABLE, INDEX, OFFSET, true),
-                new PropElementV_fast(VALUE, TABLE, INDEX, OFFSET, true));
+        return VALUE.getSolver().element(VALUE,TABLE,INDEX,OFFSET);
     }
 
     /**
@@ -963,41 +687,7 @@ public class IntConstraintFactory {
      * @param CLOSED      restricts domains of VARS to VALUES if set to true
      */
     public static Constraint global_cardinality(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED) {
-        assert VALUES.length == OCCURRENCES.length;
-        if (!CLOSED) {
-            return new GlobalCardinality(VARS, VALUES, OCCURRENCES);
-        } else {
-            TIntArrayList toAdd = new TIntArrayList();
-            TIntSet givenValues = new TIntHashSet();
-            for (int i : VALUES) {
-                assert !givenValues.contains(i);
-                givenValues.add(i);
-            }
-            for (IntVar var : VARS) {
-                int ub = var.getUB();
-                for (int k = var.getLB(); k <= ub; k = var.nextValue(k)) {
-                    if (!givenValues.contains(k)) {
-                        if (!toAdd.contains(k)) {
-                            toAdd.add(k);
-                        }
-                    }
-                }
-            }
-            if (toAdd.size() > 0) {
-                int n2 = VALUES.length + toAdd.size();
-                int[] values = new int[n2];
-                IntVar[] cards = new IntVar[n2];
-                System.arraycopy(VALUES, 0, values, 0, VALUES.length);
-                System.arraycopy(OCCURRENCES, 0, cards, 0, VALUES.length);
-                for (int i = VALUES.length; i < n2; i++) {
-                    values[i] = toAdd.get(i - VALUES.length);
-                    cards[i] = VARS[0].getSolver().intVar(0);
-                }
-                return new GlobalCardinality(VARS, values, cards);
-            } else {
-                return new GlobalCardinality(VARS, VALUES, OCCURRENCES);
-            }
-        }
+        return VARS[0].getSolver().globalCardinality(VARS,VALUES,OCCURRENCES,CLOSED);
     }
 
     /**
@@ -1031,21 +721,7 @@ public class IntConstraintFactory {
      * @param OFFSET2 lowest value in VARS2 (most often 0)
      */
     public static Constraint inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
-        if (VARS1.length != VARS2.length)
-            throw new UnsupportedOperationException(Arrays.toString(VARS1) + " and " + Arrays.toString(VARS2) + " should have same size");
-        boolean allEnum = true;
-        for (int i = 0; i < VARS1.length && allEnum; i++) {
-            if (!(VARS1[i].hasEnumeratedDomain() && VARS2[i].hasEnumeratedDomain())) {
-                allEnum = false;
-            }
-        }
-        Propagator ip = allEnum ? new PropInverseChannelAC(VARS1, VARS2, OFFSET1, OFFSET2)
-                : new PropInverseChannelBC(VARS1, VARS2, OFFSET1, OFFSET2);
-        return new Constraint("InverseChanneling", ArrayUtils.append(
-                alldifferent(VARS1, "").getPropagators(),
-                alldifferent(VARS2, "").getPropagators(),
-                new Propagator[]{ip}
-        ));
+        return VARS1[0].getSolver().inverseChanneling(VARS1,VARS2,OFFSET1,OFFSET2);
     }
 
     /**
@@ -1057,7 +733,7 @@ public class IntConstraintFactory {
      * @param T another value
      */
     public static Constraint int_value_precede_chain(IntVar[] X, int S, int T) {
-        return new Constraint("int_value_precede", new PropIntValuePrecedeChain(X, S, T));
+        return X[0].getSolver().intValuePrecedeChain(X,S,T);
     }
 
     /**
@@ -1069,21 +745,7 @@ public class IntConstraintFactory {
      * @param V array of (distinct) values
      */
     public static Constraint int_value_precede_chain(IntVar[] X, int[] V) {
-        if (V.length > 1) {
-            TIntHashSet values = new TIntHashSet();
-            PropIntValuePrecedeChain[] ps = new PropIntValuePrecedeChain[V.length - 1];
-            values.add(V[0]);
-            for (int i = 1; i < V.length; i++) {
-                if (values.contains(V[i])) {
-                    throw new SolverException("\"int_value_precede\" requires V to be made of distinct values");
-                }
-                values.add(V[i]);
-                ps[i - 1] = new PropIntValuePrecedeChain(X, V[i - 1], V[i]);
-            }
-            return new Constraint("int_value_precede", ps);
-        } else {
-            return X[0].getSolver().TRUE();
-        }
+        return X[0].getSolver().intValuePrecedeChain(X,V);
     }
 
     /**
@@ -1102,7 +764,7 @@ public class IntConstraintFactory {
      * and must fill it with the most useful items."
      * The limit over SUM_WEIGHT has to be specified either in its domain or with an additional constraint:
      * <pre>
-     *     solver.post(ICF.arithm(SUM_WEIGHT, "<=", limit);
+     *     solver.post(solver.arithm(SUM_WEIGHT, "<=", limit);
      * </pre>
      *
      * @param OCCURRENCES  number of occurrences of an item
@@ -1113,15 +775,11 @@ public class IntConstraintFactory {
      */
     public static Constraint knapsack(IntVar[] OCCURRENCES, IntVar SUM_WEIGHT, IntVar SUM_ENERGY,
                                       int[] WEIGHT, int[] ENERGY) {
-        return new Constraint("Knapsack", ArrayUtils.append(
-                scalar(OCCURRENCES, WEIGHT, "=",SUM_WEIGHT).propagators,
-                scalar(OCCURRENCES, ENERGY, "=", SUM_ENERGY).propagators,
-                new Propagator[]{new PropKnapsack(OCCURRENCES, SUM_WEIGHT, SUM_ENERGY, WEIGHT, ENERGY)}
-        ));
+        return SUM_ENERGY.getSolver().knapsack(OCCURRENCES,SUM_WEIGHT,SUM_ENERGY,WEIGHT,ENERGY);
     }
 
     /**
-     * Creates a keysorting constraint which ensures that the variables of SORTEDVARS correspond to the variables
+     * Creates a keySort constraint which ensures that the variables of SORTEDVARS correspond to the variables
      * of VARS according to a permutation stored in PERMVARS (optional, can be null).
      * The variables of SORTEDVARS are also sorted in increasing order wrt to K-size tuples.
      * The sort is stable, that is, ties are broken using the position of the tuple in VARS.
@@ -1137,17 +795,10 @@ public class IntConstraintFactory {
      * @param PERMVARS   array of permutation variables, domains should be [1,VARS.length]  -- Can be null
      * @param SORTEDVARS a tuple of array of variables sorted in increasing order
      * @param K          key perfixes size (0 &le; k &le; m, where m is the size of the array of variable)
-     * @return a keysorting constraint
+     * @return a keySort constraint
      */
     public static Constraint keysorting(IntVar[][] VARS, IntVar[] PERMVARS, IntVar[][] SORTEDVARS, int K) {
-        if (PERMVARS == null) {
-            int n = VARS.length;
-            PERMVARS = new IntVar[n];
-            for (int p = 0; p < n; p++) {
-                PERMVARS[p] = VARS[0][0].getSolver().intVar("p_" + (p + 1), 1, n, true);
-            }
-        }
-        return new Constraint("keysorting", new PropKeysorting(VARS, SORTEDVARS, PERMVARS, K));
+        return PERMVARS[0].getSolver().keySort(VARS,PERMVARS,SORTEDVARS,K);
     }
 
     /**
@@ -1157,7 +808,7 @@ public class IntConstraintFactory {
      * @param VARS collection of vectors of variables
      */
     public static Constraint lex_chain_less(IntVar[]... VARS) {
-        return new Constraint("LexChain(<) ", new PropLexChain(VARS, true));
+        return VARS[0][0].getSolver().lexChainLess(VARS);
     }
 
     /**
@@ -1167,7 +818,7 @@ public class IntConstraintFactory {
      * @param VARS collection of vectors of variables
      */
     public static Constraint lex_chain_less_eq(IntVar[]... VARS) {
-        return new Constraint("LexChain(<=)", new PropLexChain(VARS, false));
+        return VARS[0][0].getSolver().lexChainLessEq(VARS);
     }
 
     /**
@@ -1177,7 +828,7 @@ public class IntConstraintFactory {
      * @param VARS2 vector of variables
      */
     public static Constraint lex_less(IntVar[] VARS1, IntVar[] VARS2) {
-        return new Constraint("Lex(<)", new PropLex(VARS1, VARS2, true));
+        return VARS1[0].getSolver().lexLess(VARS1,VARS2);
     }
 
     /**
@@ -1187,7 +838,7 @@ public class IntConstraintFactory {
      * @param VARS2 vector of variables
      */
     public static Constraint lex_less_eq(IntVar[] VARS1, IntVar[] VARS2) {
-        return new Constraint("Lex(<=)", new PropLex(VARS1, VARS2, false));
+        return VARS1[0].getSolver().lexLessEq(VARS1,VARS2);
     }
 
     /**
@@ -1197,7 +848,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of variables
      */
     public static Constraint maximum(IntVar MAX, IntVar[] VARS) {
-        return new Constraint("Max", new PropMax(VARS, MAX));
+        return VARS[0].getSolver().max(MAX,VARS);
     }
 
     /**
@@ -1207,7 +858,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of boolean variables
      */
     public static Constraint maximum(BoolVar MAX, BoolVar[] VARS) {
-        return new Constraint("MinOverBools", new PropBoolMax(VARS, MAX));
+        return VARS[0].getSolver().max(MAX,VARS);
     }
 
     /**
@@ -1218,7 +869,7 @@ public class IntConstraintFactory {
      * @param MDD  the multi-valued decision diagram encoding solutions
      */
     public static Constraint mddc(IntVar[] VARS, MultivaluedDecisionDiagram MDD) {
-        return new Constraint("mddc", new PropLargeMDDC(MDD, VARS));
+        return VARS[0].getSolver().mddc(VARS,MDD);
     }
 
     /**
@@ -1228,7 +879,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of variables
      */
     public static Constraint minimum(IntVar MIN, IntVar[] VARS) {
-        return new Constraint("Min", new PropMin(VARS, MIN));
+        return VARS[0].getSolver().min(MIN,VARS);
     }
 
     /**
@@ -1238,7 +889,7 @@ public class IntConstraintFactory {
      * @param VARS a vector of boolean variables
      */
     public static Constraint minimum(BoolVar MIN, BoolVar[] VARS) {
-        return new Constraint("MinOverBools", new PropBoolMin(VARS, MIN));
+        return VARS[0].getSolver().min(MIN,VARS);
     }
 
     /**
@@ -1253,7 +904,7 @@ public class IntConstraintFactory {
      *                   Can be built from method CostAutomaton.makeMultiResources(...)
      */
     public static Constraint multicost_regular(IntVar[] VARS, IntVar[] CVARS, ICostAutomaton CAUTOMATON) {
-        return new Constraint("MultiCostRegular", new PropMultiCostRegular(VARS, CVARS, CAUTOMATON));
+        return VARS[0].getSolver().multiCostRegular(VARS,CVARS,CAUTOMATON);
     }
 
     /**
@@ -1269,8 +920,8 @@ public class IntConstraintFactory {
      * @param NVALUES limit variable
      * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
-    public static Constraint[] nvalues(IntVar[] VARS, IntVar NVALUES) {
-        return new Constraint[]{atleast_nvalues(VARS, NVALUES, false), atmost_nvalues(VARS, NVALUES, true)};
+    public static Constraint nvalues(IntVar[] VARS, IntVar NVALUES) {
+        return VARS[0].getSolver().nValues(VARS,NVALUES);
     }
 
     /**
@@ -1287,7 +938,7 @@ public class IntConstraintFactory {
      * @param END    variable indicating the index of the last variable in the path
      * @return a path constraint
      */
-    public static Constraint[] path(IntVar[] VARS, IntVar START, IntVar END) {
+    public static Constraint path(IntVar[] VARS, IntVar START, IntVar END) {
         return path(VARS,START,END,0);
     }
 
@@ -1307,28 +958,8 @@ public class IntConstraintFactory {
      *               (which counts from 1 to n instead of from 0 to n-1)
      * @return a path constraint
      */
-    public static Constraint[] path(IntVar[] VARS, IntVar START, IntVar END, int OFFSET) {
-        assert START != null && END != null && VARS != null;
-        switch (VARS.length) {
-            case 0:
-                throw new UnsupportedOperationException("|VARS| Should be strictly greater than 0");
-            case 1:
-                return new Constraint[]{
-                        arithm(START, "=", OFFSET),
-                        arithm(END, "=", OFFSET),
-                        arithm(VARS[0], "=", 1 + OFFSET),
-                };
-            default:
-                if (START == END) {
-                    return new Constraint[]{START.getSolver().FALSE()};
-                } else {
-                    return new Constraint[]{
-                            arithm(START, "!=", END),
-                            circuit(ArrayUtils.append(VARS, new IntVar[]{START}), OFFSET),
-                            element(END.getSolver().intVar(VARS.length + OFFSET), VARS, END, OFFSET)
-                    };
-                }
-        }
+    public static Constraint path(IntVar[] VARS, IntVar START, IntVar END, int OFFSET) {
+        return VARS[0].getSolver().path(VARS,START,END,OFFSET);
     }
 
     /**
@@ -1341,7 +972,7 @@ public class IntConstraintFactory {
      * @param AUTOMATON a deterministic finite automaton defining the regular language
      */
     public static Constraint regular(IntVar[] VARS, IAutomaton AUTOMATON) {
-        return new Constraint("Regular", new PropRegular(VARS, AUTOMATON));
+        return VARS[0].getSolver().regular(VARS,AUTOMATON);
     }
 
     /**
@@ -1366,10 +997,7 @@ public class IntConstraintFactory {
      * @return a scalar constraint
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, int SCALAR) {
-        assert VARS.length>0;
-        Solver s = VARS[0].getSolver();
-        IntVar scalarVar = s.intVar(SCALAR);
-        return scalar(VARS,COEFFS,OPERATOR,scalarVar);
+        return VARS[0].getSolver().scalar(VARS,COEFFS,OPERATOR,SCALAR);
     }
 
     /**
@@ -1382,7 +1010,7 @@ public class IntConstraintFactory {
      * @return a scalar constraint
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, IntVar SCALAR) {
-        return IntLinCombFactory.reduce(VARS, COEFFS, Operator.get(OPERATOR), SCALAR);
+        return VARS[0].getSolver().scalar(VARS,COEFFS,OPERATOR,SCALAR);
     }
 
     /**
@@ -1399,18 +1027,11 @@ public class IntConstraintFactory {
      * @return a sort constraint
      */
     public static Constraint sort(IntVar[] VARS, IntVar[] SORTEDVARS) {
-//        return new Constraint("Sort", new PropSort(VARS, SORTEDVARS));
-        IntVar[][] X = new IntVar[VARS.length][1];
-        IntVar[][] Y = new IntVar[SORTEDVARS.length][1];
-        for (int i = 0; i < VARS.length; i++) {
-            X[i][0] = VARS[i];
-            Y[i][0] = SORTEDVARS[i];
-        }
-        return keysorting(X, null, Y, 1);
+        return VARS[0].getSolver().sort(VARS,SORTEDVARS);
     }
 
     /**
-     * Creates a subcircuit constraint which ensures that
+     * Creates a subCircuit constraint which ensures that
      * <p/> the elements of vars define a single circuit of subcircuitSize nodes where
      * <p/> VARS[i] = OFFSET+j means that j is the successor of i.
      * <p/> and VARS[i] = OFFSET+i means that i is not part of the circuit
@@ -1426,33 +1047,21 @@ public class IntConstraintFactory {
      * @param OFFSET          0 by default but 1 if used within MiniZinc
      *                        (which counts from 1 to n instead of from 0 to n-1)
      * @param SUBCIRCUIT_SIZE expected number of nodes in the circuit
-     * @return a subcircuit constraint
+     * @return a subCircuit constraint
      */
     public static Constraint subcircuit(IntVar[] VARS, int OFFSET, IntVar SUBCIRCUIT_SIZE) {
-        int n = VARS.length;
-        Solver solver = VARS[0].getSolver();
-        IntVar nbLoops = solver.intVar("nLoops", 0, n, true);
-        return new Constraint("SubCircuit", ArrayUtils.append(
-                alldifferent(VARS).getPropagators(),
-                ArrayUtils.toArray(
-                        new PropEqualXY_C(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, n),
-                        new PropKLoops(VARS, OFFSET, nbLoops),
-                        new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE),
-                        new PropSubcircuit_AntiArboFiltering(VARS, OFFSET),
-                        new PropSubCircuitSCC(VARS, OFFSET)
-                )
-        ));
+        return VARS[0].getSolver().subCircuit(VARS,OFFSET,SUBCIRCUIT_SIZE);
     }
 
     /**
-     * Creates a subpath constraint which ensures that
+     * Creates a subPath constraint which ensures that
      * <p/> the elements of VARS define a path of SIZE vertices, leading from START to END
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
      * <p/> where VARS[i] = OFFSET+i means that vertex i is excluded from the path.
      * <p/> Moreover, VARS[END-OFFSET] = |VARS|+OFFSET
      * <p/> Requires : |VARS|>0
      * <p>
-     * Filtering algorithms: see subcircuit constraint
+     * Filtering algorithms: see subCircuit constraint
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|]
      * @param START  variable indicating the index of the first variable in the path
@@ -1460,27 +1069,10 @@ public class IntConstraintFactory {
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
      *               (which counts from 1 to n instead of from 0 to n-1)
      * @param SIZE   variable indicating the number of variables to belong to the path
-     * @return a subpath constraint
+     * @return a subPath constraint
      */
-    public static Constraint[] subpath(IntVar[] VARS, IntVar START, IntVar END, int OFFSET, IntVar SIZE) {
-        assert START != null && END != null && VARS != null;
-        switch (VARS.length) {
-            case 0:
-                throw new UnsupportedOperationException("|VARS| Should be strictly greater than 0");
-            case 1:
-                return new Constraint[]{
-                        arithm(START, "=", OFFSET),
-                        arithm(END, "=", OFFSET),
-                        arithm(VARS[0], "=", 1 + OFFSET),
-                        arithm(SIZE, "=", 1)
-                };
-            default:
-                return new Constraint[]{
-                        arithm(START, "<", VARS.length + OFFSET),
-                        subcircuit(ArrayUtils.append(VARS, new IntVar[]{START}), OFFSET, END.getSolver().intOffsetView(SIZE, 1)),
-                        element(END.getSolver().intVar(VARS.length + OFFSET), VARS, END, OFFSET)
-                };
-        }
+    public static Constraint subpath(IntVar[] VARS, IntVar START, IntVar END, int OFFSET, IntVar SIZE) {
+        return END.getSolver().subPath(VARS,START,END,OFFSET,SIZE);
     }
 
     /**
@@ -1503,10 +1095,7 @@ public class IntConstraintFactory {
      * @return a sum constraint
      */
     public static Constraint sum(IntVar[] VARS, String OPERATOR, int SUM) {
-        assert VARS.length>0;
-        Solver s = VARS[0].getSolver();
-        IntVar sumVar = s.intVar(SUM);
-        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), sumVar);
+        return VARS[0].getSolver().sum(VARS,OPERATOR,SUM);
     }
 
     /**
@@ -1518,7 +1107,7 @@ public class IntConstraintFactory {
      * @return a sum constraint
      */
     public static Constraint sum(IntVar[] VARS, String OPERATOR, IntVar SUM) {
-        return IntLinCombFactory.reduce(VARS, Operator.get(OPERATOR), SUM);
+        return SUM.getSolver().sum(VARS,OPERATOR,SUM);
     }
 
     /**
@@ -1540,10 +1129,7 @@ public class IntConstraintFactory {
      * @param SUM  an integer
      */
     public static Constraint sum(BoolVar[] VARS, String OPERATOR, int SUM) {
-        assert VARS.length>0;
-        Solver s = VARS[0].getSolver();
-        IntVar sumVar = s.intVar(SUM);
-        return sum(VARS,OPERATOR,sumVar);
+        return VARS[0].getSolver().sum(VARS,OPERATOR,SUM);
     }
 
     /**
@@ -1554,18 +1140,7 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, String OPERATOR, IntVar SUM) {
-        if (OPERATOR.equals("=")) {
-            return IntLinCombFactory.reduce(VARS, Operator.EQ, SUM);
-        }
-        int lb = 0;
-        int ub = 0;
-        for (BoolVar v : VARS) {
-            lb += v.getLB();
-            ub += v.getUB();
-        }
-        IntVar p = SUM.getSolver().intVar(randomName(), lb, ub, true);
-        SUM.getSolver().post(sum(VARS, "=", p));
-        return arithm(p, OPERATOR, SUM);
+        return SUM.getSolver().sum(VARS,OPERATOR,SUM);
     }
 
     /**
@@ -1605,33 +1180,7 @@ public class IntConstraintFactory {
      * @param ALGORITHM to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     public static Constraint table(IntVar[] VARS, Tuples TUPLES, String ALGORITHM) {
-        if (VARS.length == 2) {
-            table(VARS[0], VARS[1], TUPLES);
-        }
-        if(ALGORITHM.contains("+") && !TUPLES.isFeasible()){
-            throw new SolverException(ALGORITHM+" table algorithm cannot be used with forbidden tuples.");
-        }
-        Propagator p;
-        switch (ALGORITHM) {
-            case "MDD+": p = new PropLargeMDDC(new MultivaluedDecisionDiagram(VARS, TUPLES), VARS);
-                break;
-            case "FC": p = new PropLargeFC(VARS, TUPLES);
-                break;
-            case "GAC3rm": p = new PropLargeGAC3rm(VARS, TUPLES);
-                break;
-            case "GAC2001": p = new PropLargeGAC2001(VARS, TUPLES);
-                break;
-            case "GACSTR+": p = new PropLargeGACSTRPos(VARS, TUPLES);
-                break;
-            case "GAC2001+": p = new PropLargeGAC2001Positive(VARS, TUPLES);
-                break;
-            case "GAC3rm+": p = new PropLargeGAC3rmPositive(VARS, TUPLES);
-                break;
-            case "STR2+": p = new PropTableStr2(VARS, TUPLES.toMatrix());
-                break;
-            default: throw new SolverException("Table algorithm "+ALGORITHM+" is unkown");
-        }
-        return new Constraint("Table(" + ALGORITHM + ")", p);
+        return VARS[0].getSolver().table(VARS,TUPLES,ALGORITHM);
     }
 
     /**
@@ -1665,71 +1214,6 @@ public class IntConstraintFactory {
      * @return a tree constraint
      */
     public static Constraint tree(IntVar[] SUCCS, IntVar NBTREES, int OFFSET) {
-        return new Constraint("tree",
-                new PropAntiArborescences(SUCCS, OFFSET, false),
-                new PropKLoops(SUCCS, OFFSET, NBTREES)
-        );
-    }
-
-    /**
-     * A constraint for the Traveling Salesman Problem :
-     * Enforces SUCCS to form a hamiltonian circuit of value COST
-     *
-     * @param SUCCS       successors variables
-     * @param COST        cost of the cycle
-     * @param COST_MATRIX symmetric cost matrix
-     * @return a CP model for the TSP
-     */
-    public static Constraint[] tsp(IntVar[] SUCCS, IntVar COST, int[][] COST_MATRIX) {
-        int n = SUCCS.length;
-        assert n > 1;
-        assert n == COST_MATRIX.length && n == COST_MATRIX[0].length;
-        IntVar[] costOf = new IntVar[n];
-        for (int i = 0; i < n; i++) {
-            costOf[i] = COST.getSolver().intVar("costOf(" + i + ")", COST_MATRIX[i]);
-        }
-        Constraint[] model = new Constraint[n + 2];
-        for (int i = 0; i < n; i++) {
-            model[i] = element(costOf[i], COST_MATRIX[i], SUCCS[i]);
-        }
-        model[n] = sum(costOf, "=", COST);
-        model[n + 1] = circuit(SUCCS, 0);
-        return model;
-    }
-
-    public static TIntArrayList getDomainUnion(IntVar[] vars) {
-        TIntArrayList values = new TIntArrayList();
-        for (IntVar v : vars) {
-            int ub = v.getUB();
-            for (int i = v.getLB(); i <= ub; i = v.nextValue(i)) {
-                if (!values.contains(i)) {
-                    values.add(i);
-                }
-            }
-        }
-        return values;
-    }
-
-    // ###################
-
-    /**
-     * Check whether the intension constraint to extension constraint substitution is enabled and can be achieved
-     *
-     * @param VARS list of variables involved
-     * @return a boolean
-     */
-    public static boolean tupleIt(IntVar... VARS) {
-        Settings settings = VARS[0].getSolver().getSettings();
-        if (!settings.enableTableSubstitution()) {
-            return false;
-        }
-        long doms = 1;
-        for (int i = 0; i < VARS.length && doms < settings.getMaxTupleSizeForSubstitution(); i++) {
-            if (!VARS[i].hasEnumeratedDomain()) {
-                return false;
-            }
-            doms *= VARS[i].getDomainSize();
-        }
-        return (doms < settings.getMaxTupleSizeForSubstitution());
+        return NBTREES.getSolver().tree(SUCCS,NBTREES,OFFSET);
     }
 }

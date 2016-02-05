@@ -36,10 +36,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
@@ -154,7 +151,7 @@ public class Constraint implements Serializable {
             boolReif = bool;
             s.post(new ReificationConstraint(boolReif, this, getOpposite()));
         } else if(bool!=boolReif){
-            s.post(ICF.arithm(bool, "=", boolReif));
+            s.post(s.arithm(bool, "=", boolReif));
         }
     }
 
@@ -232,5 +229,21 @@ public class Constraint implements Serializable {
             priority = Math.max(priority, p.getPriority().priority);
         }
         return PropagatorPriority.get(priority);
+    }
+
+	/**
+     * Creates a new constraint with all propagators of toMerge
+     * @param name name of the new constraint
+     * @param toMerge a set of constraints to merge in this
+     * @return a new constraint with all propagators of toMerge
+     */
+    public static Constraint merge(String name, Constraint... toMerge){
+        ArrayList<Propagator> props = new ArrayList<>();
+        for(Constraint c:toMerge){
+            for(Propagator p:c.getPropagators()){
+                props.add(p);
+            }
+        }
+        return new Constraint(name,props.toArray(new Propagator[0]));
     }
 }

@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -80,11 +79,11 @@ public class Partition extends AbstractProblem {
 
 //        break symmetries
         for (int i = 0; i < size - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(x[i], "<", x[i + 1]));
-            solver.post(IntConstraintFactory.arithm(y[i], "<", y[i + 1]));
+            solver.post(solver.arithm(x[i], "<", x[i + 1]));
+            solver.post(solver.arithm(y[i], "<", y[i + 1]));
         }
-        solver.post(IntConstraintFactory.arithm(x[0], "<", y[0]));
-        solver.post(IntConstraintFactory.arithm(x[0], "=", 1));
+        solver.post(solver.arithm(x[0], "<", y[0]));
+        solver.post(solver.arithm(x[0], "=", 1));
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -103,7 +102,7 @@ public class Partition extends AbstractProblem {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        heavy[0] = IntConstraintFactory.scalar(xy, coeffs, "=", 0);
+        heavy[0] = solver.scalar(xy, coeffs, "=", 0);
         solver.post(heavy[0]);
 
         IntVar[] sxy, sx, sy;
@@ -115,22 +114,22 @@ public class Partition extends AbstractProblem {
             sxy[i] = sx[i];
             sy[i] = solver.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
             sxy[size + i] = sy[i];
-            solver.post(IntConstraintFactory.times(x[i], x[i], sx[i]));
-            solver.post(IntConstraintFactory.times(y[i], y[i], sy[i]));
-            solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size));
-            solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size));
+            solver.post(solver.times(x[i], x[i], sx[i]));
+            solver.post(solver.times(y[i], y[i], sy[i]));
+            solver.post(solver.member(sx[i], 1, 4 * size * size));
+            solver.post(solver.member(sy[i], 1, 4 * size * size));
         }
-        heavy[1] = IntConstraintFactory.scalar(sxy, coeffs, "=", 0);
+        heavy[1] = solver.scalar(sxy, coeffs, "=", 0);
         solver.post(heavy[1]);
 
         coeffs = new int[size];
         Arrays.fill(coeffs, 1);
-        solver.post(IntConstraintFactory.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        solver.post(IntConstraintFactory.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        solver.post(IntConstraintFactory.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
-        solver.post(IntConstraintFactory.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        solver.post(solver.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
+        solver.post(solver.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
+        solver.post(solver.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        solver.post(solver.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
 
-        heavy[2] = IntConstraintFactory.alldifferent(xy, "BC");
+        heavy[2] = solver.allDifferent(xy, "BC");
         solver.post(heavy[2]);
 
         vars = xy;

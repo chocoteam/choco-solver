@@ -32,7 +32,6 @@ package org.chocosolver.solver.propagation;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -71,7 +70,7 @@ public class DeltaTest {
         IntVar x = solver.intVar("X", 1, 6, false);
         IntVar y = solver.intVar("Y", 1, 6, false);
 
-        solver.post(IntConstraintFactory.arithm(x, "=", y));
+        solver.post(solver.arithm(x, "=", y));
 
         solver.propagate();
 

@@ -37,7 +37,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -72,7 +71,7 @@ public class Pareto extends AbstractProblem {
 		b = solver.intVar("b", 0, 2, false);
 		c = solver.intVar("c", 0, 2, false);
 
-		solver.post(ICF.arithm(a, "+", b, "<", 3));
+		solver.post(solver.arithm(a, "+", b, "<", 3));
 	}
 
 	@Override

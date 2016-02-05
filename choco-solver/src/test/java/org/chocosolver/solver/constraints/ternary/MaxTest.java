@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -49,7 +48,7 @@ public class MaxTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return IntConstraintFactory.maximum(vars[0], vars[1], vars[2]);
+        return solver.max(vars[0], vars[1], vars[2]);
     }
 
 }

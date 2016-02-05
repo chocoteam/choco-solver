@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -80,26 +79,26 @@ public class AllIntervalSeries extends AbstractProblem {
         if (!use_views) {
             dist = solver.intVarArray("dist", m - 1, 1, m - 1, false);
             for (int i = 0; i < m - 1; i++) {
-                solver.post(IntConstraintFactory.distance(vars[i + 1], vars[i], "=", dist[i]));
+                solver.post(solver.distance(vars[i + 1], vars[i], "=", dist[i]));
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
                 IntVar k = solver.intVar(randomName(), -20000, 20000, true);
-				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[i+1]));
+				solver.post(solver.sum(new IntVar[]{vars[i],k},"=",vars[i+1]));
 				dist[i] = solver.intAbsView(k);
-                solver.post(IntConstraintFactory.member(dist[i], 1, m - 1));
+                solver.post(solver.member(dist[i], 1, m - 1));
             }
         }
 
         ALLDIFF = new Constraint[2];
-        ALLDIFF[0] = (IntConstraintFactory.alldifferent(vars, "BC"));
-        ALLDIFF[1] = (IntConstraintFactory.alldifferent(dist, "BC"));
+        ALLDIFF[0] = (solver.allDifferent(vars, "BC"));
+        ALLDIFF[1] = (solver.allDifferent(dist, "BC"));
         solver.post(ALLDIFF);
 
         // break symetries
         OTHERS = new Constraint[2];
-        OTHERS[0] = (IntConstraintFactory.arithm(vars[1], ">", vars[0]));
-        OTHERS[1] = (IntConstraintFactory.arithm(dist[0], ">", dist[m - 2]));
+        OTHERS[0] = (solver.arithm(vars[1], ">", vars[0]));
+        OTHERS[1] = (solver.arithm(dist[0], ">", dist[m - 2]));
         solver.post(OTHERS);
     }
 

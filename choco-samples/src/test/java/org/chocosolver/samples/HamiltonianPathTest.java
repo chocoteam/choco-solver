@@ -32,7 +32,6 @@ package org.chocosolver.samples;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.samples.graph.input.GraphGenerator;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -96,11 +95,11 @@ public class HamiltonianPathTest {
 				succ[i] = solver.intVar("suc", l.toArray());
 			}else{
 				succ[i] = solver.intVar("suc", offset, n + offset, true);
-				solver.post(ICF.member(succ[i],l.toArray()));
+				solver.post(solver.member(succ[i],l.toArray()));
 			}
 		}
 		succ[n - 1] = solver.intVar(n + offset);
-		solver.post(ICF.path(succ, solver.intVar(offset), solver.intVar(n - 1 + offset), offset));
+		solver.post(solver.path(succ, solver.intVar(offset), solver.intVar(n - 1 + offset), offset));
 		// configure solver
 		if (rd) {
 			if(enumerated){

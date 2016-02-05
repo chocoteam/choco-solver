@@ -32,7 +32,10 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.*;
+import org.chocosolver.solver.constraints.Arithmetic;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
@@ -101,8 +104,8 @@ public class IntLinCombTest {
 
 
         Constraint[] cstrs = new Constraint[]{
-                IntConstraintFactory.scalar(vars, coeffs, "=", sum),
-                IntConstraintFactory.arithm(sum, operatorToString(operator), constant)
+                s.scalar(vars, coeffs, "=", sum),
+                s.arithm(sum, operatorToString(operator), constant)
         };
 
         s.post(cstrs);
@@ -148,8 +151,8 @@ public class IntLinCombTest {
         }
         IntVar sum = solver.intVar("scal", -99999999, 99999999, true);
         Constraint[] cstrs = new Constraint[]{
-                IntConstraintFactory.scalar(bins, coeffs, "=", sum),
-                IntConstraintFactory.arithm(sum, opname, b)
+                solver.scalar(bins, coeffs, "=", sum),
+                solver.arithm(sum, opname, b)
         };
         solver.post(cstrs);
         solver.set(IntStrategyFactory.lexico_LB(bins));
@@ -172,8 +175,8 @@ public class IntLinCombTest {
         }
         IntVar sum = solver.intVar("scal", -99999999, 99999999, true);
         Constraint[] cstrs = new Constraint[]{
-                IntConstraintFactory.scalar(bins, coeffs, "=", sum),
-                IntConstraintFactory.arithm(sum, opname, b)
+                solver.scalar(bins, coeffs, "=", sum),
+                solver.arithm(sum, opname, b)
         };
         solver.post(cstrs);
         solver.set(IntStrategyFactory.lexico_LB(bins));
@@ -235,7 +238,7 @@ public class IntLinCombTest {
     public void testIss237_1() {
         Solver solver = new Solver();
         BoolVar[] bs = solver.boolVarArray("b", 3);
-        solver.post(ICF.scalar(bs, new int[]{1, 2, 3}, "=", 2));
+        solver.post(solver.scalar(bs, new int[]{1, 2, 3}, "=", 2));
         Chatterbox.showSolutions(solver);
         solver.findAllSolutions();
     }
@@ -252,7 +255,7 @@ public class IntLinCombTest {
         IntVar[] ivars = solver.intVarArray("V", 4, 0, 5, false);
         int[] coeffs = new int[]{1, 0, 0, 2};
         IntVar res = solver.intVar("R", 0, 10, false);
-        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Constraint c = solver.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropScalar);
@@ -272,7 +275,7 @@ public class IntLinCombTest {
         ivars[2] = ivars[1];
         int[] coeffs = new int[]{1, 1, -1, 2};
         IntVar res = solver.intVar("R", 0, 10, false);
-        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Constraint c = solver.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropScalar);
@@ -285,7 +288,7 @@ public class IntLinCombTest {
         IntVar[] ivars = solver.intVarArray("V", 4, 0, 5, false);
         int[] coeffs = new int[]{1, 1, 1, 1};
         IntVar res = solver.intVar("R", 0, 10, false);
-        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Constraint c = solver.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSum);
@@ -296,7 +299,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.boolVarArray("V", 4);
         int[] coeffs = new int[]{1, 1, 1, 1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -307,7 +310,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.boolVarArray("V", 4);
         int[] coeffs = new int[]{-1, -1, -1, -1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -318,7 +321,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.boolVarArray("V", 4);
         int[] coeffs = new int[]{1, -1, 1, 1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -329,7 +332,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.boolVarArray("V", 4);
         int[] coeffs = new int[]{-1, 1, -1, -1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -341,7 +344,7 @@ public class IntLinCombTest {
         IntVar[] ivars = solver.intVarArray("V", 4, 0, 1, false);
         ivars[1] = solver.intVar("X", 0, 2, false);
         int[] coeffs = new int[]{1, -1, 1, 1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -353,7 +356,7 @@ public class IntLinCombTest {
         IntVar[] ivars = solver.intVarArray("V", 4, 0, 1, false);
         ivars[1] = solver.intVar("X", 0, 2, false);
         int[] coeffs = new int[]{-1, 1, -1, -1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSum);
@@ -365,7 +368,7 @@ public class IntLinCombTest {
         IntVar[] ivars = solver.intVarArray("V", 4, 0, 1, false);
         ivars[2] = solver.intVar("X", 0, 2, false);
         int[] coeffs = new int[]{1, -1, 1, 1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSum);
@@ -377,7 +380,7 @@ public class IntLinCombTest {
         IntVar[] ivars = solver.intVarArray("V", 4, 0, 1, false);
         ivars[2] = solver.intVar("X", 0, 2, false);
         int[] coeffs = new int[]{-1, 1, -1, -1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropSumBool);
@@ -388,7 +391,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.intVarArray("V", 2, 0, 2, false);
         int[] coeffs = new int[]{1, 1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
@@ -397,7 +400,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.intVarArray("V", 2, 0, 2, false);
         int[] coeffs = new int[]{1, -1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
@@ -406,7 +409,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.intVarArray("V", 2, 0, 2, false);
         int[] coeffs = new int[]{-1, 1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
@@ -415,7 +418,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.intVarArray("V", 2, 0, 2, false);
         int[] coeffs = new int[]{-1, -1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
@@ -424,7 +427,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.intVarArray("V", 1, 0, 2, false);
         int[] coeffs = new int[]{1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
@@ -433,7 +436,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.intVarArray("V", 1, 0, 2, false);
         int[] coeffs = new int[]{-1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", 0);
+        Constraint c = solver.scalar(ivars, coeffs, "=", 0);
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
@@ -442,7 +445,7 @@ public class IntLinCombTest {
         Solver solver = new Solver();
         IntVar[] ivars = solver.intVarArray("V", 1, 0, 2, false);
         int[] coeffs = new int[]{1};
-        Constraint c = ICF.scalar(ivars, coeffs, "=", ivars[0]);
+        Constraint c = solver.scalar(ivars, coeffs, "=", ivars[0]);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropTrue);
@@ -460,7 +463,7 @@ public class IntLinCombTest {
         IntVar[] ivars = solver.intVarArray("V", 4, 0, 5, false);
         int[] coeffs = new int[]{1, 2, 2, 1};
         IntVar res = solver.intVar("R", 0, 10, false);
-        Constraint c = ICF.scalar(ivars, coeffs, "=", res);
+        Constraint c = solver.scalar(ivars, coeffs, "=", res);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
         Assert.assertTrue(p instanceof PropScalar);
@@ -477,7 +480,7 @@ public class IntLinCombTest {
         });
         {
             BoolVar[] bs = s1.boolVarArray("b", 5);
-            s1.post(ICF.sum(bs, "!=", 3));
+            s1.post(s1.sum(bs, "!=", 3));
         }
         Solver s2 = new Solver();
         s2.set(new Settings() {
@@ -488,7 +491,7 @@ public class IntLinCombTest {
         });
         {
             BoolVar[] bs = s2.boolVarArray("b", 5);
-            s2.post(ICF.sum(bs, "!=", 3));
+            s2.post(s2.sum(bs, "!=", 3));
         }
         s1.findAllSolutions();
         s2.findAllSolutions();
@@ -507,7 +510,7 @@ public class IntLinCombTest {
         });
         {
             BoolVar[] bs = s1.boolVarArray("b", 5);
-            s1.post(ICF.sum(bs, "<=", 3));
+            s1.post(s1.sum(bs, "<=", 3));
         }
         Solver s2 = new Solver();
         s2.set(new Settings() {
@@ -518,7 +521,7 @@ public class IntLinCombTest {
         });
         {
             BoolVar[] bs = s2.boolVarArray("b", 5);
-            s2.post(ICF.sum(bs, "<=", 3));
+            s2.post(s2.sum(bs, "<=", 3));
         }
         s1.findAllSolutions();
         s2.findAllSolutions();
@@ -538,7 +541,7 @@ public class IntLinCombTest {
         {
             BoolVar[] bs = s1.boolVarArray("b", 3);
             BoolVar r = s1.boolVar("r");
-            ICF.scalar(bs, new int[]{-1, -1, -1}, "<=",-2).reifyWith(r);
+            s1.scalar(bs, new int[]{-1, -1, -1}, "<=",-2).reifyWith(r);
         }
         Solver s2 = new Solver();
         s2.set(new Settings() {
@@ -550,7 +553,7 @@ public class IntLinCombTest {
         {
             BoolVar[] bs = s2.boolVarArray("b", 3);
             BoolVar r = s2.boolVar("r");
-            ICF.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
+            s2.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
         }
         Chatterbox.showDecisions(s1);
         Chatterbox.showDecisions(s2);
@@ -576,7 +579,7 @@ public class IntLinCombTest {
         Arrays.fill(cs, 0, n, 1);
         Arrays.fill(cs, k, n, -1);
         IntVar sum = solver.intVar("S", -n / 2, n / 2, true);
-        solver.post(ICF.scalar(bs, cs, "=", sum));
+        solver.post(solver.scalar(bs, cs, "=", sum));
         solver.set(ISF.lexico_LB(bs));
 //        Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
@@ -590,7 +593,7 @@ public class IntLinCombTest {
         BoolVar[] bs = solver.boolVarArray("b", n);
         int[] cs = new int[n];
         Arrays.fill(cs, 0, n, -1);
-        solver.post(ICF.scalar(bs, cs, "<=", -2));
+        solver.post(solver.scalar(bs, cs, "<=", -2));
         solver.propagate();
         bs[2].setToFalse(Cause.Null);
         bs[0].setToTrue(Cause.Null);
@@ -602,7 +605,7 @@ public class IntLinCombTest {
     @Test(groups="1s", timeOut=60000)
     public void testB3() {
         Solver solver = new Solver();
-        solver.post(ICF.scalar(new IntVar[]{solver.intVar(1), solver.intVar(3)}, new int[]{1, -1}, "!=", 0));
+        solver.post(solver.scalar(new IntVar[]{solver.intVar(1), solver.intVar(3)}, new int[]{1, -1}, "!=", 0));
         try {
             solver.propagate();
         } catch (ContradictionException e) {
@@ -614,7 +617,7 @@ public class IntLinCombTest {
     public void testB4() {
         Solver solver = new Solver();
         IntVar[] X = solver.intVarArray("X", 1, 1, 3, false);
-        solver.post(ICF.scalar(X, new int[]{-1}, "<=", 2));
+        solver.post(solver.scalar(X, new int[]{-1}, "<=", 2));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
 
@@ -627,7 +630,7 @@ public class IntLinCombTest {
         X[0] = solver.intVar("X1", 6, 46, false);
         X[1] = solver.intVar("X2", 6, 56, false);
         X[2] = solver.intVar("X3", -1140, 1140, true);
-        solver.post(ICF.scalar(X, new int[]{1, -1, -1}, "=", 0));
+        solver.post(solver.scalar(X, new int[]{1, -1, -1}, "=", 0));
         solver.propagate();
         X[1].updateUpperBound(46, Cause.Null);
         solver.propagate();
@@ -643,7 +646,7 @@ public class IntLinCombTest {
         IntVar[] X = new IntVar[2];
         X[0] = solver.intVar("X1", 1, 3, false);
         X[1] = solver.intVar("X2", 2, 5, false);
-        solver.post(ICF.scalar(X, new int[]{2, 3}, "<=", 10));
+        solver.post(solver.scalar(X, new int[]{2, 3}, "<=", 10));
         solver.propagate();
         Assert.assertEquals(X[0].getLB(), 1);
         Assert.assertEquals(X[0].getUB(), 2);
@@ -657,7 +660,7 @@ public class IntLinCombTest {
         IntVar[] X = new IntVar[2];
         X[0] = solver.intVar("X1", 1, 3, false);
         X[1] = solver.intVar("X2", 2, 5, false);
-        solver.post(ICF.scalar(X, new int[]{-2, -3}, ">=", -10));
+        solver.post(solver.scalar(X, new int[]{-2, -3}, ">=", -10));
         solver.propagate();
         Assert.assertEquals(X[0].getLB(), 1);
         Assert.assertEquals(X[0].getUB(), 2);
@@ -671,7 +674,7 @@ public class IntLinCombTest {
         IntVar[] X = new IntVar[2];
         X[0] = solver.intVar("X1", 0, 3, false);
         X[1] = solver.intVar("X2", 1, 5, false);
-        solver.post(ICF.scalar(X, new int[]{2, 3}, ">=", 10));
+        solver.post(solver.scalar(X, new int[]{2, 3}, ">=", 10));
         solver.propagate();
         Assert.assertEquals(X[0].getLB(), 0);
         Assert.assertEquals(X[0].getUB(), 3);
@@ -685,7 +688,7 @@ public class IntLinCombTest {
         IntVar[] X = new IntVar[2];
         X[0] = solver.intVar("X1", 0, 3, false);
         X[1] = solver.intVar("X2", 1, 5, false);
-        solver.post(ICF.scalar(X, new int[]{-2, -3}, ">=", -10));
+        solver.post(solver.scalar(X, new int[]{-2, -3}, ">=", -10));
         solver.propagate();
         Assert.assertEquals(X[0].getLB(), 0);
         Assert.assertEquals(X[0].getUB(), 3);
@@ -696,28 +699,28 @@ public class IntLinCombTest {
     @Test(groups="1s", timeOut=60000)
     public void testJL1(){
         Solver solver = new Solver();
-        solver.post(ICF.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<", 0));
+        solver.post(solver.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<", 0));
         Assert.assertTrue(solver.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL2(){
         Solver solver = new Solver();
-        solver.post(ICF.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<=", 0));
+        solver.post(solver.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<=", 0));
         Assert.assertTrue(solver.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL3(){
         Solver solver = new Solver();
-        solver.post(ICF.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">", 0));
+        solver.post(solver.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">", 0));
         Assert.assertTrue(solver.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL4(){
         Solver solver = new Solver();
-        solver.post(ICF.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">=", 0));
+        solver.post(solver.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">=", 0));
         Assert.assertTrue(solver.findSolution());
     }
 
@@ -725,7 +728,7 @@ public class IntLinCombTest {
     public void testJG1(){
         Solver solver = new Solver("TestChoco 3.3.2 Briot");
         IntVar[] var = solver.intVarArray("var", 3, new int[]{30, 60});
-        solver.post(ICF.sum(new IntVar[] { var[0], var[1], var[2] }, ">=", 60));
+        solver.post(solver.sum(new IntVar[] { var[0], var[1], var[2] }, ">=", 60));
         solver.set(ISF.lexico_LB(var));
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);
@@ -736,7 +739,7 @@ public class IntLinCombTest {
     public void testJG2(){
         Solver solver = new Solver("TestChoco 3.3.2 Briot");
         IntVar[] var = solver.intVarArray("var", 3, new int[]{30, 60});
-        solver.post(ICF.sum(new IntVar[] { var[0], var[1], var[2] }, "<=", 120));
+        solver.post(solver.sum(new IntVar[] { var[0], var[1], var[2] }, "<=", 120));
         solver.set(ISF.lexico_LB(var));
         Chatterbox.showStatistics(solver);
         Chatterbox.showSolutions(solver);

@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -74,13 +73,13 @@ public class Contrived extends AbstractProblem {
         v = solver.intVarArray("v", 5, 1, 50, true);
         w = solver.intVarArray("v", l, 1, d, true);
 
-        solver.post(IntConstraintFactory.alldifferent(v, "BC"));
-        solver.post(IntConstraintFactory.alldifferent(w, "BC"));
-        solver.post(IntConstraintFactory.arithm(v[3], "=", v[4]));
-        solver.post(IntConstraintFactory.arithm(v[0], "=", w[0]));
-        solver.post(IntConstraintFactory.arithm(v[1], "=", w[1]));
-        solver.post(IntConstraintFactory.arithm(v[2], "=", w[2]));
-        solver.post(IntConstraintFactory.arithm(v[3], "=", w[3]));
+        solver.post(solver.allDifferent(v, "BC"));
+        solver.post(solver.allDifferent(w, "BC"));
+        solver.post(solver.arithm(v[3], "=", v[4]));
+        solver.post(solver.arithm(v[0], "=", w[0]));
+        solver.post(solver.arithm(v[1], "=", w[1]));
+        solver.post(solver.arithm(v[2], "=", w[2]));
+        solver.post(solver.arithm(v[3], "=", w[3]));
 
     }
 

@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -76,7 +75,7 @@ public class Table extends AbstractProblem {
 			tuples.add(tuple);
 			System.out.println();
 		}
-		solver.post(ICF.table(vars,tuples));
+		solver.post(solver.table(vars,tuples));
 	}
 
 	@Override

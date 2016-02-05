@@ -37,8 +37,6 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.nary.LargeRelation;
@@ -69,7 +67,7 @@ public class TableTest {
 
             Solver solver = new Solver();
             IntVar[] vars = solver.intVarArray("X", 3, 1, 2, false);
-            Constraint tableConstraint = ICF.table(vars, tuples, a);
+            Constraint tableConstraint = solver.table(vars, tuples, a);
             solver.post(tableConstraint);
 
             solver.findSolution();
@@ -79,10 +77,10 @@ public class TableTest {
 
     private void allEquals(Solver solver, IntVar[] vars, int algo) {
         if (algo > -1) {
-            solver.post(ICF.table(vars, TuplesFactory.allEquals(vars), ALGOS[algo]));
+            solver.post(solver.table(vars, TuplesFactory.allEquals(vars), ALGOS[algo]));
         } else {
             for (int i = 1; i < vars.length; i++) {
-                solver.post(ICF.arithm(vars[0], "=", vars[i]));
+                solver.post(solver.arithm(vars[0], "=", vars[i]));
             }
         }
     }
@@ -113,9 +111,9 @@ public class TableTest {
 
     private void allDifferent(Solver solver, IntVar[] vars, int algo) {
         if (algo > -1) {
-            solver.post(ICF.table(vars, TuplesFactory.allDifferent(vars), ALGOS[algo]));
+            solver.post(solver.table(vars, TuplesFactory.allDifferent(vars), ALGOS[algo]));
         } else {
-            solver.post(ICF.alldifferent(vars, "AC"));
+            solver.post(solver.allDifferent(vars, "AC"));
         }
     }
 
@@ -159,7 +157,7 @@ public class TableTest {
         vars = solver.intVarArray("vars", 6, new int[]{1, 2, 3, 4, 5, 6, 10, 45, 57});
         reified = solver.intVarArray("rei", vars.length, new int[]{0, 1});
         sum = solver.intVar("sum", 0, reified.length, true);
-        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+        solver.post(solver.allDifferent(vars, "AC"));
         Tuples tuples = new Tuples(true);
         tuples.add(1, 0);
         tuples.add(2, 1);
@@ -172,10 +170,10 @@ public class TableTest {
         tuples.add(57, 1);
 
         for (int i = 0; i < vars.length; i++) {
-            Constraint c = IntConstraintFactory.table(vars[i], reified[i], tuples, type);
+            Constraint c = solver.table(vars[i], reified[i], tuples, type);
             solver.post(c);
         }
-        solver.post(IntConstraintFactory.sum(reified, "=", sum));
+        solver.post(solver.sum(reified, "=", sum));
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, sum);
         if (solver.getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
@@ -206,7 +204,7 @@ public class TableTest {
         Tuples t = new Tuples(false);
         t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
-        solver.post(ICF.table(vars, t, s));
+        solver.post(solver.table(vars, t, s));
         solver.findSolution();
         }
     }
@@ -218,7 +216,7 @@ public class TableTest {
         Tuples tuples = new Tuples();
         tuples.add(0, 0, 0);
         tuples.add(1, 1, 1);
-        solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+        solver.post(solver.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
@@ -230,7 +228,7 @@ public class TableTest {
         Tuples tuples = new Tuples();
         tuples.add(0, 1, 2);
         tuples.add(2, 1, 0);
-        solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+        solver.post(solver.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
@@ -246,7 +244,7 @@ public class TableTest {
                 IntVar[] vars = solver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                 rnd.setSeed(seed);
                 Tuples tuples = TuplesFactory.generateTuples(values -> rnd.nextBoolean(), true, vars);
-                solver.post(ICF.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
+                solver.post(solver.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)));
                 solver.set(ISF.random_value(vars, seed));
                 long nbs = solver.findAllSolutions();
                 long nbn = solver.getMeasures().getNodeCount();
@@ -254,7 +252,7 @@ public class TableTest {
                     for (int s = 0; s < 1; s++) {
                         Solver tsolver = new Solver(ALGOS[a]);
                         IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
-                        tsolver.post(ICF.table(tvars, tuples, ALGOS[a]));
+                        tsolver.post(solver.table(tvars, tuples, ALGOS[a]));
                         tsolver.set(ISF.random_value(tvars, s));
                         Assert.assertEquals(tsolver.findAllSolutions(), nbs);
                         if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
@@ -408,7 +406,7 @@ public class TableTest {
             y = solver.intVar("y", 0, 3, false);
             z = solver.intVar("z", 0, 1, false);
             Tuples ts = TuplesFactory.scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
-            solver.post(ICF.table(new IntVar[]{x, z, z, y}, ts, a));
+            solver.post(solver.table(new IntVar[]{x, z, z, y}, ts, a));
             solver.findAllSolutions();
             Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
         }

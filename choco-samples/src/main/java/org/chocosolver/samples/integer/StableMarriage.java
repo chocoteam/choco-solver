@@ -52,8 +52,6 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
-
 public class StableMarriage extends AbstractProblem {
 
     @Option(name = "-problem", usage = "Problem instance (default 1.", required = false)
@@ -190,8 +188,8 @@ public class StableMarriage extends AbstractProblem {
         wife = solver.intVarArray("wife", n, 0, n - 1, false);
         husband = solver.intVarArray("husband", n, 0, n - 1, false);
 
-        solver.post(alldifferent(wife, "BC"));
-        solver.post(alldifferent(husband, "BC"));
+        solver.post(solver.allDifferent(wife, "BC"));
+        solver.post(solver.allDifferent(husband, "BC"));
 
 
         //
@@ -203,7 +201,7 @@ public class StableMarriage extends AbstractProblem {
       solver.addConstraint(
           solver.makeEquality(solver.makeElement(husband, wife[m]), m));
       */
-            solver.post(element(solver.intVar(m), husband, wife[m], 0));
+            solver.post(solver.element(solver.intVar(m), husband, wife[m], 0));
         }
 
         //   forall(w in Women)
@@ -213,7 +211,7 @@ public class StableMarriage extends AbstractProblem {
       solver.addConstraint(
           solver.makeEquality(solver.makeElement(wife, husband[w]), w));
       */
-            solver.post(element(solver.intVar(w), wife, husband[w], 0));
+            solver.post(solver.element(solver.intVar(w), wife, husband[w], 0));
         }
 
 
@@ -232,12 +230,12 @@ public class StableMarriage extends AbstractProblem {
                         rankMen[m][o]);
         */
                 IntVar v1 = solver.intVar("v1", 0, n - 1, false);
-                solver.post(element(v1, rankMen[m], wife[m], 0, "detect"));
+                solver.post(solver.element(v1, rankMen[m], wife[m], 0));
 
                 BoolVar b1 = solver.boolVar("b1");
                 solver.ifThenElse(b1,
-                        arithm(v1, ">", rankMen[m][o]),
-                        arithm(v1, "<=", rankMen[m][o])
+                        solver.arithm(v1, ">", rankMen[m][o]),
+                        solver.arithm(v1, "<=", rankMen[m][o])
                 );
 
 
@@ -247,12 +245,12 @@ public class StableMarriage extends AbstractProblem {
                         rankWomen[o][m]);
         */
                 IntVar v2 = solver.intVar("v2", 0, n - 1, false);
-                solver.post(element(v2, rankWomen[o], husband[o], 0, "detect"));
+                solver.post(solver.element(v2, rankWomen[o], husband[o], 0));
 
                 BoolVar b2 = solver.boolVar("b2");
                 solver.ifThenElse(b2,
-                        arithm(v2, "<", rankWomen[o][m]),
-                        arithm(v2, ">=", rankWomen[o][m])
+                        solver.arithm(v2, "<", rankWomen[o][m]),
+                        solver.arithm(v2, ">=", rankWomen[o][m])
                 );
 
 
@@ -267,7 +265,7 @@ public class StableMarriage extends AbstractProblem {
                 LogOp t = LogOp.implies(b1, b2);
                 SatFactory.addClauses(t, solver);
 
-                // solver.post(IntConstraintFactory.arithm(b1, "<=", b2));
+                // solver.post(solver.arithm(b1, "<=", b2));
 
 
             }
@@ -284,12 +282,12 @@ public class StableMarriage extends AbstractProblem {
                         rankWomen[w][o]);
         */
                 IntVar v1 = solver.intVar("v1", 0, n - 1, false);
-                solver.post(element(v1, rankWomen[w], husband[w], 0, "detect"));
+                solver.post(solver.element(v1, rankWomen[w], husband[w], 0));
 
                 BoolVar b1 = solver.boolVar("b1");
                 solver.ifThenElse(b1,
-                        arithm(v1, ">", rankWomen[w][o]),
-                        arithm(v1, "<=", rankWomen[w][o])
+                        solver.arithm(v1, ">", rankWomen[w][o]),
+                        solver.arithm(v1, "<=", rankWomen[w][o])
                 );
 
 
@@ -299,12 +297,12 @@ public class StableMarriage extends AbstractProblem {
                         rankMen[o][w]);
         */
                 IntVar v2 = solver.intVar("v2", 0, n - 1, false);
-                solver.post(element(v2, rankMen[o], wife[o], 0, "detect"));
+                solver.post(solver.element(v2, rankMen[o], wife[o], 0));
 
                 BoolVar b2 = solver.boolVar("b2");
                 solver.ifThenElse(b2,
-                        arithm(v2, "<", rankMen[o][w]),
-                        arithm(v2, ">=", rankMen[o][w])
+                        solver.arithm(v2, "<", rankMen[o][w]),
+                        solver.arithm(v2, ">=", rankMen[o][w])
                 );
 
 
@@ -319,7 +317,7 @@ public class StableMarriage extends AbstractProblem {
                 LogOp t = LogOp.implies(b1, b2);
                 SatFactory.addClauses(t, solver);
 
-                // solver.post(IntConstraintFactory.arithm(b1, "<=", b2));
+                // solver.post(solver.arithm(b1, "<=", b2));
 
             }
 

@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -65,17 +64,17 @@ public class MagicSeries extends AbstractProblem {
         vars = solver.intVarArray("var", n, 0, n - 1, true);
         counts = new Constraint[n];
         for (int i = 0; i < n; i++) {
-            counts[i] = IntConstraintFactory.count(i, vars, vars[i]);
+            counts[i] = solver.count(i, vars, vars[i]);
             solver.post(counts[i]);
         }
-        solver.post(IntConstraintFactory.sum(vars, "=", n)); // cstr redundant 1
+        solver.post(solver.sum(vars, "=", n)); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.post(IntConstraintFactory.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
+        solver.post(solver.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
     }
 
     @Override

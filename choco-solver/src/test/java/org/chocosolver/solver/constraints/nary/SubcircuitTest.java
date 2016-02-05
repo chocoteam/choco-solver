@@ -38,7 +38,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
@@ -50,7 +49,7 @@ public class SubcircuitTest {
     public static void test1() {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 10, 0, 20, true);
-        solver.post(IntConstraintFactory.subcircuit(x, 0, solver.intVar("length", 0, x.length - 1, true)));
+        solver.post(solver.subCircuit(x, 0, solver.intVar("length", 0, x.length - 1, true)));
         solver.findSolution();
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
     }
@@ -61,7 +60,7 @@ public class SubcircuitTest {
         IntVar[] x = solver.intVarArray("x", 5, 0, 4, true);
         IntVar[] y = solver.intVarArray("y", 5, 5, 9, true);
         IntVar[] vars = ArrayUtils.append(x, y);
-        solver.post(IntConstraintFactory.subcircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)));
+        solver.post(solver.subCircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)));
         solver.findSolution();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
@@ -79,7 +78,7 @@ public class SubcircuitTest {
             e.printStackTrace();
             Assert.assertTrue(false);
         }
-        solver.post(IntConstraintFactory.subcircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)));
+        solver.post(solver.subCircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)));
         solver.findSolution();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 0);
     }
@@ -92,7 +91,7 @@ public class SubcircuitTest {
         int max = 4;
         IntVar[] vars = solver.intVarArray("x", n, 0, n, true);
         IntVar nb = solver.intVar("size", min, max, true);
-        solver.post(IntConstraintFactory.subcircuit(vars, 0, nb));
+        solver.post(solver.subCircuit(vars, 0, nb));
         solver.findAllSolutions();
         int nbSol = 0;
         for (int i = min; i <= max; i++) {

@@ -31,7 +31,6 @@ package org.chocosolver.samples.explanation;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -58,7 +57,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     public void buildModel() {
         vars = solver.intVarArray("x", n, 1, vals, false);
         for (int i = 0; i < vars.length - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
+            solver.post(solver.arithm(vars[i], ">", vars[i + 1]));
         }
     }
 

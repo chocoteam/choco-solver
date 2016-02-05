@@ -55,8 +55,8 @@ public interface ILogicalConstraintFactory {
 	default Constraint and(BoolVar... bools){
 		Solver s = bools[0].getSolver();
 		IntVar sum = s.intVar(0, bools.length, true);
-		s.post(IntConstraintFactory.sum(bools,"=",sum));
-		return IntConstraintFactory.arithm(sum,"=",bools.length);
+		s.post(s.sum(bools,"=",sum));
+		return s.arithm(sum,"=",bools.length);
 	}
 
 	/**
@@ -67,8 +67,8 @@ public interface ILogicalConstraintFactory {
 	default Constraint or(BoolVar... bools){
 		Solver s = bools[0].getSolver();
 		IntVar sum = s.intVar(0, bools.length, true);
-		s.post(IntConstraintFactory.sum(bools,"=",sum));
-		return IntConstraintFactory.arithm(sum,">=",1);
+		s.post(s.sum(bools,"=",sum));
+		return s.arithm(sum,">=",1);
 	}
 
 	/**
@@ -188,11 +188,11 @@ public interface ILogicalConstraintFactory {
 			if(ifVar.isInstantiated()){
 				s.post(thenCstr);
 			}else if(thenCstr.isSatisfied() == ESat.FALSE){
-				s.post(ICF.arithm(ifVar,"=",0));
+				s.post(s.arithm(ifVar,"=",0));
 			}
 			// END OF PRESOLVE
 			else {
-				s.post(ICF.arithm(ifVar, "<=", thenCstr.reif()));
+				s.post(s.arithm(ifVar, "<=", thenCstr.reif()));
 			}
 		}
 	}
@@ -230,9 +230,9 @@ public interface ILogicalConstraintFactory {
 		}else if(var.isInstantiatedTo(0)) {
 			s.post(not(cstr));
 		}else if(entail == ESat.TRUE) {
-			s.post(ICF.arithm(var,"=",1));
+			s.post(s.arithm(var,"=",1));
 		}else if(entail == ESat.FALSE) {
-			s.post(ICF.arithm(var,"=",0));
+			s.post(s.arithm(var,"=",0));
 		}
 		// END OF PRESOLVE
 		else {

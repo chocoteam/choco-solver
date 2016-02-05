@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
@@ -49,7 +48,7 @@ public class EqTest {
         Solver s = new Solver();
         IntVar two1 = s.intVar(2);
         IntVar two2 = s.intVar(2);
-        s.post(ICF.arithm(two1, "=", two2));
+        s.post(s.arithm(two1, "=", two2));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
     }
@@ -60,7 +59,7 @@ public class EqTest {
         Solver s = new Solver();
         IntVar three = s.intVar(3);
         IntVar two = s.intVar(2);
-        s.post(ICF.arithm(three, "-", two, "=", 1));
+        s.post(s.arithm(three, "-", two, "=", 1));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
     }
@@ -70,7 +69,7 @@ public class EqTest {
         Solver s = new Solver();
         IntVar three = s.intVar(3);
         IntVar two = s.intVar(2);
-        s.post(ICF.arithm(three, "=", two, "+", 1));
+        s.post(s.arithm(three, "=", two, "+", 1));
         Assert.assertTrue(s.findSolution());
         Assert.assertEquals(ESat.TRUE, s.isSatisfied());
     }

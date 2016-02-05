@@ -224,7 +224,7 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = solver.boolVarArray("b", 3);
-                solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
+                solver.post(solver.times(bvars[1], bvars[2], bvars[0]));
 
                 solver.set(IntStrategyFactory.random_bound(bvars, seed));
                 solver.findAllSolutions();
@@ -267,7 +267,7 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = solver.boolVarArray("b", 3);
-                solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
+                solver.post(solver.times(bvars[1], bvars[2], bvars[0]));
                 try {
                     solver.propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);

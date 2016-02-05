@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -69,7 +68,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
         vars[0] = solver.intVar("X", minX, maxX, true);
         vars[1] = solver.intVar("Y", minY, maxY, true);
 
-        Constraint abs = IntConstraintFactory.absolute(vars[0], vars[1]);
+        Constraint abs = solver.absolute(vars[0], vars[1]);
         solver.post(abs);
     }
 

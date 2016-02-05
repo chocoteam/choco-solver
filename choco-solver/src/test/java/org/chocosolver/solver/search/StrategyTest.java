@@ -31,7 +31,6 @@ package org.chocosolver.solver.search;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -185,7 +184,7 @@ public class StrategyTest {
         Solver solver = new Solver("OnceTest");
         IntVar[] x = solver.intVarArray("x", 5, 1, 6, false);
         SetVar y = solver.setVar("y", new int[]{}, new int[]{1,2,3,4,5,6,7,8,9,10});
-        solver.post(ICF.alldifferent(x));
+        solver.post(solver.allDifferent(x));
         solver.post(solver.member(x[0], y));
         solver.findSolution();
         AbstractStrategy strat = solver.getStrategy();
@@ -242,8 +241,8 @@ public class StrategyTest {
         IntVar v1 = solver.intVar("v1", 1, 5, false);
         IntVar v2 = solver.intVar("v2", 3, 4, false);
         IntVar[] vs = new IntVar[]{v1, v2};
-        solver.post(ICF.member(v1, 2, 3));
-        solver.post(ICF.member(v1, 3, 4));
+        solver.post(solver.member(v1, 2, 3));
+        solver.post(solver.member(v1, 3, 4));
         VariableSelector<IntVar> eval = new Occurrence<>();
         IntVar va = eval.getVariable(vs);
         Assert.assertEquals(v1, va);
@@ -329,8 +328,8 @@ public class StrategyTest {
     public void testOccurrence2() {
         Solver solver = new Solver();
         IntVar v1 = solver.intVar("v1", 1, 5, false);
-        solver.post(ICF.member(v1, 2, 3));
-        solver.post(ICF.member(v1, 3, 4));
+        solver.post(solver.member(v1, 2, 3));
+        solver.post(solver.member(v1, 3, 4));
         VariableEvaluator<IntVar> eval = new Occurrence<>();
         double va = eval.evaluate(v1);
         Assert.assertEquals(-2.0, va);

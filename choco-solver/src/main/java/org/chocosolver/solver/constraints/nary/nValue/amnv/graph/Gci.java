@@ -64,7 +64,7 @@ public class Gci extends Gi {
 
     /**
      * Creates the constrained intersection graph of X and D
-     * by automatically detecting disequalities and alldifferent constraints.
+     * by automatically detecting disequalities and allDifferent constraints.
      *
      * @param X integer variables
      */

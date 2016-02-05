@@ -525,7 +525,7 @@ public interface ISetConstraintFactory {
 		if (!intVar.hasEnumeratedDomain()) {
 			Solver s = intVar.getSolver();
 			integer = s.intVar("enumViewOf(" + intVar.getName() + ")", intVar.getLB(), intVar.getUB(), false);
-			s.post(ICF.arithm(integer, "=", intVar));
+			s.post(s.arithm(integer, "=", intVar));
 		}
 		return new Constraint("SetNotMember",
 				new PropNotMemberIntSet(integer, set),

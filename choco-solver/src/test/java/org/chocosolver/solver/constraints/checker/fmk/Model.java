@@ -32,8 +32,6 @@ package org.chocosolver.solver.constraints.checker.fmk;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -204,7 +202,7 @@ public interface Model {
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = ICF.sum(bools, "=", vars[n - 1]);
+            Constraint ctr = s.sum(bools, "=", vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
             s.post(ctrs);
@@ -228,7 +226,7 @@ public interface Model {
             } catch (ArrayIndexOutOfBoundsException ce) {
 //                System.out.printf("");
             }
-            Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
+            Constraint ctr = s.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
             s.post(ctrs);
@@ -252,7 +250,7 @@ public interface Model {
                 if (rvars[i + n / 2] == null) rvars[i + n / 2] = Y[i];
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
-            Constraint ctr = IntConstraintFactory.inverse_channeling(X, Y, 0, 0);
+            Constraint ctr = s.inverseChanneling(X, Y, 0, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(allvars);
             s.post(ctrs);
@@ -277,7 +275,7 @@ public interface Model {
                 }
             }
             AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-            s.post(IntConstraintFactory.nvalues(decvars, vars[n - 1]));
+            s.post(s.nValues(decvars, vars[n - 1]));
             s.set(strategy);
             return s;
         }

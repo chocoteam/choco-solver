@@ -32,8 +32,6 @@ package org.chocosolver.solver.constraints.ternary;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -59,7 +57,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return IntConstraintFactory.times(vars[0], vars[1], vars[2]);
+        return solver.times(vars[0], vars[1], vars[2]);
     }
 
 	@Test(groups="1s", timeOut=60000)
@@ -69,8 +67,8 @@ public class TimesTest extends AbstractTernaryTest {
 		IntVar b = s.intVar("b", -3, 3, false);
 
 		IntVar z = s.intVar("z", 3, 4, false);
-	    s.post(ICF.arithm(z, "=", 3));
-	    Constraint c = ICF.times(a, b, z);
+	    s.post(s.arithm(z, "=", 3));
+	    Constraint c = s.times(a, b, z);
 	    s.post(c);
 		try {
 			s.propagate();
@@ -91,7 +89,7 @@ public class TimesTest extends AbstractTernaryTest {
 			Solver s = new Solver();
 			IntVar i1 = s.intVar("i1", 0, 465 * i, false);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, false);
-			s.post(ICF.times(i1, 465 * i, i2));
+			s.post(s.times(i1, 465 * i, i2));
 			s.findAllSolutions();
 			Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
 		}
@@ -104,7 +102,7 @@ public class TimesTest extends AbstractTernaryTest {
 			Solver s = new Solver();
 			IntVar i1 = s.intVar("i1", 0, 465 * i, true);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, true);
-			s.post(ICF.times(i1, 465 * i, i2));
+			s.post(s.times(i1, 465 * i, i2));
 			s.findAllSolutions();
 			Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
 		}
@@ -115,7 +113,7 @@ public class TimesTest extends AbstractTernaryTest {
 		Solver s = new Solver();
 		IntVar i1 = s.intVar("i1", 0, 465, false);
 		IntVar i2 = s.intVar("i2", 0, 465 * 10000, false);
-		s.post(ICF.times(i1, 10000, i2));
+		s.post(s.times(i1, 10000, i2));
 		s.findAllSolutions();
 		Assert.assertEquals(s.getMeasures().getSolutionCount(), 466);
 	}
@@ -124,7 +122,7 @@ public class TimesTest extends AbstractTernaryTest {
 		Solver s = new Solver();
 		IntVar i1 = s.intVar("i1", MIN_VALUE / 10, MAX_VALUE / 10, true);
 		IntVar i2 = s.intVar("i2", MIN_VALUE / 10, MAX_VALUE / 10, true);
-		s.post(ICF.times(i1, 10000, i2));
+		s.post(s.times(i1, 10000, i2));
 		s.findAllSolutions();
 		Assert.assertEquals(s.getMeasures().getSolutionCount(), Integer.MAX_VALUE/100000 * 2 + 1);
 	}
@@ -141,7 +139,7 @@ public class TimesTest extends AbstractTernaryTest {
 		IntVar i1 = s.intVar("i1", new int[]{1, 55000});
 		IntVar i2 = s.intVar("i2", new int[]{1, 55000});
 		IntVar i3 = s.intVar("i3", new int[]{1, 55000});
-		s.post(ICF.times(i1, i2, i3));
+		s.post(s.times(i1, i2, i3));
 	}
 
     @Test(groups="1s", timeOut=60000)
@@ -156,7 +154,7 @@ public class TimesTest extends AbstractTernaryTest {
 		IntVar i1 = s.intVar("i1", new int[]{1, 10000});
 		IntVar i2 = s.intVar("i2", new int[]{1, 10000});
 		IntVar i3 = s.intVar("i3", new int[]{1, 10000});
-        s.post(ICF.times(i1, i2, i3));
+        s.post(s.times(i1, i2, i3));
     }
 
 }

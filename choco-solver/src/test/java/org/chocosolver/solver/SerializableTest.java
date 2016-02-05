@@ -30,7 +30,6 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
@@ -152,7 +151,7 @@ public class SerializableTest {
     public void testConstraint() {
         Solver s = new Solver();
         IntVar var = s.intVar("v", 1, 10, false);
-        Constraint c = IntConstraintFactory.arithm(var, "=", 0);
+        Constraint c = s.arithm(var, "=", 0);
         File file = null;
         try {
             file = write(c);
@@ -181,10 +180,10 @@ public class SerializableTest {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                Constraint neq = s.arithm(vars[i], "!=", vars[j]);
                 s.post(neq);
-                s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
-                s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+                s.post(s.arithm(vars[i], "!=", vars[j], "+", -k));
+                s.post(s.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
 

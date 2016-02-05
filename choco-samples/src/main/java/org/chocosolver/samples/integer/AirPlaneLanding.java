@@ -34,7 +34,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.ternary.Max;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.lns.LNSFactory;
@@ -169,18 +168,18 @@ public class AirPlaneLanding extends AbstractProblem {
 
 //        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
         IntVar obj_e = solver.intVar("obj_e", 0, obj_ub, true);
-        solver.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), "=", obj_e));
+        solver.post(solver.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), "=", obj_e));
 
         IntVar obj_t = solver.intVar("obj_t", 0, obj_ub, true);
-        solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t));
-        solver.post(IntConstraintFactory.sum(new IntVar[]{obj_e, obj_t}, "=", objective));
+        solver.post(solver.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t));
+        solver.post(solver.sum(new IntVar[]{obj_e, obj_t}, "=", objective));
 
-        solver.post(IntConstraintFactory.alldifferent(planes, "BC"));
+        solver.post(solver.allDifferent(planes, "BC"));
         solver.setObjectives(objective);
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return IntConstraintFactory.arithm(x, "<=", y, "-", duration);
+        return x.getSolver().arithm(x, "<=", y, "-", duration);
     }
 
     @Override

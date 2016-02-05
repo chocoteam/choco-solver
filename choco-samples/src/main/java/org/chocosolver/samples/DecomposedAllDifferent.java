@@ -31,7 +31,6 @@ package org.chocosolver.samples;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -89,8 +88,8 @@ public class DecomposedAllDifferent extends AbstractProblem {
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
-                    Constraint cA = IntConstraintFactory.member(X[j], p, q);
-                    Constraint ocA = IntConstraintFactory.not_member(X[j], p, q);
+                    Constraint cA = solver.member(X[j], p, q);
+                    Constraint ocA = solver.notMember(X[j], p, q);
 
                     solver.ifThenElse(a, cA, ocA);
                 }
@@ -117,7 +116,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(IntConstraintFactory.sum(ai, "=", solver.intVar("scal", 0, q - p + 1, true)));
+                solver.post(solver.sum(ai, "=", solver.intVar("scal", 0, q - p + 1, true)));
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);

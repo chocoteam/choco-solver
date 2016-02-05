@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.nary.sort.PropSort;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -96,7 +95,7 @@ public class SortTest {
         Y[1] = solver.intVar("Y2", 0, 0, true);
         Y[2] = solver.intVar("Y3", 1, 1, true);
 
-        solver.post(ICF.sort(X, Y));
+        solver.post(solver.sort(X, Y));
         try {
             solver.propagate();
             Assert.assertEquals(X[1].getValue(), 0);
@@ -119,7 +118,7 @@ public class SortTest {
         Y[1] = solver.intVar("Y2", 0, 0, true);
         Y[2] = solver.intVar("Y3", 2, 2, true);
 
-        solver.post(ICF.sort(X, Y));
+        solver.post(solver.sort(X, Y));
         try {
             solver.propagate();
             Assert.assertEquals(X[1].getValue(), 0);
@@ -142,7 +141,7 @@ public class SortTest {
         Y[1] = solver.intVar("Y2", 1, 9, true);
         Y[2] = solver.intVar("Y3", 7, 9, true);
 
-        solver.post(ICF.sort(X, Y));
+        solver.post(solver.sort(X, Y));
         try {
             solver.propagate();
             Assert.assertEquals(X[0].getValue(), 7);

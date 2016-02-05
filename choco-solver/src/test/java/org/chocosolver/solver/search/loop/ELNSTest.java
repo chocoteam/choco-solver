@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
@@ -56,9 +55,9 @@ public class ELNSTest {
         final IntVar[] vars = solver.intVarArray("var", 6, 0, 4, true);
         final IntVar obj = solver.intVar("obj", 0, 6, true);
 
-        solver.post(ICF.sum(vars, "=", obj));
-        solver.post(ICF.arithm(vars[0], "+", vars[1], "<", 2));
-        solver.post(ICF.arithm(vars[4], "+", vars[5], ">", 3));
+        solver.post(solver.sum(vars, "=", obj));
+        solver.post(solver.arithm(vars[0], "+", vars[1], "<", 2));
+        solver.post(solver.arithm(vars[4], "+", vars[5], ">", 3));
 
         ExplanationFactory.CBJ.plugin(solver, false, false);
 

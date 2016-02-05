@@ -50,7 +50,7 @@ import java.util.BitSet;
  * UB(X[i]) = j+Ox => Y[j].contains(i+Oy)
  * and reciprocally for Y
  * It however does not performs BC on the conjunction
- * of this and the alldifferent constraint implied by InverseChanneling constraint
+ * of this and the allDifferent constraint implied by InverseChanneling constraint
  * Such a consistency would require to know somehow holes in (bounded) domains
  * Again, AC is strongly advised
  *

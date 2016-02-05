@@ -86,7 +86,7 @@ public class DynamicPostTest {
 
         solver.post(new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{X, Y, Z},
-                        new Constraint[]{IntConstraintFactory.arithm(X, "=", Y), IntConstraintFactory.arithm(Y, "=", Z)},
+                        new Constraint[]{solver.arithm(X, "=", Y), solver.arithm(Y, "=", Z)},
                         new Constraint[]{}) {
                     @Override
                     public ESat checkCondition() {
@@ -122,8 +122,8 @@ public class DynamicPostTest {
             @Override
             public void afterOpenNode() {
                 if (solver.getMeasures().getNodeCount() == 1) {
-                    solver.post(IntConstraintFactory.arithm(X, "=", Y));
-                    solver.post(IntConstraintFactory.arithm(Y, "=", Z));
+                    solver.post(solver.arithm(X, "=", Y));
+                    solver.post(solver.arithm(Y, "=", Z));
                 }
             }
         });
@@ -140,8 +140,8 @@ public class DynamicPostTest {
         final IntVar X = solver.intVar("X", 1, 2, false);
         final IntVar Y = solver.intVar("Y", 1, 2, false);
         final IntVar Z = solver.intVar("Z", 1, 2, false);
-        Constraint c1 = IntConstraintFactory.arithm(X, "=", Y);
-        Constraint c2 = IntConstraintFactory.arithm(X, "=", Z);
+        Constraint c1 = solver.arithm(X, "=", Y);
+        Constraint c2 = solver.arithm(X, "=", Z);
         solver.post(c1);
         solver.post(c2);
         solver.unpost(c2);
@@ -158,8 +158,8 @@ public class DynamicPostTest {
         final IntVar X = solver.intVar("X", 1, 2, false);
         final IntVar Y = solver.intVar("Y", 1, 2, false);
         final IntVar Z = solver.intVar("Z", 1, 2, false);
-        final Constraint c1 = IntConstraintFactory.arithm(X, "=", Y);
-        final Constraint c2 = IntConstraintFactory.arithm(X, "=", Z);
+        final Constraint c1 = solver.arithm(X, "=", Y);
+        final Constraint c2 = solver.arithm(X, "=", Z);
         solver.post(c1);
         solver.post(c2);
         solver.plugMonitor((IMonitorSolution) () -> {
@@ -190,18 +190,18 @@ public class DynamicPostTest {
         IntVar b = solver.intVar("b", 0, 2, false);
         IntVar c = solver.intVar("c", 0, 2, false);
 
-        solver.post(ICF.arithm(a, "+", b, "<", 3));
+        solver.post(solver.arithm(a, "+", b, "<", 3));
 
         // START extra variables/constraints for guided improvement algorithm
         List<Constraint> stack = new ArrayList<>();
         IntVar lbA = solver.intVar("lbA", 0, 2, false);
         IntVar lbB = solver.intVar("lbB", 0, 2, false);
-        BoolVar aSBetter = ICF.arithm(a, ">", lbA).reif();
-        BoolVar bSBetter = ICF.arithm(b, ">", lbB).reif();
-        BoolVar aBetter = ICF.arithm(a, ">=", lbA).reif();
-        BoolVar bBetter = ICF.arithm(b, ">=", lbB).reif();
-        push(ICF.arithm(lbA, "=", a), stack, solver);
-        push(ICF.arithm(lbB, "=", b), stack, solver);
+        BoolVar aSBetter = solver.arithm(a, ">", lbA).reif();
+        BoolVar bSBetter = solver.arithm(b, ">", lbB).reif();
+        BoolVar aBetter = solver.arithm(a, ">=", lbA).reif();
+        BoolVar bBetter = solver.arithm(b, ">=", lbB).reif();
+        push(solver.arithm(lbA, "=", a), stack, solver);
+        push(solver.arithm(lbB, "=", b), stack, solver);
         Constraint strictlyBetter
                 = solver.or(
                 solver.and(aSBetter, bBetter),
@@ -217,17 +217,17 @@ public class DynamicPostTest {
                 bestB = b.getValue();
 
                 popAll(stack, solver);
-                push(ICF.arithm(lbA, "=", bestA), stack, solver);
-                push(ICF.arithm(lbB, "=", bestB), stack, solver);
+                push(solver.arithm(lbA, "=", bestA), stack, solver);
+                push(solver.arithm(lbB, "=", bestB), stack, solver);
                 push(strictlyBetter, stack, solver);
             } while (solver.nextSolution());
 
             popAll(stack, solver);
 
-            push(ICF.arithm(a, "=", bestA), stack, solver);
-            push(ICF.arithm(b, "=", bestB), stack, solver);
-            push(ICF.arithm(lbA, "=", bestA), stack, solver);
-            push(ICF.arithm(lbB, "=", bestB), stack, solver);
+            push(solver.arithm(a, "=", bestA), stack, solver);
+            push(solver.arithm(b, "=", bestB), stack, solver);
+            push(solver.arithm(lbA, "=", bestA), stack, solver);
+            push(solver.arithm(lbB, "=", bestB), stack, solver);
 
             solver.getEngine().flush();
             solver.getSearchLoop().reset();
@@ -245,8 +245,8 @@ public class DynamicPostTest {
             solver.getSearchLoop().reset();
 
             solver.post(solver.or(
-                    ICF.arithm(a, ">", bestA),
-                    ICF.arithm(b, ">", bestB)));
+                    solver.arithm(a, ">", bestA),
+                    solver.arithm(b, ">", bestB)));
         }
         Assert.assertEquals(9, nbSolution);
     }
@@ -258,8 +258,8 @@ public class DynamicPostTest {
         IntVar y = solver.intVar("y", 1, 2, false);
         IntVar z = solver.intVar("z", 1, 2, false);
         Constraint c = solver.or(
-                ICF.arithm(x, "<", y),
-                ICF.arithm(x, "<", z));
+                solver.arithm(x, "<", y),
+                solver.arithm(x, "<", z));
         solver.post(c);
         solver.findSolution();
         solver.unpost(c);
@@ -286,7 +286,7 @@ public class DynamicPostTest {
 
         if (dynamic) {
             // should not change anything (the constraint is already posted)
-            solver.plugMonitor((IMonitorSolution) () -> solver.post(ICF.alldifferent(vectors, "BC")));
+            solver.plugMonitor((IMonitorSolution) () -> solver.post(solver.allDifferent(vectors, "BC")));
         }
         return solver;
     }

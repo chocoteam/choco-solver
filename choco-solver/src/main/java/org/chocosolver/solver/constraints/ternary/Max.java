@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
 import org.chocosolver.util.tools.StringUtils;
@@ -58,7 +57,7 @@ public class Max extends Constraint {
             Solver solver = a.getSolver();
             IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
                     Math.max(a.getLB(), b.getLB()), Math.max(a.getUB(), b.getUB()), solver);
-            solver.post(IntConstraintFactory.maximum(z, a, b));
+            solver.post(solver.max(z, a, b));
             return z;
         }
     }

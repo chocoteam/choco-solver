@@ -31,7 +31,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -60,7 +59,7 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                IntConstraintFactory.arithm(Y, "!=", 4)
+                s.arithm(Y, "!=", 4)
         };
 
         AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
@@ -82,7 +81,7 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                IntConstraintFactory.arithm(Y, "!=", -2)
+                s.arithm(Y, "!=", -2)
         };
 
         AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
@@ -102,8 +101,8 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                IntConstraintFactory.arithm(Y, ">=", low + coeff - 1),
-                IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1)
+                s.arithm(Y, ">=", low + coeff - 1),
+                s.arithm(Y, "<=", upp - coeff - 1)
         };
 
         AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
@@ -123,9 +122,9 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                IntConstraintFactory.arithm(Y, ">=", low + coeff - 1),
-                IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1),
-                IntConstraintFactory.times(X, C, Y)
+                s.arithm(Y, ">=", low + coeff - 1),
+                s.arithm(Y, "<=", upp - coeff - 1),
+                s.times(X, C, Y)
         };
 
         AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);

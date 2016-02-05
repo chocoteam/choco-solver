@@ -34,7 +34,7 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -56,16 +56,16 @@ public class EnvironmentTest {
 			for (int j = 0; j < n; j++) {
 				if (i != j) {
 					IntVar k = solver.intVar(randomName(), -20000, 20000, true);
-					solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],k},"=",vars[j]));
+					solver.post(solver.sum(new IntVar[]{vars[i],k},"=",vars[j]));
 					// just to create many variables
-					IntConstraintFactory.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reif();
+					solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reif();
 					vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
 					idx++;
 				}
 			}
 		}
-		solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
-		solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
+		solver.post(solver.allDifferent(vars, "AC"));
+		solver.post(solver.allDifferent(vectors, "BC"));
 		solver.set(ISF.domOverWDeg(ArrayUtils.append(vectors, vars), 0));
 		solver.findSolution();
 	}

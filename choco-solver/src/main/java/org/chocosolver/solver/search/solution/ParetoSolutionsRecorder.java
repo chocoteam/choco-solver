@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.solution;
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.nary.cnf.PropSat;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -86,7 +85,7 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
             }
             for (int i = 0; i < n; i++) {
                 bvars[i] = solver.boolVar("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")");
-                ICF.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
+                solver.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
                 lits[i] = psat.Literal(bvars[i]);
             }
             psat.addLearnt(lits);

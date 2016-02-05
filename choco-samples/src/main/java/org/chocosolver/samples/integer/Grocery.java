@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -72,12 +71,12 @@ public class Grocery extends AbstractProblem {
     @Override
     public void buildModel() {
         itemCost = solver.intVarArray("item", 4, 1, 711, false);
-        solver.post(IntConstraintFactory.sum(itemCost, "=", 711));
+        solver.post(solver.sum(itemCost, "=", 711));
 
         // intermediary products
         IntVar[] tmp = solver.intVarArray("tmp", 2, 1, 71100, true);
-        solver.post(IntConstraintFactory.times(itemCost[0], itemCost[1], tmp[0]));
-        solver.post(IntConstraintFactory.times(itemCost[2], itemCost[3], tmp[1]));
+        solver.post(solver.times(itemCost[0], itemCost[1], tmp[0]));
+        solver.post(solver.times(itemCost[2], itemCost[3], tmp[1]));
 
         // the global product itemCost[0]*itemCost[1]*itemCost[2]*itemCost[3] (equal to tmp[0]*tmp[1])
         // is too large to be used within integer ranges. Thus, we will set up a dedicated constraint
@@ -86,9 +85,9 @@ public class Grocery extends AbstractProblem {
         solver.post(new Constraint("LargeProduct",new PropLargeProduct(tmp, 711000000)));
 
         // symmetry breaking
-        solver.post(IntConstraintFactory.arithm(itemCost[0], "<=", itemCost[1]));
-        solver.post(IntConstraintFactory.arithm(itemCost[1], "<=", itemCost[2]));
-        solver.post(IntConstraintFactory.arithm(itemCost[2], "<=", itemCost[3]));
+        solver.post(solver.arithm(itemCost[0], "<=", itemCost[1]));
+        solver.post(solver.arithm(itemCost[1], "<=", itemCost[2]));
+        solver.post(solver.arithm(itemCost[2], "<=", itemCost[3]));
     }
 
     @Override

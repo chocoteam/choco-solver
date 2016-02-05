@@ -31,16 +31,12 @@ package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -75,11 +71,8 @@ public class EqualXYCExplTest {
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
-        List<Constraint> lcstrsr = new ArrayList<>(1);
         IntVar[] varss = new IntVar[nbvars];
         IntVar[] indicess = new IntVar[nbvars];
-        List<Constraint> lcstrss = new ArrayList<>(1);
-
         for (int i = 0; i < varsr.length; i++) {
             varsr[i] = ref.intVar("v_" + i, 0, nbvars, false);
             indicesr[i] = ref.intVar("i_" + i, 0, nbvars, false);
@@ -94,17 +87,11 @@ public class EqualXYCExplTest {
 
 
         for (int i = 0; i < varsr.length - 1; i++) {
-            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0, "detect"));
-            lcstrsr.add(IntConstraintFactory.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
-            lcstrss.add(IntConstraintFactory.element(varss[i], values, indicess[i], 0, "detect"));
-            lcstrss.add(IntConstraintFactory.arithm(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3));
+            ref.post(ref.element(varsr[i], values, indicesr[i], 0));
+            ref.post(ref.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
+            sol.post(sol.element(varss[i], values, indicess[i], 0));
+            sol.post(sol.arithm(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3));
         }
-
-        Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);
-        ref.post(cstrsr);
-
-        Constraint[] cstrss = lcstrss.toArray(new Constraint[lcstrss.size()]);
-        sol.post(cstrss);
 
         ref.findAllSolutions();
         sol.findAllSolutions();

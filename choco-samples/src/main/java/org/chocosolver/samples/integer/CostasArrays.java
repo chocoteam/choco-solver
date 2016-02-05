@@ -31,8 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
@@ -74,16 +72,16 @@ public class CostasArrays extends AbstractProblem {
 		for (int i = 0, k = 0; i < n; i++) {
 			for (int j = i+1; j < n; j++, k++) {
 				IntVar d = solver.intVar(randomName(), -n, n, false);
-				solver.post(ICF.arithm(d,"!=",0));
-				solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i],d},"=",vars[j]));
+				solver.post(solver.arithm(d,"!=",0));
+				solver.post(solver.sum(new IntVar[]{vars[i],d},"=",vars[j]));
 				vectors[k] = solver.intOffsetView(d, 2 * n * (j - i));
 			}
 		}
-		solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
-		solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
+		solver.post(solver.allDifferent(vars, "AC"));
+		solver.post(solver.allDifferent(vectors, "BC"));
 
 		// symmetry-breaking
-		solver.post(ICF.arithm(vars[0],"<",vars[n-1]));
+		solver.post(solver.arithm(vars[0],"<",vars[n-1]));
 	}
 
 	@Override

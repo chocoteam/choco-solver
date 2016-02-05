@@ -31,8 +31,6 @@ package org.chocosolver.samples.real;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.real.RealConstraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -77,13 +75,13 @@ public class SmallSantaClaude {
         RealVar[] realViews = solver.realIntViewArray(kid_price, precision);
 
         // kids must have different gifts
-        solver.post(IntConstraintFactory.alldifferent(kid_gift, "AC"));
+        solver.post(solver.allDifferent(kid_gift, "AC"));
         // associate each kid with his gift cost
         for (int i = 0; i < n_kids; i++) {
-            solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i]));
+            solver.post(solver.element(kid_price[i], gift_price, kid_gift[i]));
         }
         // compute total cost
-        solver.post(IntConstraintFactory.sum(kid_price, "=", total_cost));
+        solver.post(solver.sum(kid_price, "=", total_cost));
 
         // compute average cost (i.e. average gift cost per kid)
         RealVar[] allRV = ArrayUtils.append(realViews, new RealVar[]{average, average_deviation});

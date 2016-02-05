@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -72,8 +71,8 @@ public class Donald extends AbstractProblem {
         t = solver.intVar("t", 0, 9, true);
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
-        solver.post(IntConstraintFactory.alldifferent(letters, "BC"));
-        solver.post(IntConstraintFactory.scalar(new IntVar[]{d, o, n, a, l, d,
+        solver.post(solver.allDifferent(letters, "BC"));
+        solver.post(solver.scalar(new IntVar[]{d, o, n, a, l, d,
                 g, e, r, a, l, d,
                 r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,
                 100000, 10000, 1000, 100, 10, 1,

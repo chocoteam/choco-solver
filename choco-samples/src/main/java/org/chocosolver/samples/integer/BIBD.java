@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
@@ -103,11 +102,11 @@ public class BIBD extends AbstractProblem {
         }
         // r ones per row
         for (int i = 0; i < v; i++) {
-            solver.post(IntConstraintFactory.sum(vars[i], "=", r));
+            solver.post(solver.sum(vars[i], "=", r));
         }
         // k ones per column
         for (int j = 0; j < b; j++) {
-            solver.post(IntConstraintFactory.sum(_vars[j], "=", k));
+            solver.post(solver.sum(_vars[j], "=", k));
         }
 
         // Exactly l ones in scalar product between two different rows
@@ -115,9 +114,9 @@ public class BIBD extends AbstractProblem {
             for (int i2 = i1 + 1; i2 < v; i2++) {
                 BoolVar[] score = solver.boolVarArray(format("row(%d,%d)", i1, i2), b);
                 for (int j = 0; j < b; j++) {
-                    solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
+                    solver.post(solver.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }
-                solver.post(IntConstraintFactory.sum(score, "=", l));
+                solver.post(solver.sum(score, "=", l));
             }
         }
         // Symmetry breaking
@@ -125,12 +124,12 @@ public class BIBD extends AbstractProblem {
         for (int i = 0; i < v; i++) {
             rev[i] = vars[v - 1 - i];
         }
-        solver.post(IntConstraintFactory.lex_chain_less_eq(rev));
+        solver.post(solver.lexChainLessEq(rev));
         BoolVar[][] _rev = new BoolVar[b][];
         for (int i = 0; i < b; i++) {
             _rev[i] = _vars[b - 1 - i];
         }
-        solver.post(IntConstraintFactory.lex_chain_less_eq(_rev));
+        solver.post(solver.lexChainLessEq(_rev));
     }
 
 

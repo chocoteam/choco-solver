@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -86,12 +85,12 @@ public class Langford extends AbstractProblem {
         lights = new Constraint[(k - 1) * n + 1];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
-                lights[i + j * n] = IntConstraintFactory.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]);
+                lights[i + j * n] = solver.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]);
             }
         }
-        lights[(k - 1) * n] = IntConstraintFactory.arithm(position[0], "<", position[n * k - 1]);
+        lights[(k - 1) * n] = solver.arithm(position[0], "<", position[n * k - 1]);
         solver.post(lights);
-        alldiff = IntConstraintFactory.alldifferent(position, "AC");
+        alldiff = solver.allDifferent(position, "AC");
         solver.post(alldiff);
     }
 

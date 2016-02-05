@@ -260,7 +260,7 @@ To facilitate the modeling, Choco |version| provides factories for almost every 
 |                              |              | (integer, boolean, set and real)          |
 +------------------------------+--------------+-------------------------------------------+
 +------------------------------+--------------+-------------------------------------------+
-| ``IntConstraintFactory``     | ICF          | Constraints over integer variables        |
+| ``ICF``     | ICF          | Constraints over integer variables        |
 +------------------------------+--------------+-------------------------------------------+
 | ``SetConstraintFactory``     | SCF          | Constraints over set variables            |
 +------------------------------+--------------+-------------------------------------------+
@@ -339,7 +339,7 @@ Constraints
 -----------
 
 Several constraint factories ease the creation of constraints: ``LogicalConstraintFactory`` (``LCF``),
-``IntConstraintFactory`` (``ICF``) and ``SetConstraintsFactory`` (``SCF``).
+``ICF`` (``ICF``) and ``SetConstraintsFactory`` (``SCF``).
 
 ``RealConstraint`` is created with a call to new and to ``addFunction`` method. It requires the `Ibex <http://www.ibex-lib.org/>`_ solver.
 

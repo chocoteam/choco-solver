@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
 import org.chocosolver.util.tools.StringUtils;
@@ -58,7 +57,7 @@ public class Min extends Constraint {
             Solver solver = a.getSolver();
             IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
                     Math.min(a.getLB(), b.getLB()), Math.min(a.getUB(), b.getUB()), solver);
-            solver.post(IntConstraintFactory.minimum(z, a, b));
+            solver.post(solver.min(z, a, b));
             return z;
         }
     }

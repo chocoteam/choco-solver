@@ -40,8 +40,6 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
@@ -65,7 +63,7 @@ public class LexChainTest {
         IntVar[] ar1 = s.intVarArray("v1", 3, 0, 10, true);
         IntVar[] ar2 = s.intVarArray("v2", 3, -1, 9, true);
 
-        Constraint c = ICF.lex_chain_less_eq(ar1, ar2);
+        Constraint c = s.lexChainLessEq(ar1, ar2);
         s.post(c);
         //SearchMonitorFactory.log(s, true, true);
         if (s.findSolution()) {
@@ -79,12 +77,12 @@ public class LexChainTest {
 
     private ILogical reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
         BoolVar b1 = solver.boolVar("A" + i);
-        solver.ifThenElse(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i]));
+        solver.ifThenElse(b1, solver.arithm(Y[i], ">", X[i]), solver.arithm(Y[i], "<=", X[i]));
         if (i == X.length - 1) {
             return b1;
         } else {
             BoolVar b2 = solver.boolVar("B" + i);
-            solver.ifThenElse(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i]));
+            solver.ifThenElse(b2, solver.arithm(Y[i], "=", X[i]), solver.arithm(X[i], "!=", Y[i]));
             return LogOp.or(b1, LogOp.and(b2, reformulate(i + 1, X, Y, solver)));
         }
     }
@@ -120,7 +118,7 @@ public class LexChainTest {
                     solver.intVarArray("X_" + i, m, 0, k, true) :
                     solver.intVarArray("X_" + i, m, 0, k, false);
         }
-        solver.post(ICF.lex_chain_less(X));
+        solver.post(solver.lexChainLess(X));
 		if(bounded){
 			solver.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
 		}else{
@@ -185,7 +183,7 @@ public class LexChainTest {
             X[i] = solver.intVarArray("X_" + i, 2, 0, 2, true);
         }
 
-        solver.post(ICF.lex_chain_less(X));
+        solver.post(solver.lexChainLess(X));
 
 
         try {

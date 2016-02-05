@@ -39,7 +39,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -82,8 +81,8 @@ public class CumulativeSample extends AbstractProblem{
 			end[i] = solver.intOffsetView(start[i],duration[i].getValue());
 			task[i] = new Task(start[i],duration[i],end[i]);
 		}
-		solver.post(ICF.cumulative(task,height,capa,true));
-		solver.post(ICF.maximum(makespan,end));
+		solver.post(solver.cumulative(task,height,capa,true));
+		solver.post(solver.max(makespan,end));
 	}
 
 	@Override

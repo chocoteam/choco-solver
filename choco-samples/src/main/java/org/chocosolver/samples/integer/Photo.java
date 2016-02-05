@@ -32,14 +32,10 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
-
-import static org.chocosolver.solver.constraints.IntConstraintFactory.*;
-import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * <a href="http://www.gecode.org">gecode</a>:<br/>
@@ -79,17 +75,17 @@ public class Photo extends AbstractProblem {
             int pb = data.preferences()[2 * i + 1];
 
 
-            IntVar k = solver.intVar(randomName(), -20000, 20000, true);
-			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]));
+            IntVar k = solver.intVar(-20000, 20000);
+			solver.post(solver.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]));
 			dist[i] = solver.intAbsView(k);
 
             solver.ifThenElse(viols[i],
-                            arithm(dist[i], ">", 1),
-                            arithm(dist[i], "<=", 1));
+                    solver.arithm(dist[i], ">", 1),
+                    solver.arithm(dist[i], "<=", 1));
         }
-        solver.post(sum(viols, "=", violations));
-        solver.post(alldifferent(positions, "BC"));
-        solver.post(arithm(positions[1], ">", positions[0]));
+        solver.post(solver.sum(viols, "=", violations));
+        solver.post(solver.allDifferent(positions, "BC"));
+        solver.post(solver.arithm(positions[1], ">", positions[0]));
     }
 
     @Override

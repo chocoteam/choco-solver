@@ -38,7 +38,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.Variable;
 
 /**
- * automatic detection of binary disequalities and alldifferent constraints
+ * automatic detection of binary disequalities and allDifferent constraints
  */
 public class AutoDiffDetection implements D {
 
@@ -64,7 +64,7 @@ public class AutoDiffDetection implements D {
 
     @Override
     public boolean mustBeDifferent(int i1, int i2) {
-        // automatic detection of binary disequalities and alldifferent constraints
+        // automatic detection of binary disequalities and allDifferent constraints
         if (DYNAMIC_ADDITIONS || scope[i1].getSolver().getEnvironment().getWorldIndex() <= 1) {
             for (Propagator p : scope[i1].getPropagators())
                 if (p.isActive())

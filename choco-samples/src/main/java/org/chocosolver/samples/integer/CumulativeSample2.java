@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -70,17 +69,17 @@ public class CumulativeSample2 extends AbstractProblem {
 		}
 
 		// post a cumulative constraint
-		solver.post(IntConstraintFactory.cumulative(tasks, res, solver.intVar(1), false));
+		solver.post(solver.cumulative(tasks, res, solver.intVar(1), false));
 
 		// maintain makespan
-		solver.post(IntConstraintFactory.maximum(maxEnd, ends));
+		solver.post(solver.max(maxEnd, ends));
 
 		// add precedences
 		int prevIdx = -1;
 		for (int iTask=999; iTask >= 0; --iTask) {
 			if (prevIdx != -1) {
 				if (iTask % 2 == 0 || iTask % 3 == 0) {
-					solver.post(IntConstraintFactory.arithm(starts[iTask], ">=", ends[prevIdx]));
+					solver.post(solver.arithm(starts[iTask], ">=", ends[prevIdx]));
 				}
 			}
 			prevIdx = iTask;

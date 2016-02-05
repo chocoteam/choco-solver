@@ -32,8 +32,6 @@ package org.chocosolver.solver.explanations;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -132,8 +130,8 @@ public class ExplanationEngineTest {
 
     private void model3(Solver solver, int n) {
         IntVar[] vs = solver.intVarArray("V", n, 2, n + 2, true);
-        solver.post(ICF.arithm(vs[n - 2], "=", vs[n - 1]));
-        solver.post(ICF.arithm(vs[n - 2], "!=", vs[n - 1]));
+        solver.post(solver.arithm(vs[n - 2], "=", vs[n - 1]));
+        solver.post(solver.arithm(vs[n - 2], "!=", vs[n - 1]));
     }
 
     /**
@@ -204,8 +202,8 @@ public class ExplanationEngineTest {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
             IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, false);
-            solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
-            solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
+            solver.post(solver.arithm(vars[n - 2], "=", vars[n - 1]));
+            solver.post(solver.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
             SLF.learnCBJ(solver, false, false);
@@ -221,8 +219,8 @@ public class ExplanationEngineTest {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
             IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, true);
-            solver.post(ICF.arithm(vars[n - 2], "=", vars[n - 1]));
-            solver.post(ICF.arithm(vars[n - 2], "!=", vars[n - 1]));
+            solver.post(solver.arithm(vars[n - 2], "=", vars[n - 1]));
+            solver.post(solver.arithm(vars[n - 2], "!=", vars[n - 1]));
             solver.set(ISF.lexico_LB(vars));
 
             SLF.learnCBJ(solver, false, false);
@@ -276,12 +274,12 @@ public class ExplanationEngineTest {
             final Solver solver = new Solver();
             IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
             BoolVar[] bs = solver.boolVarArray("b", 2);
-            ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-            ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-            solver.post(ICF.arithm(bs[0], "=", bs[1]));
+            solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+            solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+            solver.post(solver.arithm(bs[0], "=", bs[1]));
 
-            solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
-            solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
+            solver.post(solver.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
+            solver.post(solver.arithm(p[9], "+", p[8], ">", 4));
             solver.set(ISF.random_value(p, seed));
 
             SLF.learnCBJ(solver, false, false);
@@ -297,12 +295,12 @@ public class ExplanationEngineTest {
         final Solver solver = new Solver();
         IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
         BoolVar[] bs = solver.boolVarArray("b", 2);
-        ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-        ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-        solver.post(ICF.arithm(bs[0], "=", bs[1]));
+        solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+        solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+        solver.post(solver.arithm(bs[0], "=", bs[1]));
 
-        solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
-        solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
+        solver.post(solver.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
+        solver.post(solver.arithm(p[9], "+", p[8], ">", 4));
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
@@ -321,12 +319,12 @@ public class ExplanationEngineTest {
         final Solver solver = new Solver();
         IntVar[] p = solver.intVarArray("p", 10, 0, 3, false);
         BoolVar[] bs = solver.boolVarArray("b", 2);
-        ICF.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
-        ICF.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-        solver.post(ICF.arithm(bs[0], "=", bs[1]));
+        solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
+        solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
+        solver.post(solver.arithm(bs[0], "=", bs[1]));
 
-        solver.post(ICF.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
-        solver.post(ICF.arithm(p[9], "+", p[8], ">", 4));
+        solver.post(solver.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
+        solver.post(solver.arithm(p[9], "+", p[8], ">", 4));
         // p[0], p[1] are just for fun
         solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
@@ -378,8 +376,8 @@ public class ExplanationEngineTest {
                 row[x] = vars[i * m + x];
                 col[x] = vars[x * m + i];
             }
-            solver.post(IntConstraintFactory.alldifferent(col, "FC"));
-            solver.post(IntConstraintFactory.alldifferent(row, "FC"));
+            solver.post(solver.allDifferent(col, "FC"));
+            solver.post(solver.allDifferent(row, "FC"));
         }
         solver.set(IntStrategyFactory.lexico_LB(vars));
 //        solver.set(IntStrategyFactory.custom(
@@ -414,18 +412,18 @@ public class ExplanationEngineTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 IntVar k = solver.intVar(randomName(), -n, n, false);
-                solver.post(ICF.arithm(k, "!=", 0));
-                solver.post(IntConstraintFactory.sum(new IntVar[]{vars[i], k}, "=", vars[j]));
+                solver.post(solver.arithm(k, "!=", 0));
+                solver.post(solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]));
                 vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }
         }
-        solver.post(IntConstraintFactory.alldifferent(vars, "FC"));
-        solver.post(IntConstraintFactory.alldifferent(vectors, "FC"));
+        solver.post(solver.allDifferent(vars, "FC"));
+        solver.post(solver.allDifferent(vectors, "FC"));
 
         // symmetry-breaking
-        solver.post(ICF.arithm(vars[0], "<", vars[n - 1]));
+        solver.post(solver.arithm(vars[0], "<", vars[n - 1]));
 
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
@@ -449,10 +447,10 @@ public class ExplanationEngineTest {
         Solver solver = new Solver();
         IntVar[] ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
 
-        solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
+        solver.post(solver.arithm(ticks[0], "=", 0));
 
         for (int i = 0; i < m - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]));
+            solver.post(solver.arithm(ticks[i + 1], ">", ticks[i]));
         }
 
         IntVar[] diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
@@ -460,18 +458,18 @@ public class ExplanationEngineTest {
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                solver.post(IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]));
-                solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(IntConstraintFactory.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                solver.post(IntConstraintFactory.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.post(solver.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]));
+                solver.post(solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
+                solver.post(solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.post(solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
                 m_diffs[i][j] = diffs[k];
             }
         }
-        solver.post(IntConstraintFactory.alldifferent(diffs, "FC"));
+        solver.post(solver.allDifferent(diffs, "FC"));
 
         // break symetries
         if (m > 2) {
-            solver.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+            solver.post(solver.arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
 
         solver.set(IntStrategyFactory.lexico_LB(ticks));
@@ -498,10 +496,10 @@ public class ExplanationEngineTest {
         IntVar[] position = solver.intVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
-                solver.post(IntConstraintFactory.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]));
+                solver.post(solver.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]));
             }
         }
-        solver.post(IntConstraintFactory.alldifferent(position, "FC"));
+        solver.post(solver.allDifferent(position, "FC"));
         solver.set(IntStrategyFactory.minDom_UB(position));
 
         configure(solver, a);
@@ -547,21 +545,21 @@ public class ExplanationEngineTest {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.post(IntConstraintFactory.alldifferent(vars, "FC"));
+        solver.post(solver.allDifferent(vars, "FC"));
 
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
-            solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, "=", ms));
-            solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, "=", ms));
+            solver.post(solver.scalar(matrix[i], coeffs, "=", ms));
+            solver.post(solver.scalar(invMatrix[i], coeffs, "=", ms));
         }
-        solver.post(IntConstraintFactory.scalar(diag1, coeffs, "=", ms));
-        solver.post(IntConstraintFactory.scalar(diag2, coeffs, "=", ms));
+        solver.post(solver.scalar(diag1, coeffs, "=", ms));
+        solver.post(solver.scalar(diag2, coeffs, "=", ms));
 
         // Symetries breaking
-        solver.post(IntConstraintFactory.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
-        solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
-        solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][0]));
+        solver.post(solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
+        solver.post(solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
+        solver.post(solver.arithm(matrix[0][0], "<", matrix[n - 1][0]));
 
         solver.set(IntStrategyFactory.minDom_MidValue(true, vars));
 
@@ -591,11 +589,11 @@ public class ExplanationEngineTest {
 
         // break symmetries
         for (int i = 0; i < size - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(x[i], "<", x[i + 1]));
-            solver.post(IntConstraintFactory.arithm(y[i], "<", y[i + 1]));
+            solver.post(solver.arithm(x[i], "<", x[i + 1]));
+            solver.post(solver.arithm(y[i], "<", y[i + 1]));
         }
-        solver.post(IntConstraintFactory.arithm(x[0], "<", y[0]));
-        solver.post(IntConstraintFactory.arithm(x[0], "=", 1));
+        solver.post(solver.arithm(x[0], "<", y[0]));
+        solver.post(solver.arithm(x[0], "=", 1));
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -614,7 +612,7 @@ public class ExplanationEngineTest {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        solver.post(IntConstraintFactory.scalar(xy, coeffs, "=", 0));
+        solver.post(solver.scalar(xy, coeffs, "=", 0));
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
@@ -625,21 +623,21 @@ public class ExplanationEngineTest {
             sxy[i] = sx[i];
             sy[i] = solver.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
             sxy[size + i] = sy[i];
-            solver.post(IntConstraintFactory.times(x[i], x[i], sx[i]));
-            solver.post(IntConstraintFactory.times(y[i], y[i], sy[i]));
-            solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size));
-            solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size));
+            solver.post(solver.times(x[i], x[i], sx[i]));
+            solver.post(solver.times(y[i], y[i], sy[i]));
+            solver.post(solver.member(sx[i], 1, 4 * size * size));
+            solver.post(solver.member(sy[i], 1, 4 * size * size));
         }
-        solver.post(IntConstraintFactory.scalar(sxy, coeffs, "=", 0));
+        solver.post(solver.scalar(sxy, coeffs, "=", 0));
 
         coeffs = new int[size];
         Arrays.fill(coeffs, 1);
-        solver.post(IntConstraintFactory.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        solver.post(IntConstraintFactory.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        solver.post(IntConstraintFactory.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
-        solver.post(IntConstraintFactory.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        solver.post(solver.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
+        solver.post(solver.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
+        solver.post(solver.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        solver.post(solver.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
 
-        solver.post(IntConstraintFactory.alldifferent(xy, "FC"));
+        solver.post(solver.allDifferent(xy, "FC"));
 
 
         solver.set(IntStrategyFactory.minDom_LB(Ovars));
@@ -784,8 +782,8 @@ public class ExplanationEngineTest {
         // infeasible problem
         Solver s = new Solver();
         IntVar[] x = s.intVarArray("x", n, 0, m, true);
-        s.post(ICF.alldifferent(x, "NEQS"));
-        s.post(ICF.arithm(x[n - 2], "=", x[n - 1]));
+        s.post(s.allDifferent(x, "NEQS"));
+        s.post(s.arithm(x[n - 2], "=", x[n - 1]));
         // explanations
         if (expMode == 2) {
             ExplanationFactory.CBJ.plugin(s, false, true);
@@ -813,18 +811,18 @@ public class ExplanationEngineTest {
         IntVar x = s.intVar("x", 1, 10);
         IntVar y = s.intVar("y", 1, 10);
 
-        Constraint xGE3 = ICF.arithm(x, ">=", three);
-        Constraint xLE4 = ICF.arithm(x, "<=", four);
+        Constraint xGE3 = s.arithm(x, ">=", three);
+        Constraint xLE4 = s.arithm(x, "<=", four);
 
-        Constraint yGE6 = ICF.arithm(y, ">=", six);
-        Constraint yLE7 = ICF.arithm(y, "<=", seven);
+        Constraint yGE6 = s.arithm(y, ">=", six);
+        Constraint yLE7 = s.arithm(y, "<=", seven);
 
         s.post(xGE3);
         s.post(xLE4);
         s.post(yGE6);
         s.post(yLE7);
 
-        Constraint xE1 = ICF.arithm(x, "=", one);
+        Constraint xE1 = s.arithm(x, "=", one);
         s.post(xE1);
 
         SLF.learnCBJ(s, false, true);
@@ -844,7 +842,7 @@ public class ExplanationEngineTest {
         IntVar[] X = solver.intVarArray("X", 4, 1, 2, false);
         BoolVar[] B = solver.boolVarArray("B", 4);
         for(int i = 0 ; i < n; i++){
-            ICF.arithm(X[i], ">", i).reifyWith(B[i]);
+            solver.arithm(X[i], ">", i).reifyWith(B[i]);
         }
         ExplanationFactory.CBJ.plugin(solver, false, false);
         solver.set(ISF.lexico_UB(B), new Once(X, ISF.lexico_var_selector(), ISF.min_value_selector()));
@@ -860,9 +858,9 @@ public class ExplanationEngineTest {
         IntVar y = solver.intVar("y", 1, 4, true);
         IntVar z = solver.intVar("z", -2, 2, true);
 
-        solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{1, -3, -3}, "<=", 1));
-        solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{-2, 3, 2}, "<=", -2));
-        solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{3, -3, 2}, "<=", -1));
+        solver.post(solver.scalar(new IntVar[]{x, y, z}, new int[]{1, -3, -3}, "<=", 1));
+        solver.post(solver.scalar(new IntVar[]{x, y, z}, new int[]{-2, 3, 2}, "<=", -2));
+        solver.post(solver.scalar(new IntVar[]{x, y, z}, new int[]{3, -3, 2}, "<=", -1));
 
         ExplanationEngine ee = new ExplanationEngine(solver, false, false);
 
@@ -899,7 +897,7 @@ public class ExplanationEngineTest {
         IntVar y = solver.intVar("y", 0, 1, true);
         IntVar z = solver.intVar("z", 0, 1, true);
 
-        solver.post(ICF.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2));
+        solver.post(solver.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2));
 
         solver.propagate();
         System.out.printf("%s\n", solver);

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.samples.nqueen;
 
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -53,9 +53,9 @@ public class NQueenGlobal extends AbstractNQueen {
             diag2[i] = solver.intOffsetView(vars[i], -i);
         }
 
-        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
-        solver.post(IntConstraintFactory.alldifferent(diag1, "BC"));
-        solver.post(IntConstraintFactory.alldifferent(diag2, "BC"));
+        solver.post(solver.allDifferent(vars, "BC"));
+        solver.post(solver.allDifferent(diag1, "BC"));
+        solver.post(solver.allDifferent(diag2, "BC"));
     }
 
     @Override

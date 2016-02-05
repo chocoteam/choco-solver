@@ -32,7 +32,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.ISF;
@@ -206,7 +205,7 @@ public class SatTest {
         BoolVar cond = solver.boolVar("cond");
         // CSTRS
         SatFactory.addFalse(bvar);
-        ICF.arithm(var, "=", 2).reifyWith(eq2);
+        solver.arithm(var, "=", 2).reifyWith(eq2);
         SatFactory.addBoolAndArrayEqVar(new BoolVar[]{eq2, bvar.not()}, cond);
         SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
         SatFactory.addBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);

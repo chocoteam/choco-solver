@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.monitors.SMF;
@@ -192,7 +191,7 @@ public class SearchLoopTest {
         IntVar[] X = solver.intVarArray("X", n, 0, n, false);
         BoolVar[] B = solver.boolVarArray("b", n - 1);
         for (int i = 0; i < n - 1; i++) {
-            ICF.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
+            solver.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
         SLF.lds(solver, ISF.sequencer(ISF.lexico_UB(B), ISF.once(ISF.lexico_var_selector(), ISF.min_value_selector(), X)), 1);
         Chatterbox.showSolutions(solver);
@@ -210,7 +209,7 @@ public class SearchLoopTest {
         IntVar[] X = solver.intVarArray("X", n, 0, n, false);
         BoolVar[] B = solver.boolVarArray("b", n - 1);
         for (int i = 0; i < n - 1; i++) {
-            ICF.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
+            solver.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
         SLF.seq(solver,
                 new MoveBinaryLDS(ISF.lexico_UB(B), 1, solver.getEnvironment()),

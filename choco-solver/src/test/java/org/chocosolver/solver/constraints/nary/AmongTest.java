@@ -32,7 +32,6 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
@@ -94,7 +93,7 @@ public class AmongTest {
             IntVar occ = solver.intVar("oc", 0, n, true);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(IntStrategyFactory.random_bound(allvars, i));
-            solver.post(IntConstraintFactory.among(occ, vars, new int[]{value}));
+            solver.post(solver.among(occ, vars, new int[]{value}));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
@@ -111,7 +110,7 @@ public class AmongTest {
             IntVar occ = solver.intVar("oc", 0, n, true);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(IntStrategyFactory.random_bound(allvars, i));
-            solver.post(IntConstraintFactory.among(occ, vars, values));
+            solver.post(solver.among(occ, vars, values));
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -125,7 +124,7 @@ public class AmongTest {
         IntVar[] vars = solver.intVarArray("o", 4, new int[]{0, 1, 2, 5});
         int[] values = {1, 2, 0};
         IntVar occ = solver.intVar("oc", 0, 4, true);
-        solver.post(IntConstraintFactory.among(occ, vars, values));
+        solver.post(solver.among(occ, vars, values));
         try {
             solver.propagate();
 
@@ -170,10 +169,10 @@ public class AmongTest {
                     solver.post(getDecomposition(solver, vs, ivc, val
                     ));
                 } else {
-                    solver.post(IntConstraintFactory.among(ivc, vs, new int[]{val}));
+                    solver.post(solver.among(ivc, vs, new int[]{val}));
                 }
             }
-            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]));
+            solver.post(solver.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]));
 
 			if(!enumvar){
 				solver.set(IntStrategyFactory.random_bound(vars, seed));
@@ -227,7 +226,7 @@ public class AmongTest {
                     solver.post(getDecomposition(solver, vs, ivc, values
                     ));
                 } else {
-                    solver.post(IntConstraintFactory.among(ivc, vs, values));
+                    solver.post(solver.among(ivc, vs, values));
                 }
             }
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
@@ -261,17 +260,17 @@ public class AmongTest {
         BoolVar[] bs = solver.boolVarArray("b", vs.length);
         IntVar vval = solver.intVar(val);
         for (int i = 0; i < vs.length; i++) {
-            solver.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval));
+            solver.ifThenElse(bs[i], solver.arithm(vs[i], "=", vval), solver.arithm(vs[i], "!=", vval));
         }
-        return IntConstraintFactory.sum(bs, "=", occ);
+        return solver.sum(bs, "=", occ);
     }
 
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
         BoolVar[] bs = solver.boolVarArray("b", vs.length);
         for (int i = 0; i < vs.length; i++) {
-            solver.ifThenElse(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values));
+            solver.ifThenElse(bs[i], solver.member(vs[i], values), solver.notMember(vs[i], values));
         }
-        return IntConstraintFactory.sum(bs, "=", occ);
+        return solver.sum(bs, "=", occ);
     }
 
 }

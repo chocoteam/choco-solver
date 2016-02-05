@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -69,7 +68,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
         List<Constraint> ADS = new ArrayList<>();
 
-        Constraint cc = IntConstraintFactory.alldifferent(vars, "AC");
+        Constraint cc = solver.allDifferent(vars, "AC");
         solver.post(cc);
         ADS.add(cc);
 
@@ -82,20 +81,20 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
         }
         for (int i = 0; i < mm; i++) {
-            solver.post(IntConstraintFactory.element(square1[i], mod, vars[i], 0, "detect"));
-            solver.post(IntConstraintFactory.element(square2[i], div, vars[i], 0, "detect"));
+            solver.post(solver.element(square1[i], mod, vars[i], 0));
+            solver.post(solver.element(square2[i], div, vars[i], 0));
         }
 
         // Rows
         for (int i = 0; i < m; i++) {
             IntVar[] ry = new IntVar[m];
             System.arraycopy(square1, i * m, ry, 0, m);
-            cc = IntConstraintFactory.alldifferent(ry, "BC");
+            cc = solver.allDifferent(ry, "BC");
             solver.post(cc);
             ADS.add(cc);
             ry = new IntVar[m];
             System.arraycopy(square2, i * m, ry, 0, m);
-            cc = IntConstraintFactory.alldifferent(ry, "BC");
+            cc = solver.allDifferent(ry, "BC");
             solver.post(cc);
             ADS.add(cc);
         }
@@ -104,14 +103,14 @@ public class OrthoLatinSquare extends AbstractProblem {
             for (int i = 0; i < m; i++) {
                 cy[i] = square1[i * m + j];
             }
-            cc = IntConstraintFactory.alldifferent(cy, "BC");
+            cc = solver.allDifferent(cy, "BC");
             solver.post(cc);
             ADS.add(cc);
             cy = new IntVar[m];
             for (int i = 0; i < m; i++) {
                 cy[i] = square2[i * m + j];
             }
-            cc = IntConstraintFactory.alldifferent(cy, "BC");
+            cc = solver.allDifferent(cy, "BC");
             solver.post(cc);
             ADS.add(cc);
         }
@@ -125,7 +124,7 @@ public class OrthoLatinSquare extends AbstractProblem {
                 ry1[j] = square1[(i - 1) * m + j];
                 ry2[j] = square2[i * m + j];
             }
-            solver.post(IntConstraintFactory.lex_less(ry1, ry2));
+            solver.post(solver.lexLess(ry1, ry2));
         }
     }
 

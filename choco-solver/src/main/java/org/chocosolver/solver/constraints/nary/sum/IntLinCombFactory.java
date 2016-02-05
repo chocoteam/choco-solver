@@ -38,8 +38,6 @@ import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Arrays;
 
-import static org.chocosolver.solver.constraints.ICF.*;
-
 /**
  * A factory to reduce and detect specific cases related to integer linear combinations.
  * <p>
@@ -185,24 +183,25 @@ public class IntLinCombFactory {
     public static Constraint selectSum(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT, int nbools) {
         // if the operator is "="
         // 4. detect and return small arity constraints
+        Solver s = VARS[0].getSolver();
         switch (VARS.length) {
             case 1:
                 if (COEFFS[0] == 1) {
-                    return arithm(VARS[0], OPERATOR.toString(), RESULT);
+                    return s.arithm(VARS[0], OPERATOR.toString(), RESULT);
                 } else {
                     assert COEFFS[0] == -1;
-                    return arithm(VARS[0], Operator.getFlip(OPERATOR.toString()), -RESULT);
+                    return s.arithm(VARS[0], Operator.getFlip(OPERATOR.toString()), -RESULT);
                 }
             case 2:
                 if (COEFFS[0] == 1 && COEFFS[1] == 1) {
-                    return arithm(VARS[0], "+", VARS[1], OPERATOR.toString(), RESULT);
+                    return s.arithm(VARS[0], "+", VARS[1], OPERATOR.toString(), RESULT);
                 } else if (COEFFS[0] == 1 && COEFFS[1] == -1) {
-                    return arithm(VARS[0], "-", VARS[1], OPERATOR.toString(), RESULT);
+                    return s.arithm(VARS[0], "-", VARS[1], OPERATOR.toString(), RESULT);
                 } else if (COEFFS[0] == -1 && COEFFS[1] == 1) {
-                    return arithm(VARS[1], "-", VARS[0], OPERATOR.toString(), RESULT);
+                    return s.arithm(VARS[1], "-", VARS[0], OPERATOR.toString(), RESULT);
                 } else {
                     assert COEFFS[0] == -1 && COEFFS[1] == -1;
-                    return arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR.toString()), -RESULT);
+                    return s.arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR.toString()), -RESULT);
                 }
             case 3:
                 if(RESULT == 0 && OPERATOR == Operator.EQ) {
@@ -285,26 +284,26 @@ public class IntLinCombFactory {
      * @return a constraint
      */
     public static Constraint selectScalar(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int RESULT) {
-        Solver SOLVER = VARS[0].getSolver();
+        Solver s = VARS[0].getSolver();
         if (VARS.length == 1 && OPERATOR == Operator.EQ) {
-            return times(VARS[0], COEFFS[0], SOLVER.intVar(RESULT));
+            return s.times(VARS[0], COEFFS[0], s.intVar(RESULT));
         }
         if (VARS.length == 2 && OPERATOR == Operator.EQ && RESULT == 0) {
             if (COEFFS[0] == 1) {
-                return times(VARS[1], -COEFFS[1], VARS[0]);
+                return s.times(VARS[1], -COEFFS[1], VARS[0]);
             }
             if (COEFFS[0] == -1) {
-                return times(VARS[1], COEFFS[1], VARS[0]);
+                return s.times(VARS[1], COEFFS[1], VARS[0]);
             }
             if (COEFFS[1] == 1) {
-                return times(VARS[0], -COEFFS[0], VARS[1]);
+                return s.times(VARS[0], -COEFFS[0], VARS[1]);
             }
             if (COEFFS[1] == -1) {
-                return times(VARS[0], COEFFS[0], VARS[1]);
+                return s.times(VARS[0], COEFFS[0], VARS[1]);
             }
         }
-        if (Operator.EQ == OPERATOR && VARS[VARS.length - 1].hasEnumeratedDomain() && tupleIt(Arrays.copyOf(VARS, VARS.length - 1))) {
-            return table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
+        if (Operator.EQ == OPERATOR && VARS[VARS.length - 1].hasEnumeratedDomain() && TuplesFactory.canBeTupled(Arrays.copyOf(VARS, VARS.length - 1))) {
+            return s.table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
                     OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT));
         }
         int b = 0, e = VARS.length;

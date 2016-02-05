@@ -30,8 +30,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
 import org.chocosolver.solver.variables.view.*;
 
@@ -68,7 +66,7 @@ public interface IViewFactory {
                 return new BoolNotView(bool);
             }else {
                 BoolVar ov = _me().boolVar("not(" + bool.getName() + ")");
-                _me().post(ICF.arithm(ov, "!=", bool));
+                _me().post(_me().arithm(ov, "!=", bool));
                 bool._setNot(ov);
                 ov._setNot(bool);
                 ov.setNot(true);
@@ -88,7 +86,7 @@ public interface IViewFactory {
 
         } else {
             BoolVar ov = var.duplicate();
-            _me().post(ICF.arithm(ov, "=", var));
+            _me().post(_me().arithm(ov, "=", var));
             if (var.hasNot()) {
                 ov._setNot(var.not());
             }
@@ -115,7 +113,7 @@ public interface IViewFactory {
                 return new EqView(var);
             } else {
                 IntVar ov = var.duplicate();
-                _me().post(ICF.arithm(ov, "=", var));
+                _me().post(_me().arithm(ov, "=", var));
                 return ov;
             }
         }
@@ -143,7 +141,7 @@ public interface IViewFactory {
             } else {
                 ov = _me().intVar(name, lb, ub, true);
             }
-            _me().post(ICF.arithm(ov, "-", var, "=", cste));
+            _me().post(_me().arithm(ov, "-", var, "=", cste));
             return ov;
         }
     }
@@ -168,7 +166,7 @@ public interface IViewFactory {
             } else {
                 ov = _me().intVar(name, lb, ub, true);
             }
-            _me().post(ICF.arithm(ov, "+", var, "=", 0));
+            _me().post(_me().arithm(ov, "+", var, "=", 0));
             return ov;
         }
     }
@@ -212,7 +210,7 @@ public interface IViewFactory {
                     } else {
                         ov = _me().intVar(name, lb, ub, true);
                     }
-                    _me().post(ICF.times(var, cste, ov));
+                    _me().post(_me().times(var, cste, ov));
                     return ov;
                 }
             }
@@ -247,7 +245,7 @@ public interface IViewFactory {
             } else {
                 abs = _me().intVar(name, 0, ub, true);
             }
-            _me().post(IntConstraintFactory.absolute(abs, var));
+            _me().post(_me().absolute(abs, var));
             return abs;
         }
     }

@@ -52,7 +52,7 @@ import java.util.BitSet;
 import java.util.Random;
 
 /**
- * Filters subcircuit based on strongly connected components
+ * Filters subCircuit based on strongly connected components
  *
  * @author Jean-Guillaume Fages
  */

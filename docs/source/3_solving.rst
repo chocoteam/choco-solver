@@ -105,7 +105,7 @@ Choco |version| enables to solve optimization problems, that is, in which a vari
 
    // Function to maximize: 3X + 4Y
    IntVar OBJ = VariableFactory.bounded("objective", 0, 999, solver);
-   solver.post(ICF.scalar(new IntVar[]{X,Y}, new int[]{3,4}, OBJ));
+   solver.post(solver.scalar(new IntVar[]{X,Y}, new int[]{3,4}, OBJ));
    solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, OBJ);
 
 

@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.Counter;
@@ -82,7 +81,7 @@ public class CostRegularTest {
             costs[i][0][1] = 1;
             costs[i][1][1] = 1;
         }
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, costs, cost.getLB(), cost.getUB())));
+        solver.post(solver.costRegular(vars, cost, CostAutomaton.makeSingleResource(auto, costs, cost.getLB(), cost.getUB())));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -123,7 +122,7 @@ public class CostRegularTest {
 
         auto.addCounter(c);
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
+        solver.post(solver.costRegular(vars, cost, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -172,7 +171,7 @@ public class CostRegularTest {
             costs[i][1] = 1;
         }
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, costs, cost.getLB(), cost.getUB())));
+        solver.post(solver.costRegular(vars, cost, CostAutomaton.makeSingleResource(auto, costs, cost.getLB(), cost.getUB())));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -224,7 +223,7 @@ public class CostRegularTest {
         ICounter c = new Counter(costs, 0, 4);
         CostAutomaton cauto = new CostAutomaton(auto, c);
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, cauto));
+        solver.post(solver.costRegular(vars, cost, cauto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -264,7 +263,7 @@ public class CostRegularTest {
             }
         }
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, costs, cost.getLB(), cost.getUB())));
+        solver.post(solver.costRegular(vars, cost, CostAutomaton.makeSingleResource(auto, costs, cost.getLB(), cost.getUB())));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -307,7 +306,7 @@ public class CostRegularTest {
 
         auto.addCounter(new CounterState(costs, 10, 10));
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
+        solver.post(solver.costRegular(vars, cost, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -346,7 +345,7 @@ public class CostRegularTest {
             costs[i][1][1] = 1;
         }
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, costs, cost.getLB(), cost.getUB())));
+        solver.post(solver.costRegular(vars, cost, CostAutomaton.makeSingleResource(auto, costs, cost.getLB(), cost.getUB())));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -386,7 +385,7 @@ public class CostRegularTest {
 
         auto.addCounter(new CounterState(costs, 4, 6));
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
+        solver.post(solver.costRegular(vars, cost, auto));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();
@@ -416,7 +415,7 @@ public class CostRegularTest {
         }
         IntVar cost = solver.intVar("z", n / 2, n / 2 + 1, true);
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, c2, cost.getLB(), cost.getUB())));
+        solver.post(solver.costRegular(vars, cost, CostAutomaton.makeSingleResource(auto, c2, cost.getLB(), cost.getUB())));
         solver.set(IntStrategyFactory.lexico_LB(vars));
 
         solver.findAllSolutions();

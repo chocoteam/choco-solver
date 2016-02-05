@@ -31,7 +31,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
@@ -57,16 +56,16 @@ public class CountTest {
         Solver solver = new Solver();
         IntVar[] vars = solver.intVarArray("var", n, 0, n - 1, true);
         for (int i = 0; i < n; i++) {
-            solver.post(IntConstraintFactory.count(i, vars, vars[i]));
+            solver.post(solver.count(i, vars, vars[i]));
         }
-        solver.post(IntConstraintFactory.sum(vars, "=", n)); // cstr redundant 1
+        solver.post(solver.sum(vars, "=", n)); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.post(IntConstraintFactory.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
+        solver.post(solver.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
         return solver;
     }
 
@@ -110,7 +109,7 @@ public class CountTest {
             IntVar occ = solver.intVar("oc", 0, n, true);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(IntStrategyFactory.random_bound(allvars, i));
-            solver.post(IntConstraintFactory.count(value, vars, occ));
+            solver.post(solver.count(value, vars, occ));
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -149,10 +148,10 @@ public class CountTest {
                 if (gac) {
                     solver.post(getTableForOccurence(vs, ivc, val, sizeDom));
                 } else {
-                    solver.post(IntConstraintFactory.count(val, vs, ivc));
+                    solver.post(solver.count(val, vs, ivc));
                 }
             }
-            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
+            solver.post(solver.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
 
             //s.setValIntSelector(new RandomIntValSelector(interseed));
             //s.setVarIntSelector(new RandomIntVarSelector(s, interseed + 10));
@@ -210,7 +209,7 @@ public class CountTest {
         System.arraycopy(vs, 0, newvs, 0, vs.length);
         newvs[vs.length] = occ;
 
-        return IntConstraintFactory.table(newvs, tuples);
+        return solver.table(newvs, tuples);
     }
 
     /**
@@ -225,9 +224,9 @@ public class CountTest {
         BoolVar[] bs = solver.boolVarArray("b", vs.length);
         IntVar vval = solver.intVar(val);
         for (int i = 0; i < vs.length; i++) {
-            solver.ifThenElse(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval));
+            solver.ifThenElse(bs[i], solver.arithm(vs[i], "=", vval), solver.arithm(vs[i], "!=", vval));
         }
-        return IntConstraintFactory.sum(bs, "=", occ);
+        return solver.sum(bs, "=", occ);
     }
 
 }

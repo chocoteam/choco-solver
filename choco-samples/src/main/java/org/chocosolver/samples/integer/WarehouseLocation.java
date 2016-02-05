@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -104,27 +103,27 @@ public class WarehouseLocation extends AbstractProblem {
         // A warehouse is open, if it supplies to a store
         IntVar ONE = solver.intVar(1);
         for (int s = 0; s < nS; s++) {
-            solver.post(IntConstraintFactory.element(ONE, open, suppliers[s], 0));
+            solver.post(solver.element(ONE, open, suppliers[s], 0));
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s], 0, "detect"));
+            solver.post(solver.element(costPerStore[s], c_supply[s], suppliers[s], 0));
         }
         for (int w = 0; w < nWH; w++) {
             IntVar tmp = solver.intVar("occur_" + w, 0, suppliers.length, true);
-            solver.post(IntConstraintFactory.count(w, suppliers, tmp));
-            solver.post(IntConstraintFactory.arithm(tmp, ">=", open[w]));
+            solver.post(solver.count(w, suppliers, tmp));
+            solver.post(solver.arithm(tmp, ">=", open[w]));
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
             IntVar tmp = solver.intVar("occur_" + w, 0, capacity[w], true);
-            solver.post(IntConstraintFactory.count(w, suppliers, tmp));
+            solver.post(solver.count(w, suppliers, tmp));
         }
 
         int[] coeffs = new int[nWH + nS];
         Arrays.fill(coeffs, 0, nWH, cost);
         Arrays.fill(coeffs, nWH, nWH + nS, 1);
-        solver.post(IntConstraintFactory.scalar(ArrayUtils.append(open, costPerStore), coeffs, "=", totCost));
+        solver.post(solver.scalar(ArrayUtils.append(open, costPerStore), coeffs, "=", totCost));
     }
 
     @Override

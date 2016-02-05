@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.Solution;
@@ -96,11 +95,11 @@ public class SMPTSP extends AbstractProblem {
 		for (int t1 = 0; t1 < nbTasks; t1++) {
 			for (int t2 = t1+1; t2 < nbTasks; t2++) {
 				if(taskOverlaps[t1][t2]){
-					solver.post(ICF.arithm(assignment[t1],"!=",assignment[t2]));
+					solver.post(solver.arithm(assignment[t1],"!=",assignment[t2]));
 				}
 			}
 		}
-		solver.post(ICF.nvalues(assignment,nbValues));
+		solver.post(solver.nValues(assignment,nbValues));
 	}
 
 	@Override

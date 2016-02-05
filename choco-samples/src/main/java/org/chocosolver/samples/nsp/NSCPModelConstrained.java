@@ -30,7 +30,6 @@
 package org.chocosolver.samples.nsp;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
 import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
@@ -132,9 +131,9 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             int t = trip[2];
             int a = trip[3];
             if (mandatory) {
-                solver.post(IntConstraintFactory.arithm(shifts[e][t], "=", a));
+                solver.post(solver.arithm(shifts[e][t], "=", a));
             } else {
-                solver.post(IntConstraintFactory.arithm(shifts[e][t], "!=", a));
+                solver.post(solver.arithm(shifts[e][t], "!=", a));
             }
         }
     }
@@ -196,7 +195,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality(vars[t], values, cards[t], false));
+            solver.post(solver.globalCardinality(vars[t], values, cards[t], false));
         }
     }
 
@@ -212,7 +211,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality(var, values, cover, false));
+            solver.post(solver.globalCardinality(var, values, cover, false));
         }
     }
 
@@ -234,7 +233,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeCoverCounterCoupling(Solver solver, int a) {
         description += "coupling[" + a + "] ";
-        solver.post(IntConstraintFactory.sum(ArrayUtils.getColumn(occurrences, a), "=", data.getTotalCover(a)));
+        solver.post(solver.sum(ArrayUtils.getColumn(occurrences, a), "=", data.getTotalCover(a)));
     }
 
     private void makeCoverCounterCouplingAndEquity(Solver solver) {
@@ -268,7 +267,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             g++;
         }
         description += "couplingEquality[" + a + "] ";
-        solver.post(IntConstraintFactory.scalar(occ, sizes, "=", data.getTotalCover(a)));
+        solver.post(solver.scalar(occ, sizes, "=", data.getTotalCover(a)));
     }
 
 
@@ -292,7 +291,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality(shifts[e], values, occurrences[e], false));
+            solver.post(solver.globalCardinality(shifts[e], values, occurrences[e], false));
         }
 
     }
@@ -307,7 +306,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCounterWithOccurrence(Solver solver, int a) {
         for (int e = 0; e < data.nbEmployees(); e++) {
             if (occurrences[e][a].getLB() > 0 || occurrences[e][a].getUB() < data.nbDays()) {
-                solver.post(IntConstraintFactory.count(a, shifts[e], occurrences[e][a]));
+                solver.post(solver.count(a, shifts[e], occurrences[e][a]));
             }
         }
     }
@@ -342,7 +341,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //                    IntVar occ = ConstraintFactory.makeIntVar("nW" + t + data.getLiteral(a) + e, lb, ub, "cp:bound", Options.V_NO_DECISION);
                     IntVar occ = solver.intVar("nW" + t + data.getLiteral(a) + e, lb, ub, true);
                     System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                    solver.post(IntConstraintFactory.count(a, vars, occ));
+                    solver.post(solver.count(a, vars, occ));
                 }
             }
         }
@@ -362,7 +361,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 for (int i = 0; i < values.length; i++) {
                     values[i] = i;
                 }
-                solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
+                solver.post(solver.globalCardinality(vars, values, cards, false));
             }
         }
 
@@ -454,13 +453,13 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 );
                 SatFactory.addClauses(tree, solver);
                 solver.ifThenElse(bvars[0],
-                        IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n));
+                        solver.arithm(s[t], "=", n), solver.arithm(s[t], "!=", n));
                 solver.ifThenElse(bvars[1],
-                        IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n));
+                        solver.arithm(s[t + 1], "=", n), solver.arithm(s[t + 1], "!=", n));
                 solver.ifThenElse(bvars[2],
-                        IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r));
+                        solver.arithm(s[t + 1], "=", r), solver.arithm(s[t + 1], "!=", r));
                 solver.ifThenElse(bvars[3],
-                        IntConstraintFactory.arithm(s[t + 2], "=", r), IntConstraintFactory.arithm(s[t + 2], "!=", r));
+                        solver.arithm(s[t + 2], "=", r), solver.arithm(s[t + 2], "!=", r));
             }
             int t = data.nbDays() - 2;
             BoolVar[] bvars = solver.boolVarArray("b", 2);
@@ -468,9 +467,9 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             LogOp tree = LogOp.implies(bvars[0], bvars[1]);
             SatFactory.addClauses(tree, solver);
             solver.ifThenElse(bvars[0],
-                    IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n));
+                    solver.arithm(s[t], "=", n), solver.arithm(s[t], "!=", n));
             solver.ifThenElse(bvars[1],
-                    IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n));
+                    solver.arithm(s[t + 1], "=", n), solver.arithm(s[t + 1], "!=", n));
         }
     }
 
@@ -504,19 +503,19 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 );
                 SatFactory.addClauses(tree, solver);
                 solver.ifThenElse(bvars[0],
-                        IntConstraintFactory.arithm(s[t], "=", r),
-                        IntConstraintFactory.arithm(s[t], "!=", r));
+                        solver.arithm(s[t], "=", r),
+                        solver.arithm(s[t], "!=", r));
                 solver.ifThenElse(bvars[1],
-                        IntConstraintFactory.arithm(s[t + 1], "=", r),
-                        IntConstraintFactory.arithm(s[t + 1], "!=", r));
+                        solver.arithm(s[t + 1], "=", r),
+                        solver.arithm(s[t + 1], "!=", r));
                 solver.ifThenElse(bvars[2],
-                        IntConstraintFactory.arithm(s[t + 7], "=", r), IntConstraintFactory.arithm(s[t + 7], "!=", r));
+                        solver.arithm(s[t + 7], "=", r), solver.arithm(s[t + 7], "!=", r));
                 solver.ifThenElse(bvars[3],
-                        IntConstraintFactory.arithm(s[t + 8], "=", r), IntConstraintFactory.arithm(s[t + 8], "!=", r));
+                        solver.arithm(s[t + 8], "=", r), solver.arithm(s[t + 8], "!=", r));
                 solver.ifThenElse(bvars[4],
-                        IntConstraintFactory.arithm(s[t + 14], "=", r), IntConstraintFactory.arithm(s[t + 14], "!=", r));
+                        solver.arithm(s[t + 14], "=", r), solver.arithm(s[t + 14], "!=", r));
                 solver.ifThenElse(bvars[5],
-                        IntConstraintFactory.arithm(s[t + 15], "=", r), IntConstraintFactory.arithm(s[t + 15], "!=", r));
+                        solver.arithm(s[t + 15], "=", r), solver.arithm(s[t + 15], "!=", r));
 
                 /*solver.post(ConstraintFactory.ifThenElse(
          ConstraintFactory.and(
@@ -577,11 +576,11 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 LogOp tree = LogOp.ifOnlyIf(bvars[0], bvars[1]);
                 SatFactory.addClauses(tree, solver);
                 solver.ifThenElse(bvars[0],
-                        IntConstraintFactory.arithm(s[t], "=", r),
-                        IntConstraintFactory.arithm(s[t], "!=", r));
+                        solver.arithm(s[t], "=", r),
+                        solver.arithm(s[t], "!=", r));
                 solver.ifThenElse(bvars[1],
-                        IntConstraintFactory.arithm(s[t + 1], "=", r),
-                        IntConstraintFactory.arithm(s[t + 1], "!=", r));
+                        solver.arithm(s[t + 1], "=", r),
+                        solver.arithm(s[t + 1], "!=", r));
                 //solver.post(ConstraintFactory.ifOnlyIf(ConstraintFactory.eq(s[t], r), ConstraintFactory.eq(s[t + 1], r)));
             }
         }
@@ -611,7 +610,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         FiniteAutomaton automaton = this.makeForbiddenPatternsAsAutomaton();
         description += "pat[regular/" + automaton.getNbStates() + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(IntConstraintFactory.regular(shifts[e], automaton));
+            solver.post(solver.regular(shifts[e], automaton));
         }
     }
 
@@ -625,7 +624,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
         description += "pat[MCRegular/" + automaton.getNbStates() + "/" + costs[0][0].length + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(IntConstraintFactory.multicost_regular(shifts[e], occurrences[e], CostAutomaton.makeMultiResources(automaton, costs, occurrences[e])));
+            solver.post(solver.multiCostRegular(shifts[e], occurrences[e], CostAutomaton.makeMultiResources(automaton, costs, occurrences[e])));
         }
     }
 

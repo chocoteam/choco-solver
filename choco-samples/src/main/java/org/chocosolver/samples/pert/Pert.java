@@ -33,7 +33,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -97,12 +96,12 @@ public class Pert extends AbstractProblem {
             for (int k = 0, j = disjoint.nextSetBit(0); j >= 0; j = disjoint.nextSetBit(j + 1), k++) {
                 tvars[k] = vars[j];
             }
-            solver.post(IntConstraintFactory.alldifferent(tvars, "BC"));
+            solver.post(solver.allDifferent(tvars, "BC"));
         }
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return IntConstraintFactory.arithm(x, "<=", y, "-", duration);
+        return x.getSolver().arithm(x, "<=", y, "-", duration);
     }
 
     @Override

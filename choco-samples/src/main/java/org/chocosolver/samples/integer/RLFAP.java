@@ -35,7 +35,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -124,7 +123,7 @@ public class RLFAP extends AbstractProblem {
 
         for (int i = 0; i < _ctr.length; i++) {
             int[] ci = _ctr[i];
-            solver.post(IntConstraintFactory.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3]));
+            solver.post(solver.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3]));
 
             // MARK BOTH SPOTS IN "PRECEDENCE" GRAPH
             graph[ci[0] - 1][ci[1] - 1] = 1;
@@ -136,10 +135,10 @@ public class RLFAP extends AbstractProblem {
             freqs = values.toArray();
             Arrays.sort(freqs);
             for (int i = 0; i < freqs.length; i++) {
-                solver.post(IntConstraintFactory.count(freqs[i], vars, cards[i]));
+                solver.post(solver.count(freqs[i], vars, cards[i]));
             }
             nb0 = solver.intVar("nb0", 0, freqs.length, true);
-            solver.post(IntConstraintFactory.count(0, cards, nb0));
+            solver.post(solver.count(0, cards, nb0));
         }
         // RANKING VARIABLES PER LAYER OF DISTINCT SPOT
         rank = new int[n];

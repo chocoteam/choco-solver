@@ -61,10 +61,10 @@ public class ConstraintTest {
     public void testDependencyConditions() {
         Solver solver = new Solver();
         IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
-        solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
-        solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
-        solver.post(ICF.arithm(ivs[0], ">=", ivs[2])); // INST + UB or INST + LB
-        solver.post(ICF.arithm(ivs[0], "!=", ivs[3])); // instantiation()
+        solver.post(solver.allDifferent(ivs, "BC")); // boundAndInst()
+        solver.post(solver.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
+        solver.post(solver.arithm(ivs[0], ">=", ivs[2])); // INST + UB or INST + LB
+        solver.post(solver.arithm(ivs[0], "!=", ivs[3])); // instantiation()
 
         solver.set(ISF.random_value(ivs, 0));
         solver.findAllSolutions();
@@ -76,11 +76,11 @@ public class ConstraintTest {
     public void testDependencyConditions2() {
         Solver solver = new Solver();
         IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
-        solver.post(ICF.alldifferent(ivs, "BC")); // boundAndInst()
-        solver.post(ICF.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
-        Constraint cr = ICF.arithm(ivs[0], ">=", ivs[2]);
+        solver.post(solver.allDifferent(ivs, "BC")); // boundAndInst()
+        solver.post(solver.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
+        Constraint cr = solver.arithm(ivs[0], ">=", ivs[2]);
         solver.post(cr); // INST + UB or INST + LB
-        solver.post(ICF.arithm(ivs[0], "!=", ivs[3])); // instantiation()
+        solver.post(solver.arithm(ivs[0], "!=", ivs[3])); // instantiation()
         solver.unpost(cr);
     }
 
