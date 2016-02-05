@@ -103,19 +103,19 @@ public class BACP extends AbstractProblem {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\
             for (int j = 0; j < n_courses; j++) {
                 solver.ifThenElse(x[i][j],
-								solver.arithm(course_period[j], "=", i),
-								solver.arithm(course_period[j], "!=", i)
+                        solver.arithm(course_period[j], "=", i),
+                        solver.arithm(course_period[j], "!=", i)
                 );
             }
             // sum(i in courses) (x[p, i])>=courses_per_period_lb /\
             // sum(i in courses) (x[p, i])<=courses_per_period_ub /\
-            solver.post(solver.sum(x[i], "=", sum));
+            solver.sum(x[i], "=", sum).post();
             //  load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
-            solver.post(solver.scalar(x[i], course_load, "=", load[i]));
+            solver.scalar(x[i], course_load, "=", load[i]).post();
             //  load[p] >= load_per_period_lb /\
-            solver.post(solver.arithm(load[i], ">=", load_per_period_lb));
+            solver.arithm(load[i], ">=", load_per_period_lb).post();
             //  load[p] <= objective
-            solver.post(solver.arithm(load[i], "<=", objective));
+            solver.arithm(load[i], "<=", objective).post();
         }
 
         prerequisite(3, 1);
@@ -188,7 +188,7 @@ public class BACP extends AbstractProblem {
     }
 
     private void prerequisite(int a, int b) {
-        solver.post(solver.arithm(course_period[b - 1], "<", course_period[a - 1]));
+        solver.arithm(course_period[b - 1], "<", course_period[a - 1]).post();
     }
 
 

@@ -116,7 +116,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(solver.sum(ai, "=", solver.intVar("scal", 0, q - p + 1, true)));
+                solver.sum(ai, "=", solver.intVar("scal", 0, q - p + 1, true)).post();
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);

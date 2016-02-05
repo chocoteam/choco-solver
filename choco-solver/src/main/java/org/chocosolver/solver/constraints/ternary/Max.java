@@ -35,6 +35,9 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
 import org.chocosolver.util.tools.StringUtils;
 
+import static java.lang.Math.max;
+import static org.chocosolver.util.tools.StringUtils.randomName;
+
 /**
  * X = MAX(Y,Z)
  * <br/>
@@ -55,9 +58,9 @@ public class Max extends Constraint {
             return b;
         } else {
             Solver solver = a.getSolver();
-            IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
-                    Math.max(a.getLB(), b.getLB()), Math.max(a.getUB(), b.getUB()), solver);
-            solver.post(solver.max(z, a, b));
+            IntVar z = new IntervalIntVarImpl(randomName(),
+                    max(a.getLB(), b.getLB()), max(a.getUB(), b.getUB()), solver);
+            solver.max(z, a, b).post();
             return z;
         }
     }

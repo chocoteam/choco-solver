@@ -52,6 +52,10 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 
+import static java.lang.System.out;
+import static org.chocosolver.solver.constraints.SatFactory.addClauses;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.implies;
+
 public class StableMarriage extends AbstractProblem {
 
     @Option(name = "-problem", usage = "Problem instance (default 1.", required = false)
@@ -159,8 +163,8 @@ public class StableMarriage extends AbstractProblem {
         //
         // data
         //
-        System.out.println("\n#####################");
-        System.out.println("Problem: " + problem);
+        out.println("\n#####################");
+        out.println("Problem: " + problem);
 
         switch (problem) {
             case 1:
@@ -188,8 +192,8 @@ public class StableMarriage extends AbstractProblem {
         wife = solver.intVarArray("wife", n, 0, n - 1, false);
         husband = solver.intVarArray("husband", n, 0, n - 1, false);
 
-        solver.post(solver.allDifferent(wife, "BC"));
-        solver.post(solver.allDifferent(husband, "BC"));
+        solver.allDifferent(wife, "BC").post();
+        solver.allDifferent(husband, "BC").post();
 
 
         //
@@ -201,7 +205,7 @@ public class StableMarriage extends AbstractProblem {
       solver.addConstraint(
           solver.makeEquality(solver.makeElement(husband, wife[m]), m));
       */
-            solver.post(solver.element(solver.intVar(m), husband, wife[m], 0));
+            solver.element(solver.intVar(m), husband, wife[m], 0).post();
         }
 
         //   forall(w in Women)
@@ -211,7 +215,7 @@ public class StableMarriage extends AbstractProblem {
       solver.addConstraint(
           solver.makeEquality(solver.makeElement(wife, husband[w]), w));
       */
-            solver.post(solver.element(solver.intVar(w), wife, husband[w], 0));
+            solver.element(solver.intVar(w), wife, husband[w], 0).post();
         }
 
 
@@ -230,7 +234,7 @@ public class StableMarriage extends AbstractProblem {
                         rankMen[m][o]);
         */
                 IntVar v1 = solver.intVar("v1", 0, n - 1, false);
-                solver.post(solver.element(v1, rankMen[m], wife[m], 0));
+                solver.element(v1, rankMen[m], wife[m], 0).post();
 
                 BoolVar b1 = solver.boolVar("b1");
                 solver.ifThenElse(b1,
@@ -245,7 +249,7 @@ public class StableMarriage extends AbstractProblem {
                         rankWomen[o][m]);
         */
                 IntVar v2 = solver.intVar("v2", 0, n - 1, false);
-                solver.post(solver.element(v2, rankWomen[o], husband[o], 0));
+                solver.element(v2, rankWomen[o], husband[o], 0).post();
 
                 BoolVar b2 = solver.boolVar("b2");
                 solver.ifThenElse(b2,
@@ -262,8 +266,8 @@ public class StableMarriage extends AbstractProblem {
         */
 
                 // b1 -> b2
-                LogOp t = LogOp.implies(b1, b2);
-                SatFactory.addClauses(t, solver);
+                LogOp t = implies(b1, b2);
+                addClauses(t, solver);
 
                 // solver.post(solver.arithm(b1, "<=", b2));
 
@@ -282,7 +286,7 @@ public class StableMarriage extends AbstractProblem {
                         rankWomen[w][o]);
         */
                 IntVar v1 = solver.intVar("v1", 0, n - 1, false);
-                solver.post(solver.element(v1, rankWomen[w], husband[w], 0));
+                solver.element(v1, rankWomen[w], husband[w], 0).post();
 
                 BoolVar b1 = solver.boolVar("b1");
                 solver.ifThenElse(b1,
@@ -297,7 +301,7 @@ public class StableMarriage extends AbstractProblem {
                         rankMen[o][w]);
         */
                 IntVar v2 = solver.intVar("v2", 0, n - 1, false);
-                solver.post(solver.element(v2, rankMen[o], wife[o], 0));
+                solver.element(v2, rankMen[o], wife[o], 0).post();
 
                 BoolVar b2 = solver.boolVar("b2");
                 solver.ifThenElse(b2,
@@ -314,8 +318,8 @@ public class StableMarriage extends AbstractProblem {
         */
 
                 // b1 -> b2
-                LogOp t = LogOp.implies(b1, b2);
-                SatFactory.addClauses(t, solver);
+                LogOp t = implies(b1, b2);
+                addClauses(t, solver);
 
                 // solver.post(solver.arithm(b1, "<=", b2));
 

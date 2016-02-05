@@ -75,7 +75,7 @@ public class SMPTSP extends AbstractProblem {
 		// Input
 		nbTasks = 5;
 		nbAvailableShifts = 5;
-		int[][] skilledShifts = new int[][]{{2,3,4}, {1,2,3}, {1,3}, {3,4,5}, {1,2,5}};
+		int[][] skilledShifts = new int[][]{{2, 3, 4}, {1, 2, 3}, {1, 3}, {3, 4, 5}, {1, 2, 5}};
 		final boolean[][] taskOverlaps = new boolean[][]{
 				{true, true, true, true, false},
 				{true, true, true, false, false},
@@ -87,19 +87,19 @@ public class SMPTSP extends AbstractProblem {
 		// Variables
 		nbValues = solver.intVar("nb shifts", 0, nbAvailableShifts, true);
 		assignment = new IntVar[nbTasks];
-		for(int i=0;i<nbTasks;i++){
+		for (int i = 0; i < nbTasks; i++) {
 			assignment[i] = solver.intVar("t" + (i + 1), skilledShifts[i]);
 		}
 
 		// Constraints
 		for (int t1 = 0; t1 < nbTasks; t1++) {
-			for (int t2 = t1+1; t2 < nbTasks; t2++) {
-				if(taskOverlaps[t1][t2]){
-					solver.post(solver.arithm(assignment[t1],"!=",assignment[t2]));
+			for (int t2 = t1 + 1; t2 < nbTasks; t2++) {
+				if (taskOverlaps[t1][t2]) {
+					solver.arithm(assignment[t1], "!=", assignment[t2]).post();
 				}
 			}
 		}
-		solver.post(solver.nValues(assignment,nbValues));
+		solver.nValues(assignment, nbValues).post();
 	}
 
 	@Override

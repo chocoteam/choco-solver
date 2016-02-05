@@ -37,6 +37,9 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
+
 /**
  * Created by IntelliJ IDEA.
  * User: njussien
@@ -60,18 +63,15 @@ public class SimpleExplanationTest {
                     : s.intVar("x" + i, 1, vars.length + 1, true);
         }
         // post constraints
-        Constraint[] lcstrs = new Constraint[3];
-        lcstrs[0] = s.arithm(vars[0], "<", vars[1]);
-        lcstrs[1] = s.arithm(vars[1], "<", vars[2]);
-        lcstrs[2] = s.arithm(vars[0], "!=", vars[1]);
+        s.arithm(vars[0], "<", vars[1]).post();
+        s.arithm(vars[1], "<", vars[2]).post();
+        s.arithm(vars[0], "!=", vars[1]).post();
         // configure Solver
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-        s.post(lcstrs);
-        s.set(strategy);
+        s.set(lexico_LB(vars));
         // solve
         s.findSolution();
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 1, "nb sol incorrect");
+        assertEquals(sol, 1, "nb sol incorrect");
     }
 
 

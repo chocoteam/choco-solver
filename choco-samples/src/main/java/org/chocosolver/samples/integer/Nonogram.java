@@ -104,7 +104,7 @@ public class Nonogram extends AbstractProblem {
             regexp.append(i == m - 1 ? '*' : '+');
         }
         IAutomaton auto = new FiniteAutomaton(regexp.toString());
-        solver.post(solver.regular(cells, auto));
+        solver.regular(cells, auto).post();
     }
 
 

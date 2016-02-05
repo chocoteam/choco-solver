@@ -38,6 +38,13 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.testng.Assert.*;
+
 /**
  * <br/>
  *
@@ -54,58 +61,59 @@ public class ViewSumXYTest {
         IntVar X = solver.intVar("X", 1, 10, false);
         IntVar Y = solver.intVar("Y", 3, 8, false);
         IntVar Z = solver.intVar("Z", 0, 200, false);
-		solver.post(solver.sum(new IntVar[]{X,Y}, "=", Z));
+        solver.sum(new IntVar[]{X, Y}, "=", Z).post();
 
         try {
             solver.propagate();
-            Assert.assertFalse(Z.isInstantiated());
-            Assert.assertEquals(Z.getLB(), 4);
-            Assert.assertEquals(Z.getUB(), 18);
-            Assert.assertTrue(Z.contains(10));
-            Assert.assertEquals(Z.nextValue(3), 4);
-            Assert.assertEquals(Z.nextValue(10), 11);
-            Assert.assertEquals(Z.nextValue(18), Integer.MAX_VALUE);
-            Assert.assertEquals(Z.previousValue(19), 18);
-            Assert.assertEquals(Z.previousValue(10), 9);
-            Assert.assertEquals(Z.previousValue(4), Integer.MIN_VALUE);
+            assertFalse(Z.isInstantiated());
+            assertEquals(Z.getLB(), 4);
+            assertEquals(Z.getUB(), 18);
+            assertTrue(Z.contains(10));
+            assertEquals(Z.nextValue(3), 4);
+            assertEquals(Z.nextValue(10), 11);
+            assertEquals(Z.nextValue(18), MAX_VALUE);
+            assertEquals(Z.previousValue(19), 18);
+            assertEquals(Z.previousValue(10), 9);
+            assertEquals(Z.previousValue(4), MIN_VALUE);
 
-            Z.updateLowerBound(12, Cause.Null);
+            Z.updateLowerBound(12, Null);
             solver.propagate();
-            Assert.assertEquals(X.getLB(), 4);
-            Assert.assertEquals(X.getUB(), 10);
-            Assert.assertEquals(Y.getLB(), 3);
-            Assert.assertEquals(Y.getUB(), 8);
+            assertEquals(X.getLB(), 4);
+            assertEquals(X.getUB(), 10);
+            assertEquals(Y.getLB(), 3);
+            assertEquals(Y.getUB(), 8);
 
-            Y.updateUpperBound(-2, Cause.Null);
+            Y.updateUpperBound(-2, Null);
             solver.propagate();
-            Assert.assertEquals(Y.getUB(), -2);
-            Assert.assertEquals(X.getLB(), 2);
+            assertEquals(Y.getUB(), -2);
+            assertEquals(X.getLB(), 2);
 
-            Y.removeValue(-4, Cause.Null);
+            Y.removeValue(-4, Null);
             solver.propagate();
-            Assert.assertFalse(Y.contains(-4));
-            Assert.assertFalse(X.contains(4));
+            assertFalse(Y.contains(-4));
+            assertFalse(X.contains(4));
 
-            Y.removeInterval(-8, -6, Cause.Null);
+            Y.removeInterval(-8, -6, Null);
             solver.propagate();
-            Assert.assertFalse(Y.contains(-8));
-            Assert.assertFalse(Y.contains(-7));
-            Assert.assertFalse(Y.contains(-6));
-            Assert.assertFalse(X.contains(6));
-            Assert.assertFalse(X.contains(7));
-            Assert.assertFalse(X.contains(8));
+            assertFalse(Y.contains(-8));
+            assertFalse(Y.contains(-7));
+            assertFalse(Y.contains(-6));
+            assertFalse(X.contains(6));
+            assertFalse(X.contains(7));
+            assertFalse(X.contains(8));
 
-            Assert.assertEquals(X.getDomainSize(), 4);
-            Assert.assertEquals(Y.getDomainSize(), 4);
+            assertEquals(X.getDomainSize(), 4);
+            assertEquals(Y.getDomainSize(), 4);
 
-            Y.instantiateTo(-5, Cause.Null);
+            Y.instantiateTo(-5, Null);
             solver.propagate();
-            Assert.assertTrue(X.isInstantiated());
-            Assert.assertTrue(Y.isInstantiated());
-            Assert.assertEquals(X.getValue(), 5);
-            Assert.assertEquals(Y.getValue(), -5);
+            assertTrue(X.isInstantiated());
+            assertTrue(Y.isInstantiated());
+            assertEquals(X.getValue(), 5);
+            assertEquals(Y.getValue(), -5);
 
-        } catch (ContradictionException ignored) {}
+        } catch (ContradictionException ignored) {
+        }
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -119,8 +127,8 @@ public class ViewSumXYTest {
                 xs[0] = ref.intVar("x", 1, 5, true);
                 xs[1] = ref.intVar("y", 1, 5, true);
                 xs[2] = ref.intVar("z", 2, 10, true);
-                ref.post(ref.scalar(xs, new int[]{1, 1, -1}, "=", 0));
-                ref.set(IntStrategyFactory.random_bound(xs, seed));
+                ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
+                ref.set(random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
@@ -128,9 +136,9 @@ public class ViewSumXYTest {
                 xs[0] = solver.intVar("x", 1, 5, true);
                 xs[1] = solver.intVar("y", 1, 5, true);
                 IntVar Z = solver.intVar("Z", 0, 200, false);
-				solver.post(solver.sum(xs, "=", Z));
+                solver.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(IntStrategyFactory.random_bound(xs, seed));
+                solver.set(random_bound(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -150,8 +158,8 @@ public class ViewSumXYTest {
                 xs[0] = ref.intVar("x", 1, 5, false);
                 xs[1] = ref.intVar("y", 1, 5, false);
                 xs[2] = ref.intVar("z", 2, 10, false);
-                ref.post(ref.scalar(xs, new int[]{1, 1, -1}, "=", 0));
-                ref.set(IntStrategyFactory.random_value(xs, seed));
+                ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
+                ref.set(random_value(xs, seed));
             }
             Solver solver = new Solver();
             {
@@ -159,9 +167,9 @@ public class ViewSumXYTest {
                 xs[0] = solver.intVar("x", 1, 5, false);
                 xs[1] = solver.intVar("y", 1, 5, false);
                 IntVar Z = solver.intVar("Z", 0, 200, false);
-				solver.post(solver.sum(xs, "=", Z));
+                solver.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(IntStrategyFactory.random_value(xs, seed));
+                solver.set(random_value(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();

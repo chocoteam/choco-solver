@@ -76,16 +76,16 @@ public class Photo extends AbstractProblem {
 
 
             IntVar k = solver.intVar(-20000, 20000);
-			solver.post(solver.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]));
-			dist[i] = solver.intAbsView(k);
+            solver.sum(new IntVar[]{positions[pb], k}, "=", positions[pa]).post();
+            dist[i] = solver.intAbsView(k);
 
             solver.ifThenElse(viols[i],
                     solver.arithm(dist[i], ">", 1),
                     solver.arithm(dist[i], "<=", 1));
         }
-        solver.post(solver.sum(viols, "=", violations));
-        solver.post(solver.allDifferent(positions, "BC"));
-        solver.post(solver.arithm(positions[1], ">", positions[0]));
+        solver.sum(viols, "=", violations).post();
+        solver.allDifferent(positions, "BC").post();
+        solver.arithm(positions[1], ">", positions[0]).post();
     }
 
     @Override

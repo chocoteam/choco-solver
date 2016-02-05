@@ -41,6 +41,9 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -58,16 +61,11 @@ public class OffsetViewTest {
 
         IntVar[] vars = {X, Y};
 
-        Constraint[] cstrs = {
-                s.arithm(Y, "!=", 4)
-        };
+        s.arithm(Y, "!=", 4).post();
 
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-
-        s.post(cstrs);
-        s.set(strategy);
+        s.set(lexico_LB(vars));
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getMeasures().getSolutionCount(), 2);
     }
 
 
@@ -80,16 +78,11 @@ public class OffsetViewTest {
 
         IntVar[] vars = {X, Y};
 
-        Constraint[] cstrs = {
-                s.arithm(Y, "!=", -2)
-        };
+        s.arithm(Y, "!=", -2).post();
 
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-
-        s.post(cstrs);
-        s.set(strategy);
+        s.set(lexico_LB(vars));
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 4);
+        assertEquals(s.getMeasures().getSolutionCount(), 4);
     }
 
     private Solver bijective(int low, int upp, int coeff) {
@@ -100,15 +93,10 @@ public class OffsetViewTest {
 
         IntVar[] vars = {X, Y};
 
-        Constraint[] cstrs = {
-                s.arithm(Y, ">=", low + coeff - 1),
-                s.arithm(Y, "<=", upp - coeff - 1)
-        };
+        s.arithm(Y, ">=", low + coeff - 1).post();
+        s.arithm(Y, "<=", upp - coeff - 1).post();
 
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-
-        s.post(cstrs);
-        s.set(strategy);
+        s.set(lexico_LB(vars));
         return s;
     }
 
@@ -120,16 +108,11 @@ public class OffsetViewTest {
 
         IntVar[] vars = {X, Y};
 
-        Constraint[] cstrs = {
-                s.arithm(Y, ">=", low + coeff - 1),
-                s.arithm(Y, "<=", upp - coeff - 1),
-                s.arithm(X, "=", Y, "+", coeff)
-        };
+        s.arithm(Y, ">=", low + coeff - 1).post();
+        s.arithm(Y, "<=", upp - coeff - 1).post();
+        s.arithm(X, "=", Y, "+", coeff).post();
 
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-
-        s.post(cstrs);
-        s.set(strategy);
+        s.set(lexico_LB(vars));
         return s;
     }
 

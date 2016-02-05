@@ -36,6 +36,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -64,8 +66,8 @@ public class MinTest extends AbstractTernaryTest {
         X[2] = solver.intVar("2", -5, -2, true);
         X[3] = solver.intVar(-3);
 
-        solver.post(solver.min(min, X));
+        solver.min(min, X).post();
         solver.propagate();
-        Assert.assertEquals(X[2].getUB(), -5);
+        assertEquals(X[2].getUB(), -5);
     }
 }

@@ -68,8 +68,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
         vars[0] = solver.intVar("X", minX, maxX, true);
         vars[1] = solver.intVar("Y", minY, maxY, true);
 
-        Constraint abs = solver.absolute(vars[0], vars[1]);
-        solver.post(abs);
+        solver.absolute(vars[0], vars[1]).post();
     }
 
     @Override

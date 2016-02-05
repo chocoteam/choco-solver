@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StringUtils;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.tools.StatisticUtils.*;
 
 /**
@@ -56,15 +57,11 @@ public class CycleLtTest {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, min, n, false);
         }
-        Constraint[] cstrs = new Constraint[m + 1];
-        int i;
-        for (i = 0; i < n - 1; i++) {
-            cstrs[i] = s.arithm(vars[i], "<", vars[i + 1]);
+        for (int i = 0; i < n - 1; i++) {
+            s.arithm(vars[i], "<", vars[i + 1]).post();
         }
-        cstrs[i] = s.arithm(vars[n - 1], "<", vars[0]);
-
-        s.post(cstrs);
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.arithm(vars[n - 1], "<", vars[0]).post();
+        s.set(lexico_LB(vars));
         return s;
     }
 

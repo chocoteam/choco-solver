@@ -42,6 +42,14 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
+import static org.chocosolver.solver.search.limits.ICounter.Impl;
+import static org.chocosolver.solver.search.limits.ICounter.Impl.None;
+import static org.chocosolver.solver.search.loop.SearchLoopFactory.lns;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+
 /**
  * <br/>
  *
@@ -55,20 +63,20 @@ public class ELNSTest {
         final IntVar[] vars = solver.intVarArray("var", 6, 0, 4, true);
         final IntVar obj = solver.intVar("obj", 0, 6, true);
 
-        solver.post(solver.sum(vars, "=", obj));
-        solver.post(solver.arithm(vars[0], "+", vars[1], "<", 2));
-        solver.post(solver.arithm(vars[4], "+", vars[5], ">", 3));
+        solver.sum(vars, "=", obj).post();
+        solver.arithm(vars[0], "+", vars[1], "<", 2).post();
+        solver.arithm(vars[4], "+", vars[5], ">", 3).post();
 
-        ExplanationFactory.CBJ.plugin(solver, false, false);
+        CBJ.plugin(solver, false, false);
 
-        SLF.lns(solver,
+        lns(solver,
                 new SequenceNeighborhood(
                         new ExplainingObjective(solver, 200, 123456L),
                         new ExplainingCut(solver, 200, 123456L),
                         new RandomNeighborhood(solver, vars, 200, 123456L)
                 ),
-                ICounter.Impl.None);
-        solver.set(IntStrategyFactory.random_bound(vars, seed));
+                None);
+        solver.set(random_bound(vars, seed));
 
 
 //        SMF.log(solver, true, true, new IMessage() {
@@ -77,8 +85,8 @@ public class ELNSTest {
 //                return Arrays.toString(vars) + " o:" + obj;
 //            }
 //        });
-        Chatterbox.showSolutions(solver);
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);
+        showSolutions(solver);
+        solver.findOptimalSolution(MINIMIZE, obj);
     }
 
 

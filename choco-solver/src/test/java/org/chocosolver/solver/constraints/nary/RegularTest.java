@@ -43,6 +43,12 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -75,11 +81,11 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(solver.regular(vars, auto));
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        solver.regular(vars, auto).post();
+        solver.set(lexico_LB(vars));
 
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 59049);
+        assertEquals(solver.getMeasures().getSolutionCount(), 59049);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -115,13 +121,13 @@ public class RegularTest {
         }
         auto = auto.complement();
         auto.minimize();
-        Assert.assertEquals(auto.getNbStates(), 54);
+        assertEquals(auto.getNbStates(), 54);
 
-        solver.post(solver.regular(vars, auto));
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        solver.regular(vars, auto).post();
+        solver.set(lexico_LB(vars));
 
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 25980);
+        assertEquals(solver.getMeasures().getSolutionCount(), 25980);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -147,11 +153,11 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(solver.regular(vars, auto));
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        solver.regular(vars, auto).post();
+        solver.set(lexico_LB(vars));
 
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 531441);
+        assertEquals(solver.getMeasures().getSolutionCount(), 531441);
 //        assertEquals(124927,s.getNodeCount());
 
     }
@@ -178,11 +184,11 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(solver.regular(vars, auto));
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        solver.regular(vars, auto).post();
+        solver.set(lexico_LB(vars));
 
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1594323);
+        assertEquals(solver.getMeasures().getSolutionCount(), 1594323);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -195,11 +201,11 @@ public class RegularTest {
         for (int i = 0; i < n; i++) {
             vars[i] = solver.intVar("x_" + i, 0, 2, false);
         }
-        solver.post(solver.regular(vars, auto));
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        solver.regular(vars, auto).post();
+        solver.set(lexico_LB(vars));
 
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4371696);
+        assertEquals(solver.getMeasures().getSolutionCount(), 4371696);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -212,109 +218,109 @@ public class RegularTest {
         for (int i = 0; i < n; i++) {
             vars[i] = solver.intVar("x_" + i, new int[]{0, 10, 20});
         }
-        solver.post(solver.regular(vars, auto));
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        solver.regular(vars, auto).post();
+        solver.set(lexico_LB(vars));
 
-        Chatterbox.showSolutions(solver);
+        showSolutions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 162);
+        assertEquals(solver.getMeasures().getSolutionCount(), 162);
     }
 
     @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
     public void testNeg() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 4, -10, 10, false);
-        solver.post(solver.regular(CS, new FiniteAutomaton("<-9>1*")));
-        Chatterbox.showSolutions(solver);
+        solver.regular(CS, new FiniteAutomaton("<-9>1*")).post();
+        showSolutions(solver);
         solver.findAllSolutions();
 
         final List<Solution> solutions = solver.getSolutionRecorder().getSolutions();
 
-        System.out.println(solutions);
+        out.println(solutions);
 
-        Assert.assertEquals(1, solutions.size());
-        Assert.assertEquals(-9, (int) solutions.get(0).getIntVal(CS[0]));
-        Assert.assertEquals(1, (int) solutions.get(0).getIntVal(CS[1]));
-        Assert.assertEquals(1, (int) solutions.get(0).getIntVal(CS[2]));
-        Assert.assertEquals(-5, (int) solutions.get(0).getIntVal(CS[3]));
+        assertEquals(1, solutions.size());
+        assertEquals(-9, (int) solutions.get(0).getIntVal(CS[0]));
+        assertEquals(1, (int) solutions.get(0).getIntVal(CS[1]));
+        assertEquals(1, (int) solutions.get(0).getIntVal(CS[2]));
+        assertEquals(-5, (int) solutions.get(0).getIntVal(CS[3]));
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp1() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(solver.regular(CS, new FiniteAutomaton("[12]*")));
+        solver.regular(CS, new FiniteAutomaton("[12]*")).post();
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp2() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(solver.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)));
+        solver.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)).post();
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp3() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(solver.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)));
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
+        solver.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)).post();
+        showSolutions(solver);
+        showDecisions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
+        assertEquals(solver.getMeasures().getSolutionCount(), 7);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp4() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(solver.regular(CS, new FiniteAutomaton(".*", 0, 3)));
+        solver.regular(CS, new FiniteAutomaton(".*", 0, 3)).post();
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
+        assertEquals(solver.getMeasures().getSolutionCount(), 16);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp5() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 2, 0, 3, false);
-        solver.post(solver.regular(CS, new FiniteAutomaton("1{2}")));
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
+        solver.regular(CS, new FiniteAutomaton("1{2}")).post();
+        showSolutions(solver);
+        showDecisions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp6() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 4, 0, 3, false);
-        solver.post(solver.regular(CS, new FiniteAutomaton("0{2,3}1*")));
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
+        solver.regular(CS, new FiniteAutomaton("0{2,3}1*")).post();
+        showSolutions(solver);
+        showDecisions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testregExp7() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 10, 0, 2, false);
-        solver.post(solver.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")));
-        Chatterbox.showSolutions(solver, () -> {
+        solver.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")).post();
+        showSolutions(solver, () -> {
             for (int i = 0; i < 10; i++) {
-                System.out.printf("%d", CS[i].getValue());
+                out.printf("%d", CS[i].getValue());
             }
 //            System.out.printf("\n");
             return "";
         });
-        solver.set(ISF.lexico_LB(CS));
+        solver.set(lexico_LB(CS));
 //        Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 84);
+        assertEquals(solver.getMeasures().getSolutionCount(), 84);
     }
 
 
@@ -322,10 +328,10 @@ public class RegularTest {
     public void testregExp8() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 3, new int[]{43, 59, 117});
-        solver.post(solver.regular(CS, new FiniteAutomaton("<43><59><117>")));
-        solver.set(ISF.lexico_LB(CS));
+        solver.regular(CS, new FiniteAutomaton("<43><59><117>")).post();
+        solver.set(lexico_LB(CS));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        assertEquals(solver.getMeasures().getSolutionCount(), 1);
 
     }
 

@@ -43,15 +43,20 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 public class SubcircuitTest {
 
     @Test(groups="1s", timeOut=60000)
     public static void test1() {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 10, 0, 20, true);
-        solver.post(solver.subCircuit(x, 0, solver.intVar("length", 0, x.length - 1, true)));
+        solver.subCircuit(x, 0, solver.intVar("length", 0, x.length - 1, true)).post();
         solver.findSolution();
-        Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
+        assertEquals(1, solver.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -59,10 +64,10 @@ public class SubcircuitTest {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 5, 0, 4, true);
         IntVar[] y = solver.intVarArray("y", 5, 5, 9, true);
-        IntVar[] vars = ArrayUtils.append(x, y);
-        solver.post(solver.subCircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)));
+        IntVar[] vars = append(x, y);
+        solver.subCircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)).post();
         solver.findSolution();
-        Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
+        assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -70,17 +75,17 @@ public class SubcircuitTest {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 5, 0, 4, false);
         IntVar[] y = solver.intVarArray("y", 5, 5, 9, false);
-        final IntVar[] vars = ArrayUtils.append(x, y);
+        final IntVar[] vars = append(x, y);
         try {
-            vars[1].removeValue(1, Cause.Null);
-            vars[6].removeValue(6, Cause.Null);
+            vars[1].removeValue(1, Null);
+            vars[6].removeValue(6, Null);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.assertTrue(false);
+            assertTrue(false);
         }
-        solver.post(solver.subCircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)));
+        solver.subCircuit(vars, 0, solver.intVar("length", 0, vars.length - 1, true)).post();
         solver.findSolution();
-        Assert.assertTrue(solver.getMeasures().getSolutionCount() == 0);
+        assertTrue(solver.getMeasures().getSolutionCount() == 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -91,13 +96,13 @@ public class SubcircuitTest {
         int max = 4;
         IntVar[] vars = solver.intVarArray("x", n, 0, n, true);
         IntVar nb = solver.intVar("size", min, max, true);
-        solver.post(solver.subCircuit(vars, 0, nb));
+        solver.subCircuit(vars, 0, nb).post();
         solver.findAllSolutions();
         int nbSol = 0;
         for (int i = min; i <= max; i++) {
             nbSol += parmi(i, n) * factorial(i - 1);
         }
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
+        assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
     }
 
     private static int factorial(int n) {

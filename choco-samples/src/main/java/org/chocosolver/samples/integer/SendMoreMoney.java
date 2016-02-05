@@ -86,9 +86,9 @@ public class SendMoreMoney extends AbstractProblem {
         R = solver.intVar("R", 0, 9, false);
         Y = solver.intVar("Y", 0, 9, false);
 
-        solver.post(solver.arithm(S, "!=", 0));
-        solver.post(solver.arithm(M, "!=", 0));
-        solver.post(solver.allDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC"));
+        solver.arithm(S, "!=", 0).post();
+        solver.arithm(M, "!=", 0).post();
+        solver.allDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC").post();
 
 
         ALL = new IntVar[]{
@@ -100,7 +100,7 @@ public class SendMoreMoney extends AbstractProblem {
                 1000, 100, 10, 1,
                 -10000, -1000, -100, -10, -1
         };
-        solver.post(solver.scalar(ALL, COEFFS, "=", 0));
+        solver.scalar(ALL, COEFFS, "=", 0).post();
     }
 
     @Override

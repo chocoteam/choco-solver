@@ -38,6 +38,14 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static java.lang.String.format;
+import static java.lang.System.out;
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.minDom_LB;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+
 /**
  * <br/>
  * <p/>
@@ -75,36 +83,36 @@ public class SmallSantaClaude {
         RealVar[] realViews = solver.realIntViewArray(kid_price, precision);
 
         // kids must have different gifts
-        solver.post(solver.allDifferent(kid_gift, "AC"));
+        solver.allDifferent(kid_gift, "AC").post();
         // associate each kid with his gift cost
         for (int i = 0; i < n_kids; i++) {
-            solver.post(solver.element(kid_price[i], gift_price, kid_gift[i]));
+            solver.element(kid_price[i], gift_price, kid_gift[i]).post();
         }
         // compute total cost
-        solver.post(solver.sum(kid_price, "=", total_cost));
+        solver.sum(kid_price, "=", total_cost).post();
 
         // compute average cost (i.e. average gift cost per kid)
-        RealVar[] allRV = ArrayUtils.append(realViews, new RealVar[]{average, average_deviation});
-        solver.post(solver.realIbexGenericConstraint("({0}+{1}+{2})/3={3};(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}", allRV));
+        RealVar[] allRV = append(realViews, new RealVar[]{average, average_deviation});
+        solver.realIbexGenericConstraint("({0}+{1}+{2})/3={3};(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}", allRV).post();
 
         // set search strategy (ABS)
-        solver.set(IntStrategyFactory.minDom_LB(kid_gift));
+        solver.set(minDom_LB(kid_gift));
         // displays resolution statistics
-        Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
+        showStatistics(solver);
+        showSolutions(solver);
         // print each solution
         solver.plugMonitor((IMonitorSolution) () -> {
-            System.out.println("*******************");
+            out.println("*******************");
             for (int i = 0; i < n_kids; i++) {
-                System.out.println(String.format("Kids #%d has received the gift #%d at a cost of %d euros",
+                out.println(format("Kids #%d has received the gift #%d at a cost of %d euros",
                         i, kid_gift[i].getValue(), kid_price[i].getValue()));
             }
-            System.out.println(String.format("Total cost: %d euros", total_cost.getValue()));
-            System.out.println(String.format("Average: %.3f euros per kid", average.getLB()));
-            System.out.println(String.format("Average deviation: %.3f ", average_deviation.getLB()));
+            out.println(format("Total cost: %d euros", total_cost.getValue()));
+            out.println(format("Average: %.3f euros per kid", average.getLB()));
+            out.println(format("Average deviation: %.3f ", average_deviation.getLB()));
         });
         // find optimal solution (Santa Claus is stingy)
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, average_deviation, precision);
+        solver.findOptimalSolution(MINIMIZE, average_deviation, precision);
         // free IBEX structures from memory
         solver.getIbex().release();
     }

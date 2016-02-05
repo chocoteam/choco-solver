@@ -41,6 +41,12 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static java.lang.System.arraycopy;
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.search.strategy.SetStrategyFactory.force_first;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+
 /**
  * @author Jean-Guillaume Fages
  * @since 01/13
@@ -63,12 +69,9 @@ public interface Model {
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             SetVar[] sets = new SetVar[n - 1];
-            System.arraycopy(vars, 0, sets, 0, n - 1);
-            Constraint ctr = s.union(sets, vars[n - 1]);
-            Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(ctrs);
-            s.set(strategy);
+            arraycopy(vars, 0, sets, 0, n - 1);
+            s.union(sets, vars[n - 1]).post();
+            s.set(force_first(vars));
             return s;
         }
     };
@@ -87,12 +90,9 @@ public interface Model {
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             SetVar[] sets = new SetVar[n - 1];
-            System.arraycopy(vars, 0, sets, 0, n - 1);
-            Constraint ctr = s.intersection(sets, vars[n - 1]);
-            Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(ctrs);
-            s.set(strategy);
+            arraycopy(vars, 0, sets, 0, n - 1);
+            s.intersection(sets, vars[n - 1]).post();
+            s.set(force_first(vars));
             return s;
         }
     };
@@ -110,8 +110,8 @@ public interface Model {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(s.allDisjoint(vars));
+            AbstractStrategy strategy = force_first(vars);
+            s.allDisjoint(vars).post();
             s.set(strategy);
             return s;
         }
@@ -130,8 +130,8 @@ public interface Model {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(s.allDifferent(vars));
+            AbstractStrategy strategy = force_first(vars);
+            s.allDifferent(vars).post();
             s.set(strategy);
             return s;
         }
@@ -150,10 +150,8 @@ public interface Model {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = s.subsetEq(vars);
-            Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(ctrs);
+            s.subsetEq(vars).post();
+            AbstractStrategy strategy = force_first(vars);
             s.set(strategy);
             return s;
         }
@@ -172,8 +170,8 @@ public interface Model {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            AbstractStrategy strategy = SetStrategyFactory.force_first(vars);
-            s.post(s.allEqual(vars));
+            AbstractStrategy strategy = force_first(vars);
+            s.allEqual(vars).post();
             s.set(strategy);
             return s;
         }
@@ -195,18 +193,15 @@ public interface Model {
                 vars[i] = bools[i] = s.boolVar("v_" + i);
                 if (domains[i].getIntDom().length == 1) {
                     try {
-                        bools[i].instantiateTo(domains[i].getIntDom()[0], Cause.Null);
+                        bools[i].instantiateTo(domains[i].getIntDom()[0], Null);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = s.sum(bools, "=", vars[n - 1]);
-            Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-            s.post(ctrs);
-            s.set(strategy);
+            s.sum(bools, "=", vars[n - 1]).post();
+            s.set(lexico_LB(vars));
             return s;
         }
     };
@@ -226,11 +221,8 @@ public interface Model {
             } catch (ArrayIndexOutOfBoundsException ce) {
 //                System.out.printf("");
             }
-            Constraint ctr = s.arithm(vars[0], "=", vars[1]);
-            Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-            s.post(ctrs);
-            s.set(strategy);
+            s.arithm(vars[0], "=", vars[1]).post();
+            s.set(lexico_LB(vars));
             return s;
         }
     };
@@ -249,12 +241,9 @@ public interface Model {
                 Y[i] = s.intVar("Y_" + i, domains[i + (n / 2)].getIntDom());
                 if (rvars[i + n / 2] == null) rvars[i + n / 2] = Y[i];
             }
-            IntVar[] allvars = ArrayUtils.append(X, Y);
-            Constraint ctr = s.inverseChanneling(X, Y, 0, 0);
-            Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(allvars);
-            s.post(ctrs);
-            s.set(strategy);
+            IntVar[] allvars = append(X, Y);
+            s.inverseChanneling(X, Y, 0, 0).post();
+            s.set(lexico_LB(allvars));
             return s;
         }
     };
@@ -274,8 +263,8 @@ public interface Model {
                     decvars[i] = vars[i];
                 }
             }
-            AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-            s.post(s.nValues(decvars, vars[n - 1]));
+            AbstractStrategy strategy = lexico_LB(vars);
+            s.nValues(decvars, vars[n - 1]).post();
             s.set(strategy);
             return s;
         }

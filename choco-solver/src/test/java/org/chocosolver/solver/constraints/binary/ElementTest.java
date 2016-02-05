@@ -46,6 +46,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static java.lang.System.currentTimeMillis;
+import static org.chocosolver.solver.constraints.binary.element.ElementFactory.detect;
+import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.chocosolver.util.tools.ArrayUtils.toArray;
+import static org.testng.Assert.assertEquals;
+
 /**
  * Created by IntelliJ IDEA.
  * User: njussien
@@ -57,17 +65,17 @@ public class ElementTest {
     private static void model(Solver s, IntVar index, int[] values, IntVar var,
                               int offset, int nbSol) {
 
-        s.post(s.element(var, values, index, offset));
+        s.element(var, values, index, offset).post();
 
-        IntVar[] allvars = ArrayUtils.toArray(index, var);
+        IntVar[] allvars = toArray(index, var);
 
         if (!(index.hasEnumeratedDomain() && var.hasEnumeratedDomain())) {
-            s.set(IntStrategyFactory.random_bound(allvars, System.currentTimeMillis()));
+            s.set(random_bound(allvars, currentTimeMillis()));
         } else {
-            s.set(IntStrategyFactory.random_value(allvars, System.currentTimeMillis()));
+            s.set(random_value(allvars, currentTimeMillis()));
         }
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
+        assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
 
 
@@ -122,7 +130,7 @@ public class ElementTest {
                 return true;
             }
         });
-        ExplanationFactory.CBJ.plugin(s, false, false);
+        CBJ.plugin(s, false, false);
 
         Random r = new Random(125);
         int[] values = new int[10];
@@ -132,23 +140,19 @@ public class ElementTest {
 
         IntVar[] vars = new IntVar[3];
         IntVar[] indices = new IntVar[3];
-        List<Constraint> lcstrs = new ArrayList<>(1);
 
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, 0, 10, false);
             indices[i] = s.intVar("i_" + i, 0, values.length - 1, false);
-            lcstrs.add(s.element(vars[i], values, indices[i], 0));
+            s.element(vars[i], values, indices[i], 0).post();
         }
 
         for (int i = 0; i < vars.length - 1; i++) {
-            lcstrs.add(s.arithm(vars[i], ">", vars[i + 1]));
+            s.arithm(vars[i], ">", vars[i + 1]).post();
         }
 
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-        s.post(cstrs);
-
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
+        assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
     }
 
     public void nasty(int seed, int nbvars, int nbsols) {
@@ -172,8 +176,8 @@ public class ElementTest {
         ref.set(IntStrategyFactory.random_value(allvarsr, seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
-            ref.post(ref.element(varsr[i], values, indicesr[i], 0));
-            ref.post(ref.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
+            ref.element(varsr[i], values, indicesr[i], 0).post();
+            ref.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3).post();
         }
 
         ref.findAllSolutions();
@@ -194,10 +198,10 @@ public class ElementTest {
             Solver solver = new Solver();
             IntVar I = solver.intVar("I", 0, 5, false);
             IntVar R = solver.intVar("R", 0, 10, false);
-            solver.post(solver.element(R, new int[]{0, 2, 4, 6, 7}, I));
-            solver.set(ISF.random_value(new IntVar[]{I, R}, i));
+            solver.element(R, new int[]{0, 2, 4, 6, 7}, I).post();
+            solver.set(random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 5);
+            assertEquals(solver.getMeasures().getSolutionCount(), 5);
         }
     }
 
@@ -207,10 +211,10 @@ public class ElementTest {
             Solver solver = new Solver();
             IntVar I = solver.intVar("I", 0, 5, false);
             IntVar R = solver.intVar("R", 0, 10, false);
-            solver.post(solver.element(R, new int[]{7, 6, 4, 2, 0}, I));
-            solver.set(ISF.random_value(new IntVar[]{I, R}, i));
+            solver.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
+            solver.set(random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 5);
+            assertEquals(solver.getMeasures().getSolutionCount(), 5);
         }
     }
 
@@ -220,10 +224,10 @@ public class ElementTest {
             Solver solver = new Solver();
             IntVar I = solver.intVar("I", 0, 13, false);
             IntVar R = solver.intVar("R", 0, 21, false);
-            solver.post(solver.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I));
-            solver.set(ISF.random_value(new IntVar[]{I, R}, i));
+            solver.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I).post();
+            solver.set(random_value(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 14);
+            assertEquals(solver.getMeasures().getSolutionCount(), 14);
         }
     }
 
@@ -233,10 +237,10 @@ public class ElementTest {
             Solver solver = new Solver();
             IntVar I = solver.intVar("I", 0, 3, true);
             IntVar R = solver.intVar("R", -1, 0, false);
-            solver.post(solver.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1));
-            solver.set(ISF.random_bound(new IntVar[]{I, R}, i));
+            solver.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1).post();
+            solver.set(random_bound(new IntVar[]{I, R}, i));
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+            assertEquals(solver.getMeasures().getSolutionCount(), 4);
         }
     }
     @Test
@@ -244,11 +248,11 @@ public class ElementTest {
         Solver s = new Solver();
         IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
-        Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
-        s.post(s.or(el.reify()));
+        Constraint el = detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
+        s.or(el.reify()).post();
         // s.post(el);// works instead of previous post
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1L);
+        assertEquals(s.getMeasures().getSolutionCount(), 1L);
     }
 
 
@@ -258,13 +262,13 @@ public class ElementTest {
         BoolVar b = s.boolVar("b");
         IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
-        Constraint el = ElementFactory.detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
-        s.post(s.or(b.not(), el.reify()));
+        Constraint el = detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
+        s.or(b.not(), el.reify()).post();
         // !b=> val=2
         Constraint affect = s.arithm(val, "=", 2);
-        s.post(s.or(b, affect.reify()));
+        s.or(b, affect.reify()).post();
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2L);
+        assertEquals(s.getMeasures().getSolutionCount(), 2L);
     }
 
 }

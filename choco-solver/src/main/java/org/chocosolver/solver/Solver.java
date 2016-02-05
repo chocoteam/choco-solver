@@ -1003,7 +1003,7 @@ public class Solver implements Serializable, IModeler{
     public SatConstraint getMinisat() {
         if (minisat == null) {
             minisat = new SatConstraint(this);
-            this.post(minisat);
+            minisat.post();
         }
         return minisat;
     }
@@ -1018,7 +1018,7 @@ public class Solver implements Serializable, IModeler{
     public NogoodConstraint getNogoodStore() {
         if (nogoods == null) {
             nogoods = new NogoodConstraint(this);
-            this.post(nogoods);
+            nogoods.post();
         }
         return nogoods;
     }
@@ -1031,7 +1031,7 @@ public class Solver implements Serializable, IModeler{
     public CondisConstraint getCondisStore(){
         if (condis == null) {
             condis = new CondisConstraint(this);
-            this.post(condis);
+            condis.post();
         }
         return condis;
     }
@@ -1249,7 +1249,7 @@ public class Solver implements Serializable, IModeler{
                 int opt = getObjectiveManager().getBestSolutionValue().intValue();
                 getEngine().flush();
                 search.reset();
-                post(arithm(objective, "=", opt));
+                arithm(objective, "=", opt).post();
                 set(new AllSolutionsRecorder(this));
                 findAllSolutions();
             }

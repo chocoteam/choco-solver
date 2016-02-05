@@ -63,9 +63,6 @@ public class AllIntervalSeries extends AbstractProblem {
     IntVar[] vars;
     IntVar[] dist;
 
-    Constraint[] ALLDIFF;
-    Constraint[] OTHERS;
-
     @Override
     public void createSolver() {
         solver = new Solver("AllIntervalSeries");
@@ -79,27 +76,23 @@ public class AllIntervalSeries extends AbstractProblem {
         if (!use_views) {
             dist = solver.intVarArray("dist", m - 1, 1, m - 1, false);
             for (int i = 0; i < m - 1; i++) {
-                solver.post(solver.distance(vars[i + 1], vars[i], "=", dist[i]));
+                solver.distance(vars[i + 1], vars[i], "=", dist[i]).post();
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
                 IntVar k = solver.intVar(randomName(), -20000, 20000, true);
-				solver.post(solver.sum(new IntVar[]{vars[i],k},"=",vars[i+1]));
-				dist[i] = solver.intAbsView(k);
-                solver.post(solver.member(dist[i], 1, m - 1));
+                solver.sum(new IntVar[]{vars[i], k}, "=", vars[i + 1]).post();
+                dist[i] = solver.intAbsView(k);
+                solver.member(dist[i], 1, m - 1).post();
             }
         }
 
-        ALLDIFF = new Constraint[2];
-        ALLDIFF[0] = (solver.allDifferent(vars, "BC"));
-        ALLDIFF[1] = (solver.allDifferent(dist, "BC"));
-        solver.post(ALLDIFF);
+        solver.allDifferent(vars, "BC").post();
+        solver.allDifferent(dist, "BC").post();
 
         // break symetries
-        OTHERS = new Constraint[2];
-        OTHERS[0] = (solver.arithm(vars[1], ">", vars[0]));
-        OTHERS[1] = (solver.arithm(dist[0], ">", dist[m - 2]));
-        solver.post(OTHERS);
+        solver.arithm(vars[1], ">", vars[0]).post();
+        solver.arithm(dist[0], ">", dist[m - 2]).post();
     }
 
     @Override

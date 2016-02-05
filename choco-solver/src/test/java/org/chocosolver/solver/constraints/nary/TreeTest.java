@@ -60,12 +60,12 @@ public class TreeTest {
 		IntVar[] VS = solver.intVarArray("VS", 6, -1, 6, false);
 		IntVar NT = solver.intVar("NT", 2, 3, false);
 		if(defaultCstr) {
-			solver.post(solver.tree(VS, NT, 0));
-		}else{
-			solver.post(new Constraint("tree",
+			solver.tree(VS, NT, 0).post();
+		}else {
+			new Constraint("tree",
 					new PropAntiArborescences(VS, 0, false),
 					new PropKLoops(VS, 0, NT)
-			));
+			).post();
 		}
 		solver.set(ISF.random(VS,0));
 		Chatterbox.showShortStatistics(solver);

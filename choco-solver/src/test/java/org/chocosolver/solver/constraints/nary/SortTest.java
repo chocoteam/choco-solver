@@ -37,6 +37,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -63,7 +65,7 @@ public class SortTest {
         Y[3] = solver.intVar("Y4", 13, 16, true);
         Y[4] = solver.intVar("Y5", 14, 18, true);
 
-        solver.post(new Constraint("sort", new PropSort(X, Y)));
+        new Constraint("sort", new PropSort(X, Y)).post();
         /*if (solver.findSolution()) {
             do {
                 System.out.printf("Solution:\n");
@@ -77,7 +79,7 @@ public class SortTest {
                 System.out.printf("\n\n");
             } while (solver.nextSolution());
         }*/
-        Assert.assertEquals(solver.findAllSolutions(), 182);
+        assertEquals(solver.findAllSolutions(), 182);
 
     }
 
@@ -95,10 +97,10 @@ public class SortTest {
         Y[1] = solver.intVar("Y2", 0, 0, true);
         Y[2] = solver.intVar("Y3", 1, 1, true);
 
-        solver.post(solver.sort(X, Y));
+        solver.sort(X, Y).post();
         try {
             solver.propagate();
-            Assert.assertEquals(X[1].getValue(), 0);
+            assertEquals(X[1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -118,10 +120,10 @@ public class SortTest {
         Y[1] = solver.intVar("Y2", 0, 0, true);
         Y[2] = solver.intVar("Y3", 2, 2, true);
 
-        solver.post(solver.sort(X, Y));
+        solver.sort(X, Y).post();
         try {
             solver.propagate();
-            Assert.assertEquals(X[1].getValue(), 0);
+            assertEquals(X[1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -141,10 +143,10 @@ public class SortTest {
         Y[1] = solver.intVar("Y2", 1, 9, true);
         Y[2] = solver.intVar("Y3", 7, 9, true);
 
-        solver.post(solver.sort(X, Y));
+        solver.sort(X, Y).post();
         try {
             solver.propagate();
-            Assert.assertEquals(X[0].getValue(), 7);
+            assertEquals(X[0].getValue(), 7);
         } catch (ContradictionException e) {
             e.printStackTrace();
         }

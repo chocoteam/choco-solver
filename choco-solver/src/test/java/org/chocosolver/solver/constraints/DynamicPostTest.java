@@ -46,6 +46,10 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.util.ESat.*;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -84,7 +88,7 @@ public class DynamicPostTest {
         final IntVar Y = solver.intVar("Y", 1, 2, false);
         final IntVar Z = solver.intVar("Z", 1, 2, false);
 
-        solver.post(new Constraint("Conditionnal",
+        new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{X, Y, Z},
                         new Constraint[]{solver.arithm(X, "=", Y), solver.arithm(Y, "=", Z)},
                         new Constraint[]{}) {
@@ -94,18 +98,18 @@ public class DynamicPostTest {
                         switch (nbNode) {
                             case 0:
                             case 1:
-                                return ESat.UNDEFINED;
+                                return UNDEFINED;
                             case 2:
-                                return ESat.TRUE;
+                                return TRUE;
                             default:
-                                return ESat.FALSE;
+                                return FALSE;
                         }
 
                     }
-                }));
+                }).post();
         solver.set(engine.make(solver));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
+        assertEquals(solver.getMeasures().getSolutionCount(), 7);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -122,8 +126,8 @@ public class DynamicPostTest {
             @Override
             public void afterOpenNode() {
                 if (solver.getMeasures().getNodeCount() == 1) {
-                    solver.post(solver.arithm(X, "=", Y));
-                    solver.post(solver.arithm(Y, "=", Z));
+                    solver.arithm(X, "=", Y).post();
+                    solver.arithm(Y, "=", Z).post();
                 }
             }
         });
@@ -142,14 +146,14 @@ public class DynamicPostTest {
         final IntVar Z = solver.intVar("Z", 1, 2, false);
         Constraint c1 = solver.arithm(X, "=", Y);
         Constraint c2 = solver.arithm(X, "=", Z);
-        solver.post(c1);
-        solver.post(c2);
+        c1.post();
+        c2.post();
         solver.unpost(c2);
         solver.unpost(c1);
         solver.set(engine.make(solver));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
-        Assert.assertEquals(solver.getNbCstrs(), 0);
+        assertEquals(solver.getMeasures().getSolutionCount(), 8);
+        assertEquals(solver.getNbCstrs(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -160,16 +164,16 @@ public class DynamicPostTest {
         final IntVar Z = solver.intVar("Z", 1, 2, false);
         final Constraint c1 = solver.arithm(X, "=", Y);
         final Constraint c2 = solver.arithm(X, "=", Z);
-        solver.post(c1);
-        solver.post(c2);
+        c1.post();
+        c2.post();
         solver.plugMonitor((IMonitorSolution) () -> {
             solver.unpost(c1);
             solver.unpost(c2);
         });
         solver.set(engine.make(solver));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 5);
-        Assert.assertEquals(solver.getNbCstrs(), 0);
+        assertEquals(solver.getMeasures().getSolutionCount(), 5);
+        assertEquals(solver.getNbCstrs(), 0);
     }
 
     private static void popAll(List<Constraint> stack, Solver solver) {
@@ -178,7 +182,7 @@ public class DynamicPostTest {
 
     private static void push(Constraint constraint, List<Constraint> stack, Solver solver) {
         stack.add(constraint);
-        solver.post(constraint);
+        constraint.post();
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -190,7 +194,7 @@ public class DynamicPostTest {
         IntVar b = solver.intVar("b", 0, 2, false);
         IntVar c = solver.intVar("c", 0, 2, false);
 
-        solver.post(solver.arithm(a, "+", b, "<", 3));
+        solver.arithm(a, "+", b, "<", 3).post();
 
         // START extra variables/constraints for guided improvement algorithm
         List<Constraint> stack = new ArrayList<>();
@@ -207,7 +211,7 @@ public class DynamicPostTest {
                 solver.and(aSBetter, bBetter),
                 solver.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
-        solver.set(ISF.lexico_LB(a, b, c, lbA, lbB));
+        solver.set(lexico_LB(a, b, c, lbA, lbB));
         int nbSolution = 0;
         while (solver.findSolution()) {
             int bestA;
@@ -244,11 +248,11 @@ public class DynamicPostTest {
             solver.getEngine().flush();
             solver.getSearchLoop().reset();
 
-            solver.post(solver.or(
+            solver.or(
                     solver.arithm(a, ">", bestA),
-                    solver.arithm(b, ">", bestB)));
+                    solver.arithm(b, ">", bestB)).post();
         }
-        Assert.assertEquals(9, nbSolution);
+        assertEquals(9, nbSolution);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -260,7 +264,7 @@ public class DynamicPostTest {
         Constraint c = solver.or(
                 solver.arithm(x, "<", y),
                 solver.arithm(x, "<", z));
-        solver.post(c);
+        c.post();
         solver.findSolution();
         solver.unpost(c);
     }
@@ -286,7 +290,7 @@ public class DynamicPostTest {
 
         if (dynamic) {
             // should not change anything (the constraint is already posted)
-            solver.plugMonitor((IMonitorSolution) () -> solver.post(solver.allDifferent(vectors, "BC")));
+            solver.plugMonitor((IMonitorSolution) () -> solver.allDifferent(vectors, "BC").post());
         }
         return solver;
     }

@@ -37,6 +37,9 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.chocosolver.util.ESat.TRUE;
+
 /**
  * <br/>
  *
@@ -59,7 +62,7 @@ public class DivTest extends AbstractTernaryTest {
     public void testJL() {
         Solver solver = new Solver();
         IntVar i = solver.intVar("i", 0, 2, false);
-        solver.post(solver.div(i, solver.ONE(), solver.ZERO()).getOpposite());
+        solver.div(i, solver.ONE(), solver.ZERO()).getOpposite().post();
 //        SMF.log(solver, true, false);
         solver.findAllSolutions();
     }
@@ -71,11 +74,11 @@ public class DivTest extends AbstractTernaryTest {
             IntVar a = s.intVar("a", new int[]{0, 2, 3, 4});
             IntVar b = s.intVar("b", new int[]{-1, 1, 3, 4});
             IntVar c = s.intVar("c", new int[]{-3, 1, 4});
-            s.post(s.div(a, b, c));
-            s.set(ISF.random_value(new IntVar[]{a, b, c}, i));
+            s.div(a, b, c).post();
+            s.set(random_value(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);
             s.plugMonitor((IMonitorSolution) () -> {
-                if (!ESat.TRUE.equals(s.isSatisfied())) {
+                if (!TRUE.equals(s.isSatisfied())) {
                     throw new Error(s.toString());
                 }
             });

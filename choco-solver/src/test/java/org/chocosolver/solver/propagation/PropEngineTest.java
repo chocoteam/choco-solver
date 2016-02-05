@@ -49,6 +49,15 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
+import static java.util.Arrays.sort;
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.constraints.PropagatorPriority.UNARY;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random;
+import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
+import static org.chocosolver.solver.variables.events.IntEventType.VOID;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.testng.Assert.*;
+
 /**
  * <br/>
  *
@@ -62,8 +71,8 @@ public class PropEngineTest {
         Solver solver = new Solver("t1");
         IntVar x = solver.intVar("X", 1, 3, true);
         IntVar y = solver.intVar("Y", 1, 3, true);
-        solver.post(solver.arithm(x, ">=", y));
-        solver.post(solver.arithm(x, "<=", 2));
+        solver.arithm(x, ">=", y).post();
+        solver.arithm(x, "<=", 2).post();
 
         solver.findSolution();
     }
@@ -93,13 +102,13 @@ public class PropEngineTest {
             }
         });
         IntVar[] vars = solver.intVarArray("V", 3, 0, 4, false);
-        solver.post(solver.allDifferent(vars));
-        Arrays.sort(vars, (o1, o2) -> o2.getId() - o1.getId());
+        solver.allDifferent(vars).post();
+        sort(vars, (o1, o2) -> o2.getId() - o1.getId());
 
         solver.propagate();
-        vars[0].instantiateTo(0, Cause.Null);
+        vars[0].instantiateTo(0, Null);
         solver.propagate();
-        Assert.assertFalse(vars[0].isInstantiatedTo(0));
+        assertFalse(vars[0].isInstantiatedTo(0));
     }
 
     public static void main(String[] args) {
@@ -148,14 +157,14 @@ public class PropEngineTest {
         for(int i = 0 ; i < 20; i++) {
             Solver solver = new Solver("Propagation condition");
             IntVar[] X = solver.intVarArray("X", 2, 0, 2, false);
-            solver.post(new Constraint("test", new Propagator(X, PropagatorPriority.UNARY, true) {
+            new Constraint("test", new Propagator(X, UNARY, true) {
 
                 @Override
                 public int getPropagationConditions(int vIdx) {
-                    if(vIdx == 0) {
-                        return IntEventType.VOID.getMask();
-                    }else{
-                        return IntEventType.ALL_EVENTS;
+                    if (vIdx == 0) {
+                        return VOID.getMask();
+                    } else {
+                        return ALL_EVENTS;
                     }
                 }
 
@@ -166,19 +175,19 @@ public class PropEngineTest {
 
                 @Override
                 public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-                    if(idxVarInProp == 0){
-                        Assert.fail();
+                    if (idxVarInProp == 0) {
+                        fail();
                     }
                 }
 
                 @Override
                 public ESat isEntailed() {
-                    return ESat.TRUE;
+                    return TRUE;
                 }
-            }));
-            solver.set(ISF.random(X, i));
+            }).post();
+            solver.set(random(X, i));
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+            assertEquals(solver.getMeasures().getSolutionCount(), 9);
         }
     }
 }

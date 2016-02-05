@@ -39,6 +39,8 @@ import org.kohsuke.args4j.Option;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
+import static java.util.Arrays.fill;
+
 /**
  * CSPLib prob019:<br/>
  * "An order n magic square is a n by n matrix containing the numbers 1 to n^2, with each row,
@@ -85,21 +87,21 @@ public class MagicSquare extends AbstractProblem {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.post(solver.allDifferent(vars, "BC"));
+        solver.allDifferent(vars, "BC").post();
 
         int[] coeffs = new int[n];
-        Arrays.fill(coeffs, 1);
+        fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
-            solver.post(solver.scalar(matrix[i], coeffs, "=", ms));
-            solver.post(solver.scalar(invMatrix[i], coeffs, "=", ms));
+            solver.scalar(matrix[i], coeffs, "=", ms).post();
+            solver.scalar(invMatrix[i], coeffs, "=", ms).post();
         }
-        solver.post(solver.scalar(diag1, coeffs, "=", ms));
-        solver.post(solver.scalar(diag2, coeffs, "=", ms));
+        solver.scalar(diag1, coeffs, "=", ms).post();
+        solver.scalar(diag2, coeffs, "=", ms).post();
 
         // Symetries breaking
-        solver.post(solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
-        solver.post(solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
-        solver.post(solver.arithm(matrix[0][0], "<", matrix[n - 1][0]));
+        solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
+        solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
+        solver.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
     }
 

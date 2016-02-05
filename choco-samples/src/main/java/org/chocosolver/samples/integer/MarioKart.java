@@ -245,40 +245,40 @@ public class MarioKart extends AbstractProblem {
 	/** Post all the constraints of the problem */
 	private void constraints() {
 		/* The scalar constraint to compute global consumption of the kart to perform the path */
-		solver.post(solver.scalar(ArrayUtils.flatten(edges), ArrayUtils.flatten(consumptions), "=", fuelConsumed));
+		solver.scalar(flatten(edges), flatten(consumptions), "=", fuelConsumed).post();
 
 		/* The scalar constraint to compute the amount of gold founded by Mario in the path. With our model if a
 		 * node isn't used then his next value is equals to his id. Then the boolean edges[i][i] is equals to true */
 		BoolVar[] used = new BoolVar[n];
 		for (int i = 0; i < used.length; i++)
 			used[i] = edges[i][i].not();
-		solver.post(solver.scalar(used, gold, "=", goldFound));
+		solver.scalar(used, gold, "=", goldFound).post();
 
 		/* The subCircuit constraint. This forces all the next value to form a circuit which the overall size is equals
 		 * to the size variable. This constraint check if the path contains any sub circles. */
-		solver.post(solver.subCircuit(next, 0, size));
+		solver.subCircuit(next, 0, size).post();
 
 		/* The path has to end on the t node. This constraint doesn't create a path, but a circle or a circuit. So we
 		 * force the edge (t,s) then all the other node of the circuit will form a starting from s and ending at t */
-		solver.post(solver.arithm(next[t], "=", s));
+		solver.arithm(next[t], "=", s).post();
 
 		/* The boolean channeling constraint. Enforce the relation between the next values and the edges values in the
 		 * graph boolean variable matrix */
-		for (int i = 0; i < n; i++){
-			solver.post(solver.boolsIntChanneling(edges[i], next[i],0));
+		for (int i = 0; i < n; i++) {
+			solver.boolsIntChanneling(edges[i], next[i], 0).post();
 		}
 	}
 
 	/** Adds more constraints to get a stronger filtering */
-	private void strengthenFiltering(){
+	private void strengthenFiltering() {
 		/* FUEL RELATED FILTERING:
 		 * identifies the min/max fuel consumption involved by visiting each house */
 		IntVar[] fuelHouse = new IntVar[HOUSE_NUMBER];
-		for(int i=0;i<HOUSE_NUMBER;i++){
+		for (int i = 0; i < HOUSE_NUMBER; i++) {
 			fuelHouse[i] = solver.intVar("fuelHouse", 0, FUEL, false);
-			solver.post(solver.element(fuelHouse[i], consumptions[i], next[i], 0));
+			solver.element(fuelHouse[i], consumptions[i], next[i], 0).post();
 		}
-		solver.post(solver.sum(fuelHouse,"=",fuelConsumed));
+		solver.sum(fuelHouse, "=", fuelConsumed).post();
 
 		/* GOLD RELATED FILTERING
 		* This problem can be seen has a knapsack problem where are trying to found the set of edges that contains the
@@ -288,8 +288,8 @@ public class MarioKart extends AbstractProblem {
 		for (int i = 0; i < goldMatrix.length; i++)
 			for (int j = 0; j < goldMatrix.length; j++)
 				goldMatrix[i][j] = (i == j) ? 0 : gold[i];
-		solver.post(solver.knapsack(flatten(edges), solver.intVar(FUEL),
-				goldFound, flatten(consumptions), flatten(goldMatrix)));
+		solver.knapsack(flatten(edges), solver.intVar(FUEL),
+				goldFound, flatten(consumptions), flatten(goldMatrix)).post();
 	}
 
 	// SOME USEFUL METHODS

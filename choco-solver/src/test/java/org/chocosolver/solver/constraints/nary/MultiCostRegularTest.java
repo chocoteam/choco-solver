@@ -39,6 +39,10 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeMultiResources;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+
 /**
  * <br/>
  *
@@ -95,10 +99,10 @@ public class MultiCostRegularTest {
                 }
             }
         }
-        ICostAutomaton costAutomaton = CostAutomaton.makeMultiResources(auto, costMatrix, bounds);
-        solver.post(solver.multiCostRegular(sequence, bounds, costAutomaton));
+        ICostAutomaton costAutomaton = makeMultiResources(auto, costMatrix, bounds);
+        solver.multiCostRegular(sequence, bounds, costAutomaton).post();
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
-        solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(sequence, bounds), seed));
+        solver.set(random_bound(append(sequence, bounds), seed));
         return solver;
     }
 

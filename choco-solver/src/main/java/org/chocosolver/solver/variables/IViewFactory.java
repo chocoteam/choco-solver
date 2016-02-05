@@ -33,6 +33,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
 import org.chocosolver.solver.variables.view.*;
 
+import static java.lang.Math.max;
+
 /**
  * Interface to make views (BoolVar, IntVar, RealVar and SetVar)
  *
@@ -66,7 +68,7 @@ public interface IViewFactory {
                 return new BoolNotView(bool);
             }else {
                 BoolVar ov = _me().boolVar("not(" + bool.getName() + ")");
-                _me().post(_me().arithm(ov, "!=", bool));
+                _me().arithm(ov, "!=", bool).post();
                 bool._setNot(ov);
                 ov._setNot(bool);
                 ov.setNot(true);
@@ -86,7 +88,7 @@ public interface IViewFactory {
 
         } else {
             BoolVar ov = var.duplicate();
-            _me().post(_me().arithm(ov, "=", var));
+            _me().arithm(ov, "=", var).post();
             if (var.hasNot()) {
                 ov._setNot(var.not());
             }
@@ -113,7 +115,7 @@ public interface IViewFactory {
                 return new EqView(var);
             } else {
                 IntVar ov = var.duplicate();
-                _me().post(_me().arithm(ov, "=", var));
+                _me().arithm(ov, "=", var).post();
                 return ov;
             }
         }
@@ -141,7 +143,7 @@ public interface IViewFactory {
             } else {
                 ov = _me().intVar(name, lb, ub, true);
             }
-            _me().post(_me().arithm(ov, "-", var, "=", cste));
+            _me().arithm(ov, "-", var, "=", cste).post();
             return ov;
         }
     }
@@ -166,7 +168,7 @@ public interface IViewFactory {
             } else {
                 ov = _me().intVar(name, lb, ub, true);
             }
-            _me().post(_me().arithm(ov, "+", var, "=", 0));
+            _me().arithm(ov, "+", var, "=", 0).post();
             return ov;
         }
     }
@@ -210,7 +212,7 @@ public interface IViewFactory {
                     } else {
                         ov = _me().intVar(name, lb, ub, true);
                     }
-                    _me().post(_me().times(var, cste, ov));
+                    _me().times(var, cste, ov).post();
                     return ov;
                 }
             }
@@ -237,7 +239,7 @@ public interface IViewFactory {
         } else if (var.getUB() <= 0) {
             return intMinusView(var);
         } else {
-            int ub = Math.max(-var.getLB(), var.getUB());
+            int ub = max(-var.getLB(), var.getUB());
             String name = "|" + var.getName() + "|";
             IntVar abs;
             if (var.hasEnumeratedDomain()) {
@@ -245,7 +247,7 @@ public interface IViewFactory {
             } else {
                 abs = _me().intVar(name, 0, ub, true);
             }
-            _me().post(_me().absolute(abs, var));
+            _me().absolute(abs, var).post();
             return abs;
         }
     }
@@ -268,7 +270,7 @@ public interface IViewFactory {
             double lb = var.getLB();
             double ub = var.getUB();
             RealVar rv = _me().realVar("(real)" + var.getName(), lb, ub, precision);
-            _me().post(new IntEqRealConstraint(var, rv, precision));
+            new IntEqRealConstraint(var, rv, precision).post();
             return rv;
         }
     }
@@ -292,7 +294,7 @@ public interface IViewFactory {
                 double ub = ints[i].getUB();
                 reals[i] = _me().realVar("(real)" + ints[i].getName(), lb, ub, precision);
             }
-            _me().post(new IntEqRealConstraint(ints, reals, precision));
+            new IntEqRealConstraint(ints, reals, precision).post();
         }
         return reals;
     }

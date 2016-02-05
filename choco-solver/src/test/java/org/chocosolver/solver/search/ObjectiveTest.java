@@ -50,6 +50,13 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static java.lang.System.nanoTime;
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.util.ESat.*;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -63,8 +70,8 @@ public class ObjectiveTest {
         Solver solver = new Solver();
 
         IntVar iv = solver.intVar("iv", -5, 15, false);
-        solver.post(solver.arithm(iv, ">=", 0));
-        solver.post(solver.arithm(iv, "<=", 10));
+        solver.arithm(iv, ">=", 0).post();
+        solver.arithm(iv, "<=", 10).post();
         Random rnd = new Random();
         for (int i = 0; i < 2000; i++) {
             rnd.setSeed(i);
@@ -128,24 +135,24 @@ public class ObjectiveTest {
     public void test2() {
         Solver solver = new Solver();
         IntVar iv = solver.intVar("iv", 0, 10, false);
-        solver.post(solver.arithm(iv, ">=", 2));
+        solver.arithm(iv, ">=", 2).post();
 
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
-        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        solver.findOptimalSolution(MINIMIZE, iv);
+        assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
 
         solver.getSearchLoop().reset();
 
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
-        Assert.assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        solver.findOptimalSolution(MINIMIZE, iv);
+        assertEquals(solver.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         final Solver solver = new Solver();
         final IntVar iv = solver.intVar("iv", 0, 10, false);
-        solver.post(solver.arithm(iv, ">=", 2));
+        solver.arithm(iv, ">=", 2).post();
 
-        solver.post(new Constraint("Conditionnal",
+        new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{iv},
                         new Constraint[]{solver.arithm(iv, ">=", 4)},
                         new Constraint[]{solver.TRUE()}) {
@@ -155,26 +162,26 @@ public class ObjectiveTest {
                         switch (nbNode) {
                             case 0:
                             case 1:
-                                return ESat.UNDEFINED;
+                                return UNDEFINED;
                             case 2:
-                                return ESat.TRUE;
+                                return TRUE;
                             default:
-                                return ESat.FALSE;
+                                return FALSE;
                         }
 
                     }
-                }));
+                }).post();
         solver.findSolution();
-        Assert.assertEquals(iv.getValue(), 2);
+        assertEquals(iv.getValue(), 2);
 
         solver.getSearchLoop().reset();
-        solver.plugMonitor((IMonitorSolution) () -> solver.post(solver.arithm(iv, ">=", 6)));
+        solver.plugMonitor((IMonitorSolution) () -> solver.arithm(iv, ">=", 6).post());
         solver.findSolution();
-        Assert.assertEquals(iv.getValue(), 2);
+        assertEquals(iv.getValue(), 2);
 
         solver.getSearchLoop().reset();
         solver.findSolution();
-        Assert.assertEquals(iv.getValue(), 6);
+        assertEquals(iv.getValue(), 6);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -196,20 +203,20 @@ public class ObjectiveTest {
         Solver solver = new Solver();
         BoolVar b1 = solver.boolVar("b1");
         BoolVar b2 = solver.boolVar("b2");
-        solver.post(solver.arithm(b1, "<=", b2));
+        solver.arithm(b1, "<=", b2).post();
 //        SMF.log(solver, true, true);
-        solver.set(new ObjectiveManager<IntVar, Integer>(b1, ResolutionPolicy.MINIMIZE, true));
+        solver.set(new ObjectiveManager<IntVar, Integer>(b1, MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
-        if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
+        if (solver.getEngine() == SINGLETON) {
             solver.set(new SevenQueuesPropagatorEngine(solver));
         }
-        solver.getMeasures().setReadingTimeCount(System.nanoTime());
+        solver.getMeasures().setReadingTimeCount(nanoTime());
         solver.getSearchLoop().launch(false);
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         solver.getSearchLoop().reset();
-        solver.post(solver.arithm(b1, "=", bestvalue));
-        solver.set(ISF.lexico_LB(new BoolVar[]{b1, b2}));
+        solver.arithm(b1, "=", bestvalue).post();
+        solver.set(lexico_LB(new BoolVar[]{b1, b2}));
         int count = 0;
         if (solver.findSolution()) {
             do {
@@ -217,7 +224,7 @@ public class ObjectiveTest {
 //                System.out.println(b1 + " " + b2);
             } while (solver.nextSolution());
         }
-        Assert.assertEquals(count, 2);
+        assertEquals(count, 2);
     }
 
 	@Test(groups="1s", timeOut=60000)

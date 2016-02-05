@@ -51,6 +51,9 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 /**
  * <br/>
  *
@@ -183,12 +186,12 @@ public class StrategyTest {
     public void testNoScope() {
         Solver solver = new Solver("OnceTest");
         IntVar[] x = solver.intVarArray("x", 5, 1, 6, false);
-        SetVar y = solver.setVar("y", new int[]{}, new int[]{1,2,3,4,5,6,7,8,9,10});
-        solver.post(solver.allDifferent(x));
-        solver.post(solver.member(x[0], y));
+        SetVar y = solver.setVar("y", new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        solver.allDifferent(x).post();
+        solver.member(x[0], y).post();
         solver.findSolution();
         AbstractStrategy strat = solver.getStrategy();
-        Assert.assertTrue(strat instanceof LastConflict);
+        assertTrue(strat instanceof LastConflict);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -241,11 +244,11 @@ public class StrategyTest {
         IntVar v1 = solver.intVar("v1", 1, 5, false);
         IntVar v2 = solver.intVar("v2", 3, 4, false);
         IntVar[] vs = new IntVar[]{v1, v2};
-        solver.post(solver.member(v1, 2, 3));
-        solver.post(solver.member(v1, 3, 4));
+        solver.member(v1, 2, 3).post();
+        solver.member(v1, 3, 4).post();
         VariableSelector<IntVar> eval = new Occurrence<>();
         IntVar va = eval.getVariable(vs);
-        Assert.assertEquals(v1, va);
+        assertEquals(v1, va);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -328,11 +331,11 @@ public class StrategyTest {
     public void testOccurrence2() {
         Solver solver = new Solver();
         IntVar v1 = solver.intVar("v1", 1, 5, false);
-        solver.post(solver.member(v1, 2, 3));
-        solver.post(solver.member(v1, 3, 4));
+        solver.member(v1, 2, 3).post();
+        solver.member(v1, 3, 4).post();
         VariableEvaluator<IntVar> eval = new Occurrence<>();
         double va = eval.evaluate(v1);
-        Assert.assertEquals(-2.0, va);
+        assertEquals(-2.0, va);
     }
 
     @Test(groups="1s", timeOut=60000)

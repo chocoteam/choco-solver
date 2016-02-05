@@ -102,11 +102,11 @@ public class BIBD extends AbstractProblem {
         }
         // r ones per row
         for (int i = 0; i < v; i++) {
-            solver.post(solver.sum(vars[i], "=", r));
+            solver.sum(vars[i], "=", r).post();
         }
         // k ones per column
         for (int j = 0; j < b; j++) {
-            solver.post(solver.sum(_vars[j], "=", k));
+            solver.sum(_vars[j], "=", k).post();
         }
 
         // Exactly l ones in scalar product between two different rows
@@ -114,9 +114,9 @@ public class BIBD extends AbstractProblem {
             for (int i2 = i1 + 1; i2 < v; i2++) {
                 BoolVar[] score = solver.boolVarArray(format("row(%d,%d)", i1, i2), b);
                 for (int j = 0; j < b; j++) {
-                    solver.post(solver.times(_vars[j][i1], _vars[j][i2], score[j]));
+                    solver.times(_vars[j][i1], _vars[j][i2], score[j]).post();
                 }
-                solver.post(solver.sum(score, "=", l));
+                solver.sum(score, "=", l).post();
             }
         }
         // Symmetry breaking
@@ -124,12 +124,12 @@ public class BIBD extends AbstractProblem {
         for (int i = 0; i < v; i++) {
             rev[i] = vars[v - 1 - i];
         }
-        solver.post(solver.lexChainLessEq(rev));
+        solver.lexChainLessEq(rev).post();
         BoolVar[][] _rev = new BoolVar[b][];
         for (int i = 0; i < b; i++) {
             _rev[i] = _vars[b - 1 - i];
         }
-        solver.post(solver.lexChainLessEq(_rev));
+        solver.lexChainLessEq(_rev).post();
     }
 
 

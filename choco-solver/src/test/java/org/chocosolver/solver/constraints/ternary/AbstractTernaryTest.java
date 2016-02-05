@@ -39,6 +39,9 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+
 /**
  * <br/>
  *
@@ -85,12 +88,12 @@ public abstract class AbstractTernaryTest {
             }
         }
         Constraint div = make(vars, s);
-        s.post(div);
-		if(bounded){
-			s.set(IntStrategyFactory.random_bound(vars, seed));
-		}else{
-			s.set(IntStrategyFactory.random_value(vars, seed));
-		}
+        div.post();
+        if (bounded) {
+            s.set(random_bound(vars, seed));
+        } else {
+            s.set(random_value(vars, seed));
+        }
         return s;
     }
 

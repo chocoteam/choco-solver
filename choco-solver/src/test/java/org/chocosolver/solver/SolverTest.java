@@ -48,8 +48,16 @@ import org.testng.annotations.Test;
 
 import java.text.MessageFormat;
 
+import static org.chocosolver.memory.Environments.COPY;
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.chocosolver.solver.variables.IVariableFactory.MAX_INT_BOUND;
 import static org.chocosolver.solver.variables.IVariableFactory.MIN_INT_BOUND;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * <br/>
@@ -67,9 +75,9 @@ public class SolverTest {
 
     public static Solver knapsack(boolean copy) {
         Solver s;
-        if(copy){
-            s = new Solver(Environments.COPY.make(), "test");
-        }else{
+        if (copy) {
+            s = new Solver(COPY.make(), "test");
+        } else {
             s = new Solver();
         }
         IntVar power = s.intVar("v_" + n, 0, 9999, true);
@@ -77,11 +85,11 @@ public class SolverTest {
         for (int i = 0; i < n; i++) {
             objects[i] = s.intVar("v_" + i, 0, nbOmax[i], false);
         }
-        s.post(s.scalar(objects, volumes, "=", s.intVar("capa", capacites[0], capacites[1], true)));
-        s.post(s.scalar(objects, energies, "=", power));
+        s.scalar(objects, volumes, "=", s.intVar("capa", capacites[0], capacites[1], true)).post();
+        s.scalar(objects, energies, "=", power).post();
         s.setObjectives(power);
-        s.set(IntStrategyFactory.lexico_LB(objects));
-        Chatterbox.showShortStatistics(s);
+        s.set(lexico_LB(objects));
+        showShortStatistics(s);
         return s;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,15 +241,15 @@ public class SolverTest {
     public void testFH2() {
         Solver solver = new Solver();
         BoolVar b = solver.boolVar("b");
-        solver.post(solver.arithm(b, "=", 2));
+        solver.arithm(b, "=", 2).post();
         solver.findAllSolutions();
-        Assert.assertEquals(solver.isFeasible(), ESat.FALSE);
+        assertEquals(solver.isFeasible(), FALSE);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL1() {
         Solver s = new Solver();
-        s.post(s.arithm(s.ONE(), "!=", s.ZERO()));
+        s.arithm(s.ONE(), "!=", s.ZERO()).post();
         if (s.findSolution()) {
             while (s.nextSolution()) ;
         }
@@ -365,16 +373,16 @@ public class SolverTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testCompSearch(){
+    public void testCompSearch() {
         Solver solver = new Solver();
         IntVar[] v = solver.boolVarArray("v", 2);
         IntVar[] w = solver.boolVarArray("w", 2);
-        solver.post(solver.arithm(v[0], "!=", v[1]));
-        solver.post(solver.arithm(w[0], "!=", w[1]));
-        solver.set(ISF.lexico_LB(v));
+        solver.arithm(v[0], "!=", v[1]).post();
+        solver.arithm(w[0], "!=", w[1]).post();
+        solver.set(lexico_LB(v));
         solver.makeCompleteSearch(true);
         solver.findSolution();
-        Assert.assertEquals(solver.isSatisfied(),ESat.TRUE);
+        assertEquals(solver.isSatisfied(), TRUE);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -394,11 +402,11 @@ public class SolverTest {
     public void testRestore() throws ContradictionException {
         Solver solver = new Solver();
         IntVar[] v = solver.boolVarArray("v", 2);
-        solver.post(solver.arithm(v[0], "!=", v[1]));
-        solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, v[0]);
+        solver.arithm(v[0], "!=", v[1]).post();
+        solver.findOptimalSolution(MAXIMIZE, v[0]);
         solver.restoreLastSolution();
-        Assert.assertTrue(v[0].isInstantiated());
-        Assert.assertTrue(v[0].isInstantiatedTo(1));
+        assertTrue(v[0].isInstantiated());
+        assertTrue(v[0].isInstantiatedTo(1));
     }
 
     @Test(groups="1s", timeOut=60000)

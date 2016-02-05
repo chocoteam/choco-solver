@@ -38,6 +38,9 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.testng.Assert.assertTrue;
+
 /**
  * <br/>
  *
@@ -56,16 +59,16 @@ public class BoolNotViewTest {
                 BoolVar[] xs = new BoolVar[2];
                 xs[0] = ref.boolVar("x");
                 xs[1] = ref.boolVar("y");
-                ref.post(ref.sum(xs, "=", 1));
-                ref.set(IntStrategyFactory.random_bound(xs, seed));
+                ref.sum(xs, "=", 1).post();
+                ref.set(random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
                 BoolVar[] xs = new BoolVar[2];
                 xs[0] = solver.boolVar("x");
                 xs[1] = solver.boolNotView(xs[0]);
-                solver.post(solver.sum(xs, "=", 1));
-                solver.set(IntStrategyFactory.random_bound(xs, seed));
+                solver.sum(xs, "=", 1).post();
+                solver.set(random_bound(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -108,7 +111,7 @@ public class BoolNotViewTest {
         Solver solver = new Solver();
         BoolVar a = solver.boolVar("a");
         BoolVar b = solver.boolVar("b");
-        solver.post(solver.arithm(a, "+", solver.boolNotView(b), "=", 2));
-        Assert.assertTrue(solver.findSolution());
+        solver.arithm(a, "+", solver.boolNotView(b), "=", 2).post();
+        assertTrue(solver.findSolution());
     }
 }

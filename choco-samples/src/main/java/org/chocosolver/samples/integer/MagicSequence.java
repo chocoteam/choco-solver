@@ -54,6 +54,8 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.util.tools.ArrayUtils.zeroToN;
+
 public class MagicSequence extends AbstractProblem {
 
     @Option(name = "-n", usage = "Size of problem (default 10).", required = false)
@@ -65,15 +67,15 @@ public class MagicSequence extends AbstractProblem {
     @Override
     public void buildModel() {
 
-        int[] values = ArrayUtils.zeroToN(n);
+        int[] values = zeroToN(n);
 
         x = solver.intVarArray("x", n, 0, n - 1, false);
 
         boolean closed = true; // restricts domains of VARS to VALUES if set to true
-        solver.post(solver.globalCardinality(x, values, x, closed));
+        solver.globalCardinality(x, values, x, closed).post();
 
         // Redundant constraint
-        solver.post(solver.sum(x, "=", n));
+        solver.sum(x, "=", n).post();
 
     }
 

@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -87,7 +88,7 @@ public class BinTableTest {
             s = new Solver();
             v1 = s.intVar("v1", 1, 4, false);
             v2 = s.intVar("v2", 1, 4, false);
-            s.post(s.table(v1, v2, feasible, a));
+            s.table(v1, v2, feasible, a).post();
 
             s.findAllSolutions();
             assertEquals(5, s.getMeasures().getSolutionCount());
@@ -103,7 +104,7 @@ public class BinTableTest {
             s = new Solver();
             v1 = s.intVar("v1", 1, 4, false);
             v2 = s.intVar("v2", 1, 4, false);
-            s.post(s.table(v1, v2, infeasible, a));
+            s.table(v1, v2, infeasible, a).post();
 
             s.findAllSolutions();
             assertEquals((16 - 5), s.getMeasures().getSolutionCount());
@@ -125,7 +126,7 @@ public class BinTableTest {
         Solver solver = new Solver();
         IntVar v1 = solver.intVar("v1", -10, 10, false);
         IntVar v2 = solver.intVar("v2", -10, 10, false);
-        solver.post(absolute(v1, v2, -1));
+        absolute(v1, v2, -1).post();
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
@@ -133,10 +134,10 @@ public class BinTableTest {
                 Solver tsolver = new Solver();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
-                tsolver.post(absolute(tv1, tv2, a));
-                tsolver.set(ISF.random_value(new IntVar[]{tv1, tv2}));
-                Assert.assertEquals(tsolver.findAllSolutions(), nbs);
-                if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+                absolute(tv1, tv2, a).post();
+                tsolver.set(random_value(new IntVar[]{tv1, tv2}));
+                assertEquals(tsolver.findAllSolutions(), nbs);
+                if (a > 1) assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
             }
         }
     }
@@ -154,7 +155,7 @@ public class BinTableTest {
         Solver solver = new Solver();
         IntVar v1 = solver.intVar("v1", -10, 10, false);
         IntVar v2 = solver.intVar("v2", -10, 10, false);
-        solver.post(arithmLT(v1, v2, -1));
+        arithmLT(v1, v2, -1).post();
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
         for (int s = 0; s < 20; s++) {
@@ -162,10 +163,10 @@ public class BinTableTest {
                 Solver tsolver = new Solver();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
-                tsolver.post(arithmLT(tv1, tv2, a));
-                tsolver.set(ISF.random_value(new IntVar[]{tv1, tv2}));
-                Assert.assertEquals(tsolver.findAllSolutions(), nbs);
-                if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+                arithmLT(tv1, tv2, a).post();
+                tsolver.set(random_value(new IntVar[]{tv1, tv2}));
+                assertEquals(tsolver.findAllSolutions(), nbs);
+                if (a > 1) assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
             }
         }
     }
@@ -183,7 +184,7 @@ public class BinTableTest {
         Solver solver = new Solver();
         IntVar v1 = solver.intVar("v1", -10, 10, false);
         IntVar v2 = solver.intVar("v2", -10, 10, false);
-        solver.post(arithmNQ(v1, v2, -1));
+        arithmNQ(v1, v2, -1).post();
         long nbs = solver.findAllSolutions();
         long nbn = solver.getMeasures().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
@@ -191,10 +192,10 @@ public class BinTableTest {
                 Solver tsolver = new Solver();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
-                tsolver.post(arithmNQ(tv1, tv2, a));
-                tsolver.set(ISF.random_value(new IntVar[]{tv1, tv2}));
-                Assert.assertEquals(tsolver.findAllSolutions(), nbs);
-                if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+                arithmNQ(tv1, tv2, a).post();
+                tsolver.set(random_value(new IntVar[]{tv1, tv2}));
+                assertEquals(tsolver.findAllSolutions(), nbs);
+                if (a > 1) assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
             }
         }
     }
@@ -211,10 +212,10 @@ public class BinTableTest {
 
                 Solver solver = new Solver();
                 IntVar[] vars = solver.intVarArray("X", 2, -1, 1, false);
-                solver.post(solver.table(vars[0], vars[1], tuples, a));
+                solver.table(vars[0], vars[1], tuples, a).post();
 
-                solver.set(ISF.random_value(vars));
-                Assert.assertEquals(solver.findAllSolutions(), 3);
+                solver.set(random_value(vars));
+                assertEquals(solver.findAllSolutions(), 3);
             }
         }
     }
@@ -231,10 +232,10 @@ public class BinTableTest {
 
                 Solver solver = new Solver();
                 IntVar[] vars = solver.intVarArray("X", 2, -1, 1, false);
-                solver.post(solver.table(vars[0], vars[1], tuples, a));
+                solver.table(vars[0], vars[1], tuples, a).post();
 
-                solver.set(ISF.random_value(vars));
-                Assert.assertEquals(solver.findAllSolutions(), 3);
+                solver.set(random_value(vars));
+                assertEquals(solver.findAllSolutions(), 3);
             }
         }
     }

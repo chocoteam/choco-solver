@@ -68,20 +68,20 @@ public class CostasArrays extends AbstractProblem {
 	@Override
 	public void buildModel() {
 		vars = solver.intVarArray("v", n, 0, n - 1, false);
-		vectors = new IntVar[(n*(n-1))/2];
+		vectors = new IntVar[(n * (n - 1)) / 2];
 		for (int i = 0, k = 0; i < n; i++) {
-			for (int j = i+1; j < n; j++, k++) {
+			for (int j = i + 1; j < n; j++, k++) {
 				IntVar d = solver.intVar(randomName(), -n, n, false);
-				solver.post(solver.arithm(d,"!=",0));
-				solver.post(solver.sum(new IntVar[]{vars[i],d},"=",vars[j]));
+				solver.arithm(d, "!=", 0).post();
+				solver.sum(new IntVar[]{vars[i], d}, "=", vars[j]).post();
 				vectors[k] = solver.intOffsetView(d, 2 * n * (j - i));
 			}
 		}
-		solver.post(solver.allDifferent(vars, "AC"));
-		solver.post(solver.allDifferent(vectors, "BC"));
+		solver.allDifferent(vars, "AC").post();
+		solver.allDifferent(vectors, "BC").post();
 
 		// symmetry-breaking
-		solver.post(solver.arithm(vars[0],"<",vars[n-1]));
+		solver.arithm(vars[0], "<", vars[n - 1]).post();
 	}
 
 	@Override

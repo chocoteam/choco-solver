@@ -74,8 +74,8 @@ public class LatinSquare extends AbstractProblem {
                 row[x] = vars[i * m + x];
                 col[x] = vars[x * m + i];
             }
-            solver.post(solver.allDifferent(col, "AC"));
-            solver.post(solver.allDifferent(row, "AC"));
+            solver.allDifferent(col, "AC").post();
+            solver.allDifferent(row, "AC").post();
         }
     }
 

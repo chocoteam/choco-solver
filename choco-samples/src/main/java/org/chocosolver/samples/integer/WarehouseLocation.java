@@ -41,6 +41,9 @@ import org.kohsuke.args4j.Option;
 
 import java.util.Arrays;
 
+import static java.util.Arrays.fill;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+
 /**
  * CSPLib prob034:<br/>
  * "In the Warehouse Location problem (WLP), a company considers opening warehouses
@@ -103,27 +106,27 @@ public class WarehouseLocation extends AbstractProblem {
         // A warehouse is open, if it supplies to a store
         IntVar ONE = solver.intVar(1);
         for (int s = 0; s < nS; s++) {
-            solver.post(solver.element(ONE, open, suppliers[s], 0));
+            solver.element(ONE, open, suppliers[s], 0).post();
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.post(solver.element(costPerStore[s], c_supply[s], suppliers[s], 0));
+            solver.element(costPerStore[s], c_supply[s], suppliers[s], 0).post();
         }
         for (int w = 0; w < nWH; w++) {
             IntVar tmp = solver.intVar("occur_" + w, 0, suppliers.length, true);
-            solver.post(solver.count(w, suppliers, tmp));
-            solver.post(solver.arithm(tmp, ">=", open[w]));
+            solver.count(w, suppliers, tmp).post();
+            solver.arithm(tmp, ">=", open[w]).post();
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
             IntVar tmp = solver.intVar("occur_" + w, 0, capacity[w], true);
-            solver.post(solver.count(w, suppliers, tmp));
+            solver.count(w, suppliers, tmp).post();
         }
 
         int[] coeffs = new int[nWH + nS];
-        Arrays.fill(coeffs, 0, nWH, cost);
-        Arrays.fill(coeffs, nWH, nWH + nS, 1);
-        solver.post(solver.scalar(ArrayUtils.append(open, costPerStore), coeffs, "=", totCost));
+        fill(coeffs, 0, nWH, cost);
+        fill(coeffs, nWH, nWH + nS, 1);
+        solver.scalar(append(open, costPerStore), coeffs, "=", totCost).post();
     }
 
     @Override

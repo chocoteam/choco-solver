@@ -39,6 +39,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lastConflict;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+
 /**
  * Tests the various filtering algorithms of the cumulative constraint
  * @author Thierry Petit, Jean-Guillaume Fages
@@ -139,7 +144,7 @@ public class CumulativeTest {
 	public static long solve(int n, int capamax, int dmin, int hmax, long seed,
 							 boolean graph, int mode) {
 		final Solver solver = new Solver();
-		int dmax = 5+dmin*2;
+		int dmax = 5 + dmin * 2;
 		final IntVar[] s = solver.intVarArray("s", n, 0, n * dmax, false);
 		final IntVar[] d = solver.intVarArray("d", n, dmin, dmax, false);
 		final IntVar[] e = solver.intVarArray("e", n, 0, n * dmax, false);
@@ -147,26 +152,30 @@ public class CumulativeTest {
 		final IntVar capa = solver.intVar("capa", 0, capamax, false);
 		final IntVar last = solver.intVar("last", 0, n * dmax, false);
 		Task[] t = new Task[n];
-		for(int i=0;i<n;i++){
-			t[i] = new Task(s[i],d[i],e[i]);
-			solver.post(solver.arithm(e[i],"<=",last));
+		for (int i = 0; i < n; i++) {
+			t[i] = new Task(s[i], d[i], e[i]);
+			solver.arithm(e[i], "<=", last).post();
 		}
-		Constraint c = solver.cumulative(t,h,capa,graph);
-		solver.post(c);
-		solver.set(ISF.random_bound(solver.retrieveIntVars(false), seed));
-		solver.set(ISF.lastConflict(solver,solver.getStrategy()));
-		SMF.limitTime(solver,5000);
-		switch (mode){
-			case 0:	solver.findSolution();
-				if(solver.hasReachedLimit())return -1;
+		Constraint c = solver.cumulative(t, h, capa, graph);
+		c.post();
+		solver.set(random_bound(solver.retrieveIntVars(false), seed));
+		solver.set(lastConflict(solver, solver.getStrategy()));
+		limitTime(solver, 5000);
+		switch (mode) {
+			case 0:
+				solver.findSolution();
+				if (solver.hasReachedLimit()) return -1;
 				return solver.getMeasures().getSolutionCount();
-			case 1:	solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,last);
-				if(solver.hasReachedLimit())return -1;
+			case 1:
+				solver.findOptimalSolution(MINIMIZE, last);
+				if (solver.hasReachedLimit()) return -1;
 				return solver.getMeasures().getBestSolutionValue().longValue();
-			case 2:	solver.findAllSolutions();// too many solutions to be used
-				if(solver.hasReachedLimit())return -1;
+			case 2:
+				solver.findAllSolutions();// too many solutions to be used
+				if (solver.hasReachedLimit()) return -1;
 				return solver.getMeasures().getSolutionCount();
-			default:throw new UnsupportedOperationException();
+			default:
+				throw new UnsupportedOperationException();
 		}
 	}
 }

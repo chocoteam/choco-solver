@@ -95,13 +95,13 @@ public class CarSequencing extends AbstractProblem {
                     // optfreq[optNum][0] times AT MOST
                     atMost[i] = solver.intVar("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], true);
                 }
-                solver.post(solver.globalCardinality(carSequence, options[optNum], atMost, false));
+                solver.globalCardinality(carSequence, options[optNum], atMost, false).post();
                 IntVar[] atLeast = solver.intVarArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, true);
-                solver.post(solver.globalCardinality(carSequence, idleConfs[optNum], atLeast, false));
+                solver.globalCardinality(carSequence, idleConfs[optNum], atLeast, false).post();
 
                 // all others configurations may be chosen
                 IntVar sum = solver.intVar("sum", optfreq[optNum][1] - optfreq[optNum][0], 99999999, true);
-                solver.post(solver.sum(atLeast, "=", sum));
+                solver.sum(atLeast, "=", sum).post();
             }
         }
 
@@ -110,7 +110,7 @@ public class CarSequencing extends AbstractProblem {
             expArray[i] = solver.intVar("var_" + i, 0, demands[i], false);
             values[i] = i;
         }
-        solver.post(solver.globalCardinality(cars, values, expArray, false));
+        solver.globalCardinality(cars, values, expArray, false).post();
     }
 
     private static IntVar[] extractor(IntVar[] cars, int initialNumber, int amount) {

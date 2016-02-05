@@ -37,6 +37,10 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
+
 /**
  *
  * @author Charles Prud'homme
@@ -49,11 +53,11 @@ public class ExplanationExamples {
     public void dummy() {
         Solver solver = new Solver();
         BoolVar[] bvars = solver.boolVarArray("B", 4);
-        solver.post(solver.arithm(bvars[2], "=", bvars[3]));
-        solver.post(solver.arithm(bvars[2], "!=", bvars[3]));
-        solver.set(ISF.lexico_LB(bvars));
-        ExplanationFactory.CBJ.plugin(solver, false, false);
-        Chatterbox.showStatistics(solver);
+        solver.arithm(bvars[2], "=", bvars[3]).post();
+        solver.arithm(bvars[2], "!=", bvars[3]).post();
+        solver.set(lexico_LB(bvars));
+        CBJ.plugin(solver, false, false);
+        showStatistics(solver);
         solver.findAllSolutions();
     }
 
@@ -63,7 +67,7 @@ public class ExplanationExamples {
         IntVar[] pigeon = solver.intVarArray("p", 5, 1, 4, false);
         for (int i = 0; i < 4; i++) {
             for (int j = i + 1; j < 5; j++) {
-                solver.post(solver.arithm(pigeon[i], "!=", pigeon[j]));
+                solver.arithm(pigeon[i], "!=", pigeon[j]).post();
             }
         }
         solver.set(ISF.lexico_LB(pigeon));

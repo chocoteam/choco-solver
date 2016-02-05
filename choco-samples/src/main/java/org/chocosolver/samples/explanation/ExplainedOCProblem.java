@@ -58,7 +58,7 @@ public class ExplainedOCProblem extends AbstractProblem {
         vars = solver.intVarArray("x", 2 * n, 1, vals, false);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
-                solver.post(solver.arithm(vars[2 * i], "!=", vars[2 * j]));
+                solver.arithm(vars[2 * i], "!=", vars[2 * j]).post();
             }
         }
     }

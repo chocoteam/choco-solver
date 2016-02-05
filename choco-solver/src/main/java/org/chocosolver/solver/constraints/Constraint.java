@@ -149,9 +149,9 @@ public class Constraint implements Serializable {
         Solver s = propagators[0].getSolver();
         if (boolReif == null) {
             boolReif = bool;
-            s.post(new ReificationConstraint(boolReif, this, getOpposite()));
-        } else if(bool!=boolReif){
-            s.post(s.arithm(bool, "=", boolReif));
+            new ReificationConstraint(boolReif, this, getOpposite()).post();
+        } else if(bool!=boolReif) {
+            s.arithm(bool, "=", boolReif).post();
         }
     }
 
@@ -164,9 +164,17 @@ public class Constraint implements Serializable {
         if (boolReif == null) {
             Solver s = propagators[0].getSolver();
             boolReif = s.boolVar(randomName());
-            s.post(new ReificationConstraint(boolReif, this, getOpposite()));
+            new ReificationConstraint(boolReif, this, getOpposite()).post();
         }
         return boolReif;
+    }
+
+	/**
+     * Posts the constraint to its solver so that the constraint must be satisfied.
+     * This should not be reified.
+     */
+    public final void post(){
+        propagators[0].getSolver().post(this);
     }
 
     /**

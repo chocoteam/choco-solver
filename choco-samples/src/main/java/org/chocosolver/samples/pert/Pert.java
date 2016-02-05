@@ -85,7 +85,7 @@ public class Pert extends AbstractProblem {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
-                    solver.post(precedence(vars[i], 1, vars[j]));
+                    precedence(vars[i], 1, vars[j]).post();
                 }
             }
         }
@@ -96,7 +96,7 @@ public class Pert extends AbstractProblem {
             for (int k = 0, j = disjoint.nextSetBit(0); j >= 0; j = disjoint.nextSetBit(j + 1), k++) {
                 tvars[k] = vars[j];
             }
-            solver.post(solver.allDifferent(tvars, "BC"));
+            solver.allDifferent(tvars, "BC").post();
         }
     }
 

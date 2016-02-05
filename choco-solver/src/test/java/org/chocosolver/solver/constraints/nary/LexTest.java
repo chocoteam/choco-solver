@@ -40,6 +40,12 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static java.lang.Math.pow;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -62,11 +68,11 @@ public class LexTest {
                 vs1[i] = solver.intVar("" + i, 0, k, true);
                 vs2[i] = solver.intVar("" + i, 0, k, true);
             }
-            solver.post(solver.lexLessEq(vs1, vs2));
-            solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(vs1, vs2), seed));
+            solver.lexLessEq(vs1, vs2).post();
+            solver.set(random_bound(append(vs1, vs2), seed));
             solver.findAllSolutions();
-            int kpn = (int) Math.pow(k + 1, n1 / 2);
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
+            int kpn = (int) pow(k + 1, n1 / 2);
+            assertEquals(solver.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
         }
     }
 
@@ -82,11 +88,11 @@ public class LexTest {
                 vs1[i] = solver.intVar("" + i, 0, k, true);
                 vs2[i] = solver.intVar("" + i, 0, k, true);
             }
-            solver.post(solver.lexLess(vs1, vs2));
-            solver.set(IntStrategyFactory.random_bound(ArrayUtils.append(vs1, vs2), seed));
+            solver.lexLess(vs1, vs2).post();
+            solver.set(random_bound(append(vs1, vs2), seed));
 
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3240);
+            assertEquals(solver.getMeasures().getSolutionCount(), 3240);
         }
     }
 
@@ -125,16 +131,16 @@ public class LexTest {
         b[1] = solver.intVar("b2", 0, 0, true);
 
 
-        solver.post(solver.lexLess(a, b));
+        solver.lexLess(a, b).post();
         try {
             solver.propagate();
 
         } catch (ContradictionException e) {
-            Assert.fail();
+            fail();
         }
 //        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
-        Assert.assertEquals(6, solver.getMeasures().getSolutionCount());
+        assertEquals(6, solver.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -149,17 +155,16 @@ public class LexTest {
         b[0] = solver.intVar("b2", new int[]{5, 8});
         b[1] = solver.intVar("b3", new int[]{-3, -2});
 
-
-        solver.post(solver.lexLess(a, b));
+        solver.lexLess(a, b).post();
         try {
             solver.propagate();
         } catch (ContradictionException e) {
-            Assert.fail();
+            fail();
         }
-        Assert.assertEquals(5, a[0].getUB());
+        assertEquals(5, a[0].getUB());
 //        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -175,15 +180,15 @@ public class LexTest {
         b[1] = solver.intVar("b2", new int[]{-6, -1});
 
 
-        solver.post(solver.lexLess(a, b));
+        solver.lexLess(a, b).post();
         try {
             solver.propagate();
         } catch (ContradictionException e) {
-            Assert.fail();
+            fail();
         }
-        Assert.assertEquals(-2, a[0].getUB());
+        assertEquals(-2, a[0].getUB());
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
+        assertEquals(solver.getMeasures().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -199,13 +204,13 @@ public class LexTest {
         b[1] = solver.intVar("b2", new int[]{-6, -1});
 
 
-        solver.post(solver.lexLess(a, b));
+        solver.lexLess(a, b).post();
         try {
             solver.propagate();
-            Assert.fail();
+            fail();
         } catch (ContradictionException ignored) {
         }
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0);
+        assertEquals(solver.getMeasures().getSolutionCount(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -227,13 +232,13 @@ public class LexTest {
         b[4] = solver.intVar("b5", new int[]{0, 1, 2});
 
 
-        solver.post(solver.lexLess(a, b));
+        solver.lexLess(a, b).post();
         try {
             solver.propagate();
         } catch (ContradictionException ignored) {
         }
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 216);
+        assertEquals(solver.getMeasures().getSolutionCount(), 216);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -251,15 +256,15 @@ public class LexTest {
         b[2] = solver.intVar("b3", new int[]{-4, 2});
 
 
-        solver.post(solver.lexLess(a, b));
+        solver.lexLess(a, b).post();
         try {
             solver.propagate();
         } catch (ContradictionException e) {
-            Assert.fail();
+            fail();
         }
-        Assert.assertEquals(-1, b[0].getLB());
+        assertEquals(-1, b[0].getLB());
 //        SearchMonitorFactory.log(solver, true, false);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 30);
+        assertEquals(solver.getMeasures().getSolutionCount(), 30);
     }
 }

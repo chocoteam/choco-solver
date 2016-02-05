@@ -46,6 +46,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
+
 
 /**
  * <br/>
@@ -95,12 +99,12 @@ public class ReifiedTest {
         s.ifThenElse(b, s.member(y, new int[]{1, 1}), s.notMember(y, new int[]{1, 1}));
         s.ifThenElse(c, s.member(z, new int[]{1, 1}), s.notMember(z, new int[]{1, 1}));
 
-        s.post(s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")));
+        s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")).post();
 
-        s.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y, z}));
+        s.set(lexico_LB(new IntVar[]{x, y, z}));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 2, "nb sol incorrect");
+        assertEquals(sol, 2, "nb sol incorrect");
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -147,9 +151,9 @@ public class ReifiedTest {
             vars1[j] = s1.intVar("v_" + j, values[j]);
         }
 
-        s1.post(s1.allDifferent(vars1, "AC"));
+        s1.allDifferent(vars1, "AC").post();
 
-        s1.set(IntStrategyFactory.lexico_LB(vars1));
+        s1.set(lexico_LB(vars1));
         return s1;
     }
 
@@ -211,7 +215,7 @@ public class ReifiedTest {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                s2.post(s2.sum(ai, "=", s2.intVar("sum", 0, q - p + 1, true)));
+                s2.sum(ai, "=", s2.intVar("sum", 0, q - p + 1, true)).post();
             }
         }
 
@@ -284,7 +288,7 @@ public class ReifiedTest {
         }
 
         IntVar cp2 = solver.intVar("cp27", 1, 10, false);
-        solver.post(solver.arithm(cp2, ">=", cp));
+        solver.arithm(cp2, ">=", cp).post();
 
         BoolVar[] bv2 = solver.boolVarArray("b2", 10);
         for (int i = 1; i <= 10; i++) {
@@ -295,9 +299,9 @@ public class ReifiedTest {
 
         try {
             solver.propagate();
-            cp.updateUpperBound(5, Cause.Null);
+            cp.updateUpperBound(5, Null);
             solver.propagate();
-            bv[0].instantiateTo(1, Cause.Null);
+            bv[0].instantiateTo(1, Null);
             solver.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -317,7 +321,7 @@ public class ReifiedTest {
         IntVar calc[] = new IntVar[2];
         calc[0] = s.intOffsetView(row[0], 2);
         calc[1] = s.intVar("C", 0, 80, true);
-        s.post(s.sum(new IntVar[]{row[0], row[1]}, "=", calc[1]));
+        s.sum(new IntVar[]{row[0], row[1]}, "=", calc[1]).post();
 
         Constraint[] constraints = new Constraint[4];
         constraints[0] = s.arithm(row[1], "=", calc[0]);
@@ -333,11 +337,11 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(s.sum(ab, "=", ab.length - max_abs));
+        s.sum(ab, "=", ab.length - max_abs).post();
 
         s.findAllSolutions();
 
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getMeasures().getSolutionCount(), 2);
 
     }
 
@@ -353,7 +357,7 @@ public class ReifiedTest {
         IntVar calc[] = new IntVar[2];
         calc[0] = s.intScaleView(row[0], 2);
         calc[1] = s.intVar("C", 0, 1600, true);
-        s.post(s.times(row[0], row[1], calc[1]));
+        s.times(row[0], row[1], calc[1]).post();
 
         Constraint[] constraints = new Constraint[4];
         constraints[0] = s.arithm(row[1], "=", calc[0]);
@@ -369,11 +373,11 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(s.sum(ab, "=", ab.length - max_abs));
+        s.sum(ab, "=", ab.length - max_abs).post();
 
         s.findAllSolutions();
 
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getMeasures().getSolutionCount(), 2);
 
     }
 
@@ -388,8 +392,8 @@ public class ReifiedTest {
 
         IntVar calc[] = s.intVarArray("C", 2, 0, 100, true);
 
-        s.post(s.div(row[0], s.intVar(2), calc[0]));
-        s.post(s.div(row[0], row[1], calc[1]));
+        s.div(row[0], s.intVar(2), calc[0]).post();
+        s.div(row[0], row[1], calc[1]).post();
 
         Constraint[] constraints = new Constraint[4];
         constraints[0] = s.arithm(row[1], "=", calc[0]);
@@ -405,12 +409,12 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(s.sum(ab,"=",ab.length - max_abs));
+        s.sum(ab, "=", ab.length - max_abs).post();
 
 //        SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
 
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getMeasures().getSolutionCount(), 2);
 
     }
 
@@ -425,8 +429,8 @@ public class ReifiedTest {
 
         IntVar calc[] = s.intVarArray("C", 2, 0, 100, true);
 
-        s.post(s.div(row[0], s.intVar(25), calc[0]));
-        s.post(s.div(row[0], row[1], calc[1]));
+        s.div(row[0], s.intVar(25), calc[0]).post();
+        s.div(row[0], row[1], calc[1]).post();
 
         Constraint[] constraints = new Constraint[4];
         constraints[0] = s.arithm(row[1], "=", calc[0]);
@@ -442,12 +446,12 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(s.sum(ab, "=", ab.length - max_abs));
+        s.sum(ab, "=", ab.length - max_abs).post();
 
 //        SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
 
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 5);
+        assertEquals(s.getMeasures().getSolutionCount(), 5);
 
     }
 }

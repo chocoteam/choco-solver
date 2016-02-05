@@ -107,7 +107,7 @@ public class Knapsack extends AbstractProblem {
 
         IntVar scalar = solver.intVar("weight", capacites[0] - 1, capacites[1] + 1, true);
 
-        solver.post(solver.knapsack(objects, scalar, power, volumes, energies));
+        solver.knapsack(objects, scalar, power, volumes, energies).post();
     }
 
     @Override

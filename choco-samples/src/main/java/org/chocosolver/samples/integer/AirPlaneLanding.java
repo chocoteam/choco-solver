@@ -50,6 +50,10 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import static java.lang.Math.max;
+import static java.util.Arrays.copyOfRange;
+import static org.chocosolver.solver.constraints.ternary.Max.var;
+
 /**
  * OR-LIBRARY:<br/>
  * "Given a set of planes and runways, the objective is to minimize the total (weighted) deviation from
@@ -132,12 +136,12 @@ public class AirPlaneLanding extends AbstractProblem {
 //            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
 //            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
 
-            obj_ub += Math.max(
+            obj_ub += max(
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-            earliness[i] = Max.var(ZERO, solver.intOffsetView(solver.intMinusView(planes[i]), data[i][TT]));
-            tardiness[i] = Max.var(ZERO, solver.intOffsetView(planes[i], -data[i][TT]));
+            earliness[i] = var(ZERO, solver.intOffsetView(solver.intMinusView(planes[i]), data[i][TT]));
+            tardiness[i] = var(ZERO, solver.intOffsetView(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<>();
@@ -163,18 +167,18 @@ public class AirPlaneLanding extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             costLAT[i] = data[i][PCBT];
             costLAT[n + i] = data[i][PCAT];
-            maxCost.put(planes[i], Math.max(data[i][PCBT], data[i][PCAT]));
+            maxCost.put(planes[i], max(data[i][PCBT], data[i][PCAT]));
         }
 
 //        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
         IntVar obj_e = solver.intVar("obj_e", 0, obj_ub, true);
-        solver.post(solver.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), "=", obj_e));
+        solver.scalar(earliness, copyOfRange(costLAT, 0, n), "=", obj_e).post();
 
         IntVar obj_t = solver.intVar("obj_t", 0, obj_ub, true);
-        solver.post(solver.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t));
-        solver.post(solver.sum(new IntVar[]{obj_e, obj_t}, "=", objective));
+        solver.scalar(tardiness, copyOfRange(costLAT, n, 2 * n), "=", obj_t).post();
+        solver.sum(new IntVar[]{obj_e, obj_t}, "=", objective).post();
 
-        solver.post(solver.allDifferent(planes, "BC"));
+        solver.allDifferent(planes, "BC").post();
         solver.setObjectives(objective);
     }
 

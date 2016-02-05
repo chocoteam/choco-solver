@@ -181,9 +181,9 @@ public class SerializableTest {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
                 Constraint neq = s.arithm(vars[i], "!=", vars[j]);
-                s.post(neq);
-                s.post(s.arithm(vars[i], "!=", vars[j], "+", -k));
-                s.post(s.arithm(vars[i], "!=", vars[j], "+", k));
+                neq.post();
+                s.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                s.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
 

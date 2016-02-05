@@ -38,6 +38,8 @@ import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 
+import static java.lang.System.out;
+
 /**
  * The cyclo hexan problem but hybrids finite/continuous problems
  * <br/>
@@ -58,7 +60,7 @@ public class HybridCycloHexan extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		System.out.println("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n"
+		out.println("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n"
 				+ "It is decribed with a system of three non linear equations : \n"
 				+ " y^2 * (1 + z^2) + z * (z - 24 * y) = -13 \n" +
 				" x^2 * (1 + y^2) + y * (y - 24 * x) = -13 \n" +
@@ -71,17 +73,16 @@ public class HybridCycloHexan extends AbstractProblem {
 		// finite domain
 		intx = solver.intVar("x", new int[]{-10, -9, 0, 2, 42});
 		// continuous view
-		x = solver.realIntView(intx,precision);
+		x = solver.realIntView(intx, precision);
 		y = solver.realVar("y", -1.0e8, 1.0e8, precision);
 		z = solver.realVar("z", -1.0e8, 1.0e8, precision);
 
 		vars = new RealVar[]{x, y, z};
-		solver.post(solver.realIbexGenericConstraint(
+		solver.realIbexGenericConstraint(
 				"{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
 						"{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
 						"{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
-				vars)
-		);
+				vars).post();
 	}
 
 	@Override

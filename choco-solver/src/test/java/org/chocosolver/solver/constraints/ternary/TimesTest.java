@@ -41,6 +41,10 @@ import org.testng.annotations.Test;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
+import static java.lang.System.out;
+import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 /**
  * <br/>
@@ -62,49 +66,49 @@ public class TimesTest extends AbstractTernaryTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testJL() {
-	    Solver s = new Solver();
+		Solver s = new Solver();
 		IntVar a = s.intVar("a", 0, 3, false);
 		IntVar b = s.intVar("b", -3, 3, false);
 
 		IntVar z = s.intVar("z", 3, 4, false);
-	    s.post(s.arithm(z, "=", 3));
-	    Constraint c = s.times(a, b, z);
-	    s.post(c);
+		s.arithm(z, "=", 3).post();
+		Constraint c = s.times(a, b, z);
+		c.post();
 		try {
 			s.propagate();
-			Assert.assertFalse(a.contains(0));
+			assertFalse(a.contains(0));
 			for (Propagator p : c.getPropagators()) {
-				p.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+				p.propagate(FULL_PROPAGATION.getMask());
 			}
-			Assert.assertFalse(a.contains(0));
-		}catch (ContradictionException e){
-			Assert.assertFalse(true);
+			assertFalse(a.contains(0));
+		} catch (ContradictionException e) {
+			assertFalse(true);
 		}
 	}
 
 	@Test(groups="10s", timeOut=60000)
 	public void testJL2(){
 		for(int i = 1 ; i < 100001; i*=10) {
-			System.out.printf("%d\n", 465 * i);
+			out.printf("%d\n", 465 * i);
 			Solver s = new Solver();
 			IntVar i1 = s.intVar("i1", 0, 465 * i, false);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, false);
-			s.post(s.times(i1, 465 * i, i2));
+			s.times(i1, 465 * i, i2).post();
 			s.findAllSolutions();
-			Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+			assertEquals(s.getMeasures().getSolutionCount(), 2);
 		}
 	}
 
 	@Test(groups="1s", timeOut=60000)
 	public void testJL3(){
 		for(int i = 1 ; i < 1000001; i*=10) {
-			System.out.printf("%d\n", 465 * i);
+			out.printf("%d\n", 465 * i);
 			Solver s = new Solver();
 			IntVar i1 = s.intVar("i1", 0, 465 * i, true);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, true);
-			s.post(s.times(i1, 465 * i, i2));
+			s.times(i1, 465 * i, i2).post();
 			s.findAllSolutions();
-			Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+			assertEquals(s.getMeasures().getSolutionCount(), 2);
 		}
 	}
 
@@ -113,22 +117,22 @@ public class TimesTest extends AbstractTernaryTest {
 		Solver s = new Solver();
 		IntVar i1 = s.intVar("i1", 0, 465, false);
 		IntVar i2 = s.intVar("i2", 0, 465 * 10000, false);
-		s.post(s.times(i1, 10000, i2));
+		s.times(i1, 10000, i2).post();
 		s.findAllSolutions();
-		Assert.assertEquals(s.getMeasures().getSolutionCount(), 466);
+		assertEquals(s.getMeasures().getSolutionCount(), 466);
 	}
 	@Test(groups="1s", timeOut=60000)
-	public void testJL5(){
+	public void testJL5() {
 		Solver s = new Solver();
 		IntVar i1 = s.intVar("i1", MIN_VALUE / 10, MAX_VALUE / 10, true);
 		IntVar i2 = s.intVar("i2", MIN_VALUE / 10, MAX_VALUE / 10, true);
-		s.post(s.times(i1, 10000, i2));
+		s.times(i1, 10000, i2).post();
 		s.findAllSolutions();
-		Assert.assertEquals(s.getMeasures().getSolutionCount(), Integer.MAX_VALUE/100000 * 2 + 1);
+		assertEquals(s.getMeasures().getSolutionCount(), MAX_VALUE / 100000 * 2 + 1);
 	}
 
 	@Test(groups="1s", timeOut=60000)
-	public void testJL6(){
+	public void testJL6() {
 		Solver s = new Solver();
 		s.set(new Settings() {
 			@Override
@@ -139,22 +143,22 @@ public class TimesTest extends AbstractTernaryTest {
 		IntVar i1 = s.intVar("i1", new int[]{1, 55000});
 		IntVar i2 = s.intVar("i2", new int[]{1, 55000});
 		IntVar i3 = s.intVar("i3", new int[]{1, 55000});
-		s.post(s.times(i1, i2, i3));
+		s.times(i1, i2, i3).post();
 	}
 
     @Test(groups="1s", timeOut=60000)
-    public void testJL7(){
-        Solver s = new Solver();
-        s.set(new Settings() {
-            @Override
-            public boolean enableTableSubstitution() {
-                return true;
-            }
-        });
+    public void testJL7() {
+		Solver s = new Solver();
+		s.set(new Settings() {
+			@Override
+			public boolean enableTableSubstitution() {
+				return true;
+			}
+		});
 		IntVar i1 = s.intVar("i1", new int[]{1, 10000});
 		IntVar i2 = s.intVar("i2", new int[]{1, 10000});
 		IntVar i3 = s.intVar("i3", new int[]{1, 10000});
-        s.post(s.times(i1, i2, i3));
-    }
+		s.times(i1, i2, i3).post();
+	}
 
 }

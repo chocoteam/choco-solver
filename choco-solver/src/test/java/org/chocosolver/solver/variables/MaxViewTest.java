@@ -57,7 +57,7 @@ public class MaxViewTest {
     }
 
     public void max(Solver solver, IntVar x, IntVar y, IntVar z) {
-        solver.post(solver.max(z, x, y));
+        solver.max(z, x, y).post();
     }
 
     @Test(groups="10s", timeOut=60000)

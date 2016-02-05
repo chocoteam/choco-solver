@@ -42,6 +42,11 @@ import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.constraints.Operator.EQ;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.SetStrategyFactory.force_first;
+import static org.testng.Assert.*;
+
 /**
  * <br/>
  *
@@ -89,16 +94,16 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", 0, 4, false);
-                ref.post(new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, 2, Operator.EQ, 0)));
-                ref.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
+                new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, 2, EQ, 0)).post();
+                ref.set(random_value(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = solver.intVar("x", 0, 2, false);
                 IntVar y = solver.intVar("y", 0, 2, false);
                 IntVar z = solver.intVar("Z", 0, 200, false);
-                solver.post(solver.sum(new IntVar[]{x, y}, "=", z));
-                solver.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
+                solver.sum(new IntVar[]{x, y}, "=", z).post();
+                solver.set(random_value(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, false, true);
@@ -115,16 +120,16 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", 0, 2, true);
                 IntVar y = ref.intVar("y", 0, 2, true);
                 IntVar z = ref.intVar("z", 0, 4, true);
-                ref.post(new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, 2, Operator.EQ, 0)));
-                ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
+                new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, 2, EQ, 0)).post();
+                ref.set(random_bound(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = solver.intVar("x", 0, 2, true);
                 IntVar y = solver.intVar("y", 0, 2, true);
                 IntVar z = solver.intVar("Z", 0, 200, false);
-                solver.post(solver.sum(new IntVar[]{x, y}, "=", z));
-                solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
+                solver.sum(new IntVar[]{x, y}, "=", z).post();
+                solver.set(random_bound(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -141,8 +146,8 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", 0, 2, true);
-                ref.post(ref.max(z, x, y));
-                ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
+                ref.max(z, x, y).post();
+                ref.set(random_bound(new IntVar[]{x, y, z}, seed));
 
             }
             {
@@ -166,8 +171,8 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", -2, 2, false);
                 IntVar z = ref.intVar("z", 0, 2, false);
 
-                ref.post(ref.absolute(z, x));
-                ref.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
+                ref.absolute(z, x).post();
+                ref.set(random_value(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = solver.intVar("x", -2, 2, false);
@@ -189,8 +194,8 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", -2, 2, false);
                 IntVar z = ref.intVar("z", -1, 3, false);
 
-                ref.post(ref.arithm(z, "=", x, "+", 1));
-                ref.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
+                ref.arithm(z, "=", x, "+", 1).post();
+                ref.set(random_value(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = solver.intVar("x", -2, 2, false);
@@ -212,8 +217,8 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", -2, 2, false);
                 IntVar z = ref.intVar("z", -4, 4, false);
 
-                ref.post(ref.times(x, ref.intVar(2), z));
-                ref.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
+                ref.times(x, ref.intVar(2), z).post();
+                ref.set(random_value(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = solver.intVar("x", -2, 2, false);
@@ -235,8 +240,8 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar z = ref.intVar("z", -2, 0, false);
 
-                ref.post(ref.arithm(z, "+", x, "=", 0));
-                ref.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
+                ref.arithm(z, "+", x, "=", 0).post();
+                ref.set(random_value(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = solver.intVar("x", 0, 2, false);
@@ -257,19 +262,19 @@ public class ViewsTest {
             int n = seed * 2;
             {
                 IntVar[] x = ref.intVarArray("x", n, 0, 2, false);
-                ref.post(ref.sum(x, "=", n));
-                ref.set(IntStrategyFactory.minDom_LB(x));
+                ref.sum(x, "=", n).post();
+                ref.set(minDom_LB(x));
             }
             {
                 IntVar[] x = solver.intVarArray("x", n, 0, 2, false);
                 IntVar[] y = new IntVar[seed];
                 for (int i = 0; i < seed; i++) {
                     y[i] = solver.intVar("Z", 0, 200, false);
-                    solver.post(solver.sum(new IntVar[]{x[i], x[i + seed]}, "=", y[i]));
+                    solver.sum(new IntVar[]{x[i], x[i + seed]}, "=", y[i]).post();
                 }
-                solver.post(solver.sum(y, "=", n));
+                solver.sum(y, "=", n).post();
 
-                solver.set(IntStrategyFactory.minDom_LB(x));
+                solver.set(minDom_LB(x));
 
             }
             check(ref, solver, seed, true, true);
@@ -286,14 +291,14 @@ public class ViewsTest {
             IntVar x = ref.intVar("x", 160, 187, false);
             IntVar y = ref.intVar("y", -999, 999, false);
             IntVar z = ref.intVar("z", -9999, 9999, false);
-            ref.post(ref.arithm(z, "+", x, "=", 180));
-            ref.post(ref.max(y, ref.intVar(0), z));
+            ref.arithm(z, "+", x, "=", 180).post();
+            ref.max(y, ref.intVar(0), z).post();
         }
         {
             IntVar x = solver.intVar("x", 160, 187, false);
             IntVar y = solver.intVar("y", -999, 999, false);
             IntVar z = solver.intOffsetView(solver.intMinusView(x), 180);
-            solver.post(solver.max(y, solver.intVar(0), z));
+            solver.max(y, solver.intVar(0), z).post();
 
             check(ref, solver, 0, false, true);
         }
@@ -310,9 +315,9 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", -2, 2, false);
-                ref.post(new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
+                new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
 //				System.out.println(cstr);
-                ref.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
+                ref.set(random_value(new IntVar[]{x, y, z}, seed));
 
             }
             {
@@ -320,9 +325,9 @@ public class ViewsTest {
                 IntVar y = solver.intVar("y", 0, 2, false);
                 IntVar z = solver.intVar("Z", -200, 200, false);
                 Constraint cstr = solver.sum(new IntVar[]{z, y}, "=", x);
-                solver.post(cstr);
+                cstr.post();
 //				System.out.println(cstr);
-                solver.set(IntStrategyFactory.random_value(new IntVar[]{x, y, z}, seed));
+                solver.set(random_value(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, false, true);
@@ -340,17 +345,17 @@ public class ViewsTest {
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", -2, 2, false);
                 IntVar az = ref.intVar("az", 0, 2, false);
-                ref.post(new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
-                ref.post(ref.absolute(az, z));
-                ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
+                new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
+                ref.absolute(az, z).post();
+                ref.set(random_bound(new IntVar[]{x, y, az}, seed));
             }
             {
                 IntVar x = solver.intVar("x", 0, 2, false);
                 IntVar y = solver.intVar("y", 0, 2, false);
                 IntVar z = solver.intVar("Z", -2, 2, false);
                 IntVar az = solver.intAbsView(z);
-                solver.post(solver.sum(new IntVar[]{z, y}, "=", x));
-                solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
+                solver.sum(new IntVar[]{z, y}, "=", x).post();
+                solver.set(random_bound(new IntVar[]{x, y, az}, seed));
             }
             check(ref, solver, seed, true, true);
         }
@@ -367,19 +372,19 @@ public class ViewsTest {
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", -2, 2, false);
                 IntVar az = ref.intVar("az", 0, 2, false);
-                ref.post(new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
-                ref.post(ref.absolute(az, z));
-                ref.post(ref.allDifferent(new IntVar[]{x, y, az}, "BC"));
-                ref.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
+                new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
+                ref.absolute(az, z).post();
+                ref.allDifferent(new IntVar[]{x, y, az}, "BC").post();
+                ref.set(random_bound(new IntVar[]{x, y, az}, seed));
             }
             {
                 IntVar x = solver.intVar("x", 0, 2, false);
                 IntVar y = solver.intVar("y", 0, 2, false);
                 IntVar z = solver.intVar("z", -2, 2, false);
-                solver.post(new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
+                new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
                 IntVar az = solver.intAbsView(z);
-                solver.post(solver.allDifferent(new IntVar[]{x, y, az}, "BC"));
-                solver.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, az}, seed));
+                solver.allDifferent(new IntVar[]{x, y, az}, "BC").post();
+                solver.set(random_bound(new IntVar[]{x, y, az}, seed));
             }
             check(ref, solver, seed, true, true);
         }
@@ -397,28 +402,28 @@ public class ViewsTest {
                 IntVar[] y = ref.intVarArray("y", k - 1, -(k - 1), k - 1, false);
                 IntVar[] t = ref.intVarArray("t", k - 1, 0, k - 1, false);
                 for (int i = 0; i < k - 1; i++) {
-                    ref.post(new Constraint("SP", new PropScalar(new IntVar[]{x[i + 1], x[i], y[i]}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
-                    ref.post(ref.absolute(t[i], y[i]));
+                    new Constraint("SP", new PropScalar(new IntVar[]{x[i + 1], x[i], y[i]}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
+                    ref.absolute(t[i], y[i]).post();
                 }
-                ref.post(ref.allDifferent(x, "BC"));
-                ref.post(ref.allDifferent(t, "BC"));
-                ref.post(ref.arithm(x[1], ">", x[0]));
-                ref.post(ref.arithm(t[0], ">", t[k - 2]));
-                ref.set(IntStrategyFactory.random_value(x, seed));
+                ref.allDifferent(x, "BC").post();
+                ref.allDifferent(t, "BC").post();
+                ref.arithm(x[1], ">", x[0]).post();
+                ref.arithm(t[0], ">", t[k - 2]).post();
+                ref.set(random_value(x, seed));
             }
             {
                 IntVar[] x = solver.intVarArray("x", k, 0, k - 1, false);
                 IntVar[] t = new IntVar[k - 1];
                 for (int i = 0; i < k - 1; i++) {
                     IntVar z = solver.intVar("Z", -200, 200, false);
-                    solver.post(new Constraint("SP", new PropScalar(new IntVar[]{x[i + 1], x[i], z}, new int[]{1, -1, -1}, 1, Operator.EQ, 0)));
+                    new Constraint("SP", new PropScalar(new IntVar[]{x[i + 1], x[i], z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
                     t[i] = solver.intAbsView(z);
                 }
-                solver.post(solver.allDifferent(x, "BC"));
-                solver.post(solver.allDifferent(t, "BC"));
-                solver.post(solver.arithm(x[1], ">", x[0]));
-                solver.post(solver.arithm(t[0], ">", t[k - 2]));
-                solver.set(IntStrategyFactory.random_value(x, seed));
+                solver.allDifferent(x, "BC").post();
+                solver.allDifferent(t, "BC").post();
+                solver.arithm(x[1], ">", x[0]).post();
+                solver.arithm(t[0], ">", t[k - 2]).post();
+                solver.set(random_value(x, seed));
             }
             check(ref, solver, k, true, true);
         }
@@ -457,34 +462,34 @@ public class ViewsTest {
         Solver s = new Solver();
         IntVar v1 = s.intVar("v1", -2, 2, false);
         IntVar v2 = s.intMinusView(s.intMinusView(s.intVar("v2", -2, 2, false)));
-        s.post(s.arithm(v1, "=", v2));
-        s.post(s.arithm(v2, "!=", 1));
+        s.arithm(v1, "=", v2).post();
+        s.arithm(v2, "!=", 1).post();
 
         s.propagate();
 
-        Assert.assertFalse(v1.contains(1));
+        assertFalse(v1.contains(1));
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL2() {
         Solver solver = new Solver();
         SetVar v1 = solver.setVar("{0,1}", new int[]{0, 1});
-        SetVar v2 = solver.setVar("v2", new int[]{}, new int[]{0,1,2,3});
-        solver.post(solver.subsetEq(new SetVar[]{v1, v2}));
-        solver.set(SetStrategyFactory.force_first(new SetVar[]{v1, v2}));
+        SetVar v2 = solver.setVar("v2", new int[]{}, new int[]{0, 1, 2, 3});
+        solver.subsetEq(new SetVar[]{v1, v2}).post();
+        solver.set(force_first(new SetVar[]{v1, v2}));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL3() {
         Solver solver = new Solver();
-        solver.post(solver.arithm(
+        solver.arithm(
                 solver.intVar("int", -3, 3, false),
                 "=",
-                solver.intMinusView(solver.boolVar("bool"))));
+                solver.intMinusView(solver.boolVar("bool"))).post();
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
+        assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -492,12 +497,12 @@ public class ViewsTest {
         Solver s = new Solver();
         BoolVar bool = s.boolVar("bool");
         BoolVar view = s.boolEqView(bool);
-        SetVar set = s.setVar("set", new int[]{}, new int[]{0,1});
-        s.post(s.setBoolsChanneling(new BoolVar[]{view, bool}, set, 0));
-        s.post(s.member(s.ONE(), set));
-        s.set(ISF.minDom_UB(bool));
+        SetVar set = s.setVar("set", new int[]{}, new int[]{0, 1});
+        s.setBoolsChanneling(new BoolVar[]{view, bool}, set, 0).post();
+        s.member(s.ONE(), set).post();
+        s.set(minDom_UB(bool));
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
+        assertEquals(s.getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -506,10 +511,10 @@ public class ViewsTest {
         BoolVar bool = s.boolVar("bool");
         BoolVar view = s.boolEqView(bool);
         IntVar sum = s.intVar("sum", 0, 6, true);
-        s.post(s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum));
-        s.post(s.arithm(sum, ">", 2));
+        s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum).post();
+        s.arithm(sum, ">", 2).post();
         s.propagate();
-        Assert.assertEquals(sum.isInstantiated(), true);
+        assertEquals(sum.isInstantiated(), true);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -518,10 +523,10 @@ public class ViewsTest {
         BoolVar bool = s.boolVar("bool");
         BoolVar view = s.boolNotView(bool);
         IntVar sum = s.intVar("sum", 0, 6, true);
-        s.post(s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum));
-        s.post(s.arithm(sum, ">", 2));
+        s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum).post();
+        s.arithm(sum, ">", 2).post();
         s.propagate();
-        Assert.assertEquals(sum.isInstantiated(), true);
+        assertEquals(sum.isInstantiated(), true);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -530,10 +535,10 @@ public class ViewsTest {
         IntVar var = s.intVar("int", 0, 2, true);
         IntVar view = s.intEqView(var);
         IntVar sum = s.intVar("sum", 0, 6, true);
-        s.post(s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum));
-        s.post(s.arithm(sum, ">", 2));
+        s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
+        s.arithm(sum, ">", 2).post();
         s.propagate();
-        Assert.assertEquals(sum.isInstantiated(), true);
+        assertEquals(sum.isInstantiated(), true);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -542,10 +547,10 @@ public class ViewsTest {
         IntVar var = s.intVar("int", 0, 2, true);
         IntVar view = s.intMinusView(var);
         IntVar sum = s.intVar("sum", 0, 6, true);
-        s.post(s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum));
-        s.post(s.arithm(sum, ">", 2));
+        s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
+        s.arithm(sum, ">", 2).post();
         s.propagate();
-        Assert.assertEquals(sum.isInstantiated(), true);
+        assertEquals(sum.isInstantiated(), true);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -556,12 +561,12 @@ public class ViewsTest {
         BoolVar x3 = solver.boolVar("x3");
         IntVar[] av = new IntVar[]{x1, x2, x3};
         int[] coef = new int[]{5, 3, 2};
-        solver.post(solver.scalar(av, coef, ">=", 7));
+        solver.scalar(av, coef, ">=", 7).post();
         try {
             solver.propagate();
         } catch (Exception ignored) {
         }
-        Assert.assertTrue(x3.isInstantiated());
-        Assert.assertEquals(x3.getValue(), 1);
+        assertTrue(x3.isInstantiated());
+        assertEquals(x3.getValue(), 1);
     }
 }

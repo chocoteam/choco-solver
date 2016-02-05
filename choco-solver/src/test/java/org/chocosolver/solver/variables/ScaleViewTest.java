@@ -41,6 +41,9 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -52,22 +55,13 @@ public class ScaleViewTest {
     @Test(groups="1s", timeOut=60000)
     public void test1() {
         Solver s = new Solver();
-
         IntVar X = s.intVar("X", 1, 3, false);
         IntVar Y = s.intScaleView(X, 2);
-
         IntVar[] vars = {X, Y};
-
-        Constraint[] cstrs = {
-                s.arithm(Y, "!=", 4)
-        };
-
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-
-        s.post(cstrs);
-        s.set(strategy);
+        s.arithm(Y, "!=", 4).post();
+        s.set(lexico_LB(vars));
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getMeasures().getSolutionCount(), 2);
     }
 
 
@@ -77,19 +71,13 @@ public class ScaleViewTest {
 
         IntVar X = s.intVar("X", 1, 4, false);
         IntVar Y = s.intScaleView(X, 3);
-
         IntVar[] vars = {X, Y};
 
-        Constraint[] cstrs = {
-                s.arithm(Y, "!=", -2)
-        };
+        s.arithm(Y, "!=", -2).post();
 
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-
-        s.post(cstrs);
-        s.set(strategy);
+        s.set(lexico_LB(vars));
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 4);
+        assertEquals(s.getMeasures().getSolutionCount(), 4);
     }
 
     private Solver bijective(int low, int upp, int coeff) {
@@ -100,15 +88,10 @@ public class ScaleViewTest {
 
         IntVar[] vars = {X, Y};
 
-        Constraint[] cstrs = {
-                s.arithm(Y, ">=", low + coeff - 1),
-                s.arithm(Y, "<=", upp - coeff - 1)
-        };
+        s.arithm(Y, ">=", low + coeff - 1).post();
+        s.arithm(Y, "<=", upp - coeff - 1).post();
 
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-
-        s.post(cstrs);
-        s.set(strategy);
+        s.set(lexico_LB(vars));
         return s;
     }
 
@@ -121,16 +104,11 @@ public class ScaleViewTest {
 
         IntVar[] vars = {X, Y};
 
-        Constraint[] cstrs = {
-                s.arithm(Y, ">=", low + coeff - 1),
-                s.arithm(Y, "<=", upp - coeff - 1),
-                s.times(X, C, Y)
-        };
+        s.arithm(Y, ">=", low + coeff - 1).post();
+        s.arithm(Y, "<=", upp - coeff - 1).post();
+        s.times(X, C, Y).post();
 
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
-
-        s.post(cstrs);
-        s.set(strategy);
+        s.set(lexico_LB(vars));
         return s;
     }
 

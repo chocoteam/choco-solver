@@ -48,6 +48,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import static java.util.Arrays.sort;
+
 /**
  * <a href="http://www.inra.fr/mia/T/schiex/Doc/CELAR.shtml">CELAR Radio Link Frequency Assignment Problem</a>:
  * <br/>
@@ -123,7 +125,7 @@ public class RLFAP extends AbstractProblem {
 
         for (int i = 0; i < _ctr.length; i++) {
             int[] ci = _ctr[i];
-            solver.post(solver.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3]));
+            solver.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3]).post();
 
             // MARK BOTH SPOTS IN "PRECEDENCE" GRAPH
             graph[ci[0] - 1][ci[1] - 1] = 1;
@@ -133,12 +135,12 @@ public class RLFAP extends AbstractProblem {
         if (opt) {
             cards = solver.intVarArray("c", values.size(), 0, vars.length, true);
             freqs = values.toArray();
-            Arrays.sort(freqs);
+            sort(freqs);
             for (int i = 0; i < freqs.length; i++) {
-                solver.post(solver.count(freqs[i], vars, cards[i]));
+                solver.count(freqs[i], vars, cards[i]).post();
             }
             nb0 = solver.intVar("nb0", 0, freqs.length, true);
-            solver.post(solver.count(0, cards, nb0));
+            solver.count(0, cards, nb0).post();
         }
         // RANKING VARIABLES PER LAYER OF DISTINCT SPOT
         rank = new int[n];

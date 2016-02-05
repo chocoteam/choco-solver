@@ -40,6 +40,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 /**
  * <br/>
  *
@@ -53,14 +58,14 @@ public class DistanceTest {
         for (int i = 0; i < 100; i++) {
             long nbSol, nbNod;
             {
-				final Solver solver = new Solver();
+                final Solver solver = new Solver();
                 IntVar X = solver.intVar("X", 1, 10, false);
                 IntVar Y = solver.intVar("Y", 1, 10, false);
                 IntVar diff = solver.intVar("X-Y", -9, 9, true);
-				solver.post(solver.sum(new IntVar[]{Y,diff}, "=", X));
+                solver.sum(new IntVar[]{Y, diff}, "=", X).post();
                 IntVar Z = solver.intAbsView(diff);
-                solver.post(solver.arithm(Z, "=", 5));
-                solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
+                solver.arithm(Z, "=", 5).post();
+                solver.set(random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
 //					public void onSolution() {
@@ -78,8 +83,8 @@ public class DistanceTest {
                 final Solver solver = new Solver();
                 IntVar X = solver.intVar("X", 1, 10, false);
                 IntVar Y = solver.intVar("Y", 1, 10, false);
-                solver.post(solver.distance(X, Y, "=", 5));
-                solver.set(IntStrategyFactory.random_value(new IntVar[]{X, Y}, i));
+                solver.distance(X, Y, "=", 5).post();
+                solver.set(random_value(new IntVar[]{X, Y}, i));
 //				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
 //					public void onSolution() {
@@ -90,8 +95,8 @@ public class DistanceTest {
 //					}
 //				});
                 solver.findAllSolutions();
-                Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
-                Assert.assertTrue(solver.getMeasures().getNodeCount() <= nbNod);
+                assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
+                assertTrue(solver.getMeasures().getNodeCount() <= nbNod);
             }
         }
     }
@@ -107,14 +112,14 @@ public class DistanceTest {
                 IntVar Y = s1.intVar("Y", 1, k, false);
                 vs1 = new IntVar[]{X, Y};
                 Constraint c = s1.distance(X, Y, "=", k / 2);
-                s1.post(c);
+                c.post();
             }
             {
                 IntVar X = s2.intVar("X", 1, k, false);
                 IntVar Y = s2.intVar("Y", 1, k, false);
                 vs2 = new IntVar[]{X, Y};
                 Constraint c = s2.distance(X, Y, "=", k / 2);
-                s2.post(c);
+                c.post();
                 p2 = c.getPropagator(0);
             }
 
@@ -155,8 +160,8 @@ public class DistanceTest {
         IntVar X = solver.intVar("X", -5, 5, true);
         IntVar Y = solver.intVar("Y", -5, 5, true);
         IntVar Z = solver.intVar("Z", 0, 10, true);
-        solver.post(solver.distance(X, Y, "=", Z));
-        solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{Z, X, Y, Z}));
+        solver.distance(X, Y, "=", Z).post();
+        solver.set(lexico_LB(new IntVar[]{Z, X, Y, Z}));
 //        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
 //        System.out.printf("end\n");

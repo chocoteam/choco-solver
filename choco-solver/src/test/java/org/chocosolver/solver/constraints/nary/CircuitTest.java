@@ -42,24 +42,27 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
+
 public class CircuitTest {
 
     @Test(groups="1s", timeOut=60000)
     public static void test1() {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 10, 0, 20, true);
-        solver.post(solver.circuit(x, 0));
+        solver.circuit(x, 0).post();
         solver.findSolution();
-        Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
+        assertEquals(1, solver.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
     public static void test2() {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 10, 0, 10, false);
-        solver.post(solver.circuit(x, 0));
+        solver.circuit(x, 0).post();
         solver.findSolution();
-        Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
+        assertEquals(1, solver.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -67,10 +70,10 @@ public class CircuitTest {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 5, 0, 4, true);
         IntVar[] y = solver.intVarArray("y", 5, 5, 9, true);
-        IntVar[] vars = ArrayUtils.append(x, y);
-        solver.post(solver.circuit(vars, 0));
+        IntVar[] vars = append(x, y);
+        solver.circuit(vars, 0).post();
         solver.findSolution();
-        Assert.assertEquals(0, solver.getMeasures().getSolutionCount());
+        assertEquals(0, solver.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -78,9 +81,9 @@ public class CircuitTest {
         for (int n = 2; n < 8; n++) {
             Solver solver = new Solver();
             IntVar[] x = solver.intVarArray("x", n, 0, n - 1, true);
-            solver.post(solver.circuit(x, 0));
+            solver.circuit(x, 0).post();
             solver.findAllSolutions();
-            Assert.assertEquals(factorial(n - 1), solver.getMeasures().getSolutionCount());
+            assertEquals(factorial(n - 1), solver.getMeasures().getSolutionCount());
         }
     }
 

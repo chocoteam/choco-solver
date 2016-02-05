@@ -41,6 +41,12 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality.reformulate;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertTrue;
+
 /**
  * <br/>
  *
@@ -60,18 +66,18 @@ public class BoundGlobalCardinlityTest {
         for (int i = 0; i < values.length; i++) {
             values[i] = i;
         }
-        solver.post(solver.globalCardinality(vars, values, card, false));
+        solver.globalCardinality(vars, values, card, false).post();
 
-        vars[0].instantiateTo(0, Cause.Null);
-        vars[1].instantiateTo(1, Cause.Null);
-        vars[2].instantiateTo(3, Cause.Null);
-        vars[3].instantiateTo(2, Cause.Null);
-        vars[4].instantiateTo(0, Cause.Null);
-        vars[5].instantiateTo(0, Cause.Null);
+        vars[0].instantiateTo(0, Null);
+        vars[1].instantiateTo(1, Null);
+        vars[2].instantiateTo(3, Null);
+        vars[3].instantiateTo(2, Null);
+        vars[4].instantiateTo(0, Null);
+        vars[5].instantiateTo(0, Null);
 
-        solver.set(IntStrategyFactory.lexico_LB(ArrayUtils.append(vars, card)));
+        solver.set(lexico_LB(append(vars, card)));
         solver.findAllSolutions();
-        Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
+        assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -92,17 +98,17 @@ public class BoundGlobalCardinlityTest {
             {
                 IntVar[] vars = solver.intVarArray("vars", n, 0, m - 1, true);
                 IntVar[] cards = solver.intVarArray("cards", m, 0, n, true);
-                solver.post(solver.globalCardinality(vars, values, cards, false));
+                solver.globalCardinality(vars, values, cards, false).post();
 //              solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
-                solver.set(IntStrategyFactory.lexico_LB(ArrayUtils.append(vars, cards)));
+                solver.set(lexico_LB(append(vars, cards)));
             }
             // reformulation
             Solver ref = new Solver();
             {
                 IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);
                 IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
-                ref.post(GlobalCardinality.reformulate(vars, cards, ref));
-                ref.set(IntStrategyFactory.lexico_LB(ArrayUtils.append(vars, cards)));
+                reformulate(vars, cards, ref).post();
+                ref.set(lexico_LB(append(vars, cards)));
             }
 //            SearchMonitorFactory.log(solver, false, true);
             solver.findAllSolutions();
@@ -129,17 +135,17 @@ public class BoundGlobalCardinlityTest {
             {
                 IntVar[] vars = solver.intVarArray("vars", n, 0, m - 1, true);
                 IntVar[] cards = solver.intVarArray("cards", m, 0, n, true);
-                solver.post(solver.globalCardinality(vars, values, cards, false));
+                solver.globalCardinality(vars, values, cards, false).post();
 //                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
-                solver.set(IntStrategyFactory.lexico_LB(vars));
+                solver.set(lexico_LB(vars));
             }
             // reformulation
             Solver ref = new Solver();
             {
                 IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
                 IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);
-                ref.post(GlobalCardinality.reformulate(vars, cards, ref));
-                ref.set(IntStrategyFactory.lexico_LB(vars));
+                reformulate(vars, cards, ref).post();
+                ref.set(lexico_LB(vars));
             }
 //            SearchMonitorFactory.log(solver, false, true);
             solver.findAllSolutions();

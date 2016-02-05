@@ -50,9 +50,9 @@ public class NQueenLinearBinary extends AbstractNQueen {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(solver.arithm(vars[i], "!=", vars[j]));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.arithm(vars[i], "!=", vars[j]).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
     }

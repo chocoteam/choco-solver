@@ -53,9 +53,9 @@ public class NQueenGlobal extends AbstractNQueen {
             diag2[i] = solver.intOffsetView(vars[i], -i);
         }
 
-        solver.post(solver.allDifferent(vars, "BC"));
-        solver.post(solver.allDifferent(diag1, "BC"));
-        solver.post(solver.allDifferent(diag2, "BC"));
+        solver.allDifferent(vars, "BC").post();
+        solver.allDifferent(diag1, "BC").post();
+        solver.allDifferent(diag2, "BC").post();
     }
 
     @Override

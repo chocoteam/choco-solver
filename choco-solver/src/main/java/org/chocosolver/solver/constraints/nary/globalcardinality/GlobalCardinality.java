@@ -66,7 +66,7 @@ public class GlobalCardinality extends Constraint {
 		return new PropFastGCC(vars, values, map, cards);
 	}
 
-    public static Constraint[] reformulate(IntVar[] vars, IntVar[] card, Solver solver) {
+    public static Constraint reformulate(IntVar[] vars, IntVar[] card, Solver solver) {
         List<Constraint> cstrs = new ArrayList<>();
         for (int i = 0; i < card.length; i++) {
 			IntVar cste = solver.intVar(i);
@@ -76,6 +76,6 @@ public class GlobalCardinality extends Constraint {
             }
             cstrs.add(solver.sum(bs, "=", card[i]));
         }
-        return cstrs.toArray(new Constraint[cstrs.size()]);
+        return Constraint.merge("reformulatedGCC",cstrs.toArray(new Constraint[0]));
     }
 }

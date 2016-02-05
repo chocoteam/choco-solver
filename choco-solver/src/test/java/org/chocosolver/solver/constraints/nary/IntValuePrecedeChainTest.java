@@ -36,6 +36,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random;
+
 /**
  * Created by cprudhom on 07/07/15.
  * Project: choco.
@@ -44,7 +46,7 @@ public class IntValuePrecedeChainTest {
 
     public static void int_value_precede_chain_dec(IntVar[] X, int S, int T) {
         Solver solver = X[0].getSolver();
-        solver.post(solver.arithm(X[0], "!=", T));
+        solver.arithm(X[0], "!=", T).post();
         for (int j = 1; j < X.length; j++) {
             BoolVar bj = solver.arithm(X[j], "=", T).reify();
             BoolVar[] bis = new BoolVar[j];
@@ -63,8 +65,8 @@ public class IntValuePrecedeChainTest {
             {
                 Solver solver = new Solver();
                 IntVar[] vars = solver.intVarArray("X", 5, 0, 5, false);
-                solver.post(solver.intValuePrecedeChain(vars, 1, 2));
-                solver.set(ISF.random(vars, i));
+                solver.intValuePrecedeChain(vars, 1, 2).post();
+                solver.set(random(vars, i));
                 solver.findAllSolutions();
                 s1 = solver.getMeasures().getSolutionCount();
             }

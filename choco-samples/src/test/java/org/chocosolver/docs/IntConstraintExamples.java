@@ -40,6 +40,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeMultiResources;
+import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeSingleResource;
+import static org.chocosolver.solver.constraints.nary.circuit.CircuitConf.LIGHT;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+
 /**
  * BEWARE: 5_elements.rst SHOULD BE UPDATED ANYTIME THIS CLASS IS CHANGED
  *
@@ -52,8 +57,8 @@ public class IntConstraintExamples {
     public void arithm1() {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 1, 4, false);
-        solver.post(solver.arithm(X, ">", 2));
-        Chatterbox.showSolutions(solver);
+        solver.arithm(X, ">", 2).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -61,8 +66,8 @@ public class IntConstraintExamples {
     public void testmember1() {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 1, 4, false);
-        solver.post(solver.member(X, new int[]{-2, -1, 0, 1, 2}));
-        Chatterbox.showSolutions(solver);
+        solver.member(X, new int[]{-2, -1, 0, 1, 2}).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -70,8 +75,8 @@ public class IntConstraintExamples {
     public void testmember2() {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 1, 4, false);
-        solver.post(solver.member(X, 2, 5));
-        Chatterbox.showSolutions(solver);
+        solver.member(X, 2, 5).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -79,8 +84,8 @@ public class IntConstraintExamples {
     public void testnotmember1() {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 1, 4, false);
-        solver.post(solver.notMember(X, new int[]{-2, -1, 0, 1, 2}));
-        Chatterbox.showSolutions(solver);
+        solver.notMember(X, new int[]{-2, -1, 0, 1, 2}).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -89,8 +94,8 @@ public class IntConstraintExamples {
     public void testnotmember2() {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 1, 4, false);
-        solver.post(solver.notMember(X, 2, 5));
-        Chatterbox.showSolutions(solver);
+        solver.notMember(X, 2, 5).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -99,8 +104,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 0, 2, false);
         IntVar Y = solver.intVar("X", -6, 1, false);
-        solver.post(solver.absolute(X, Y));
-        Chatterbox.showSolutions(solver);
+        solver.absolute(X, Y).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -109,8 +114,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 0, 2, false);
         IntVar Y = solver.intVar("X", -6, 1, false);
-        solver.post(solver.arithm(X, "<=", Y, "+", 1));
-        Chatterbox.showSolutions(solver);
+        solver.arithm(X, "<=", Y, "+", 1).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -119,8 +124,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 0, 2, false);
         IntVar Y = solver.intVar("X", -3, 1, false);
-        solver.post(solver.distance(X, Y, "=", 1));
-        Chatterbox.showSolutions(solver);
+        solver.distance(X, Y, "=", 1).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -129,8 +134,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar V = solver.intVar("V", -2, 2, false);
         IntVar I = solver.intVar("I", 0, 5, false);
-        solver.post(solver.element(V, new int[]{2, -2, 1, -1, 0}, I, 0));
-        Chatterbox.showSolutions(solver);
+        solver.element(V, new int[]{2, -2, 1, -1, 0}, I, 0).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -139,8 +144,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar X = solver.intVar("X", 0, 5, false);
         IntVar Y = solver.intVar("Y", -1, 3, false);
-        solver.post(solver.square(X, Y));
-        Chatterbox.showSolutions(solver);
+        solver.square(X, Y).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -154,8 +159,8 @@ public class IntConstraintExamples {
         tuples.add(1, 1);
         tuples.add(4, 2);
         tuples.add(1, 4);
-        solver.post(solver.table(X, Y, tuples, "AC2001"));
-        Chatterbox.showSolutions(solver);
+        solver.table(X, Y, tuples, "AC2001").post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -165,8 +170,8 @@ public class IntConstraintExamples {
         IntVar X = solver.intVar("X", 1, 3, false);
         IntVar Y = solver.intVar("Y", -1, 1, false);
         IntVar Z = solver.intVar("Z", 2, 3, false);
-        solver.post(solver.distance(X, Y, "<", Z));
-        Chatterbox.showSolutions(solver);
+        solver.distance(X, Y, "<", Z).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -176,8 +181,8 @@ public class IntConstraintExamples {
         IntVar X = solver.intVar("X", 1, 3, false);
         IntVar Y = solver.intVar("Y", -1, 1, false);
         IntVar Z = solver.intVar("Z", 2, 3, false);
-        solver.post(solver.div(X, Y, Z));
-        Chatterbox.showSolutions(solver);
+        solver.div(X, Y, Z).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -187,8 +192,8 @@ public class IntConstraintExamples {
         IntVar MAX = solver.intVar("MAX", 1, 3, false);
         IntVar Y = solver.intVar("Y", -1, 1, false);
         IntVar Z = solver.intVar("Z", 2, 3, false);
-        solver.post(solver.max(MAX, Y, Z));
-        Chatterbox.showSolutions(solver);
+        solver.max(MAX, Y, Z).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -198,8 +203,8 @@ public class IntConstraintExamples {
         IntVar MIN = solver.intVar("MIN", 1, 3, false);
         IntVar Y = solver.intVar("Y", -1, 1, false);
         IntVar Z = solver.intVar("Z", 2, 3, false);
-        solver.post(solver.min(MIN, Y, Z));
-        Chatterbox.showSolutions(solver);
+        solver.min(MIN, Y, Z).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -209,8 +214,8 @@ public class IntConstraintExamples {
         IntVar X = solver.intVar("X", 2, 4, false);
         IntVar Y = solver.intVar("Y", -1, 4, false);
         IntVar Z = solver.intVar("Z", 1, 3, false);
-        solver.post(solver.mod(X, Y, Z));
-        Chatterbox.showSolutions(solver);
+        solver.mod(X, Y, Z).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -220,8 +225,8 @@ public class IntConstraintExamples {
         IntVar X = solver.intVar("X", -1, 2, false);
         IntVar Y = solver.intVar("Y", 2, 4, false);
         IntVar Z = solver.intVar("Z", 5, 7, false);
-        solver.post(solver.times(X, Y, Z));
-        Chatterbox.showSolutions(solver);
+        solver.times(X, Y, Z).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -232,8 +237,8 @@ public class IntConstraintExamples {
         IntVar X = solver.intVar("X", -1, 2, false);
         IntVar Y = solver.intVar("Y", 2, 4, false);
         IntVar Z = solver.intVar("Z", 5, 7, false);
-        solver.post(solver.allDifferent(new IntVar[]{W, X, Y, Z}));
-        Chatterbox.showSolutions(solver);
+        solver.allDifferent(new IntVar[]{W, X, Y, Z}).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -241,9 +246,9 @@ public class IntConstraintExamples {
     public void testalldifferent_cond() {
         Solver solver = new Solver();
         IntVar[] XS = solver.intVarArray("XS", 5, 0, 3, false);
-        solver.post(solver.allDifferentUnderCondition(XS,
-                x -> !x.contains(1) && !x.contains(3)));
-        Chatterbox.showSolutions(solver);
+        solver.allDifferentUnderCondition(XS,
+                x -> !x.contains(1) && !x.contains(3)).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -251,8 +256,8 @@ public class IntConstraintExamples {
     public void testalldifferent_exc0() {
         Solver solver = new Solver();
         IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
-        solver.post(solver.allDifferentExcept0(XS));
-        Chatterbox.showSolutions(solver);
+        solver.allDifferentExcept0(XS).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -261,8 +266,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar N = solver.intVar("N", 2, 3, false);
         IntVar[] XS = solver.intVarArray("XS", 4, 0, 6, false);
-        solver.post(solver.among(N, XS, new int[]{1, 2, 3}));
-        Chatterbox.showSolutions(solver);
+        solver.among(N, XS, new int[]{1, 2, 3}).post();
+        showSolutions(solver);
         solver.findAllSolutions();
 
     }
@@ -272,8 +277,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
         IntVar N = solver.intVar("N", 2, 3, false);
-        solver.post(solver.atLeastNValues(XS, N, true));
-        Chatterbox.showSolutions(solver);
+        solver.atLeastNValues(XS, N, true).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -282,8 +287,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] XS = solver.intVarArray("XS", 4, 0, 2, false);
         IntVar N = solver.intVar("N", 1, 3, false);
-        solver.post(solver.atMostNVvalues(XS, N, false));
-        Chatterbox.showSolutions(solver);
+        solver.atMostNVvalues(XS, N, false).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -293,8 +298,8 @@ public class IntConstraintExamples {
         IntVar[] IBIN = solver.intVarArray("IBIN", 5, 1, 3, false);
         int[] sizes = new int[]{2, 3, 1, 4, 2};
         IntVar[] BLOADS = solver.intVarArray("BLOADS", 3, 0, 5, false);
-        solver.post(solver.binPacking(IBIN, sizes, BLOADS, 1));
-        Chatterbox.showSolutions(solver);
+        solver.binPacking(IBIN, sizes, BLOADS, 1).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -303,8 +308,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         BoolVar[] BVARS = solver.boolVarArray("BVARS", 5);
         IntVar VAR = solver.intVar("VAR", 1, 5, false);
-        solver.post(solver.boolsIntChanneling(BVARS, VAR, 1));
-        Chatterbox.showSolutions(solver);
+        solver.boolsIntChanneling(BVARS, VAR, 1).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -312,8 +317,8 @@ public class IntConstraintExamples {
     public void testcircuit() {
         Solver solver = new Solver();
         IntVar[] NODES = solver.intVarArray("NODES", 5, 0, 4, false);
-        solver.post(solver.circuit(NODES, 0, CircuitConf.LIGHT));
-        Chatterbox.showSolutions(solver);
+        solver.circuit(NODES, 0, LIGHT).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -341,8 +346,8 @@ public class IntConstraintExamples {
         costs[3] = new int[]{3, 2, 1};
         costs[4] = new int[]{2, 1, 3};
 
-        solver.post(solver.costRegular(VARS, COST, CostAutomaton.makeSingleResource(fauto, costs, COST.getLB(), COST.getUB())));
-        Chatterbox.showSolutions(solver);
+        solver.costRegular(VARS, COST, makeSingleResource(fauto, costs, COST.getLB(), COST.getUB())).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -352,8 +357,8 @@ public class IntConstraintExamples {
         IntVar[] VS = solver.intVarArray("VS", 4, 0, 3, false);
         IntVar VA = solver.intVar("VA", new int[]{1, 3});
         IntVar CO = solver.intVar("CO", new int[]{0, 2, 4});
-        solver.post(solver.count(VA, VS, CO));
-        Chatterbox.showSolutions(solver);
+        solver.count(VA, VS, CO).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -372,8 +377,8 @@ public class IntConstraintExamples {
             HE[i] = solver.intVar("HE_" + i, i - 1, i + 1, true);
         }
         IntVar CA = solver.intVar("CA", 1, 3, false);
-        solver.post(solver.cumulative(TS, HE, CA, true));
-        Chatterbox.showSolutions(solver);
+        solver.cumulative(TS, HE, CA, true).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -388,8 +393,8 @@ public class IntConstraintExamples {
             D[i] = solver.intVar("D_" + i, 1);
             W[i] = solver.intVar("W_" + i, i + 1);
         }
-        solver.post(solver.diffN(X, Y, D, W, true));
-        Chatterbox.showSolutions(solver);
+        solver.diffN(X, Y, D, W, true).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -399,8 +404,8 @@ public class IntConstraintExamples {
         IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, true);
         int[] values = new int[]{-1, 1, 2};
         IntVar[] OCC = solver.intVarArray("OCC", 3, 0, 2, true);
-        solver.post(solver.globalCardinality(VS, values, OCC, true));
-        Chatterbox.showSolutions(solver);
+        solver.globalCardinality(VS, values, OCC, true).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -409,8 +414,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] X = solver.intVarArray("X", 3, 0, 3, false);
         IntVar[] Y = solver.intVarArray("Y", 3, 1, 4, false);
-        solver.post(solver.inverseChanneling(X, Y, 0, 1));
-        Chatterbox.showSolutions(solver);
+        solver.inverseChanneling(X, Y, 0, 1).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -425,8 +430,8 @@ public class IntConstraintExamples {
         IntVar EN = solver.intVar("EN", 0, 6, true);
         int[] weights = new int[]{1, 3, 4};
         int[] energies = new int[]{1, 4, 6};
-        solver.post(solver.knapsack(IT, WE, EN, weights, energies));
-        Chatterbox.showSolutions(solver);
+        solver.knapsack(IT, WE, EN, weights, energies).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -436,8 +441,8 @@ public class IntConstraintExamples {
         IntVar[] X = solver.intVarArray("X", 3, -1, 1, false);
         IntVar[] Y = solver.intVarArray("Y", 3, 1, 2, false);
         IntVar[] Z = solver.intVarArray("Z", 3, 0, 2, false);
-        solver.post(solver.lexChainLess(X, Y, Z));
-        Chatterbox.showSolutions(solver);
+        solver.lexChainLess(X, Y, Z).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -447,8 +452,8 @@ public class IntConstraintExamples {
         IntVar[] X = solver.intVarArray("X", 3, -1, 1, false);
         IntVar[] Y = solver.intVarArray("Y", 3, 1, 2, false);
         IntVar[] Z = solver.intVarArray("Z", 3, 0, 2, false);
-        solver.post(solver.lexChainLessEq(X, Y, Z));
-        Chatterbox.showSolutions(solver);
+        solver.lexChainLessEq(X, Y, Z).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -457,8 +462,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] X = solver.intVarArray("X", 3, -1, 1, false);
         IntVar[] Y = solver.intVarArray("Y", 3, 1, 2, false);
-        solver.post(solver.lexLess(X, Y));
-        Chatterbox.showSolutions(solver);
+        solver.lexLess(X, Y).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -467,8 +472,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] X = solver.intVarArray("X", 3, -1, 1, false);
         IntVar[] Y = solver.intVarArray("Y", 3, 1, 2, false);
-        solver.post(solver.lexLessEq(X, Y));
-        Chatterbox.showSolutions(solver);
+        solver.lexLessEq(X, Y).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -496,8 +501,8 @@ public class IntConstraintExamples {
 //        costs[3] = new int[]{3, 2, 1};
 //        costs[4] = new int[]{2, 1, 3};
 
-        solver.post(solver.multiCostRegular(VARS, CVARS, CostAutomaton.makeMultiResources(fauto, costs, CVARS)));
-        Chatterbox.showSolutions(solver);
+        solver.multiCostRegular(VARS, CVARS, makeMultiResources(fauto, costs, CVARS)).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -506,8 +511,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] VS = solver.intVarArray("VS", 4, 0, 2, false);
         IntVar N = solver.intVar("N", 0, 3, false);
-        solver.post(solver.nValues(VS, N));
-        Chatterbox.showSolutions(solver);
+        solver.nValues(VS, N).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -517,8 +522,8 @@ public class IntConstraintExamples {
         IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, false);
         IntVar S = solver.intVar("S", 0, 3, false);
         IntVar E = solver.intVar("E", 0, 3, false);
-        solver.post(solver.path(VS, S, E, 0));
-        Chatterbox.showSolutions(solver);
+        solver.path(VS, S, E, 0).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -526,9 +531,9 @@ public class IntConstraintExamples {
     public void testregular() {
         Solver solver = new Solver();
         IntVar[] CS = solver.intVarArray("CS", 4, 1, 5, false);
-        solver.post(solver.regular(CS,
-                new FiniteAutomaton("(1|2)(3*)(4|5)")));
-        Chatterbox.showSolutions(solver);
+        solver.regular(CS,
+                new FiniteAutomaton("(1|2)(3*)(4|5)")).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -538,8 +543,8 @@ public class IntConstraintExamples {
         IntVar[] CS = solver.intVarArray("CS", 4, 1, 4, false);
         int[] coeffs = new int[]{1, 2, 3, 4};
         IntVar R = solver.intVar("R", 0, 20, true);
-        solver.post(solver.scalar(CS, coeffs, "=", R));
-        Chatterbox.showSolutions(solver);
+        solver.scalar(CS, coeffs, "=", R).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -548,8 +553,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] X = solver.intVarArray("X", 3, 0, 2, false);
         IntVar[] Y = solver.intVarArray("Y", 3, 0, 2, false);
-        solver.post(solver.sort(X, Y));
-        Chatterbox.showSolutions(solver);
+        solver.sort(X, Y).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -558,8 +563,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] NODES = solver.intVarArray("NS", 5, 0, 4, false);
         IntVar SI = solver.intVar("SI", 2, 3, false);
-        solver.post(solver.subCircuit(NODES, 0, SI));
-        Chatterbox.showSolutions(solver);
+        solver.subCircuit(NODES, 0, SI).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -570,8 +575,8 @@ public class IntConstraintExamples {
         IntVar S = solver.intVar("S", 0, 3, false);
         IntVar E = solver.intVar("E", 0, 3, false);
         IntVar SI = solver.intVar("SI", 2, 3, false);
-        solver.post(solver.subPath(VS, S, E, 0, SI));
-        Chatterbox.showSolutions(solver);
+        solver.subPath(VS, S, E, 0, SI).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -580,8 +585,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, false);
         IntVar SU = solver.intVar("SU", 2, 3, false);
-        solver.post(solver.sum(VS, "<=", SU));
-        Chatterbox.showSolutions(solver);
+        solver.sum(VS, "<=", SU).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -590,8 +595,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         IntVar[] VS = solver.intVarArray("VS", 4, 0, 4, false);
         IntVar NT = solver.intVar("NT", 2, 3, false);
-        solver.post(solver.tree(VS, NT, 0));
-        Chatterbox.showSolutions(solver);
+        solver.tree(VS, NT, 0).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -600,8 +605,8 @@ public class IntConstraintExamples {
         Solver solver = new Solver();
         BoolVar[] BVARS = solver.boolVarArray("BVARS", 4);
         IntVar VAR = solver.intVar("VAR", 0, 15, false);
-        solver.post(solver.bitsIntChanneling(BVARS, VAR));
-        Chatterbox.showSolutions(solver);
+        solver.bitsIntChanneling(BVARS, VAR).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 }

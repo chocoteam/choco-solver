@@ -53,18 +53,18 @@ public class NQueenDualBinary extends AbstractNQueen {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(solver.arithm(dualvars[i], "!=", dualvars[j], "+", -k));
-                solver.post(solver.arithm(dualvars[i], "!=", dualvars[j], "+", k));
+                solver.arithm(dualvars[i], "!=", dualvars[j], "+", -k).post();
+                solver.arithm(dualvars[i], "!=", dualvars[j], "+", k).post();
             }
         }
-        solver.post(solver.inverseChanneling(vars, dualvars, 1, 1));
+        solver.inverseChanneling(vars, dualvars, 1, 1).post();
     }
 
 

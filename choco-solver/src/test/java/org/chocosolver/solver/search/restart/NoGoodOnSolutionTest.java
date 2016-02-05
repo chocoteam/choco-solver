@@ -41,6 +41,9 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitSolution;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+
 /**
  * @author Jean-Guillaume Fages
  * @since 17/12/14
@@ -70,12 +73,12 @@ public class NoGoodOnSolutionTest {
             costOf[i] = s.intVar("costOf(" + i + ")", costs[i]);
         }
         for (int i = 0; i < n; i++) {
-            s.post(s.element(costOf[i], costs[i], vars[i]));
+            s.element(costOf[i], costs[i], vars[i]).post();
         }
-        s.post(s.sum(costOf, "=", z));
-        s.post(s.circuit(vars, 0));
-        s.set(ISF.random_value(vars));
-        SMF.limitSolution(s, MAX_NB_SOLS);
+        s.sum(costOf, "=", z).post();
+        s.circuit(vars, 0).post();
+        s.set(random_value(vars));
+        limitSolution(s, MAX_NB_SOLS);
         return s;
     }
 
@@ -142,9 +145,9 @@ public class NoGoodOnSolutionTest {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
                 Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
-                solver.post(neq);
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                neq.post();
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         SMF.nogoodRecordingOnSolution(solver.retrieveIntVars(true));
@@ -166,9 +169,9 @@ public class NoGoodOnSolutionTest {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
                 Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
-                solver.post(neq);
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                neq.post();
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         SMF.nogoodRecordingOnSolution(solver.retrieveIntVars(false));
@@ -190,9 +193,9 @@ public class NoGoodOnSolutionTest {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
                 Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
-                solver.post(neq);
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                neq.post();
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0]});
@@ -213,9 +216,9 @@ public class NoGoodOnSolutionTest {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
                 Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
-                solver.post(neq);
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                neq.post();
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         SMF.nogoodRecordingOnSolution(new IntVar[]{vars[0], vars[1]});

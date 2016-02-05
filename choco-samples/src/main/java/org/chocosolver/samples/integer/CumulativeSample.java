@@ -75,14 +75,14 @@ public class CumulativeSample extends AbstractProblem{
 		IntVar[] height = new IntVar[n];
 		Task[] task = new Task[n];
 		Random rd = new Random(0);
-		for(int i=0;i<n;i++){
+		for (int i = 0; i < n; i++) {
 			duration[i] = solver.intVar(rd.nextInt(20) + 1);
 			height[i] = solver.intVar(rd.nextInt(5) + 1);
-			end[i] = solver.intOffsetView(start[i],duration[i].getValue());
-			task[i] = new Task(start[i],duration[i],end[i]);
+			end[i] = solver.intOffsetView(start[i], duration[i].getValue());
+			task[i] = new Task(start[i], duration[i], end[i]);
 		}
-		solver.post(solver.cumulative(task,height,capa,true));
-		solver.post(solver.max(makespan,end));
+		solver.cumulative(task, height, capa, true).post();
+		solver.max(makespan, end).post();
 	}
 
 	@Override

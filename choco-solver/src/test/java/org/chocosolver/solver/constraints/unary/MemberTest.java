@@ -39,6 +39,10 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -85,19 +89,18 @@ public class MemberTest {
                 Solver s = new Solver();
 
                 IntVar[] vars = new IntVar[1];
-                int[][] values = DomainBuilder.buildFullDomains(2, 0, i, r, d, false);
+                int[][] values = buildFullDomains(2, 0, i, r, d, false);
                 vars[0] = s.intVar("v", values[0]);
 
-                Constraint[] cstrs = new Constraint[]{s.member(vars[0], values[1])};
+                s.member(vars[0], values[1]).post();
 
-                s.post(cstrs);
-                s.set(IntStrategyFactory.lexico_LB(vars));
+                s.set(lexico_LB(vars));
 
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
-                Assert.assertEquals(sol, unionSize(values[0], values[1]), "nb sol incorrect");
-                Assert.assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb sol incorrect");
+                assertEquals(sol, unionSize(values[0], values[1]), "nb sol incorrect");
+                assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb sol incorrect");
             }
         }
     }
@@ -110,22 +113,21 @@ public class MemberTest {
 
                 Solver s = new Solver();
                 IntVar[] vars = new IntVar[1];
-                int[][] values = DomainBuilder.buildFullDomains(2, 0, i, r, d, false);
+                int[][] values = buildFullDomains(2, 0, i, r, d, false);
                 int lb = values[0][0];
                 int ub = values[0][values[0].length - 1];
 
                 vars[0] = s.intVar("v", lb, ub, true);
 
-                Constraint[] cstrs = new Constraint[]{s.member(vars[0], values[1])};
+                s.member(vars[0], values[1]).post();
 
-                s.post(cstrs);
-                s.set(IntStrategyFactory.lexico_LB(vars));
+                s.set(lexico_LB(vars));
 
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
-                Assert.assertEquals(sol, unionSize(lb, ub, values[1]), "nb sol incorrect");
-                Assert.assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb nod incorrect");
+                assertEquals(sol, unionSize(lb, ub, values[1]), "nb sol incorrect");
+                assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb nod incorrect");
             }
         }
     }
@@ -136,8 +138,8 @@ public class MemberTest {
         IntVar vars = s.intVar("v", 0, 10, false);
         int[] values = new int[]{0, 2, 4, 6, 8};
 
-        s.post(s.member(vars, values));
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.member(vars, values).post();
+        s.set(lexico_LB(vars));
 
         s.findAllSolutions();
 

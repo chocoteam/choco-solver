@@ -46,6 +46,10 @@ import org.chocosolver.util.procedure.IntProcedure;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
+import static org.testng.Assert.assertFalse;
+
 /**
  * <br/>
  *
@@ -70,28 +74,28 @@ public class DeltaTest {
         IntVar x = solver.intVar("X", 1, 6, false);
         IntVar y = solver.intVar("Y", 1, 6, false);
 
-        solver.post(solver.arithm(x, "=", y));
+        solver.arithm(x, "=", y).post();
 
         solver.propagate();
 
-        x.removeValue(4, Cause.Null);
+        x.removeValue(4, Null);
 
         solver.propagate();
 
-        Assert.assertFalse(y.contains(4));
+        assertFalse(y.contains(4));
 
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL() {
         Solver solver = new Solver();
-        final SetVar s0 = solver.setVar("s0", new int[]{}, new int[]{0,1});
+        final SetVar s0 = solver.setVar("s0", new int[]{}, new int[]{0, 1});
         final BoolVar b0 = solver.boolVar("b0");
         final BoolVar b1 = solver.boolVar("b1");
         final IntVar i0 = solver.boolVar("i0");
-        solver.set(ISF.lexico_LB(i0));
-        solver.post(solver.setBoolsChanneling(new BoolVar[]{b0, b1}, s0, 0));
-        solver.post(solver.cardinality(s0, solver.intVar(0)));
+        solver.set(lexico_LB(i0));
+        solver.setBoolsChanneling(new BoolVar[]{b0, b1}, s0, 0).post();
+        solver.cardinality(s0, solver.intVar(0)).post();
 
         solver.findSolution();
         solver.getSearchLoop().reset();
@@ -107,8 +111,8 @@ public class DeltaTest {
             final IntVar j = s.intVar("j", -2, 2, false);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
-            s.set(ISF.random_value(new IntVar[]{i, j}));
-            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.set(random_value(new IntVar[]{i, j}));
+            new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             s.findAllSolutions();
         }
     }
@@ -121,8 +125,8 @@ public class DeltaTest {
             final IntVar j = s.intVar("j", -2, 2, true);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
-            s.set(ISF.random_bound(new IntVar[]{i, j}));
-            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.set(random_bound(new IntVar[]{i, j}));
+            new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             s.findAllSolutions();
         }
     }
@@ -135,8 +139,8 @@ public class DeltaTest {
             final IntVar j = s.boolVar("j");
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
-            s.set(ISF.random_value(new IntVar[]{i, j}));
-            s.post(new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)));
+            s.set(random_value(new IntVar[]{i, j}));
+            new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             s.findAllSolutions();
         }
     }

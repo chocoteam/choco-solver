@@ -59,7 +59,7 @@ public class Pigeons extends AbstractProblem {
 
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
-                solver.post(solver.arithm(vars[i], "!=", vars[j]));
+                solver.arithm(vars[i], "!=", vars[j]).post();
             }
         }
     }

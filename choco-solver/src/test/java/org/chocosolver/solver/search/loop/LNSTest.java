@@ -39,6 +39,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static java.lang.Math.ceil;
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.search.loop.SearchLoopFactory.lns;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.printSolutions;
 
 /**
  * <br/>
@@ -65,60 +70,60 @@ public class LNSTest {
         }
         final IntVar power = solver.intVar("power", 0, 99999, true);
         IntVar scalar = solver.intVar("weight", capacities[0], capacities[1], true);
-        solver.post(solver.scalar(objects, volumes, "=", scalar));
-        solver.post(solver.scalar(objects, energies, "=", power));
-        solver.post(solver.knapsack(objects, scalar, power, volumes, energies));
-        solver.set(IntStrategyFactory.lexico_LB(objects));
+        solver.scalar(objects, volumes, "=", scalar).post();
+        solver.scalar(objects, energies, "=", power).post();
+        solver.knapsack(objects, scalar, power, volumes, energies).post();
+        solver.set(lexico_LB(objects));
 //        SearchMonitorFactory.log(solver, true, false);
         switch (lns) {
             case 0:
                 break;
             case 1:
-                SLF.lns(solver, new RandomNeighborhood(solver, objects, 200, 123456L));
-                SearchMonitorFactory.limitTime(solver, 10000);
+                lns(solver, new RandomNeighborhood(solver, objects, 200, 123456L));
+                limitTime(solver, 10000);
                 break;
             case 2:
-                SLF.lns(solver, new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10));
-                SearchMonitorFactory.limitTime(solver, 10000);
+                lns(solver, new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10));
+                limitTime(solver, 10000);
                 break;
             case 3:
-                SLF.lns(solver,
+                lns(solver,
                         new SequenceNeighborhood(
                                 new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
                                 new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10)
                         ));
-                SearchMonitorFactory.limitTime(solver, 10000);
+                limitTime(solver, 10000);
                 break;
             case 4:
-                SLF.lns(solver,
+                lns(solver,
                         new SequenceNeighborhood(
                                 new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
                                 new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
                                 new RandomNeighborhood(solver, objects, 200, 123456L)
                         ));
-                SearchMonitorFactory.limitTime(solver, 10000);
+                limitTime(solver, 10000);
                 break;
             case 5:
-                SLF.lns(solver,
+                lns(solver,
                         new ExplainingCut(solver, 200, 123456L));
-                SearchMonitorFactory.limitTime(solver, 10000);
+                limitTime(solver, 10000);
                 break;
             case 6:
-                SLF.lns(solver,
+                lns(solver,
                         new ExplainingObjective(solver, 200, 123456L));
-                SearchMonitorFactory.limitTime(solver, 10000);
+                limitTime(solver, 10000);
                 break;
             case 7:
-                SLF.lns(solver, new SequenceNeighborhood(
+                lns(solver, new SequenceNeighborhood(
                         new ExplainingObjective(solver, 200, 123456L),
                         new ExplainingCut(solver, 200, 123456L),
                         new RandomNeighborhood(solver, objects, 200, 123456L)));
-                SearchMonitorFactory.limitTime(solver, 10000);
+                limitTime(solver, 10000);
                 break;
         }
 //        Chatterbox.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());
-        solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
-        Chatterbox.printSolutions(solver);
+        solver.findOptimalSolution(MAXIMIZE, power);
+        printSolutions(solver);
     }
 
 

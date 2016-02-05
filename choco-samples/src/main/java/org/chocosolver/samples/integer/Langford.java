@@ -69,9 +69,6 @@ public class Langford extends AbstractProblem {
 
     IntVar[] position;
 
-    Constraint[] lights;
-    Constraint alldiff;
-
     @Override
     public void createSolver() {
         solver = new Solver("Langford number");
@@ -82,16 +79,17 @@ public class Langford extends AbstractProblem {
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
         position = solver.intVarArray("p", n * k, 0, k * n - 1, false);
-        lights = new Constraint[(k - 1) * n + 1];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
-                lights[i + j * n] = solver.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]);
+                solver.arithm(
+                        solver.intOffsetView(position[i + j * n], i + 2),
+                        "=",
+                        position[i + (j + 1) * n]
+                ).post();
             }
         }
-        lights[(k - 1) * n] = solver.arithm(position[0], "<", position[n * k - 1]);
-        solver.post(lights);
-        alldiff = solver.allDifferent(position, "AC");
-        solver.post(alldiff);
+        solver.arithm(position[0], "<", position[n * k - 1]).post();
+        solver.allDifferent(position, "AC").post();
     }
 
     @Override

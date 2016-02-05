@@ -71,7 +71,7 @@ public class ReifSample extends AbstractProblem {
 		);
 		Constraint ad = solver.allDifferent(new IntVar[]{x, y, z}, "DEFAULT");
 		Constraint nad = solver.not(ad);
-		solver.post(solver.or(imp, nad));
+		solver.or(imp, nad).post();
 	}
 
 	@Override

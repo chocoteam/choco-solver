@@ -45,6 +45,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.Arrays.asList;
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
 /**
  * <br/>
  *
@@ -91,12 +99,12 @@ public class AmongTest {
             IntVar[] vars = solver.intVarArray("o", n, 0, n, true);
             int value = 1;
             IntVar occ = solver.intVar("oc", 0, n, true);
-            IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(IntStrategyFactory.random_bound(allvars, i));
-            solver.post(solver.among(occ, vars, new int[]{value}));
+            IntVar[] allvars = append(vars, new IntVar[]{occ});
+            solver.set(random_bound(allvars, i));
+            solver.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+            assertEquals(solver.getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -108,13 +116,13 @@ public class AmongTest {
             IntVar[] vars = solver.intVarArray("o", n, 0, n, true);
             int[] values = {1, 2, 0};
             IntVar occ = solver.intVar("oc", 0, n, true);
-            IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(IntStrategyFactory.random_bound(allvars, i));
-            solver.post(solver.among(occ, vars, values));
+            IntVar[] allvars = append(vars, new IntVar[]{occ});
+            solver.set(random_bound(allvars, i));
+            solver.among(occ, vars, values).post();
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+            assertEquals(solver.getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -124,15 +132,15 @@ public class AmongTest {
         IntVar[] vars = solver.intVarArray("o", 4, new int[]{0, 1, 2, 5});
         int[] values = {1, 2, 0};
         IntVar occ = solver.intVar("oc", 0, 4, true);
-        solver.post(solver.among(occ, vars, values));
+        solver.among(occ, vars, values).post();
         try {
             solver.propagate();
 
-            vars[0].removeValue(1, Cause.Null);
-            vars[0].removeValue(2, Cause.Null);
+            vars[0].removeValue(1, Null);
+            vars[0].removeValue(2, Null);
             solver.propagate();
         } catch (ContradictionException e) {
-            Assert.fail();
+            fail();
         }
         solver.findAllSolutions();
     }
@@ -153,7 +161,7 @@ public class AmongTest {
             }
 
             List<IntVar> lvs = new LinkedList<>();
-            lvs.addAll(Arrays.asList(vars));
+            lvs.addAll(asList(vars));
 
             Random rand = new Random(seed);
             for (int i = 0; i < nbOcc; i++) {
@@ -166,24 +174,24 @@ public class AmongTest {
                 IntVar ivc = lvs.get(rand.nextInt(lvs.size()));
                 int val = rand.nextInt(sizeDom);
                 if (gac) {
-                    solver.post(getDecomposition(solver, vs, ivc, val
-                    ));
+                    getDecomposition(solver, vs, ivc, val
+                    ).post();
                 } else {
-                    solver.post(solver.among(ivc, vs, new int[]{val}));
+                    solver.among(ivc, vs, new int[]{val}).post();
                 }
             }
-            solver.post(solver.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]));
+            solver.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]).post();
 
-			if(!enumvar){
-				solver.set(IntStrategyFactory.random_bound(vars, seed));
-			}else{
-				solver.set(IntStrategyFactory.random_value(vars, seed));
-			}
+            if (!enumvar) {
+                solver.set(random_bound(vars, seed));
+            } else {
+                solver.set(random_value(vars, seed));
+            }
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
             } else {
-                Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbsol);
+                assertEquals(solver.getMeasures().getSolutionCount(), nbsol);
             }
 
         }
@@ -223,10 +231,10 @@ public class AmongTest {
                         rand.nextInt(sizeDom)
                 };
                 if (gac) {
-                    solver.post(getDecomposition(solver, vs, ivc, values
-                    ));
+                    getDecomposition(solver, vs, ivc, values
+                    ).post();
                 } else {
-                    solver.post(solver.among(ivc, vs, values));
+                    solver.among(ivc, vs, values).post();
                 }
             }
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));

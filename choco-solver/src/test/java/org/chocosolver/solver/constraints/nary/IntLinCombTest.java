@@ -55,6 +55,13 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Random;
 
+import static java.util.Arrays.fill;
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
+import static org.testng.Assert.*;
+
 /**
  * User : cprudhom<br/>
  * Mail : cprudhom(a)emn.fr<br/>
@@ -103,13 +110,10 @@ public class IntLinCombTest {
         IntVar sum = s.intVar("scal", -99999999, 99999999, true);
 
 
-        Constraint[] cstrs = new Constraint[]{
-                s.scalar(vars, coeffs, "=", sum),
-                s.arithm(sum, operatorToString(operator), constant)
-        };
+        s.scalar(vars, coeffs, "=", sum).post();
+        s.arithm(sum, operatorToString(operator), constant).post();
 
-        s.post(cstrs);
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.set(lexico_LB(vars));
 
         s.findAllSolutions();
     }
@@ -150,12 +154,9 @@ public class IntLinCombTest {
             }
         }
         IntVar sum = solver.intVar("scal", -99999999, 99999999, true);
-        Constraint[] cstrs = new Constraint[]{
-                solver.scalar(bins, coeffs, "=", sum),
-                solver.arithm(sum, opname, b)
-        };
-        solver.post(cstrs);
-        solver.set(IntStrategyFactory.lexico_LB(bins));
+        solver.scalar(bins, coeffs, "=", sum).post();
+        solver.arithm(sum, opname, b).post();
+        solver.set(lexico_LB(bins));
         return solver;
     }
 
@@ -174,12 +175,9 @@ public class IntLinCombTest {
             }
         }
         IntVar sum = solver.intVar("scal", -99999999, 99999999, true);
-        Constraint[] cstrs = new Constraint[]{
-                solver.scalar(bins, coeffs, "=", sum),
-                solver.arithm(sum, opname, b)
-        };
-        solver.post(cstrs);
-        solver.set(IntStrategyFactory.lexico_LB(bins));
+        solver.scalar(bins, coeffs, "=", sum).post();
+        solver.arithm(sum, opname, b).post();
+        solver.set(lexico_LB(bins));
         return solver;
     }
 
@@ -238,8 +236,8 @@ public class IntLinCombTest {
     public void testIss237_1() {
         Solver solver = new Solver();
         BoolVar[] bs = solver.boolVarArray("b", 3);
-        solver.post(solver.scalar(bs, new int[]{1, 2, 3}, "=", 2));
-        Chatterbox.showSolutions(solver);
+        solver.scalar(bs, new int[]{1, 2, 3}, "=", 2).post();
+        showSolutions(solver);
         solver.findAllSolutions();
     }
 
@@ -480,7 +478,7 @@ public class IntLinCombTest {
         });
         {
             BoolVar[] bs = s1.boolVarArray("b", 5);
-            s1.post(s1.sum(bs, "!=", 3));
+            s1.sum(bs, "!=", 3).post();
         }
         Solver s2 = new Solver();
         s2.set(new Settings() {
@@ -491,7 +489,7 @@ public class IntLinCombTest {
         });
         {
             BoolVar[] bs = s2.boolVarArray("b", 5);
-            s2.post(s2.sum(bs, "!=", 3));
+            s2.sum(bs, "!=", 3).post();
         }
         s1.findAllSolutions();
         s2.findAllSolutions();
@@ -510,7 +508,7 @@ public class IntLinCombTest {
         });
         {
             BoolVar[] bs = s1.boolVarArray("b", 5);
-            s1.post(s1.sum(bs, "<=", 3));
+            s1.sum(bs, "<=", 3).post();
         }
         Solver s2 = new Solver();
         s2.set(new Settings() {
@@ -521,7 +519,7 @@ public class IntLinCombTest {
         });
         {
             BoolVar[] bs = s2.boolVarArray("b", 5);
-            s2.post(s2.sum(bs, "<=", 3));
+            s2.sum(bs, "<=", 3).post();
         }
         s1.findAllSolutions();
         s2.findAllSolutions();
@@ -576,11 +574,11 @@ public class IntLinCombTest {
         BoolVar[] bs = solver.boolVarArray("b", n);
         int[] cs = new int[n];
         int k = (int) (n * .7);
-        Arrays.fill(cs, 0, n, 1);
-        Arrays.fill(cs, k, n, -1);
+        fill(cs, 0, n, 1);
+        fill(cs, k, n, -1);
         IntVar sum = solver.intVar("S", -n / 2, n / 2, true);
-        solver.post(solver.scalar(bs, cs, "=", sum));
-        solver.set(ISF.lexico_LB(bs));
+        solver.scalar(bs, cs, "=", sum).post();
+        solver.set(lexico_LB(bs));
 //        Chatterbox.showDecisions(solver);
         solver.findAllSolutions();
     }
@@ -592,24 +590,24 @@ public class IntLinCombTest {
         int n = 3;
         BoolVar[] bs = solver.boolVarArray("b", n);
         int[] cs = new int[n];
-        Arrays.fill(cs, 0, n, -1);
-        solver.post(solver.scalar(bs, cs, "<=", -2));
+        fill(cs, 0, n, -1);
+        solver.scalar(bs, cs, "<=", -2).post();
         solver.propagate();
-        bs[2].setToFalse(Cause.Null);
-        bs[0].setToTrue(Cause.Null);
+        bs[2].setToFalse(Null);
+        bs[0].setToTrue(Null);
         solver.propagate();
-        Assert.assertTrue(bs[1].isInstantiatedTo(1));
+        assertTrue(bs[1].isInstantiatedTo(1));
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void testB3() {
         Solver solver = new Solver();
-        solver.post(solver.scalar(new IntVar[]{solver.intVar(1), solver.intVar(3)}, new int[]{1, -1}, "!=", 0));
+        solver.scalar(new IntVar[]{solver.intVar(1), solver.intVar(3)}, new int[]{1, -1}, "!=", 0).post();
         try {
             solver.propagate();
         } catch (ContradictionException e) {
-            Assert.fail();
+            fail();
         }
     }
 
@@ -617,9 +615,9 @@ public class IntLinCombTest {
     public void testB4() {
         Solver solver = new Solver();
         IntVar[] X = solver.intVarArray("X", 1, 1, 3, false);
-        solver.post(solver.scalar(X, new int[]{-1}, "<=", 2));
+        solver.scalar(X, new int[]{-1}, "<=", 2).post();
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
+        assertEquals(solver.getMeasures().getSolutionCount(), 3);
 
     }
 
@@ -630,12 +628,12 @@ public class IntLinCombTest {
         X[0] = solver.intVar("X1", 6, 46, false);
         X[1] = solver.intVar("X2", 6, 56, false);
         X[2] = solver.intVar("X3", -1140, 1140, true);
-        solver.post(solver.scalar(X, new int[]{1, -1, -1}, "=", 0));
+        solver.scalar(X, new int[]{1, -1, -1}, "=", 0).post();
         solver.propagate();
-        X[1].updateUpperBound(46, Cause.Null);
+        X[1].updateUpperBound(46, Null);
         solver.propagate();
-        Assert.assertEquals(X[2].getLB(), -40);
-        Assert.assertEquals(X[2].getUB(), 40);
+        assertEquals(X[2].getLB(), -40);
+        assertEquals(X[2].getUB(), 40);
 
     }
 
@@ -646,12 +644,12 @@ public class IntLinCombTest {
         IntVar[] X = new IntVar[2];
         X[0] = solver.intVar("X1", 1, 3, false);
         X[1] = solver.intVar("X2", 2, 5, false);
-        solver.post(solver.scalar(X, new int[]{2, 3}, "<=", 10));
+        solver.scalar(X, new int[]{2, 3}, "<=", 10).post();
         solver.propagate();
-        Assert.assertEquals(X[0].getLB(), 1);
-        Assert.assertEquals(X[0].getUB(), 2);
-        Assert.assertEquals(X[1].getLB(), 2);
-        Assert.assertEquals(X[1].getUB(), 2);
+        assertEquals(X[0].getLB(), 1);
+        assertEquals(X[0].getUB(), 2);
+        assertEquals(X[1].getLB(), 2);
+        assertEquals(X[1].getUB(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -660,12 +658,12 @@ public class IntLinCombTest {
         IntVar[] X = new IntVar[2];
         X[0] = solver.intVar("X1", 1, 3, false);
         X[1] = solver.intVar("X2", 2, 5, false);
-        solver.post(solver.scalar(X, new int[]{-2, -3}, ">=", -10));
+        solver.scalar(X, new int[]{-2, -3}, ">=", -10).post();
         solver.propagate();
-        Assert.assertEquals(X[0].getLB(), 1);
-        Assert.assertEquals(X[0].getUB(), 2);
-        Assert.assertEquals(X[1].getLB(), 2);
-        Assert.assertEquals(X[1].getUB(), 2);
+        assertEquals(X[0].getLB(), 1);
+        assertEquals(X[0].getUB(), 2);
+        assertEquals(X[1].getLB(), 2);
+        assertEquals(X[1].getUB(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -674,12 +672,12 @@ public class IntLinCombTest {
         IntVar[] X = new IntVar[2];
         X[0] = solver.intVar("X1", 0, 3, false);
         X[1] = solver.intVar("X2", 1, 5, false);
-        solver.post(solver.scalar(X, new int[]{2, 3}, ">=", 10));
+        solver.scalar(X, new int[]{2, 3}, ">=", 10).post();
         solver.propagate();
-        Assert.assertEquals(X[0].getLB(), 0);
-        Assert.assertEquals(X[0].getUB(), 3);
-        Assert.assertEquals(X[1].getLB(), 2);
-        Assert.assertEquals(X[1].getUB(), 5);
+        assertEquals(X[0].getLB(), 0);
+        assertEquals(X[0].getUB(), 3);
+        assertEquals(X[1].getLB(), 2);
+        assertEquals(X[1].getUB(), 5);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -688,61 +686,61 @@ public class IntLinCombTest {
         IntVar[] X = new IntVar[2];
         X[0] = solver.intVar("X1", 0, 3, false);
         X[1] = solver.intVar("X2", 1, 5, false);
-        solver.post(solver.scalar(X, new int[]{-2, -3}, ">=", -10));
+        solver.scalar(X, new int[]{-2, -3}, ">=", -10).post();
         solver.propagate();
-        Assert.assertEquals(X[0].getLB(), 0);
-        Assert.assertEquals(X[0].getUB(), 3);
-        Assert.assertEquals(X[1].getLB(), 1);
-        Assert.assertEquals(X[1].getUB(), 3);
+        assertEquals(X[0].getLB(), 0);
+        assertEquals(X[0].getUB(), 3);
+        assertEquals(X[1].getLB(), 1);
+        assertEquals(X[1].getUB(), 3);
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testJL1(){
+    public void testJL1() {
         Solver solver = new Solver();
-        solver.post(solver.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<", 0));
-        Assert.assertTrue(solver.findSolution());
+        solver.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<", 0).post();
+        assertTrue(solver.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testJL2(){
+    public void testJL2() {
         Solver solver = new Solver();
-        solver.post(solver.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<=", 0));
-        Assert.assertTrue(solver.findSolution());
+        solver.sum(new IntVar[]{solver.intVar(3), solver.intVar(-4)}, "<=", 0).post();
+        assertTrue(solver.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testJL3(){
+    public void testJL3() {
         Solver solver = new Solver();
-        solver.post(solver.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">", 0));
-        Assert.assertTrue(solver.findSolution());
+        solver.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">", 0).post();
+        assertTrue(solver.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testJL4(){
+    public void testJL4() {
         Solver solver = new Solver();
-        solver.post(solver.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">=", 0));
-        Assert.assertTrue(solver.findSolution());
+        solver.sum(new IntVar[]{solver.intVar(-3), solver.intVar(4)}, ">=", 0).post();
+        assertTrue(solver.findSolution());
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testJG1(){
+    public void testJG1() {
         Solver solver = new Solver("TestChoco 3.3.2 Briot");
         IntVar[] var = solver.intVarArray("var", 3, new int[]{30, 60});
-        solver.post(solver.sum(new IntVar[] { var[0], var[1], var[2] }, ">=", 60));
-        solver.set(ISF.lexico_LB(var));
-        Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
+        solver.sum(new IntVar[]{var[0], var[1], var[2]}, ">=", 60).post();
+        solver.set(lexico_LB(var));
+        showStatistics(solver);
+        showSolutions(solver);
         solver.findSolution();
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testJG2(){
+    public void testJG2() {
         Solver solver = new Solver("TestChoco 3.3.2 Briot");
         IntVar[] var = solver.intVarArray("var", 3, new int[]{30, 60});
-        solver.post(solver.sum(new IntVar[] { var[0], var[1], var[2] }, "<=", 120));
-        solver.set(ISF.lexico_LB(var));
-        Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
+        solver.sum(new IntVar[]{var[0], var[1], var[2]}, "<=", 120).post();
+        solver.set(lexico_LB(var));
+        showStatistics(solver);
+        showSolutions(solver);
         solver.findSolution();
     }
 }

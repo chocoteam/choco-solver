@@ -70,9 +70,9 @@ public class SetUnion extends AbstractProblem {
         // z initial domain
         z = solver.setVar("z", new int[]{}, new int[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7});
         // set-union constraint
-		solver.post(solver.union(new SetVar[]{x, y}, z));
+        solver.union(new SetVar[]{x, y}, z).post();
         if (noEmptySet) {
-            solver.post(solver.nbEmpty(new SetVar[]{x, y, z}, solver.intVar(0)));
+            solver.nbEmpty(new SetVar[]{x, y, z}, solver.intVar(0)).post();
         }
     }
 

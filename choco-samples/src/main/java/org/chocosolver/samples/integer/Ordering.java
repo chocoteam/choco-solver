@@ -48,7 +48,6 @@ public class Ordering extends AbstractProblem {
     int n = 1000;
 
     IntVar[] vars;
-    Constraint[] cstrs;
 
     @Override
     public void createSolver() {
@@ -58,11 +57,9 @@ public class Ordering extends AbstractProblem {
     @Override
     public void buildModel() {
         vars = solver.intVarArray("v", n, 1, n, true);
-        cstrs = new Constraint[n - 1];
         for (int i = 0; i < n - 1; i++) {
-            cstrs[i] = solver.arithm(vars[i], "<", vars[i + 1]);
+            solver.arithm(vars[i], "<", vars[i + 1]).post();
         }
-        solver.post(cstrs);
     }
 
     @Override

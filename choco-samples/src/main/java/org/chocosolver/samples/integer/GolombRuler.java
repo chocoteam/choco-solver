@@ -58,10 +58,6 @@ public class GolombRuler extends AbstractProblem {
     IntVar[] diffs;
     IntVar[][] m_diffs;
 
-    Constraint[] lex;
-    Constraint alldiff;
-    Constraint[] distances;
-
     @Override
     public void createSolver() {
         solver = new Solver("Golomb Ruler");
@@ -71,35 +67,30 @@ public class GolombRuler extends AbstractProblem {
     public void buildModel() {
         ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
 
-        solver.post(solver.arithm(ticks[0], "=", 0));
+        solver.arithm(ticks[0], "=", 0).post();
 
-        lex = new Constraint[m - 1];
         for (int i = 0; i < m - 1; i++) {
-            lex[i] = solver.arithm(ticks[i + 1], ">", ticks[i]);
+            solver.arithm(ticks[i + 1], ">", ticks[i]).post();
         }
-        solver.post(lex);
 
         diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         m_diffs = new IntVar[m][m];
-        distances = new Constraint[(m * m - m) / 2];
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
                 // <cpru 04/03/12> it is worth adding a constraint instead of a view
-                distances[k] = solver.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]);
-                solver.post(distances[k]);
-                solver.post(solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                solver.post(solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]).post();
+                solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
+                solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
+                solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
                 m_diffs[i][j] = diffs[k];
             }
         }
-        alldiff = solver.allDifferent(diffs, "BC");
-        solver.post(alldiff);
+        solver.allDifferent(diffs, "BC").post();
 
         // break symetries
         if (m > 2) {
-            solver.post(solver.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+            solver.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
     }
 

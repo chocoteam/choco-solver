@@ -39,6 +39,10 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static java.lang.System.arraycopy;
+import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeMultiResources;
+import static org.chocosolver.util.tools.ArrayUtils.getColumn;
+
 /*
 * Created by IntelliJ IDEA.
 * User: sofdem - sophie.demassey{at}emn.fr
@@ -131,9 +135,9 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             int t = trip[2];
             int a = trip[3];
             if (mandatory) {
-                solver.post(solver.arithm(shifts[e][t], "=", a));
+                solver.arithm(shifts[e][t], "=", a).post();
             } else {
-                solver.post(solver.arithm(shifts[e][t], "!=", a));
+                solver.arithm(shifts[e][t], "!=", a).post();
             }
         }
     }
@@ -195,7 +199,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(solver.globalCardinality(vars[t], values, cards[t], false));
+            solver.globalCardinality(vars[t], values, cards[t], false).post();
         }
     }
 
@@ -211,7 +215,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(solver.globalCardinality(var, values, cover, false));
+            solver.globalCardinality(var, values, cover, false).post();
         }
     }
 
@@ -233,7 +237,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeCoverCounterCoupling(Solver solver, int a) {
         description += "coupling[" + a + "] ";
-        solver.post(solver.sum(ArrayUtils.getColumn(occurrences, a), "=", data.getTotalCover(a)));
+        solver.sum(getColumn(occurrences, a), "=", data.getTotalCover(a)).post();
     }
 
     private void makeCoverCounterCouplingAndEquity(Solver solver) {
@@ -267,7 +271,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             g++;
         }
         description += "couplingEquality[" + a + "] ";
-        solver.post(solver.scalar(occ, sizes, "=", data.getTotalCover(a)));
+        solver.scalar(occ, sizes, "=", data.getTotalCover(a)).post();
     }
 
 
@@ -291,7 +295,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(solver.globalCardinality(shifts[e], values, occurrences[e], false));
+            solver.globalCardinality(shifts[e], values, occurrences[e], false).post();
         }
 
     }
@@ -306,7 +310,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCounterWithOccurrence(Solver solver, int a) {
         for (int e = 0; e < data.nbEmployees(); e++) {
             if (occurrences[e][a].getLB() > 0 || occurrences[e][a].getUB() < data.nbDays()) {
-                solver.post(solver.count(a, shifts[e], occurrences[e][a]));
+                solver.count(a, shifts[e], occurrences[e][a]).post();
             }
         }
     }
@@ -340,8 +344,8 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 for (int t = 0; t < data.nbWeeks(); t++) {
 //                    IntVar occ = ConstraintFactory.makeIntVar("nW" + t + data.getLiteral(a) + e, lb, ub, "cp:bound", Options.V_NO_DECISION);
                     IntVar occ = solver.intVar("nW" + t + data.getLiteral(a) + e, lb, ub, true);
-                    System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                    solver.post(solver.count(a, vars, occ));
+                    arraycopy(shifts[e], t * 7, vars, 0, 7);
+                    solver.count(a, vars, occ).post();
                 }
             }
         }
@@ -356,12 +360,12 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 cards[a] = solver.intVar("card_" + a, data.getWeekCounterLB(e, a), data.getWeekCounterLB(e, a), true);
             }
             for (int t = 0; t < data.nbWeeks(); t++) {
-                System.arraycopy(shifts[e], t * 7, vars, 0, 7);
+                arraycopy(shifts[e], t * 7, vars, 0, 7);
                 int[] values = new int[cards.length];
                 for (int i = 0; i < values.length; i++) {
                     values[i] = i;
                 }
-                solver.post(solver.globalCardinality(vars, values, cards, false));
+                solver.globalCardinality(vars, values, cards, false).post();
             }
         }
 
@@ -610,7 +614,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         FiniteAutomaton automaton = this.makeForbiddenPatternsAsAutomaton();
         description += "pat[regular/" + automaton.getNbStates() + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(solver.regular(shifts[e], automaton));
+            solver.regular(shifts[e], automaton).post();
         }
     }
 
@@ -624,7 +628,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
         description += "pat[MCRegular/" + automaton.getNbStates() + "/" + costs[0][0].length + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(solver.multiCostRegular(shifts[e], occurrences[e], CostAutomaton.makeMultiResources(automaton, costs, occurrences[e])));
+            solver.multiCostRegular(shifts[e], occurrences[e], makeMultiResources(automaton, costs, occurrences[e])).post();
         }
     }
 

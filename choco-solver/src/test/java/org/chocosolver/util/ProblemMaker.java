@@ -59,9 +59,9 @@ public class ProblemMaker {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(solver.arithm(vars[i], "!=", vars[j]));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.arithm(vars[i], "!=", vars[j]).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         return solver;
@@ -75,19 +75,19 @@ public class ProblemMaker {
      * @return a solve-ready solver.
      */
     @SuppressWarnings("Duplicates")
-    public static Solver makeNQueenWithOneAlldifferent(int n){
+    public static Solver makeNQueenWithOneAlldifferent(int n) {
         Solver solver = new Solver();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = solver.intVar("Q_" + i, 1, n, false);
         }
         solver.addHook("vars", vars);
-        solver.post(solver.allDifferent(vars, "AC"));
+        solver.allDifferent(vars, "AC").post();
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         return solver;
@@ -101,17 +101,17 @@ public class ProblemMaker {
      * @return a solve-ready solver
      */
     @SuppressWarnings("Duplicates")
-    public static Solver makeCostasArrays(int n){
+    public static Solver makeCostasArrays(int n) {
         Solver solver = new Solver();
         IntVar[] vars = solver.intVarArray("v", n, 0, n - 1, false);
-        IntVar[] vectors = new IntVar[(n*(n-1))/2];
+        IntVar[] vectors = new IntVar[(n * (n - 1)) / 2];
         IntVar[][] diff = new IntVar[n][n];
         int idx = 0;
         for (int i = 0; i < n; i++) {
-            for (int j = i+1; j < n; j++) {
+            for (int j = i + 1; j < n; j++) {
                 IntVar k = solver.intVar(randomName(), -n, n, false);
-                solver.post(solver.arithm(k,"!=",0));
-                solver.post(solver.sum(new IntVar[]{vars[i],k},"=",vars[j]));
+                solver.arithm(k, "!=", 0).post();
+                solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
                 vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
@@ -120,11 +120,11 @@ public class ProblemMaker {
         solver.addHook("vars", vars);
         solver.addHook("vectors", vectors);
 
-        solver.post(solver.allDifferent(vars, "AC"));
-        solver.post(solver.allDifferent(vectors, "BC"));
+        solver.allDifferent(vars, "AC").post();
+        solver.allDifferent(vectors, "BC").post();
 
         // symmetry-breaking
-        solver.post(solver.arithm(vars[0],"<",vars[n-1]));
+        solver.arithm(vars[0], "<", vars[n - 1]).post();
         return solver;
     }
 
@@ -135,33 +135,33 @@ public class ProblemMaker {
      * @return a solve-ready solver
      */
     @SuppressWarnings("Duplicates")
-    public static Solver makeGolombRuler(int m){
+    public static Solver makeGolombRuler(int m) {
         Solver solver = new Solver();
         IntVar[] ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         solver.addHook("ticks", ticks);
         IntVar[] diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         solver.addHook("diffs", diffs);
-        solver.post(solver.arithm(ticks[0], "=", 0));
+        solver.arithm(ticks[0], "=", 0).post();
 
         for (int i = 0; i < m - 1; i++) {
-            solver.post(solver.arithm(ticks[i + 1], ">", ticks[i]));
+            solver.arithm(ticks[i + 1], ">", ticks[i]).post();
         }
 
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                solver.post(solver.arithm(ticks[j],"-", ticks[i], "=", diffs[k]));
-                solver.post(solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                solver.post(solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.arithm(ticks[j], "-", ticks[i], "=", diffs[k]).post();
+                solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
+                solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
+                solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
             }
         }
-        solver.post(solver.allDifferent(diffs, "BC"));
+        solver.allDifferent(diffs, "BC").post();
         // break symetries
         if (m > 2) {
-            solver.post(solver.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+            solver.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
-        solver.setObjectives(ticks[m-1]);
+        solver.setObjectives(ticks[m - 1]);
         return solver;
     }
 

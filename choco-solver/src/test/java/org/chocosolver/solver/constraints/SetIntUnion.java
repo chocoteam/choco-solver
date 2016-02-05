@@ -42,6 +42,12 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
+import static org.testng.Assert.assertEquals;
+
 public class SetIntUnion {
 
 	@Test(groups="1s", timeOut=60000)
@@ -49,10 +55,10 @@ public class SetIntUnion {
         Solver s = new Solver();
         IntVar[] x = s.intVarArray("ints", 4, 0, 5, false);
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
-        s.post(s.union(x, values));
-        Chatterbox.showStatistics(s);
-        Chatterbox.showSolutions(s);
-        s.set(ISF.lexico_LB(x));
+        s.union(x, values).post();
+        showStatistics(s);
+        showSolutions(s);
+        s.set(lexico_LB(x));
         s.findAllSolutions();
     }
 
@@ -67,12 +73,12 @@ public class SetIntUnion {
                 , s.intVar(2)
         };
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
-        s.post(s.union(x, values));
-        Chatterbox.showStatistics(s);
-        Chatterbox.showSolutions(s);
-        s.set(ISF.lexico_LB(x));
+        s.union(x, values).post();
+        showStatistics(s);
+        showSolutions(s);
+        s.set(lexico_LB(x));
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 0);
+        assertEquals(s.getMeasures().getSolutionCount(), 0);
     }
 
 	@Test(groups="1s", timeOut=60000)
@@ -85,13 +91,13 @@ public class SetIntUnion {
                 , s.intVar(0)
                 , s.intVar(2)
         };
-        SetVar values = s.setVar("values", new int[]{}, new int[]{-1,0,1,2,3,4,5,6});
-        s.post(s.union(x, values));
-        Chatterbox.showStatistics(s);
-        Chatterbox.showSolutions(s);
-        s.set(ISF.lexico_LB(x));
+        SetVar values = s.setVar("values", new int[]{}, new int[]{-1, 0, 1, 2, 3, 4, 5, 6});
+        s.union(x, values).post();
+        showStatistics(s);
+        showSolutions(s);
+        s.set(lexico_LB(x));
         s.findAllSolutions();
-        System.out.println(values);
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
+        out.println(values);
+        assertEquals(s.getMeasures().getSolutionCount(), 1);
     }
 }

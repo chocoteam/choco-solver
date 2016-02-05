@@ -40,6 +40,11 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static java.lang.System.out;
+import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
+
 /**
  * @author Jean-Guillaume Fages
  * @since 22/01/16
@@ -65,48 +70,48 @@ public class SetCstrsTest {
 		);
 	}
 
-	public static IntVar[] eqFilter(String mode){
+	public static IntVar[] eqFilter(String mode) {
 		Solver s = new Solver();
 		IntVar x = s.intVar("x", 0, 10, false);
 		IntVar y = s.intVar("y", 0, 10, false);
 		// set view of A
-		SetVar xset = s.setVar("x as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		SetVar yset = s.setVar("y as a set", new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		s.post(s.union(new IntVar[]{x},xset));
-		s.post(s.union(new IntVar[]{y},yset));
+		SetVar xset = s.setVar("x as a set", new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		SetVar yset = s.setVar("y as a set", new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		s.union(new IntVar[]{x}, xset).post();
+		s.union(new IntVar[]{y}, yset).post();
 		// X +9 <= Y or Y + 9 <= X
-		SetVar Xleft = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		SetVar tmpLeft = s.setVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
-		s.post(s.offSet(Xleft,tmpLeft,9));
-		SetVar Yleft = s.setVar("",  new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		s.post(eq(tmpLeft, Yleft,mode));
+		SetVar Xleft = s.setVar(new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		SetVar tmpLeft = s.setVar(new int[]{}, new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19});
+		s.offSet(Xleft, tmpLeft, 9).post();
+		SetVar Yleft = s.setVar("", new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		eq(tmpLeft, Yleft, mode).post();
 
-		SetVar Yright = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		SetVar tmpRight = s.setVar(new int[]{}, new int[]{9,10,11,12,13,14,15,16,17,18,19});
-		s.post(s.offSet(Yright,tmpRight,9));
-		SetVar Xright = s.setVar(new int[]{}, new int[]{0,1,2,3,4,5,6,7,8,9,10});
-		s.post(eq(tmpRight, Xright,mode));
+		SetVar Yright = s.setVar(new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		SetVar tmpRight = s.setVar(new int[]{}, new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19});
+		s.offSet(Yright, tmpRight, 9).post();
+		SetVar Xright = s.setVar(new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		eq(tmpRight, Xright, mode).post();
 
 		//
-		s.post(s.union(new SetVar[]{Xleft, Xright}, xset));
-		s.post(s.union(new SetVar[]{Yleft,Yright},yset));
+		s.union(new SetVar[]{Xleft, Xright}, xset).post();
+		s.union(new SetVar[]{Yleft, Yright}, yset).post();
 		// link to booleans
 		BoolVar b1 = s.notEmpty(Yleft).reify();
 		BoolVar b2 = s.notEmpty(Yright).reify();
 		// ---
-		SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
-		Chatterbox.showStatistics(s);
-		Chatterbox.showSolutions(s);
+		addBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
+		showStatistics(s);
+		showSolutions(s);
 		try {
 			s.propagate();
 		} catch (ContradictionException e) {
 			e.printStackTrace();
 		}
-		System.out.println(mode);
-		System.out.println(x);
-		System.out.println(y);
-		System.out.println("%%%%%%");
-		return new IntVar[]{x,y};
+		out.println(mode);
+		out.println(x);
+		out.println(y);
+		out.println("%%%%%%");
+		return new IntVar[]{x, y};
 	}
 
 	public static Constraint eq(SetVar x, SetVar y, String mode){

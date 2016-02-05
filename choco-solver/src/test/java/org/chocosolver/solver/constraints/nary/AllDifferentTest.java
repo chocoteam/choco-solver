@@ -44,6 +44,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -59,15 +62,15 @@ public class AllDifferentTest {
         for (int i = 0; i < n; i++) {
             vars[i] = s.intVar("v_" + i, 1, n, false);
         }
-        s.post(s.allDifferent(vars, "BC"));
+        s.allDifferent(vars, "BC").post();
         if (simple) {
 
             for (int i = 0; i < n - 1; i++) {
                 for (int j = i + 1; j < n; j++) {
                     int k = j - i;
-                    s.post(s.arithm(vars[i], "!=", vars[j]));
-                    s.post(s.arithm(vars[i], "!=", vars[j], "+", k));
-                    s.post(s.arithm(vars[i], "!=", vars[j], "+", -k));
+                    s.arithm(vars[i], "!=", vars[j]).post();
+                    s.arithm(vars[i], "!=", vars[j], "+", k).post();
+                    s.arithm(vars[i], "!=", vars[j], "+", -k).post();
                 }
             }
         } else {
@@ -79,17 +82,17 @@ public class AllDifferentTest {
                 diag2[i] = s.intVar("v_" + (i + n), 1, 2 * n, false);
             }
             for (int i = 0; i < n; i++) {
-                s.post(s.arithm(diag1[i], "=", vars[i], "-", i));
-                s.post(s.arithm(diag2[i], "=", vars[i], "+", i));
+                s.arithm(diag1[i], "=", vars[i], "-", i).post();
+                s.arithm(diag2[i], "=", vars[i], "+", i).post();
             }
-            s.post(s.allDifferent(diag1, "BC"));
-            s.post(s.allDifferent(diag2, "BC"));
+            s.allDifferent(diag1, "BC").post();
+            s.allDifferent(diag2, "BC").post();
         }
-        AbstractStrategy strategy = IntStrategyFactory.lexico_LB(vars);
+        AbstractStrategy strategy = lexico_LB(vars);
         s.set(strategy);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, nbSol, "nb sol incorrect");
+        assertEquals(sol, nbSol, "nb sol incorrect");
     }
 
 
@@ -117,38 +120,26 @@ public class AllDifferentTest {
         vars[3] = s.intVar("v_3", new int[]{1, 3, 5, 6});
 
 
-        List<Constraint> lcstrs = new ArrayList<>(10);
-        List<Constraint> lcstrs1 = new ArrayList<>(1);
-        List<Constraint> lcstrs2 = new ArrayList<>(10);
-
-        lcstrs1.add(s.allDifferent(vars, "BC"));
+        s.allDifferent(vars, "BC").post();
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                lcstrs2.add(s.arithm(vars[i], "!=", vars[j], "+", -k));
-                lcstrs2.add(s.arithm(vars[i], "!=", vars[j], "+", k));
+                s.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                s.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        lcstrs.addAll(lcstrs1);
-        lcstrs.addAll(lcstrs2);
-
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        s.post(cstrs);
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.set(lexico_LB(vars));
         //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 1, "nb sol incorrect");
+        assertEquals(sol, 1, "nb sol incorrect");
 
     }
 
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-
         Solver s = new Solver();
-
         int n = 5;
         IntVar[] vars = new IntVar[n];
         vars[0] = s.intVar("v_0", 5);
@@ -156,20 +147,11 @@ public class AllDifferentTest {
         vars[2] = s.intVar("v_2", 3, 4, true);
         vars[3] = s.intVar("v_3", 2, 6, true);
         vars[4] = s.intVar("v_4", 2, 6, true);
-
-
-        List<Constraint> lcstrs = new ArrayList<>(10);
-
-        lcstrs.add(s.allDifferent(vars, "BC"));
-
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        s.post(cstrs);
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.allDifferent(vars, "BC").post();
+        s.set(lexico_LB(vars));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 2, "nb sol incorrect");
-
+        assertEquals(sol, 2, "nb sol incorrect");
     }
 
 
@@ -222,31 +204,25 @@ public class AllDifferentTest {
             }
         }
 
-        List<Constraint> lcstrs = new ArrayList<>(10);
-
         switch (c) {
             case 0:
                 for (int i = 0; i < vars.length - 1; i++) {
                     for (int j = i + 1; j < vars.length; j++) {
-                        lcstrs.add(s.arithm(vars[i], "!=", vars[j]));
+                        s.arithm(vars[i], "!=", vars[j]).post();
                     }
                 }
                 break;
             case 1:
-                lcstrs.add(s.allDifferent(vars, "NEQS"));
+                s.allDifferent(vars, "NEQS").post();
                 break;
             case 2:
-                lcstrs.add(s.allDifferent(vars, "BC"));
+                s.allDifferent(vars, "BC").post();
                 break;
             case 3:
-                lcstrs.add(s.allDifferent(vars, "AC"));
+                s.allDifferent(vars, "AC").post();
                 break;
         }
-
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        s.post(cstrs);
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.set(lexico_LB(vars));
         return s;
     }
 
@@ -286,11 +262,11 @@ public class AllDifferentTest {
         ts[1] = solver.intVar("t1", 1, 3, false);
         ts[2] = solver.intVar("t2", 1, 3, false);
 
-        solver.post(solver.allDifferent(ts, "BC"));
+        solver.allDifferent(ts, "BC").post();
 
         solver.propagate();
-        Assert.assertEquals(ts[1].getDomainSize(), 2);
-        Assert.assertEquals(ts[2].getDomainSize(), 2);
+        assertEquals(ts[1].getDomainSize(), 2);
+        assertEquals(ts[2].getDomainSize(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -301,11 +277,11 @@ public class AllDifferentTest {
         ts[1] = solver.intVar("t1", 1, 3, true);
         ts[2] = solver.intVar("t2", 1, 3, true);
 
-        solver.post(solver.allDifferent(ts, "FC"));
+        solver.allDifferent(ts, "FC").post();
 
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 23);
+        assertEquals(solver.getMeasures().getSolutionCount(), 10);
+        assertEquals(solver.getMeasures().getNodeCount(), 23);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -316,11 +292,11 @@ public class AllDifferentTest {
         ts[1] = solver.intVar("t1", 1, 3, false);
         ts[2] = solver.intVar("t2", 1, 3, false);
 
-        solver.post(solver.allDifferent(ts, "FC"));
+        solver.allDifferent(ts, "FC").post();
 
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+        assertEquals(solver.getMeasures().getSolutionCount(), 10);
+        assertEquals(solver.getMeasures().getNodeCount(), 19);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -360,10 +336,10 @@ public class AllDifferentTest {
         X[30] = solver.intVar("X30", new int[]{-15, -2, -1, 3});
         X[31] = solver.intVar("X31", new int[]{1, 10, 14});
 
-        solver.post(solver.allDifferent(X, "AC"));
+        solver.allDifferent(X, "AC").post();
         solver.propagate();
-        Assert.assertEquals(X[14].getUB(), 16);
-        Assert.assertEquals(X[14].getLB(), -16);
-        Assert.assertEquals(X[14].getDomainSize(), 2);
+        assertEquals(X[14].getUB(), 16);
+        assertEquals(X[14].getLB(), -16);
+        assertEquals(X[14].getDomainSize(), 2);
     }
 }

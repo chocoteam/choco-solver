@@ -36,6 +36,10 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.minDom_LB;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+
 /**
  * <br/>
  *
@@ -57,17 +61,17 @@ public class BottleneckTest {
                 nexts[i] = solver.intVar("n_" + i, 0, 200, false);
                 exps[i] = solver.intVar("e_" + i, 0, 200, false);
                 bws[i] = solver.intVar("b_" + i, 0, 2000, false);
-                solver.post(solver.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
+                solver.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]).post();
             }
 
             IntVar sum = solver.intVar("sum", 0, 2000 * n, true);
-			solver.post(solver.sum(bws, "=", sum));
+            solver.sum(bws, "=", sum).post();
 
-            IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
+            IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 
 
-            solver.set(IntStrategyFactory.minDom_LB(allvars));
-            solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, sum);
+            solver.set(minDom_LB(allvars));
+            solver.findOptimalSolution(MAXIMIZE, sum);
         }
     }
 
@@ -84,16 +88,16 @@ public class BottleneckTest {
                 nexts[i] = solver.intVar("n_" + i, 0, 200, false);
                 exps[i] = solver.intVar("e_" + i, 0, 200, false);
                 bws[i] = solver.intVar("b_" + i, 0, 2000, false);
-				solver.post(solver.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]));
+                solver.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]).post();
             }
 
             IntVar sum = solver.intVar("sum", 0, 2000 * n, true);
-			solver.post(solver.sum(bws, "=", sum));
+            solver.sum(bws, "=", sum).post();
 
-            IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
+            IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 
             // Heuristic val
-            solver.set(IntStrategyFactory.minDom_LB(allvars));
+            solver.set(minDom_LB(allvars));
 
             solver.findSolution();
         }

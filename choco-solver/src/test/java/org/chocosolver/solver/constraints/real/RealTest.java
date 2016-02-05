@@ -41,6 +41,11 @@ import org.chocosolver.solver.variables.RealVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static java.lang.System.out;
+import static org.chocosolver.solver.constraints.real.Ibex.HC4;
+import static org.chocosolver.solver.trace.Chatterbox.printStatistics;
+import static org.testng.Assert.assertEquals;
+
 /**
  * -Djava.library.path=/Users/cprudhom/Sources/Ibex/ibex-2.1.12/__build__/src/
  * <br/>
@@ -161,11 +166,11 @@ public class RealTest {
             // or x : [1.000000, 1.000000], y : [8.000000, 8.000000]
             // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
 //        rcons.discretize(x,y);
-            solver.post(solver.realIbexGenericConstraint("{0} * {1} = 8", vars));
+            solver.realIbexGenericConstraint("{0} * {1} = 8", vars).post();
             solver.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
             solver.findSolution();
-            Assert.assertEquals(x.getValue(), 2);
-            Assert.assertEquals(y.getValue(), 4);
+            assertEquals(x.getValue(), 2);
+            assertEquals(y.getValue(), 4);
             solver.getIbex().release();
         }
     }
@@ -204,18 +209,18 @@ public class RealTest {
         Solver solver = new Solver();
 
         RealVar x = solver.realVar("x", 0.0, 5.0, 0.001);
-        System.out.println("Before solving:");
+        out.println("Before solving:");
 
-        RealConstraint newRange = new RealConstraint("newRange", "1.4142<{0};{0}<3.1416", Ibex.HC4, x);
-        solver.post(newRange);
+        RealConstraint newRange = new RealConstraint("newRange", "1.4142<{0};{0}<3.1416", HC4, x);
+        newRange.post();
 
         try {
             solver.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        System.out.printf("%s\n", solver.toString());
-        Chatterbox.printStatistics(solver);
+        out.printf("%s\n", solver.toString());
+        printStatistics(solver);
         solver.getIbex().release();
     }
 
@@ -224,17 +229,17 @@ public class RealTest {
         Solver solver = new Solver();
 
         RealVar x = solver.realVar("x", 0.0, 5.0, 0.001);
-        System.out.println("Before solving:");
+        out.println("Before solving:");
 
-        solver.post(solver.realIbexGenericConstraint("1.4142<{0};{0}<3.1416",x));
+        solver.realIbexGenericConstraint("1.4142<{0};{0}<3.1416", x).post();
 
         try {
             solver.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        System.out.printf("%s\n", solver.toString());
-        Chatterbox.printStatistics(solver);
+        out.printf("%s\n", solver.toString());
+        printStatistics(solver);
         solver.getIbex().release();
     }
 }

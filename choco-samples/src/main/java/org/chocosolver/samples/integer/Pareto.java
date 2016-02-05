@@ -71,7 +71,7 @@ public class Pareto extends AbstractProblem {
 		b = solver.intVar("b", 0, 2, false);
 		c = solver.intVar("c", 0, 2, false);
 
-		solver.post(solver.arithm(a, "+", b, "<", 3));
+		solver.arithm(a, "+", b, "<", 3).post();
 	}
 
 	@Override

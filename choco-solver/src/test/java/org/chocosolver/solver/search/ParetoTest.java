@@ -37,6 +37,10 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.Math.max;
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+
 /**
  * Created by cprudhom on 18/02/15.
  * Project: choco.
@@ -67,10 +71,10 @@ public class ParetoTest {
             String item = items[it];
             item = item.trim();
             final String[] itemData = item.split(";");
-            nbItems[it] = Integer.parseInt(itemData[0]);
-            weights[it] = Integer.parseInt(itemData[1]);
-            profits_1[it] = Integer.parseInt(itemData[2]);
-            profits_2[it] = Integer.parseInt(itemData[3]);
+            nbItems[it] = parseInt(itemData[0]);
+            weights[it] = parseInt(itemData[1]);
+            profits_1[it] = parseInt(itemData[2]);
+            profits_2[it] = parseInt(itemData[3]);
             maxProfit_1 += nbItems[it] * profits_1[it];
             maxProfit_2 += nbItems[it] * profits_2[it];
         }
@@ -86,11 +90,11 @@ public class ParetoTest {
         IntVar totalProfit_2 = s.intVar("totalProfit_2", 0, maxProfit_2, true);
 
         // --- Posts constraints
-        s.post(s.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1));
-        s.post(s.knapsack(occurrences, totalWeight, totalProfit_2, weights, profits_2));
+        s.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1).post();
+        s.knapsack(occurrences, totalWeight, totalProfit_2, weights, profits_2).post();
         // --- Monitor
-        s.plugMonitor((IMonitorSolution) () -> bestProfit1 = Math.max(bestProfit1, totalProfit_1.getValue()));
+        s.plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
         // --- solve
-        s.findParetoFront(ResolutionPolicy.MAXIMIZE, totalProfit_1, totalProfit_2);
+        s.findParetoFront(MAXIMIZE, totalProfit_1, totalProfit_2);
     }
 }

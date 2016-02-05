@@ -110,7 +110,7 @@ public class MeetingScheduling extends AbstractProblem {
         for (int i = 0; i < mspdata.numberOfMeetings - 1; i++) { // for each pair of meeting
             for (int j = i + 1; j < mspdata.numberOfMeetings; j++) {
                 if (conflicts[i][j]) {
-                    solver.post(solver.distance(meetingTime[i], meetingTime[j], ">", mspdata.betweenMeetingsDistance[i][j]));
+                    solver.distance(meetingTime[i], meetingTime[j], ">", mspdata.betweenMeetingsDistance[i][j]).post();
                 }
             }
         }

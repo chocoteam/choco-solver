@@ -54,6 +54,14 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.tools.ArrayUtils.flatten;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
 public class LexChainTest {
 
     @Test(groups="10s", timeOut=60000)
@@ -64,11 +72,11 @@ public class LexChainTest {
         IntVar[] ar2 = s.intVarArray("v2", 3, -1, 9, true);
 
         Constraint c = s.lexChainLessEq(ar1, ar2);
-        s.post(c);
+        c.post();
         //SearchMonitorFactory.log(s, true, true);
         if (s.findSolution()) {
             do {
-                Assert.assertEquals(ESat.TRUE, c.isSatisfied());
+                assertEquals(TRUE, c.isSatisfied());
             } while (s.nextSolution());
         }
 
@@ -118,12 +126,12 @@ public class LexChainTest {
                     solver.intVarArray("X_" + i, m, 0, k, true) :
                     solver.intVarArray("X_" + i, m, 0, k, false);
         }
-        solver.post(solver.lexChainLess(X));
-		if(bounded){
-			solver.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
-		}else{
-			solver.set(IntStrategyFactory.random_value(ArrayUtils.flatten(X), seed));
-		}
+        solver.lexChainLess(X).post();
+        if (bounded) {
+            solver.set(random_bound(flatten(X), seed));
+        } else {
+            solver.set(random_value(flatten(X), seed));
+        }
         return solver;
     }
 
@@ -183,20 +191,20 @@ public class LexChainTest {
             X[i] = solver.intVarArray("X_" + i, 2, 0, 2, true);
         }
 
-        solver.post(solver.lexChainLess(X));
+        solver.lexChainLess(X).post();
 
 
         try {
             solver.propagate();
-            X[0][0].updateLowerBound(1, Cause.Null);
-            X[0][1].updateLowerBound(1, Cause.Null);
-            X[1][0].updateLowerBound(1, Cause.Null);
-            X[2][1].updateLowerBound(1, Cause.Null);
+            X[0][0].updateLowerBound(1, Null);
+            X[0][1].updateLowerBound(1, Null);
+            X[1][0].updateLowerBound(1, Null);
+            X[2][1].updateLowerBound(1, Null);
             solver.propagate();
-            X[2][1].instantiateTo(1, Cause.Null);
+            X[2][1].instantiateTo(1, Null);
             solver.propagate();
         } catch (ContradictionException e) {
-            Assert.fail();
+            fail();
         }
     }
 

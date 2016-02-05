@@ -39,6 +39,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.minDom_LB;
+
 /**
  * <br/>
  *
@@ -66,22 +68,22 @@ public class PertTest {
         garden = solver.intVar("garden", 0, horizon, false);
         objective = solver.intVar("moving", 0, horizon - 1, false);
 
-        solver.post(precedence(masonry, 7, carpentry));
-        solver.post(precedence(masonry, 7, plumbing));
-        solver.post(precedence(masonry, 7, ceiling));
-        solver.post(precedence(carpentry, 3, roofing));
-        solver.post(precedence(ceiling, 3, roofing));
-        solver.post(precedence(roofing, 1, windows));
-        solver.post(precedence(windows, 1, painting));
-        solver.post(precedence(roofing, 1, facade));
-        solver.post(precedence(plumbing, 8, facade));
-        solver.post(precedence(roofing, 1, garden));
-        solver.post(precedence(plumbing, 8, garden));
-        solver.post(precedence(facade, 2, objective));
-        solver.post(precedence(garden, 1, objective));
-        solver.post(precedence(painting, 2, objective));
+        precedence(masonry, 7, carpentry).post();
+        precedence(masonry, 7, plumbing).post();
+        precedence(masonry, 7, ceiling).post();
+        precedence(carpentry, 3, roofing).post();
+        precedence(ceiling, 3, roofing).post();
+        precedence(roofing, 1, windows).post();
+        precedence(windows, 1, painting).post();
+        precedence(roofing, 1, facade).post();
+        precedence(plumbing, 8, facade).post();
+        precedence(roofing, 1, garden).post();
+        precedence(plumbing, 8, garden).post();
+        precedence(facade, 2, objective).post();
+        precedence(garden, 1, objective).post();
+        precedence(painting, 2, objective).post();
 
-        solver.set(IntStrategyFactory.minDom_LB(new IntVar[]{masonry, carpentry, plumbing, ceiling,
+        solver.set(minDom_LB(new IntVar[]{masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden, objective}));
         return solver;
 

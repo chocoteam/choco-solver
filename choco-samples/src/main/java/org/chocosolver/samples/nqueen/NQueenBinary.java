@@ -58,10 +58,10 @@ public class NQueenBinary extends AbstractNQueen {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
                 Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
-                solver.post(neq);
+                neq.post();
                 set.add(neq);
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
     }

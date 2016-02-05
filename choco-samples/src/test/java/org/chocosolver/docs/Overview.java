@@ -34,6 +34,9 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.printStatistics;
+
 /**
  * <br/>
  *
@@ -49,13 +52,13 @@ public class Overview {
         IntVar x = solver.intVar("X", 0, 5, true);
         IntVar y = solver.intVar("Y", 0, 5, true);
         // 3. Create and post constraints by using constraint factories
-        solver.post(solver.arithm(x, "+", y, "<", 5));
+        solver.arithm(x, "+", y, "<", 5).post();
         // 4. Define the search strategy
-        solver.set(IntStrategyFactory.lexico_LB(x, y));
+        solver.set(lexico_LB(x, y));
         // 5. Launch the resolution process
         solver.findSolution();
         //6. Print search statistics
-        Chatterbox.printStatistics(solver);
+        printStatistics(solver);
     }
 
     public static void main(String[] args) {

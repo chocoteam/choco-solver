@@ -37,6 +37,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
 /**
  * User: cprudhom
  * Mail: cprudhom(a)emn.fr
@@ -54,12 +59,12 @@ public class NotEqualX_YCTest {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, 0, n, false);
         }
-        s.post(s.arithm(vars[0], "!=", vars[1]));
+        s.arithm(vars[0], "!=", vars[1]).post();
 
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.set(lexico_LB(vars));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 6, "nb sol incorrect");
+        assertEquals(sol, 6, "nb sol incorrect");
 
     }
 
@@ -73,12 +78,12 @@ public class NotEqualX_YCTest {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, 0, n, true);
         }
-        s.post(s.arithm(vars[0], "!=", vars[1]));
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.arithm(vars[0], "!=", vars[1]).post();
+        s.set(lexico_LB(vars));
 //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 6, "nb sol incorrect");
+        assertEquals(sol, 6, "nb sol incorrect");
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -91,21 +96,21 @@ public class NotEqualX_YCTest {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = s.intVar("v_" + i, 0, n, true);
         }
-        s.post(s.arithm(vars[0], "!=", vars[1]));
-        s.set(IntStrategyFactory.lexico_LB(vars));
+        s.arithm(vars[0], "!=", vars[1]).post();
+        s.set(lexico_LB(vars));
 
         try {
             s.propagate();
-            vars[0].instantiateTo(1, Cause.Null);
+            vars[0].instantiateTo(1, Null);
             s.propagate();
-            Assert.assertEquals(vars[1].getLB(), 0);
-            Assert.assertEquals(vars[1].getUB(), 2);
-            vars[1].removeValue(2, Cause.Null);
+            assertEquals(vars[1].getLB(), 0);
+            assertEquals(vars[1].getUB(), 2);
+            vars[1].removeValue(2, Null);
             s.propagate();
-            Assert.assertEquals(vars[1].getLB(), 0);
-            Assert.assertEquals(vars[1].getUB(), 0);
+            assertEquals(vars[1].getLB(), 0);
+            assertEquals(vars[1].getUB(), 0);
         } catch (ContradictionException e) {
-            Assert.fail();
+            fail();
         }
     }
 

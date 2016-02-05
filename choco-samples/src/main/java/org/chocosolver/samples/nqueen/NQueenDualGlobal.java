@@ -61,18 +61,18 @@ public class NQueenDualGlobal extends AbstractNQueen {
         }
 
         for (int i = 0; i < n; i++) {
-            solver.post(solver.arithm(diag1[i], "=", vars[i], "+", i));
-            solver.post(solver.arithm(diag2[i], "=", vars[i], "-", i));
+            solver.arithm(diag1[i], "=", vars[i], "+", i).post();
+            solver.arithm(diag2[i], "=", vars[i], "-", i).post();
 
-            solver.post(solver.arithm(dualdiag1[i], "=", dualvars[i], "+", i));
-            solver.post(solver.arithm(dualdiag2[i], "=", dualvars[i], "-", i));
+            solver.arithm(dualdiag1[i], "=", dualvars[i], "+", i).post();
+            solver.arithm(dualdiag2[i], "=", dualvars[i], "-", i).post();
         }
-        solver.post(solver.allDifferent(diag1, "BC"));
-        solver.post(solver.allDifferent(diag2, "BC"));
-        solver.post(solver.allDifferent(dualdiag1, "BC"));
-        solver.post(solver.allDifferent(dualdiag2, "BC"));
+        solver.allDifferent(diag1, "BC").post();
+        solver.allDifferent(diag2, "BC").post();
+        solver.allDifferent(dualdiag1, "BC").post();
+        solver.allDifferent(dualdiag2, "BC").post();
 
-        solver.post(solver.inverseChanneling(vars, dualvars, 1, 1));
+        solver.inverseChanneling(vars, dualvars, 1, 1).post();
     }
 
 

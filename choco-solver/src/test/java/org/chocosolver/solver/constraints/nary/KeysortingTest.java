@@ -38,6 +38,11 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+import static org.chocosolver.util.tools.ArrayUtils.flatten;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -78,20 +83,20 @@ public class KeysortingTest {
         Y[3][1] = solver.intVar("Y42", 2, 6, true);
         Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
-        solver.post(solver.keySort(X, null, Y, 2));
+        solver.keySort(X, null, Y, 2).post();
         solver.findSolution();
-        Assert.assertEquals(Y[0][0].getValue(), 1);
-        Assert.assertEquals(Y[0][1].getValue(), 5);
-        Assert.assertEquals(Y[0][2].getValue(), 1003);
-        Assert.assertEquals(Y[1][0].getValue(), 2);
-        Assert.assertEquals(Y[1][1].getValue(), 3);
-        Assert.assertEquals(Y[1][2].getValue(), 1001);
-        Assert.assertEquals(Y[2][0].getValue(), 2);
-        Assert.assertEquals(Y[2][1].getValue(), 3);
-        Assert.assertEquals(Y[2][2].getValue(), 1004);
-        Assert.assertEquals(Y[3][0].getValue(), 2);
-        Assert.assertEquals(Y[3][1].getValue(), 4);
-        Assert.assertEquals(Y[3][2].getValue(), 1002);
+        assertEquals(Y[0][0].getValue(), 1);
+        assertEquals(Y[0][1].getValue(), 5);
+        assertEquals(Y[0][2].getValue(), 1003);
+        assertEquals(Y[1][0].getValue(), 2);
+        assertEquals(Y[1][1].getValue(), 3);
+        assertEquals(Y[1][2].getValue(), 1001);
+        assertEquals(Y[2][0].getValue(), 2);
+        assertEquals(Y[2][1].getValue(), 3);
+        assertEquals(Y[2][2].getValue(), 1004);
+        assertEquals(Y[3][0].getValue(), 2);
+        assertEquals(Y[3][1].getValue(), 4);
+        assertEquals(Y[3][2].getValue(), 1002);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -126,20 +131,20 @@ public class KeysortingTest {
         Y[3][1] = solver.intVar("Y42", 2, 6, true);
         Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
-        solver.post(solver.keySort(X, null, Y, 1));
+        solver.keySort(X, null, Y, 1).post();
         solver.findSolution();
-        Assert.assertEquals(Y[0][0].getValue(), 1);
-        Assert.assertEquals(Y[0][1].getValue(), 5);
-        Assert.assertEquals(Y[0][2].getValue(), 1003);
-        Assert.assertEquals(Y[1][0].getValue(), 2);
-        Assert.assertEquals(Y[1][1].getValue(), 3);
-        Assert.assertEquals(Y[1][2].getValue(), 1001);
-        Assert.assertEquals(Y[2][0].getValue(), 2);
-        Assert.assertEquals(Y[2][1].getValue(), 4);
-        Assert.assertEquals(Y[2][2].getValue(), 1002);
-        Assert.assertEquals(Y[3][0].getValue(), 2);
-        Assert.assertEquals(Y[3][1].getValue(), 3);
-        Assert.assertEquals(Y[3][2].getValue(), 1004);
+        assertEquals(Y[0][0].getValue(), 1);
+        assertEquals(Y[0][1].getValue(), 5);
+        assertEquals(Y[0][2].getValue(), 1003);
+        assertEquals(Y[1][0].getValue(), 2);
+        assertEquals(Y[1][1].getValue(), 3);
+        assertEquals(Y[1][2].getValue(), 1001);
+        assertEquals(Y[2][0].getValue(), 2);
+        assertEquals(Y[2][1].getValue(), 4);
+        assertEquals(Y[2][2].getValue(), 1002);
+        assertEquals(Y[3][0].getValue(), 2);
+        assertEquals(Y[3][1].getValue(), 3);
+        assertEquals(Y[3][2].getValue(), 1004);
     }
 
 
@@ -175,20 +180,20 @@ public class KeysortingTest {
         Y[3][1] = solver.intVar("Y42", 2, 6, true);
         Y[3][2] = solver.intVar("Y43", 1000, 10006, true);
 
-        solver.post(solver.keySort(X, null, Y, 0));
+        solver.keySort(X, null, Y, 0).post();
         solver.findSolution();
-        Assert.assertEquals(Y[0][0].getValue(), 2);
-        Assert.assertEquals(Y[0][1].getValue(), 3);
-        Assert.assertEquals(Y[0][2].getValue(), 1001);
-        Assert.assertEquals(Y[1][0].getValue(), 2);
-        Assert.assertEquals(Y[1][1].getValue(), 4);
-        Assert.assertEquals(Y[1][2].getValue(), 1002);
-        Assert.assertEquals(Y[2][0].getValue(), 1);
-        Assert.assertEquals(Y[2][1].getValue(), 5);
-        Assert.assertEquals(Y[2][2].getValue(), 1003);
-        Assert.assertEquals(Y[3][0].getValue(), 2);
-        Assert.assertEquals(Y[3][1].getValue(), 3);
-        Assert.assertEquals(Y[3][2].getValue(), 1004);
+        assertEquals(Y[0][0].getValue(), 2);
+        assertEquals(Y[0][1].getValue(), 3);
+        assertEquals(Y[0][2].getValue(), 1001);
+        assertEquals(Y[1][0].getValue(), 2);
+        assertEquals(Y[1][1].getValue(), 4);
+        assertEquals(Y[1][2].getValue(), 1002);
+        assertEquals(Y[2][0].getValue(), 1);
+        assertEquals(Y[2][1].getValue(), 5);
+        assertEquals(Y[2][2].getValue(), 1003);
+        assertEquals(Y[3][0].getValue(), 2);
+        assertEquals(Y[3][1].getValue(), 3);
+        assertEquals(Y[3][2].getValue(), 1004);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -211,14 +216,14 @@ public class KeysortingTest {
         Y[2][0] = solver.intVar("Y31", 14, 16, true);
         Y[2][1] = solver.intVar("Y32", 0, 19, true);
 
-        solver.post(solver.keySort(X, null, Y, 2));
+        solver.keySort(X, null, Y, 2).post();
         solver.findSolution();
-        Assert.assertEquals(Y[0][0].getValue(), 15);
-        Assert.assertEquals(Y[0][1].getValue(), 0);
-        Assert.assertEquals(Y[1][0].getValue(), 15);
-        Assert.assertEquals(Y[1][1].getValue(), 8);
-        Assert.assertEquals(Y[2][0].getValue(), 15);
-        Assert.assertEquals(Y[2][1].getValue(), 19);
+        assertEquals(Y[0][0].getValue(), 15);
+        assertEquals(Y[0][1].getValue(), 0);
+        assertEquals(Y[1][0].getValue(), 15);
+        assertEquals(Y[1][1].getValue(), 8);
+        assertEquals(Y[2][0].getValue(), 15);
+        assertEquals(Y[2][1].getValue(), 19);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -239,8 +244,8 @@ public class KeysortingTest {
         Y[3][0] = solver.intVar("Y4", 13, 16, true);
         Y[4][0] = solver.intVar("Y5", 14, 18, true);
 
-        solver.post(solver.keySort(X, null, Y, 1));
-        Assert.assertEquals(solver.findAllSolutions(), 182);
+        solver.keySort(X, null, Y, 1).post();
+        assertEquals(solver.findAllSolutions(), 182);
 
     }
 
@@ -258,10 +263,10 @@ public class KeysortingTest {
         Y[0][1] = solver.intVar("Y2", 0, 0, true);
         Y[0][2] = solver.intVar("Y3", 1, 1, true);
 
-        solver.post(solver.keySort(X, null, Y, 1));
+        solver.keySort(X, null, Y, 1).post();
         try {
             solver.propagate();
-            Assert.assertEquals(X[0][1].getValue(), 0);
+            assertEquals(X[0][1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -281,10 +286,10 @@ public class KeysortingTest {
         Y[0][1] = solver.intVar("Y2", 0, 0, true);
         Y[0][2] = solver.intVar("Y3", 2, 2, true);
 
-        solver.post(solver.keySort(X, null, Y, 1));
+        solver.keySort(X, null, Y, 1).post();
         try {
             solver.propagate();
-            Assert.assertEquals(X[0][1].getValue(), 0);
+            assertEquals(X[0][1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -304,10 +309,10 @@ public class KeysortingTest {
         Y[0][1] = solver.intVar("Y2", 1, 9, true);
         Y[0][2] = solver.intVar("Y3", 7, 9, true);
 
-        solver.post(solver.keySort(X, null, Y, 1));
+        solver.keySort(X, null, Y, 1).post();
         try {
             solver.propagate();
-            Assert.assertEquals(X[0][0].getValue(), 7);
+            assertEquals(X[0][0].getValue(), 7);
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -338,11 +343,11 @@ public class KeysortingTest {
         Y[3][1] = solver.intVar("Y52", 1, 4, true);
 
 
-        solver.post(solver.keySort(X, null, Y, 2));
-        solver.set(ISF.lexico_LB(ArrayUtils.flatten(X)), ISF.lexico_LB(ArrayUtils.flatten(Y)));
-        Chatterbox.showSolutions(solver);
+        solver.keySort(X, null, Y, 2).post();
+        solver.set(lexico_LB(flatten(X)), lexico_LB(flatten(Y)));
+        showSolutions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
+        assertEquals(solver.getMeasures().getSolutionCount(), 16);
     }
 
 
@@ -363,10 +368,10 @@ public class KeysortingTest {
         Y[0][3] = solver.intVar("Y51", 1, 4, true);
 
 
-        solver.post(solver.keySort(X, null, Y, 1));
-        solver.set(ISF.lexico_LB(ArrayUtils.flatten(X)), ISF.lexico_LB(ArrayUtils.flatten(Y)));
-        Chatterbox.showSolutions(solver);
+        solver.keySort(X, null, Y, 1).post();
+        solver.set(lexico_LB(flatten(X)), lexico_LB(flatten(Y)));
+        showSolutions(solver);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 16);
+        assertEquals(solver.getMeasures().getSolutionCount(), 16);
     }
 }

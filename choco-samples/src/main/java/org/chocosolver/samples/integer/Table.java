@@ -37,6 +37,8 @@ import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Random;
 
+import static java.lang.System.out;
+
 /**
  * Small illustration of a table constraint
  * @author Guillaume Perez, Jean-Guillaume Fages
@@ -65,17 +67,17 @@ public class Table extends AbstractProblem {
 		}
 		Random rand = new Random(12);
 		Tuples tuples = new Tuples(true);
-		System.out.println("Allowed tuples");
-		for(int i = 0; i < nbTuples ; i++){
+		out.println("Allowed tuples");
+		for (int i = 0; i < nbTuples; i++) {
 			int[] tuple = new int[n];
-			for(int j = 0; j < n; j++){
+			for (int j = 0; j < n; j++) {
 				tuple[j] = rand.nextInt(upB - lowB) + lowB;
-				System.out.print(tuple[j] + " ");
+				out.print(tuple[j] + " ");
 			}
 			tuples.add(tuple);
-			System.out.println();
+			out.println();
 		}
-		solver.post(solver.table(vars,tuples));
+		solver.table(vars, tuples).post();
 	}
 
 	@Override

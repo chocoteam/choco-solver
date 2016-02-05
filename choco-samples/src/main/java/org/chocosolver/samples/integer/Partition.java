@@ -39,6 +39,8 @@ import org.kohsuke.args4j.Option;
 
 import java.util.Arrays;
 
+import static java.util.Arrays.fill;
+
 /**
  * CSPLib prob049:<br/>
  * "This problem consists in finding a partition of numbers 1..N into two sets A and B such that:
@@ -79,11 +81,11 @@ public class Partition extends AbstractProblem {
 
 //        break symmetries
         for (int i = 0; i < size - 1; i++) {
-            solver.post(solver.arithm(x[i], "<", x[i + 1]));
-            solver.post(solver.arithm(y[i], "<", y[i + 1]));
+            solver.arithm(x[i], "<", x[i + 1]).post();
+            solver.arithm(y[i], "<", y[i + 1]).post();
         }
-        solver.post(solver.arithm(x[0], "<", y[0]));
-        solver.post(solver.arithm(x[0], "=", 1));
+        solver.arithm(x[0], "<", y[0]).post();
+        solver.arithm(x[0], "=", 1).post();
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -103,7 +105,7 @@ public class Partition extends AbstractProblem {
             coeffs[size + i] = -1;
         }
         heavy[0] = solver.scalar(xy, coeffs, "=", 0);
-        solver.post(heavy[0]);
+        heavy[0].post();
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
@@ -114,23 +116,23 @@ public class Partition extends AbstractProblem {
             sxy[i] = sx[i];
             sy[i] = solver.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
             sxy[size + i] = sy[i];
-            solver.post(solver.times(x[i], x[i], sx[i]));
-            solver.post(solver.times(y[i], y[i], sy[i]));
-            solver.post(solver.member(sx[i], 1, 4 * size * size));
-            solver.post(solver.member(sy[i], 1, 4 * size * size));
+            solver.times(x[i], x[i], sx[i]).post();
+            solver.times(y[i], y[i], sy[i]).post();
+            solver.member(sx[i], 1, 4 * size * size).post();
+            solver.member(sy[i], 1, 4 * size * size).post();
         }
         heavy[1] = solver.scalar(sxy, coeffs, "=", 0);
-        solver.post(heavy[1]);
+        heavy[1].post();
 
         coeffs = new int[size];
-        Arrays.fill(coeffs, 1);
-        solver.post(solver.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        solver.post(solver.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        solver.post(solver.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
-        solver.post(solver.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        fill(coeffs, 1);
+        solver.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
+        solver.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
+        solver.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
+        solver.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
 
         heavy[2] = solver.allDifferent(xy, "BC");
-        solver.post(heavy[2]);
+        heavy[2].post();
 
         vars = xy;
     }

@@ -37,6 +37,8 @@ import org.chocosolver.util.ESat;
 
 import java.util.Arrays;
 
+import static java.util.Arrays.copyOfRange;
+
 /**
  * <br/>
  *
@@ -81,7 +83,7 @@ public class Eq20 extends AbstractProblem {
     public void buildModel() {
         vars = solver.intVarArray("v", n, 0, 10, true);
         for (int i = 0; i < coeffs.length; i++) {
-            solver.post(solver.scalar(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), "=", coeffs[i][0]));
+            solver.scalar(vars, copyOfRange(coeffs[i], 1, n + 1), "=", coeffs[i][0]).post();
         }
     }
 

@@ -37,6 +37,9 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -50,37 +53,37 @@ public class ConstraintTest {
         //#issue 190
         Solver solver = new Solver();
         BoolVar[] bs = solver.boolVarArray("bs", 3);
-        SetVar s1 = solver.setVar("s1", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
-        SetVar s2 = solver.setVar("s2", new int[]{}, new int[]{-3,-2,-1,0,1,2,3});
-        solver.post(solver.or(solver.allEqual(new SetVar[]{s1, s2}), solver.setBoolsChanneling(bs, s1, 0)));
+        SetVar s1 = solver.setVar("s1", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
+        SetVar s2 = solver.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
+        solver.or(solver.allEqual(new SetVar[]{s1, s2}), solver.setBoolsChanneling(bs, s1, 0)).post();
         solver.findAllSolutions();
-        Assert.assertEquals(2040, solver.getMeasures().getSolutionCount());
+        assertEquals(2040, solver.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions() {
         Solver solver = new Solver();
         IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
-        solver.post(solver.allDifferent(ivs, "BC")); // boundAndInst()
-        solver.post(solver.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
-        solver.post(solver.arithm(ivs[0], ">=", ivs[2])); // INST + UB or INST + LB
-        solver.post(solver.arithm(ivs[0], "!=", ivs[3])); // instantiation()
+        solver.allDifferent(ivs, "BC").post(); // boundAndInst()
+        solver.arithm(ivs[0], "+", ivs[1], "=", 4).post(); // all()
+        solver.arithm(ivs[0], ">=", ivs[2]).post(); // INST + UB or INST + LB
+        solver.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
 
-        solver.set(ISF.random_value(ivs, 0));
+        solver.set(random_value(ivs, 0));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 48);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 100);
+        assertEquals(solver.getMeasures().getSolutionCount(), 48);
+        assertEquals(solver.getMeasures().getNodeCount(), 100);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testDependencyConditions2() {
         Solver solver = new Solver();
         IntVar[] ivs = solver.intVarArray("X", 4, 0, 10, false);
-        solver.post(solver.allDifferent(ivs, "BC")); // boundAndInst()
-        solver.post(solver.arithm(ivs[0], "+", ivs[1], "=", 4)); // all()
+        solver.allDifferent(ivs, "BC").post(); // boundAndInst()
+        solver.arithm(ivs[0], "+", ivs[1], "=", 4).post(); // all()
         Constraint cr = solver.arithm(ivs[0], ">=", ivs[2]);
-        solver.post(cr); // INST + UB or INST + LB
-        solver.post(solver.arithm(ivs[0], "!=", ivs[3])); // instantiation()
+        cr.post(); // INST + UB or INST + LB
+        solver.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
         solver.unpost(cr);
     }
 

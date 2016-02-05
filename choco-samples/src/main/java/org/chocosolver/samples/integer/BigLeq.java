@@ -58,9 +58,9 @@ public class BigLeq extends AbstractProblem {
     public void buildModel() {
         vars = solver.intVarArray("v", m, 0, m - 1, false);
         for (int i = 0; i < m - 1; i++) {
-            solver.post(solver.arithm(vars[i], "<=", vars[i + 1]));
+            solver.arithm(vars[i], "<=", vars[i + 1]).post();
         }
-        solver.post(solver.allDifferent(vars, "BC"));
+        solver.allDifferent(vars, "BC").post();
     }
 
     @Override

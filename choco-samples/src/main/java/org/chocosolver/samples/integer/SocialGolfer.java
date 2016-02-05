@@ -105,7 +105,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int j = 0; j < g; j++) {
                     player[j] = P[i][j][k];
                 }
-                solver.post(solver.sum(player, "=", 1));
+                solver.sum(player, "=", 1).post();
             }
         }
 
@@ -116,30 +116,30 @@ public class SocialGolfer extends AbstractProblem {
                 for (int i = 0; i < p; i++) {
                     group[i] = P[i][j][k];
                 }
-                solver.post(solver.sum(group, "=", s));
+                solver.sum(group, "=", s).post();
             }
         }
 
 		// obvious filtering for M
 		for (int i = 0; i < p; i++) {
 			for (int l = 0; l < w; l++) {
-				for (int j = i+1; j < p; j++) {
-					solver.post(solver.arithm(M[i][j][l],"=",M[j][i][l]));
-				}
-				solver.post(solver.arithm(M[i][i][l],"=",1));
-			}
+                for (int j = i + 1; j < p; j++) {
+                    solver.arithm(M[i][j][l], "=", M[j][i][l]).post();
+                }
+                solver.arithm(M[i][i][l], "=", 1).post();
+            }
 		}
 
         // link the M and P variables
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
 				for (int l = 0; l < w; l++) {
-					BoolVar[] group = new BoolVar[g];
-					for (int k = 0; k < g; k++) {
-						group[k] = solver.and(P[i][k][l], P[j][k][l]).reify();
-						solver.post(solver.arithm(group[k], "<=", M[i][j][l]));
+                    BoolVar[] group = new BoolVar[g];
+                    for (int k = 0; k < g; k++) {
+                        group[k] = solver.and(P[i][k][l], P[j][k][l]).reify();
+                        solver.arithm(group[k], "<=", M[i][j][l]).post();
                     }
-					solver.post(solver.sum(group, "=", M[i][j][l]));
+                    solver.sum(group, "=", M[i][j][l]).post();
                 }
             }
         }
@@ -147,13 +147,13 @@ public class SocialGolfer extends AbstractProblem {
         // each pair of players only meets once
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
-                solver.post(solver.sum(M[i][j], "=", solver.boolVar("sum")));
+                solver.sum(M[i][j], "=", solver.boolVar("sum")).post();
             }
         }
 
         // break symmetries on first group
         for (int i = 1; i < p; i++) {
-            solver.post(solver.lexLessEq(P[i][0], P[i - 1][0]));
+            solver.lexLessEq(P[i][0], P[i - 1][0]).post();
         }
     }
 

@@ -41,6 +41,9 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+
 /**
  * <br/>
  *
@@ -125,16 +128,16 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = ref.intVar("x", 1, 15, true);
                 xs[1] = ref.intVar("y", -15, -1, true);
-                ref.post(ref.sum(xs, "=", 0));
-                ref.set(IntStrategyFactory.random_bound(xs, seed));
+                ref.sum(xs, "=", 0).post();
+                ref.set(random_bound(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = solver.intVar("x", 1, 15, true);
                 xs[1] = solver.intMinusView(xs[0]);
-                solver.post(solver.sum(xs, "=", 0));
-                solver.set(IntStrategyFactory.random_bound(xs, seed));
+                solver.sum(xs, "=", 0).post();
+                solver.set(random_bound(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -153,16 +156,16 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = ref.intVar("x", 1, 15, false);
                 xs[1] = ref.intVar("y", -15, -1, false);
-                ref.post(ref.sum(xs, "=", 0));
-                ref.set(IntStrategyFactory.random_value(xs, seed));
+                ref.sum(xs, "=", 0).post();
+                ref.set(random_value(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = solver.intVar("x", 1, 15, false);
                 xs[1] = solver.intMinusView(xs[0]);
-                solver.post(solver.sum(xs, "=", 0));
-                solver.set(IntStrategyFactory.random_value(xs, seed));
+                solver.sum(xs, "=", 0).post();
+                solver.set(random_value(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();

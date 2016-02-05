@@ -65,16 +65,16 @@ public class MagicSeries extends AbstractProblem {
         counts = new Constraint[n];
         for (int i = 0; i < n; i++) {
             counts[i] = solver.count(i, vars, vars[i]);
-            solver.post(counts[i]);
+            counts[i].post();
         }
-        solver.post(solver.sum(vars, "=", n)); // cstr redundant 1
+        solver.sum(vars, "=", n).post(); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.post(solver.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
+        solver.scalar(vs2, coeff2, "=", n).post(); // cstr redundant 1
     }
 
     @Override

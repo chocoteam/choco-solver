@@ -37,6 +37,10 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
 /**
  * <br/>
  *
@@ -59,12 +63,12 @@ public class ModTest extends AbstractTernaryTest {
 	public void test2() {
 		Solver solver = new Solver();
 		IntVar res = solver.intVar("r", 1, 2, true);
-		solver.post(solver.mod(res, solver.intVar(2), solver.intVar(1)));
+		solver.mod(res, solver.intVar(2), solver.intVar(1)).post();
 		try {
 			solver.propagate();
-			Assert.assertTrue(res.isInstantiatedTo(1));
+			assertTrue(res.isInstantiatedTo(1));
 		} catch (ContradictionException e) {
-			Assert.fail();
+			fail();
 		}
 	}
 
@@ -74,8 +78,8 @@ public class ModTest extends AbstractTernaryTest {
 		IntVar dividend = s.intVar("dividend", 2, 3, false);
 		IntVar divisor = s.intVar(1);
 		IntVar remainder = s.intVar("remainder", 1, 2, false);
-		s.post(s.mod(dividend, divisor, remainder).getOpposite());
-		s.set(ISF.lexico_LB(dividend, divisor, remainder));
+		s.mod(dividend, divisor, remainder).getOpposite().post();
+		s.set(lexico_LB(dividend, divisor, remainder));
 		s.findSolution();
 	}
 }

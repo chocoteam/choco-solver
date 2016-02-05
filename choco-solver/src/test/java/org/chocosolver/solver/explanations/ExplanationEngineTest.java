@@ -54,7 +54,19 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
+import static java.lang.System.out;
+import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.fill;
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
+import static org.chocosolver.solver.explanations.ExplanationFactory.DBT;
+import static org.chocosolver.solver.search.loop.SearchLoopFactory.learnCBJ;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
+import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.chocosolver.util.tools.StringUtils.randomName;
+import static org.testng.Assert.*;
 
 /**
  * Created by cprudhom on 09/12/14.
@@ -66,7 +78,7 @@ public class ExplanationEngineTest {
     public void model1(Solver solver, int n) {
         IntVar[] vs = solver.intVarArray("V", n, 1, n - 1, false);
         for (int i = 0; i < n - 1; i++) {
-            solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)));
+            new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[i], vs[i + 1]}, 1)).post();
         }
     }
 
@@ -98,8 +110,8 @@ public class ExplanationEngineTest {
 
     private void model2(Solver solver, int n) {
         IntVar[] vs = solver.intVarArray("V", 2, 0, n, false);
-        solver.post(new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)));
-        solver.post(new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)));
+        new Constraint("0>1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[0], vs[1]}, 1)).post();
+        new Constraint("0<1", new PropGreaterOrEqualX_YC(new IntVar[]{vs[1], vs[0]}, 1)).post();
     }
 
     /**
@@ -130,8 +142,8 @@ public class ExplanationEngineTest {
 
     private void model3(Solver solver, int n) {
         IntVar[] vs = solver.intVarArray("V", n, 2, n + 2, true);
-        solver.post(solver.arithm(vs[n - 2], "=", vs[n - 1]));
-        solver.post(solver.arithm(vs[n - 2], "!=", vs[n - 1]));
+        solver.arithm(vs[n - 2], "=", vs[n - 1]).post();
+        solver.arithm(vs[n - 2], "!=", vs[n - 1]).post();
     }
 
     /**
@@ -173,13 +185,13 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test4() {
         int n = 3;
-        System.out.printf("n = %d : ", n);
+        out.printf("n = %d : ", n);
         Solver solver = new Solver();
         IntVar[] vs = solver.intVarArray("V", n, 0, n, false);
-        solver.post(new Constraint((n - 2) + ">" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 2], vs[n - 1]}, 1)));
-        solver.post(new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)));
+        new Constraint((n - 2) + ">" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 2], vs[n - 1]}, 1)).post();
+        new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)).post();
 
-        IntStrategy is = ISF.lexico_LB(vs);
+        IntStrategy is = lexico_LB(vs);
         ExplanationEngine ee = new ExplanationEngine(solver, true, true);
         Explanation r = null;
         try {
@@ -189,12 +201,12 @@ public class ExplanationEngineTest {
                 d.apply();
                 solver.propagate();
             }
-            Assert.fail();
+            fail();
         } catch (ContradictionException e) {
             r = ee.explain(e);
         }
-        Assert.assertNotNull(r);
-        Assert.assertEquals(r.nbCauses(), 2);
+        assertNotNull(r);
+        assertEquals(r.nbCauses(), 2);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -202,15 +214,15 @@ public class ExplanationEngineTest {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
             IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, false);
-            solver.post(solver.arithm(vars[n - 2], "=", vars[n - 1]));
-            solver.post(solver.arithm(vars[n - 2], "!=", vars[n - 1]));
-            solver.set(ISF.lexico_LB(vars));
+            solver.arithm(vars[n - 2], "=", vars[n - 1]).post();
+            solver.arithm(vars[n - 2], "!=", vars[n - 1]).post();
+            solver.set(lexico_LB(vars));
 
-            SLF.learnCBJ(solver, false, false);
-            Assert.assertFalse(solver.findSolution());
+            learnCBJ(solver, false, false);
+            assertFalse(solver.findSolution());
 
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
-            Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
+            assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
+            assertEquals(solver.getMeasures().getFailCount(), n - 1);
         }
     }
 
@@ -219,15 +231,15 @@ public class ExplanationEngineTest {
         for (int n = 500; n < 4501; n += 500) {
             final Solver solver = new Solver();
             IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, true);
-            solver.post(solver.arithm(vars[n - 2], "=", vars[n - 1]));
-            solver.post(solver.arithm(vars[n - 2], "!=", vars[n - 1]));
-            solver.set(ISF.lexico_LB(vars));
+            solver.arithm(vars[n - 2], "=", vars[n - 1]).post();
+            solver.arithm(vars[n - 2], "!=", vars[n - 1]).post();
+            solver.set(lexico_LB(vars));
 
-            SLF.learnCBJ(solver, false, false);
-            Assert.assertFalse(solver.findSolution());
+            learnCBJ(solver, false, false);
+            assertFalse(solver.findSolution());
 
-            Assert.assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
-            Assert.assertEquals(solver.getMeasures().getFailCount(), n - 1);
+            assertEquals(solver.getMeasures().getNodeCount(), (n - 2) * 2);
+            assertEquals(solver.getMeasures().getFailCount(), n - 1);
         }
     }
 
@@ -237,7 +249,7 @@ public class ExplanationEngineTest {
             final Solver solver = new Solver();
             IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, false);
             for (int i = 0; i < n - 1; i++) {
-                solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
+                new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
 
             SLF.learnCBJ(solver, false, false);
@@ -254,7 +266,7 @@ public class ExplanationEngineTest {
             final Solver solver = new Solver();
             IntVar[] vars = solver.intVarArray("p", n, 0, n - 2, true);
             for (int i = 0; i < n - 1; i++) {
-                solver.post(new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)));
+                new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
             solver.set(ISF.lexico_LB(vars));
 
@@ -276,16 +288,16 @@ public class ExplanationEngineTest {
             BoolVar[] bs = solver.boolVarArray("b", 2);
             solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
             solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-            solver.post(solver.arithm(bs[0], "=", bs[1]));
+            solver.arithm(bs[0], "=", bs[1]).post();
 
-            solver.post(solver.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
-            solver.post(solver.arithm(p[9], "+", p[8], ">", 4));
-            solver.set(ISF.random_value(p, seed));
+            solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
+            solver.arithm(p[9], "+", p[8], ">", 4).post();
+            solver.set(random_value(p, seed));
 
-            SLF.learnCBJ(solver, false, false);
+            learnCBJ(solver, false, false);
 
-            Chatterbox.showShortStatistics(solver);
-            Assert.assertFalse(solver.findSolution());
+            showShortStatistics(solver);
+            assertFalse(solver.findSolution());
         }
     }
 
@@ -297,19 +309,19 @@ public class ExplanationEngineTest {
         BoolVar[] bs = solver.boolVarArray("b", 2);
         solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
         solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-        solver.post(solver.arithm(bs[0], "=", bs[1]));
+        solver.arithm(bs[0], "=", bs[1]).post();
 
-        solver.post(solver.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
-        solver.post(solver.arithm(p[9], "+", p[8], ">", 4));
+        solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
+        solver.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
-        solver.set(ISF.lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
+        solver.set(lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
 
-        SLF.learnCBJ(solver, false, false);
+        learnCBJ(solver, false, false);
 
-        Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
-        Assert.assertFalse(solver.findSolution());
+        showStatistics(solver);
+        showSolutions(solver);
+        showDecisions(solver);
+        assertFalse(solver.findSolution());
 
     }
 
@@ -321,19 +333,19 @@ public class ExplanationEngineTest {
         BoolVar[] bs = solver.boolVarArray("b", 2);
         solver.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
         solver.arithm(p[9], "!=", p[8]).reifyWith(bs[1]);
-        solver.post(solver.arithm(bs[0], "=", bs[1]));
+        solver.arithm(bs[0], "=", bs[1]).post();
 
-        solver.post(solver.sum(Arrays.copyOfRange(p, 0, 8), "=", 5));
-        solver.post(solver.arithm(p[9], "+", p[8], ">", 4));
+        solver.sum(copyOfRange(p, 0, 8), "=", 5).post();
+        solver.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
-        solver.set(ISF.lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
+        solver.set(lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
 
-        SLF.learnCBJ(solver, false, false);
+        learnCBJ(solver, false, false);
 
-        Chatterbox.showStatistics(solver);
-        Chatterbox.showSolutions(solver);
-        Chatterbox.showDecisions(solver);
-        Assert.assertFalse(solver.findSolution());
+        showStatistics(solver);
+        showSolutions(solver);
+        showDecisions(solver);
+        assertFalse(solver.findSolution());
     }
 
 
@@ -376,8 +388,8 @@ public class ExplanationEngineTest {
                 row[x] = vars[i * m + x];
                 col[x] = vars[x * m + i];
             }
-            solver.post(solver.allDifferent(col, "FC"));
-            solver.post(solver.allDifferent(row, "FC"));
+            solver.allDifferent(col, "FC").post();
+            solver.allDifferent(row, "FC").post();
         }
         solver.set(IntStrategyFactory.lexico_LB(vars));
 //        solver.set(IntStrategyFactory.custom(
@@ -412,25 +424,25 @@ public class ExplanationEngineTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 IntVar k = solver.intVar(randomName(), -n, n, false);
-                solver.post(solver.arithm(k, "!=", 0));
-                solver.post(solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]));
+                solver.arithm(k, "!=", 0).post();
+                solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
                 vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }
         }
-        solver.post(solver.allDifferent(vars, "FC"));
-        solver.post(solver.allDifferent(vectors, "FC"));
+        solver.allDifferent(vars, "FC").post();
+        solver.allDifferent(vectors, "FC").post();
 
         // symmetry-breaking
-        solver.post(solver.arithm(vars[0], "<", vars[n - 1]));
+        solver.arithm(vars[0], "<", vars[n - 1]).post();
 
-        solver.set(IntStrategyFactory.lexico_LB(vars));
+        solver.set(lexico_LB(vars));
 
         configure(solver, a);
-        Chatterbox.showShortStatistics(solver);
-        SMF.limitTime(solver, "5m");
-        Assert.assertTrue(solver.findSolution());
+        showShortStatistics(solver);
+        limitTime(solver, "5m");
+        assertTrue(solver.findSolution());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -447,10 +459,10 @@ public class ExplanationEngineTest {
         Solver solver = new Solver();
         IntVar[] ticks = solver.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
 
-        solver.post(solver.arithm(ticks[0], "=", 0));
+        solver.arithm(ticks[0], "=", 0).post();
 
         for (int i = 0; i < m - 1; i++) {
-            solver.post(solver.arithm(ticks[i + 1], ">", ticks[i]));
+            solver.arithm(ticks[i + 1], ">", ticks[i]).post();
         }
 
         IntVar[] diffs = solver.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
@@ -458,27 +470,27 @@ public class ExplanationEngineTest {
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                solver.post(solver.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]));
-                solver.post(solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
-                solver.post(solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]).post();
+                solver.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
+                solver.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
+                solver.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
                 m_diffs[i][j] = diffs[k];
             }
         }
-        solver.post(solver.allDifferent(diffs, "FC"));
+        solver.allDifferent(diffs, "FC").post();
 
         // break symetries
         if (m > 2) {
-            solver.post(solver.arithm(diffs[0], "<", diffs[diffs.length - 1]));
+            solver.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
 
-        solver.set(IntStrategyFactory.lexico_LB(ticks));
+        solver.set(lexico_LB(ticks));
 
         configure(solver, a);
-        Chatterbox.showShortStatistics(solver);
-        SMF.limitTime(solver, "5m");
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, ticks[m - 1]);
-        Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
+        showShortStatistics(solver);
+        limitTime(solver, "5m");
+        solver.findOptimalSolution(MINIMIZE, ticks[m - 1]);
+        assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -496,16 +508,16 @@ public class ExplanationEngineTest {
         IntVar[] position = solver.intVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
-                solver.post(solver.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]));
+                solver.arithm(solver.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]).post();
             }
         }
-        solver.post(solver.allDifferent(position, "FC"));
-        solver.set(IntStrategyFactory.minDom_UB(position));
+        solver.allDifferent(position, "FC").post();
+        solver.set(minDom_UB(position));
 
         configure(solver, a);
-        Chatterbox.showShortStatistics(solver);
-        SMF.limitTime(solver, "5m");
-        Assert.assertTrue(solver.findSolution());
+        showShortStatistics(solver);
+        limitTime(solver, "5m");
+        assertTrue(solver.findSolution());
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -545,28 +557,28 @@ public class ExplanationEngineTest {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.post(solver.allDifferent(vars, "FC"));
+        solver.allDifferent(vars, "FC").post();
 
         int[] coeffs = new int[n];
-        Arrays.fill(coeffs, 1);
+        fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
-            solver.post(solver.scalar(matrix[i], coeffs, "=", ms));
-            solver.post(solver.scalar(invMatrix[i], coeffs, "=", ms));
+            solver.scalar(matrix[i], coeffs, "=", ms).post();
+            solver.scalar(invMatrix[i], coeffs, "=", ms).post();
         }
-        solver.post(solver.scalar(diag1, coeffs, "=", ms));
-        solver.post(solver.scalar(diag2, coeffs, "=", ms));
+        solver.scalar(diag1, coeffs, "=", ms).post();
+        solver.scalar(diag2, coeffs, "=", ms).post();
 
         // Symetries breaking
-        solver.post(solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
-        solver.post(solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
-        solver.post(solver.arithm(matrix[0][0], "<", matrix[n - 1][0]));
+        solver.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
+        solver.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
+        solver.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
-        solver.set(IntStrategyFactory.minDom_MidValue(true, vars));
+        solver.set(minDom_MidValue(true, vars));
 
         configure(solver, a);
-        Chatterbox.showShortStatistics(solver);
-        SMF.limitTime(solver, "5m");
-        Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
+        showShortStatistics(solver);
+        limitTime(solver, "5m");
+        assertTrue(solver.findSolution() || solver.hasReachedLimit());
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -589,11 +601,11 @@ public class ExplanationEngineTest {
 
         // break symmetries
         for (int i = 0; i < size - 1; i++) {
-            solver.post(solver.arithm(x[i], "<", x[i + 1]));
-            solver.post(solver.arithm(y[i], "<", y[i + 1]));
+            solver.arithm(x[i], "<", x[i + 1]).post();
+            solver.arithm(y[i], "<", y[i + 1]).post();
         }
-        solver.post(solver.arithm(x[0], "<", y[0]));
-        solver.post(solver.arithm(x[0], "=", 1));
+        solver.arithm(x[0], "<", y[0]).post();
+        solver.arithm(x[0], "=", 1).post();
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -612,7 +624,7 @@ public class ExplanationEngineTest {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        solver.post(solver.scalar(xy, coeffs, "=", 0));
+        solver.scalar(xy, coeffs, "=", 0).post();
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
@@ -623,29 +635,29 @@ public class ExplanationEngineTest {
             sxy[i] = sx[i];
             sy[i] = solver.intVar("y^", 0, y[i].getUB() * y[i].getUB(), true);
             sxy[size + i] = sy[i];
-            solver.post(solver.times(x[i], x[i], sx[i]));
-            solver.post(solver.times(y[i], y[i], sy[i]));
-            solver.post(solver.member(sx[i], 1, 4 * size * size));
-            solver.post(solver.member(sy[i], 1, 4 * size * size));
+            solver.times(x[i], x[i], sx[i]).post();
+            solver.times(y[i], y[i], sy[i]).post();
+            solver.member(sx[i], 1, 4 * size * size).post();
+            solver.member(sy[i], 1, 4 * size * size).post();
         }
-        solver.post(solver.scalar(sxy, coeffs, "=", 0));
+        solver.scalar(sxy, coeffs, "=", 0).post();
 
         coeffs = new int[size];
-        Arrays.fill(coeffs, 1);
-        solver.post(solver.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        solver.post(solver.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        solver.post(solver.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
-        solver.post(solver.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        fill(coeffs, 1);
+        solver.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
+        solver.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4).post();
+        solver.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
+        solver.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12).post();
 
-        solver.post(solver.allDifferent(xy, "FC"));
+        solver.allDifferent(xy, "FC").post();
 
 
-        solver.set(IntStrategyFactory.minDom_LB(Ovars));
+        solver.set(minDom_LB(Ovars));
 
         configure(solver, a);
-        Chatterbox.showShortStatistics(solver);
-        SMF.limitTime(solver, "5m");
-        Assert.assertTrue(solver.findSolution() || solver.hasReachedLimit());
+        showShortStatistics(solver);
+        limitTime(solver, "5m");
+        assertTrue(solver.findSolution() || solver.hasReachedLimit());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -782,17 +794,17 @@ public class ExplanationEngineTest {
         // infeasible problem
         Solver s = new Solver();
         IntVar[] x = s.intVarArray("x", n, 0, m, true);
-        s.post(s.allDifferent(x, "NEQS"));
-        s.post(s.arithm(x[n - 2], "=", x[n - 1]));
+        s.allDifferent(x, "NEQS").post();
+        s.arithm(x[n - 2], "=", x[n - 1]).post();
         // explanations
         if (expMode == 2) {
-            ExplanationFactory.CBJ.plugin(s, false, true);
+            CBJ.plugin(s, false, true);
         } else if (expMode == 3) {
-            ExplanationFactory.DBT.plugin(s, false, true);
+            DBT.plugin(s, false, true);
         }
         // logging and solution
-        Chatterbox.showStatistics(s);
-        Chatterbox.showSolutions(s);
+        showStatistics(s);
+        showSolutions(s);
         s.findAllSolutions();
         return s;
     }
@@ -817,21 +829,21 @@ public class ExplanationEngineTest {
         Constraint yGE6 = s.arithm(y, ">=", six);
         Constraint yLE7 = s.arithm(y, "<=", seven);
 
-        s.post(xGE3);
-        s.post(xLE4);
-        s.post(yGE6);
-        s.post(yLE7);
+        xGE3.post();
+        xLE4.post();
+        yGE6.post();
+        yLE7.post();
 
         Constraint xE1 = s.arithm(x, "=", one);
-        s.post(xE1);
+        xE1.post();
 
-        SLF.learnCBJ(s, false, true);
-        LearnCBJ cbj = (LearnCBJ)s.getSearchLoop().getLearn();
-        Chatterbox.showDecisions(s);
-        Assert.assertFalse(s.findSolution());
+        learnCBJ(s, false, true);
+        LearnCBJ cbj = (LearnCBJ) s.getSearchLoop().getLearn();
+        showDecisions(s);
+        assertFalse(s.findSolution());
         // If the problem has no solution, the end-user explanation can be retrieved
-        System.out.println(cbj.getLastExplanation());
-        Assert.assertEquals(cbj.getLastExplanation().nbCauses(), 3);
+        out.println(cbj.getLastExplanation());
+        assertEquals(cbj.getLastExplanation().nbCauses(), 3);
     }
 
 
@@ -858,32 +870,32 @@ public class ExplanationEngineTest {
         IntVar y = solver.intVar("y", 1, 4, true);
         IntVar z = solver.intVar("z", -2, 2, true);
 
-        solver.post(solver.scalar(new IntVar[]{x, y, z}, new int[]{1, -3, -3}, "<=", 1));
-        solver.post(solver.scalar(new IntVar[]{x, y, z}, new int[]{-2, 3, 2}, "<=", -2));
-        solver.post(solver.scalar(new IntVar[]{x, y, z}, new int[]{3, -3, 2}, "<=", -1));
+        solver.scalar(new IntVar[]{x, y, z}, new int[]{1, -3, -3}, "<=", 1).post();
+        solver.scalar(new IntVar[]{x, y, z}, new int[]{-2, 3, 2}, "<=", -2).post();
+        solver.scalar(new IntVar[]{x, y, z}, new int[]{3, -3, 2}, "<=", -1).post();
 
         ExplanationEngine ee = new ExplanationEngine(solver, false, false);
 
         solver.getEnvironment().worldPush();
         solver.propagate();
-        Assert.assertEquals(x.getLB(), 1);
-        Assert.assertEquals(y.getUB(), 2);
-        Assert.assertEquals(z.getUB(), 0);
+        assertEquals(x.getLB(), 1);
+        assertEquals(y.getUB(), 2);
+        assertEquals(z.getUB(), 0);
         solver.getEnvironment().worldPush();
         OnDemandIntStrategy strategy = new OnDemandIntStrategy();
-        IntDecision d1 = strategy.makeIntDecision(x, DecisionOperator.int_split, 2);
+        IntDecision d1 = strategy.makeIntDecision(x, int_split, 2);
         d1.buildNext();
         d1.apply();
         solver.propagate();
-        Assert.assertEquals(z.getUB(), -1);
+        assertEquals(z.getUB(), -1);
         solver.getEnvironment().worldPush();
-        IntDecision d2 = strategy.makeIntDecision(x, DecisionOperator.int_split, 1);
+        IntDecision d2 = strategy.makeIntDecision(x, int_split, 1);
         d2.buildNext();
         d2.apply();
         ContradictionException c = null;
         try {
             solver.propagate();
-            Assert.fail();
+            fail();
         } catch (ContradictionException ce) {
             c = ce;
         }
@@ -897,10 +909,10 @@ public class ExplanationEngineTest {
         IntVar y = solver.intVar("y", 0, 1, true);
         IntVar z = solver.intVar("z", 0, 1, true);
 
-        solver.post(solver.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2));
+        solver.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2).post();
 
         solver.propagate();
-        System.out.printf("%s\n", solver);
+        out.printf("%s\n", solver);
     }
 
 }

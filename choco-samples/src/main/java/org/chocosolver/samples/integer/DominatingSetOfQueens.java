@@ -37,6 +37,11 @@ import org.chocosolver.util.ESat;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.lang.Math.abs;
+import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.util.ESat.TRUE;
+
 /**
  * @author Hadrien Cambazard
  */
@@ -55,7 +60,7 @@ public class DominatingSetOfQueens {
 	 * @return la liste des positions des reines.
 	 */
 	public static List<Integer> dominationQueen(int n, int val) {
-		System.out.println("Domination queen (Q" + n + ":" + val + ")");
+		out.println("Domination queen (Q" + n + ":" + val + ")");
 		Solver pb = new Solver("Introductive Example");
 		IntVar[] X = new IntVar[n * n];
 		//une variable par case avec pour domaine la reine qui l attaque. (les reines sont ainsi designees par les valeurs, et les cases par les variables)
@@ -63,39 +68,39 @@ public class DominatingSetOfQueens {
 			X[i] = pb.intVar("Q" + i, 1, n * n, false);
 		}
 		IntVar N = pb.intVar(val);
-		pb.post(pb.nValues(X,N));
+		pb.nValues(X, N).post();
 		//i appartient a la variable j ssi la case i est sur une ligne/colonne/diagonale de j
 		for (int i = 1; i <= n; i++) {
 			for (int j = 1; j <= n; j++) {
 				//pour chaque case
 				for (int k = 1; k <= n; k++) {
 					for (int l = 1; l <= n; l++) {
-						if (!(k == i || l == j || Math.abs(i - k) == Math.abs(j - l))) {
-							pb.post(pb.arithm(X[n * (i - 1) + j - 1], "!=", (k - 1) * n + l));
+						if (!(k == i || l == j || abs(i - k) == abs(j - l))) {
+							pb.arithm(X[n * (i - 1) + j - 1], "!=", (k - 1) * n + l).post();
 						}
 					}
 				}
 			}
 		}
 
-		pb.set(IntStrategyFactory.lexico_LB(X));
+		pb.set(lexico_LB(X));
 
 		pb.findSolution();
-		System.out.println("Back  : " + pb.getMeasures().getBackTrackCount());
-		System.out.println("Time  : " + pb.getMeasures().getTimeCount()+" (sec)");
+		out.println("Back  : " + pb.getMeasures().getBackTrackCount());
+		out.println("Time  : " + pb.getMeasures().getTimeCount() + " (sec)");
 
 		List<Integer> values = new LinkedList<>();
-		if (pb.isFeasible() == ESat.TRUE) {
+		if (pb.isFeasible() == TRUE) {
 			for (int i = 0; i < n * n; i++) {
 				if (!values.contains(X[i].getValue()))
 					values.add(X[i].getValue());
 			}
-			System.out.print("Solution: ");
+			out.print("Solution: ");
 			for (Integer value : values) {
-				System.out.print("" + value + " ");
+				out.print("" + value + " ");
 			}
-			System.out.println();
-		} else System.out.println("No Solution");
+			out.println();
+		} else out.println("No Solution");
 		return values;
 	}
 

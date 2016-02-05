@@ -38,6 +38,8 @@ import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.samples.graph.input.HCP_Utils.generateKingTourInstance;
+
 /**
  * Solves the Knight's Tour Problem
  *
@@ -69,20 +71,20 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        boolean[][] matrix = HCP_Utils.generateKingTourInstance(40);
+        boolean[][] matrix = generateKingTourInstance(40);
         int n = matrix.length;
-		succ = new IntVar[n];
-		TIntArrayList values = new TIntArrayList();
+        succ = new IntVar[n];
+        TIntArrayList values = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-			values.clear();
+            values.clear();
             for (int j = 0; j < n; j++) {
                 if (matrix[i][j]) {
-					values.add(j);
+                    values.add(j);
                 }
             }
             succ[i] = solver.intVar("succ_" + i, values.toArray());
         }
-        solver.post(solver.circuit(succ,0));
+        solver.circuit(succ, 0).post();
     }
 
     @Override

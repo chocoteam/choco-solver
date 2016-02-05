@@ -44,6 +44,11 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
+import static org.chocosolver.solver.constraints.SatFactory.addConstructiveDisjunction;
+import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+
 /**
  * <p>
  * Project: choco.
@@ -130,7 +135,7 @@ public class PropCondisTest {
         }
     }
 
-    private Solver modelPb(int size, long seed, Random rnd, boolean cd){
+    private Solver modelPb(int size, long seed, Random rnd, boolean cd) {
         rnd.setSeed(seed);
         int[] os = new int[size * 2];
         int[] ls = new int[size * 2];
@@ -144,7 +149,7 @@ public class PropCondisTest {
         IntVar[] OS = solver.intVarArray("O", size, 0, os[2 * size - 1] + ls[2 * size - 1], false);
         IntVar[] LS = solver.intVarArray("L", size, 1, 10, false);
         for (int i = 0; i < size - 1; i++) {
-            solver.post(solver.sum(new IntVar[]{OS[i], LS[i]}, "<", OS[i + 1]));
+            solver.sum(new IntVar[]{OS[i], LS[i]}, "<", OS[i + 1]).post();
         }
         for (int i = 0; i < size; i++) {
             BoolVar[] disjunction = new BoolVar[os.length];
@@ -154,17 +159,17 @@ public class PropCondisTest {
                         solver.arithm(OS[i], "+", LS[i], "<", os[j] + ls[j])
                 ).reify();
             }
-            if(cd) {
-                SatFactory.addConstructiveDisjunction(disjunction);
-            }else {
-                SatFactory.addBoolOrArrayEqualTrue(disjunction);
+            if (cd) {
+                addConstructiveDisjunction(disjunction);
+            } else {
+                addBoolOrArrayEqualTrue(disjunction);
             }
         }
         IntVar horizon = solver.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);
-        solver.post(solver.sum(new IntVar[]{OS[size-1],LS[size-1]},"=",horizon));
+        solver.sum(new IntVar[]{OS[size - 1], LS[size - 1]}, "=", horizon).post();
         solver.setObjectives(horizon);
-        solver.addHook("decvars", ArrayUtils.append(OS, LS));
-        Chatterbox.showShortStatistics(solver);
+        solver.addHook("decvars", append(OS, LS));
+        showShortStatistics(solver);
         return solver;
     }
 }

@@ -36,6 +36,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
+import static java.lang.Math.max;
+
 /**
  * It consists of two vectors v and w.
  * v is of length 5 and the variables have domain {1 . . . 50}.
@@ -66,20 +68,20 @@ public class Contrived extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        l = Math.max(4, l);
+        l = max(4, l);
         if (d == 0) {
             d = l + 1;
         }
         v = solver.intVarArray("v", 5, 1, 50, true);
         w = solver.intVarArray("v", l, 1, d, true);
 
-        solver.post(solver.allDifferent(v, "BC"));
-        solver.post(solver.allDifferent(w, "BC"));
-        solver.post(solver.arithm(v[3], "=", v[4]));
-        solver.post(solver.arithm(v[0], "=", w[0]));
-        solver.post(solver.arithm(v[1], "=", w[1]));
-        solver.post(solver.arithm(v[2], "=", w[2]));
-        solver.post(solver.arithm(v[3], "=", w[3]));
+        solver.allDifferent(v, "BC").post();
+        solver.allDifferent(w, "BC").post();
+        solver.arithm(v[3], "=", v[4]).post();
+        solver.arithm(v[0], "=", w[0]).post();
+        solver.arithm(v[1], "=", w[1]).post();
+        solver.arithm(v[2], "=", w[2]).post();
+        solver.arithm(v[3], "=", w[3]).post();
 
     }
 

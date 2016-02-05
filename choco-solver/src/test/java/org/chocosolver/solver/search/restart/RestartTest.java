@@ -42,6 +42,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.memory.Environments.TRAIL;
+import static org.chocosolver.solver.search.loop.SearchLoopFactory.restartOnSolutions;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitSolution;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+
 /**
  * <br/>
  *
@@ -62,9 +67,9 @@ public class RestartTest {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
                 Constraint neq = solver.arithm(vars[i], "!=", vars[j]);
-                solver.post(neq);
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", -k));
-                solver.post(solver.arithm(vars[i], "!=", vars[j], "+", k));
+                neq.post();
+                solver.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                solver.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
         solver.set(ISF.lexico_LB(vars));
@@ -129,17 +134,17 @@ public class RestartTest {
 
         for (int j = 1; j < 5; j++) {
             int n = 200;
-            Solver solver = new Solver(Environments.TRAIL.make(), "Test");
+            Solver solver = new Solver(TRAIL.make(), "Test");
             IntVar[] X = solver.intVarArray("X", n, 1, n, false);
             IntVar[] Y = solver.intVarArray("Y", n, n + 1, 2 * (n + 1), false);
-            solver.post(solver.allDifferent(X));
+            solver.allDifferent(X).post();
             for (int i = 0; i < n; i++) {
-                solver.post(solver.arithm(Y[i], "=", X[i], "+", n));
+                solver.arithm(Y[i], "=", X[i], "+", n).post();
             }
-            SLF.restartOnSolutions(solver);
-            solver.set(ISF.lexico_LB(X));
+            restartOnSolutions(solver);
+            solver.set(lexico_LB(X));
 //            SMF.log(solver, false, false);
-            SMF.limitSolution(solver, 100);
+            limitSolution(solver, 100);
             solver.findAllSolutions();
             //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());
         }

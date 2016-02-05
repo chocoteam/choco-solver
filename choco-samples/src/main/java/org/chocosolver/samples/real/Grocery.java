@@ -72,10 +72,10 @@ public class Grocery extends AbstractProblem {
         itemCost = solver.intVarArray("item", 4, 1, 711, true);
         // views as real variables to be used by Ibex
         realitemCost = solver.realIntViewArray(itemCost, epsilon);
-        solver.post(solver.realIbexGenericConstraint("{0} + {1} + {2} + {3} = 711", realitemCost));
-        solver.post(solver.realIbexGenericConstraint("{0} * {1}/100 * {2}/100 * {3}/100 = 711", realitemCost));
+        solver.realIbexGenericConstraint("{0} + {1} + {2} + {3} = 711", realitemCost).post();
+        solver.realIbexGenericConstraint("{0} * {1}/100 * {2}/100 * {3}/100 = 711", realitemCost).post();
         // symmetry breaking
-        solver.post(solver.realIbexGenericConstraint("{0} <= {1};{1} <= {2};{2} <= {3}", realitemCost));
+        solver.realIbexGenericConstraint("{0} <= {1};{1} <= {2};{2} <= {3}", realitemCost).post();
     }
 
     @Override

@@ -44,6 +44,11 @@ import org.chocosolver.util.PoolManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.testng.Assert.assertTrue;
+
 /**
  * Find a Hamiltonian path in a sparse graph with incremental algorithm
  * test the correctness of fine event recorders
@@ -83,39 +88,39 @@ public class HamiltonianPathTest {
 		IntVar[] succ = new IntVar[n];
 		int offset = -5;
 		TIntArrayList l = new TIntArrayList();
-		for (int i = 0; i < n-1; i++) {
+		for (int i = 0; i < n - 1; i++) {
 			l.clear();
 			for (int j = 0; j < n; j++) {
-				if(matrix[i][j]){
-					l.add(j+offset);
+				if (matrix[i][j]) {
+					l.add(j + offset);
 				}
 			}
-			if(l.isEmpty())throw new UnsupportedOperationException();
-			if(enumerated){
+			if (l.isEmpty()) throw new UnsupportedOperationException();
+			if (enumerated) {
 				succ[i] = solver.intVar("suc", l.toArray());
-			}else{
+			} else {
 				succ[i] = solver.intVar("suc", offset, n + offset, true);
-				solver.post(solver.member(succ[i],l.toArray()));
+				solver.member(succ[i], l.toArray()).post();
 			}
 		}
 		succ[n - 1] = solver.intVar(n + offset);
-		solver.post(solver.path(succ, solver.intVar(offset), solver.intVar(n - 1 + offset), offset));
+		solver.path(succ, solver.intVar(offset), solver.intVar(n - 1 + offset), offset).post();
 		// configure solver
 		if (rd) {
-			if(enumerated){
-				solver.set(ISF.random_value(succ,seed));
-			}else{
-				solver.set(ISF.random_bound(succ, seed));
+			if (enumerated) {
+				solver.set(random_value(succ, seed));
+			} else {
+				solver.set(random_bound(succ, seed));
 			}
 		} else {
-			solver.set(new ConstructorIntHeur(succ,offset));
+			solver.set(new ConstructorIntHeur(succ, offset));
 		}
-		SearchMonitorFactory.limitTime(solver, TIME_LIMIT);
+		limitTime(solver, TIME_LIMIT);
 		solver.findSolution();
 		IMeasures mes = solver.getMeasures();
 		// the problem has at least one solution
-		Assert.assertTrue(mes.getSolutionCount() == 1 || solver.hasReachedLimit(),
-				"sol count:"+mes.getSolutionCount()+ ", has reached limit: "+solver.hasReachedLimit());
+		assertTrue(mes.getSolutionCount() == 1 || solver.hasReachedLimit(),
+				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + solver.hasReachedLimit());
 	}
 
 	private static boolean[][] transformMatrix(boolean[][] m) {

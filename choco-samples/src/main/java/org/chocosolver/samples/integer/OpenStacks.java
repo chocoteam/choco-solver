@@ -41,6 +41,10 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.solver.constraints.SatFactory.addClauses;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.and;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifOnlyIf;
+
 /**
  * <br/>
  *
@@ -88,19 +92,19 @@ public class OpenStacks extends AbstractProblem {
     public void buildModel() {
         setUp();
         scheds = solver.intVarArray("s", np, 0, np - 1, false);
-        solver.post(solver.allDifferent(scheds, "BC"));
+        solver.allDifferent(scheds, "BC").post();
         o = new IntVar[nc][np + 1];
         for (int i = 0; i < nc; i++) {
             o[i] = solver.intVarArray("o_" + i, np + 1, 0, norders[i], false);
             // no order at t = 0
-            solver.post(solver.arithm(o[i][0], "=", 0));
+            solver.arithm(o[i][0], "=", 0).post();
         }
         for (int t = 1; t < np + 1; t++) {
             for (int i = 0; i < nc; i++) {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
                 IntVar value = solver.intVar("val_" + t + "_" + i, 0, norders[i], false);
-                solver.post(solver.element(value, orders[i], scheds[t - 1], 0));
-                solver.post(solver.sum(new IntVar[]{o[i][t - 1], value}, "=", o[i][t]));
+                solver.element(value, orders[i], scheds[t - 1], 0).post();
+                solver.sum(new IntVar[]{o[i][t - 1], value}, "=", o[i][t]).post();
             }
         }
         o2b = solver.boolVarMatrix("b", np, nc);
@@ -114,17 +118,17 @@ public class OpenStacks extends AbstractProblem {
                 solver.ifThenElse(btmp[1],
                         solver.arithm(o[i][j], ">", solver.intVar(0)),
                         solver.arithm(o[i][j], "<=", solver.intVar(0)));
-                SatFactory.addClauses(LogOp.ifOnlyIf(o2b[j - 1][i], LogOp.and(btmp[0], btmp[1])), solver);
+                addClauses(ifOnlyIf(o2b[j - 1][i], and(btmp[0], btmp[1])), solver);
             }
         }
         open = solver.intVarArray("open", np, 0, nc + 1, true);
         for (int i = 0; i < np; i++) {
-            solver.post(solver.sum(o2b[i], "=", open[i]));
+            solver.sum(o2b[i], "=", open[i]).post();
         }
 
 
         objective = solver.intVar("OBJ", 0, nc * np, true);
-        solver.post(solver.max(objective, open));
+        solver.max(objective, open).post();
     }
 
     @Override

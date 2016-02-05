@@ -71,23 +71,23 @@ public class Grocery extends AbstractProblem {
     @Override
     public void buildModel() {
         itemCost = solver.intVarArray("item", 4, 1, 711, false);
-        solver.post(solver.sum(itemCost, "=", 711));
+        solver.sum(itemCost, "=", 711).post();
 
         // intermediary products
         IntVar[] tmp = solver.intVarArray("tmp", 2, 1, 71100, true);
-        solver.post(solver.times(itemCost[0], itemCost[1], tmp[0]));
-        solver.post(solver.times(itemCost[2], itemCost[3], tmp[1]));
+        solver.times(itemCost[0], itemCost[1], tmp[0]).post();
+        solver.times(itemCost[2], itemCost[3], tmp[1]).post();
 
         // the global product itemCost[0]*itemCost[1]*itemCost[2]*itemCost[3] (equal to tmp[0]*tmp[1])
         // is too large to be used within integer ranges. Thus, we will set up a dedicated constraint
         // which uses a long to handle such a product
 
-        solver.post(new Constraint("LargeProduct",new PropLargeProduct(tmp, 711000000)));
+        new Constraint("LargeProduct", new PropLargeProduct(tmp, 711000000)).post();
 
         // symmetry breaking
-        solver.post(solver.arithm(itemCost[0], "<=", itemCost[1]));
-        solver.post(solver.arithm(itemCost[1], "<=", itemCost[2]));
-        solver.post(solver.arithm(itemCost[2], "<=", itemCost[3]));
+        solver.arithm(itemCost[0], "<=", itemCost[1]).post();
+        solver.arithm(itemCost[1], "<=", itemCost[2]).post();
+        solver.arithm(itemCost[2], "<=", itemCost[3]).post();
     }
 
     @Override

@@ -42,6 +42,9 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+
 /**
  * <br/>
  *
@@ -224,9 +227,9 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = solver.boolVarArray("b", 3);
-                solver.post(solver.times(bvars[1], bvars[2], bvars[0]));
+                solver.times(bvars[1], bvars[2], bvars[0]).post();
 
-                solver.set(IntStrategyFactory.random_bound(bvars, seed));
+                solver.set(random_bound(bvars, seed));
                 solver.findAllSolutions();
                 n2 = solver.getMeasures().getSolutionCount();
             }
@@ -267,11 +270,11 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = solver.boolVarArray("b", 3);
-                solver.post(solver.times(bvars[1], bvars[2], bvars[0]));
+                solver.times(bvars[1], bvars[2], bvars[0]).post();
                 try {
                     solver.propagate();
-                    bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);
-                    bvars[n2].instantiateTo(b2 ? 1 : 0, Cause.Null);
+                    bvars[n1].instantiateTo(b1 ? 1 : 0, Null);
+                    bvars[n2].instantiateTo(b2 ? 1 : 0, Null);
                     s2 = true;
                 } catch (ContradictionException cex) {
                     s2 = false;

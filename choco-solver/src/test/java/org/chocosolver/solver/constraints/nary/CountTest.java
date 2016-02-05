@@ -44,6 +44,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.Arrays.asList;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -56,16 +62,16 @@ public class CountTest {
         Solver solver = new Solver();
         IntVar[] vars = solver.intVarArray("var", n, 0, n - 1, true);
         for (int i = 0; i < n; i++) {
-            solver.post(solver.count(i, vars, vars[i]));
+            solver.count(i, vars, vars[i]).post();
         }
-        solver.post(solver.sum(vars, "=", n)); // cstr redundant 1
+        solver.sum(vars, "=", n).post(); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.post(solver.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
+        solver.scalar(vs2, coeff2, "=", n).post(); // cstr redundant 1
         return solver;
     }
 
@@ -107,13 +113,13 @@ public class CountTest {
             IntVar[] vars = solver.intVarArray("o", n, 0, n, true);
             int value = 1;
             IntVar occ = solver.intVar("oc", 0, n, true);
-            IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(IntStrategyFactory.random_bound(allvars, i));
-            solver.post(solver.count(value, vars, occ));
+            IntVar[] allvars = append(vars, new IntVar[]{occ});
+            solver.set(random_bound(allvars, i));
+            solver.count(value, vars, occ).post();
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
+            assertEquals(solver.getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -133,7 +139,7 @@ public class CountTest {
             }
 
             List<IntVar> lvs = new LinkedList<>();
-            lvs.addAll(Arrays.asList(vars));
+            lvs.addAll(asList(vars));
 
             Random rand = new Random(seed);
             for (int i = 0; i < nbOcc; i++) {
@@ -146,12 +152,12 @@ public class CountTest {
                 IntVar ivc = lvs.get(rand.nextInt(lvs.size()));
                 int val = rand.nextInt(sizeDom);
                 if (gac) {
-                    solver.post(getTableForOccurence(vs, ivc, val, sizeDom));
+                    getTableForOccurence(vs, ivc, val, sizeDom).post();
                 } else {
-                    solver.post(solver.count(val, vs, ivc));
+                    solver.count(val, vs, ivc).post();
                 }
             }
-            solver.post(solver.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
+            solver.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0).post();
 
             //s.setValIntSelector(new RandomIntValSelector(interseed));
             //s.setVarIntSelector(new RandomIntVarSelector(s, interseed + 10));
@@ -160,15 +166,15 @@ public class CountTest {
 //            }
 
             if (!enumvar) {
-                solver.set(IntStrategyFactory.random_bound(vars, seed));
+                solver.set(random_bound(vars, seed));
             } else {
-                solver.set(IntStrategyFactory.random_value(vars, seed));
+                solver.set(random_value(vars, seed));
             }
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
             } else {
-                Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbsol);
+                assertEquals(solver.getMeasures().getSolutionCount(), nbsol);
             }
 
         }

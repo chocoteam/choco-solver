@@ -91,6 +91,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
 
+import static java.lang.Math.abs;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
@@ -403,14 +404,14 @@ public interface IIntConstraintFactory {
 	 * @param Z result
 	 */
 	default Constraint mod(IntVar X, IntVar Y, IntVar Z) {
-		int xl = Math.abs(X.getLB());
-		int xu = Math.abs(X.getUB());
+		int xl = abs(X.getLB());
+		int xu = abs(X.getUB());
 		int b = Math.max(xl, xu);
 		Solver solver = X.getSolver();
 		IntVar t1 = solver.intVar(randomName(), -b, b, true);
 		IntVar t2 = solver.intVar(randomName(), -b, b, true);
-		solver.post(div(X, Y, t1));
-		solver.post(times(t1, Y, t2));
+		div(X, Y, t1).post();
+		times(t1, Y, t2).post();
 		return sum(new IntVar[]{Z, t2}, "=", X);
 	}
 
@@ -1521,7 +1522,7 @@ public interface IIntConstraintFactory {
 			ub += v.getUB();
 		}
 		IntVar p = sum.getSolver().intVar(randomName(), lb, ub, true);
-		sum.getSolver().post(sum(vars, "=", p));
+		sum(vars, "=", p).post();
 		return arithm(p, operator, sum);
 	}
 

@@ -53,7 +53,7 @@ public class CumulativeSample2 extends AbstractProblem {
 	}
 
 	@Override
-	public void buildModel(){
+	public void buildModel() {
 		// build variables
 		starts = new IntVar[NUM_OF_TASKS];
 		ends = new IntVar[NUM_OF_TASKS];
@@ -61,7 +61,7 @@ public class CumulativeSample2 extends AbstractProblem {
 		maxEnd = solver.intVar("maxEnd", 0, HORIZON, true);
 		IntVar[] res = new IntVar[NUM_OF_TASKS];
 		Task[] tasks = new Task[NUM_OF_TASKS];
-		for (int iTask=0; iTask < NUM_OF_TASKS; ++iTask) {
+		for (int iTask = 0; iTask < NUM_OF_TASKS; ++iTask) {
 			starts[iTask] = solver.intVar("start" + iTask, 0, HORIZON, true);
 			ends[iTask] = solver.intVar("ends" + iTask, 0, HORIZON, true);
 			tasks[iTask] = new Task(starts[iTask], duration, ends[iTask]);
@@ -69,17 +69,17 @@ public class CumulativeSample2 extends AbstractProblem {
 		}
 
 		// post a cumulative constraint
-		solver.post(solver.cumulative(tasks, res, solver.intVar(1), false));
+		solver.cumulative(tasks, res, solver.intVar(1), false).post();
 
 		// maintain makespan
-		solver.post(solver.max(maxEnd, ends));
+		solver.max(maxEnd, ends).post();
 
 		// add precedences
 		int prevIdx = -1;
-		for (int iTask=999; iTask >= 0; --iTask) {
+		for (int iTask = 999; iTask >= 0; --iTask) {
 			if (prevIdx != -1) {
 				if (iTask % 2 == 0 || iTask % 3 == 0) {
-					solver.post(solver.arithm(starts[iTask], ">=", ends[prevIdx]));
+					solver.arithm(starts[iTask], ">=", ends[prevIdx]).post();
 				}
 			}
 			prevIdx = iTask;

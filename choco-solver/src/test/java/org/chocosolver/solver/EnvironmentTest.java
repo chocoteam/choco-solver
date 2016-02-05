@@ -40,12 +40,14 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.domOverWDeg;
+import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
 public class EnvironmentTest {
 
 	@Test(groups="10s", timeOut=60000)
-	public void testSize(){
+	public void testSize() {
 		int n = 14;
 		IntVar[] vars, vectors;
 		Solver solver = new Solver("CostasArrays");
@@ -56,7 +58,7 @@ public class EnvironmentTest {
 			for (int j = 0; j < n; j++) {
 				if (i != j) {
 					IntVar k = solver.intVar(randomName(), -20000, 20000, true);
-					solver.post(solver.sum(new IntVar[]{vars[i],k},"=",vars[j]));
+					solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
 					// just to create many variables
 					solver.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reify();
 					vectors[idx] = solver.intOffsetView(k, 2 * n * (j - i));
@@ -64,9 +66,9 @@ public class EnvironmentTest {
 				}
 			}
 		}
-		solver.post(solver.allDifferent(vars, "AC"));
-		solver.post(solver.allDifferent(vectors, "BC"));
-		solver.set(ISF.domOverWDeg(ArrayUtils.append(vectors, vars), 0));
+		solver.allDifferent(vars, "AC").post();
+		solver.allDifferent(vectors, "BC").post();
+		solver.set(domOverWDeg(append(vectors, vars), 0));
 		solver.findSolution();
 	}
 }

@@ -39,6 +39,8 @@ import org.kohsuke.args4j.Option;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.System.arraycopy;
+
 
 /**
  * Orthogonal latin square
@@ -69,7 +71,7 @@ public class OrthoLatinSquare extends AbstractProblem {
         List<Constraint> ADS = new ArrayList<>();
 
         Constraint cc = solver.allDifferent(vars, "AC");
-        solver.post(cc);
+        cc.post();
         ADS.add(cc);
 
         int[] mod = new int[mm];
@@ -81,21 +83,21 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
         }
         for (int i = 0; i < mm; i++) {
-            solver.post(solver.element(square1[i], mod, vars[i], 0));
-            solver.post(solver.element(square2[i], div, vars[i], 0));
+            solver.element(square1[i], mod, vars[i], 0).post();
+            solver.element(square2[i], div, vars[i], 0).post();
         }
 
         // Rows
         for (int i = 0; i < m; i++) {
             IntVar[] ry = new IntVar[m];
-            System.arraycopy(square1, i * m, ry, 0, m);
+            arraycopy(square1, i * m, ry, 0, m);
             cc = solver.allDifferent(ry, "BC");
-            solver.post(cc);
+            cc.post();
             ADS.add(cc);
             ry = new IntVar[m];
-            System.arraycopy(square2, i * m, ry, 0, m);
+            arraycopy(square2, i * m, ry, 0, m);
             cc = solver.allDifferent(ry, "BC");
-            solver.post(cc);
+            cc.post();
             ADS.add(cc);
         }
         for (int j = 0; j < m; j++) {
@@ -104,14 +106,14 @@ public class OrthoLatinSquare extends AbstractProblem {
                 cy[i] = square1[i * m + j];
             }
             cc = solver.allDifferent(cy, "BC");
-            solver.post(cc);
+            cc.post();
             ADS.add(cc);
             cy = new IntVar[m];
             for (int i = 0; i < m; i++) {
                 cy[i] = square2[i * m + j];
             }
             cc = solver.allDifferent(cy, "BC");
-            solver.post(cc);
+            cc.post();
             ADS.add(cc);
         }
         ALLDIFFS = new Constraint[ADS.size()];
@@ -124,7 +126,7 @@ public class OrthoLatinSquare extends AbstractProblem {
                 ry1[j] = square1[(i - 1) * m + j];
                 ry2[j] = square2[i * m + j];
             }
-            solver.post(solver.lexLess(ry1, ry2));
+            solver.lexLess(ry1, ry2).post();
         }
     }
 

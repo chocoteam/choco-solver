@@ -39,6 +39,8 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Random;
 
+import static org.chocosolver.util.tools.ArrayUtils.append;
+
 /**
  * <br/>
  *
@@ -77,11 +79,11 @@ public class SantaClaude extends AbstractProblem {
         for (int i = 0; i < n_gifts; i++) {
             gift_price[i] = rand.nextInt(max_price) + 1;
         }
-        solver.post(solver.allDifferent(kid_gift, "BC"));
+        solver.allDifferent(kid_gift, "BC").post();
         for (int i = 0; i < n_kids; i++) {
-            solver.post(solver.element(kid_price[i], gift_price, kid_gift[i], 0));
+            solver.element(kid_price[i], gift_price, kid_gift[i], 0).post();
         }
-        solver.post(solver.sum(kid_price, "=", total_cost));
+        solver.sum(kid_price, "=", total_cost).post();
 
         StringBuilder funBuilder = new StringBuilder("(");
         for (int i = 0; i < n_kids; i++) {
@@ -89,10 +91,10 @@ public class SantaClaude extends AbstractProblem {
         }
         funBuilder.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
-        RealVar[] all_vars = ArrayUtils.append(solver.realIntViewArray(kid_price, precision), new RealVar[]{average});
+        RealVar[] all_vars = append(solver.realIntViewArray(kid_price, precision), new RealVar[]{average});
         String function = funBuilder.toString();
 
-        solver.post(solver.realIbexGenericConstraint(function, all_vars));
+        solver.realIbexGenericConstraint(function, all_vars).post();
     }
 
     @Override

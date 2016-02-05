@@ -88,9 +88,9 @@ public class Sudoku extends AbstractProblem {
         }
 
         for (int i = 0; i < n; i++) {
-            solver.post(solver.allDifferent(rows[i], "AC"));
-            solver.post(solver.allDifferent(cols[i], "AC"));
-            solver.post(solver.allDifferent(carres[i], "AC"));
+            solver.allDifferent(rows[i], "AC").post();
+            solver.allDifferent(cols[i], "AC").post();
+            solver.allDifferent(carres[i], "AC").post();
         }
 
 

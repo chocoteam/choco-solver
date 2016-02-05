@@ -36,6 +36,9 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.RealVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.constraints.real.Ibex.HC4;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+
 /**
  * @author Charles Prud'homme
  * @version choco
@@ -52,10 +55,10 @@ public class RealConstraintExamples {
         RealConstraint rc = new RealConstraint(
                 "my fct",
                 "({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6",
-                Ibex.HC4,
+                HC4,
                 x, y);
-        solver.post(rc);
-        Chatterbox.showSolutions(solver);
+        rc.post();
+        showSolutions(solver);
         solver.findSolution();
     }
 }

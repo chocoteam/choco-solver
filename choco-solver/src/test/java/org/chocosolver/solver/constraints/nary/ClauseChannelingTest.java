@@ -37,6 +37,11 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
+
 /**
  * Created by cprudhom on 14/01/15.
  * Project: choco.
@@ -52,11 +57,11 @@ public class ClauseChannelingTest {
                 BoolVar[] eqs = solver.boolVarArray("eq", i);
                 BoolVar[] lqs = solver.boolVarArray("lq", i);
 
-                solver.post(solver.clausesIntChanneling(iv, eqs, lqs));
+                solver.clausesIntChanneling(iv, eqs, lqs).post();
 
-                solver.set(ISF.random_value(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
+                solver.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
                 solver.findAllSolutions();
-                Assert.assertEquals(solver.getMeasures().getSolutionCount(), i);
+                assertEquals(solver.getMeasures().getSolutionCount(), i);
             }
         }
     }
@@ -70,11 +75,11 @@ public class ClauseChannelingTest {
                 BoolVar[] eqs = solver.boolVarArray("eq", i);
                 BoolVar[] lqs = solver.boolVarArray("lq", i);
 
-                solver.post(solver.clausesIntChanneling(iv, eqs, lqs));
+                solver.clausesIntChanneling(iv, eqs, lqs).post();
 
-                solver.set(ISF.random_bound(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
+                solver.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
                 solver.findAllSolutions();
-                Assert.assertEquals(solver.getMeasures().getSolutionCount(), i);
+                assertEquals(solver.getMeasures().getSolutionCount(), i);
             }
         }
     }
@@ -105,9 +110,9 @@ public class ClauseChannelingTest {
                     BoolVar[] eqs = sc.boolVarArray("eq", i);
                     BoolVar[] lqs = sc.boolVarArray("lq", i);
 
-                    sc.post(sc.clausesIntChanneling(iv, eqs, lqs));
+                    sc.clausesIntChanneling(iv, eqs, lqs).post();
 
-                    sc.set(ISF.random_value(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
+                    sc.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
                     sc.findAllSolutions();
                 }
                 Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);
@@ -144,9 +149,9 @@ public class ClauseChannelingTest {
                     BoolVar[] eqs = sc.boolVarArray("eq", i);
                     BoolVar[] lqs = sc.boolVarArray("lq", i);
 
-                    sc.post(sc.clausesIntChanneling(iv, eqs, lqs));
+                    sc.clausesIntChanneling(iv, eqs, lqs).post();
 
-                    sc.set(ISF.random_bound(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
+                    sc.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
                     sc.findAllSolutions();
                 }
                 Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);

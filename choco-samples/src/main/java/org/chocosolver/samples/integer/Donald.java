@@ -71,13 +71,13 @@ public class Donald extends AbstractProblem {
         t = solver.intVar("t", 0, 9, true);
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
-        solver.post(solver.allDifferent(letters, "BC"));
-        solver.post(solver.scalar(new IntVar[]{d, o, n, a, l, d,
+        solver.allDifferent(letters, "BC").post();
+        solver.scalar(new IntVar[]{d, o, n, a, l, d,
                 g, e, r, a, l, d,
                 r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,
                 100000, 10000, 1000, 100, 10, 1,
                 -100000, -10000, -1000, -100, -10, -1,
-        }, "=", 0));
+        }, "=", 0).post();
 
 
     }

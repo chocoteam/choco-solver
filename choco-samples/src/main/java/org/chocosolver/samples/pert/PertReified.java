@@ -61,7 +61,7 @@ public class PertReified extends Pert {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
-                    solver.post(precedence(vars[i], 1, vars[j]));
+                    precedence(vars[i], 1, vars[j]).post();
                 }
             }
         }

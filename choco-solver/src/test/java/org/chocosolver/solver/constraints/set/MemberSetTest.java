@@ -40,6 +40,9 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Random;
 
+import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -84,13 +87,13 @@ public class MemberSetTest {
             random.setSeed(k);
             for (int d = 0; d < 11; d++) {
                 for (int h = 0; h < 2; h++) {
-                    doms = DomainBuilder.buildFullDomains(2, -4, 5, random, d / 10.d, h == 0);
+                    doms = buildFullDomains(2, -4, 5, random, d / 10.d, h == 0);
                     Solver solver = new Solver();
                     SetVar s = solver.setVar("s", new int[]{}, doms[0]);
                     IntVar i = solver.intVar("i", doms[1]);
-                    solver.post(solver.member(i, s));
+                    solver.member(i, s).post();
                     //Chatterbox.showSolutions(solver);
-                    Assert.assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
+                    assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
                             Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
                 }
             }
@@ -106,7 +109,7 @@ public class MemberSetTest {
             random.setSeed(k);
             for (int d = 0; d < 11; d++) {
                 for (int h = 0; h < 2; h++) {
-                    doms = DomainBuilder.buildFullDomains(2, -4, 5, random, d / 10.d, h == 0);
+                    doms = buildFullDomains(2, -4, 5, random, d / 10.d, h == 0);
                     // fill doms[1]
                     int lb = doms[1][0];
                     int ub = doms[1][doms[1].length - 1];
@@ -117,9 +120,9 @@ public class MemberSetTest {
                     Solver solver = new Solver();
                     SetVar s = solver.setVar("s", new int[]{}, doms[0]);
                     IntVar i = solver.intVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
-                    solver.post(solver.member(i, s));
+                    solver.member(i, s).post();
                     //Chatterbox.showSolutions(solver);
-                    Assert.assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
+                    assertEquals(solver.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
                             Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
                 }
             }

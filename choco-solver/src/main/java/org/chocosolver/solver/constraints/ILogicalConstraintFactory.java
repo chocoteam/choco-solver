@@ -52,11 +52,11 @@ public interface ILogicalConstraintFactory {
 	 * @param bools an array of boolean variable
 	 * @return a constraint and ensuring that variables in <i>bools</i> are all set to true
 	 */
-	default Constraint and(BoolVar... bools){
+	default Constraint and(BoolVar... bools) {
 		Solver s = bools[0].getSolver();
 		IntVar sum = s.intVar(0, bools.length, true);
-		s.post(s.sum(bools,"=",sum));
-		return s.arithm(sum,"=",bools.length);
+		s.sum(bools, "=", sum).post();
+		return s.arithm(sum, "=", bools.length);
 	}
 
 	/**
@@ -64,11 +64,11 @@ public interface ILogicalConstraintFactory {
 	 * @param bools an array of boolean variable
 	 * @return a constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
 	 */
-	default Constraint or(BoolVar... bools){
+	default Constraint or(BoolVar... bools) {
 		Solver s = bools[0].getSolver();
 		IntVar sum = s.intVar(0, bools.length, true);
-		s.post(s.sum(bools,"=",sum));
-		return s.arithm(sum,">=",1);
+		s.sum(bools, "=", sum).post();
+		return s.arithm(sum, ">=", 1);
 	}
 
 	/**
@@ -185,14 +185,14 @@ public interface ILogicalConstraintFactory {
 		// PRESOLVE
 		if(ifVar.contains(1)){
 			Solver s = ifVar.getSolver();
-			if(ifVar.isInstantiated()){
-				s.post(thenCstr);
-			}else if(thenCstr.isSatisfied() == ESat.FALSE){
-				s.post(s.arithm(ifVar,"=",0));
+			if(ifVar.isInstantiated()) {
+				thenCstr.post();
+			}else if(thenCstr.isSatisfied() == ESat.FALSE) {
+				s.arithm(ifVar, "=", 0).post();
 			}
 			// END OF PRESOLVE
 			else {
-				s.post(s.arithm(ifVar, "<=", thenCstr.reify()));
+				s.arithm(ifVar, "<=", thenCstr.reify()).post();
 			}
 		}
 	}
@@ -225,14 +225,14 @@ public interface ILogicalConstraintFactory {
 		Solver s = var.getSolver();
 		// PRESOLVE
 		ESat entail = cstr.isSatisfied();
-		if(var.isInstantiatedTo(1)){
-			s.post(cstr);
+		if(var.isInstantiatedTo(1)) {
+			cstr.post();
 		}else if(var.isInstantiatedTo(0)) {
-			s.post(not(cstr));
+			not(cstr).post();
 		}else if(entail == ESat.TRUE) {
-			s.post(s.arithm(var,"=",1));
+			s.arithm(var, "=", 1).post();
 		}else if(entail == ESat.FALSE) {
-			s.post(s.arithm(var,"=",0));
+			s.arithm(var, "=", 0).post();
 		}
 		// END OF PRESOLVE
 		else {
