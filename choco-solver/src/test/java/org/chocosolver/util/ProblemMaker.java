@@ -30,6 +30,7 @@
 package org.chocosolver.util;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.variables.IntVar;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -161,7 +162,7 @@ public class ProblemMaker {
         if (m > 2) {
             model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
-        model.setObjectives(ticks[m - 1]);
+        model.setObjectives(ResolutionPolicy.MINIMIZE,ticks[m - 1]);
         return model;
     }
 

@@ -165,7 +165,7 @@ public class PropCondisTest {
         }
         IntVar horizon = model.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);
         model.sum(new IntVar[]{OS[size - 1], LS[size - 1]}, "=", horizon).post();
-        model.setObjectives(horizon);
+        model.setObjectives(ResolutionPolicy.MINIMIZE, horizon);
         model.addHook("decvars", append(OS, LS));
         showShortStatistics(model);
         return model;

@@ -84,6 +84,9 @@ public class Model implements Serializable, IModeler{
     /** For serialization purpose */
     private static final long serialVersionUID = 1L;
 
+    /** Settings to use with this solver */
+    private Settings settings = new Settings() {};
+
     /** A map to cache constants (considered as fixed variables) */
     public TIntObjectHashMap<IntVar> cachedConstants;
 
@@ -147,6 +150,11 @@ public class Model implements Serializable, IModeler{
     /** Enable attaching hooks to a model. */
     private Map<String,Object> hooks;
 
+    /** The propagation engine to use */
+    protected IPropagationEngine engine;
+
+    protected ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,17 +173,11 @@ public class Model implements Serializable, IModeler{
         this.cstrs = new Constraint[32];
         this.cIdx = 0;
         this.environment = environment;
-        this.measures = new MeasuresRecorder(this);
-        this.eoList = new FilteringMonitorList();
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
-        SLF.dfs(this, null);
-        this.searchMonitors = new ArrayList<>();
-        this.stopCriteria = new ArrayList<>();
-        this.search.setObjectiveManager(ObjectiveManager.SAT());
+        this.getResolver().setObjectiveManager(ObjectiveManager.SAT());
         this.objectives = new Variable[0];
-        this.solutionRecorder = new LastSolutionRecorder(new Solution(), this);
         this.hooks = new HashMap<>();
     }
 
@@ -275,10 +277,14 @@ public class Model implements Serializable, IModeler{
      * @return the unique and internal <code>SearchLoop</code> object.
      */
     public Resolver getResolver() {
+        if(search == null){
+            SLF.dfs(this, null);
+            search.set(new LastSolutionRecorder(new Solution(), this));
+        }
         return search;
     }
 
-	/**
+    /**
      * @deprecated use {@link #getResolver()} instead
      * Will be removed in version > 3.4.0
      */
@@ -422,6 +428,15 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
+     * Returns the propagation engine used in <code>this</code>.
+     *
+     * @return a propagation engine.
+     */
+    public IPropagationEngine getEngine() {
+        return engine;
+    }
+
+    /**
      * Return the objective variables
      *
      * @return a variable
@@ -502,6 +517,15 @@ public class Model implements Serializable, IModeler{
         return condis;
     }
 
+    /**
+     * Return the current settings for the solver
+     *
+     * @return a {@link org.chocosolver.solver.Settings}
+     */
+    public Settings getSettings() {
+        return this.settings;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -520,12 +544,35 @@ public class Model implements Serializable, IModeler{
      *
      * @param objectives one or more variables
      */
+    public void setObjectives(ResolutionPolicy policy, Variable... objectives) {
+        if(objectives == null){
+            resetObjectives();
+        }else {
+            this.objectives = objectives;
+            this.policy = policy;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
     public void setObjectives(Variable... objectives) {
         if(objectives == null){
-            this.objectives = new Variable[0];
+            resetObjectives();
         }else {
             this.objectives = objectives;
         }
+    }
+
+    /**
+     * Removes any objective and set problem to a satisfaction problem
+     */
+    public void resetObjectives() {
+        this.objectives = new Variable[0];
+        this.policy = ResolutionPolicy.SATISFACTION;
     }
 
     /**
@@ -537,6 +584,24 @@ public class Model implements Serializable, IModeler{
         this.precision = p;
     }
 
+    /**
+     * Attach a propagation engine <code>this</code>.
+     * It overrides the previously defined one, if any.
+     *
+     * @param propagationEngine a propagation strategy
+     */
+    public void set(IPropagationEngine propagationEngine) {
+        this.engine = propagationEngine;
+    }
+
+    /**
+     * Override the default {@link org.chocosolver.solver.Settings} object.
+     *
+     * @param defaults new settings
+     */
+    public void set(Settings defaults) {
+        this.settings = defaults;
+    }
 
     /**
      * Adds the <code>hookObject</code> to store in this model, associated with the name <code>hookName</code>.
@@ -738,7 +803,7 @@ public class Model implements Serializable, IModeler{
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("\n Model[%s]\n", name));
         st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
-        st.append(String.format("Feasability: %s\n", feasible));
+        st.append(String.format("Feasability: %s\n", isFeasible()));
         st.append("== variables ==\n");
         for (int v = 0; v < vIdx; v++) {
             st.append(vars[v].toString()).append('\n');
@@ -886,39 +951,6 @@ public class Model implements Serializable, IModeler{
 
 
 
-    /** A solution recorder */
-    protected ISolutionRecorder solutionRecorder;
-
-    /**
-     * Problem feasbility:
-     * - UNDEFINED if unknown,
-     * - TRUE if satisfiable,
-     * - FALSE if unsatisfiable
-     */
-    ESat feasible = ESat.UNDEFINED;
-
-
-
-    /** Settings to use with this solver */
-    private Settings settings = new Settings() {};
-
-    /** An explanation engine */
-    private ExplanationEngine explainer;
-
-    /** A list of filtering monitors to be informed on any variable events */
-    private FilteringMonitorList eoList;
-
-    /** List of search monitors to plug before launching the search */
-    protected List<ISearchMonitor> searchMonitors;
-
-    /** List of stop criteria to plug before launching the search */
-    protected List<Criterion> stopCriteria;
-
-    /** The propagation engine to use */
-    protected IPropagationEngine engine;
-
-    /** Model's measures */
-    protected final IMeasures measures;
 
 
 
@@ -926,257 +958,7 @@ public class Model implements Serializable, IModeler{
 
 
 
-    /**
-     * Get the objective manager.
-     * @return the objective manager (can be <tt>null</tt>).
-     */
-    public ObjectiveManager getObjectiveManager() {
-        return this.search.getObjectiveManager();
-    }
 
-    /**
-     * The search strategy declared
-     * @return the search strategy declared (can be <tt>null</tt>).
-     */
-    public AbstractStrategy getStrategy() {
-        return search.getStrategy();
-    }
-
-    /**
-     * Returns the propagation engine used in <code>this</code>.
-     *
-     * @return a propagation engine.
-     */
-    public IPropagationEngine getEngine() {
-        return engine;
-    }
-
-
-
-    /**
-     * Return a reference to the measures recorder.
-     * This enables to get, for instance, the number of solutions found, time count, etc.
-     * @return this model's measure recorder
-     */
-    public IMeasures getMeasures() {
-        return measures;
-    }
-
-    /**
-     * Return the explanation engine plugged into <code>this</code>.
-     * @return this model's explanation engine
-     */
-    public ExplanationEngine getExplainer() {
-        return explainer;
-    }
-
-    /**
-     * Return the solution recorder
-     * @return this model's solution recorder
-     */
-    public ISolutionRecorder getSolutionRecorder() {
-        return solutionRecorder;
-    }
-
-    /**
-     * Return the current settings for the solver
-     *
-     * @return a {@link org.chocosolver.solver.Settings}
-     */
-    public Settings getSettings() {
-        return this.settings;
-    }
-
-
-
-    /**
-     * Override the default search strategies to use in <code>this</code>.
-     * In case many strategies are given, they will be called in sequence:
-     * The first strategy in parameter is first called to compute a decision, if possible.
-     * If it cannot provide a new decision, the second strategy is called ...
-     * and so on, until the last strategy.
-     * <p>
-     *
-     * @param strategies the search strategies to use.
-     */
-    public void set(AbstractStrategy... strategies) {
-        if (strategies == null || strategies.length == 0) {
-            throw new UnsupportedOperationException("no search strategy has been specified");
-        }
-        if (strategies.length == 1) {
-            search.set(strategies[0]);
-        } else {
-            search.set(ISF.sequencer(strategies));
-        }
-    }
-
-    /**
-     * Attach a propagation engine <code>this</code>.
-     * It overrides the previously defined one, if any.
-     *
-     * @param propagationEngine a propagation strategy
-     */
-    public void set(IPropagationEngine propagationEngine) {
-        this.engine = propagationEngine;
-    }
-
-    /**
-     * Override the explanation engine.
-     * @param explainer the explanation to use
-     */
-    public void set(ExplanationEngine explainer) {
-        this.explainer = explainer;
-        plugMonitor(explainer);
-    }
-
-    /**
-     * Override the objective manager
-     * @param om the objective manager to use
-     */
-    public void set(ObjectiveManager om) {
-        this.search.setObjectiveManager(om);
-    }
-
-    /**
-     * Override the solution recorder.
-     * Beware : multiple recorders which restore a solution might create a conflict.
-     * @param sr the solution recorder to use
-     */
-    public void set(ISolutionRecorder sr) {
-        this.solutionRecorder = sr;
-    }
-
-    /**
-     * Put a search monitor to react on search events (solutions, decisions, fails, ...).
-     * Any search monitor is actually plugged just before the search starts.
-     *
-     * There is no check if there are any duplicates.
-     * A search monitor added during while the resolution has started will not be taken into account.
-     *
-     * @param sm a search monitor to be plugged in the solver
-     */
-    public void plugMonitor(ISearchMonitor sm) {
-        searchMonitors.add(sm);
-    }
-
-    /**
-     * Removes a search monitors from the ones to plug when the search will start.
-     * @param sm a search monitor to be unplugged in the solver
-     */
-    public void unplugMonitor(ISearchMonitor sm){
-        searchMonitors.remove(sm);
-    }
-
-    /**
-     * Removes all search monitors from the list of search monitors to plug on the search loop.
-     */
-    public void unplugAllMonitors(){
-        searchMonitors.clear();
-    }
-
-
-
-    /**
-     * Add an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
-     * <p>
-     * Erase the current event observer if any.
-     *
-     * @param filteringMonitor an event observer
-     */
-    public void plugMonitor(FilteringMonitor filteringMonitor) {
-        this.eoList.add(filteringMonitor);
-    }
-
-    /**
-     * If {@code isComplete} is set to true, a complementary search strategy is added to the declared one in order to
-     * ensure that all variables are covered by a search strategy.
-     * Otherwise, the declared search strategy is used as is.
-     *
-     * @param isComplete completeness of the declared search strategy
-     */
-    public void makeCompleteSearch(boolean isComplete) {
-        this.search.makeCompleteStrategy(isComplete);
-    }
-    /**
-     * Adds a stop criterion, which, when met, stops the search loop.
-     * There can be multiple stop criteria, a logical OR is then applied.
-     * The stop criteria are declared to the search loop just before launching the search,
-     * the previously defined ones are erased.
-     *
-     * There is no check if there are any duplicates.
-     *
-     * <br/>
-     * Examples:
-     * <br/>
-     * With a built-in counter, stop after 20 seconds:
-     * <pre>
-     *         SMF.limitTime(solver, "20s");
-     * </pre>
-     * With lambda, stop when 10 nodes are visited:
-     * <pre>
-     *     () -> solver.getMeasures().getNodeCount() >= 10
-     * </pre>
-     *
-     * @param criterion a stop criterion to add.
-     * @see #removeStopCriterion(Criterion)
-     * @see #removeAllStopCriteria()
-     */
-    public void addStopCriterion(Criterion criterion){
-        stopCriteria.add(criterion);
-    }
-
-    /**
-     * Removes a stop criterion from the one to declare to the search loop.
-     * @param criterion criterion to remove
-     */
-    public void removeStopCriterion(Criterion criterion){
-        stopCriteria.remove(criterion);
-    }
-
-    /**
-     * Remove all declared stop criteria.
-     */
-    public void removeAllStopCriteria(){
-        stopCriteria.clear();
-    }
-
-
-    /**
-     * Override the default {@link org.chocosolver.solver.Settings} object.
-     *
-     * @param defaults new settings
-     */
-    public void set(Settings defaults) {
-        this.settings = defaults;
-    }
-
-    /**
-     * Return the current event observer list
-     * @return this solver's events observer
-     */
-    public FilteringMonitor getEventObserver() {
-        return this.eoList;
-    }
-
-    /**
-     * Returns information on the completeness of the search process.
-     * <p>
-     * A call to {@link #isFeasible()} may provide complementary information.
-     * <p>
-     * Possible back values are:
-     * <p>
-     * <br/>- <code>false</code> : the resolution is complete and
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatisfiable.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, org.chocosolver.solver.variables.IntVar)}: the optimal solution has been found and
-     * proven to be optimal, or the CSP has been proven to be unsatisfiable.
-     * <br/>- <code>true</code>: the resolution stopped after reaching a limit.
-     * @return <tt>true</tt> if the resolution stops before having explored the entire search space, <tt>false</tt> otherwise
-     */
-    public boolean hasReachedLimit() {
-        return search.hasReachedLimit();
-    }
 
     /**
      * Attempts to find the first solution of the declared problem.
@@ -1188,7 +970,7 @@ public class Model implements Serializable, IModeler{
      */
     public boolean findSolution() {
         solve(true);
-        return measures.getSolutionCount() > 0;
+        return getMeasures().getSolutionCount() > 0;
     }
 
     /**
@@ -1201,10 +983,10 @@ public class Model implements Serializable, IModeler{
      * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
      */
     public boolean nextSolution() {
-        if(search != null && search.hasResolutionBegun()){
-            long nbsol = measures.getSolutionCount();
-            search.launch(true);
-            return (measures.getSolutionCount() - nbsol) > 0;
+        if(getResolver() != null && getResolver().hasResolutionBegun()){
+            long nbsol = getMeasures().getSolutionCount();
+            getResolver().launch(true);
+            return (getMeasures().getSolutionCount() - nbsol) > 0;
         }else{
             return findSolution();
         }
@@ -1216,8 +998,9 @@ public class Model implements Serializable, IModeler{
      * @return the number of found solutions.
      */
     public long findAllSolutions() {
+        resetObjectives();
         solve(false);
-        return measures.getSolutionCount();
+        return getMeasures().getSolutionCount();
     }
 
     /**
@@ -1340,7 +1123,7 @@ public class Model implements Serializable, IModeler{
             if (getMeasures().getSolutionCount() > 0) {
                 int opt = getObjectiveManager().getBestSolutionValue().intValue();
                 getEngine().flush();
-                search.reset();
+                getResolver().reset();
                 arithm(objective, "=", opt).post();
                 set(new AllSolutionsRecorder(this));
                 findAllSolutions();
@@ -1459,144 +1242,268 @@ public class Model implements Serializable, IModeler{
         if (!engine.isInitialized()) {
             engine.initialize();
         }
-        // first declare the search monitors to the search
-        search.unplugAllSearchMonitors();
-        search.transferSearchMonitors(searchMonitors);
-        // then, declare the stop criterion
-        search.removeAllStopCriteria();
-        search.transferStopCriteria(stopCriteria);
-
-        measures.setReadingTimeCount(creationTime + System.nanoTime());
-        search.launch(stopAtFirst);
-    }
-
-    /**
-     * Propagate constraints and related events through the constraint network until a fix point is find, or a contradiction
-     * is detected.
-     *
-     * @throws ContradictionException inconsistency is detected, the problem has no solution with the current set of domains and constraints.
-     */
-    public void propagate() throws ContradictionException {
-        if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(PropagationEngineFactory.DEFAULT.make(this));
-        }
-        if (!engine.isInitialized()) {
-            engine.initialize();
-        }
-        engine.propagate();
+        getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        getResolver().launch(stopAtFirst);
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////   MOVED IN RESOLVER   //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
     /**
-     * Restores the last solution found (if any) in this solver.
-     * That is, after calling this method:
-     * <ol>
-     * <li>the search backtracks to the ROOT node in order to restore the initial state of variables, constraints and any other backtrackable structures</li>
-     * <li>the initial state is then saved (by calling : {@code this.getEnvironment().worldPush();}).</li>
-     * <li>each variable is then instantiated to its value in the last recorded solution.</li>
-     * </ol>
-     *
-     * The input state can be rollbacked by calling :  {@code this.getEnvironment().worldPop();}.
-     * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
-     * @throws ContradictionException when inconsistency is detected while restoring the solution.
+     * @deprecated use {@link Resolver#getSolutionRecorder()} instead
+     * Will be removed in version > 3.4.0
      */
+    @Deprecated
+    public ISolutionRecorder getSolutionRecorder() {
+        return getResolver().getSolutionRecorder();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#set(ISolutionRecorder)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void set(ISolutionRecorder sr) {
+        getResolver().set(sr);
+    }
+
+    /**
+     * @deprecated use {@link Resolver#restoreLastSolution()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
     public boolean restoreLastSolution() throws ContradictionException {
-        return restoreSolution(solutionRecorder.getLastSolution());
+        return getResolver().restoreLastSolution();
     }
 
     /**
-     * Restores a given solution in this solver.
-     * That is, after calling this method:
-     * <ol>
-     * <li>the search backtracks to the ROOT node in order to restore the initial state of variables, constraints and any other backtrackable structures</li>
-     * <li>the initial state is then saved (by calling : {@code this.getEnvironment().worldPush();}).</li>
-     * <li>each variable is then instantiated to its value in the solution.</li>
-     * </ol>
-     *
-     * The input state can be rolled-back by calling :  {@code this.getEnvironment().worldPop();}.
-     * @param solution the solution to restore
-     * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
-     * @throws ContradictionException when inconsistency is detected while restoring the solution.
+     * @deprecated use {@link Resolver#restoreSolution(Solution)} instead
+     * Will be removed in version > 3.4.0
      */
+    @Deprecated
     public boolean restoreSolution(Solution solution) throws ContradictionException {
-        boolean restore = false;
-        if(solution!=null){
-            try{
-                search.restoreRootNode();
-                environment.worldPush();
-                solution.restore(this);
-                restore = true;
-            }catch (ContradictionException e){
-                throw new UnsupportedOperationException("restoring the solution ended in a failure");
-            }
-            engine.flush();
-        }
-        return restore;
+        return getResolver().restoreSolution(solution);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////// RELATED TO RESOLUTION //////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     /**
-     * Returns information on the feasibility of the current problem defined by the solver.
-     * <p>
-     * Possible back values are:
-     * <br/>- {@link ESat#TRUE}: a solution has been found,
-     * <br/>- {@link ESat#FALSE}: the CSP has been proven to have no solution,
-     * <br/>- {@link ESat#UNDEFINED}: no solution has been found so far (within given limits)
-     * without proving the unfeasibility, though.
-     *
-     * @return an {@link ESat}.
+     * @deprecated use {@link Resolver#isFeasible()} instead
+     * Will be removed in version > 3.4.0
      */
+    @Deprecated
     public ESat isFeasible() {
-        return feasible;
+        return getResolver().isFeasible();
     }
 
     /**
-     * Changes the current feasibility state of the <code>Model</code> object.
-     * <p>
-     * <b>Commonly called by the search loop, should not used without any knowledge of side effects.</b>
-     *
-     * @param feasible new state
+     * @deprecated use {@link Resolver#setFeasible(ESat)} instead
+     * Will be removed in version > 3.4.0
      */
+    @Deprecated
     public void setFeasible(ESat feasible) {
-        this.feasible = feasible;
+        getResolver().setFeasible(feasible);
     }
 
-
+    /**
+     * @deprecated use {@link Resolver#getExplainer()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public ExplanationEngine getExplainer() {
+        return getResolver().getExplainer();
+    }
 
     /**
-     * Return the current state of the CSP.
-     * <p>
-     * Given the current domains, it can return a value among:
-     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
-     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
-     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
-     * <p>
-     * Presumably, not all variables are instantiated.
-     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
-     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
-     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
+     * @deprecated use {@link Resolver#set(ExplanationEngine)} instead
+     * Will be removed in version > 3.4.0
      */
+    @Deprecated
+    public void set(ExplanationEngine explainer) {
+        getResolver().set(explainer);
+    }
+
+    /**
+     * @deprecated use {@link Resolver#plugMonitor(ISearchMonitor)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void plugMonitor(ISearchMonitor sm) {
+        getResolver().plugMonitor(sm);
+    }
+
+    /**
+     * @deprecated use {@link Resolver#unplugMonitor(ISearchMonitor)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void unplugMonitor(ISearchMonitor sm){
+        getResolver().unplugMonitor(sm);
+    }
+
+    /**
+     * @deprecated use {@link Resolver#unplugAllMonitors()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void unplugAllMonitors(){
+        getResolver().unplugAllMonitors();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#plugMonitor(ISearchMonitor)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void plugMonitor(FilteringMonitor filteringMonitor) {
+        getResolver().plugMonitor(filteringMonitor);
+    }
+
+    /**
+     * @deprecated use {@link Resolver#getEventObserver()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public FilteringMonitor getEventObserver() {
+        return getResolver().getEventObserver();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#addStopCriterion(Criterion)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void addStopCriterion(Criterion criterion){
+        getResolver().addStopCriterion(criterion);
+    }
+
+    /**
+     * @deprecated use {@link Resolver#removeStopCriterion(Criterion)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void removeStopCriterion(Criterion criterion){
+        getResolver().removeStopCriterion(criterion);
+    }
+
+    /**
+     * @deprecated use {@link Resolver#removeAllStopCriteria()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void removeAllStopCriteria(){
+        getResolver().removeAllStopCriteria();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#getMeasures()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public IMeasures getMeasures() {
+        return getResolver().getMeasures();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#isSatisfied()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
     public ESat isSatisfied() {
-        if (isFeasible() != ESat.FALSE) {
-            int OK = 0;
-            for (int c = 0; c < cIdx; c++) {
-                ESat satC = cstrs[c].isSatisfied();
-                if (ESat.FALSE == satC) {
-                    System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
-                    return ESat.FALSE;
-                } else if (ESat.TRUE == satC) {
-                    OK++;
-                }
-            }
-            if (OK == cIdx) {
-                return ESat.TRUE;
-            } else {
-                return ESat.UNDEFINED;
-            }
+        return getResolver().isSatisfied();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#propagate()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void propagate() throws ContradictionException {
+        getResolver().propagate();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#hasReachedLimit()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public boolean hasReachedLimit() {
+        return getResolver().hasReachedLimit();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#getObjectiveManager()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public ObjectiveManager getObjectiveManager() {
+        return getResolver().getObjectiveManager();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#getStrategy()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public AbstractStrategy getStrategy() {
+        return getResolver().getStrategy();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#set(AbstractStrategy[])} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void set(AbstractStrategy... strategies) {
+        if (strategies == null || strategies.length == 0) {
+            throw new UnsupportedOperationException("no search strategy has been specified");
         }
-        return ESat.FALSE;
+        if (strategies.length == 1) {
+            getResolver().set(strategies[0]);
+        } else {
+            getResolver().set(ISF.sequencer(strategies));
+        }
+    }
+
+    /**
+     * @deprecated use {@link Resolver#setObjectiveManager(ObjectiveManager)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void set(ObjectiveManager om) {
+        getResolver().setObjectiveManager(om);
+    }
+
+    /**
+     * @deprecated use {@link Resolver#makeCompleteStrategy(boolean)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void makeCompleteSearch(boolean isComplete) {
+        getResolver().makeCompleteStrategy(isComplete);
     }
 }
