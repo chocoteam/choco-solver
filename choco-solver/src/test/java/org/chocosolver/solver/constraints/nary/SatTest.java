@@ -41,6 +41,11 @@ import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.constraints.SatFactory.*;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -204,16 +209,17 @@ public class SatTest {
         BoolVar bvar2 = model.boolVar("bvar2");
         BoolVar cond = model.boolVar("cond");
         // CSTRS
-        SatFactory.addFalse(bvar);
+        addFalse(bvar);
         model.arithm(var, "=", 2).reifyWith(eq2);
-        SatFactory.addBoolAndArrayEqVar(new BoolVar[]{eq2, bvar.not()}, cond);
-        SatFactory.addBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
-        SatFactory.addBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
+        addBoolAndArrayEqVar(new BoolVar[]{eq2, bvar.not()}, cond);
+        addBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
+        addBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
         // SEARCH
-        model.set(ISF.lexico_LB(var));
+        model.set(lexico_LB(var));
 
-        model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, var);
-        Assert.assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(var).intValue(), 2);
+        model.setObjectives(MAXIMIZE, var);
+        model.solve();
+        assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(var).intValue(), 2);
 
     }
 }

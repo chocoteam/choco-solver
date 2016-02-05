@@ -36,6 +36,8 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+
 /**
  * CSPLib prob006:<br/>
  * A Golomb ruler may be defined as a set of m integers 0 = a_1 < a_2 < ... < a_m such that
@@ -97,7 +99,8 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) model.getVars()[m - 1]);
+        model.setObjectives(MINIMIZE, (IntVar) model.getVars()[m - 1]);
+        model.solve();
     }
 
     @Override

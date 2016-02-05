@@ -108,7 +108,9 @@ public class SmallSantaClaude {
             out.println(format("Average deviation: %.3f ", average_deviation.getLB()));
         });
         // find optimal solution (Santa Claus is stingy)
-        model.findOptimalSolution(MINIMIZE, average_deviation, precision);
+        model.setObjectives(MINIMIZE,average_deviation);
+        model.setPrecision(precision);
+        model.solve();
         // free IBEX structures from memory
         model.getIbex().release();
     }

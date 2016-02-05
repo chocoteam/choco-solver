@@ -105,8 +105,8 @@ public class PropCondisTest {
                 Model cd = modelPb(n, n, rnd, true);
                 or.set(ISF.lexico_LB((IntVar[]) or.getHook("decvars")));
                 cd.set(ISF.lexico_LB((IntVar[]) cd.getHook("decvars")));
-                or.findOptimalSolution(ResolutionPolicy.MINIMIZE);
-                cd.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+                or.solve();
+                cd.solve();
                 Assert.assertEquals(cd.getSolutionRecorder().getLastSolution().getIntVal((IntVar) cd.getObjectives()[0]),
                         or.getSolutionRecorder().getLastSolution().getIntVal((IntVar) or.getObjectives()[0]));
                 Assert.assertEquals(cd.getMeasures().getSolutionCount(), or.getMeasures().getSolutionCount(), "wrong nb of solutions");

@@ -31,6 +31,7 @@ package org.chocosolver.solver.search;
 
 import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -94,6 +95,7 @@ public class ParetoTest {
         // --- Monitor
         s.plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
         // --- solve
-        s.findParetoFront(MAXIMIZE, totalProfit_1, totalProfit_2);
+        s.setObjectives(ResolutionPolicy.MAXIMIZE,totalProfit_1, totalProfit_2);
+        s.solve();
     }
 }

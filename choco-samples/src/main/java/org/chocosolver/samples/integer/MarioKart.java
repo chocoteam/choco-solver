@@ -40,6 +40,7 @@ import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
@@ -161,7 +162,8 @@ public class MarioKart extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, goldFound);
+		model.setObjectives(MAXIMIZE, goldFound);
+		model.solve();
 		printInputData();
 	}
 

@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static java.util.Arrays.sort;
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 
 /**
  * <a href="http://www.inra.fr/mia/T/schiex/Doc/CELAR.shtml">CELAR Radio Link Frequency Assignment Problem</a>:
@@ -169,10 +170,10 @@ public class RLFAP extends AbstractProblem {
     @Override
     public void solve() {
         SearchMonitorFactory.limitNode(model, 10000);
-        if (opt)
-            model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
-        else
-            model.findSolution();
+        if (opt) {
+            model.setObjectives(MAXIMIZE, nb0);
+        }
+        model.solve();
     }
 
     @Override

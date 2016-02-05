@@ -95,7 +95,7 @@ public class PropagationEnginesTest {
                     Model model = problem.getModel();
                     problem.buildModel();
                     problem.configureSearch();
-                    model.set(pe.make(model));
+                    model.getResolver().set(pe.make(model));
                     //SMF.toCSV(solver, problem.getClass().getCanonicalName() + ";" + pe.name(), "/Users/kyzrsoze/Sandbox/pren/pe.csv");
                     problem.solve();
                     switch (pe) {

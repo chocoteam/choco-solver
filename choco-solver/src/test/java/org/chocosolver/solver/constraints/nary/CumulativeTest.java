@@ -164,7 +164,8 @@ public class CumulativeTest {
 				if (model.hasReachedLimit()) return -1;
 				return model.getMeasures().getSolutionCount();
 			case 1:
-				model.findOptimalSolution(MINIMIZE, last);
+				model.setObjectives(MINIMIZE, last);
+				model.solve();
 				if (model.hasReachedLimit()) return -1;
 				return model.getMeasures().getBestSolutionValue().longValue();
 			case 2:

@@ -45,6 +45,8 @@ import org.chocosolver.solver.variables.Task;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+
 public class CumulativeSample extends AbstractProblem{
 
 	//***********************************************************************************
@@ -89,7 +91,8 @@ public class CumulativeSample extends AbstractProblem{
 
 	@Override
 	public void solve() {
-		model.findOptimalSolution(ResolutionPolicy.MINIMIZE,makespan);
+		model.setObjectives(MINIMIZE, makespan);
+		model.solve();
 	}
 
 	@Override

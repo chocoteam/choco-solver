@@ -150,9 +150,6 @@ public class Model implements Serializable, IModeler{
     /** Enable attaching hooks to a model. */
     private Map<String,Object> hooks;
 
-    /** The propagation engine to use */
-    protected IPropagationEngine engine;
-
     protected ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +172,6 @@ public class Model implements Serializable, IModeler{
         this.environment = environment;
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
-        this.engine = NoPropagationEngine.SINGLETON;
         this.getResolver().setObjectiveManager(ObjectiveManager.SAT());
         this.objectives = new Variable[0];
         this.hooks = new HashMap<>();
@@ -212,6 +208,10 @@ public class Model implements Serializable, IModeler{
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public long getCreationTime(){
+        return creationTime;
+    }
 
     /**
      * The basic constant "0"
@@ -428,15 +428,6 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Returns the propagation engine used in <code>this</code>.
-     *
-     * @return a propagation engine.
-     */
-    public IPropagationEngine getEngine() {
-        return engine;
-    }
-
-    /**
      * Return the objective variables
      *
      * @return a variable
@@ -545,11 +536,30 @@ public class Model implements Serializable, IModeler{
      * @param objectives one or more variables
      */
     public void setObjectives(ResolutionPolicy policy, Variable... objectives) {
-        if(objectives == null){
+        if(objectives == null || objectives.length==0){
+            assert policy == ResolutionPolicy.SATISFACTION;
             resetObjectives();
         }else {
+            assert policy != ResolutionPolicy.SATISFACTION;
             this.objectives = objectives;
             this.policy = policy;
+            if (objectives.length == 1) {
+                if ((objectives[0].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
+                    set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
+                } else {
+                    set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
+                }
+            }else{
+                // BEWARE the usual optimization manager is only defined for mono-objective optimization
+                // so we use a satisfaction manager by default (which does nothing)
+                // with a pareto solution recorder that dynamically adds constraints to skip dominated solutions
+                set(ObjectiveManager.SAT());
+                IntVar[] _objectives = new IntVar[objectives.length];
+                for (int i = 0; i < objectives.length; i++) {
+                    _objectives[i] = (IntVar) objectives[i];
+                }
+                set(new ParetoSolutionsRecorder(policy, _objectives));
+            }
         }
     }
 
@@ -563,7 +573,7 @@ public class Model implements Serializable, IModeler{
         if(objectives == null){
             resetObjectives();
         }else {
-            this.objectives = objectives;
+            throw new UnsupportedOperationException("please specify a resolution policy");
         }
     }
 
@@ -573,6 +583,7 @@ public class Model implements Serializable, IModeler{
     public void resetObjectives() {
         this.objectives = new Variable[0];
         this.policy = ResolutionPolicy.SATISFACTION;
+        set(ObjectiveManager.SAT());
     }
 
     /**
@@ -582,16 +593,6 @@ public class Model implements Serializable, IModeler{
      */
     public void setPrecision(double p) {
         this.precision = p;
-    }
-
-    /**
-     * Attach a propagation engine <code>this</code>.
-     * It overrides the previously defined one, if any.
-     *
-     * @param propagationEngine a propagation strategy
-     */
-    public void set(IPropagationEngine propagationEngine) {
-        this.engine = propagationEngine;
     }
 
     /**
@@ -704,7 +705,7 @@ public class Model implements Serializable, IModeler{
      */
     public void postTemp(Constraint c) throws ContradictionException {
         _post(false, c);
-        if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
+        if (getEngine() == NoPropagationEngine.SINGLETON || !getEngine().isInitialized()) {
             throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                     "A call to Model.post(Constraint) is more appropriate.");
         }
@@ -712,7 +713,7 @@ public class Model implements Serializable, IModeler{
             if(settings.debugPropagation()){
                 IPropagationEngine.Trace.printFirstPropagation(propagator, settings.outputWithANSIColors());
             }
-            PropagationTrigger.execute(propagator, engine);
+            PropagationTrigger.execute(propagator, getEngine());
         }
     }
 
@@ -726,7 +727,7 @@ public class Model implements Serializable, IModeler{
     private void _post(boolean permanent, Constraint... cs) {
         boolean dynAdd = false;
         // check if the resolution already started -> if true, dynamic addition
-        if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
+        if (getEngine() != NoPropagationEngine.SINGLETON && getEngine().isInitialized()) {
             dynAdd = true;
         }
         // then store the constraints
@@ -744,7 +745,7 @@ public class Model implements Serializable, IModeler{
         // specific behavior for dynamic addition and/or reified constraints
         for (int i = 0; i < cs.length; i++) {
             if (dynAdd) {
-                engine.dynamicAddition(permanent, cs[i].getPropagators());
+                getEngine().dynamicAddition(permanent, cs[i].getPropagators());
             }
             if (cs[i].isReified()) {
                 try {
@@ -773,8 +774,8 @@ public class Model implements Serializable, IModeler{
             cstrs[idx] = cm;
             cstrs[cIdx] = null;
             // 3. check if the resolution already started -> if true, dynamic deletion
-            if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
-                engine.dynamicDeletion(c.getPropagators());
+            if (getEngine() != NoPropagationEngine.SINGLETON && getEngine().isInitialized()) {
+                getEngine().dynamicDeletion(c.getPropagators());
             }
             // 4. remove the propagators of the constraint from its variables
             for (Propagator prop : c.getPropagators()) {
@@ -911,10 +912,38 @@ public class Model implements Serializable, IModeler{
 
 
 
+    /**
+     * Executes the resolver as configured
+     * Default configuration: Computes a feasible solution (SAT) with the default search strategy
+     */
+    public void solve(){
+        solve(policy != ResolutionPolicy.SATISFACTION);
+    }
 
-
-
-
+    /**
+     * Executes the resolver as configured
+     * Default configuration: Computes a feasible solution (SAT) with the default search strategy
+     */
+    public void solve(boolean restoreBestSolution){
+        if(policy == ResolutionPolicy.SATISFACTION){
+            getResolver().setStopAtFirstSolution(true);
+        }else{
+            if(objectives == null || objectives.length == 0) {
+                throw new SolverException("No objective variable has been defined");
+            }
+            getResolver().setStopAtFirstSolution(false);
+        }
+        getResolver().launch();
+        if(restoreBestSolution){
+            try {
+                restoreLastSolution();
+            } catch (ContradictionException e) {
+                throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+            } finally {
+                getEngine().flush();
+            }
+        }
+    }
 
 
 
@@ -969,27 +998,11 @@ public class Model implements Serializable, IModeler{
      * @return <code>true</code> if and only if a solution has been found.
      */
     public boolean findSolution() {
-        solve(true);
-        return getMeasures().getSolutionCount() > 0;
-    }
-
-    /**
-     * Once {@link Model#findSolution()} has been called once, other solutions can be found using this method.
-     * <p>
-     * The search is then resume to the last found solution point.
-     *
-     * If {@link Model#findSolution()} has not been called yet, call it instead.
-     *
-     * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
-     */
-    public boolean nextSolution() {
-        if(getResolver() != null && getResolver().hasResolutionBegun()){
-            long nbsol = getMeasures().getSolutionCount();
-            getResolver().launch(true);
-            return (getMeasures().getSolutionCount() - nbsol) > 0;
-        }else{
-            return findSolution();
-        }
+        resetObjectives();
+        getResolver().setStopAtFirstSolution(true);
+        long nbsol = getMeasures().getSolutionCount();
+        solve();
+        return (getMeasures().getSolutionCount() - nbsol) > 0;
     }
 
     /**
@@ -999,108 +1012,15 @@ public class Model implements Serializable, IModeler{
      */
     public long findAllSolutions() {
         resetObjectives();
-        solve(false);
+        getResolver().setStopAtFirstSolution(false);
+        solve();
         return getMeasures().getSolutionCount();
     }
 
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
-     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
-     * the last solution found so far is restored on exit.
-     *
-     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
-     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
-     *                            set to <tt>false</tt> otherwise.
-     */
-    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
-        if (objectives == null || objectives.length == 0) {
-            throw new SolverException("No objective variable has been defined");
-        }
-        if (!getObjectiveManager().isOptimization()) {
-            if (objectives.length == 1) {
-                if ((objectives[0].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
-                    set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
-                } else {
-                    set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
-                }
-            } else {
-                // BEWARE the usual optimization manager is only defined for mono-objective optimization
-                // so we use a satisfaction manager by default (which does nothing)
-                // with a pareto solution recorder that dynamically adds constraints to skip dominated solutions
-                if (!getObjectiveManager().isOptimization()) {
-                    set(new ObjectiveManager<IntVar, Integer>(null, ResolutionPolicy.SATISFACTION, false));
-                }
-                IntVar[] _objectives = new IntVar[objectives.length];
-                for (int i = 0; i < objectives.length; i++) {
-                    _objectives[i] = (IntVar) objectives[i];
-                }
-                set(new ParetoSolutionsRecorder(policy, _objectives));
-            }
-        }
-        solve(false);
-        if (restoreLastSolution) {
-            try {
-                restoreLastSolution();
-            } catch (ContradictionException e) {
-                throw new UnsupportedOperationException("restoring the last solution ended in a failure");
-            } finally {
-                getEngine().flush();
-            }
-        }
-    }
 
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
-     * and restores the last solution found (if any) on exit.
-     * <p>
-     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean)} where <i>boolean</i> is set to <tt>true</tt>.
-     *
-     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @see #findOptimalSolution(ResolutionPolicy, boolean)
-     */
-    public void findOptimalSolution(ResolutionPolicy policy) {
-        findOptimalSolution(policy, true);
-    }
 
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
-     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
-     * the last solution found so far is restored on exit.
-     * <p>
-     * Indeed, it calls in sequence:
-     * <pre>
-     *     <code>setObjectives(objectives);
-     *     findOptimalSolution(policy, restoreLastSolution);
-     *     </code>
-     * </pre>
-     *
-     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
-     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
-     *                            set to <tt>false</tt> otherwise.
-     * @param objective the variable to optimize
-     * @see #setObjectives(Variable...)
-     * @see #findOptimalSolution(ResolutionPolicy, boolean)
-     */
-    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
-        setObjectives(objective);
-        findOptimalSolution(policy, restoreLastSolution);
-    }
 
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
-     * and restores the last solution found (if any) on exit.
-     * <p>
-     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean, IntVar)} where <i>boolean</i> is set to <tt>true</tt>.
-     *
-     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param objective the variable to optimize
-     * @see #findOptimalSolution(ResolutionPolicy, boolean, IntVar)
-     */
-    public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
-        findOptimalSolution(policy, true, objective);
-    }
+
 
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
@@ -1139,9 +1059,115 @@ public class Model implements Serializable, IModeler{
                 set(new ObjectiveManager<IntVar, Integer>(objective, policy, false));
             }
             set(new BestSolutionsRecorder(objective));
-            solve(false);
+            getResolver().setStopAtFirstSolution(false);
+            solve();
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////       TO DELETE       //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+    /**
+     * Once {@link Model#findSolution()} has been called once, other solutions can be found using this method.
+     * <p>
+     * The search is then resume to the last found solution point.
+     *
+     * If {@link Model#findSolution()} has not been called yet, call it instead.
+     *
+     * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
+     */
+    public boolean nextSolution() {
+        return findSolution();
+    }
+
+    // INTS
+
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
+     *
+     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
+     */
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
+        setObjectives(policy,getObjectives());
+        solve(restoreLastSolution);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean)} where <i>boolean</i> is set to <tt>true</tt>.
+     *
+     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy) {
+        findOptimalSolution(policy,true);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
+     * and restores the last solution found (if any) on exit.
+     * <p>
+     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean, IntVar)} where <i>boolean</i> is set to <tt>true</tt>.
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param objective the variable to optimize
+     * @see #findOptimalSolution(ResolutionPolicy, boolean, IntVar)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
+        findOptimalSolution(policy, true, objective);
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
+     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
+     * the last solution found so far is restored on exit.
+     * <p>
+     * Indeed, it calls in sequence:
+     * <pre>
+     *     <code>setObjectives(objectives);
+     *     findOptimalSolution(policy, restoreLastSolution);
+     *     </code>
+     * </pre>
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
+     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
+     *                            set to <tt>false</tt> otherwise.
+     * @param objective the variable to optimize
+     * @see #setObjectives(Variable...)
+     * @see #findOptimalSolution(ResolutionPolicy, boolean)
+     */
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
+        setObjectives(policy,objective);
+        solve(restoreLastSolution);
+    }
+
+    // PARETO
 
     /**
      * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
@@ -1165,8 +1191,8 @@ public class Model implements Serializable, IModeler{
      * @see #findOptimalSolution(ResolutionPolicy, boolean)
      */
     public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
-        setObjectives(objectives);
-        findOptimalSolution(policy, restoreLastSolution);
+        setObjectives(policy,objectives);
+        solve(restoreLastSolution);
     }
 
     /**
@@ -1183,6 +1209,8 @@ public class Model implements Serializable, IModeler{
     public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
         findParetoFront(policy, true, objectives);
     }
+
+    // REALS
 
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
@@ -1208,9 +1236,9 @@ public class Model implements Serializable, IModeler{
      * @see #findOptimalSolution(ResolutionPolicy, boolean)
      */
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
-        setObjectives(objective);
+        setObjectives(policy,objective);
         setPrecision(precision);
-        findOptimalSolution(policy, restoreLastSolution);
+        solve(restoreLastSolution);
     }
 
     /**
@@ -1226,24 +1254,7 @@ public class Model implements Serializable, IModeler{
      * @see #findOptimalSolution(ResolutionPolicy, boolean, RealVar, double)
      */
     public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
-        setObjectives(objective);
-        setPrecision(precision);
-        findOptimalSolution(policy, true);
-    }
-
-    /**
-     * This method should not be called externally. It launches the resolution process.
-     * @param stopAtFirst set to <tt>true</tt> to stop the search when the first solution is found, <tt>false</tt> otherwise.
-     */
-    protected void solve(boolean stopAtFirst) {
-        if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(PropagationEngineFactory.DEFAULT.make(this));
-        }
-        if (!engine.isInitialized()) {
-            engine.initialize();
-        }
-        getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
-        getResolver().launch(stopAtFirst);
+        findOptimalSolution(policy,true,objective,precision);
     }
 
 
@@ -1298,8 +1309,8 @@ public class Model implements Serializable, IModeler{
      * Will be removed in version > 3.4.0
      */
     @Deprecated
-    public boolean restoreLastSolution() throws ContradictionException {
-        return getResolver().restoreLastSolution();
+    public void restoreLastSolution() throws ContradictionException {
+        getResolver().restoreLastSolution();
     }
 
     /**
@@ -1307,8 +1318,8 @@ public class Model implements Serializable, IModeler{
      * Will be removed in version > 3.4.0
      */
     @Deprecated
-    public boolean restoreSolution(Solution solution) throws ContradictionException {
-        return getResolver().restoreSolution(solution);
+    public void restoreSolution(Solution solution) throws ContradictionException {
+        getResolver().restoreSolution(solution);
     }
 
     /**
@@ -1435,6 +1446,24 @@ public class Model implements Serializable, IModeler{
     @Deprecated
     public ESat isSatisfied() {
         return getResolver().isSatisfied();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#getEngine()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public IPropagationEngine getEngine() {
+        return getResolver().getEngine();
+    }
+
+    /**
+     * @deprecated use {@link Resolver#set(IPropagationEngine)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void set(IPropagationEngine propagationEngine) {
+        getResolver().set(propagationEngine);
     }
 
     /**

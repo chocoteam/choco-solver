@@ -39,6 +39,7 @@ import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
 import static java.util.Arrays.fill;
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -132,7 +133,8 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, totCost);
+        model.setObjectives(MINIMIZE, totCost);
+        model.solve();
     }
 
     @Override

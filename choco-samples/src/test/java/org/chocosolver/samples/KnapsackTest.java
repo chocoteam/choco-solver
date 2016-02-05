@@ -39,6 +39,8 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+
 /**
  * <br/>
  *
@@ -51,9 +53,7 @@ public class KnapsackTest {
     public Model modelIt(String data, int n) throws IOException {
         Knapsack pb = new Knapsack();
         pb.readArgs("-d", data, "-n", "" + n);
-        pb.createSolver();
         pb.buildModel();
-
         for (IntVar v : pb.objects) {
             if (v == null) {
                 throw new UnsupportedOperationException();
@@ -63,6 +63,7 @@ public class KnapsackTest {
     }
 
     public void solveIt(Model s, boolean optimize) {
+        System.out.println(optimize);
         if (optimize) {
             // BEWARE trick to find power variable
             IntVar power = null;
@@ -78,7 +79,8 @@ public class KnapsackTest {
                 throw new UnsupportedOperationException("The solver has no power variable");
             }
             // end of trick
-            s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
+            s.setObjectives(MAXIMIZE, power);
+            s.solve();
         } else {
             s.findAllSolutions();
         }

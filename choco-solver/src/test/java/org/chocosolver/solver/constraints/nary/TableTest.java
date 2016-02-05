@@ -180,7 +180,8 @@ public class TableTest {
             c.post();
         }
         model.sum(reified, "=", sum).post();
-        model.findOptimalSolution(MINIMIZE, sum);
+        model.setObjectives(MINIMIZE, sum);
+        model.solve();
         if (model.getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
                 out.print(model.getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");

@@ -39,9 +39,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.and;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifOnlyIf;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitNode;
 
 /**
  * <br/>
@@ -133,8 +135,9 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.limitNode(model, 200000);
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        limitNode(model, 200000);
+        model.setObjectives(MINIMIZE, objective);
+        model.solve();
     }
 
     @Override

@@ -485,7 +485,8 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         limitTime(model, "5m");
-        model.findOptimalSolution(MINIMIZE, ticks[m - 1]);
+        model.setObjectives(MINIMIZE, ticks[m - 1]);
+        model.solve();
         assertTrue(model.getMeasures().getSolutionCount() > 0);
     }
 

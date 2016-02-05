@@ -75,7 +75,7 @@ public class DynamicPostTest {
         final IntVar X = model.intVar("X", 1, 2, false);
         final IntVar Y = model.intVar("Y", 1, 2, false);
         final IntVar Z = model.intVar("Z", 1, 2, false);
-        model.set(engine.make(model));
+        model.getResolver().set(engine.make(model));
         model.findAllSolutions();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
@@ -107,7 +107,7 @@ public class DynamicPostTest {
 
                     }
                 }).post();
-        model.set(engine.make(model));
+        model.getResolver().set(engine.make(model));
         model.findAllSolutions();
         assertEquals(model.getMeasures().getSolutionCount(), 7);
     }
@@ -133,7 +133,7 @@ public class DynamicPostTest {
         });
         Chatterbox.showDecisions(model);
         Chatterbox.showSolutions(model);
-        model.set(engine.make(model));
+        model.getResolver().set(engine.make(model));
         model.findAllSolutions();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
@@ -150,7 +150,7 @@ public class DynamicPostTest {
         c2.post();
         model.unpost(c2);
         model.unpost(c1);
-        model.set(engine.make(model));
+        model.getResolver().set(engine.make(model));
         model.findAllSolutions();
         assertEquals(model.getMeasures().getSolutionCount(), 8);
         assertEquals(model.getNbCstrs(), 0);
@@ -170,7 +170,7 @@ public class DynamicPostTest {
             model.unpost(c1);
             model.unpost(c2);
         });
-        model.set(engine.make(model));
+        model.getResolver().set(engine.make(model));
         model.findAllSolutions();
         assertEquals(model.getMeasures().getSolutionCount(), 5);
         assertEquals(model.getNbCstrs(), 0);

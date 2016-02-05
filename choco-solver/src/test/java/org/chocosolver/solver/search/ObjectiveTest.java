@@ -50,6 +50,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static java.lang.System.nanoTime;
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
@@ -115,18 +116,20 @@ public class ObjectiveTest {
     private void min(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
-            model.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
-            Assert.assertEquals(model.getMeasures().getBestSolutionValue(), 0);
-            Assert.assertEquals(model.getMeasures().getNodeCount(), 2);
+            model.setObjectives(MINIMIZE, iv);
+            model.solve();
+            assertEquals(model.getMeasures().getBestSolutionValue(), 0);
+            assertEquals(model.getMeasures().getNodeCount(), 2);
         }
     }
 
     private void max(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
-            model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, iv);
-            Assert.assertEquals(model.getMeasures().getBestSolutionValue(), 10);
-            Assert.assertEquals(model.getMeasures().getNodeCount(), 21);
+            model.setObjectives(MAXIMIZE, iv);
+            model.solve();
+            assertEquals(model.getMeasures().getBestSolutionValue(), 10);
+            assertEquals(model.getMeasures().getNodeCount(), 21);
         }
     }
 
@@ -136,12 +139,14 @@ public class ObjectiveTest {
         IntVar iv = model.intVar("iv", 0, 10, false);
         model.arithm(iv, ">=", 2).post();
 
-        model.findOptimalSolution(MINIMIZE, iv);
+        model.setObjectives(MINIMIZE, iv);
+        model.solve();
         assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
 
         model.getResolver().reset();
 
-        model.findOptimalSolution(MINIMIZE, iv);
+        model.setObjectives(MINIMIZE, iv);
+        model.solve();
         assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
     }
 
@@ -189,11 +194,13 @@ public class ObjectiveTest {
         IntVar iv = model.intVar("iv", 0, 10, false);
         BoolVar v = model.arithm(iv, "<=", 2).reify();
 
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
+        model.setObjectives(MINIMIZE, v);
+        model.solve();
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
         model.getResolver().reset();
 
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
+        model.setObjectives(MINIMIZE, v);
+        model.solve();
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
@@ -207,10 +214,11 @@ public class ObjectiveTest {
         model.set(new ObjectiveManager<IntVar, Integer>(b1, MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
         if (model.getEngine() == SINGLETON) {
-            model.set(new SevenQueuesPropagatorEngine(model));
+            model.getResolver().set(new SevenQueuesPropagatorEngine(model));
         }
         model.getMeasures().setReadingTimeCount(nanoTime());
-        model.getResolver().launch(false);
+        model.getResolver().setStopAtFirstSolution(false);
+        model.solve();
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         model.getResolver().reset();

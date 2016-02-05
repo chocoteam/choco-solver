@@ -51,7 +51,10 @@ import java.util.regex.Pattern;
 
 import static java.lang.Math.max;
 import static java.util.Arrays.copyOfRange;
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
+import static org.chocosolver.solver.search.loop.lns.LNSFactory.pglns;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 
 /**
  * OR-LIBRARY:<br/>
@@ -192,9 +195,10 @@ public class AirPlaneLanding extends AbstractProblem {
     @Override
     public void solve() {
         IntVar[] ivars = model.retrieveIntVars(true);
-        LNSFactory.pglns(model, ivars, 30, 10, 200, 0, new FailCounter(model, 100));
-        SMF.limitTime(model, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        pglns(model, ivars, 30, 10, 200, 0, new FailCounter(model, 100));
+        limitTime(model, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
+        model.setObjectives(MINIMIZE, objective);
+        model.solve();
     }
 
     @Override

@@ -37,6 +37,8 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+
 /**
  * <a href="http://www.gecode.org">gecode</a>:<br/>
  * "A group of people wants to take a group photo. Each person can give
@@ -92,7 +94,8 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, violations);
+        model.setObjectives(MINIMIZE, violations);
+        model.solve();
 //        model.findAllSolutions();
     }
 

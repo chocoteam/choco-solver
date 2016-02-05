@@ -38,7 +38,10 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.minDom_LB;
+import static org.testng.Assert.assertEquals;
 
 /**
  * <br/>
@@ -105,16 +108,18 @@ public class PertTest {
                 return true;
             }
         });
-        PropagationEngineFactory.values()[0].make(sol);
-        sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        values()[0].make(sol);
+        sol.setObjectives(MINIMIZE, objective);
+        sol.solve();
         long nbsol = sol.getMeasures().getSolutionCount();
         long node = sol.getMeasures().getNodeCount();
-        for (int t = 1; t < PropagationEngineFactory.values().length; t++) {
+        for (int t = 1; t < values().length; t++) {
             sol = modeler();
-            PropagationEngineFactory.values()[t].make(sol);
-            sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
-            Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
-            Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
+            values()[t].make(sol);
+            sol.setObjectives(MINIMIZE, objective);
+            sol.solve();
+            assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
+            assertEquals(sol.getMeasures().getNodeCount(), node);
         }
     }
 }

@@ -76,7 +76,8 @@ public class Pareto extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		model.findParetoFront(ResolutionPolicy.MAXIMIZE,a,b);
+		model.setObjectives(ResolutionPolicy.MAXIMIZE,a,b);
+		model.solve();
 	}
 
 	@Override

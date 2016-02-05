@@ -83,7 +83,7 @@ public class ResolverTest {
     public void test1HBFS() {
         Model model = ProblemMaker.makeGolombRuler(8);
         hbfs(model, ISF.lexico_LB(model.retrieveIntVars(false)), .05, .1, 32);
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        model.solve();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 7);
         Assert.assertEquals(model.getMeasures().getNodeCount(), 7522);
     }
@@ -128,7 +128,7 @@ public class ResolverTest {
     public void test3() {
         Model model = ProblemMaker.makeGolombRuler(6);
         dfs(model, ISF.lexico_LB(model.retrieveIntVars(false)));
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        model.solve();
         Chatterbox.printShortStatistics(model);
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
         Assert.assertEquals(model.getMeasures().getNodeCount(), 16);
@@ -153,7 +153,7 @@ public class ResolverTest {
         lns(model, new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0),
                 new NodeCounter(model, 10));
         SMF.limitSearch(model, () -> model.getMeasures().getNodeCount() >= 1000);
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        model.solve();
         Chatterbox.printShortStatistics(model);
         Assert.assertEquals(model.getMeasures().getRestartCount(), 314);
     }
@@ -165,7 +165,7 @@ public class ResolverTest {
         lns(model, new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0),
                 new NodeCounter(model, 10));
         model.addStopCriterion(() -> model.getMeasures().getNodeCount() >= 1000);
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        model.solve();
         Chatterbox.printShortStatistics(model);
         Assert.assertEquals(model.getMeasures().getRestartCount(), 972);
     }

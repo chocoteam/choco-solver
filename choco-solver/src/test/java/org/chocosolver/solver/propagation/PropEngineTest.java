@@ -115,7 +115,7 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test3(){
         Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
-        model.set(new SevenQueuesPropagatorEngine(model));
+        model.getResolver().set(new SevenQueuesPropagatorEngine(model));
         model.findAllSolutions();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
@@ -123,7 +123,7 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test4(){
         Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
-        model.set(new TwoBucketPropagationEngine(model));
+        model.getResolver().set(new TwoBucketPropagationEngine(model));
         model.findAllSolutions();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
@@ -131,8 +131,8 @@ public class PropEngineTest {
     @Test(groups="10s", timeOut=60000)
     public void test5(){
         Model model = ProblemMaker.makeGolombRuler(10);
-        model.set(new SevenQueuesPropagatorEngine(model));
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        model.getResolver().set(new SevenQueuesPropagatorEngine(model));
+        model.solve();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }
@@ -140,8 +140,8 @@ public class PropEngineTest {
     @Test(groups="10s", timeOut=60000)
     public void test6(){
         Model model = ProblemMaker.makeGolombRuler(10);
-        model.set(new TwoBucketPropagationEngine(model));
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE);
+        model.getResolver().set(new TwoBucketPropagationEngine(model));
+        model.solve();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }

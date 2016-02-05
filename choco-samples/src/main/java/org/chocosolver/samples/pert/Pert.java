@@ -41,6 +41,8 @@ import java.util.ArrayDeque;
 import java.util.BitSet;
 import java.util.Deque;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+
 
 /**
  * <br/>
@@ -128,7 +130,8 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, vars[n - 1]);
+        model.setObjectives(MINIMIZE, vars[n - 1]);
+        model.solve();
     }
 
     @Override

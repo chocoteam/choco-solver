@@ -52,8 +52,7 @@ import static org.chocosolver.solver.variables.IVariableFactory.MAX_INT_BOUND;
 import static org.chocosolver.solver.variables.IVariableFactory.MIN_INT_BOUND;
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -83,7 +82,7 @@ public class ModelTest {
         }
         s.scalar(objects, volumes, "=", s.intVar("capa", capacites[0], capacites[1], true)).post();
         s.scalar(objects, energies, "=", power).post();
-        s.setObjectives(power);
+        s.setObjectives(MAXIMIZE,power);
         s.set(lexico_LB(objects));
         showShortStatistics(s);
         return s;
@@ -106,10 +105,11 @@ public class ModelTest {
                     s.findAllSolutions();
                     break;
                 case OPT:
-                    s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, (IntVar) s.getVar(0));
+                    s.setObjectives(MAXIMIZE, (IntVar) s.getVar(0));
+                    s.solve();
                     break;
                 default:
-                    Assert.fail("unknonw case");
+                    fail("unknonw case");
                     break;
             }
         }
@@ -284,7 +284,7 @@ public class ModelTest {
     public void testParBug2() {
         for (int iter = 0; iter < 50; iter++) {
             Model s = knapsack(true);
-            s.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
+            s.solve();
             Chatterbox.printSolutions(s);
             Assert.assertEquals(s.getObjectiveManager().getBestSolutionValue(), 51);
         }
@@ -305,18 +305,19 @@ public class ModelTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testJL300(){
+    public void testJL300() {
         Model s = new Model();
         IntVar i = s.intVar("i", -5, 5, false);
-        s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, i);
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(s.getSolutionRecorder().getLastSolution().getIntVal(i).intValue(), 5);
+        s.setObjectives(MAXIMIZE, i);
+        s.solve();
+        assertEquals(s.getMeasures().getSolutionCount(), 1);
+        assertEquals(s.getSolutionRecorder().getLastSolution().getIntVal(i).intValue(), 5);
 
         s.getEngine().flush();
         s.getResolver().reset();
 
         s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 11);
+        assertEquals(s.getMeasures().getSolutionCount(), 11);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -399,7 +400,8 @@ public class ModelTest {
         Model model = new Model();
         IntVar[] v = model.boolVarArray("v", 2);
         model.arithm(v[0], "!=", v[1]).post();
-        model.findOptimalSolution(MAXIMIZE, v[0]);
+        model.setObjectives(MAXIMIZE, v[0]);
+        model.solve();
         model.restoreLastSolution();
         assertTrue(v[0].isInstantiated());
         assertTrue(v[0].isInstantiatedTo(1));

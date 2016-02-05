@@ -39,6 +39,8 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+
 /**
  * <a href="http://en.wikipedia.org/wiki/Knapsack_problem">wikipedia</a>:<br/>
  * "Given a set of items, each with a weight and a value,
@@ -117,7 +119,8 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
+        model.setObjectives(MAXIMIZE, power);
+        model.solve();
     }
 
     @Override

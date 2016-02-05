@@ -80,7 +80,8 @@ public class ELNSTest {
 //            }
 //        });
         showSolutions(model);
-        model.findOptimalSolution(MINIMIZE, obj);
+        model.setObjectives(MINIMIZE, obj);
+        model.solve();
     }
 
 

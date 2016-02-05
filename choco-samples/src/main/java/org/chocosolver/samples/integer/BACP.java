@@ -35,6 +35,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+
 /**
  * A curriculum is a set of courses with prerequisites.
  * <p/>
@@ -194,7 +196,8 @@ public class BACP extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+        model.setObjectives(MINIMIZE, objective);
+        model.solve();
     }
 
     @Override

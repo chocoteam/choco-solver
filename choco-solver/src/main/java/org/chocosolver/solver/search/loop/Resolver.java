@@ -218,6 +218,8 @@ public final class Resolver implements Serializable {
      */
     protected boolean completeSearch = false;
 
+    protected boolean stopAtFirstSolution = true;
+
     /**
      * Create a search loop based on three components.
      *
@@ -231,8 +233,6 @@ public final class Resolver implements Serializable {
         P = p;
         L = l;
         M = m;
-        this.eoList = new FilteringMonitorList();
-        this.searchMonitors = new SearchMonitorList();
         defaultSettings();
     }
 
@@ -240,6 +240,9 @@ public final class Resolver implements Serializable {
      * Set variables to default their values
      */
     private void defaultSettings() {
+        eoList = new FilteringMonitorList();
+        searchMonitors = new SearchMonitorList();
+        engine = NoPropagationEngine.SINGLETON;
         objectivemanager = SAT();
         decision = RootDecision.ROOT;
         action = initialize;
@@ -277,7 +280,7 @@ public final class Resolver implements Serializable {
             searchWorldIndex = -1;
             mMeasures.reset();
             objectivemanager = SAT();
-            mModel.set(SINGLETON);
+            set(SINGLETON);
             crit_met = false;
             kill = true;
             entire = false;
@@ -288,10 +291,8 @@ public final class Resolver implements Serializable {
 
     /**
      * Execute the search loop
-     *
-     * @param stopAtFirst should stop at first solution (<code>true</code>) or not.
      */
-    public void launch(boolean stopAtFirst) {
+    public void launch() {
         boolean left = true;
         do {
             switch (action) {
@@ -307,7 +308,7 @@ public final class Resolver implements Serializable {
                         P.execute(this);
                         action = extend;
                     } catch (ContradictionException ce) {
-                        mModel.getEngine().flush();
+                        engine.flush();
                         mMeasures.incFailCount();
                         jumpTo = 1;
                         action = repair;
@@ -348,7 +349,7 @@ public final class Resolver implements Serializable {
                     mMeasures.incSolutionCount();
                     mModel.getObjectiveManager().update();
                     searchMonitors.onSolution();
-                    if (stopAtFirst) {
+                    if (stopAtFirstSolution()) {
                         action = stop;
                     } else {
                         jumpTo = 1;
@@ -371,7 +372,7 @@ public final class Resolver implements Serializable {
                         sat = UNDEFINED;
                     }
                     mModel.setFeasible(sat);
-                    if (stopAtFirst) { // for the next call, if needed
+                    if (stopAtFirstSolution()) { // for the next call, if needed
                         jumpTo = 1;
                         action = repair;
                     }
@@ -394,6 +395,20 @@ public final class Resolver implements Serializable {
      * - initialize the Move and the search strategy
      */
     private void initialize() {
+
+
+
+        if (engine == NoPropagationEngine.SINGLETON) {
+            this.set(PropagationEngineFactory.DEFAULT.make(mModel));
+        }
+        if (!engine.isInitialized()) {
+            engine.initialize();
+        }
+        getMeasures().setReadingTimeCount(mModel.getCreationTime() + System.nanoTime());
+
+
+
+
         mMeasures.startStopwatch();
         rootWorldIndex = mModel.getEnvironment().getWorldIndex();
         mModel.getEnvironment().buildFakeHistoryOn(mModel.getSettings().getEnvironmentHistorySimulationCondition());
@@ -405,7 +420,7 @@ public final class Resolver implements Serializable {
             searchWorldIndex = mModel.getEnvironment().getWorldIndex(); // w = 2
             mModel.getEnvironment().worldPush(); // store another time for restart purpose: w = 2 -> 3
         } catch (ContradictionException ce) {
-            mModel.getEngine().flush();
+            engine.flush();
             mMeasures.incFailCount();
             searchMonitors.onContradiction(ce);
             L.record(this);
@@ -427,7 +442,7 @@ public final class Resolver implements Serializable {
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
             mModel.getEnvironment().worldPop();
             mModel.setFeasible(FALSE);
-            mModel.getEngine().flush();
+            engine.flush();
             mModel.getMeasures().incFailCount();
             entire = true;
             action = stop;
@@ -774,8 +789,8 @@ public final class Resolver implements Serializable {
      * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
      * @throws ContradictionException when inconsistency is detected while restoring the solution.
      */
-    public boolean restoreLastSolution() throws ContradictionException {
-        return restoreSolution(getSolutionRecorder().getLastSolution());
+    public void restoreLastSolution() throws ContradictionException {
+        restoreSolution(getSolutionRecorder().getLastSolution());
     }
 
     /**
@@ -792,20 +807,17 @@ public final class Resolver implements Serializable {
      * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
      * @throws ContradictionException when inconsistency is detected while restoring the solution.
      */
-    public boolean restoreSolution(Solution solution) throws ContradictionException {
-        boolean restore = false;
+    public void restoreSolution(Solution solution) throws ContradictionException {
         if(solution!=null){
             try{
                 restoreRootNode();
                 mModel.getEnvironment().worldPush();
                 solution.restore(mModel);
-                restore = true;
             }catch (ContradictionException e){
                 throw new UnsupportedOperationException("restoring the solution ended in a failure");
             }
-            mModel.getEngine().flush();
+            engine.flush();
         }
-        return restore;
     }
 
     /**
@@ -1014,6 +1026,28 @@ public final class Resolver implements Serializable {
 
     // Propagation
 
+    /** The propagation engine to use */
+    protected IPropagationEngine engine;
+
+    /**
+     * Returns the propagation engine used in <code>this</code>.
+     *
+     * @return a propagation engine.
+     */
+    public IPropagationEngine getEngine() {
+        return engine;
+    }
+
+    /**
+     * Attach a propagation engine <code>this</code>.
+     * It overrides the previously defined one, if any.
+     *
+     * @param propagationEngine a propagation strategy
+     */
+    public void set(IPropagationEngine propagationEngine) {
+        this.engine = propagationEngine;
+    }
+
     /**
      * Propagate constraints and related events through the constraint network until a fix point is find, or a contradiction
      * is detected.
@@ -1021,13 +1055,13 @@ public final class Resolver implements Serializable {
      * @throws ContradictionException inconsistency is detected, the problem has no solution with the current set of domains and constraints.
      */
     public void propagate() throws ContradictionException {
-        if (mModel.getEngine() == NoPropagationEngine.SINGLETON) {
-            mModel.set(PropagationEngineFactory.DEFAULT.make(mModel));
+        if (engine == NoPropagationEngine.SINGLETON) {
+            set(PropagationEngineFactory.DEFAULT.make(mModel));
         }
-        if (!mModel.getEngine().isInitialized()) {
-            mModel.getEngine().initialize();
+        if (!engine.isInitialized()) {
+            engine.initialize();
         }
-        mModel.getEngine().propagate();
+        engine.propagate();
     }
 
     /**
@@ -1050,4 +1084,21 @@ public final class Resolver implements Serializable {
             set(ISF.sequencer(strategies));
         }
     }
+
+    public boolean stopAtFirstSolution() {
+        return stopAtFirstSolution;
+    }
+
+    public void setStopAtFirstSolution(boolean stopAtFirstSolution) {
+        this.stopAtFirstSolution = stopAtFirstSolution;
+    }
+
+
+
+
+
+
+
+
+
 }
