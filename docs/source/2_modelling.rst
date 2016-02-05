@@ -400,7 +400,7 @@ If we want an integer variable ``sum`` to be equal to the sum of values of varia
 
 .. literalinclude:: /../../choco-samples/src/main/java/org/chocosolver/samples/integer/CarSequencing.java
    :language: java
-   :lines: 107
+   :lines: 104
 
 A constraint may define its specific checker through the method ``isSatisfied()``, but most of the time the checker is given by checking the entailment of each of its propagators.
 The satisfaction of the constraints' solver is done on each solution if assertions are enabled.
