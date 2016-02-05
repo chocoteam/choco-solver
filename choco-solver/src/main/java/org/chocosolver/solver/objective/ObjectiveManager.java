@@ -189,7 +189,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     }
 
     /**
-     * Prevent the solver from computing worse quality solutions
+     * Prevent the model from computing worse quality solutions
      *
      * @throws org.chocosolver.solver.exception.ContradictionException
      */
@@ -242,7 +242,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     public void updateBestLB(N lb) {
         if (bestProvedLB == null) {
             // this may happen with multi-thread resolution
-            // when one thread find a solver before one other is being launched
+            // when one thread find a model before one other is being launched
             bestProvedLB = lb;
         }
         if (lb.doubleValue() > bestProvedLB.doubleValue()) {
@@ -258,7 +258,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     public void updateBestUB(N ub) {
         if (bestProvedUB == null) {
             // this may happen with multi-thread resolution
-            // when one thread find a solver before one other is being launched
+            // when one thread find a model before one other is being launched
             bestProvedUB = ub;
         }
         if (ub.doubleValue() < bestProvedUB.doubleValue()) {

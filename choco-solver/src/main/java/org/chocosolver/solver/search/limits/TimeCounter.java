@@ -42,7 +42,7 @@ import org.chocosolver.solver.Model;
 public class TimeCounter extends ACounter {
 
     /**
-     * @param model the solver to instrument
+     * @param model the model to instrument
      * @param timeLimitInNano in nanosecond
      */
     public TimeCounter(Model model, long timeLimitInNano) {

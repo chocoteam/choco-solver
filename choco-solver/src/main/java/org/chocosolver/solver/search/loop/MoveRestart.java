@@ -75,24 +75,24 @@ public class MoveRestart implements Move {
     }
 
     @Override
-    public boolean extend(SearchLoop searchLoop) {
+    public boolean extend(Resolver resolver) {
         boolean extend;
         if (!criterion.isMet(limit)) {
-            extend =  move.extend(searchLoop);
+            extend =  move.extend(resolver);
         }else{
-            restart(searchLoop);
+            restart(resolver);
             extend = true;
         }
         return extend;
     }
 
     @Override
-    public boolean repair(SearchLoop searchLoop) {
+    public boolean repair(Resolver resolver) {
         boolean repair;
         if (!criterion.isMet(limit)) {
-            repair =  move.repair(searchLoop);
+            repair =  move.repair(resolver);
         }else{
-            restart(searchLoop);
+            restart(resolver);
             repair = true;
         }
         return repair;
@@ -113,7 +113,7 @@ public class MoveRestart implements Move {
         move.setStrategy(aStrategy);
     }
 
-    protected void restart(SearchLoop searchLoop) {
+    protected void restart(Resolver resolver) {
         // update parameters for restarts
         restartFromStrategyCount++;
         if (restartFromStrategyCount >= restartLimit) {
@@ -122,7 +122,7 @@ public class MoveRestart implements Move {
             limit += restartStrategy.getNextCutoff(restartFromStrategyCount);
         }
         // then do the restart
-        searchLoop.restart();
+        resolver.restart();
     }
 
     @Override

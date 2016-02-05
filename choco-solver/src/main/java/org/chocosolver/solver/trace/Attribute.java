@@ -36,7 +36,7 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 
 /**
- * List of attributes that can be extracted from a Solver.
+ * List of attributes that can be extracted from a Model.
  * Created by cprudhom on 16/03/15.
  * Project: choco.
  * @author Charles Prud'homme
@@ -204,7 +204,7 @@ public enum Attribute {
 
 
     /**
-     * Method to evaluate a specific attribute over a solver
+     * Method to evaluate a specific attribute over a model
      * @param model to evaluate
      * @return the value of the attribute
      */
@@ -217,7 +217,7 @@ public enum Attribute {
 
     /**
      * Print all declared attributes and their values
-     * @param model solver to evaluate
+     * @param model model to evaluate
      */
     public static void printAll(Model model) {
         printSuccint(model);
@@ -227,11 +227,11 @@ public enum Attribute {
     }
 
     /**
-     * Print basic features of a solver
+     * Print basic features of a model
      * @param model to evaluate
      */
     public static void printSuccint(Model model) {
-        Chatterbox.out.printf("- Solver[%s] features:\n", model.getName());
+        Chatterbox.out.printf("- Model[%s] features:\n", model.getName());
         Chatterbox.out.printf("\tVariables : %d\n", model.getNbVars());
         Chatterbox.out.printf("\tConstraints : %d\n", model.getNbCstrs());
         Chatterbox.out.printf("\tDefault search strategy : %s\n", model.getSearchLoop().isDefaultSearchUsed()?"yes":"no");

@@ -46,9 +46,9 @@ import org.chocosolver.solver.Model;
 public interface ISearchBinder {
 
     /**
-     * Configure or override the search strategies of the given solver.
+     * Configure or override the search strategies of the given model.
      *
-     * @param model a solver
+     * @param model a model
      */
     void configureSearch(Model model);
 }

@@ -2807,7 +2807,7 @@ The two methods add clauses to the SAT constraint.
 
 **API**: ::
 
-    boolean addClauses(LogOp TREE, Solver SOLVER)
+    boolean addClauses(LogOp TREE, Model SOLVER)
     boolean addClauses(BoolVar[] POSLITS, BoolVar[] NEGLITS)
 
 

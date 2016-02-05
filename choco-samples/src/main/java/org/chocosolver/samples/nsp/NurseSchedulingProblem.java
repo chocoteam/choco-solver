@@ -124,7 +124,7 @@ public class NurseSchedulingProblem {
     /**
      * print the current solver solution if exists
      *
-     * @param s the CPSolver
+     * @param s the CPModel
      */
     public String solutionToString(Model s) {
         if (ESat.TRUE != s.isFeasible()) {
@@ -149,7 +149,7 @@ public class NurseSchedulingProblem {
     /**
      * print the current solver solution if exists
      *
-     * @param s the CPSolver
+     * @param s the CPModel
      */
     public void printSolution(Model s) {
         if (ESat.TRUE != s.isFeasible()) {
@@ -172,7 +172,7 @@ public class NurseSchedulingProblem {
     /**
      * get the current solver solution as the assignment table if exists
      *
-     * @param s the CPSolver
+     * @param s the CPModel
      * @return the current solver solution as the assignment table [nbEmployees][nbDays] if exists, null otherwise
      */
     public int[][] getSolution(Model s) {

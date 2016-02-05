@@ -56,7 +56,7 @@ public class NurseScheduling {
 
 
         /*IMPACT {
-            AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+            AbstractStrategy getGoal(Model s, IntVar[] vars) {
                 return new ImpactBasedBranching(s, vars);
             }
         },*/
@@ -76,7 +76,7 @@ public class NurseScheduling {
             }
         },
         /*DOMWDEG {
-            AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+            AbstractStrategy getGoal(Model s, IntVar[] vars) {
                 return StrategyFactory.domWDeg(s, vars, new IncreasingDomain());
             }
         },*/
@@ -87,7 +87,7 @@ public class NurseScheduling {
         },
 
         /*LEX {
-            AbstractStrategy getGoal(Solver s, IntVar[] vars) {
+            AbstractStrategy getGoal(Model s, IntVar[] vars) {
                 return StrategyFactory.lexicographic(s, vars);
             }
         },*/
@@ -98,7 +98,7 @@ public class NurseScheduling {
         };
 
 
-        //	DOMDDEG { AbstractIntBranchingStrategy getGoal(Solver s, IntVar[] vars) { return BranchingFactory.domDDeg(s, vars, new IncreasingDomain()); }},
+        //	DOMDDEG { AbstractIntBranchingStrategy getGoal(Model s, IntVar[] vars) { return BranchingFactory.domDDeg(s, vars, new IncreasingDomain()); }},
         AbstractStrategy getGoal(Model s, IntVar[] vars) {
             return null;
         }
@@ -112,7 +112,7 @@ public class NurseScheduling {
         }
     }
 
-//    private AbstractStrategy<IntVar> buildStrategy(Solver solver, IntVar[][] shifts, CostRegular[][] cregs) {
+//    private AbstractStrategy<IntVar> buildStrategy(Model solver, IntVar[][] shifts, CostRegular[][] cregs) {
 //        int[] days = new int[shifts.length * shifts[0].length];
 //        IntVar[] flatten = new IntVar[shifts.length * shifts[0].length];
 //        for (int e = 0, k = 0; e < shifts.length; e++) {

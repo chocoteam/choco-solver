@@ -49,7 +49,7 @@ import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.propagation.PropagationTrigger;
 import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.loop.SearchLoop;
+import org.chocosolver.solver.search.loop.Resolver;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
@@ -65,10 +65,10 @@ import java.io.*;
 import java.util.*;
 
 /**
- * The <code>Solver</code> is the header component of Constraint Programming.
+ * The <code>Model</code> is the header component of Constraint Programming.
  * It embeds the list of <code>Variable</code> (and their <code>Domain</code>), the <code>Constraint</code>'s network,
  * and a <code>IPropagationEngine</code> to pilot the propagation.<br/>
- * <code>Solver</code> includes a <code>AbstractSearchLoop</code> to guide the search loop: applying decisions and propagating,
+ * <code>Model</code> includes a <code>AbstractSearchLoop</code> to guide the search loop: applying decisions and propagating,
  * running backups and rollbacks and storing solutions.
  *
  * @author Xavier Lorca
@@ -81,182 +81,82 @@ import java.util.*;
  */
 public class Model implements Serializable, IModeler{
 
-    /**
-     * For serialization purpose
-     */
+    /** For serialization purpose */
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Settings to use with this solver
-     */
-    private Settings settings = new Settings() {
-    };
-
-    /**
-     * An explanation engine
-     */
-    private ExplanationEngine explainer;
-
-    /**
-     * A list of filtering monitors to be informed on any variable events
-     */
-    private FilteringMonitorList eoList;
-
-    /**
-     * Variables of the solver
-     */
-    Variable[] vars;
-
-    /**
-     * Index of the last added variable
-     */
-    int vIdx;
-
-    /**
-     * Constraints of the solver
-     */
-    Constraint[] cstrs;
-
-    /**
-     * Index of the last added constraint
-     */
-    int cIdx;
-
-    /**
-     * A map to cache constants (considered as fixed variables)
-     */
+    /** A map to cache constants (considered as fixed variables) */
     public TIntObjectHashMap<IntVar> cachedConstants;
 
-    /**
-     * Environment, based of the search tree (trailing or copying)
-     */
+    /** Variables of the model */
+    Variable[] vars;
+
+    /** Index of the last added variable */
+    int vIdx;
+
+    /** Constraints of the model */
+    Constraint[] cstrs;
+
+    /** Index of the last added constraint */
+    int cIdx;
+
+    /** Environment, based of the search tree (trailing or copying) */
     final IEnvironment environment;
 
-    /**
-     * Search loop of the solver
-     */
-    protected SearchLoop search;
+    /** Resolver of the model */
+    protected Resolver search;
 
-    /**
-     * List of search monitors to plug before launching the search
-     */
-    protected List<ISearchMonitor> searchMonitors;
-
-
-    /**
-     * List of stop criteria to plug before launching the search
-     */
-    protected List<Criterion> stopCriteria;
-
-    /**
-     * The propagation engine to use
-     */
-    protected IPropagationEngine engine;
-
-    /**
-     * Solver's measures
-     */
-    protected final IMeasures measures;
-
-    /**
-     * Array of variable to optimize.
-     */
+    /** Array of variable to optimize. */
     protected Variable[] objectives;
 
-    /**
-     * Precision to consider when optimizing a RealVariable
-     */
+    /** Precision to consider when optimizing a RealVariable */
     protected double precision = 0.00D;
 
-    /**
-     * A solution recorder
-     */
-    protected ISolutionRecorder solutionRecorder;
-
-    /**
-     * Solver name
-     */
+    /** Model name */
     protected String name;
 
-    /**
-     * Problem feasbility:
-     * - UNDEFINED if unknown,
-     * - TRUE if satisfiable,
-     * - FALSE if unsatisfiable
-     */
-    ESat feasible = ESat.UNDEFINED;
-
-    /**
-     * Stores this solver's creation time
-     */
+    /** Stores this model's creation time */
     protected long creationTime;
 
-    /**
-     * Counter used to set ids to variables and propagators
-     */
+    /** Counter used to set ids to variables and propagators */
     protected int id = 1;
 
-    /**
-     * Basic TRUE constraint, cached to avoid multiple useless occurrences
-     */
+    /** Basic TRUE constraint, cached to avoid multiple useless occurrences */
     private Constraint TRUE;
 
-    /**
-     * Basic FALSE constraint, cached to avoid multiple useless occurrences
-     */
+    /** Basic FALSE constraint, cached to avoid multiple useless occurrences */
     private Constraint FALSE;
 
-    /**
-     * Basic ZERO constant, cached to avoid multiple useless occurrences.
-     */
+    /** Basic ZERO constant, cached to avoid multiple useless occurrences. */
     private BoolVar ZERO;
 
-    /**
-     * Basic ONE constant, cached to avoid multiple useless occurrences.
-     */
+    /** Basic ONE constant, cached to avoid multiple useless occurrences. */
     private BoolVar ONE;
 
-
-    /**
-     * A MiniSat instance, useful to deal with clauses
-     */
+    /** A MiniSat instance, useful to deal with clauses*/
     protected SatConstraint minisat;
 
-    /**
-     * A MiniSat instance adapted to nogood management
-     */
+    /** A MiniSat instance adapted to nogood management */
     protected NogoodConstraint nogoods;
 
-    /**
-     * A CondisConstraint instance adapted to constructive disjunction management
-     */
+    /** A CondisConstraint instance adapted to constructive disjunction management */
     protected CondisConstraint condis;
 
-    /**
-     * An Ibex (continuous constraint solver) instance
-     */
+    /** An Ibex (continuous constraint model) instance */
     private Ibex ibex;
 
-
-    /**
-     * Enable attaching hooks to a solver.
-     */
+    /** Enable attaching hooks to a model. */
     private Map<String,Object> hooks;
 
-    /**
-     * For autonumbering anonymous solvers.
-     */
-    private static int solverInitNumber;
+    /** For autonumbering anonymous models. */
+    private static int modelInitNumber;
 
-    /**
-     * @return next solver's number, for anonymous solvers.
-     */
-    private static synchronized int nextSolverNum() {
-        return solverInitNumber++;
+    /** @return next model's number, for anonymous models. */
+    private static synchronized int nextModelNum() {
+        return modelInitNumber++;
     }
 
     /**
-     * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
+     * Create a model object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
      *
      * @param environment a backtracking environment
@@ -284,18 +184,18 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Create a solver object with default parameters.
+     * Create a model object with default parameters.
      *
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
      */
     public Model() {
-        this(Environments.DEFAULT.make(), "Solver-" + nextSolverNum());
+        this(Environments.DEFAULT.make(), "Model-" + nextModelNum());
     }
 
     /**
-     * Create a solver object with default parameters, named <code>name</code>.
+     * Create a model object with default parameters, named <code>name</code>.
      *
-     * @param name name attributed to this solver
+     * @param name name attributed to this model
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
      */
     public Model(String name) {
@@ -364,12 +264,12 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Returns the unique and internal search loop.
-     * Set to null when this solver is created,
+     * Set to null when this model is created,
      * it is lazily created (if needed) when a resolution is asked.
      *
      * @return the unique and internal <code>SearchLoop</code> object.
      */
-    public SearchLoop getSearchLoop() {
+    public Resolver getSearchLoop() {
         return search;
     }
 
@@ -399,7 +299,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Returns the array of declared <code>Variable</code> objects defined in this <code>Solver</code>.
+     * Returns the array of declared <code>Variable</code> objects defined in this <code>Model</code>.
      *
      * @return array of variables
      */
@@ -428,7 +328,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains all the IntVar of the solver.
+     * Iterate over the variable of <code>this</code> and build an array that contains all the IntVar of the model.
      * <b>excludes</b> BoolVar if includeBoolVar=false.
      * It also contains FIXED variables and VIEWS, if any.
      *
@@ -499,7 +399,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Returns the array of declared <code>Constraint</code> objects defined in this <code>Solver</code>.
+     * Returns the array of declared <code>Constraint</code> objects defined in this <code>Model</code>.
      *
      * @return array of constraints
      */
@@ -518,7 +418,7 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Return the name, if any, of <code>this</code>.
-     * @return this solver's name
+     * @return this model's name
      */
     public String getName() {
         return name;
@@ -526,7 +426,7 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Return the backtracking environment of <code>this</code>.
-     * @return the backtracking environment of this solver
+     * @return the backtracking environment of this model
      */
     public IEnvironment getEnvironment() {
         return environment;
@@ -535,7 +435,7 @@ public class Model implements Serializable, IModeler{
     /**
      * Return a reference to the measures recorder.
      * This enables to get, for instance, the number of solutions found, time count, etc.
-     * @return this solver's measure recorder
+     * @return this model's measure recorder
      */
     public IMeasures getMeasures() {
         return measures;
@@ -543,7 +443,7 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Return the explanation engine plugged into <code>this</code>.
-     * @return this solver's explanation engine
+     * @return this model's explanation engine
      */
     public ExplanationEngine getExplainer() {
         return explainer;
@@ -551,7 +451,7 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Return the solution recorder
-     * @return this solver's solution recorder
+     * @return this model's solution recorder
      */
     public ISolutionRecorder getSolutionRecorder() {
         return solutionRecorder;
@@ -618,10 +518,10 @@ public class Model implements Serializable, IModeler{
     /**
      * Override the default search loop to use in <code>this</code>.
      *
-     * @param searchLoop the search loop to use
+     * @param resolver the search loop to use
      */
-    public void set(SearchLoop searchLoop) {
-        this.search = searchLoop;
+    public void set(Resolver resolver) {
+        this.search = resolver;
     }
 
     /**
@@ -808,7 +708,7 @@ public class Model implements Serializable, IModeler{
 
 
     /**
-     * Adds the <code>hookObject</code> to store in this solver, associated with the name <code>hookName</code>.
+     * Adds the <code>hookObject</code> to store in this model, associated with the name <code>hookName</code>.
      * A hook is a simple map "hookName" <-> hookObject.
      * @param hookName name of the hook
      * @param hookObject hook to store
@@ -826,15 +726,15 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Empties the hooks attaches to this solver.
+     * Empties the hooks attaches to this model.
      */
     public void removeAllHooks(){
         this.hooks.clear();
     }
 
     /**
-     * Changes the name of this solver to be equal to the argument <code>name</code>.
-     * @param name the new name of this solver.
+     * Changes the name of this model to be equal to the argument <code>name</code>.
+     * @param name the new name of this model.
      */
     public void setName(String name){
         this.name = name;
@@ -910,7 +810,7 @@ public class Model implements Serializable, IModeler{
         _post(false, c);
         if (engine == NoPropagationEngine.SINGLETON || !engine.isInitialized()) {
             throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
-                    "A call to Solver.post(Constraint) is more appropriate.");
+                    "A call to Model.post(Constraint) is more appropriate.");
         }
         for (Propagator propagator : c.getPropagators()) {
             if(settings.debugPropagation()){
@@ -995,8 +895,8 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Return a constraint embedding a minisat solver.
-     * It is highly recommended that there is only once instance of this constraint in a solver.
+     * Return a constraint embedding a minisat model.
+     * It is highly recommended that there is only once instance of this constraint in a model.
      * So a call to this method will create and post the constraint if it does not exist.
      *
      * @return the minisat constraint
@@ -1010,8 +910,8 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Return a constraint embedding a nogood store (based on a sat solver).
-     * It is highly recommended that there is only once instance of this constraint in a solver.
+     * Return a constraint embedding a nogood store (based on a sat model).
+     * It is highly recommended that there is only once instance of this constraint in a model.
      * So a call to this method will create and post the constraint if it does not exist.
      *
      * @return the minisat constraint
@@ -1057,7 +957,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Changes the current feasibility state of the <code>Solver</code> object.
+     * Changes the current feasibility state of the <code>Model</code> object.
      * <p>
      * <b>Commonly called by the search loop, should not used without any knowledge of side effects.</b>
      *
@@ -1066,6 +966,221 @@ public class Model implements Serializable, IModeler{
     public void setFeasible(ESat feasible) {
         this.feasible = feasible;
     }
+
+
+
+    /**
+     * Return the current state of the CSP.
+     * <p>
+     * Given the current domains, it can return a value among:
+     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
+     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
+     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
+     * <p>
+     * Presumably, not all variables are instantiated.
+     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
+     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
+     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
+     */
+    public ESat isSatisfied() {
+        if (isFeasible() != ESat.FALSE) {
+            int OK = 0;
+            for (int c = 0; c < cIdx; c++) {
+                ESat satC = cstrs[c].isSatisfied();
+                if (ESat.FALSE == satC) {
+                    System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
+                    return ESat.FALSE;
+                } else if (ESat.TRUE == satC) {
+                    OK++;
+                }
+            }
+            if (OK == cIdx) {
+                return ESat.TRUE;
+            } else {
+                return ESat.UNDEFINED;
+            }
+        }
+        return ESat.FALSE;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Return a string describing the CSP defined in <code>this</code>.
+     */
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder(256);
+        st.append(String.format("\n Model[%s]\n", name));
+        st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
+        st.append(String.format("Feasability: %s\n", feasible));
+        st.append("== variables ==\n");
+        for (int v = 0; v < vIdx; v++) {
+            st.append(vars[v].toString()).append('\n');
+        }
+        st.append("== constraints ==\n");
+        for (int c = 0; c < cIdx; c++) {
+            st.append(cstrs[c].toString()).append('\n');
+        }
+        return st.toString();
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////// RELATED TO I/O ////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Kicks off the serialization mechanism and flatten the {@code model} into the given {@code file}.
+     *
+     * @param model to flatten
+     * @param file   scope file
+     * @throws java.io.IOException if an I/O exception occurs.
+     */
+    public static void writeInFile(final Model model, final File file) throws IOException {
+        FileOutputStream fos;
+        ObjectOutputStream out;
+        fos = new FileOutputStream(file);
+        out = new ObjectOutputStream(fos);
+        out.writeObject(model);
+        out.close();
+    }
+
+    /**
+     * Kicks off the serialization mechanism and flatten the {@code model} into a file
+     * in the default temporary-file directory.
+     *
+     * @param model to flatten
+     * @return output file
+     * @throws IOException if an I/O exception occurs.
+     */
+    public static File writeInFile(final Model model) throws IOException {
+        final File file = File.createTempFile("SOLVER_", ".ser");
+        FileOutputStream fos;
+        ObjectOutputStream out;
+        fos = new FileOutputStream(file);
+        out = new ObjectOutputStream(fos);
+        out.writeObject(model);
+        out.close();
+        return file;
+    }
+
+
+    /**
+     * Restore flatten {@link Model} from the given {@code file}.
+     *
+     * @param file input file
+     * @return a {@link Model}
+     * @throws IOException            if an I/O exception occurs.
+     * @throws ClassNotFoundException if wrong flattened object.
+     */
+    @SuppressWarnings("unused")
+    public static Model readFromFile(final String file) throws IOException, ClassNotFoundException {
+        FileInputStream fis;
+        ObjectInputStream in;
+        fis = new FileInputStream(file);
+        in = new ObjectInputStream(fis);
+        final Model model = (Model) in.readObject();
+        in.close();
+        return model;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <b>This methods should not be called by the user.</b>
+     * @return a free id to use
+     */
+    public int nextId() {
+        return id++;
+    }
+
+    /**
+     * Get the ibex reference
+     * Creates one if none
+     *
+     * @return the ibex reference
+     */
+    public Ibex getIbex() {
+        if (ibex == null) ibex = new Ibex();
+        return ibex;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public Model _me(){
+        return this;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /** A solution recorder */
+    protected ISolutionRecorder solutionRecorder;
+
+    /**
+     * Problem feasbility:
+     * - UNDEFINED if unknown,
+     * - TRUE if satisfiable,
+     * - FALSE if unsatisfiable
+     */
+    ESat feasible = ESat.UNDEFINED;
+
+
+
+    /** Settings to use with this solver */
+    private Settings settings = new Settings() {};
+
+    /** An explanation engine */
+    private ExplanationEngine explainer;
+
+    /** A list of filtering monitors to be informed on any variable events */
+    private FilteringMonitorList eoList;
+
+    /** List of search monitors to plug before launching the search */
+    protected List<ISearchMonitor> searchMonitors;
+
+    /** List of stop criteria to plug before launching the search */
+    protected List<Criterion> stopCriteria;
+
+    /** The propagation engine to use */
+    protected IPropagationEngine engine;
+
+    /** Model's measures */
+    protected final IMeasures measures;
 
     /**
      * Returns information on the completeness of the search process.
@@ -1256,7 +1371,7 @@ public class Model implements Serializable, IModeler{
             }
         } else {
             if (policy == ResolutionPolicy.SATISFACTION) {
-                throw new SolverException("Solver.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
+                throw new SolverException("Model.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
             }
             if (objective == null) {
                 throw new SolverException("No objective variable has been defined");
@@ -1395,39 +1510,6 @@ public class Model implements Serializable, IModeler{
         engine.propagate();
     }
 
-    /**
-     * Return the current state of the CSP.
-     * <p>
-     * Given the current domains, it can return a value among:
-     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
-     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
-     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
-     * <p>
-     * Presumably, not all variables are instantiated.
-     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
-     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
-     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
-     */
-    public ESat isSatisfied() {
-        if (isFeasible() != ESat.FALSE) {
-            int OK = 0;
-            for (int c = 0; c < cIdx; c++) {
-                ESat satC = cstrs[c].isSatisfied();
-                if (ESat.FALSE == satC) {
-                    System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
-                    return ESat.FALSE;
-                } else if (ESat.TRUE == satC) {
-                    OK++;
-                }
-            }
-            if (OK == cIdx) {
-                return ESat.TRUE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        }
-        return ESat.FALSE;
-    }
 
     /**
      * Restores the last solution found (if any) in this solver.
@@ -1474,119 +1556,5 @@ public class Model implements Serializable, IModeler{
             engine.flush();
         }
         return restore;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Return a string describing the CSP defined in <code>this</code>.
-     */
-    @Override
-    public String toString() {
-        StringBuilder st = new StringBuilder(256);
-        st.append(String.format("\n Solver[%s]\n", name));
-        st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
-        st.append(String.format("Feasability: %s\n", feasible));
-        st.append("== variables ==\n");
-        for (int v = 0; v < vIdx; v++) {
-            st.append(vars[v].toString()).append('\n');
-        }
-        st.append("== constraints ==\n");
-        for (int c = 0; c < cIdx; c++) {
-            st.append(cstrs[c].toString()).append('\n');
-        }
-        return st.toString();
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////// RELATED TO I/O ////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Kicks off the serialization mechanism and flatten the {@code solver} into the given {@code file}.
-     *
-     * @param model to flatten
-     * @param file   scope file
-     * @throws java.io.IOException if an I/O exception occurs.
-     */
-    public static void writeInFile(final Model model, final File file) throws IOException {
-        FileOutputStream fos;
-        ObjectOutputStream out;
-        fos = new FileOutputStream(file);
-        out = new ObjectOutputStream(fos);
-        out.writeObject(model);
-        out.close();
-    }
-
-    /**
-     * Kicks off the serialization mechanism and flatten the {@code model} into a file
-     * in the default temporary-file directory.
-     *
-     * @param model to flatten
-     * @return output file
-     * @throws IOException if an I/O exception occurs.
-     */
-    public static File writeInFile(final Model model) throws IOException {
-        final File file = File.createTempFile("SOLVER_", ".ser");
-        FileOutputStream fos;
-        ObjectOutputStream out;
-        fos = new FileOutputStream(file);
-        out = new ObjectOutputStream(fos);
-        out.writeObject(model);
-        out.close();
-        return file;
-    }
-
-
-    /**
-     * Restore flatten {@link Model} from the given {@code file}.
-     *
-     * @param file input file
-     * @return a {@link Model}
-     * @throws IOException            if an I/O exception occurs.
-     * @throws ClassNotFoundException if wrong flattened object.
-     */
-    @SuppressWarnings("unused")
-    public static Model readFromFile(final String file) throws IOException, ClassNotFoundException {
-        FileInputStream fis;
-        ObjectInputStream in;
-        fis = new FileInputStream(file);
-        in = new ObjectInputStream(fis);
-        final Model model = (Model) in.readObject();
-        in.close();
-        return model;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * <b>This methods should not be called by the user.</b>
-     * @return a free id to use
-     */
-    public int nextId() {
-        return id++;
-    }
-
-    /**
-     * Get the ibex reference
-     * Creates one if none
-     *
-     * @return the ibex reference
-     */
-    public Ibex getIbex() {
-        if (ibex == null) ibex = new Ibex();
-        return ibex;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public Model _me(){
-        return this;
     }
 }

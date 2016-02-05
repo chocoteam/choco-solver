@@ -740,7 +740,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         long currentbt = model.getMeasures().getBackTrackCount();
         long currentrestart = model.getMeasures().getRestartCount();
         //System.err.println("TIME STAMP : "+currentbt+"   BT COUNT : "+solver.getBackTrackCount());
-        // assert (currentbt == solver.getBackTrackCount());
+        // assert (currentbt == model.getBackTrackCount());
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
 
             for (int i = 0; i <= nbR; i++) {

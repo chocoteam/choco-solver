@@ -49,5 +49,5 @@ public interface Propagate extends Serializable{
      *
      * @throws ContradictionException if a dead-end is encountered
      */
-    void execute(SearchLoop searchLoop) throws ContradictionException;
+    void execute(Resolver resolver) throws ContradictionException;
 }

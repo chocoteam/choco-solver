@@ -99,7 +99,7 @@ public class PropCondis extends Propagator<BoolVar> {
      */
     boolean firstAwake;
     /**
-     * All integer variables (INT and BOOL) extract from this solver.
+     * All integer variables (INT and BOOL) extract from this model.
      */
     IntVar[] allvars;
     /**
@@ -121,11 +121,11 @@ public class PropCondis extends Propagator<BoolVar> {
 
     /**
      * A propagator to deal with constructive disjunction
-     * @param model a solver
+     * @param model a model
      */
     public PropCondis(Model model) {
-        super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds solver.ONE to fit to the super constructor
-        this.vars = new BoolVar[0];    // erase solver.ONE from the variable scope
+        super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds model.ONE to fit to the super constructor
+        this.vars = new BoolVar[0];    // erase model.ONE from the variable scope
         domains = new TIntObjectHashMap<>();
         toUnion = new BitSet();
         toZero = new BitSet();
@@ -267,7 +267,7 @@ public class PropCondis extends Propagator<BoolVar> {
     private void forceReification(BoolVar bvar, int idxDisj) {
         // make a backup world
         model.getEnvironment().worldPush();
-//        System.out.printf("%sTry %s for %s\n", pad("", solver.getEnvironment().getWorldIndex(), "."), vars[b].getName(), this);
+//        System.out.printf("%sTry %s for %s\n", pad("", model.getEnvironment().getWorldIndex(), "."), vars[b].getName(), this);
         try {
             bvar.instantiateTo(1, this);
             internalEngine.propagate();

@@ -256,8 +256,8 @@ public class ModelTest {
         ParallelResolution pares = new ParallelResolution();
         int n = 4; // number of solvers to use
         for (int i = 0; i < n; i++) {
-            pares.addSolver(knapsack(true));
-            pares.addSolver(knapsack(false));
+            pares.addModel(knapsack(true));
+            pares.addModel(knapsack(false));
         }
         pares.findSolution();
         Chatterbox.printSolutions(pares.getFinder());
@@ -268,11 +268,11 @@ public class ModelTest {
     public void testParBug() {
         for (int iter = 0; iter < 50; iter++) {
             ParallelResolution pares = new ParallelResolution();
-            pares.addSolver(knapsack(true));
-            pares.addSolver(knapsack(true));
-            pares.addSolver(knapsack(true));
-            pares.addSolver(knapsack(true));
-            pares.addSolver(knapsack(true));
+            pares.addModel(knapsack(true));
+            pares.addModel(knapsack(true));
+            pares.addModel(knapsack(true));
+            pares.addModel(knapsack(true));
+            pares.addModel(knapsack(true));
             pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
             Assert.assertTrue(pares.getFinder()!=null);
             Chatterbox.printSolutions(pares.getFinder());
@@ -295,8 +295,8 @@ public class ModelTest {
         for (int iter = 0; iter < 50; iter++) {
             ParallelResolution pares = new ParallelResolution();
             for (int i = 0; i < 10; i++) {
-                pares.addSolver(knapsack(true));
-                pares.addSolver(knapsack(false));
+                pares.addModel(knapsack(true));
+                pares.addModel(knapsack(false));
             }
             pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
             Chatterbox.printSolutions(pares.getFinder());
@@ -424,7 +424,7 @@ public class ModelTest {
     @Test(groups="1s", timeOut=60000)
     public void testName(){
         Model model = new Model();
-        Assert.assertTrue(model.getName().startsWith("Solver-"));
+        Assert.assertTrue(model.getName().startsWith("Model-"));
         model.setName("Revlos");
         Assert.assertEquals(model.getName(), "Revlos");
     }

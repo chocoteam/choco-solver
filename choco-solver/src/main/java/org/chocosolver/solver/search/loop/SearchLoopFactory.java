@@ -54,12 +54,12 @@ public class SearchLoopFactory {
      * The current search loop (if any) will be replaced by this one after that call.
      * The current search strategy (if any) will also be replaced by the input one.
      *
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param aSearchStrategy the search strategy to apply
      * @param <V>             the type of variables
      */
     public static <V extends Variable> void dfs(Model aModel, AbstractStrategy<V> aSearchStrategy) {
-        aModel.set(new SearchLoop(aModel, new PropagateBasic(), new LearnNothing(), new MoveBinaryDFS(aSearchStrategy)));
+        aModel.set(new Resolver(aModel, new PropagateBasic(), new LearnNothing(), new MoveBinaryDFS(aSearchStrategy)));
     }
 
     /**
@@ -70,13 +70,13 @@ public class SearchLoopFactory {
      * The current search loop (if any) will be replaced by this one after that call.
      * The current search strategy (if any) will also be replaced by the input one.
      *
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param aSearchStrategy the search strategy to apply
      * @param discrepancy     the maximum discrepancy
      * @param <V>             the type of variables
      */
     public static <V extends Variable> void lds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
-        aModel.set(new SearchLoop(aModel, new PropagateBasic(), new LearnNothing(),
+        aModel.set(new Resolver(aModel, new PropagateBasic(), new LearnNothing(),
                 new MoveBinaryLDS(aSearchStrategy, discrepancy, aModel.getEnvironment())));
     }
 
@@ -88,13 +88,13 @@ public class SearchLoopFactory {
      * The current search loop (if any) will be replaced by this one after that call.
      * The current search strategy (if any) will also be replaced by the input one.
      *
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param aSearchStrategy the search strategy to apply
      * @param discrepancy     the maximum discrepancy
      * @param <V>             the type of variables
      */
     public static <V extends Variable> void dds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
-        aModel.set(new SearchLoop(aModel, new PropagateBasic(), new LearnNothing(),
+        aModel.set(new Resolver(aModel, new PropagateBasic(), new LearnNothing(),
                 new MoveBinaryDDS(aSearchStrategy, discrepancy, aModel.getEnvironment())));
     }
 
@@ -108,7 +108,7 @@ public class SearchLoopFactory {
      * The current search loop (if any) will be replaced by this one after that call.
      * The current search strategy (if any) will also be replaced by the input one.
      *
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param aSearchStrategy the search strategy to apply
      * @param a               lower bound to limit the rate of redundantly propagated decisions
      * @param b               upper bound to limit the rate of redundantly propagated decisions.
@@ -117,7 +117,7 @@ public class SearchLoopFactory {
      */
     public static <V extends Variable> void hbfs(Model aModel, AbstractStrategy<V> aSearchStrategy,
                                                  double a, double b, long N) {
-        aModel.set(new SearchLoop(aModel, new PropagateBasic(), new LearnNothing(),
+        aModel.set(new Resolver(aModel, new PropagateBasic(), new LearnNothing(),
                 new MoveBinaryHBFS(aModel, aSearchStrategy, a, b, N)));
     }
 
@@ -143,7 +143,7 @@ public class SearchLoopFactory {
      * thanks to <code>restartStrategy</code>.
      * There will be at most <code>restartsLimit</code> restarts.
      *
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param restartCriterion the restart criterion, that is, the condition which triggers a restart
      * @param restartStrategy  the way restart limit (evaluated in <code>restartCriterion</code>) is updated, that is, computes the next limit
      * @param restartsLimit    number of allowed restarts
@@ -159,7 +159,7 @@ public class SearchLoopFactory {
      * It encapsulates the current move within a restart move.
      * Every time a solution is found, a restart is done.
      *
-     * @param aModel         the target solver
+     * @param aModel         the target model
      */
     public static void restartOnSolutions(Model aModel) {
         Move currentMove = aModel.getSearchLoop().getMove();
@@ -179,7 +179,7 @@ public class SearchLoopFactory {
      * If a fragment induces a search space which a too big to be entirely evaluated, restarting the search can be forced
      * using the <code>restartCriterion</code>. A fast restart strategy is often a good choice.
      *
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param neighbor         the neighbor for the LNS
      * @param restartCounter the (fast) restart counter. Initial limit gives the frequency.
      */
@@ -197,7 +197,7 @@ public class SearchLoopFactory {
      * If a fragment cannot be extended to a solution, a new one is selected by restarting the search.
      *
      * @see #lns(Model, INeighbor, ICounter)
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param neighbor         the neighbor for the LNS
      */
     public static void lns(Model aModel, INeighbor neighbor) {
@@ -214,15 +214,15 @@ public class SearchLoopFactory {
      *
      * If no neighbor can be found, the search ends; the search may not be complete though.
      *
-     * @param aModel the target solver
+     * @param aModel the target model
      * @param tabuListSize the size of the tabu list which records conflicts.
      */
     private static void tabuDecisionRepair(Model aModel, int tabuListSize) {
         // TODO: incomplete, have to deal with gamma when extending
-//        Move currentMove = aSolver.getSearchLoop().getMove();
-//        MoveLearnBinaryTDR tdr = new MoveLearnBinaryTDR(aSolver, currentMove, tabuListSize);
-//        aSolver.getSearchLoop().setMove(tdr);
-//        aSolver.getSearchLoop().setLearn(tdr);
+//        Move currentMove = aModel.getSearchLoop().getMove();
+//        MoveLearnBinaryTDR tdr = new MoveLearnBinaryTDR(aModel, currentMove, tabuListSize);
+//        aModel.getSearchLoop().setMove(tdr);
+//        aModel.getSearchLoop().setLearn(tdr);
     }
 
     //****************************************************************************************************************//
@@ -232,7 +232,7 @@ public class SearchLoopFactory {
     /**
      * Conflict-based Backjumping (CBJ) explanation strategy.
      * It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param nogoodsOn set to true to extract nogoods from failures
      * @param userFeedbackOn set to true to record the propagation in conflict
      *                       (only relevant when one wants to interpret the explanation of a failure).
@@ -247,7 +247,7 @@ public class SearchLoopFactory {
     /**
      * Dynamic ExplanConflict-based Backjumping (CBJ) explanation strategy.
      * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
-     * @param aModel         the target solver
+     * @param aModel         the target model
      * @param nogoodsOn set to true to extract nogoods from failures
      * @param userFeedbackOn set to true to record the propagation in conflict
      *                       (only relevant when one wants to interpret the explanation of a failure).

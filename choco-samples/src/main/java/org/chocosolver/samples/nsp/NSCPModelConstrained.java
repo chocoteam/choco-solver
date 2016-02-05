@@ -145,7 +145,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //      SYMMETRY BREAKING Constraints
 //**************************************************
 
-    /*private void makeSymmetryBreaking(Solver solver) {
+    /*private void makeSymmetryBreaking(Model solver) {
         description += "symBreak ";
         for (int[] group : data.symmetricEmployeeGroups()) {
             this.makeSymmetryBreaking(group);
@@ -374,12 +374,12 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //      MAXIMAL WORK SPAN Constraints
 //**************************************************
 
-    /*private void makeMaxWorkSpan(Solver solver) {
+    /*private void makeMaxWorkSpan(Model solver) {
         this.makeMaxWorkSpanWithMax(solver);
     }*/
 
     /*// use the fact that value "REST" is greater than the value of any worked activity
-    private void makeMaxWorkSpanWithMax(Solver solver) {
+    private void makeMaxWorkSpanWithMax(Model solver) {
         description += "span[max] ";
         int r = data.getValue("REST");
         assert r >= data.nbActivities() - 1;
@@ -424,7 +424,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         this.makeForbidTreeConsecutiveWEs(model);
     }
 
-    /*private void makeForbidNightBeforeFreeWE(Solver solver) {
+    /*private void makeForbidNightBeforeFreeWE(Model solver) {
         description += "patNWE[extAC] ";
         int n = data.getValue("NIGHT");
         int r = data.getValue("REST");
@@ -476,7 +476,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
     }
 
-    /*private void makeForceRestRestAfterNightsReifTuple(Solver solver) {
+    /*private void makeForceRestRestAfterNightsReifTuple(Model solver) {
         int n = data.getValue("NIGHT");
         int r = data.getValue("REST");
         List<int[]> tuples = new ArrayList<int[]>(3);
@@ -535,7 +535,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //      COMPLETE WEEK-END Constraints
 //**************************************************
 
-    /*private void makeCompleteWEWithFeasTuple(Solver solver) {
+    /*private void makeCompleteWEWithFeasTuple(Model solver) {
         description += "patCompWE[feasAC] ";
         int r = data.getValue("REST");
         List<int[]> tuples = new ArrayList<int[]>();
@@ -554,7 +554,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
     }*/
 
-    /*private void makeCompleteWEWithInfeasTuple(Solver solver) {
+    /*private void makeCompleteWEWithInfeasTuple(Model solver) {
         description += "patCompWE[infeasAC] ";
         int r = data.getValue("REST");
         List<int[]> tuples = new ArrayList<int[]>();

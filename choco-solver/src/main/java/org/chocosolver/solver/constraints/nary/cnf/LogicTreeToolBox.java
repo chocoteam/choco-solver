@@ -57,7 +57,7 @@ public class LogicTreeToolBox {
      * - (lit OR lit ... OR lit) AND (lit OR lit ... OR lit) ... AND (lit OR lit ... OR lit)
      *
      * @param logOp logical operator
-     * @param model the solver in which the logical expression will be added, useful since the expression may only be made of TRUE and FALSE.
+     * @param model the model in which the logical expression will be added, useful since the expression may only be made of TRUE and FALSE.
      * @return a CNF logical expression
      */
     public static ILogical toCNF(LogOp logOp, Model model) {

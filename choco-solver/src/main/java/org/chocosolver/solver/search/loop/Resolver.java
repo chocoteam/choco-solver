@@ -54,7 +54,7 @@ import java.util.List;
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
 import static org.chocosolver.solver.search.loop.Reporting.fullReport;
-import static org.chocosolver.solver.search.loop.SearchLoop.Action.*;
+import static org.chocosolver.solver.search.loop.Resolver.Action.*;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 import static org.chocosolver.util.ESat.*;
 
@@ -82,7 +82,7 @@ import static org.chocosolver.util.ESat.*;
  * Project: choco.
  * @author Charles Prud'homme
  */
-public final class SearchLoop implements Serializable {
+public final class Resolver implements Serializable {
 
     /**
      * Define the possible actions of SearchLoop
@@ -130,7 +130,7 @@ public final class SearchLoop implements Serializable {
     protected Move M;
 
     /**
-     * The declaring solver
+     * The declaring model
      */
     protected Model mModel;
     /**
@@ -208,12 +208,12 @@ public final class SearchLoop implements Serializable {
     /**
      * Create a search loop based on three components.
      *
-     * @param aModel the target solver
+     * @param aModel the target model
      * @param p       the {@code Propagate} component
      * @param l       the {@code Learn} component
      * @param m       the {@code Move} component
      */
-    public SearchLoop(Model aModel, Propagate p, Learn l, Move m) {
+    public Resolver(Model aModel, Propagate p, Learn l, Move m) {
         mModel = aModel;
         P = p;
         L = l;
@@ -466,9 +466,9 @@ public final class SearchLoop implements Serializable {
     }
 
     /**
-     * Return the target solver
+     * Return the target model
      *
-     * @return the solver
+     * @return the model
      */
     public Model getSolver() {
         return mModel;
@@ -543,7 +543,7 @@ public final class SearchLoop implements Serializable {
      * </pre>
      * With lambda, stop when 10 nodes are visited:
      * <pre>
-     *     () -> solver.getMeasures().getNodeCount() >= 10
+     *     () -> model.getMeasures().getNodeCount() >= 10
      * </pre>
      *
      * @param stopCriteria one or more stop condition

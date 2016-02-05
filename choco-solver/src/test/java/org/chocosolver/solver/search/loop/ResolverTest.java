@@ -49,7 +49,7 @@ import static org.chocosolver.solver.search.loop.SLF.*;
  * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
-public class SearchLoopTest {
+public class ResolverTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1DFS() {

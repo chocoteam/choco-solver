@@ -180,7 +180,7 @@ public class Constraint implements Serializable {
     }
 
 	/**
-     * Posts the constraint to its solver so that the constraint must be satisfied.
+     * Posts the constraint to its model so that the constraint must be satisfied.
      * This should not be reified.
      */
     public final void post(){

@@ -45,11 +45,11 @@ public interface Learn extends Serializable{
     /**
      * Validate and record a new piece of knowledge, that is, the current position is a dead-end.
      */
-    void record(SearchLoop searchLoop);
+    void record(Resolver resolver);
 
     /**
      * Forget some pieces of knowledge.
      */
-    void forget(SearchLoop searchLoop);
+    void forget(Resolver resolver);
 
 }

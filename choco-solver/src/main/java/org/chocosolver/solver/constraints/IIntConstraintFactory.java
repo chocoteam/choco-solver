@@ -1097,7 +1097,7 @@ public interface IIntConstraintFactory {
 	 * and must fill it with the most useful items."
 	 * The limit over weightSum has to be specified either in its domain or with an additional constraint:
 	 * <pre>
-	 *     solver.post(solver.arithm(weightSum, "<=", limit);
+	 *     model.post(solver.arithm(weightSum, "<=", limit);
 	 * </pre>
 	 *
 	 * @param occurrences  number of occurrences of an item

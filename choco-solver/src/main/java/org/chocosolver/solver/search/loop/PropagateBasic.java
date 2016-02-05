@@ -39,11 +39,11 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 public class PropagateBasic implements Propagate {
 
     @Override
-    public void execute(SearchLoop searchLoop) throws ContradictionException {
-        Decision cd = searchLoop.decision;
+    public void execute(Resolver resolver) throws ContradictionException {
+        Decision cd = resolver.decision;
         cd.buildNext();
-        searchLoop.objectivemanager.apply(cd);
-        searchLoop.objectivemanager.postDynamicCut();
-        searchLoop.mModel.getEngine().propagate();
+        resolver.objectivemanager.apply(cd);
+        resolver.objectivemanager.postDynamicCut();
+        resolver.mModel.getEngine().propagate();
     }
 }

@@ -153,7 +153,7 @@ We provide a zip file which contains the following files:
 
 choco-solver-|release|-with-dependencies.jar
     An ready-to-use jar file including dependencies;
-    it provides tools to declare a Solver, the variables, the constraints, the search strategies, etc.
+    it provides tools to declare a Model, the variables, the constraints, the search strategies, etc.
     In a few words, it enables modeling and solving CP problems.
 
 choco-solver-|release|.jar
@@ -304,12 +304,12 @@ Don't be afraid to take a look at the sources, we think it is a good start point
 Choco |version| quick documentation
 ===================================
 
-Solver
+Model
 ------
 
-The ``Solver`` is a central object and must be created first: ``Solver solver = new Solver();``.
+The ``Model`` is a central object and must be created first: ``Model solver = new Model();``.
 
-:ref:`[Solver] <21_solver_label>`
+:ref:`[Model] <21_solver_label>`
 
 Variables
 ---------

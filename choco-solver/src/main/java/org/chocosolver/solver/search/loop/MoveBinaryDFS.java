@@ -58,26 +58,26 @@ public class MoveBinaryDFS implements Move {
     }
 
     @Override
-    public boolean extend(SearchLoop searchLoop) {
+    public boolean extend(Resolver resolver) {
         boolean extended = false;
-        Decision tmp = searchLoop.decision;
-        searchLoop.decision = strategy.getDecision();
-        if (searchLoop.decision != null) { // null means there is no more decision
-            searchLoop.decision.setPrevious(tmp);
-            searchLoop.mModel.getEnvironment().worldPush();
+        Decision tmp = resolver.decision;
+        resolver.decision = strategy.getDecision();
+        if (resolver.decision != null) { // null means there is no more decision
+            resolver.decision.setPrevious(tmp);
+            resolver.mModel.getEnvironment().worldPush();
             extended = true;
         } else {
-            searchLoop.decision = tmp;
+            resolver.decision = tmp;
         }
         return extended;
     }
 
     @Override
-    public boolean repair(SearchLoop searchLoop) {
-        searchLoop.mMeasures.incBackTrackCount();
-        searchLoop.mMeasures.incDepth();
-        searchLoop.mModel.getEnvironment().worldPop();
-        return rewind(searchLoop);
+    public boolean repair(Resolver resolver) {
+        resolver.mMeasures.incBackTrackCount();
+        resolver.mMeasures.incDepth();
+        resolver.mModel.getEnvironment().worldPop();
+        return rewind(resolver);
     }
 
     @Override
@@ -95,30 +95,30 @@ public class MoveBinaryDFS implements Move {
         this.strategy = aStrategy;
     }
 
-    protected boolean rewind(SearchLoop searchLoop) {
+    protected boolean rewind(Resolver resolver) {
         boolean repaired = false;
-        while (!repaired && searchLoop.decision != topDecision) {
-            searchLoop.jumpTo--;
-            if (searchLoop.jumpTo <= 0 && searchLoop.decision.hasNext()) {
-                searchLoop.mModel.getEnvironment().worldPush();
+        while (!repaired && resolver.decision != topDecision) {
+            resolver.jumpTo--;
+            if (resolver.jumpTo <= 0 && resolver.decision.hasNext()) {
+                resolver.mModel.getEnvironment().worldPush();
                 repaired = true;
             } else {
-                prevDecision(searchLoop);
+                prevDecision(resolver);
             }
         }
         return repaired;
     }
 
-    protected void prevDecision(SearchLoop searchLoop) {
-        Decision tmp = searchLoop.decision;
-        searchLoop.decision = searchLoop.decision.getPrevious();
+    protected void prevDecision(Resolver resolver) {
+        Decision tmp = resolver.decision;
+        resolver.decision = resolver.decision.getPrevious();
         tmp.free();
         // goes up in the search tree and makes sure search monitors are correctly informed
-        searchLoop.searchMonitors.afterUpBranch();
-        searchLoop.mMeasures.incBackTrackCount();
-        searchLoop.mMeasures.decDepth();
-        searchLoop.mModel.getEnvironment().worldPop();
-        searchLoop.searchMonitors.beforeUpBranch();
+        resolver.searchMonitors.afterUpBranch();
+        resolver.mMeasures.incBackTrackCount();
+        resolver.mMeasures.decDepth();
+        resolver.mModel.getEnvironment().worldPop();
+        resolver.searchMonitors.beforeUpBranch();
     }
 
     @Override

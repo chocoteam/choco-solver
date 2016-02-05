@@ -57,20 +57,20 @@ public class MoveBinaryDDS extends MoveBinaryLDS {
     }
 
     @Override
-    public boolean extend(SearchLoop searchLoop) {
+    public boolean extend(Resolver resolver) {
         boolean extended = false;
-        Decision tmp = searchLoop.decision;
-        searchLoop.decision = strategy.getDecision();
-        if (searchLoop.decision != null) { // null means there is no more decision
-            searchLoop.decision.setPrevious(tmp);
-            searchLoop.mModel.getEnvironment().worldPush();
+        Decision tmp = resolver.decision;
+        resolver.decision = strategy.getDecision();
+        if (resolver.decision != null) { // null means there is no more decision
+            resolver.decision.setPrevious(tmp);
+            resolver.mModel.getEnvironment().worldPush();
             if (dis.get() == 1) {
-                searchLoop.decision.buildNext();
+                resolver.decision.buildNext();
             }
             dis.add(-1);
             extended = true;
         } else {
-            searchLoop.decision = tmp;
+            resolver.decision = tmp;
         }
         return extended;
     }

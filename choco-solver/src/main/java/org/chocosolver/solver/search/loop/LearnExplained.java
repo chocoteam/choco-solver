@@ -61,7 +61,7 @@ class LearnExplained implements Learn {
     final boolean saveCauses;
 
     /**
-     * Maintains the number of solutions found, required for {@link #record(SearchLoop)}.
+     * Maintains the number of solutions found, required for {@link #record(Resolver)}.
      */
     private long nbsol = 0;
 
@@ -87,17 +87,17 @@ class LearnExplained implements Learn {
     }
 
     @Override
-    public void record(SearchLoop searchLoop) {
-        if (nbsol == searchLoop.mModel.getMeasures().getSolutionCount()) {
-            onFailure(searchLoop);
+    public void record(Resolver resolver) {
+        if (nbsol == resolver.mModel.getMeasures().getSolutionCount()) {
+            onFailure(resolver);
         } else {
             nbsol++;
-            onSolution(searchLoop);
+            onSolution(resolver);
         }
     }
 
     @Override
-    public void forget(SearchLoop searchLoop) {
+    public void forget(Resolver resolver) {
         // nothing by default but forget some learnt nogoods should be done here
     }
 
@@ -105,7 +105,7 @@ class LearnExplained implements Learn {
      * Actions to do when a solution is found.
      * By default, it records the basic explanation related to the refutation of the last decision.
      */
-    void onSolution(SearchLoop searchLoop){
+    void onSolution(Resolver resolver){
         // we need to prepare a "false" backtrack on this decision
         Decision dec = mModel.getSearchLoop().getLastDecision();
         while ((dec != ROOT) && (!dec.hasNext())) {
@@ -123,13 +123,13 @@ class LearnExplained implements Learn {
             }
             mExplainer.storeDecisionExplanation(dec, explanation);
         }
-        searchLoop.jumpTo = 1;
+        resolver.jumpTo = 1;
     }
 
     /**
      * Actions to do when a failure is met.
      */
-    void onFailure(SearchLoop searchLoop){
+    void onFailure(Resolver resolver){
         ContradictionException cex = mModel.getEngine().getContradictionException();
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
         lastExplanation = mExplainer.explain(cex);

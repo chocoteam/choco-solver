@@ -117,33 +117,33 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
     }
 
     @Override
-    public boolean extend(SearchLoop searchLoop) {
+    public boolean extend(Resolver resolver) {
         boolean extend;
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < neighbor.length) {
-            Decision tmp = searchLoop.decision;
-            searchLoop.decision = neighbor[current++];
-            assert searchLoop.decision != null;
-            searchLoop.decision.setWorldIndex(searchLoop.mModel.getEnvironment().getWorldIndex());
-            searchLoop.decision.setPrevious(tmp);
-            searchLoop.mModel.getEnvironment().worldPush();
+            Decision tmp = resolver.decision;
+            resolver.decision = neighbor[current++];
+            assert resolver.decision != null;
+            resolver.decision.setWorldIndex(resolver.mModel.getEnvironment().getWorldIndex());
+            resolver.decision.setPrevious(tmp);
+            resolver.mModel.getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
             // TODO: incomplete, have to deal with gamma when extending
-            extend = move.extend(searchLoop);
+            extend = move.extend(resolver);
         }
         return extend;
     }
 
     @Override
-    public boolean repair(SearchLoop searchLoop) {
+    public boolean repair(Resolver resolver) {
         boolean repair;
         if (current < neighbor.length) {
-            searchLoop.restart();
+            resolver.restart();
             // check stop conditionsn for instance, when no compatible decision path can be computed
             repair = !stop;
         } else {
-            repair = move.repair(searchLoop);
+            repair = move.repair(resolver);
         }
         return repair;
     }
@@ -152,14 +152,14 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
      * {@inheritDoc} main reason we implement this Learn.
      */
     @Override
-    void onFailure(SearchLoop searchLoop) {
-        super.onFailure(searchLoop);
-        neighbor(searchLoop);
+    void onFailure(Resolver resolver) {
+        super.onFailure(resolver);
+        neighbor(resolver);
     }
 
-    private void neighbor(SearchLoop searchLoop) {
+    private void neighbor(Resolver resolver) {
         Explanation expl = getLastExplanation();
-        IntMetaDecision k = extractConlict(searchLoop, expl);
+        IntMetaDecision k = extractConlict(resolver, expl);
         // add k to the list of conflicts
         gamma.add(k);
         // remove the oldest element in gamma if the tabu size is met
@@ -274,8 +274,8 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
         return _w2.get(k.getDop(i));
     }
 
-    private IntMetaDecision extractConlict(SearchLoop searchLoop, Explanation lastExplanation) {
-        int offset = searchLoop.searchWorldIndex;
+    private IntMetaDecision extractConlict(Resolver resolver, Explanation lastExplanation) {
+        int offset = resolver.searchWorldIndex;
         int wi = mModel.getEnvironment().getWorldIndex() - 1;
         int k = wi - offset;
         int size = lastExplanation.getDecisions().cardinality();
@@ -288,7 +288,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
 
         // start iteration over decisions
         IntMetaDecision md = new IntMetaDecision();
-        Decision decision = searchLoop.decision;
+        Decision decision = resolver.decision;
         IntDecision id;
         if (DEBUG) System.out.printf("Conflict: ");
         while (decision != RootDecision.ROOT) { // all decisions needs to be explored

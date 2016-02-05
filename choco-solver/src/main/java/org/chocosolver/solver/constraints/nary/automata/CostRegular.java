@@ -278,7 +278,7 @@ public class CostRegular extends Constraint {
 //		for (int i = 0; i < lays.length; i++) {
 //			lays[i] = layers[i].toArray();
 //		}
-//		IEnvironment environment = vars[0].getSolver().getEnvironment();
+//		IEnvironment environment = vars[0].getModel().getEnvironment();
 //		return new StoredValuedDirectedMultiGraph(environment, graph, lays, starts, offsets, totalSizes);
 //	}
 }

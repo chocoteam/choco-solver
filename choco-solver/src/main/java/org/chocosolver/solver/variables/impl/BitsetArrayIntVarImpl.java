@@ -121,7 +121,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
      * Non-consecutive condition is the main reason which motivates this class.
      * @param name name of the variable
      * @param sortedValues domain values
-     * @param model the solver to declare this variable in
+     * @param model the model to declare this variable in
      */
     public BitsetArrayIntVarImpl(String name, int[] sortedValues, Model model) {
         super(name, model);

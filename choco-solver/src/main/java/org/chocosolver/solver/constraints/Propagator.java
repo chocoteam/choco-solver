@@ -154,7 +154,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected Constraint constraint;
 
     /**
-     * Reference to the solver declaring this propagator.
+     * Reference to the model declaring this propagator.
      */
     protected final Model model;
 
@@ -494,7 +494,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
-     * @return the solver this propagator is defined in
+     * @return the model this propagator is defined in
      */
     public Model getModel() {
         return model;

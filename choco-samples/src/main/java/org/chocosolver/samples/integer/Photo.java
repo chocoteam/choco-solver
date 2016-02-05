@@ -93,7 +93,7 @@ public class Photo extends AbstractProblem {
     @Override
     public void solve() {
         model.findOptimalSolution(ResolutionPolicy.MINIMIZE, violations);
-//        solver.findAllSolutions();
+//        model.findAllSolutions();
     }
 
     @Override

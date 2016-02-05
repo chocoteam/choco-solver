@@ -67,9 +67,9 @@ public class SearchMonitorFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Branch a luby restart strategy to the solver
+     * Branch a luby restart strategy to the model
      *
-     * @param model               the solver
+     * @param model               the model
      * @param scaleFactor          scale factor
      * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger

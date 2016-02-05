@@ -23,7 +23,7 @@ choco-gui
 =========
 
 choco-gui is an extension of Choco |version|.
-It provides a Graphical User Interface with various views which can be simply plugged on any Choco Solver object.
+It provides a Graphical User Interface with various views which can be simply plugged on any Choco Model object.
 You will find it at https://github.com/chocoteam/choco-gui
 
 .. _61_ext_cpviz:

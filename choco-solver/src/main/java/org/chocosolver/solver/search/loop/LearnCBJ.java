@@ -104,14 +104,14 @@ public class LearnCBJ extends LearnExplained {
     }
 
     @Override
-    void onFailure(SearchLoop searchLoop) {
-       super.onFailure(searchLoop);
+    void onFailure(Resolver resolver) {
+       super.onFailure(resolver);
         if (this.nogoodFromConflict) {
             postNogood();
         }
         int upto = compute(mModel.getEnvironment().getWorldIndex());
         assert upto > 0;
-        searchLoop.jumpTo = upto;
+        resolver.jumpTo = upto;
         identifyRefutedDecision(upto);
     }
 
@@ -150,7 +150,7 @@ public class LearnCBJ extends LearnExplained {
     }
 
     @Override
-    public void forget(SearchLoop searchLoop) {
+    public void forget(Resolver resolver) {
         mExplainer.getRuleStore();
     }
 }

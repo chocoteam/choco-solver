@@ -92,7 +92,7 @@ public class SatFactory {
      * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
      *
      * @param TREE   the syntactic tree
-     * @param Model solver is required, as the TREE can be declared without any variables
+     * @param Model model is required, as the TREE can be declared without any variables
      * @return true if the clause has been added to the clause store
      */
     public static boolean addClauses(LogOp TREE, Model Model) {

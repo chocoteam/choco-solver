@@ -80,7 +80,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     /**
      * Create a bridge to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
      *
-     * @param aModel solver to observe resolution
+     * @param aModel model to observe resolution
      */
     public CPProfiler(Model aModel) {
         this.mModel = aModel;
@@ -89,7 +89,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     /**
      * Create a bridge to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
      *
-     * @param aModel         solver to observe resolution
+     * @param aModel         model to observe resolution
      * @param solutionMessage to send to cp-profiler when a solution is found
      */
     public CPProfiler(Model aModel, IMessage solutionMessage) {

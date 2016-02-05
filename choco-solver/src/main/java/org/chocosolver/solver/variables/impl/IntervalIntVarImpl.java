@@ -97,7 +97,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @param name name of the variable
      * @param min lower bound
      * @param max upper bound
-     * @param model declaring solver
+     * @param model declaring model
      */
     public IntervalIntVarImpl(String name, int min, int max, Model model) {
         super(name, model);

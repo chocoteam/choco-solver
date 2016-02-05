@@ -45,8 +45,8 @@ import java.io.Serializable;
  *
  * To developers: any constructor of variable must pass in parameter
  * the back-end ISolver, that is, in decreasing order:
- * - the solver portfolio,
- * - the solver (or portfolio workers but fes).
+ * - the model portfolio,
+ * - the model (or portfolio workers but fes).
  * Created by IntelliJ IDEA.
  * User: xlorca, Charles Prud'homme
  */
@@ -262,9 +262,9 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     void contradiction(ICause cause, String message) throws ContradictionException;
 
     /**
-     * Return the associated solver
+     * Return the associated model
      *
-     * @return a Solver object
+     * @return a Model object
      */
     Model getModel();
 

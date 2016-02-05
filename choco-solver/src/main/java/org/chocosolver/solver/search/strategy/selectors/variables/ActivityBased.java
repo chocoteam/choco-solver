@@ -38,7 +38,7 @@ import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.Move;
 import org.chocosolver.solver.search.loop.MoveRestart;
 import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.loop.SearchLoop;
+import org.chocosolver.solver.search.loop.Resolver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
@@ -376,7 +376,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
                 if(restartAfterEachFail){
-                    SearchLoop sl = model.getSearchLoop();
+                    Resolver sl = model.getSearchLoop();
                     Move m = sl.getMove();
                     if(m == rfMove){
                         sl.setMove(rfMove.getChildMoves().get(0));

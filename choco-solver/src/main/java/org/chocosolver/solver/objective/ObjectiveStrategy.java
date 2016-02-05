@@ -111,7 +111,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
         if (coefLB + coefUB != 1 && policy != OptimizationPolicy.DICHOTOMIC) {
             throw new UnsupportedOperationException("Invalid coefficients for BOTTOM_UP or TOP_DOWN optimization" +
-                    "\nuse signature public ObjectiveStrategy(IntVar obj, OptimizationPolicy policy, Solver solver) instead");
+                    "\nuse signature public ObjectiveStrategy(IntVar obj, OptimizationPolicy policy, Model model) instead");
         }
     }
 
@@ -171,7 +171,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         nbSols = model.getMeasures().getSolutionCount();
         globalLB = Math.max(globalLB, obj.getLB());//check
         globalUB = Math.min(globalUB, obj.getUB());//check
-//        ObjectiveManager man = solver.getSearchLoop().getObjectiveManager();
+//        ObjectiveManager man = model.getSearchLoop().getObjectiveManager();
 //        man.updateLB(globalLB);
 //        man.updateUB(globalUB);
         if (globalLB > globalUB) {
@@ -201,7 +201,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
             globalLB = value + 1;
-//            solver.getSearchLoop().getObjectiveManager().updateLB(globalLB);
+//            model.getSearchLoop().getObjectiveManager().updateLB(globalLB);
             var.updateLowerBound(globalLB, cause);
         }
 
@@ -230,7 +230,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
             globalUB = value - 1;
-//            solver.getSearchLoop().getObjectiveManager().updateUB(globalUB);
+//            model.getSearchLoop().getObjectiveManager().updateUB(globalUB);
             var.updateUpperBound(globalUB, cause);
         }
 

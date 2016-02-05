@@ -109,7 +109,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     /**
      * Create a BoolVar {0,1} or {true, false}
      * @param name name of the variable
-     * @param model declaring solver
+     * @param model declaring model
      */
     public BoolVarImpl(String name, Model model) {
         super(name, model);

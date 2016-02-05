@@ -46,7 +46,7 @@ import java.util.List;
 
 /**
  * A search binder, which configures but not overrides, a search strategy if none is defined.
- * The method is called after the initial propagation step, for single solver.
+ * The method is called after the initial propagation step, for single model.
  * <br/>
  *
  * @author Charles Prud'homme

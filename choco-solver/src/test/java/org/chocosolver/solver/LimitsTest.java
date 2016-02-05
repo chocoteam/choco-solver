@@ -33,7 +33,7 @@ import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.Move;
 import org.chocosolver.solver.search.loop.MoveLNS;
-import org.chocosolver.solver.search.loop.SearchLoop;
+import org.chocosolver.solver.search.loop.Resolver;
 import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.monitors.SMF;
@@ -139,17 +139,17 @@ public class LimitsTest {
         Move currentMove = model.getSearchLoop().getMove();
         model.getSearchLoop().setMove(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
-            public boolean extend(SearchLoop searchLoop) {
+            public boolean extend(Resolver resolver) {
                 if (nodeCounter.isMet()) {
-                    super.extend(searchLoop);
+                    super.extend(resolver);
                 }
-                return currentMove.extend(searchLoop);
+                return currentMove.extend(resolver);
             }
 
             @Override
-            public boolean repair(SearchLoop searchLoop) {
+            public boolean repair(Resolver resolver) {
                 if (nodeCounter.isMet()) {
-                    super.repair(searchLoop);
+                    super.repair(resolver);
                 } else if (this.solutions > 0
                         // the second condition is only here for intiale calls, when solutions is not already up to date
                         || model.getMeasures().getSolutionCount() > 0) {
@@ -160,7 +160,7 @@ public class LimitsTest {
                         neighbor.recordSolution();
                     }
                 }
-                return currentMove.repair(searchLoop);
+                return currentMove.repair(resolver);
             }
         });
         model.findAllSolutions();

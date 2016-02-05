@@ -127,7 +127,7 @@ public class StoredValuedDirectedMultiGraph {
 
         Set<Arc> arcs = graph.edgeSet();
 
-        this.inStack = new BitSet(arcs.size());//constraint.getSolver().getEnvironment().makeBitSet(arcs.size());
+        this.inStack = new BitSet(arcs.size());//constraint.getModel().getEnvironment().makeBitSet(arcs.size());
 
         GArcs.values = new int[arcs.size()];
         GArcs.dests = new int[arcs.size()];
@@ -154,7 +154,7 @@ public class StoredValuedDirectedMultiGraph {
         }
 
         this.inGraph = new StoredIndexedBipartiteSet(environment, inginit);
-        // this.inGraph = constraint.getSolver().getEnvironment().makeBitSet(arcs.size());
+        // this.inGraph = constraint.getModel().getEnvironment().makeBitSet(arcs.size());
 //        this.inGraph.set(0,arcs.size());
         // System.out.println(this.inGraph.size());
         for (int i = 0; i < sups.length; i++) {
@@ -663,7 +663,7 @@ public class StoredValuedDirectedMultiGraph {
         graph.supports = new StoredIndexedBipartiteSetWithOffset[supportLength];
 
         int asize = GArcs.values.length;
-        graph.inStack = new BitSet(asize);//constraint.getSolver().getEnvironment().makeBitSet(asize);
+        graph.inStack = new BitSet(asize);//constraint.getModel().getEnvironment().makeBitSet(asize);
         graph.GArcs.values = GArcs.values.clone();
         graph.GArcs.dests = GArcs.dests.clone();
         graph.GArcs.origs = GArcs.origs.clone();

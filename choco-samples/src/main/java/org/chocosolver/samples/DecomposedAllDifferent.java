@@ -114,7 +114,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
     @Override
     public void configureSearch() {
         model.set(IntStrategyFactory.lexico_LB(X));
-        /*IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = model.getEngine();
         engine.addGroup(
                 Group.buildGroup(
                         Predicates.member(B),

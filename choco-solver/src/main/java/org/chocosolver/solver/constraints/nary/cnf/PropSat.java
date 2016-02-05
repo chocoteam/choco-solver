@@ -91,7 +91,7 @@ public class PropSat extends Propagator<BoolVar> {
     public PropSat(Model model) {
         // this propagator initially has no variable
         super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
-        this.vars = new BoolVar[0];    // erase solver.ONE from the variable scope
+        this.vars = new BoolVar[0];    // erase model.ONE from the variable scope
 
         this.indices_ = new TObjectIntHashMap<>();
         sat_ = new SatSolver();

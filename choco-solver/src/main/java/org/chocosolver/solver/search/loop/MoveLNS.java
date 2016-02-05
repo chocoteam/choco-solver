@@ -97,34 +97,34 @@ public class MoveLNS implements Move {
      * </li>
      * </ul>
      *
-     * @param searchLoop SearchLoop
+     * @param resolver SearchLoop
      * @return true if the decision path is extended
      */
     @Override
-    public boolean extend(SearchLoop searchLoop) {
+    public boolean extend(Resolver resolver) {
         boolean extend;
         // when a new fragment is needed (condition: at least one solution has been found)
         if (solutions > 0) {
             if (freshRestart) {
-                Decision tmp = searchLoop.decision;
+                Decision tmp = resolver.decision;
                 assert tmp == RootDecision.ROOT;
-                searchLoop.decision = neighbor.fixSomeVariables();
-                searchLoop.decision.setPrevious(tmp);
-                searchLoop.mModel.getEnvironment().worldPush();
+                resolver.decision = neighbor.fixSomeVariables();
+                resolver.decision.setPrevious(tmp);
+                resolver.mModel.getEnvironment().worldPush();
                 freshRestart = false;
                 extend = true;
             } else {
                 // if fast restart is on
                 if (counter.isMet()) {
                     // then is restart is triggered
-                    doRestart(searchLoop);
+                    doRestart(resolver);
                     extend = true;
                 } else {
-                    extend = move.extend(searchLoop);
+                    extend = move.extend(resolver);
                 }
             }
         } else {
-            extend = move.extend(searchLoop);
+            extend = move.extend(resolver);
         }
         return extend;
     }
@@ -162,21 +162,21 @@ public class MoveLNS implements Move {
      * </li>
      * </ul>
      *
-     * @param searchLoop SearchLoop
+     * @param resolver SearchLoop
      * @return true if the decision path is repaired
      */
     @Override
-    public boolean repair(SearchLoop searchLoop) {
+    public boolean repair(Resolver resolver) {
         boolean repair;
         if(solutions > 0
                 // the second condition is only here for intiale calls, when solutions is not already up to date
-                || searchLoop.mModel.getMeasures().getSolutionCount() > 0) {
+                || resolver.mModel.getMeasures().getSolutionCount() > 0) {
             // the detection of a new solution can only be met here
-            if (solutions < searchLoop.mModel.getMeasures().getSolutionCount()) {
-                assert solutions == searchLoop.mModel.getMeasures().getSolutionCount() - 1;
+            if (solutions < resolver.mModel.getMeasures().getSolutionCount()) {
+                assert solutions == resolver.mModel.getMeasures().getSolutionCount() - 1;
                 solutions++;
                 neighbor.recordSolution();
-                doRestart(searchLoop);
+                doRestart(resolver);
                 repair = true;
             }
             // when posting the cut directly at root node fails
@@ -184,22 +184,22 @@ public class MoveLNS implements Move {
                 repair = false;
             }
             // the current sub-tree has been entirely explored
-            else if (!(repair = move.repair(searchLoop))) {
+            else if (!(repair = move.repair(resolver))) {
                 // but the neighbor cannot ensure completeness
                 if (!neighbor.isSearchComplete()) {
                     // then a restart is triggered
-                    doRestart(searchLoop);
+                    doRestart(resolver);
                     repair = true;
                 }
             }
             // or a fast restart is on
             else if (counter.isMet()) {
                 // then is restart is triggered
-                doRestart(searchLoop);
+                doRestart(resolver);
                 repair = true;
             }
         }else{
-            repair = move.repair(searchLoop);
+            repair = move.repair(resolver);
         }
         return repair;
     }
@@ -222,15 +222,15 @@ public class MoveLNS implements Move {
     /**
      * Extend the neighbor when conditions are met and do the restart
      *
-     * @param searchLoop SearchLoop
+     * @param resolver SearchLoop
      */
-    private void doRestart(SearchLoop searchLoop) {
+    private void doRestart(Resolver resolver) {
         if (freshRestart) {
             neighbor.restrictLess();
         }
         freshRestart = true;
         counter.overrideLimit(counter.getLimitValue() + frequency);
-        searchLoop.restart();
+        resolver.restart();
     }
 
     @Override

@@ -315,7 +315,7 @@ public final class MeasuresRecorder implements IMeasures {
     public String toOneLineString() {
         updateTime();
         StringBuilder st = new StringBuilder(256);
-        st.append("Solver[").append(model.getName()).append("], ");
+        st.append("Model[").append(model.getName()).append("], ");
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
             st.append(model.getObjectiveManager()).append(", ");
@@ -340,7 +340,7 @@ public final class MeasuresRecorder implements IMeasures {
     public String toOneShortLineString() {
         updateTime();
         StringBuilder st = new StringBuilder(256);
-        st.append("Solver[").append(model.getName()).append("], ");
+        st.append("Model[").append(model.getName()).append("], ");
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
             st.append(model.getObjectiveManager()).append(", ");
@@ -375,7 +375,7 @@ public final class MeasuresRecorder implements IMeasures {
             }
             st.append('\n');
         }
-        st.append("\tSolver[").append(model.getName()).append("]\n");
+        st.append("\tModel[").append(model.getName()).append("]\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
             st.append("\t").append(model.getObjectiveManager()).append(",\n");

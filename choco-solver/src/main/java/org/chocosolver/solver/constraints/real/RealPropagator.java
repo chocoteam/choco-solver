@@ -69,7 +69,7 @@ public class RealPropagator extends Propagator<RealVar> {
      * <p>
      * <p>
      * <blockquote><pre>
-     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, new String[]{""}, solver);
+     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, new String[]{""}, model);
      * </pre>
      * </blockquote>
      *

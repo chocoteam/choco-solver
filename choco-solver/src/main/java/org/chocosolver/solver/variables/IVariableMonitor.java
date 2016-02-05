@@ -65,7 +65,7 @@ public interface IVariableMonitor<V extends Variable> extends Serializable, ICau
     /**
      * Duplicate <code>this</code> (which naturally adds it into <code>solver</code>).
      * IMonitor should be duplicated only if it is about modeling and not solving (ie: search).
-     * @param model target solver
+     * @param model target model
      * @param identitymap a map to guarantee uniqueness of objects
      */
     default void duplicate(Model model, THashMap<Object, Object> identitymap){

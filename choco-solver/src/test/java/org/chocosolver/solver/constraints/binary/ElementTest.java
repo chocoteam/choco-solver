@@ -239,7 +239,7 @@ public class ElementTest {
         }
     }
     @Test
-    public void testSolverOrMin() {
+    public void testModelOrMin() {
         Model s = new Model();
         IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
@@ -252,7 +252,7 @@ public class ElementTest {
 
 
     @Test
-    public void testSolverOrFull() {
+    public void testModelOrFull() {
         Model s = new Model();
         BoolVar b = s.boolVar("b");
         IntVar val = s.intVar("v", 0, 9, true);

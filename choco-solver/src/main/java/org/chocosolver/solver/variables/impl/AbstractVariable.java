@@ -103,7 +103,7 @@ public abstract class AbstractVariable implements Variable {
     private final int ID;
 
     /**
-     * Reference to the solver containing this variable (unique).
+     * Reference to the model containing this variable (unique).
      */
     protected final Model model;
 
@@ -167,7 +167,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Create the shared data of any type of variable.
      * @param name name of the variable
-     * @param model solver which declares this variable
+     * @param model model which declares this variable
      */
     protected AbstractVariable(String name, Model model) {
         this.name = name;

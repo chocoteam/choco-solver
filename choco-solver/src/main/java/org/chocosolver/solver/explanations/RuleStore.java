@@ -106,7 +106,7 @@ public class RuleStore {
      */
     private int swi;
     /**
-     * The observed solver
+     * The observed model
      */
     private final Model mModel;
 
@@ -130,7 +130,7 @@ public class RuleStore {
     /**
      * Instantiate a rule store to compute explanations
      *
-     * @param model                   the solver to observe
+     * @param model                   the model to observe
      * @param saveCauses               does it keep trace of the constraints in conflict ?
      * @param enablePartialExplanation do explanations need to be complete (for DBT or nogood extraction) ?
      */

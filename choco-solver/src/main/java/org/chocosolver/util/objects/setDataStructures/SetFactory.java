@@ -70,7 +70,7 @@ public class SetFactory {
      *
      * @param type        of set data structure
      * @param maximumSize of the set (maximum value -1)
-     * @param model	  solver providing the backtracking environment
+     * @param model	  model providing the backtracking environment
      * @return a new set which can be restored during search, after some backtracks
      */
     public static ISet makeStoredSet(SetType type, int maximumSize, Model model) {

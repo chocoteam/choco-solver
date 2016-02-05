@@ -65,31 +65,31 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
     }
 
     @Override
-    public boolean repair(SearchLoop searchLoop) {
-        searchLoop.mMeasures.incBackTrackCount();
-        searchLoop.mMeasures.incDepth();
-        searchLoop.mModel.getEnvironment().worldPop();
-        boolean repaired = rewind(searchLoop);
+    public boolean repair(Resolver resolver) {
+        resolver.mMeasures.incBackTrackCount();
+        resolver.mMeasures.incDepth();
+        resolver.mModel.getEnvironment().worldPop();
+        boolean repaired = rewind(resolver);
         // increase the discrepancy max, if allowed, when the root node is reached
-        if (searchLoop.decision == topDecision && dis.get() < DIS) {
+        if (resolver.decision == topDecision && dis.get() < DIS) {
             dis.add(1);
-            searchLoop.restart();
+            resolver.restart();
             repaired = true;
         }
         return repaired;
     }
 
     @Override
-    protected boolean rewind(SearchLoop searchLoop) {
+    protected boolean rewind(Resolver resolver) {
         boolean repaired = false;
-        while (!repaired && searchLoop.decision != topDecision) {
-            searchLoop.jumpTo--;
-            if (dis.get() > 0 && searchLoop.jumpTo <= 0 && searchLoop.decision.hasNext()) {
-                searchLoop.mModel.getEnvironment().worldPush();
+        while (!repaired && resolver.decision != topDecision) {
+            resolver.jumpTo--;
+            if (dis.get() > 0 && resolver.jumpTo <= 0 && resolver.decision.hasNext()) {
+                resolver.mModel.getEnvironment().worldPush();
                 repaired = true;
                 dis.add(-1);
             } else {
-                prevDecision(searchLoop);
+                prevDecision(resolver);
             }
         }
         return repaired;

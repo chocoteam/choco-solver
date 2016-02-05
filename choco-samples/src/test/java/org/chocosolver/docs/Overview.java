@@ -44,7 +44,7 @@ import static org.chocosolver.solver.trace.Chatterbox.printStatistics;
 public class Overview {
 
     public void overview1() {
-        // 1. Create a Solver
+        // 1. Create a Model
         Model model = new Model("my first problem");
         // 2. Create variables through the variable factory
         IntVar x = model.intVar("X", 0, 5, true);

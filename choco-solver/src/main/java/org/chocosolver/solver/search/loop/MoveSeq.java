@@ -81,37 +81,37 @@ public class MoveSeq implements Move {
     }
 
     @Override
-    public boolean extend(SearchLoop searchLoop) {
+    public boolean extend(Resolver resolver) {
         boolean extend = false;
         int i = index.get();
         // if the current Move is able to extend the decision path
         if (i < moves.size()) {
-            extend = moves.get(i).extend(searchLoop);
+            extend = moves.get(i).extend(resolver);
         }
         //otherwise, try the remaining ones.
         while (i < moves.size() - 1 && !extend) {
             // first, store the world index in which the first decision of this move is taken.
             i++;
-            Decision tmp = searchLoop.decision;
-            searchLoop.decision = tds[i - 1];
-            searchLoop.decision.setPrevious(tmp);
-            searchLoop.mModel.getEnvironment().worldPush();
+            Decision tmp = resolver.decision;
+            resolver.decision = tds[i - 1];
+            resolver.decision.setPrevious(tmp);
+            resolver.mModel.getEnvironment().worldPush();
             moves.get(i).setTopDecision(tds[i - 1]);
-            extend = moves.get(i).extend(searchLoop);
+            extend = moves.get(i).extend(resolver);
         }
         index.set(i);
         return extend;
     }
 
     @Override
-    public boolean repair(SearchLoop searchLoop) {
+    public boolean repair(Resolver resolver) {
         boolean repair = false;
         int i = index.get() + 1;
         while (i > 0 && !repair) {
-            repair = moves.get(--i).repair(searchLoop);
+            repair = moves.get(--i).repair(resolver);
             if (i > 0) {
-                Decision tmp = searchLoop.decision;
-                searchLoop.decision = searchLoop.decision.getPrevious();
+                Decision tmp = resolver.decision;
+                resolver.decision = resolver.decision.getPrevious();
                 tmp.free();
             }
         }

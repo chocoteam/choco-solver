@@ -80,7 +80,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
      * Creates a variable whom domain is natively reduced to the singleton {<code>constante</code>}.
      * @param name name of the variable
      * @param constante value its domain is reduced to
-     * @param model the declaring solver
+     * @param model the declaring model
      */
     public FixedIntVarImpl(String name, int constante, Model model) {
         super(name, model);

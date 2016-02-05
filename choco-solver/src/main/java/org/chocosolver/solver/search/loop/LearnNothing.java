@@ -35,12 +35,12 @@ package org.chocosolver.solver.search.loop;
  */
 public class LearnNothing implements Learn {
     @Override
-    public void record(SearchLoop searchLoop) {
+    public void record(Resolver resolver) {
 
     }
 
     @Override
-    public void forget(SearchLoop searchLoop) {
+    public void forget(Resolver resolver) {
 
     }
 }

@@ -86,7 +86,7 @@ public class DirectedGraph implements IGraph {
      * Allocates memory for n nodes (but they should then be added explicitly,
      * unless allNodes is true).
      *
-     * @param model   solver providing the backtracking environment
+     * @param model   model providing the backtracking environment
      * @param n        maximum number of nodes
      * @param type     data structure to use for representing node successors and predecessors
      * @param allNodes true iff all nodes must always remain present in the graph

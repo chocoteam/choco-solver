@@ -62,7 +62,7 @@ public class ExplanationEngine implements FilteringMonitor {
 
     /**
      * Create an explanation engine based on a rule store
-     * @param model                   a solver
+     * @param model                   a model
      * @param partialExplanationsOn set to <tt>true</tt> to enable partial explanations, <tt>false</tt> otherwise
      * @param recordCauses set to <tt>true</tt> to record causes in explanations, <tt>false</tt> otherwise
      */

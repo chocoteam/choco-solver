@@ -79,7 +79,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     private static final int WORD_MASK = 0xffffffff;
 
     /**
-     * Reference to the solver declaring this propagation engine.
+     * Reference to the model declaring this propagation engine.
      */
     protected final Model model;
 
@@ -202,7 +202,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
      * It propagates all fine events first, wrt their increasing priority, before propagating the smallest priority coarse and propagates all fine events again.
      * Iterates like this until failure or fix-point.
      *
-     * @param model the declaring solver.
+     * @param model the declaring model.
      */
     public TwoBucketPropagationEngine(Model model) {
         this.exception = new ContradictionException();

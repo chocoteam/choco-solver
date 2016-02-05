@@ -53,7 +53,7 @@ public class FailPerPropagator implements IMonitorContradiction {
     /**
      * Create an observer on propagators failures, based on the constraints in input
      * @param constraints set of constraints to observe
-     * @param model the target solver
+     * @param model the target model
      */
     public FailPerPropagator(Constraint[] constraints, Model model) {
         p2w = new IntMap(10, 0);

@@ -75,7 +75,7 @@ public class SerializableTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testEmptySolver() {
+    public void testEmptyModel() {
         Model model = new Model();
         File file = null;
         try {

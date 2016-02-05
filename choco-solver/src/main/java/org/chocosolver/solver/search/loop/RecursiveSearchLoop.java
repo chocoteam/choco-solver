@@ -212,7 +212,7 @@ class RecursiveSearchLoop {
     public static void main(String[] args) {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 3, 0, 2, false);
-//        solver.post(solver.allDifferent(X));
+//        model.post(solver.allDifferent(X));
         model.set(new SevenQueuesPropagatorEngine(model));
         model.getEngine().initialize();
 //        System.out.printf("%d solutions\n", dfs(solver, ISF.lexico_LB(X)));

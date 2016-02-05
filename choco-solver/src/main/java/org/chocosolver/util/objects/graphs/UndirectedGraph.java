@@ -60,7 +60,7 @@ public class UndirectedGraph implements IGraph {
      * Allocates memory for n nodes (but they should then be added explicitly,
      * unless allNodes is true).
      *
-     * @param model   solver providing the backtracking environment
+     * @param model   model providing the backtracking environment
      * @param n        max number of nodes
      * @param type     data structure storing for node neighbors
      * @param allNodes true iff all nodes will always remain in the graph

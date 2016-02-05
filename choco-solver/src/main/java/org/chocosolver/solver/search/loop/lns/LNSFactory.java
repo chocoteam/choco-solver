@@ -51,7 +51,7 @@ public class LNSFactory {
     /**
      * Create a random neighborhood
      *
-     * @param model the solver concerned
+     * @param model the model concerned
      * @param vars   the pool of variables to choose from
      * @param level  the number of tries for each size of fragment
      * @param seed   a seed for the random selection
@@ -64,7 +64,7 @@ public class LNSFactory {
     /**
      * Create a propagation guided neighborhood
      *
-     * @param model   the solver concerned
+     * @param model   the model concerned
      * @param vars     the pool of variables to choose from
      * @param fgmtSize fragment size (evaluated against log value)
      * @param listSize size of the list
@@ -78,7 +78,7 @@ public class LNSFactory {
     /**
      * Create a reverse propagation guided neighborhood
      *
-     * @param model    the solver concerned
+     * @param model    the model concerned
      * @param vars      the pool of variables to choose from
      * @param fgmtSize  the limit size for PG and RPG
      * @param listSize  size of the list
@@ -94,7 +94,7 @@ public class LNSFactory {
     /**
      * Create a LNS based on a random neighborhood.
      *
-     * @param model    the solver
+     * @param model    the model
      * @param vars      the pool of variables to choose from
      * @param level     the number of tries for each size of fragment
      * @param seed      a seed for the random selection
@@ -110,7 +110,7 @@ public class LNSFactory {
     /**
      * Create a PGLNS, based on "Propagation-Guided LNS", Perronn Shaw and Furnon, CP2004.
      *
-     * @param model    the solver
+     * @param model    the model
      * @param vars      the pool of variables to choose from
      * @param fgmtSize  fragment size (evaluated against log value)
      * @param listSize  size of the list
@@ -132,7 +132,7 @@ public class LNSFactory {
     /**
      * Create a ELNS, an Explanation based LNS
      *
-     * @param model the solver
+     * @param model the model
      * @param vars   the pool of variables to choose from
      * @param level  the number of tries for each size of fragment
      * @param seed   a seed for the random selection

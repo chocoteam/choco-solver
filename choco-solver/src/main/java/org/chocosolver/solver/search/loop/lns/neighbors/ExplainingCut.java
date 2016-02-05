@@ -240,7 +240,7 @@ public class ExplainingCut implements INeighbor {
                 mModel.propagate();
                 previous = d;
             }
-            //mSolver.propagate();
+            //mModel.propagate();
             assert false : "SHOULD FAIL!";
         } catch (ContradictionException cex) {
             if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out

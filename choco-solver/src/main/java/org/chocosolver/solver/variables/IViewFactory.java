@@ -45,9 +45,9 @@ import static java.lang.Math.max;
 public interface IViewFactory {
 
     /**
-     * Simple method to get a solver object
+     * Simple method to get a model object
      * Should not be called by the user
-     * @return a solver object
+     * @return a model object
      */
     Model _me();
 

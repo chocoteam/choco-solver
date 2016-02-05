@@ -125,11 +125,11 @@ public class PropNogoods extends Propagator<IntVar> {
     /**
      * Create a (unique) propagator for no-goods recording and propagation.
      *
-     * @param model the solver that declares the propagator
+     * @param model the model that declares the propagator
      */
     public PropNogoods(Model model) {
         super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, true);
-        this.vars = new IntVar[0];// erase solver.ONE from the variable scope
+        this.vars = new IntVar[0];// erase model.ONE from the variable scope
 
         int k = 16;
         this.vv2lit = new TLongIntHashMap[k];//new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
@@ -139,7 +139,7 @@ public class PropNogoods extends Propagator<IntVar> {
         Arrays.fill(lit2pos, NO_ENTRY);
         this.var2pos = new int[k];//new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
         Arrays.fill(var2pos, NO_ENTRY);
-        //TODO: one satsolver per solver...
+        //TODO: one satsolver per model...
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = model.getEnvironment().makeInt();

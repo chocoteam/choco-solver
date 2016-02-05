@@ -116,7 +116,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     int current;
 
     /**
-     * The owner solver.
+     * The owner model.
      */
     Model mModel;
 
@@ -148,30 +148,30 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     }
 
     @Override
-    public boolean extend(SearchLoop searchLoop) {
+    public boolean extend(Resolver resolver) {
         boolean extend;
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < copen.length) {
-            Decision tmp = searchLoop.decision;
-            searchLoop.decision = copen[current++];
-            assert searchLoop.decision != null;
-            searchLoop.decision.setPrevious(tmp);
-            searchLoop.mModel.getEnvironment().worldPush();
+            Decision tmp = resolver.decision;
+            resolver.decision = copen[current++];
+            assert resolver.decision != null;
+            resolver.decision.setPrevious(tmp);
+            resolver.mModel.getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
-            extend = super.extend(searchLoop);
+            extend = super.extend(resolver);
         }
         return extend;
     }
 
     @Override
-    public boolean repair(SearchLoop searchLoop) {
+    public boolean repair(Resolver resolver) {
         boolean repair;
         if (!dfslimit.isMet(limit)) {
             current = copen.length;
-            repair = super.repair(searchLoop);
+            repair = super.repair(resolver);
         } else {
-            extractOpenRightBranches(searchLoop);
+            extractOpenRightBranches(resolver);
             repair = true;
         }
         return repair;
@@ -180,10 +180,10 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * This methods extracts and stores all open right branches for future exploration
      */
-    protected void extractOpenRightBranches(SearchLoop searchLoop) {
+    protected void extractOpenRightBranches(Resolver resolver) {
         // update parameters for restarts
         if (nodesRecompute > 0) {
-            double ratio = nodesRecompute * 1.d / searchLoop.mMeasures.getNodeCount();
+            double ratio = nodesRecompute * 1.d / resolver.mMeasures.getNodeCount();
             if (ratio > b && Z <= N) {
                 Z *= 2;
             } else if (ratio < a && Z >= 2) {
@@ -192,9 +192,9 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
         }
         limit += Z;
         // then start the extraction of open right branches
-        int i = compareSubpath(searchLoop);
+        int i = compareSubpath(resolver);
         if(i < _unkopen.size()) {
-            extractOB(searchLoop, i);
+            extractOB(resolver, i);
         }
         // finally, get the best ORB to keep up the search
         Open next = opens.poll();
@@ -206,25 +206,25 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             // the decision in 0 is the last taken, then the array us reversed
             ArrayUtils.reverse(copen);
             current = 0;
-            nodesRecompute = searchLoop.mMeasures.getNodeCount() + copen.length;
+            nodesRecompute = resolver.mMeasures.getNodeCount() + copen.length;
         } else{
             // to be sure not to use the previous path
             current = copen.length;
         }
         // then do the restart
-        searchLoop.restart();
+        resolver.restart();
     }
 
     /**
      * Copy the current decision path in _unkopen, for comparison with copen.
      * Then, it compares each decision, from the top to the bottom, to find the first difference.
      * This is required to avoid adding the same decision sub-path more than once
-     * @param searchLoop the search loop
+     * @param resolver the search loop
      * @return the index of the decision, in _unkopen, that stops the loop
      */
-    private int compareSubpath(SearchLoop searchLoop) {
+    private int compareSubpath(Resolver resolver) {
         _unkopen.clear();
-        Decision decision = searchLoop.decision;
+        Decision decision = resolver.decision;
         while (decision != topDecision) {
             _unkopen.add(decision);
             decision = decision.getPrevious();
@@ -241,14 +241,14 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
 
     /**
      * Extract the open right branches from the current path until it reaches the i^th decision of _unkopen
-     * @param searchLoop the search loop
+     * @param resolver the search loop
      * @param i the index of the decision, in _unkopen, that stops the loop
      */
-    private void extractOB(SearchLoop searchLoop, int i) {
+    private void extractOB(Resolver resolver, int i) {
         Decision stopAt = _unkopen.get(i).getPrevious();
         // then, goes up in the search tree, and detect open nodes
-        searchLoop.mModel.getEnvironment().worldPop();
-        Decision decision = searchLoop.decision;
+        resolver.mModel.getEnvironment().worldPop();
+        Decision decision = resolver.decision;
         int bound;
         while (decision != stopAt) {
             bound = isMinimization ?
@@ -257,10 +257,10 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             if (decision.hasNext() && isValid(bound)) {
                 opens.add(new Open(decision, bound, isMinimization));
             }
-            searchLoop.decision = searchLoop.decision.getPrevious();
+            resolver.decision = resolver.decision.getPrevious();
             decision.free();
-            decision = searchLoop.decision;
-            searchLoop.mModel.getEnvironment().worldPop();
+            decision = resolver.decision;
+            resolver.mModel.getEnvironment().worldPop();
         }
     }
 

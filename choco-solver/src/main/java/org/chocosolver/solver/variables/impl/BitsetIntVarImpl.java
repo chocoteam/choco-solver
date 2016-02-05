@@ -108,7 +108,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * Create an enumerated IntVar based on a bitset
      * @param name name of the variable
      * @param sortedValues original domain values
-     * @param model declaring solver
+     * @param model declaring model
      */
     public BitsetIntVarImpl(String name, int[] sortedValues, Model model) {
         super(name, model);
@@ -130,7 +130,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @param name name of the variable
      * @param offset lower bound
      * @param values values in the domain (bit to true + offset)
-     * @param model declaring solver
+     * @param model declaring model
      */
     private BitsetIntVarImpl(String name, int offset, BitSet values, Model model) {
         super(name, model);
@@ -152,7 +152,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @param name name of the variable
      * @param min lower bound
      * @param max upper bound
-     * @param model declaring solver
+     * @param model declaring model
      */
     public BitsetIntVarImpl(String name, int min, int max, Model model) {
         super(name, model);

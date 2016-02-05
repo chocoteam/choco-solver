@@ -138,7 +138,7 @@ public class PropagationTrigger implements Serializable {
 
     /**
      * Define a way to initialize the propagation engine.
-     * Loops over the propagator of the solver, then activate them one by one, if stateless,
+     * Loops over the propagator of the model, then activate them one by one, if stateless,
      * and call propagate after each propagator.
      *
      * @throws ContradictionException can throw a contradiction
@@ -182,7 +182,7 @@ public class PropagationTrigger implements Serializable {
                         if (LoggerFactory.getLogger("solver").isDebugEnabled()) {
                             LoggerFactory.getLogger("solver").debug("unpost " + c);
                         }
-                        solver.unpost(c);
+                        model.unpost(c);
                     }
                 });
             }

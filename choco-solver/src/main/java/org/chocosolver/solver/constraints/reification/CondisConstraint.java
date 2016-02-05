@@ -48,8 +48,8 @@ public class CondisConstraint extends Constraint{
     final PropCondis condissol;
 
     /**
-     * A constraint to deal with constructive disjunction (unique in a solver instance)
-     * @param model declaring solver
+     * A constraint to deal with constructive disjunction (unique in a model instance)
+     * @param model declaring model
      */
     public CondisConstraint(Model model) {
         super("CondisConstraint",new PropCondis(model));

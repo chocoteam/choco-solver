@@ -83,11 +83,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      */
     protected final ContradictionException exception;
     /**
-     * The solver declaring this engine
+     * The model declaring this engine
      */
     private final Model model;
     /**
-     * Backtrackable environment attached to this solver
+     * Backtrackable environment attached to this model
      */
     protected final IEnvironment environment;
     /**
@@ -144,7 +144,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      * Each of the seven queues deals with on priority.
      * When a propagator needs to be executed, it is scheduled in the queue corresponding to its priority.
      * The lowest priority queue is emptied before one element of the second lowest queue is popped, etc.
-     * @param model the declaring solver
+     * @param model the declaring model
      */
     public SevenQueuesPropagatorEngine(Model model) {
         this.exception = new ContradictionException();
