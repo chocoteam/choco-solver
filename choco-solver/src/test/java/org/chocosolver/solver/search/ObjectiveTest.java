@@ -95,7 +95,7 @@ public class ObjectiveTest {
     @SuppressWarnings("UnusedParameters")
     private void one(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            model.getSearchLoop().reset();
+            model.getResolver().reset();
             model.findSolution();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
             Assert.assertEquals(model.getMeasures().getNodeCount(), 2);
@@ -105,7 +105,7 @@ public class ObjectiveTest {
     @SuppressWarnings("UnusedParameters")
     private void all(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            model.getSearchLoop().reset();
+            model.getResolver().reset();
             model.findAllSolutions();
             Assert.assertEquals(model.getMeasures().getSolutionCount(), 11);
             Assert.assertEquals(model.getMeasures().getNodeCount(), 21);
@@ -114,7 +114,7 @@ public class ObjectiveTest {
 
     private void min(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            model.getSearchLoop().reset();
+            model.getResolver().reset();
             model.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
             Assert.assertEquals(model.getMeasures().getBestSolutionValue(), 0);
             Assert.assertEquals(model.getMeasures().getNodeCount(), 2);
@@ -123,7 +123,7 @@ public class ObjectiveTest {
 
     private void max(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            model.getSearchLoop().reset();
+            model.getResolver().reset();
             model.findOptimalSolution(ResolutionPolicy.MAXIMIZE, iv);
             Assert.assertEquals(model.getMeasures().getBestSolutionValue(), 10);
             Assert.assertEquals(model.getMeasures().getNodeCount(), 21);
@@ -139,7 +139,7 @@ public class ObjectiveTest {
         model.findOptimalSolution(MINIMIZE, iv);
         assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
 
-        model.getSearchLoop().reset();
+        model.getResolver().reset();
 
         model.findOptimalSolution(MINIMIZE, iv);
         assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
@@ -173,12 +173,12 @@ public class ObjectiveTest {
         model.findSolution();
         assertEquals(iv.getValue(), 2);
 
-        model.getSearchLoop().reset();
+        model.getResolver().reset();
         model.plugMonitor((IMonitorSolution) () -> model.arithm(iv, ">=", 6).post());
         model.findSolution();
         assertEquals(iv.getValue(), 2);
 
-        model.getSearchLoop().reset();
+        model.getResolver().reset();
         model.findSolution();
         assertEquals(iv.getValue(), 6);
     }
@@ -191,7 +191,7 @@ public class ObjectiveTest {
 
         model.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
-        model.getSearchLoop().reset();
+        model.getResolver().reset();
 
         model.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
@@ -210,10 +210,10 @@ public class ObjectiveTest {
             model.set(new SevenQueuesPropagatorEngine(model));
         }
         model.getMeasures().setReadingTimeCount(nanoTime());
-        model.getSearchLoop().launch(false);
+        model.getResolver().launch(false);
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
-        model.getSearchLoop().reset();
+        model.getResolver().reset();
         model.arithm(b1, "=", bestvalue).post();
         model.set(lexico_LB(new BoolVar[]{b1, b2}));
         int count = 0;

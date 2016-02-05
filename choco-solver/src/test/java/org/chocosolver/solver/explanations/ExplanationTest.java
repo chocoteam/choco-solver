@@ -89,7 +89,7 @@ public class ExplanationTest {
         model.set(lexico_LB(vars));
 
         learnCBJ(model, false, true);
-        LearnCBJ cbj = (LearnCBJ) model.getSearchLoop().getLearn();
+        LearnCBJ cbj = (LearnCBJ) model.getResolver().getLearn();
         assertFalse(model.findSolution());
         Explanation exp = cbj.getLastExplanation();
         assertEquals(2, exp.nbCauses());

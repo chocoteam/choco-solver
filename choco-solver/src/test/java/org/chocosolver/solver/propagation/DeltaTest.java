@@ -97,7 +97,7 @@ public class DeltaTest {
         model.cardinality(s0, model.intVar(0)).post();
 
         model.findSolution();
-        model.getSearchLoop().reset();
+        model.getResolver().reset();
         model.findSolution();
     }
 

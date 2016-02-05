@@ -313,7 +313,7 @@ public class ModelTest {
         Assert.assertEquals(s.getSolutionRecorder().getLastSolution().getIntVal(i).intValue(), 5);
 
         s.getEngine().flush();
-        s.getSearchLoop().reset();
+        s.getResolver().reset();
 
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 11);

@@ -362,7 +362,7 @@ public final class MeasuresRecorder implements IMeasures {
 //        st.append("- Search statistics\n");
         if (model.hasReachedLimit()) {
             st.append("- Incomplete search - Limit reached.\n");
-        } else if (model.getSearchLoop().hasEndedUnexpectedly()) {
+        } else if (model.getResolver().hasEndedUnexpectedly()) {
             st.append("- Incomplete search - Unexpected interruption.\n");
         } else {
             st.append("- Complete search - ");

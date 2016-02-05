@@ -100,7 +100,7 @@ public class LearnDBT extends LearnCBJ {
             return;
         }
         // preliminary : compute where to jump back
-        Decision dup, dec = mModel.getSearchLoop().getLastDecision(); // the current decision to undo
+        Decision dup, dec = mModel.getResolver().getLastDecision(); // the current decision to undo
         int myworld = nworld;
         while (dec != RootDecision.ROOT && myworld > 1) {
             dec = dec.getPrevious();
@@ -109,7 +109,7 @@ public class LearnDBT extends LearnCBJ {
         Decision jmpBck = dec;
 
         // now we can explicitly enforce the jump
-        dec = mModel.getSearchLoop().getLastDecision(); // the current decision to undo
+        dec = mModel.getResolver().getLastDecision(); // the current decision to undo
         int decIdx = lastExplanation.getEvtstrIdx(); // index of the decision to refute in the event store
         while (dec != RootDecision.ROOT && nworld > 1) {
 

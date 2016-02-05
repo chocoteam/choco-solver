@@ -282,7 +282,7 @@ public class Chatterbox {
         model.plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownBranch(boolean left) {
-                Decision d = model.getSearchLoop().getLastDecision();
+                Decision d = model.getResolver().getLastDecision();
                 out.printf("%s[%d/%d] %s%s ", pad("", model.getEnvironment().getWorldIndex(), "."),
                         d.getArity() - d.triesLeft() +1, d.getArity(),
                         model.getSettings().outputWithANSIColors()?ANSI_BLUE:"",

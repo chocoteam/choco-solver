@@ -171,7 +171,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         nbSols = model.getMeasures().getSolutionCount();
         globalLB = Math.max(globalLB, obj.getLB());//check
         globalUB = Math.min(globalUB, obj.getUB());//check
-//        ObjectiveManager man = model.getSearchLoop().getObjectiveManager();
+//        ObjectiveManager man = model.getResolver().getObjectiveManager();
 //        man.updateLB(globalLB);
 //        man.updateUB(globalUB);
         if (globalLB > globalUB) {
@@ -201,7 +201,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
             globalLB = value + 1;
-//            model.getSearchLoop().getObjectiveManager().updateLB(globalLB);
+//            model.getResolver().getObjectiveManager().updateLB(globalLB);
             var.updateLowerBound(globalLB, cause);
         }
 
@@ -230,7 +230,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
             globalUB = value - 1;
-//            model.getSearchLoop().getObjectiveManager().updateUB(globalUB);
+//            model.getResolver().getObjectiveManager().updateUB(globalUB);
             var.updateUpperBound(globalUB, cause);
         }
 

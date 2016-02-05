@@ -121,7 +121,7 @@ public class ExplainingCut implements INeighbor {
         decision.free();
         // then fix variables
         _fixVar();
-        assert mModel.getSearchLoop().getLastDecision() == RootDecision.ROOT;
+        assert mModel.getResolver().getLastDecision() == RootDecision.ROOT;
         // add unrelated
         notFrozen.or(unrelated);
         for (int id = notFrozen.nextSetBit(0); id >= 0; id = notFrozen.nextSetBit(id + 1)) {
@@ -179,7 +179,7 @@ public class ExplainingCut implements INeighbor {
      */
     void clonePath() {
         path.free();
-        Decision dec = mModel.getSearchLoop().getLastDecision();
+        Decision dec = mModel.getResolver().getLastDecision();
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
             dec = dec.getPrevious();
@@ -225,7 +225,7 @@ public class ExplainingCut implements INeighbor {
         int i = 0;
         try {
 
-            Decision previous = mModel.getSearchLoop().getLastDecision();
+            Decision previous = mModel.getResolver().getLastDecision();
             assert previous == RootDecision.ROOT;
             // 2. apply the decisions
             mExplanationEngine.getSolver().getObjectiveManager().postDynamicCut();

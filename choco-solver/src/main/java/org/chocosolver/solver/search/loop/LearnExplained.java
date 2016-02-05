@@ -107,7 +107,7 @@ class LearnExplained implements Learn {
      */
     void onSolution(Resolver resolver){
         // we need to prepare a "false" backtrack on this decision
-        Decision dec = mModel.getSearchLoop().getLastDecision();
+        Decision dec = mModel.getResolver().getLastDecision();
         while ((dec != ROOT) && (!dec.hasNext())) {
             dec = dec.getPrevious();
         }

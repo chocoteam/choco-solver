@@ -49,7 +49,7 @@ public enum Reporting {
     ;
 
     public static String onDecisions(Model model) {
-        Resolver resolver = model.getSearchLoop();
+        Resolver resolver = model.getResolver();
         Decision last = resolver.getLastDecision();
         Deque<Decision> stack = new ArrayDeque<>();
         while (last != null) {

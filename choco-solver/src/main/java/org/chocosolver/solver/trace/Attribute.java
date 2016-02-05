@@ -234,8 +234,8 @@ public enum Attribute {
         Chatterbox.out.printf("- Model[%s] features:\n", model.getName());
         Chatterbox.out.printf("\tVariables : %d\n", model.getNbVars());
         Chatterbox.out.printf("\tConstraints : %d\n", model.getNbCstrs());
-        Chatterbox.out.printf("\tDefault search strategy : %s\n", model.getSearchLoop().isDefaultSearchUsed()?"yes":"no");
-        Chatterbox.out.printf("\tCompleted search strategy : %s\n", model.getSearchLoop().isSearchCompleted()?"yes":"no");
+        Chatterbox.out.printf("\tDefault search strategy : %s\n", model.getResolver().isDefaultSearchUsed()?"yes":"no");
+        Chatterbox.out.printf("\tCompleted search strategy : %s\n", model.getResolver().isSearchCompleted()?"yes":"no");
     }
 
 }

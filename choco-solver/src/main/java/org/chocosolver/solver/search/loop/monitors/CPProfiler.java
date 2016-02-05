@@ -112,7 +112,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     @Override
     public void beforeDownBranch(boolean left) {
         if (left) {
-            Decision dec = mModel.getSearchLoop().getLastDecision();
+            Decision dec = mModel.getResolver().getLastDecision();
             String pdec = pretty(dec.getPrevious());
             int ari = dec.getArity();
             send(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, Connector.NodeStatus.BRANCH, pdec, "");
@@ -140,13 +140,13 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
 
     @Override
     public void onSolution() {
-        String dec = pretty(mModel.getSearchLoop().getLastDecision());
+        String dec = pretty(mModel.getResolver().getLastDecision());
         send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.SOLVED, dec, solutionMessage.print());
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        String dec = pretty(mModel.getSearchLoop().getLastDecision());
+        String dec = pretty(mModel.getResolver().getLastDecision());
         send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.FAILED, dec, cex.toString());
     }
 

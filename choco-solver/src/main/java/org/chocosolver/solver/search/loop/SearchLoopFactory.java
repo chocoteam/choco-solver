@@ -129,7 +129,7 @@ public class SearchLoopFactory {
      * @param <V> type of variables
      */
     public static <V extends Variable> void seq(Model aModel, Move... moves) {
-        aModel.getSearchLoop().setMove(new MoveSeq(aModel, moves));
+        aModel.getResolver().setMove(new MoveSeq(aModel, moves));
     }
 
     //****************************************************************************************************************//
@@ -150,8 +150,8 @@ public class SearchLoopFactory {
      */
     public static void restart(Model aModel, LongCriterion restartCriterion, IRestartStrategy restartStrategy,
                                int restartsLimit) {
-        Move currentMove = aModel.getSearchLoop().getMove();
-        aModel.getSearchLoop().setMove(new MoveRestart(currentMove, restartStrategy, restartCriterion, restartsLimit));
+        Move currentMove = aModel.getResolver().getMove();
+        aModel.getResolver().setMove(new MoveRestart(currentMove, restartStrategy, restartCriterion, restartsLimit));
     }
 
     /**
@@ -162,8 +162,8 @@ public class SearchLoopFactory {
      * @param aModel         the target model
      */
     public static void restartOnSolutions(Model aModel) {
-        Move currentMove = aModel.getSearchLoop().getMove();
-        aModel.getSearchLoop().setMove(
+        Move currentMove = aModel.getResolver().getMove();
+        aModel.getResolver().setMove(
                 new MoveRestart(currentMove,
                         new MonotonicRestartStrategy(1),
                         new SolutionCounter(aModel, 1),
@@ -184,8 +184,8 @@ public class SearchLoopFactory {
      * @param restartCounter the (fast) restart counter. Initial limit gives the frequency.
      */
     public static void lns(Model aModel, INeighbor neighbor, ICounter restartCounter) {
-        Move currentMove = aModel.getSearchLoop().getMove();
-        aModel.getSearchLoop().setMove(new MoveLNS(currentMove, neighbor, restartCounter));
+        Move currentMove = aModel.getResolver().getMove();
+        aModel.getResolver().setMove(new MoveLNS(currentMove, neighbor, restartCounter));
     }
 
 
@@ -201,8 +201,8 @@ public class SearchLoopFactory {
      * @param neighbor         the neighbor for the LNS
      */
     public static void lns(Model aModel, INeighbor neighbor) {
-        Move currentMove = aModel.getSearchLoop().getMove();
-        aModel.getSearchLoop().setMove(new MoveLNS(currentMove, neighbor, ICounter.Impl.None));
+        Move currentMove = aModel.getResolver().getMove();
+        aModel.getResolver().setMove(new MoveLNS(currentMove, neighbor, ICounter.Impl.None));
     }
 
     /**
@@ -219,10 +219,10 @@ public class SearchLoopFactory {
      */
     private static void tabuDecisionRepair(Model aModel, int tabuListSize) {
         // TODO: incomplete, have to deal with gamma when extending
-//        Move currentMove = aModel.getSearchLoop().getMove();
+//        Move currentMove = aModel.getResolver().getMove();
 //        MoveLearnBinaryTDR tdr = new MoveLearnBinaryTDR(aModel, currentMove, tabuListSize);
-//        aModel.getSearchLoop().setMove(tdr);
-//        aModel.getSearchLoop().setLearn(tdr);
+//        aModel.getResolver().setMove(tdr);
+//        aModel.getResolver().setLearn(tdr);
     }
 
     //****************************************************************************************************************//
@@ -239,8 +239,8 @@ public class SearchLoopFactory {
      * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
      */
     public static void learnCBJ(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        if (!(aModel.getSearchLoop().getLearn() instanceof LearnCBJ)) {
-            aModel.getSearchLoop().setLearn(new LearnCBJ(aModel, nogoodsOn, userFeedbackOn));
+        if (!(aModel.getResolver().getLearn() instanceof LearnCBJ)) {
+            aModel.getResolver().setLearn(new LearnCBJ(aModel, nogoodsOn, userFeedbackOn));
         }
     }
 
@@ -254,8 +254,8 @@ public class SearchLoopFactory {
      * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
      */
     public static void learnDBT(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        if (!(aModel.getSearchLoop().getLearn() instanceof LearnDBT)) {
-            aModel.getSearchLoop().setLearn(new LearnDBT(aModel, nogoodsOn, userFeedbackOn));
+        if (!(aModel.getResolver().getLearn() instanceof LearnDBT)) {
+            aModel.getResolver().setLearn(new LearnDBT(aModel, nogoodsOn, userFeedbackOn));
         }
     }
 }

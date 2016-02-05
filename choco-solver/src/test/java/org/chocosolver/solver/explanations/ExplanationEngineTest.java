@@ -834,7 +834,7 @@ public class ExplanationEngineTest {
         xE1.post();
 
         learnCBJ(s, false, true);
-        LearnCBJ cbj = (LearnCBJ) s.getSearchLoop().getLearn();
+        LearnCBJ cbj = (LearnCBJ) s.getResolver().getLearn();
         showDecisions(s);
         assertFalse(s.findSolution());
         // If the problem has no solution, the end-user explanation can be retrieved

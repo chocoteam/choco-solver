@@ -177,11 +177,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 //        idx_large = 0; // start the first variable
         SLF.restartOnSolutions(model);
         if(restartAfterEachFail){
-            rfMove = new MoveRestart(model.getSearchLoop().getMove(),
+            rfMove = new MoveRestart(model.getResolver().getMove(),
                     new MonotonicRestartStrategy(1),
-                    new FailCounter(model.getSearchLoop().getSolver(), 1),
+                    new FailCounter(model.getResolver().getSolver(), 1),
                     Integer.MAX_VALUE);
-            model.getSearchLoop().setMove(rfMove);
+            model.getResolver().setMove(rfMove);
         }
         model.plugMonitor(this);
         decisionPool = new PoolManager<>();
@@ -376,7 +376,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
                 if(restartAfterEachFail){
-                    Resolver sl = model.getSearchLoop();
+                    Resolver sl = model.getResolver();
                     Move m = sl.getMove();
                     if(m == rfMove){
                         sl.setMove(rfMove.getChildMoves().get(0));

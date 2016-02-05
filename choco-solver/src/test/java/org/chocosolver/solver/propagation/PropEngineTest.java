@@ -79,7 +79,7 @@ public class PropEngineTest {
         model.post(CSTR, CSTR);
         model.findAllSolutions();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
-        model.getSearchLoop().reset();
+        model.getResolver().reset();
         model.unpost(CSTR);
         model.findAllSolutions();
         Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);

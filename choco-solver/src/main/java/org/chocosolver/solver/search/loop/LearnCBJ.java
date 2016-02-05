@@ -88,7 +88,7 @@ public class LearnCBJ extends LearnExplained {
      * @param nworld index of the world to backtrack to
      */
     void identifyRefutedDecision(int nworld) {
-        Decision dec = mModel.getSearchLoop().getLastDecision(); // the current decision to undo
+        Decision dec = mModel.getResolver().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
             mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
             dec = dec.getPrevious();
@@ -123,7 +123,7 @@ public class LearnCBJ extends LearnExplained {
     private void postNogood() {
         if (lastExplanation.isComplete()) {
             Model mModel = ngstore.getModel();
-            Decision<IntVar> decision = mModel.getSearchLoop().getLastDecision();
+            Decision<IntVar> decision = mModel.getResolver().getLastDecision();
             ps.clear();
             while (decision != RootDecision.ROOT) {
                 if (lastExplanation.getDecisions().get(decision.getWorldIndex())) {

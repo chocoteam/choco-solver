@@ -144,7 +144,7 @@ public class ExplainingObjective extends ExplainingCut{
     @Override
     public void afterUpBranch() {
         // we need to catch up that case when the sub tree is closed and this imposes a fragment
-        if (last != null && mModel.getSearchLoop().getLastDecision()*//*.getId()*//* == last*//*.getId()*//*) {
+        if (last != null && mModel.getResolver().getLastDecision()*//*.getId()*//* == last*//*.getId()*//*) {
             mModel.getSearchLoop().restart();
         }
     }*/

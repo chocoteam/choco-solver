@@ -234,7 +234,7 @@ public class DynamicPostTest {
             push(model.arithm(lbB, "=", bestB), stack, model);
 
             model.getEngine().flush();
-            model.getSearchLoop().reset();
+            model.getResolver().reset();
 
             if (model.findSolution()) {
                 do {
@@ -246,7 +246,7 @@ public class DynamicPostTest {
             popAll(stack, model);
 
             model.getEngine().flush();
-            model.getSearchLoop().reset();
+            model.getResolver().reset();
 
             model.or(
                     model.arithm(a, ">", bestA),

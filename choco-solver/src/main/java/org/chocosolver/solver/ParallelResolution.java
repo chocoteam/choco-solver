@@ -237,11 +237,11 @@ public class ParallelResolution {
                             switch (s.getObjectiveManager().getPolicy()) {
                                 case MAXIMIZE:
                                     Number lb = s.getObjectiveManager().getBestSolutionValue();
-                                    models.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestLB(lb));
+                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestLB(lb));
                                     break;
                                 case MINIMIZE:
                                     int ub = s.getObjectiveManager().getBestSolutionValue().intValue();
-                                    models.forEach(s1 -> s1.getSearchLoop().getObjectiveManager().updateBestUB(ub));
+                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestUB(ub));
                                     break;
                                 case SATISFACTION:
                                     break;

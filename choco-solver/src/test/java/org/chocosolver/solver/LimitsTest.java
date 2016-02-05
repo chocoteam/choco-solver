@@ -136,8 +136,8 @@ public class LimitsTest {
         Model model = ProblemMaker.makeNQueenWithBinaryConstraints(12);
         NodeCounter nodeCounter = new NodeCounter(model, 100);
         INeighbor rnd = LNSFactory.random(model, model.retrieveIntVars(true), 30, 0);
-        Move currentMove = model.getSearchLoop().getMove();
-        model.getSearchLoop().setMove(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
+        Move currentMove = model.getResolver().getMove();
+        model.getResolver().setMove(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
             public boolean extend(Resolver resolver) {
                 if (nodeCounter.isMet()) {

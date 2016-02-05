@@ -65,7 +65,7 @@ public class DistanceTest {
                 IntVar Z = model.intAbsView(diff);
                 model.arithm(Z, "=", 5).post();
                 model.set(random_value(new IntVar[]{X, Y}, i));
-//				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+//				solver.getResolver().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
 //					public void onSolution() {
 //						System.out.println("REF");
@@ -84,7 +84,7 @@ public class DistanceTest {
                 IntVar Y = model.intVar("Y", 1, 10, false);
                 model.distance(X, Y, "=", 5).post();
                 model.set(random_value(new IntVar[]{X, Y}, i));
-//				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+//				solver.getResolver().plugSearchMonitor(new IMonitorSolution() {
 //					@Override
 //					public void onSolution() {
 //						System.out.println("NO REF");

@@ -147,13 +147,9 @@ public class Model implements Serializable, IModeler{
     /** Enable attaching hooks to a model. */
     private Map<String,Object> hooks;
 
-    /** For autonumbering anonymous models. */
-    private static int modelInitNumber;
-
-    /** @return next model's number, for anonymous models. */
-    private static synchronized int nextModelNum() {
-        return modelInitNumber++;
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Create a model object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
@@ -184,15 +180,6 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Create a model object with default parameters.
-     *
-     * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
-     */
-    public Model() {
-        this(Environments.DEFAULT.make(), "Model-" + nextModelNum());
-    }
-
-    /**
      * Create a model object with default parameters, named <code>name</code>.
      *
      * @param name name attributed to this model
@@ -201,6 +188,24 @@ public class Model implements Serializable, IModeler{
     public Model(String name) {
         this(Environments.DEFAULT.make(), name);
     }
+
+    /**
+     * Create a model object with default parameters.
+     *
+     * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
+     */
+    public Model() {
+        this("Model-" + nextModelNum());
+    }
+
+    /** For autonumbering anonymous models. */
+    private static int modelInitNumber;
+
+    /** @return next model's number, for anonymous models. */
+    private static synchronized int nextModelNum() {
+        return modelInitNumber++;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
@@ -269,33 +274,17 @@ public class Model implements Serializable, IModeler{
      *
      * @return the unique and internal <code>SearchLoop</code> object.
      */
-    public Resolver getSearchLoop() {
+    public Resolver getResolver() {
         return search;
     }
 
-    /**
-     * Get the objective manager.
-     * @return the objective manager (can be <tt>null</tt>).
+	/**
+     * @deprecated use {@link #getResolver()} instead
+     * Will be removed in version > 3.4.0
      */
-    public ObjectiveManager getObjectiveManager() {
-        return this.search.getObjectiveManager();
-    }
-
-    /**
-     * The search strategy declared
-     * @return the search strategy declared (can be <tt>null</tt>).
-     */
-    public AbstractStrategy getStrategy() {
-        return search.getStrategy();
-    }
-
-    /**
-     * Returns the propagation engine used in <code>this</code>.
-     *
-     * @return a propagation engine.
-     */
-    public IPropagationEngine getEngine() {
-        return engine;
+    @Deprecated
+    public Resolver getSearchLoop() {
+        return getResolver();
     }
 
     /**
@@ -433,49 +422,6 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Return a reference to the measures recorder.
-     * This enables to get, for instance, the number of solutions found, time count, etc.
-     * @return this model's measure recorder
-     */
-    public IMeasures getMeasures() {
-        return measures;
-    }
-
-    /**
-     * Return the explanation engine plugged into <code>this</code>.
-     * @return this model's explanation engine
-     */
-    public ExplanationEngine getExplainer() {
-        return explainer;
-    }
-
-    /**
-     * Return the solution recorder
-     * @return this model's solution recorder
-     */
-    public ISolutionRecorder getSolutionRecorder() {
-        return solutionRecorder;
-    }
-
-    /**
-     * Return the current settings for the solver
-     *
-     * @return a {@link org.chocosolver.solver.Settings}
-     */
-    public Settings getSettings() {
-        return this.settings;
-    }
-
-
-    /**
-     * Return the current event observer list
-     * @return this solver's events observer
-     */
-    public FilteringMonitor getEventObserver() {
-        return this.eoList;
-    }
-
-    /**
      * Return the objective variables
      *
      * @return a variable
@@ -511,6 +457,51 @@ public class Model implements Serializable, IModeler{
     public Map<String, Object> getHooks(){
         return hooks;
     }
+
+
+    /**
+     * Return a constraint embedding a minisat model.
+     * It is highly recommended that there is only once instance of this constraint in a model.
+     * So a call to this method will create and post the constraint if it does not exist.
+     *
+     * @return the minisat constraint
+     */
+    public SatConstraint getMinisat() {
+        if (minisat == null) {
+            minisat = new SatConstraint(this);
+            minisat.post();
+        }
+        return minisat;
+    }
+
+    /**
+     * Return a constraint embedding a nogood store (based on a sat model).
+     * It is highly recommended that there is only once instance of this constraint in a model.
+     * So a call to this method will create and post the constraint if it does not exist.
+     *
+     * @return the minisat constraint
+     */
+    public NogoodConstraint getNogoodStore() {
+        if (nogoods == null) {
+            nogoods = new NogoodConstraint(this);
+            nogoods.post();
+        }
+        return nogoods;
+    }
+
+    /**
+     * Return a constraint embedding a constructive disjunction store.
+     * There can be only on instance of such a constraint in a solver to avoid undesirable side effects.
+     * @return the condis constraint
+     */
+    public CondisConstraint getCondisStore(){
+        if (condis == null) {
+            condis = new CondisConstraint(this);
+            condis.post();
+        }
+        return condis;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -522,144 +513,6 @@ public class Model implements Serializable, IModeler{
      */
     public void set(Resolver resolver) {
         this.search = resolver;
-    }
-
-    /**
-     * Override the default search strategies to use in <code>this</code>.
-     * In case many strategies are given, they will be called in sequence:
-     * The first strategy in parameter is first called to compute a decision, if possible.
-     * If it cannot provide a new decision, the second strategy is called ...
-     * and so on, until the last strategy.
-     * <p>
-     *
-     * @param strategies the search strategies to use.
-     */
-    public void set(AbstractStrategy... strategies) {
-        if (strategies == null || strategies.length == 0) {
-            throw new UnsupportedOperationException("no search strategy has been specified");
-        }
-        if (strategies.length == 1) {
-            search.set(strategies[0]);
-        } else {
-            search.set(ISF.sequencer(strategies));
-        }
-    }
-
-    /**
-     * Attach a propagation engine <code>this</code>.
-     * It overrides the previously defined one, if any.
-     *
-     * @param propagationEngine a propagation strategy
-     */
-    public void set(IPropagationEngine propagationEngine) {
-        this.engine = propagationEngine;
-    }
-
-    /**
-     * Override the explanation engine.
-     * @param explainer the explanation to use
-     */
-    public void set(ExplanationEngine explainer) {
-        this.explainer = explainer;
-        plugMonitor(explainer);
-    }
-
-    /**
-     * Override the objective manager
-     * @param om the objective manager to use
-     */
-    public void set(ObjectiveManager om) {
-        this.search.setObjectiveManager(om);
-    }
-
-    /**
-     * Override the solution recorder.
-     * Beware : multiple recorders which restore a solution might create a conflict.
-     * @param sr the solution recorder to use
-     */
-    public void set(ISolutionRecorder sr) {
-        this.solutionRecorder = sr;
-    }
-
-    /**
-     * Put a search monitor to react on search events (solutions, decisions, fails, ...).
-     * Any search monitor is actually plugged just before the search starts.
-     *
-     * There is no check if there are any duplicates.
-     * A search monitor added during while the resolution has started will not be taken into account.
-     *
-     * @param sm a search monitor to be plugged in the solver
-     */
-    public void plugMonitor(ISearchMonitor sm) {
-        searchMonitors.add(sm);
-    }
-
-    /**
-     * Removes a search monitors from the ones to plug when the search will start.
-     * @param sm a search monitor to be unplugged in the solver
-     */
-    public void unplugMonitor(ISearchMonitor sm){
-        searchMonitors.remove(sm);
-    }
-
-    /**
-     * Removes all search monitors from the list of search monitors to plug on the search loop.
-     */
-    public void unplugAllMonitors(){
-        searchMonitors.clear();
-    }
-
-    /**
-     * Adds a stop criterion, which, when met, stops the search loop.
-     * There can be multiple stop criteria, a logical OR is then applied.
-     * The stop criteria are declared to the search loop just before launching the search,
-     * the previously defined ones are erased.
-     *
-     * There is no check if there are any duplicates.
-     *
-     * <br/>
-     * Examples:
-     * <br/>
-     * With a built-in counter, stop after 20 seconds:
-     * <pre>
-     *         SMF.limitTime(solver, "20s");
-     * </pre>
-     * With lambda, stop when 10 nodes are visited:
-     * <pre>
-     *     () -> solver.getMeasures().getNodeCount() >= 10
-     * </pre>
-     *
-     * @param criterion a stop criterion to add.
-     * @see #removeStopCriterion(Criterion)
-     * @see #removeAllStopCriteria()
-     */
-    public void addStopCriterion(Criterion criterion){
-        stopCriteria.add(criterion);
-    }
-
-    /**
-     * Removes a stop criterion from the one to declare to the search loop.
-     * @param criterion criterion to remove
-     */
-    public void removeStopCriterion(Criterion criterion){
-        stopCriteria.remove(criterion);
-    }
-
-    /**
-     * Remove all declared stop criteria.
-     */
-    public void removeAllStopCriteria(){
-        stopCriteria.clear();
-    }
-
-
-    /**
-     * Override the default {@link org.chocosolver.solver.Settings} object.
-     *
-     * @param defaults new settings
-     */
-    public void set(Settings defaults) {
-        this.settings = defaults;
     }
 
     /**
@@ -682,28 +535,6 @@ public class Model implements Serializable, IModeler{
      */
     public void setPrecision(double p) {
         this.precision = p;
-    }
-
-    /**
-     * Add an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
-     * <p>
-     * Erase the current event observer if any.
-     *
-     * @param filteringMonitor an event observer
-     */
-    public void plugMonitor(FilteringMonitor filteringMonitor) {
-        this.eoList.add(filteringMonitor);
-    }
-
-    /**
-     * If {@code isComplete} is set to true, a complementary search strategy is added to the declared one in order to
-     * ensure that all variables are covered by a search strategy.
-     * Otherwise, the declared search strategy is used as is.
-     *
-     * @param isComplete completeness of the declared search strategy
-     */
-    public void makeCompleteSearch(boolean isComplete) {
-        this.search.makeCompleteStrategy(isComplete);
     }
 
 
@@ -894,117 +725,9 @@ public class Model implements Serializable, IModeler{
         }
     }
 
-    /**
-     * Return a constraint embedding a minisat model.
-     * It is highly recommended that there is only once instance of this constraint in a model.
-     * So a call to this method will create and post the constraint if it does not exist.
-     *
-     * @return the minisat constraint
-     */
-    public SatConstraint getMinisat() {
-        if (minisat == null) {
-            minisat = new SatConstraint(this);
-            minisat.post();
-        }
-        return minisat;
-    }
-
-    /**
-     * Return a constraint embedding a nogood store (based on a sat model).
-     * It is highly recommended that there is only once instance of this constraint in a model.
-     * So a call to this method will create and post the constraint if it does not exist.
-     *
-     * @return the minisat constraint
-     */
-    public NogoodConstraint getNogoodStore() {
-        if (nogoods == null) {
-            nogoods = new NogoodConstraint(this);
-            nogoods.post();
-        }
-        return nogoods;
-    }
-
-    /**
-     * Return a constraint embedding a constructive disjunction store.
-     * There can be only on instance of such a constraint in a solver to avoid undesirable side effects.
-     * @return the condis constraint
-     */
-    public CondisConstraint getCondisStore(){
-        if (condis == null) {
-            condis = new CondisConstraint(this);
-            condis.post();
-        }
-        return condis;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////// RELATED TO RESOLUTION //////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Returns information on the feasibility of the current problem defined by the solver.
-     * <p>
-     * Possible back values are:
-     * <br/>- {@link ESat#TRUE}: a solution has been found,
-     * <br/>- {@link ESat#FALSE}: the CSP has been proven to have no solution,
-     * <br/>- {@link ESat#UNDEFINED}: no solution has been found so far (within given limits)
-     * without proving the unfeasibility, though.
-     *
-     * @return an {@link ESat}.
-     */
-    public ESat isFeasible() {
-        return feasible;
-    }
-
-    /**
-     * Changes the current feasibility state of the <code>Model</code> object.
-     * <p>
-     * <b>Commonly called by the search loop, should not used without any knowledge of side effects.</b>
-     *
-     * @param feasible new state
-     */
-    public void setFeasible(ESat feasible) {
-        this.feasible = feasible;
-    }
-
-
-
-    /**
-     * Return the current state of the CSP.
-     * <p>
-     * Given the current domains, it can return a value among:
-     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
-     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
-     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
-     * <p>
-     * Presumably, not all variables are instantiated.
-     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
-     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
-     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
-     */
-    public ESat isSatisfied() {
-        if (isFeasible() != ESat.FALSE) {
-            int OK = 0;
-            for (int c = 0; c < cIdx; c++) {
-                ESat satC = cstrs[c].isSatisfied();
-                if (ESat.FALSE == satC) {
-                    System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
-                    return ESat.FALSE;
-                } else if (ESat.TRUE == satC) {
-                    OK++;
-                }
-            }
-            if (OK == cIdx) {
-                return ESat.TRUE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        }
-        return ESat.FALSE;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////// RELATED TO I/O ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -1026,11 +749,6 @@ public class Model implements Serializable, IModeler{
         }
         return st.toString();
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////// RELATED TO I/O ////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Kicks off the serialization mechanism and flatten the {@code model} into the given {@code file}.
@@ -1087,7 +805,9 @@ public class Model implements Serializable, IModeler{
         return model;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////// RELATED TO IBEX ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -1109,7 +829,9 @@ public class Model implements Serializable, IModeler{
         return ibex;
     }
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////// RELATED TO MODELING FACTORIES /////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -1127,6 +849,22 @@ public class Model implements Serializable, IModeler{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // CONTENT TO MOVE INSIDE RESOLVER
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -1181,6 +919,244 @@ public class Model implements Serializable, IModeler{
 
     /** Model's measures */
     protected final IMeasures measures;
+
+
+
+
+
+
+
+    /**
+     * Get the objective manager.
+     * @return the objective manager (can be <tt>null</tt>).
+     */
+    public ObjectiveManager getObjectiveManager() {
+        return this.search.getObjectiveManager();
+    }
+
+    /**
+     * The search strategy declared
+     * @return the search strategy declared (can be <tt>null</tt>).
+     */
+    public AbstractStrategy getStrategy() {
+        return search.getStrategy();
+    }
+
+    /**
+     * Returns the propagation engine used in <code>this</code>.
+     *
+     * @return a propagation engine.
+     */
+    public IPropagationEngine getEngine() {
+        return engine;
+    }
+
+
+
+    /**
+     * Return a reference to the measures recorder.
+     * This enables to get, for instance, the number of solutions found, time count, etc.
+     * @return this model's measure recorder
+     */
+    public IMeasures getMeasures() {
+        return measures;
+    }
+
+    /**
+     * Return the explanation engine plugged into <code>this</code>.
+     * @return this model's explanation engine
+     */
+    public ExplanationEngine getExplainer() {
+        return explainer;
+    }
+
+    /**
+     * Return the solution recorder
+     * @return this model's solution recorder
+     */
+    public ISolutionRecorder getSolutionRecorder() {
+        return solutionRecorder;
+    }
+
+    /**
+     * Return the current settings for the solver
+     *
+     * @return a {@link org.chocosolver.solver.Settings}
+     */
+    public Settings getSettings() {
+        return this.settings;
+    }
+
+
+
+    /**
+     * Override the default search strategies to use in <code>this</code>.
+     * In case many strategies are given, they will be called in sequence:
+     * The first strategy in parameter is first called to compute a decision, if possible.
+     * If it cannot provide a new decision, the second strategy is called ...
+     * and so on, until the last strategy.
+     * <p>
+     *
+     * @param strategies the search strategies to use.
+     */
+    public void set(AbstractStrategy... strategies) {
+        if (strategies == null || strategies.length == 0) {
+            throw new UnsupportedOperationException("no search strategy has been specified");
+        }
+        if (strategies.length == 1) {
+            search.set(strategies[0]);
+        } else {
+            search.set(ISF.sequencer(strategies));
+        }
+    }
+
+    /**
+     * Attach a propagation engine <code>this</code>.
+     * It overrides the previously defined one, if any.
+     *
+     * @param propagationEngine a propagation strategy
+     */
+    public void set(IPropagationEngine propagationEngine) {
+        this.engine = propagationEngine;
+    }
+
+    /**
+     * Override the explanation engine.
+     * @param explainer the explanation to use
+     */
+    public void set(ExplanationEngine explainer) {
+        this.explainer = explainer;
+        plugMonitor(explainer);
+    }
+
+    /**
+     * Override the objective manager
+     * @param om the objective manager to use
+     */
+    public void set(ObjectiveManager om) {
+        this.search.setObjectiveManager(om);
+    }
+
+    /**
+     * Override the solution recorder.
+     * Beware : multiple recorders which restore a solution might create a conflict.
+     * @param sr the solution recorder to use
+     */
+    public void set(ISolutionRecorder sr) {
+        this.solutionRecorder = sr;
+    }
+
+    /**
+     * Put a search monitor to react on search events (solutions, decisions, fails, ...).
+     * Any search monitor is actually plugged just before the search starts.
+     *
+     * There is no check if there are any duplicates.
+     * A search monitor added during while the resolution has started will not be taken into account.
+     *
+     * @param sm a search monitor to be plugged in the solver
+     */
+    public void plugMonitor(ISearchMonitor sm) {
+        searchMonitors.add(sm);
+    }
+
+    /**
+     * Removes a search monitors from the ones to plug when the search will start.
+     * @param sm a search monitor to be unplugged in the solver
+     */
+    public void unplugMonitor(ISearchMonitor sm){
+        searchMonitors.remove(sm);
+    }
+
+    /**
+     * Removes all search monitors from the list of search monitors to plug on the search loop.
+     */
+    public void unplugAllMonitors(){
+        searchMonitors.clear();
+    }
+
+
+
+    /**
+     * Add an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
+     * <p>
+     * Erase the current event observer if any.
+     *
+     * @param filteringMonitor an event observer
+     */
+    public void plugMonitor(FilteringMonitor filteringMonitor) {
+        this.eoList.add(filteringMonitor);
+    }
+
+    /**
+     * If {@code isComplete} is set to true, a complementary search strategy is added to the declared one in order to
+     * ensure that all variables are covered by a search strategy.
+     * Otherwise, the declared search strategy is used as is.
+     *
+     * @param isComplete completeness of the declared search strategy
+     */
+    public void makeCompleteSearch(boolean isComplete) {
+        this.search.makeCompleteStrategy(isComplete);
+    }
+    /**
+     * Adds a stop criterion, which, when met, stops the search loop.
+     * There can be multiple stop criteria, a logical OR is then applied.
+     * The stop criteria are declared to the search loop just before launching the search,
+     * the previously defined ones are erased.
+     *
+     * There is no check if there are any duplicates.
+     *
+     * <br/>
+     * Examples:
+     * <br/>
+     * With a built-in counter, stop after 20 seconds:
+     * <pre>
+     *         SMF.limitTime(solver, "20s");
+     * </pre>
+     * With lambda, stop when 10 nodes are visited:
+     * <pre>
+     *     () -> solver.getMeasures().getNodeCount() >= 10
+     * </pre>
+     *
+     * @param criterion a stop criterion to add.
+     * @see #removeStopCriterion(Criterion)
+     * @see #removeAllStopCriteria()
+     */
+    public void addStopCriterion(Criterion criterion){
+        stopCriteria.add(criterion);
+    }
+
+    /**
+     * Removes a stop criterion from the one to declare to the search loop.
+     * @param criterion criterion to remove
+     */
+    public void removeStopCriterion(Criterion criterion){
+        stopCriteria.remove(criterion);
+    }
+
+    /**
+     * Remove all declared stop criteria.
+     */
+    public void removeAllStopCriteria(){
+        stopCriteria.clear();
+    }
+
+
+    /**
+     * Override the default {@link org.chocosolver.solver.Settings} object.
+     *
+     * @param defaults new settings
+     */
+    public void set(Settings defaults) {
+        this.settings = defaults;
+    }
+
+    /**
+     * Return the current event observer list
+     * @return this solver's events observer
+     */
+    public FilteringMonitor getEventObserver() {
+        return this.eoList;
+    }
 
     /**
      * Returns information on the completeness of the search process.
@@ -1556,5 +1532,71 @@ public class Model implements Serializable, IModeler{
             engine.flush();
         }
         return restore;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// RELATED TO RESOLUTION //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Returns information on the feasibility of the current problem defined by the solver.
+     * <p>
+     * Possible back values are:
+     * <br/>- {@link ESat#TRUE}: a solution has been found,
+     * <br/>- {@link ESat#FALSE}: the CSP has been proven to have no solution,
+     * <br/>- {@link ESat#UNDEFINED}: no solution has been found so far (within given limits)
+     * without proving the unfeasibility, though.
+     *
+     * @return an {@link ESat}.
+     */
+    public ESat isFeasible() {
+        return feasible;
+    }
+
+    /**
+     * Changes the current feasibility state of the <code>Model</code> object.
+     * <p>
+     * <b>Commonly called by the search loop, should not used without any knowledge of side effects.</b>
+     *
+     * @param feasible new state
+     */
+    public void setFeasible(ESat feasible) {
+        this.feasible = feasible;
+    }
+
+
+
+    /**
+     * Return the current state of the CSP.
+     * <p>
+     * Given the current domains, it can return a value among:
+     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
+     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
+     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
+     * <p>
+     * Presumably, not all variables are instantiated.
+     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
+     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
+     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
+     */
+    public ESat isSatisfied() {
+        if (isFeasible() != ESat.FALSE) {
+            int OK = 0;
+            for (int c = 0; c < cIdx; c++) {
+                ESat satC = cstrs[c].isSatisfied();
+                if (ESat.FALSE == satC) {
+                    System.err.println(String.format("FAILURE >> %s (%s)", cstrs[c].toString(), satC));
+                    return ESat.FALSE;
+                } else if (ESat.TRUE == satC) {
+                    OK++;
+                }
+            }
+            if (OK == cIdx) {
+                return ESat.TRUE;
+            } else {
+                return ESat.UNDEFINED;
+            }
+        }
+        return ESat.FALSE;
     }
 }
