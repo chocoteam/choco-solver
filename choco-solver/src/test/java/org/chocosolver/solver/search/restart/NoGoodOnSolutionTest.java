@@ -76,7 +76,7 @@ public class NoGoodOnSolutionTest {
             s.element(costOf[i], costs[i], vars[i]).post();
         }
         s.sum(costOf, "=", z).post();
-        s.circuit(vars, 0).post();
+        s.circuit(vars).post();
         s.set(random_value(vars));
         limitSolution(s, MAX_NB_SOLS);
         return s;

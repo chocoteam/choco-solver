@@ -306,6 +306,25 @@ public interface IIntConstraintFactory {
 		return new Constraint("TableBin(" + algo + ")", p);
 	}
 
+	/**
+	 * Creates a multiplication constraint: X * Y = Z
+	 *
+	 * @param X first variable
+	 * @param Y a constant
+	 * @param Z result variable
+	 */
+	default Constraint times(IntVar X, int Y, IntVar Z) {
+		if (Y == 0) {
+			return arithm(Z, "=", 0);
+		} else if (Y == 1) {
+			return arithm(X, "=", Z);
+		} else if (Y < 0) {
+			return times(X.getSolver().intMinusView(X), -Y, Z);
+		} else {
+			return new Constraint("Times", new PropScale(X, Y, Z));
+		}
+	}
+
 	//##################################################################################################################
 	//TERNARIES ########################################################################################################
 	//##################################################################################################################
@@ -432,25 +451,6 @@ public interface IIntConstraintFactory {
 			return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
 		} else {
 			return new Times(X, Y, Z);
-		}
-	}
-
-	/**
-	 * Creates a multiplication constraint: X * Y = Z
-	 *
-	 * @param X first variable
-	 * @param Y a constant
-	 * @param Z result variable
-	 */
-	default Constraint times(IntVar X, int Y, IntVar Z) {
-		if (Y == 0) {
-			return arithm(Z, "=", 0);
-		} else if (Y == 1) {
-			return arithm(X, "=", Z);
-		} else if (Y < 0) {
-			return times(X.getSolver().intMinusView(X), -Y, Z);
-		} else {
-			return new Constraint("Times", new PropScale(X, Y, Z));
 		}
 	}
 
@@ -696,6 +696,44 @@ public interface IIntConstraintFactory {
 	 * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
 	 * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
 	 * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+	 * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
+	 *
+	 * @param vars   vector of variables which take their value in [offset,offset+|vars|-1]
+	 * @return a circuit constraint
+	 */
+	default Constraint circuit(IntVar[] vars) {
+		return circuit(vars, 0);
+	}
+
+	/**
+	 * Creates a circuit constraint which ensures that
+	 * <p/> the elements of vars define a covering circuit
+	 * <p/> where vars[i] = offset+j means that j is the successor of i.
+	 * <p>
+	 * Filtering algorithms:
+	 * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
+	 * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
+	 * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+	 * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
+	 *
+	 * @param vars   vector of variables which take their value in [offset,offset+|vars|-1]
+	 * @param offset 0 by default but typically 1 if used within MiniZinc
+	 *               (which counts from 1 to n instead of from 0 to n-1)
+	 * @return a circuit constraint
+	 */
+	default Constraint circuit(IntVar[] vars, int offset) {
+		return circuit(vars, offset, CircuitConf.RD);
+	}
+
+	/**
+	 * Creates a circuit constraint which ensures that
+	 * <p/> the elements of vars define a covering circuit
+	 * <p/> where vars[i] = offset+j means that j is the successor of i.
+	 * <p>
+	 * Filtering algorithms:
+	 * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
+	 * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
+	 * <p/> dominator-based filtering: Fages & Lorca (CP'11)
 	 * <p/> Strongly Connected Components based filtering (Cambazard & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
 	 * <p/> See Fages PhD Thesis (2014) for more information
 	 *
@@ -718,26 +756,6 @@ public interface IIntConstraintFactory {
 			};
 		}
 		return new Constraint("Circuit", ArrayUtils.append(allDifferent(vars, "AC").propagators, props));
-	}
-
-	/**
-	 * Creates a circuit constraint which ensures that
-	 * <p/> the elements of vars define a covering circuit
-	 * <p/> where vars[i] = offset+j means that j is the successor of i.
-	 * <p>
-	 * Filtering algorithms:
-	 * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
-	 * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
-	 * <p/> dominator-based filtering: Fages & Lorca (CP'11)
-	 * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
-	 *
-	 * @param vars   vector of variables which take their value in [offset,offset+|vars|-1]
-	 * @param offset 0 by default but typically 1 if used within MiniZinc
-	 *               (which counts from 1 to n instead of from 0 to n-1)
-	 * @return a circuit constraint
-	 */
-	default Constraint circuit(IntVar[] vars, int offset) {
-		return circuit(vars, offset, CircuitConf.RD);
 	}
 
 	/**

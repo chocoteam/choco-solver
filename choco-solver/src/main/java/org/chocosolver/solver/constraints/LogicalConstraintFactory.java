@@ -47,28 +47,28 @@ public class LogicalConstraintFactory {
 	//***********************************************************************************
 
 	/**
-	 * Make a and constraint
-	 * @param BOOLS an array of boolean variable
-	 * @return a constraint and ensuring that variables in BOOLS are all set to true
+	 * @deprecated : use {@link Solver#and(BoolVar...)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint and(BoolVar... BOOLS){
 		return BOOLS[0].getSolver().and(BOOLS);
 	}
 
 	/**
-	 * Make an or constraint
-	 * @param BOOLS an array of boolean variable
-	 * @return a constraint or ensuring that at least one variables in BOOLS is set to true
+	 * @deprecated : use {@link Solver#or(BoolVar...)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint or(BoolVar... BOOLS){
 		return BOOLS[0].getSolver().or(BOOLS);
 	}
 
 	/**
-	 * Make a and constraint
-	 * @param CONS an array of constraints
-	 * @return a constraint and ensuring that constraints in CONS are all satisfied
+	 * @deprecated : use {@link Solver#and(Constraint...)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint and(Constraint... CONS){
 		BoolVar[] bools = new BoolVar[CONS.length];
 		for(int i=0;i<CONS.length;i++){
@@ -78,10 +78,10 @@ public class LogicalConstraintFactory {
 	}
 
 	/**
-	 * Make an or constraint
-	 * @param CONS an array of constraints
-	 * @return a constraint or ensuring that at least one constraint in CONS is satisfied
+	 * @deprecated : use {@link Solver#or(Constraint...)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint or(Constraint... CONS){
 		BoolVar[] bools = new BoolVar[CONS.length];
 		for(int i=0;i<CONS.length;i++){
@@ -91,11 +91,10 @@ public class LogicalConstraintFactory {
 	}
 
 	/**
-	 * Get the opposite of a constraint
-	 * Works for any constraint, but the associated performances might be weak
-	 * @param CONS a constraint
-	 * @return the opposite constraint of CONS
+	 * @deprecated : use {@link Solver#not(Constraint)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint not(Constraint CONS){
 		return CONS.getOpposite();
 	}
@@ -105,89 +104,47 @@ public class LogicalConstraintFactory {
 	//***********************************************************************************
 
 	/**
-	 * Post a constraint ensuring that if IF is satisfied, then THEN is satisfied as well
-	 * Otherwise, ELSE must be satisfied
-	 *
-	 * BEWARE : it is automatically posted (it cannot be reified)
-	 *
-	 * @param IF a constraint
-	 * @param THEN a constraint
-	 * @param ELSE a constraint
+	 * @deprecated : use {@link Solver#ifThenElse(Constraint, Constraint, Constraint)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static void ifThenElse(Constraint IF, Constraint THEN, Constraint ELSE){
 		ifThenElse(IF.reify(), THEN, ELSE);
 	}
 
 	/**
-	 * Implication constraint: BVAR => THEN && not(B) => ELSE.
-	 * <br/>
-	 * Ensures:
-	 * <p/>- BVAR = 1 =>  THEN is satisfied, <br/>
-	 * <p/>- BVAR = 0 =>  ELSE is satisfied, <br/>
-	 * <p/>- THEN is not satisfied => BVAR = 0 <br/>
-	 * <p/>- ELSE is not satisfied => BVAR = 1 <br/>
-	 * <p/>
-	 * <p/> In order to have BVAR <=> THEN, use reification
-	 *
-	 * BEWARE : it is automatically posted (it cannot be reified)
-	 *
-	 * @param BVAR     variable of reification
-	 * @param THEN     the constraint to be satisfied when BVAR = 1
-	 * @param ELSE     the constraint to be satisfied when BVAR = 0
+	 * @deprecated : use {@link Solver#ifThenElse(BoolVar, Constraint, Constraint)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static void ifThenElse(BoolVar BVAR, Constraint THEN, Constraint ELSE) {
 		ifThen(BVAR,THEN);
 		ifThen(BVAR.not(),ELSE);
 	}
 
 	/**
-	 * Post a constraint ensuring that if IF is satisfied, then THEN is satisfied as well
-	 *
-	 * BEWARE : it is automatically posted (it cannot be reified)
-	 *
-	 * @param IF a constraint
-	 * @param THEN a constraint
+	 * @deprecated : use {@link Solver#ifThen(Constraint, Constraint)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static void ifThen(Constraint IF, Constraint THEN) {
 		ifThen(IF.reify(), THEN);
 	}
 
 	/**
-	 * Imply a constraint: BVAR => CSTR
-	 * Also called half reification constraint
-	 * Ensures:<br/>
-	 * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
-	 * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
-	 * <p/>
-	 * Example : <br/>
-	 * - <code>ifThen(b1, arithm(v1, "=", 2));</code>:
-	 * b1 is equal to 1 => v1 = 2, so v1 != 2 => b1 is equal to 0
-	 * But if b1 is equal to 0, nothing happens
-	 *
-	 * BEWARE : it is automatically posted (it cannot be reified)
-	 *
-	 * Note that its implementation relies on reification
-	 * (it will not be faster)
-	 * <p/>
-	 *
-	 * @param BVAR variable of reification
-	 * @param CSTR the constraint to be satisfied when BVAR = 1
+	 * @deprecated : use {@link Solver#ifThen(BoolVar, Constraint)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static void ifThen(BoolVar BVAR, Constraint CSTR) {
 		BVAR.getSolver().ifThen(BVAR,CSTR);
 	}
 
 	/**
-	 * Reify a constraint with a boolean variable: BVAR <=> CSTR
-	 *
-	 * Ensures:<br/>
-	 * <p/>- BVAR = 1 <=>  CSTR is satisfied, <br/>
-	 *
-	 * BEWARE : it is automatically posted (it cannot be reified)
-	 *
-	 * @param BVAR variable of reification
-	 * @param CSTR the constraint to be satisfied when BVAR = 1
+	 * @deprecated : use {@link Solver#reification(BoolVar, Constraint)} instead
+	 * This will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static void reification(BoolVar BVAR, Constraint CSTR){
 		BVAR.getSolver().reification(BVAR,CSTR);
 	}
@@ -199,37 +156,33 @@ public class LogicalConstraintFactory {
 	//***********************************************************************************
 
 	/**
-	 * Same as ifThenElse, but:
-	 * + can be reified
-	 * - may be slower
+	 * @deprecated : will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint ifThenElse_reifiable(Constraint IF, Constraint THEN, Constraint ELSE){
 		return ifThenElse_reifiable(IF.reif(), THEN, ELSE);
 	}
 
 	/**
-	 * Same as ifThenElse, but:
-	 * + can be reified
-	 * - may be slower
+	 * @deprecated : will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint ifThenElse_reifiable(BoolVar BVAR, Constraint THEN, Constraint ELSE) {
 		return and(ifThen_reifiable(BVAR,THEN),ifThen_reifiable(BVAR.not(),ELSE));
 	}
 
 	/**
-	 * Same as ifThen, but:
-	 * + can be reified
-	 * - may be slower
+	 * @deprecated : will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint ifThen_reifiable(Constraint IF, Constraint THEN) {
 		return ifThen_reifiable(IF.reif(), THEN);
 	}
 
 	/**
-	 * Same as ifThen, but:
-	 * + can be reified
-	 * - may be slower
+	 * @deprecated : will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint ifThen_reifiable(BoolVar BVAR, Constraint CSTR) {
 		Solver s = BVAR.getSolver();
 		// PRESOLVE
@@ -244,10 +197,9 @@ public class LogicalConstraintFactory {
 	}
 
 	/**
-	 * Same as reification, but:
-	 * + can be reified
-	 * - may be slower
+	 * @deprecated : will be removed in versions > 3.4.0
 	 */
+	@Deprecated
 	public static Constraint reification_reifiable(BoolVar BVAR, Constraint CSTR) {
 		Solver s = BVAR.getSolver();
 		// PRESOLVE

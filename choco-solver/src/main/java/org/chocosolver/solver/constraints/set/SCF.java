@@ -29,13 +29,13 @@
  */
 package org.chocosolver.solver.constraints.set;
 
+import org.chocosolver.solver.Solver;
+
 /**
- * A short-named version of {@code SetConstraintsFactory}
- * <br/>
+ * @deprecated : set constraint creation should be done through the {@link Solver} object
+ * which extends {@link org.chocosolver.solver.constraints.ISetConstraintFactory}
  *
- * @author Charles Prud'homme
- * @since 15/05/13
+ * This class will be removed in versions > 3.4.0
  */
-public final class SCF extends SetConstraintsFactory {
-    // SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
-}
+@Deprecated
+public final class SCF extends SetConstraintsFactory {}

@@ -566,7 +566,7 @@ public interface Modeler {
                 vars[i] = s.intVar("v_" + i, domains[i]);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            s.circuit(vars, 0).post();
+            s.circuit(vars).post();
             s.set(random_value(vars));
             return s;
         }

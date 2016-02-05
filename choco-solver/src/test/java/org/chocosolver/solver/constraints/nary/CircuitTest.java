@@ -51,7 +51,7 @@ public class CircuitTest {
     public static void test1() {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 10, 0, 20, true);
-        solver.circuit(x, 0).post();
+        solver.circuit(x).post();
         solver.findSolution();
         assertEquals(1, solver.getMeasures().getSolutionCount());
     }
@@ -60,7 +60,7 @@ public class CircuitTest {
     public static void test2() {
         Solver solver = new Solver();
         IntVar[] x = solver.intVarArray("x", 10, 0, 10, false);
-        solver.circuit(x, 0).post();
+        solver.circuit(x).post();
         solver.findSolution();
         assertEquals(1, solver.getMeasures().getSolutionCount());
     }
@@ -71,7 +71,7 @@ public class CircuitTest {
         IntVar[] x = solver.intVarArray("x", 5, 0, 4, true);
         IntVar[] y = solver.intVarArray("y", 5, 5, 9, true);
         IntVar[] vars = append(x, y);
-        solver.circuit(vars, 0).post();
+        solver.circuit(vars).post();
         solver.findSolution();
         assertEquals(0, solver.getMeasures().getSolutionCount());
     }
@@ -81,7 +81,7 @@ public class CircuitTest {
         for (int n = 2; n < 8; n++) {
             Solver solver = new Solver();
             IntVar[] x = solver.intVarArray("x", n, 0, n - 1, true);
-            solver.circuit(x, 0).post();
+            solver.circuit(x).post();
             solver.findAllSolutions();
             assertEquals(factorial(n - 1), solver.getMeasures().getSolutionCount());
         }
