@@ -142,11 +142,11 @@ public class BinTableTest {
         }
     }
 
-    private Constraint arithmLT(IntVar v1, IntVar v2, int algo) {
+    private static Constraint arithmLT(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return s.table(v1, v2, TuplesFactory.arithm(v1, "<", v2), ALGOS[algo]);
+            return v1.getSolver().table(v1, v2, TuplesFactory.arithm(v1, "<", v2), ALGOS[algo]);
         } else {
-            return s.arithm(v1, "<", v2);
+            return v1.getSolver().arithm(v1, "<", v2);
         }
     }
 
@@ -171,11 +171,11 @@ public class BinTableTest {
         }
     }
 
-    private Constraint arithmNQ(IntVar v1, IntVar v2, int algo) {
+    private static Constraint arithmNQ(IntVar v1, IntVar v2, int algo) {
         if (algo > -1) {
-            return s.table(v1, v2, TuplesFactory.arithm(v1, "!=", v2), ALGOS[algo]);
+            return v1.getSolver().table(v1, v2, TuplesFactory.arithm(v1, "!=", v2), ALGOS[algo]);
         } else {
-            return s.arithm(v1, "!=", v2);
+            return v1.getSolver().arithm(v1, "!=", v2);
         }
     }
 
