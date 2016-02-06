@@ -382,7 +382,7 @@ public class ParallelResolution {
 
 
     public boolean solve() {
-        ResolutionPolicy policy = models.get(0).policy;
+        ResolutionPolicy policy = models.get(0).getResolutionPolicy();
         check(policy);
         setUpResolution(policy);
         models.parallelStream().forEach(Model::solve);

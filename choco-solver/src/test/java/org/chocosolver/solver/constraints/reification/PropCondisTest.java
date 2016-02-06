@@ -54,7 +54,7 @@ import static org.chocosolver.util.tools.ArrayUtils.append;
  * @author Charles Prud'homme
  * @since 26/01/2016.
  */
-public class PropCondisTest {
+public class PropConDisTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testCD1() throws ContradictionException {

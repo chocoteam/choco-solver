@@ -91,12 +91,12 @@ public interface IVariableFactory {
      */
     default BoolVar boolVar(String name, boolean value) {
         int intVal = value?1:0;
-        if (name.equals(CSTE_NAME + intVal) && _me().cachedConstants.containsKey(intVal)) {
-            return (BoolVar)_me().cachedConstants.get(intVal);
+        if (name.equals(CSTE_NAME + intVal) && _me().getCachedConstants().containsKey(intVal)) {
+            return (BoolVar)_me().getCachedConstants().get(intVal);
         }
         BoolVar cste = new FixedBoolVarImpl(name, intVal, _me());
         if (name.equals(CSTE_NAME + intVal)) {
-            _me().cachedConstants.put(intVal, cste);
+            _me().getCachedConstants().put(intVal, cste);
         }
         return cste;
     }
@@ -228,12 +228,12 @@ public interface IVariableFactory {
         if (value == 0 || value == 1) {
             return boolVar(name,value==1);
         }
-        if (name.equals(CSTE_NAME + value) && _me().cachedConstants.containsKey(value)) {
-            return _me().cachedConstants.get(value);
+        if (name.equals(CSTE_NAME + value) && _me().getCachedConstants().containsKey(value)) {
+            return _me().getCachedConstants().get(value);
         }
         IntVar cste = new FixedIntVarImpl(name, value, _me());
         if (name.equals(CSTE_NAME + value)) {
-            _me().cachedConstants.put(value, cste);
+            _me().getCachedConstants().put(value, cste);
         }
         return cste;
     }

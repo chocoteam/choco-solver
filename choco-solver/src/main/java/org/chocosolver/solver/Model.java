@@ -39,7 +39,7 @@ import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
-import org.chocosolver.solver.constraints.reification.CondisConstraint;
+import org.chocosolver.solver.constraints.reification.ConDisConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -78,6 +78,10 @@ import java.util.*;
  */
 public class Model implements Serializable, IModeler{
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /** For serialization purpose */
     private static final long serialVersionUID = 1L;
 
@@ -85,40 +89,40 @@ public class Model implements Serializable, IModeler{
     private Settings settings = new Settings() {};
 
     /** A map to cache constants (considered as fixed variables) */
-    public TIntObjectHashMap<IntVar> cachedConstants;
+    private TIntObjectHashMap<IntVar> cachedConstants;
 
     /** Variables of the model */
-    Variable[] vars;
+    private Variable[] vars;
 
     /** Index of the last added variable */
-    int vIdx;
+    private int vIdx;
 
     /** Constraints of the model */
-    Constraint[] cstrs;
+    private Constraint[] cstrs;
 
     /** Index of the last added constraint */
-    int cIdx;
+    private int cIdx;
 
     /** Environment, based of the search tree (trailing or copying) */
-    final IEnvironment environment;
+    private final IEnvironment environment;
 
-    /** Resolver of the model */
-    protected Resolver search;
+    /** Resolver of the model, controls propagation and search */
+    private Resolver search;
 
-    /** Array of variable to optimize. */
-    protected Variable[] objectives;
+    /** Array of variable to optimize, possibly empty. */
+    private Variable[] objectives;
 
     /** Precision to consider when optimizing a RealVariable */
-    protected double precision = 0.00D;
+    private double precision = 0.0001D;
 
     /** Model name */
-    protected String name;
+    private String name;
 
     /** Stores this model's creation time */
-    protected long creationTime;
+    private long creationTime;
 
     /** Counter used to set ids to variables and propagators */
-    protected int id = 1;
+    private int id = 1;
 
     /** Basic TRUE constraint, cached to avoid multiple useless occurrences */
     private Constraint TRUE;
@@ -133,13 +137,13 @@ public class Model implements Serializable, IModeler{
     private BoolVar ONE;
 
     /** A MiniSat instance, useful to deal with clauses*/
-    protected SatConstraint minisat;
+    private SatConstraint minisat;
 
     /** A MiniSat instance adapted to nogood management */
-    protected NogoodConstraint nogoods;
+    private NogoodConstraint nogoods;
 
     /** A CondisConstraint instance adapted to constructive disjunction management */
-    protected CondisConstraint condis;
+    private ConDisConstraint condis;
 
     /** An Ibex (continuous constraint model) instance */
     private Ibex ibex;
@@ -147,18 +151,19 @@ public class Model implements Serializable, IModeler{
     /** Enable attaching hooks to a model. */
     private Map<String,Object> hooks;
 
-    protected ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
+    /** Resolution policy (sat/min/max) */
+    private ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Create a model object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
-     * properties <code>solverProperties</code>.
+     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
+     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
      *
-     * @param environment a backtracking environment
-     * @param name        a name
+     * @param environment a backtracking environment to allow search
+     * @param name        The name of the model (for logging purpose)
      */
     public Model(IEnvironment environment, String name) {
         this.name = name;
@@ -167,17 +172,17 @@ public class Model implements Serializable, IModeler{
         this.cstrs = new Constraint[32];
         this.cIdx = 0;
         this.environment = environment;
-        this.creationTime -= System.nanoTime();
+        this.creationTime = System.currentTimeMillis();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
-        this.getResolver().setObjectiveManager(ObjectiveManager.SAT());
         this.objectives = new Variable[0];
         this.hooks = new HashMap<>();
     }
 
     /**
-     * Create a model object with default parameters, named <code>name</code>.
+     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
+     * The model is named <code>name</code> and uses the default (trailing) backtracking environment.
      *
-     * @param name name attributed to this model
+     * @param name        The name of the model (for logging purpose)
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
      */
     public Model(String name) {
@@ -185,7 +190,8 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Create a model object with default parameters.
+     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
+     * The model uses the default (trailing) backtracking environment.
      *
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
      */
@@ -201,19 +207,39 @@ public class Model implements Serializable, IModeler{
         return modelInitNumber++;
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Get the creation time (in milliseconds) of the model (to estimate modeling duration)
+     * @return the time (in ms) of the creation of the model
+     */
     public long getCreationTime(){
         return creationTime;
     }
 
     /**
-     * The basic constant "0"
-     *
-     * @return a boolean variable set to 0
+     * Get the resolution policy of the model
+     * @return the resolution policy of the model
+     * @see ResolutionPolicy
+     */
+    public ResolutionPolicy getResolutionPolicy(){
+        return policy;
+    }
+
+    /**
+     * Get the map of constant IntVar the have default names to avoid creating multiple identical constants.
+     * Should not be called by the user.
+     * @return the map of constant IntVar having default names.
+     */
+    public TIntObjectHashMap<IntVar> getCachedConstants() {
+        return cachedConstants;
+    }
+
+    /**
+     * The basic constant "0" used as an integer variable or a (false) boolean variable
+     * @return a BoolVar set to 0
      */
     public BoolVar ZERO() {
         if (ZERO == null) {
@@ -223,9 +249,8 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * The basic constant "1"
-     *
-     * @return a boolean variable set to 1
+     * The basic constant "1" used as an integer variable or a (true) boolean variable
+     * @return a BoolVar set to 1
      */
     public BoolVar ONE() {
         if (ONE == null) {
@@ -242,8 +267,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * The basic "true" constraint
-     *
+     * The basic "true" constraint, which is always satisfied
      * @return a "true" constraint
      */
     public Constraint TRUE() {
@@ -254,8 +278,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * The basic "false" constraint
-     *
+     * The basic "false" constraint, which is always violated
      * @return a "false" constraint
      */
     public Constraint FALSE() {
@@ -265,13 +288,11 @@ public class Model implements Serializable, IModeler{
         return FALSE;
     }
 
-
     /**
-     * Returns the unique and internal search loop.
-     * Set to null when this model is created,
-     * it is lazily created (if needed) when a resolution is asked.
-     *
-     * @return the unique and internal <code>SearchLoop</code> object.
+     * Returns the unique and internal propagation and search object to solve this model.
+     * Set to null when this model is created, and lazily created when this method is called.
+     * Creates {@link SLF#dfs(Model, AbstractStrategy)} by default.
+     * @return the unique and internal <code>Resolver</code> object.
      */
     public Resolver getResolver() {
         if(search == null){
@@ -282,38 +303,25 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use {@link #getResolver()} instead
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public Resolver getSearchLoop() {
-        return getResolver();
-    }
-
-    /**
-     * Returns the array of declared <code>Variable</code> objects defined in this <code>Model</code>.
-     *
-     * @return array of variables
+     * Returns the array of <code>Variable</code> objects declared in this <code>Model</code>.
+     * @return array of all variables in this model
      */
     public Variable[] getVars() {
         return Arrays.copyOf(vars, vIdx);
     }
 
-
     /**
      * Returns the number of variables involved in <code>this</code>.
-     *
-     * @return number of variables
+     * @return number of variables in this model
      */
     public int getNbVars() {
         return vIdx;
     }
 
     /**
-     * Returns the i<sup>th</sup> variables within the array of variables defined in <code>this</code>.
-     *
-     * @param i index of the variables to return.
-     * @return a variable
+     * Returns the i<sup>th</sup> variable within the array of variables defined in <code>this</code>.
+     * @param i index of the variable to return.
+     * @return the i<sup>th</sup> variable of this model
      */
     public Variable getVar(int i) {
         return vars[i];
@@ -323,9 +331,8 @@ public class Model implements Serializable, IModeler{
      * Iterate over the variable of <code>this</code> and build an array that contains all the IntVar of the model.
      * <b>excludes</b> BoolVar if includeBoolVar=false.
      * It also contains FIXED variables and VIEWS, if any.
-     *
      * @param includeBoolVar indicates whether or not to include BoolVar
-     * @return array of IntVars of <code>this</code>
+     * @return array of IntVars in <code>this</code> model
      */
     public IntVar[] retrieveIntVars(boolean includeBoolVar) {
         IntVar[] ivars = new IntVar[vIdx];
@@ -342,8 +349,7 @@ public class Model implements Serializable, IModeler{
     /**
      * Iterate over the variable of <code>this</code> and build an array that contains the BoolVar only.
      * It also contains FIXED variables and VIEWS, if any.
-     *
-     * @return array of BoolVars of <code>this</code>
+     * @return array of BoolVars in <code>this</code> model
      */
     public BoolVar[] retrieveBoolVars() {
         BoolVar[] bvars = new BoolVar[vIdx];
@@ -359,8 +365,7 @@ public class Model implements Serializable, IModeler{
     /**
      * Iterate over the variable of <code>this</code> and build an array that contains the SetVar only.
      * It also contains FIXED variables and VIEWS, if any.
-     *
-     * @return array of SetVars of <code>this</code>
+     * @return array of SetVars in <code>this</code> model
      */
     public SetVar[] retrieveSetVars() {
         SetVar[] bvars = new SetVar[vIdx];
@@ -376,8 +381,7 @@ public class Model implements Serializable, IModeler{
     /**
      * Iterate over the variable of <code>this</code> and build an array that contains the RealVar only.
      * It also contains FIXED variables and VIEWS, if any.
-     *
-     * @return array of RealVars of <code>this</code>
+     * @return array of RealVars in <code>this</code> model
      */
     public RealVar[] retrieveRealVars() {
         RealVar[] bvars = new RealVar[vIdx];
@@ -391,25 +395,23 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Returns the array of declared <code>Constraint</code> objects defined in this <code>Model</code>.
-     *
-     * @return array of constraints
+     * Returns the array of <code>Constraint</code> objects posted in this <code>Model</code>.
+     * @return array of posted constraints
      */
     public Constraint[] getCstrs() {
         return Arrays.copyOf(cstrs, cIdx);
     }
 
     /**
-     * Return the number of constraints declared in <code>this</code>.
-     *
-     * @return number of constraints.
+     * Return the number of constraints posted in <code>this</code>.
+     * @return number of posted constraints.
      */
     public int getNbCstrs() {
         return cIdx;
     }
 
     /**
-     * Return the name, if any, of <code>this</code>.
+     * Return the name of <code>this</code> model.
      * @return this model's name
      */
     public String getName() {
@@ -417,7 +419,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Return the backtracking environment of <code>this</code>.
+     * Return the backtracking environment of <code>this</code> model.
      * @return the backtracking environment of this model
      */
     public IEnvironment getEnvironment() {
@@ -425,9 +427,8 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Return the objective variables
-     *
-     * @return a variable
+     * Return the (possibly empty) array of objective variables
+     * @return an array of variables (empty for satisfaction problems)
      */
     public Variable[] getObjectives() {
         assert objectives!=null;
@@ -435,8 +436,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * In case of real variable to optimize, a precision is required.
-     *
+     * In case of real variable(s) to optimize, a precision is required.
      * @return the precision used
      */
     public double getPrecision() {
@@ -461,12 +461,9 @@ public class Model implements Serializable, IModeler{
         return hooks;
     }
 
-
     /**
-     * Return a constraint embedding a minisat model.
-     * It is highly recommended that there is only once instance of this constraint in a model.
-     * So a call to this method will create and post the constraint if it does not exist.
-     *
+     * Returns the unique constraint embedding a minisat model.
+     * A call to this method will create and post the constraint if it does not exist already.
      * @return the minisat constraint
      */
     public SatConstraint getMinisat() {
@@ -479,10 +476,8 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Return a constraint embedding a nogood store (based on a sat model).
-     * It is highly recommended that there is only once instance of this constraint in a model.
-     * So a call to this method will create and post the constraint if it does not exist.
-     *
-     * @return the minisat constraint
+     * A call to this method will create and post the constraint if it does not exist already.
+     * @return the no good constraint
      */
     public NogoodConstraint getNogoodStore() {
         if (nogoods == null) {
@@ -494,12 +489,12 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Return a constraint embedding a constructive disjunction store.
-     * There can be only on instance of such a constraint in a solver to avoid undesirable side effects.
-     * @return the condis constraint
+     * A call to this method will create and post the constraint if it does not exist already.
+     * @return the constructive disjunction constraint
      */
-    public CondisConstraint getCondisStore(){
+    public ConDisConstraint getConDisStore(){
         if (condis == null) {
-            condis = new CondisConstraint(this);
+            condis = new ConDisConstraint(this);
             condis.post();
         }
         return condis;
@@ -507,7 +502,6 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Return the current settings for the solver
-     *
      * @return a {@link org.chocosolver.solver.Settings}
      */
     public Settings getSettings() {
@@ -520,7 +514,6 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Override the default search loop to use in <code>this</code>.
-     *
      * @param resolver the search loop to use
      */
     public void set(Resolver resolver) {
@@ -528,14 +521,15 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Define the variables to optimize
-     *
+     * Defines the variable(s) to optimize according to <i>policy</i>.
+     * In case of multiple variables, all should be optimised in the same direction.
+     * @param policy optimisation policy (minimisation or maximisation)
      * @param objectives one or more variables
      */
     public void setObjectives(ResolutionPolicy policy, Variable... objectives) {
         if(objectives == null || objectives.length==0){
             assert policy == ResolutionPolicy.SATISFACTION;
-            resetObjectives();
+            clearObjectives();
         }else {
             assert policy != ResolutionPolicy.SATISFACTION;
             this.objectives = objectives;
@@ -561,32 +555,17 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     *
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public void setObjectives(Variable... objectives) {
-        if(objectives == null){
-            resetObjectives();
-        }else {
-            throw new UnsupportedOperationException("please specify a resolution policy");
-        }
-    }
-
-    /**
      * Removes any objective and set problem to a satisfaction problem
      */
-    public void resetObjectives() {
+    public void clearObjectives() {
         this.objectives = new Variable[0];
         this.policy = ResolutionPolicy.SATISFACTION;
-        set(ObjectiveManager.SAT());
+        getResolver().setObjectiveManager(ObjectiveManager.SAT());
     }
 
     /**
      * In case of real variable to optimize, a precision is required.
-     *
-     * @param p the precision (default is 0.00D)
+     * @param p the precision (default is 0.0001D)
      */
     public void setPrecision(double p) {
         this.precision = p;
@@ -594,7 +573,6 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Override the default {@link org.chocosolver.solver.Settings} object.
-     *
      * @param defaults new settings
      */
     public void set(Settings defaults) {
@@ -620,7 +598,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Empties the hooks attaches to this model.
+     * Empties the hooks attached to this model.
      */
     public void removeAllHooks(){
         this.hooks.clear();
@@ -633,15 +611,15 @@ public class Model implements Serializable, IModeler{
     public void setName(String name){
         this.name = name;
     }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
+    ///////////////////////////////////////         RELATED TO VAR              ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Link a variable to <code>this</code>.
-     * This is executed AUTOMATICALLY in variable constructor, so no checked are done on multiple occurrences of
-     * the very same variable.
-     *
+     * Link a variable to <code>this</code>. This is executed AUTOMATICALLY in variable constructor,
+     * so no checked are done on multiple occurrences of the very same variable.
+     * Should not be called by the user.
      * @param variable a newly created variable, not already added
      */
     public void associates(Variable variable) {
@@ -655,7 +633,7 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Unlink the variable from <code>this</code>.
-     *
+     * Should not be called by the user.
      * @param variable variable to un-associate
      */
     public void unassociates(Variable variable) {
@@ -671,19 +649,20 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * Post permanently a constraint <code>c</code> in the constraints network of <code>this</code>:
-     * - add it to the data structure,
-     * - set the fixed idx,
-     * - checks for restrictions
-     *
-     * @param c a Constraint
+     * Get a free id to idendity unically a new variable.
+     * Should not be called by the user.
+     * @return a free id to use
      */
-    public void post(Constraint c) {
-        _post(true, c);
+    public int nextId() {
+        return id++;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////     RELATED TO CSTR DECLARATION     ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
-     * Post constraints <code>cs</code> permanently in the constraints network of <code>this</code>:
+     * Posts constraints <code>cs</code> permanently in the constraints network of <code>this</code>:
      * - add them to the data structure,
      * - set the fixed idx,
      * - checks for restrictions
@@ -693,27 +672,6 @@ public class Model implements Serializable, IModeler{
     public void post(Constraint... cs) {
         _post(true, cs);
     }
-
-    /**
-     * Post a constraint temporary, that is, it will be unposted upon backtrack.
-     *
-     * @param c constraint to add
-     * @throws ContradictionException if the addition of the constraint <code>c</code> detects inconsistency.
-     */
-    public void postTemp(Constraint c) throws ContradictionException {
-        _post(false, c);
-        if (getEngine() == NoPropagationEngine.SINGLETON || !getEngine().isInitialized()) {
-            throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
-                    "A call to Model.post(Constraint) is more appropriate.");
-        }
-        for (Propagator propagator : c.getPropagators()) {
-            if(settings.debugPropagation()){
-                IPropagationEngine.Trace.printFirstPropagation(propagator, settings.outputWithANSIColors());
-            }
-            PropagationTrigger.execute(propagator, getEngine());
-        }
-    }
-
 
     /**
      * Add constraints to the model.
@@ -755,6 +713,27 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
+     * Posts constraints <code>cs</code> temporary, that is, they will be unposted upon backtrack.
+     * @param cs a set of constraints to add
+     * @throws ContradictionException if the addition of constraints <code>cs</code> detects inconsistency.
+     */
+    public void postTemp(Constraint... cs) throws ContradictionException {
+        for(Constraint c:cs) {
+            _post(false, c);
+            if (getResolver().getEngine() == NoPropagationEngine.SINGLETON || !getResolver().getEngine().isInitialized()) {
+                throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
+                        "A call to Model.post(Constraint) is more appropriate.");
+            }
+            for (Propagator propagator : c.getPropagators()) {
+                if (settings.debugPropagation()) {
+                    IPropagationEngine.Trace.printFirstPropagation(propagator, settings.outputWithANSIColors());
+                }
+                PropagationTrigger.execute(propagator, getResolver().getEngine());
+            }
+        }
+    }
+
+    /**
      * Remove permanently the constraint <code>c</code> from the constraint network.
      *
      * @param c the constraint to remove
@@ -788,13 +767,12 @@ public class Model implements Serializable, IModeler{
         }
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////// RELATED TO I/O ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Return a string describing the CSP defined in <code>this</code>.
+     * Return a string describing the CSP defined in <code>this</code> model.
      */
     @Override
     public String toString() {
@@ -848,7 +826,6 @@ public class Model implements Serializable, IModeler{
         return file;
     }
 
-
     /**
      * Restore flatten {@link Model} from the given {@code file}.
      *
@@ -868,18 +845,9 @@ public class Model implements Serializable, IModeler{
         return model;
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////// RELATED TO IBEX ///////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * <b>This methods should not be called by the user.</b>
-     * @return a free id to use
-     */
-    public int nextId() {
-        return id++;
-    }
 
     /**
      * Get the ibex reference
@@ -892,7 +860,6 @@ public class Model implements Serializable, IModeler{
         return ibex;
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////// RELATED TO MODELING FACTORIES /////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -902,23 +869,27 @@ public class Model implements Serializable, IModeler{
         return this;
     }
 
-
-
-
-
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////  RELATED TO SOLVING PROCESS   /////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Executes the resolver as configured
+     * Executes the resolver as it is configured.
      * Default configuration: Computes a feasible solution (SAT) with the default search strategy
+     * If configured for optimisation, restores last solution by default.
+     * @return if at least one new solution has been found.
+     * @see {@link Resolver}
      */
     public boolean solve(){
         return solve(policy != ResolutionPolicy.SATISFACTION);
     }
 
     /**
-     * Executes the resolver as configured
-     * Default configuration: Computes a feasible solution (SAT) with the default search strategy
+     * Executes the resolver as it is configured.
+     * Enables to specify not to restore the last solution found (done by default)
+     * @param restoreBestSolution do not restore last solution after solving if set to false
+     * @return if at least one new solution has been found.
+     * @see {@link Resolver}
      */
     public boolean solve(boolean restoreBestSolution){
         if(policy == ResolutionPolicy.SATISFACTION){
@@ -929,26 +900,36 @@ public class Model implements Serializable, IModeler{
             }
             getResolver().setStopAtFirstSolution(false);
         }
-        long nbsol = getMeasures().getSolutionCount();
+        long nbsol = getResolver().getMeasures().getSolutionCount();
         getResolver().launch();
         if(restoreBestSolution){
             try {
-                restoreLastSolution();
+                getResolver().restoreLastSolution();
             } catch (ContradictionException e) {
                 throw new UnsupportedOperationException("restoring the last solution ended in a failure");
             } finally {
                 getEngine().flush();
             }
         }
-        return (getMeasures().getSolutionCount() - nbsol) > 0;
+        return (getResolver().getMeasures().getSolutionCount() - nbsol) > 0;
     }
 
+    /**
+     * Executes the resolver to enumerate all solutions.
+     * @return the number of solutions that have been found.
+     * @see {@link Resolver}
+     */
     public long solveAll() {
-        resetObjectives();
+        clearObjectives();
         getResolver().setStopAtFirstSolution(false);
         getResolver().launch();
-        return getMeasures().getSolutionCount();
+        return getResolver().getMeasures().getSolutionCount();
     }
+
+
+
+
+
 
 
 
@@ -974,14 +955,6 @@ public class Model implements Serializable, IModeler{
 
 
 
-
-
-    public long findAllSolutions() {
-        resetObjectives();
-        getResolver().setStopAtFirstSolution(false);
-        getResolver().launch();
-        return getMeasures().getSolutionCount();
-    }
 
 
 
@@ -1046,226 +1019,10 @@ public class Model implements Serializable, IModeler{
 
 
 
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////       TO DELETE       //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-    /**
-     * Attempts to find the first solution of the declared problem.
-     * Then, following solutions can be found using {@link Model#nextSolution()}.
-     * <p>
-     * An alternative is to call {@link Model#isFeasible()} which tells, whether or not, a solution has been found.
-     *
-     * @return <code>true</code> if and only if a solution has been found.
-     */
-    public boolean findSolution() {
-        resetObjectives();
-        return solve();
-    }
-
-    /**
-     * Once {@link Model#findSolution()} has been called once, other solutions can be found using this method.
-     * <p>
-     * The search is then resume to the last found solution point.
-     *
-     * If {@link Model#findSolution()} has not been called yet, call it instead.
-     *
-     * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
-     */
-    public boolean nextSolution() {
-        return findSolution();
-    }
-
-    // INTS
-
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
-     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
-     * the last solution found so far is restored on exit.
-     *
-     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
-     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
-     *                            set to <tt>false</tt> otherwise.
-     */
-    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
-        setObjectives(policy,getObjectives());
-        solve(restoreLastSolution);
-    }
-
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
-     * and restores the last solution found (if any) on exit.
-     * <p>
-     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean)} where <i>boolean</i> is set to <tt>true</tt>.
-     *
-     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @see #findOptimalSolution(ResolutionPolicy, boolean)
-     */
-    public void findOptimalSolution(ResolutionPolicy policy) {
-        findOptimalSolution(policy,true);
-    }
-
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
-     * and restores the last solution found (if any) on exit.
-     * <p>
-     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean, IntVar)} where <i>boolean</i> is set to <tt>true</tt>.
-     *
-     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param objective the variable to optimize
-     * @see #findOptimalSolution(ResolutionPolicy, boolean, IntVar)
-     */
-    public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
-        findOptimalSolution(policy, true, objective);
-    }
-
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
-     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
-     * the last solution found so far is restored on exit.
-     * <p>
-     * Indeed, it calls in sequence:
-     * <pre>
-     *     <code>setObjectives(objectives);
-     *     findOptimalSolution(policy, restoreLastSolution);
-     *     </code>
-     * </pre>
-     *
-     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
-     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
-     *                            set to <tt>false</tt> otherwise.
-     * @param objective the variable to optimize
-     * @see #setObjectives(Variable...)
-     * @see #findOptimalSolution(ResolutionPolicy, boolean)
-     */
-    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
-        setObjectives(policy,objective);
-        solve(restoreLastSolution);
-    }
-
-    // PARETO
-
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
-     * Finds and stores all optimal solution.
-     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
-     * the last solution found so far is restored on exit.
-     * <p>
-     * Indeed, it calls in sequence:
-     * <pre>
-     *     <code>setObjectives(objectives);
-     *     findOptimalSolution(policy, restoreLastSolution);
-     *     </code>
-     * </pre>
-     *
-     * @param policy     optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
-     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
-     *                            set to <tt>false</tt> otherwise.
-     * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
-     * @see #setObjectives(Variable...)
-     * @see #findOptimalSolution(ResolutionPolicy, boolean)
-     */
-    public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
-        setObjectives(policy,objectives);
-        solve(restoreLastSolution);
-    }
-
-    /**
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>.
-     * It finds and stores all optimal solution
-     * and restores the last solution found (if any) on exit.
-     * <p>
-     * Equivalent to {@link #findParetoFront(ResolutionPolicy, boolean, IntVar...)} where <i>boolean</i> is set to <tt>true</tt>.
-     *
-     * @param policy     optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param objectives the variables to optimize. BEWARE they should all respect the SAME optimization policy
-     * @see #findParetoFront(ResolutionPolicy, boolean, IntVar...)
-     */
-    public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
-        findParetoFront(policy, true, objectives);
-    }
-
-    // REALS
-
-    /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * If <i>restoreLastSolution</i> is set to <tt>true</tt> and at least one solution has been found,
-     * the last solution found so far is restored on exit.
-     * <p>
-     * Indeed, it calls in sequence:
-     * <pre>
-     *     <code>setObjectives(objectives);
-     *     setPrecision(precision);
-     *     findOptimalSolution(policy, restoreLastSolution);
-     *     </code>
-     * </pre>
-     *
-     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param restoreLastSolution set to <tt>true</tt> to automatically restore the last (presumably best) solution
-     *                            found in this solver (i.e., {@link #restoreLastSolution()} is called) on exit,
-     *                            set to <tt>false</tt> otherwise.
-     * @param objective the variable to optimize
-     * @param precision to consider that <code>objective</code> is instantiated.
-     * @see #setObjectives(Variable...)
-     * @see #setPrecision(double)
-     * @see #findOptimalSolution(ResolutionPolicy, boolean)
-     */
-    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
-        setObjectives(policy,objective);
-        setPrecision(precision);
-        solve(restoreLastSolution);
-    }
-
-    /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>
-     * and restores the last solution found (if any) on exit.
-     * <p>
-     * Equivalent to {@link #findOptimalSolution(ResolutionPolicy, boolean, RealVar, double)}
-     * where <i>boolean</i> is set to <tt>true</tt>.
-     *
-     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param objective the variable to optimize
-     * @param precision to consider that <code>objective</code> is instantiated.
-     * @see #findOptimalSolution(ResolutionPolicy, boolean, RealVar, double)
-     */
-    public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
-        findOptimalSolution(policy,true,objective,precision);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////   MOVED IN RESOLVER   //////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
 
     /**
      * @deprecated use {@link Resolver#getSolutionRecorder()} instead
@@ -1515,5 +1272,153 @@ public class Model implements Serializable, IModeler{
     @Deprecated
     public void makeCompleteSearch(boolean isComplete) {
         getResolver().makeCompleteStrategy(isComplete);
+    }
+
+    /**
+     * @deprecated use {@link #getResolver()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public Resolver getSearchLoop() {
+        return getResolver();
+    }
+
+    /**
+     * @deprecated use {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void setObjectives(Variable... objectives) {
+        if(objectives == null){
+            clearObjectives();
+        }else {
+            throw new UnsupportedOperationException("please specify a resolution policy");
+        }
+    }
+
+    /**
+     * @deprecated use {@link #solveAll()} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public long findAllSolutions() {
+        clearObjectives();
+        getResolver().setStopAtFirstSolution(false);
+        getResolver().launch();
+        return getMeasures().getSolutionCount();
+    }
+
+    /**
+     * @deprecated use {@link #solve()} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public boolean findSolution() {
+        clearObjectives();
+        return solve();
+    }
+
+    /**
+     * @deprecated use {@link #solve()} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public boolean nextSolution() {
+        return findSolution();
+    }
+
+    // INTS
+
+    /**
+     * @deprecated use {@link #solve(boolean)} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
+        setObjectives(policy,getObjectives());
+        solve(restoreLastSolution);
+    }
+
+    /**
+     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findOptimalSolution(ResolutionPolicy policy) {
+        findOptimalSolution(policy,true);
+    }
+
+    /**
+     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
+        findOptimalSolution(policy, true, objective);
+    }
+
+    /**
+     * @deprecated use {@link #solve(boolean)} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
+        setObjectives(policy,objective);
+        solve(restoreLastSolution);
+    }
+
+    // REALS
+
+    /**
+     * @deprecated use {@link #solve(boolean)} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
+        setObjectives(policy,objective);
+        setPrecision(precision);
+        solve(restoreLastSolution);
+    }
+
+    /**
+     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findOptimalSolution(ResolutionPolicy policy, RealVar objective, double precision) {
+        findOptimalSolution(policy,true,objective,precision);
+    }
+
+    // PARETO
+
+    /**
+     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
+        setObjectives(policy,objectives);
+        solve(restoreLastSolution);
+    }
+
+    /**
+     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
+        findParetoFront(policy, true, objectives);
     }
 }

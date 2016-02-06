@@ -404,7 +404,7 @@ public final class Resolver implements Serializable {
         if (!engine.isInitialized()) {
             engine.initialize();
         }
-        getMeasures().setReadingTimeCount(mModel.getCreationTime() + System.nanoTime());
+        getMeasures().setReadingTimeCount(System.currentTimeMillis() - mModel.getCreationTime());
 
 
 

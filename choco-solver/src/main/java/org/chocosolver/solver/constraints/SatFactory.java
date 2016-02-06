@@ -33,7 +33,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.*;
-import org.chocosolver.solver.constraints.reification.PropCondis;
+import org.chocosolver.solver.constraints.reification.PropConDis;
 import org.chocosolver.solver.variables.BoolVar;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -537,7 +537,7 @@ public class SatFactory {
      */
     public static boolean addConstructiveDisjunction(BoolVar... BOOLS) {
         Model model = BOOLS[0].getModel();
-        PropCondis condis = model.getCondisStore().getPropCondis();
+        PropConDis condis = model.getConDisStore().getPropCondis();
         condis.addDisjunction(BOOLS);
         return true;
     }

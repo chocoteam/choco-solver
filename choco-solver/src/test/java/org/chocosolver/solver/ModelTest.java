@@ -260,7 +260,7 @@ public class ModelTest {
             pares.addModel(knapsack(false));
         }
         for(Model m:pares.getModels()){
-            m.resetObjectives();
+            m.clearObjectives();
         }
         pares.solve();
         Chatterbox.printSolutions(pares.getFinder());
@@ -338,13 +338,13 @@ public class ModelTest {
         Assert.assertEquals(2, d[0]);
         // unplug
         model.unplugMonitor(sm1);
-        model.search.reset();
+        model.getResolver().reset();
         model.solveAll();
         Assert.assertEquals(2, c[0]);
         Assert.assertEquals(4, d[0]);
         // plug
         model.unplugAllMonitors();
-        model.search.reset();
+        model.getResolver().reset();
         model.solveAll();
         Assert.assertEquals(2, c[0]);
         Assert.assertEquals(4, d[0]);
@@ -362,12 +362,12 @@ public class ModelTest {
         Assert.assertEquals(0, model.getMeasures().getSolutionCount());
         // unplug
         model.removeStopCriterion(c1);
-        model.search.reset();
+        model.getResolver().reset();
         model.solveAll();
         Assert.assertEquals(1, model.getMeasures().getSolutionCount());
         // plug
         model.removeAllStopCriteria();
-        model.search.reset();
+        model.getResolver().reset();
         model.solveAll();
         Assert.assertEquals(2, model.getMeasures().getSolutionCount());
     }
@@ -380,7 +380,7 @@ public class ModelTest {
         model.arithm(v[0], "!=", v[1]).post();
         model.arithm(w[0], "!=", w[1]).post();
         model.set(lexico_LB(v));
-        model.makeCompleteSearch(true);
+        model.getResolver().makeCompleteStrategy(true);
         model.solve();
         assertEquals(model.isSatisfied(), TRUE);
     }
