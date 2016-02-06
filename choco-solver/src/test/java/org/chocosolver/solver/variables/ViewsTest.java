@@ -56,8 +56,8 @@ public class ViewsTest {
 //        SearchMonitorFactory.log(ref, true, true);
 //        SearchMonitorFactory.log(solver, true, true);
         if (solveAll) {
-            ref.solveAll();
-            model.solveAll();
+            while (ref.solve()) ;
+            while (model.solve()) ;
         } else {
 //            System.out.printf("%s\n", ref.toString());
             ref.solve();
@@ -474,7 +474,7 @@ public class ViewsTest {
         SetVar v2 = model.setVar("v2", new int[]{}, new int[]{0, 1, 2, 3});
         model.subsetEq(new SetVar[]{v1, v2}).post();
         model.set(force_first(new SetVar[]{v1, v2}));
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -485,7 +485,7 @@ public class ViewsTest {
                 model.intVar("int", -3, 3, false),
                 "=",
                 model.intMinusView(model.boolVar("bool"))).post();
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
@@ -498,7 +498,7 @@ public class ViewsTest {
         s.setBoolsChanneling(new BoolVar[]{view, bool}, set, 0).post();
         s.member(s.ONE(), set).post();
         s.set(minDom_UB(bool));
-        s.solveAll();
+        while (s.solve()) ;
         assertEquals(s.getMeasures().getSolutionCount(), 1);
     }
 

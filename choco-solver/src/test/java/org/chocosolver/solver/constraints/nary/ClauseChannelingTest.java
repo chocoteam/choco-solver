@@ -60,7 +60,7 @@ public class ClauseChannelingTest {
                 model.clausesIntChanneling(iv, eqs, lqs).post();
 
                 model.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
-                model.solveAll();
+                while (model.solve()) ;
                 assertEquals(model.getMeasures().getSolutionCount(), i);
             }
         }
@@ -78,7 +78,7 @@ public class ClauseChannelingTest {
                 model.clausesIntChanneling(iv, eqs, lqs).post();
 
                 model.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
-                model.solveAll();
+                while (model.solve()) ;
                 assertEquals(model.getMeasures().getSolutionCount(), i);
             }
         }
@@ -102,8 +102,8 @@ public class ClauseChannelingTest {
                         sr.arithm(iv, "<=", j).reifyWith(lqs[j - 1]);
                     }
 
-                    sr.set(ISF.random_value(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
-                    sr.solveAll();
+                    sr.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
+                    while (sr.solve()) ;
                 }
                 {
                     IntVar iv = sc.intVar("iv", 1, i, false);
@@ -113,7 +113,7 @@ public class ClauseChannelingTest {
                     sc.clausesIntChanneling(iv, eqs, lqs).post();
 
                     sc.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
-                    sc.solveAll();
+                    while (sc.solve()) ;
                 }
                 Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);
                 Assert.assertEquals(sc.getMeasures().getSolutionCount(), i);
@@ -141,8 +141,8 @@ public class ClauseChannelingTest {
                         sr.arithm(iv, "<=", j).reifyWith(lqs[j - 1]);
                     }
 
-                    sr.set(ISF.random_bound(ArrayUtils.append(new IntVar[]{iv}, eqs, lqs), seed));
-                    sr.solveAll();
+                    sr.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
+                    while (sr.solve()) ;
                 }
                 {
                     IntVar iv = sc.intVar("iv", 1, i, true);
@@ -152,7 +152,7 @@ public class ClauseChannelingTest {
                     sc.clausesIntChanneling(iv, eqs, lqs).post();
 
                     sc.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
-                    sc.solveAll();
+                    while (sc.solve()) ;
                 }
                 Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);
                 Assert.assertEquals(sc.getMeasures().getSolutionCount(), i);

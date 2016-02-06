@@ -42,6 +42,8 @@ import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Jean-Guillaume Fages
@@ -54,15 +56,15 @@ public class SetCstrsTest {
 	public static void testEq() {
 		IntVar[] v1 = eqFilter("offset");
 		IntVar[] v2 = eqFilter("allEqual");
-		for(int i=0;i<v1.length;i++) {
-			Assert.assertEquals(v1[i].getDomainSize(), v2[i].getDomainSize());
-			for(int v=v1[i].getLB();v<=v1[i].getUB();v=v1[i].nextValue(v)){
-				Assert.assertTrue(v2[i].contains(v));
+		for (int i = 0; i < v1.length; i++) {
+			assertEquals(v1[i].getDomainSize(), v2[i].getDomainSize());
+			for (int v = v1[i].getLB(); v <= v1[i].getUB(); v = v1[i].nextValue(v)) {
+				assertTrue(v2[i].contains(v));
 			}
 		}
-		v1[0].getModel().solveAll();
-		v2[0].getModel().solveAll();
-		Assert.assertEquals(
+		while (v1[0].getModel().solve()) ;
+		while (v2[0].getModel().solve()) ;
+		assertEquals(
 				v1[0].getModel().getMeasures().getSolutionCount(),
 				v2[0].getModel().getMeasures().getSolutionCount()
 		);

@@ -102,7 +102,7 @@ public class ModelTest {
                     s.solve();
                     break;
                 case ALL:
-                    s.solveAll();
+                    while (s.solve()) ;
                     break;
                 case OPT:
                     s.setObjectives(MAXIMIZE, (IntVar) s.getVar(0));
@@ -238,7 +238,7 @@ public class ModelTest {
         Model model = new Model();
         BoolVar b = model.boolVar("b");
         model.arithm(b, "=", 2).post();
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.isFeasible(), FALSE);
     }
 
@@ -246,9 +246,7 @@ public class ModelTest {
     public void testJL1() {
         Model s = new Model();
         s.arithm(s.ONE(), "!=", s.ZERO()).post();
-        if (s.solve()) {
-            while (s.solve()) ;
-        }
+        while (s.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -319,12 +317,12 @@ public class ModelTest {
         s.getEngine().flush();
         s.getResolver().reset();
 
-        s.solveAll();
+        while (s.solve()) ;
         assertEquals(s.getMeasures().getSolutionCount(), 11);
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testMonitors(){
+    public void testMonitors() {
         Model model = new Model();
         IntVar v = model.boolVar("b");
         final int[] c = {0};
@@ -333,43 +331,43 @@ public class ModelTest {
         IMonitorSolution sm2 = () -> d[0]++;
         model.plugMonitor(sm1);
         model.plugMonitor(sm2);
-        model.solveAll();
-        Assert.assertEquals(2, c[0]);
-        Assert.assertEquals(2, d[0]);
+        while (model.solve()) ;
+        assertEquals(2, c[0]);
+        assertEquals(2, d[0]);
         // unplug
         model.unplugMonitor(sm1);
         model.getResolver().reset();
-        model.solveAll();
-        Assert.assertEquals(2, c[0]);
-        Assert.assertEquals(4, d[0]);
+        while (model.solve()) ;
+        assertEquals(2, c[0]);
+        assertEquals(4, d[0]);
         // plug
         model.unplugAllMonitors();
         model.getResolver().reset();
-        model.solveAll();
-        Assert.assertEquals(2, c[0]);
-        Assert.assertEquals(4, d[0]);
+        while (model.solve()) ;
+        assertEquals(2, c[0]);
+        assertEquals(4, d[0]);
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testCriteria(){
+    public void testCriteria() {
         Model model = new Model();
         IntVar v = model.boolVar("b");
         Criterion c1 = () -> model.getMeasures().getNodeCount() == 1;
         Criterion c2 = () -> model.getMeasures().getSolutionCount() == 1;
         model.addStopCriterion(c1);
         model.addStopCriterion(c2);
-        model.solveAll();
-        Assert.assertEquals(0, model.getMeasures().getSolutionCount());
+        while (model.solve()) ;
+        assertEquals(0, model.getMeasures().getSolutionCount());
         // unplug
         model.removeStopCriterion(c1);
         model.getResolver().reset();
-        model.solveAll();
-        Assert.assertEquals(1, model.getMeasures().getSolutionCount());
+        while (model.solve()) ;
+        assertEquals(1, model.getMeasures().getSolutionCount());
         // plug
         model.removeAllStopCriteria();
         model.getResolver().reset();
-        model.solveAll();
-        Assert.assertEquals(2, model.getMeasures().getSolutionCount());
+        while (model.solve()) ;
+        assertEquals(2, model.getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)

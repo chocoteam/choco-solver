@@ -51,6 +51,8 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
+import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -369,20 +371,20 @@ public class StrategyTest {
     public void testFH3321() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        model.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(true), ISF.split(), X));
-        Chatterbox.showDecisions(model);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
+        model.set(custom(minDomainSize_var_selector(), new IntDomainMiddle(true), split(), X));
+        showDecisions(model);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testFH3322() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        model.set(ISF.custom(ISF.minDomainSize_var_selector(), new IntDomainMiddle(false), ISF.reverse_split(), X));
-        Chatterbox.showDecisions(model);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
+        model.set(custom(minDomainSize_var_selector(), new IntDomainMiddle(false), reverse_split(), X));
+        showDecisions(model);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
 
@@ -390,19 +392,19 @@ public class StrategyTest {
     public void testFH33232() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        model.set(ISF.dichotomic(ISF.minDomainSize_var_selector(), true, X));
-        Chatterbox.showDecisions(model);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
+        model.set(dichotomic(minDomainSize_var_selector(), true, X));
+        showDecisions(model);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testFH3324() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        model.set(ISF.dichotomic(ISF.minDomainSize_var_selector(), false, X));
-        Chatterbox.showDecisions(model);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
+        model.set(dichotomic(minDomainSize_var_selector(), false, X));
+        showDecisions(model);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 }

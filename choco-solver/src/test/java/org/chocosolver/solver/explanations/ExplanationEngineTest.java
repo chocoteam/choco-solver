@@ -802,7 +802,7 @@ public class ExplanationEngineTest {
         // logging and solution
         showStatistics(s);
         showSolutions(s);
-        s.solveAll();
+        while (s.solve()) ;
         return s;
     }
 
@@ -845,19 +845,19 @@ public class ExplanationEngineTest {
 
 
     @Test(groups="1s", timeOut=60000)
-    public void testOnce1(){
+    public void testOnce1() {
         Model model = new Model();
         int n = 4;
         IntVar[] X = model.intVarArray("X", 4, 1, 2, false);
         BoolVar[] B = model.boolVarArray("B", 4);
-        for(int i = 0 ; i < n; i++){
+        for (int i = 0; i < n; i++) {
             model.arithm(X[i], ">", i).reifyWith(B[i]);
         }
-        ExplanationFactory.CBJ.plugin(model, false, false);
-        model.set(ISF.lexico_UB(B), new Once(X, ISF.lexico_var_selector(), ISF.min_value_selector()));
-        Chatterbox.showDecisions(model);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        CBJ.plugin(model, false, false);
+        model.set(lexico_UB(B), new Once(X, lexico_var_selector(), min_value_selector()));
+        showDecisions(model);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)

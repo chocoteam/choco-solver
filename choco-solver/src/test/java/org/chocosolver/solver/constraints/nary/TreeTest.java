@@ -43,17 +43,19 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+
 public class TreeTest {
 
 	@Test(groups="10s", timeOut=60000)
 	public void test1() {
-        Model s1 = model(true);
+		Model s1 = model(true);
 		Model s2 = model(false);
-		s1.solveAll();
-		s2.solveAll();
-		Assert.assertEquals(s1.getMeasures().getSolutionCount(),s2.getMeasures().getSolutionCount());
-		Assert.assertEquals(s1.getMeasures().getNodeCount(),s2.getMeasures().getNodeCount());
-    }
+		while (s1.solve()) ;
+		while (s2.solve()) ;
+		assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
+		assertEquals(s1.getMeasures().getNodeCount(), s2.getMeasures().getNodeCount());
+	}
 
 	private Model model(boolean defaultCstr) {
 		Model model = new Model();

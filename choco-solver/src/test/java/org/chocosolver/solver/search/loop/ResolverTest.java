@@ -43,6 +43,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.loop.SLF.*;
+import static org.chocosolver.solver.search.loop.SearchLoopFactory.lds;
+import static org.chocosolver.solver.search.loop.SearchLoopFactory.seq;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitSolution;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
+import static org.chocosolver.solver.trace.Chatterbox.*;
+import static org.chocosolver.util.ProblemMaker.makeNQueenWithOneAlldifferent;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Created by cprudhom on 02/09/15.
@@ -89,38 +96,38 @@ public class ResolverTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2DFS() {
-        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        dfs(model, ISF.lexico_LB(model.retrieveIntVars(true)));
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
-        Assert.assertEquals(model.getMeasures().getNodeCount(), 480);
+        Model model = makeNQueenWithOneAlldifferent(8);
+        dfs(model, lexico_LB(model.retrieveIntVars(true)));
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 92);
+        assertEquals(model.getMeasures().getNodeCount(), 480);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2LDS() {
-        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        lds(model, ISF.lexico_LB(model.retrieveIntVars(false)), 4);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 7);
-        Assert.assertEquals(model.getMeasures().getNodeCount(), 205);
+        Model model = makeNQueenWithOneAlldifferent(8);
+        lds(model, lexico_LB(model.retrieveIntVars(false)), 4);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 7);
+        assertEquals(model.getMeasures().getNodeCount(), 205);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DDS() {
-        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        dds(model, ISF.lexico_LB(model.retrieveIntVars(false)), 5);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
-        Assert.assertEquals(model.getMeasures().getNodeCount(), 130);
+        Model model = makeNQueenWithOneAlldifferent(8);
+        dds(model, lexico_LB(model.retrieveIntVars(false)), 5);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getMeasures().getNodeCount(), 130);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DDS2() {
         Model model = new Model();
         IntVar[] bs = model.boolVarArray("b", 4);
-        dds(model, ISF.lexico_LB(bs), 3);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 8);
+        dds(model, lexico_LB(bs), 3);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -135,14 +142,14 @@ public class ResolverTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
-        Model model = ProblemMaker.makeNQueenWithOneAlldifferent(8);
-        dfs(model, ISF.lexico_LB(model.retrieveIntVars(false)));
+        Model model = makeNQueenWithOneAlldifferent(8);
+        dfs(model, lexico_LB(model.retrieveIntVars(false)));
         restart(model,
                 limit -> model.getMeasures().getNodeCount() >= limit,
                 new LubyRestartStrategy(2, 2), 2);
-        model.solveAll();
-        Chatterbox.printShortStatistics(model);
-        Assert.assertEquals(model.getMeasures().getRestartCount(), 2);
+        while (model.solve()) ;
+        printShortStatistics(model);
+        assertEquals(model.getMeasures().getRestartCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -175,11 +182,11 @@ public class ResolverTest {
         Model model = new Model();
         int n = 3;
         BoolVar[] B = model.boolVarArray("b", n - 1);
-        SLF.lds(model, ISF.lexico_UB(B), 1);
-        Chatterbox.showSolutions(model);
-        Chatterbox.showDecisions(model);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
+        lds(model, lexico_UB(B), 1);
+        showSolutions(model);
+        showDecisions(model);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
 
     }
 
@@ -192,12 +199,12 @@ public class ResolverTest {
         for (int i = 0; i < n - 1; i++) {
             model.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
-        SLF.lds(model, ISF.sequencer(ISF.lexico_UB(B), ISF.once(ISF.lexico_var_selector(), ISF.min_value_selector(), X)), 1);
-        Chatterbox.showSolutions(model);
+        lds(model, sequencer(lexico_UB(B), once(lexico_var_selector(), min_value_selector(), X)), 1);
+        showSolutions(model);
 //        Chatterbox.showDecisions(solver);
-        SMF.limitSolution(model, 10);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
+        limitSolution(model, 10);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
 
     }
 
@@ -210,17 +217,17 @@ public class ResolverTest {
         for (int i = 0; i < n - 1; i++) {
             model.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
-        SLF.seq(model,
-                new MoveBinaryLDS(ISF.lexico_UB(B), 1, model.getEnvironment()),
+        seq(model,
+                new MoveBinaryLDS(lexico_UB(B), 1, model.getEnvironment()),
                 new MoveBinaryDFS(
                         // ISF.lexico_LB(X)
-                        ISF.once(ISF.lexico_var_selector(), ISF.min_value_selector(), X)
+                        once(lexico_var_selector(), min_value_selector(), X)
                 ));
-        Chatterbox.showSolutions(model);
-        Chatterbox.showDecisions(model);
-        SMF.limitSolution(model, 10);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
+        showSolutions(model);
+        showDecisions(model);
+        limitSolution(model, 10);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
 
     }
 

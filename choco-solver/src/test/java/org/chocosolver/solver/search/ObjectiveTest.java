@@ -107,9 +107,9 @@ public class ObjectiveTest {
     private void all(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), 11);
-            Assert.assertEquals(model.getMeasures().getNodeCount(), 21);
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), 11);
+            assertEquals(model.getMeasures().getNodeCount(), 21);
         }
     }
 

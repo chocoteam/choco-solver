@@ -43,6 +43,8 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 
+import static java.lang.System.out;
+
 /**
  * Small example enumerating solutions of
  * (x>y && y>z && z>x) || not(AllDifferent(x,y,z)
@@ -79,13 +81,13 @@ public class ReifSample extends AbstractProblem {
 	@Override
 	public void solve() {
 		model.plugMonitor((IMonitorSolution) () -> {
-			System.out.println("////////////////");
-			System.out.println(x);
-			System.out.println(y);
-			System.out.println(z);
-			System.out.println();
+			out.println("////////////////");
+			out.println(x);
+			out.println(y);
+			out.println(z);
+			out.println();
 		});
-		model.solveAll();
+		while (model.solve()) ;
 	}
 
 	@Override

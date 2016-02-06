@@ -54,9 +54,9 @@ import java.util.Random;
 
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
-import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
+import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.testng.Assert.*;
 
 /**
@@ -112,7 +112,7 @@ public class IntLinCombTest {
 
         s.set(lexico_LB(vars));
 
-        s.solveAll();
+        while (s.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -186,7 +186,7 @@ public class IntLinCombTest {
             int n = 1 + rand.nextInt(6);
             int min = -10 + rand.nextInt(20);
             int max = min + rand.nextInt(20);
-            int[][] domains = DomainBuilder.buildFullDomains(n, min, max, rand, 1.0, false);
+            int[][] domains = buildFullDomains(n, min, max, rand, 1.0, false);
             int[] coeffs = new int[n];
             for (int i = 0; i < n; i++) {
                 coeffs[i] = -25 + rand.nextInt(50);
@@ -197,17 +197,17 @@ public class IntLinCombTest {
             Model sum = sum(domains, coeffs, lb, op);
             Model intlincomb = intlincomb(domains, coeffs, lb, op);
 
-            sum.solveAll();
-            intlincomb.solveAll();
-            Assert.assertEquals(sum.getMeasures().getSolutionCount(), intlincomb.getMeasures().getSolutionCount());
-            Assert.assertEquals(sum.getMeasures().getNodeCount(), intlincomb.getMeasures().getNodeCount());
+            while (sum.solve()) ;
+            while (intlincomb.solve()) ;
+            assertEquals(sum.getMeasures().getSolutionCount(), intlincomb.getMeasures().getSolutionCount());
+            assertEquals(sum.getMeasures().getNodeCount(), intlincomb.getMeasures().getNodeCount());
         }
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testUSum1() {
         Model sumleq = sum(new int[][]{{-2, 3}}, new int[]{-2}, -6, -1);
-        sumleq.solveAll();
+        while (sumleq.solve()) ;
     }
 
     /**
@@ -235,7 +235,7 @@ public class IntLinCombTest {
         BoolVar[] bs = model.boolVarArray("b", 3);
         model.scalar(bs, new int[]{1, 2, 3}, "=", 2).post();
         showSolutions(model);
-        model.solveAll();
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -488,10 +488,10 @@ public class IntLinCombTest {
             BoolVar[] bs = s2.boolVarArray("b", 5);
             s2.sum(bs, "!=", 3).post();
         }
-        s1.solveAll();
-        s2.solveAll();
-        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
-        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
+        while (s1.solve()) ;
+        while (s2.solve()) ;
+        assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -518,10 +518,10 @@ public class IntLinCombTest {
             BoolVar[] bs = s2.boolVarArray("b", 5);
             s2.sum(bs, "<=", 3).post();
         }
-        s1.solveAll();
-        s2.solveAll();
-        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
-        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
+        while (s1.solve()) ;
+        while (s2.solve()) ;
+        assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -536,7 +536,7 @@ public class IntLinCombTest {
         {
             BoolVar[] bs = s1.boolVarArray("b", 3);
             BoolVar r = s1.boolVar("r");
-            s1.scalar(bs, new int[]{-1, -1, -1}, "<=",-2).reifyWith(r);
+            s1.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
         }
         Model s2 = new Model();
         s2.set(new Settings() {
@@ -550,12 +550,12 @@ public class IntLinCombTest {
             BoolVar r = s2.boolVar("r");
             s2.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
         }
-        Chatterbox.showDecisions(s1);
-        Chatterbox.showDecisions(s2);
-        s1.solveAll();
-        s2.solveAll();
-        Assert.assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
-        Assert.assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
+        showDecisions(s1);
+        showDecisions(s2);
+        while (s1.solve()) ;
+        while (s2.solve()) ;
+        assertEquals(s2.getMeasures().getSolutionCount(), s1.getMeasures().getSolutionCount());
+        assertEquals(s2.getMeasures().getNodeCount(), s1.getMeasures().getNodeCount());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -577,7 +577,7 @@ public class IntLinCombTest {
         model.scalar(bs, cs, "=", sum).post();
         model.set(lexico_LB(bs));
 //        Chatterbox.showDecisions(solver);
-        model.solveAll();
+        while (model.solve()) ;
     }
 
 
@@ -613,7 +613,7 @@ public class IntLinCombTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 1, 1, 3, false);
         model.scalar(X, new int[]{-1}, "<=", 2).post();
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 3);
 
     }

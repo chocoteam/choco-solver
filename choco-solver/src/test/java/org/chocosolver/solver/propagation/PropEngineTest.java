@@ -49,6 +49,7 @@ import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.IntEventType.VOID;
 import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
 import static org.testng.Assert.*;
 
 /**
@@ -76,12 +77,12 @@ public class PropEngineTest {
         IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
         Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
         model.post(CSTR, CSTR);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 3);
         model.getResolver().reset();
         model.unpost(CSTR);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 9);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 9);
     }
 
     // test clone in propagators
@@ -112,19 +113,19 @@ public class PropEngineTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void test3(){
-        Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+    public void test3() {
+        Model model = makeNQueenWithBinaryConstraints(8);
         model.getResolver().set(new SevenQueuesPropagatorEngine(model));
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void test4(){
-        Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
+    public void test4() {
+        Model model = makeNQueenWithBinaryConstraints(8);
         model.getResolver().set(new TwoBucketPropagationEngine(model));
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 92);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -179,7 +180,7 @@ public class PropEngineTest {
                 }
             }).post();
             model.set(random(X, i));
-            model.solveAll();
+            while (model.solve()) ;
             assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }

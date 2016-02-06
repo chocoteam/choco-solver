@@ -41,8 +41,9 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.memory.Environments.TRAIL;
 import static org.chocosolver.solver.search.loop.SearchLoopFactory.restartOnSolutions;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitSolution;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.*;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.testng.Assert.assertEquals;
 
 /**
  * <br/>
@@ -76,23 +77,23 @@ public class RestartTest {
     @Test(groups="1s", timeOut=60000)
     public void testGeometricalRestart1() {
         Model model = buildQ(4);
-        SearchMonitorFactory.geometrical(model, 2, 1.1, new NodeCounter(model, 2), 2);
-        model.solveAll();
+        geometrical(model, 2, 1.1, new NodeCounter(model, 2), 2);
+        while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
-        Assert.assertEquals(model.getMeasures().getRestartCount(), 2);
-        Assert.assertEquals(model.getMeasures().getNodeCount(), 12);
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getMeasures().getRestartCount(), 2);
+        assertEquals(model.getMeasures().getNodeCount(), 12);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testLubyRestart1() {
         Model model = buildQ(4);
-        SearchMonitorFactory.luby(model, 2, 2, new NodeCounter(model, 2), 2);
-        model.solveAll();
+        luby(model, 2, 2, new NodeCounter(model, 2), 2);
+        while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
-        Assert.assertEquals(model.getMeasures().getRestartCount(), 2);
-        Assert.assertEquals(model.getMeasures().getNodeCount(), 11);
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getMeasures().getRestartCount(), 2);
+        assertEquals(model.getMeasures().getNodeCount(), 11);
     }
 
 
@@ -142,7 +143,7 @@ public class RestartTest {
             model.set(lexico_LB(X));
 //            SMF.log(solver, false, false);
             limitSolution(model, 100);
-            model.solveAll();
+            while (model.solve()) ;
             //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());
         }
     }
@@ -150,11 +151,11 @@ public class RestartTest {
     @Test(groups="1s", timeOut=60000)
     public void testGeometricalRestart2() {
         Model model = buildQ(8);
-        SearchMonitorFactory.geometrical(model, 10, 1.2, new FailCounter(model, 10), 2);
-        model.solveAll();
+        geometrical(model, 10, 1.2, new FailCounter(model, 10), 2);
+        while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
-        Assert.assertEquals(model.getMeasures().getRestartCount(), 2);
+        assertEquals(model.getMeasures().getRestartCount(), 2);
     }
 
 }

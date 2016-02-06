@@ -54,7 +54,7 @@ public class ConstraintTest {
         SetVar s1 = model.setVar("s1", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         SetVar s2 = model.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         model.or(model.allEqual(new SetVar[]{s1, s2}), model.setBoolsChanneling(bs, s1, 0)).post();
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(2040, model.getMeasures().getSolutionCount());
     }
 
@@ -68,7 +68,7 @@ public class ConstraintTest {
         model.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
 
         model.set(random_value(ivs, 0));
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 48);
         assertEquals(model.getMeasures().getNodeCount(), 100);
     }

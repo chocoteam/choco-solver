@@ -92,7 +92,7 @@ public class Table extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		model.solveAll();
+		while (model.solve()) ;
 	}
 
 	//***********************************************************************************

@@ -52,6 +52,7 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static java.lang.String.format;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
@@ -72,12 +73,9 @@ public class LexChainTest {
         Constraint c = s.lexChainLessEq(ar1, ar2);
         c.post();
         //SearchMonitorFactory.log(s, true, true);
-        if (s.solve()) {
-            do {
-                assertEquals(TRUE, c.isSatisfied());
-            } while (s.solve());
+        while (s.solve()) {
+            assertEquals(TRUE, c.isSatisfied());
         }
-
     }
 
 
@@ -145,10 +143,10 @@ public class LexChainTest {
             Model refor = reformulate(n, m, k, seed, false);
             Model lex = lex(n, m, k, seed, false);
 
-            refor.solveAll();
-            lex.solveAll();
+            while (refor.solve()) ;
+            while (lex.solve()) ;
 
-            Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
+            assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), format("seed:%d", seed));
         }
     }
 
@@ -164,10 +162,10 @@ public class LexChainTest {
             Model refor = reformulate(n, m, k, seed, true);
             Model lex = lex(n, m, k, seed, true);
 
-            refor.solveAll();
-            lex.solveAll();
+            while (refor.solve()) ;
+            while (lex.solve()) ;
 
-            Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
+            assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), format("seed:%d", seed));
         }
     }
 
@@ -176,9 +174,9 @@ public class LexChainTest {
         int n = 3, m = 2, k = 2, seed = 47;
         Model refor = reformulate(n, m, k, seed, true);
         Model lex = lex(n, m, k, seed, true);
-        refor.solveAll();
-        lex.solveAll();
-        Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
+        while (refor.solve()) ;
+        while (lex.solve()) ;
+        assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), format("seed:%d", seed));
     }
 
     @Test(groups="1s", timeOut=60000)

@@ -112,7 +112,7 @@ public class DeltaTest {
             //Chatterbox.showSolutions(s);
             s.set(random_value(new IntVar[]{i, j}));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
-            s.solveAll();
+            while (s.solve()) ;
         }
     }
 
@@ -126,7 +126,7 @@ public class DeltaTest {
             //Chatterbox.showSolutions(s);
             s.set(random_bound(new IntVar[]{i, j}));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
-            s.solveAll();
+            while (s.solve()) ;
         }
     }
 
@@ -140,7 +140,7 @@ public class DeltaTest {
             //Chatterbox.showSolutions(s);
             s.set(random_value(new IntVar[]{i, j}));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
-            s.solveAll();
+            while (s.solve()) ;
         }
     }
 

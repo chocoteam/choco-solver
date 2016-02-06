@@ -39,6 +39,7 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeMultiResources;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
 import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
 
 /**
  * <br/>
@@ -109,8 +110,8 @@ public class MultiCostRegularTest {
         long seed = 0;
         for (int i = 0; i < 2000; i++) {
             Model model = make(5, i + seed);
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), 4, "seed:" + (seed + i));
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), 4, "seed:" + (seed + i));
         }
     }
 
@@ -119,8 +120,8 @@ public class MultiCostRegularTest {
         long seed = 0;
         for (int i = 0; i < 2000; i++) {
             Model model = make(7, i);
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), 6, "seed:" + (seed + i));
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), 6, "seed:" + (seed + i));
         }
     }
 
@@ -129,8 +130,8 @@ public class MultiCostRegularTest {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
             Model model = make(14, i);
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), 141, "seed:" + (seed + i));
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), 141, "seed:" + (seed + i));
         }
     }
 
@@ -139,8 +140,8 @@ public class MultiCostRegularTest {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
             Model model = make(21, i);
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), 85, "seed:" + (seed + i));
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), 85, "seed:" + (seed + i));
         }
     }
 

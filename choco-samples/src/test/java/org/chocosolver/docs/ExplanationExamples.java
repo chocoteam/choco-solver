@@ -58,7 +58,7 @@ public class ExplanationExamples {
         model.set(lexico_LB(bvars));
         CBJ.plugin(model, false, false);
         showStatistics(model);
-        model.solveAll();
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -70,9 +70,9 @@ public class ExplanationExamples {
                 model.arithm(pigeon[i], "!=", pigeon[j]).post();
             }
         }
-        model.set(ISF.lexico_LB(pigeon));
-        ExplanationFactory.CBJ.plugin(model, false, false);
-        Chatterbox.showStatistics(model);
-        model.solveAll();
+        model.set(lexico_LB(pigeon));
+        CBJ.plugin(model, false, false);
+        showStatistics(model);
+        while (model.solve()) ;
     }
 }

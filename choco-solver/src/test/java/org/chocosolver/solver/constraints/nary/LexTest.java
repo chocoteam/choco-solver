@@ -68,7 +68,7 @@ public class LexTest {
             }
             model.lexLessEq(vs1, vs2).post();
             model.set(random_bound(append(vs1, vs2), seed));
-            model.solveAll();
+            while (model.solve()) ;
             int kpn = (int) pow(k + 1, n1 / 2);
             assertEquals(model.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
         }
@@ -89,7 +89,7 @@ public class LexTest {
             model.lexLess(vs1, vs2).post();
             model.set(random_bound(append(vs1, vs2), seed));
 
-            model.solveAll();
+            while (model.solve()) ;
             assertEquals(model.getMeasures().getSolutionCount(), 3240);
         }
     }
@@ -137,7 +137,7 @@ public class LexTest {
             fail();
         }
 //        SearchMonitorFactory.log(solver, true, true);
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(6, model.getMeasures().getSolutionCount());
     }
 
@@ -161,7 +161,7 @@ public class LexTest {
         }
         assertEquals(5, a[0].getUB());
 //        SearchMonitorFactory.log(solver, true, true);
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
@@ -185,7 +185,7 @@ public class LexTest {
             fail();
         }
         assertEquals(-2, a[0].getUB());
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
 
@@ -235,7 +235,7 @@ public class LexTest {
             model.propagate();
         } catch (ContradictionException ignored) {
         }
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 216);
     }
 
@@ -262,7 +262,7 @@ public class LexTest {
         }
         assertEquals(-1, b[0].getLB());
 //        SearchMonitorFactory.log(solver, true, false);
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 30);
     }
 }

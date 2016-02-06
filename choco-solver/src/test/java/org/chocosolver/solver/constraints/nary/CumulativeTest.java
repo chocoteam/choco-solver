@@ -169,7 +169,7 @@ public class CumulativeTest {
 				if (model.hasReachedLimit()) return -1;
 				return model.getMeasures().getBestSolutionValue().longValue();
 			case 2:
-				model.solveAll();// too many solutions to be used
+				while (model.solve()) ;// too many solutions to be used
 				if (model.hasReachedLimit()) return -1;
 				return model.getMeasures().getSolutionCount();
 			default:

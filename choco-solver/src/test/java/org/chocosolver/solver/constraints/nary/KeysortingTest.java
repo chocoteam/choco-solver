@@ -241,7 +241,7 @@ public class KeysortingTest {
         Y[4][0] = model.intVar("Y5", 14, 18, true);
 
         model.keySort(X, null, Y, 1).post();
-        assertEquals(model.solveAll(), 182);
+        assertEquals(model.findAllSolutions(), 182);
 
     }
 
@@ -342,7 +342,7 @@ public class KeysortingTest {
         model.keySort(X, null, Y, 2).post();
         model.set(lexico_LB(flatten(X)), lexico_LB(flatten(Y)));
         showSolutions(model);
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 16);
     }
 
@@ -367,7 +367,7 @@ public class KeysortingTest {
         model.keySort(X, null, Y, 1).post();
         model.set(lexico_LB(flatten(X)), lexico_LB(flatten(Y)));
         showSolutions(model);
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 16);
     }
 }

@@ -38,6 +38,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -69,9 +70,9 @@ public class BoolNotViewTest {
                 model.sum(xs, "=", 1).post();
                 model.set(random_bound(xs, seed));
             }
-            ref.solveAll();
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            while (ref.solve()) ;
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
     }

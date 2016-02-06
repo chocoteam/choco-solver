@@ -101,7 +101,7 @@ public class AmongTest {
             model.set(random_bound(allvars, i));
             model.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
-            model.solveAll();
+            while (model.solve()) ;
             assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }
@@ -119,7 +119,7 @@ public class AmongTest {
             model.among(occ, vars, values).post();
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
-            model.solveAll();
+            while (model.solve()) ;
             assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }
@@ -140,7 +140,7 @@ public class AmongTest {
         } catch (ContradictionException e) {
             fail();
         }
-        model.solveAll();
+        while (model.solve()) ;
     }
 
     public long randomOcc(long nbsol, int seed, boolean enumvar, int nbtest, boolean gac) {
@@ -185,7 +185,7 @@ public class AmongTest {
             } else {
                 model.set(random_value(vars, seed));
             }
-            model.solveAll();
+            while (model.solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getMeasures().getSolutionCount();
             } else {
@@ -212,7 +212,7 @@ public class AmongTest {
             }
 
             List<IntVar> lvs = new LinkedList<>();
-            lvs.addAll(Arrays.asList(vars));
+            lvs.addAll(asList(vars));
 
             Random rand = new Random(seed);
             for (int i = 0; i < nbOcc; i++) {
@@ -238,16 +238,16 @@ public class AmongTest {
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
 
-			if(!enumvar){
-				model.set(IntStrategyFactory.random_bound(vars, seed));
-			}else{
-				model.set(IntStrategyFactory.random_value(vars, seed));
-			}
-            model.solveAll();
+            if (!enumvar) {
+                model.set(random_bound(vars, seed));
+            } else {
+                model.set(random_value(vars, seed));
+            }
+            while (model.solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getMeasures().getSolutionCount();
             } else {
-                Assert.assertEquals(model.getMeasures().getSolutionCount(), nbsol);
+                assertEquals(model.getMeasures().getSolutionCount(), nbsol);
             }
 
         }

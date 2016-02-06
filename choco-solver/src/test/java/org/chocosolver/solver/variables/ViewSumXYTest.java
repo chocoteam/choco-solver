@@ -138,9 +138,9 @@ public class ViewSumXYTest {
 //                SearchMonitorFactory.log(solver, true, true);
                 model.set(random_bound(xs, seed));
             }
-            ref.solveAll();
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
+            while (ref.solve()) ;
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }
@@ -169,9 +169,9 @@ public class ViewSumXYTest {
 //                SearchMonitorFactory.log(solver, true, true);
                 model.set(random_value(xs, seed));
             }
-            ref.solveAll();
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
+            while (ref.solve()) ;
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }

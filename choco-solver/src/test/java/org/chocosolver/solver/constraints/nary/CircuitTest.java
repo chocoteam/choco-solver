@@ -80,7 +80,7 @@ public class CircuitTest {
             Model model = new Model();
             IntVar[] x = model.intVarArray("x", n, 0, n - 1, true);
             model.circuit(x).post();
-            model.solveAll();
+            while (model.solve()) ;
             assertEquals(factorial(n - 1), model.getMeasures().getSolutionCount());
         }
     }

@@ -42,6 +42,12 @@ import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.loop.lns.LNSFactory.random;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.*;
+import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 /**
  * <br/>
  *
@@ -52,62 +58,62 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testTime() {
-        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = makeNQueenWithBinaryConstraints(12);
         long tl = 500;
-        SearchMonitorFactory.limitTime(s, tl);
-        s.solveAll();
+        limitTime(s, tl);
+        while (s.solve()) ;
         int tc = (int) (s.getMeasures().getTimeCount() * 1000);
-        Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
+        assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testThreadTime() {
-        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = makeNQueenWithBinaryConstraints(12);
         long tl = 500;
-        SearchMonitorFactory.limitTime(s, tl);
-        s.solveAll();
+        limitTime(s, tl);
+        while (s.solve()) ;
         int tc = (int) (s.getMeasures().getTimeCount() * 1000);
-        Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
+        assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testNode() {
-        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = makeNQueenWithBinaryConstraints(12);
         long nl = 50;
-        SearchMonitorFactory.limitNode(s, nl);
-        s.solveAll();
+        limitNode(s, nl);
+        while (s.solve()) ;
         long nc = s.getMeasures().getNodeCount();
-        Assert.assertEquals(nc, nl);
+        assertEquals(nc, nl);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testBacktrack() {
-        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = makeNQueenWithBinaryConstraints(12);
         long bl = 50;
-        SearchMonitorFactory.limitBacktrack(s, bl);
-        s.solveAll();
+        limitBacktrack(s, bl);
+        while (s.solve()) ;
         long bc = s.getMeasures().getBackTrackCount();
-        Assert.assertEquals(bc, bl);
+        assertEquals(bc, bl);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testFail() {
-        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = makeNQueenWithBinaryConstraints(12);
         long fl = 50;
-        SearchMonitorFactory.limitFail(s, fl);
-        s.solveAll();
+        limitFail(s, fl);
+        while (s.solve()) ;
         long fc = s.getMeasures().getFailCount();
-        Assert.assertEquals(fc, fl);
+        assertEquals(fc, fl);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testSolution() {
-        Model s = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model s = makeNQueenWithBinaryConstraints(12);
         long sl = 50;
-        SearchMonitorFactory.limitSolution(s, sl);
-        s.solveAll();
+        limitSolution(s, sl);
+        while (s.solve()) ;
         long sc = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sc, sl);
+        assertEquals(sc, sl);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -133,9 +139,9 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testGregy4() {
-        Model model = ProblemMaker.makeNQueenWithBinaryConstraints(12);
+        Model model = makeNQueenWithBinaryConstraints(12);
         NodeCounter nodeCounter = new NodeCounter(model, 100);
-        INeighbor rnd = LNSFactory.random(model, model.retrieveIntVars(true), 30, 0);
+        INeighbor rnd = random(model, model.retrieveIntVars(true), 30, 0);
         Move currentMove = model.getResolver().getMove();
         model.getResolver().setMove(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
@@ -163,8 +169,8 @@ public class LimitsTest {
                 return currentMove.repair(resolver);
             }
         });
-        model.solveAll();
+        while (model.solve()) ;
         long sc = model.getMeasures().getSolutionCount();
-        Assert.assertEquals(sc, 11);
+        assertEquals(sc, 11);
     }
 }

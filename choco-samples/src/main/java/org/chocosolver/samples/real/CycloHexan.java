@@ -39,6 +39,7 @@ import org.chocosolver.solver.variables.RealVar;
 
 import static java.lang.Double.NEGATIVE_INFINITY;
 import static java.lang.Double.POSITIVE_INFINITY;
+import static java.lang.String.format;
 import static java.lang.System.out;
 
 /**
@@ -84,17 +85,17 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void solve() {
-		model.plugMonitor((IMonitorSolution) () -> {
+        model.plugMonitor((IMonitorSolution) () -> {
             StringBuilder st = new StringBuilder();
             st.append("\t");
             for (int i = 0; i < vars.length; i++) {
-                st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
+                st.append(format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
             }
-            System.out.println("CycloHexan");
-            System.out.println(st.toString());
+            out.println("CycloHexan");
+            out.println(st.toString());
         });
-        model.solveAll();
-		model.getIbex().release();
+        while (model.solve()) ;
+        model.getIbex().release();
     }
 
     @Override

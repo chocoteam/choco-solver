@@ -77,15 +77,15 @@ public class CountTest {
     @Test(groups="1s", timeOut=60000)
     public void testMS4() {
         Model model = modelit(4);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMS8() {
         Model model = modelit(8);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -116,7 +116,7 @@ public class CountTest {
             model.count(value, vars, occ).post();
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
-            model.solveAll();
+            while (model.solve()) ;
             assertEquals(model.getMeasures().getSolutionCount(), 9);
         }
     }
@@ -168,7 +168,7 @@ public class CountTest {
             } else {
                 model.set(random_value(vars, seed));
             }
-            model.solveAll();
+            while (model.solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getMeasures().getSolutionCount();
             } else {

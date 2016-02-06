@@ -36,8 +36,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StringUtils;
 import org.testng.annotations.Test;
 
+import static java.lang.String.format;
+import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.tools.StatisticUtils.*;
+import static org.chocosolver.util.tools.StringUtils.pad;
 
 /**
  * <br/>
@@ -91,10 +94,10 @@ public class CycleLtTest {
             for (int i = 0; i < nbIt; i++) {
                 Model rand = modeler(n);
                 rand.set(nset);
-                PropagationEngineFactory.values()[j].make(rand);
-                rand.solveAll();
-                st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
-                st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
+                values()[j].make(rand);
+                while (rand.solve()) ;
+                st.append(pad(format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
+                st.append(pad(format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
                 st.setLength(0);
             }
             st.append(StringUtils.pad(String.format("MOYENNE : %fms ", mean(prepare(times))), -15, " "));

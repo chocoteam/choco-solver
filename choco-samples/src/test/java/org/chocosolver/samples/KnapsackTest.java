@@ -81,7 +81,7 @@ public class KnapsackTest {
             s.setObjectives(MAXIMIZE, power);
             s.solve();
         } else {
-            s.solveAll();
+            while (s.solve()) ;
         }
         times.add(s.getMeasures().getTimeCount());
     }

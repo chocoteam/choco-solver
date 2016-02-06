@@ -34,6 +34,8 @@ import org.chocosolver.solver.Model;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -60,8 +62,8 @@ public class PartitionTest {
 
         for (int i = 0; i < size.length; i++) {
             Model sol = modeler(size[i]);
-            sol.solveAll();
-            Assert.assertEquals(sol.getMeasures().getSolutionCount(), sols[i]);
+            while (sol.solve()) ;
+            assertEquals(sol.getMeasures().getSolutionCount(), sols[i]);
 //            Assert.assertEquals(sol.getMeasures().getNodeCount(), nodes[i]);
         }
     }

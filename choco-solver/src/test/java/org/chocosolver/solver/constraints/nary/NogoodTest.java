@@ -39,6 +39,12 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.loop.SearchLoopFactory.restart;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.nogoodRecordingFromRestarts;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -51,30 +57,30 @@ public class NogoodTest {
     public void test1() {
         final Model model = new Model();
         IntVar[] vars = model.intVarArray("vars", 3, 0, 2, false);
-        SMF.nogoodRecordingFromRestarts(model);
-        model.set(ISF.random_value(vars, 29091981L));
-        SLF.restart(model,
+        nogoodRecordingFromRestarts(model);
+        model.set(random_value(vars, 29091981L));
+        restart(model,
                 new BacktrackCounter(model, 0),
                 new MonotonicRestartStrategy(30), 3);
 //        SMF.limitTime(solver, 2000);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 27);
-        Assert.assertEquals(model.getMeasures().getBackTrackCount(), 51);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 27);
+        assertEquals(model.getMeasures().getBackTrackCount(), 51);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         final Model model = new Model();
         IntVar[] vars = model.intVarArray("vars", 3, 0, 3, false);
-        SMF.nogoodRecordingFromRestarts(model);
-        model.set(ISF.random_value(vars, 29091981L));
-        SLF.restart(model,
+        nogoodRecordingFromRestarts(model);
+        model.set(random_value(vars, 29091981L));
+        restart(model,
                 new BacktrackCounter(model, 0),
                 new MonotonicRestartStrategy(30), 1000);
-        SMF.limitTime(model, 2000);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 64);
-        Assert.assertEquals(model.getMeasures().getBackTrackCount(), 121);
+        limitTime(model, 2000);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 64);
+        assertEquals(model.getMeasures().getBackTrackCount(), 121);
     }
 
 }

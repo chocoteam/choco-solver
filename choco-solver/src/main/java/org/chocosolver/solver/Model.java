@@ -908,24 +908,11 @@ public class Model implements Serializable, IModeler{
             } catch (ContradictionException e) {
                 throw new UnsupportedOperationException("restoring the last solution ended in a failure");
             } finally {
-                getEngine().flush();
+                getResolver().getEngine().flush();
             }
         }
         return (getResolver().getMeasures().getSolutionCount() - nbsol) > 0;
     }
-
-    /**
-     * Executes the resolver to enumerate all solutions.
-     * @return the number of solutions that have been found.
-     * @see {@link Resolver}
-     */
-    public long solveAll() {
-        clearObjectives();
-        getResolver().setStopAtFirstSolution(false);
-        getResolver().launch();
-        return getResolver().getMeasures().getSolutionCount();
-    }
-
 
 
 
@@ -988,7 +975,7 @@ public class Model implements Serializable, IModeler{
                 getResolver().reset();
                 arithm(objective, "=", opt).post();
                 set(new AllSolutionsRecorder(this));
-                solveAll();
+                findAllSolutions();
             }
         } else {
             if (policy == ResolutionPolicy.SATISFACTION) {
@@ -1298,16 +1285,18 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use {@link #solveAll()} instead
+     * @deprecated use while({@link #solve(boolean)}) instead
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public long findAllSolutions() {
         clearObjectives();
-        getResolver().setStopAtFirstSolution(false);
-        getResolver().launch();
-        return getMeasures().getSolutionCount();
+        long nbSols = 0;
+        while (solve(false)){
+            nbSols++;
+        }
+        return nbSols;
     }
 
     /**

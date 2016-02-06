@@ -39,6 +39,13 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.util.tools.ArrayUtils.flatten;
+import static org.chocosolver.util.tools.ArrayUtils.toArray;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 /**
  * Created by IntelliJ IDEA.
  * User: njussien
@@ -67,7 +74,7 @@ public class EqualXYCExplTest {
         ref.set(nset);
         sol.set(nset);
 
-        ExplanationFactory.CBJ.plugin(sol, false, false);
+        CBJ.plugin(sol, false, false);
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
@@ -79,11 +86,11 @@ public class EqualXYCExplTest {
             varss[i] = sol.intVar("v_" + i, 0, nbvars, false);
             indicess[i] = sol.intVar("i_" + i, 0, nbvars, false);
         }
-        IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(IntStrategyFactory.lexico_LB(allvarsr));
+        IntVar[] allvarsr = flatten(toArray(varsr, indicesr));
+        ref.set(lexico_LB(allvarsr));
 
-        IntVar[] allvarss = ArrayUtils.flatten(ArrayUtils.toArray(varss, indicess));
-        sol.set(IntStrategyFactory.lexico_LB(allvarss));
+        IntVar[] allvarss = flatten(toArray(varss, indicess));
+        sol.set(lexico_LB(allvarss));
 
 
         for (int i = 0; i < varsr.length - 1; i++) {
@@ -93,12 +100,12 @@ public class EqualXYCExplTest {
             sol.arithm(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3).post();
         }
 
-        ref.solveAll();
-        sol.solveAll();
+        while (ref.solve()) ;
+        while (sol.solve()) ;
 
 
-        Assert.assertEquals(sol.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
-        Assert.assertTrue(sol.getMeasures().getBackTrackCount() <= ref.getMeasures().getBackTrackCount());
+        assertEquals(sol.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+        assertTrue(sol.getMeasures().getBackTrackCount() <= ref.getMeasures().getBackTrackCount());
     }
 
     @Test(groups="1s", timeOut=60000)

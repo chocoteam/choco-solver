@@ -46,7 +46,10 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.util.ESat.*;
 import static org.testng.Assert.assertEquals;
 
@@ -76,8 +79,8 @@ public class DynamicPostTest {
         final IntVar Y = model.intVar("Y", 1, 2, false);
         final IntVar Z = model.intVar("Z", 1, 2, false);
         model.getResolver().set(engine.make(model));
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 8);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 8);
     }
 
 
@@ -108,7 +111,7 @@ public class DynamicPostTest {
                     }
                 }).post();
         model.getResolver().set(engine.make(model));
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 7);
     }
 
@@ -131,11 +134,11 @@ public class DynamicPostTest {
                 }
             }
         });
-        Chatterbox.showDecisions(model);
-        Chatterbox.showSolutions(model);
+        showDecisions(model);
+        showSolutions(model);
         model.getResolver().set(engine.make(model));
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -151,7 +154,7 @@ public class DynamicPostTest {
         model.unpost(c2);
         model.unpost(c1);
         model.getResolver().set(engine.make(model));
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 8);
         assertEquals(model.getNbCstrs(), 0);
     }
@@ -171,7 +174,7 @@ public class DynamicPostTest {
             model.unpost(c2);
         });
         model.getResolver().set(engine.make(model));
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 5);
         assertEquals(model.getNbCstrs(), 0);
     }
@@ -274,13 +277,13 @@ public class DynamicPostTest {
         Model s1 = costasArray(7, false);
         Model s2 = costasArray(7, true);
 
-        s1.solveAll();
-        System.out.println(s1.getMeasures().getSolutionCount());
+        while (s1.solve()) ;
+        out.println(s1.getMeasures().getSolutionCount());
 
-        s2.solveAll();
+        while (s2.solve()) ;
 
-        System.out.println(s2.getMeasures().getSolutionCount());
-        Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
+        out.println(s2.getMeasures().getSolutionCount());
+        assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
     }
 
     private Model costasArray(int n, boolean dynamic) {

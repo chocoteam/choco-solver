@@ -39,6 +39,12 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 /**
  * <br/>
  *
@@ -65,7 +71,7 @@ public class MaxViewTest {
         Random random = new Random();
         for (int seed = 1; seed < 9999; seed++) {
             random.setSeed(seed);
-            int[][] domains = DomainBuilder.buildFullDomains(3, 1, 15);
+            int[][] domains = buildFullDomains(3, 1, 15);
             Model ref = new Model();
             {
                 IntVar[] xs = new IntVar[3];
@@ -74,7 +80,7 @@ public class MaxViewTest {
                 xs[2] = ref.intVar("z", domains[2][0], domains[2][1], true);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.set(IntStrategyFactory.random_bound(xs, seed));
+                ref.set(random_bound(xs, seed));
             }
             Model model = new Model();
             {
@@ -84,12 +90,12 @@ public class MaxViewTest {
                 xs[2] = model.intVar("z", domains[1][0], domains[2][1], true);
                 max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                model.set(IntStrategyFactory.random_bound(xs, seed));
+                model.set(random_bound(xs, seed));
             }
-            ref.solveAll();
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
-            Assert.assertTrue(model.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
+            while (ref.solve()) ;
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            assertTrue(model.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 
@@ -98,7 +104,7 @@ public class MaxViewTest {
         Random random = new Random();
         for (int seed = 169; seed < 9999; seed++) {
             random.setSeed(seed);
-            int[][] domains = DomainBuilder.buildFullDomains(3, 1, 15, random, random.nextDouble(), random.nextBoolean());
+            int[][] domains = buildFullDomains(3, 1, 15, random, random.nextDouble(), random.nextBoolean());
             Model ref = new Model();
             {
                 IntVar[] xs = new IntVar[3];
@@ -107,7 +113,7 @@ public class MaxViewTest {
                 xs[2] = ref.intVar("z", domains[2]);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.set(IntStrategyFactory.random_value(xs, seed));
+                ref.set(random_value(xs, seed));
             }
             Model model = new Model();
             {
@@ -117,11 +123,11 @@ public class MaxViewTest {
                 xs[2] = model.intVar("z", domains[2]);
                 max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                model.set(IntStrategyFactory.random_value(xs, seed));
+                model.set(random_value(xs, seed));
             }
-            ref.solveAll();
-            model.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            while (ref.solve()) ;
+            while (model.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
             // BEWARE: MAX does not ensure AC, unlike reformulation; so nb of nodes can be different...
 //            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + "): "
 //                    + solver.getMeasures().getNodeCount() + " vs. " + ref.getMeasures().getNodeCount());

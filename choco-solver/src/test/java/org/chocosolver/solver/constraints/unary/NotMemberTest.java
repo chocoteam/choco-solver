@@ -91,7 +91,7 @@ public class NotMemberTest {
                 s.notMember(vars[0], values[1]).post();
                 s.set(lexico_LB(vars));
 
-                s.solveAll();
+                while (s.solve()) ;
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
                 assertEquals(sol, intersectionSize(values[0], values[1]), "nb sol incorrect");
@@ -117,7 +117,7 @@ public class NotMemberTest {
                 s.notMember(vars[0], values[1]).post();
                 s.set(lexico_LB(vars));
 
-                s.solveAll();
+                while (s.solve()) ;
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
                 assertEquals(sol, unionSize(lb, ub, values[1]), "nb sol incorrect");
@@ -135,7 +135,7 @@ public class NotMemberTest {
         s.notMember(vars, values).post();
         s.set(lexico_LB(vars));
 
-        s.solveAll();
+        while (s.solve()) ;
         assertEquals(s.getMeasures().getSolutionCount(), 4);
 
     }

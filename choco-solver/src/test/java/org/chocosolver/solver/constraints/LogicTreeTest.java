@@ -41,6 +41,12 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.constraints.SatFactory.addClauses;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.and;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifOnlyIf;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -221,28 +227,28 @@ public class LogicTreeTest {
         BoolVar[] rows = model.boolVarArray("b", 3);
 
         model.ifThen(
-						rows[0],
-						model.arithm(rows[1], "+", rows[2], "=", 2));
+                rows[0],
+                model.arithm(rows[1], "+", rows[2], "=", 2));
         model.ifThen(
-						rows[0].not(),
-						model.arithm(rows[1], "+", rows[2], "<=", 1));
+                rows[0].not(),
+                model.arithm(rows[1], "+", rows[2], "<=", 1));
         //SearchMonitorFactory.log(solver, true, true);
-        model.solveAll();
+        while (model.solve()) ;
         long nbSol = model.getMeasures().getSolutionCount();
 
         for (int seed = 0; seed < 2000; seed++) {
             Model sCNF = new Model();
             BoolVar[] rCNF = sCNF.boolVarArray("b", 3);
-            LogOp tree = LogOp.ifOnlyIf(
+            LogOp tree = ifOnlyIf(
                     rCNF[0],
-                    LogOp.and(rCNF[1], rCNF[2])
+                    and(rCNF[1], rCNF[2])
             );
-            SatFactory.addClauses(tree, sCNF);
-            sCNF.set(IntStrategyFactory.random_bound(rCNF, seed));
+            addClauses(tree, sCNF);
+            sCNF.set(random_bound(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);
-            sCNF.solveAll();
-            Assert.assertEquals(sCNF.getMeasures().getSolutionCount(), nbSol);
+            while (sCNF.solve()) ;
+            assertEquals(sCNF.getMeasures().getSolutionCount(), nbSol);
         }
     }
 

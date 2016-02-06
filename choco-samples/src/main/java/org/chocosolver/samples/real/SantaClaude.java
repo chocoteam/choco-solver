@@ -38,6 +38,8 @@ import org.chocosolver.solver.variables.RealVar;
 
 import java.util.Random;
 
+import static java.lang.String.format;
+import static java.lang.System.out;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -101,15 +103,15 @@ public class SantaClaude extends AbstractProblem {
     @Override
     public void solve() {
         model.plugMonitor((IMonitorSolution) () -> {
-            System.out.println("*******************");
+            out.println("*******************");
             for (int i = 0; i < n_kids; i++) {
-                System.out.println(String.format("Kids #%d has received the gift #%d at a cost of %d euros",
+                out.println(format("Kids #%d has received the gift #%d at a cost of %d euros",
                         i, kid_gift[i].getValue(), kid_price[i].getValue()));
             }
-            System.out.println(String.format("Total cost: %d euros", total_cost.getValue()));
-            System.out.println(String.format("Average: [%.3f,%.3f] euros", average.getLB(), average.getUB()));
+            out.println(format("Total cost: %d euros", total_cost.getValue()));
+            out.println(format("Average: [%.3f,%.3f] euros", average.getLB(), average.getUB()));
         });
-        model.solveAll();
+        while (model.solve()) ;
     }
 
     @Override

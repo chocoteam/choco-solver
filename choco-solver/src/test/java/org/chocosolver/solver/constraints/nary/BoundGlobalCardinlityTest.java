@@ -41,6 +41,7 @@ import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality.reformulate;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -72,7 +73,7 @@ public class BoundGlobalCardinlityTest {
         vars[5].instantiateTo(0, Null);
 
         model.set(lexico_LB(append(vars, card)));
-        model.solveAll();
+        while (model.solve()) ;
         assertTrue(model.getMeasures().getSolutionCount() > 0);
     }
 
@@ -107,9 +108,9 @@ public class BoundGlobalCardinlityTest {
                 ref.set(lexico_LB(append(vars, cards)));
             }
 //            SearchMonitorFactory.log(solver, false, true);
-            model.solveAll();
-            ref.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            while (model.solve()) ;
+            while (ref.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
     }
@@ -144,9 +145,9 @@ public class BoundGlobalCardinlityTest {
                 ref.set(lexico_LB(vars));
             }
 //            SearchMonitorFactory.log(solver, false, true);
-            model.solveAll();
-            ref.solveAll();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            while (model.solve()) ;
+            while (ref.solve()) ;
+            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
         }
     }

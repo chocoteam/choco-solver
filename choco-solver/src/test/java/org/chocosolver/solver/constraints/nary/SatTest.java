@@ -42,6 +42,8 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.constraints.SatFactory.*;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -58,9 +60,9 @@ public class SatTest {
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
-        SatFactory.addBoolEq(b1, b2);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
+        addBoolEq(b1, b2);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -69,9 +71,9 @@ public class SatTest {
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
-        SatFactory.addBoolNot(b1, b2);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 2);
+        addBoolNot(b1, b2);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -80,9 +82,9 @@ public class SatTest {
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
-        SatFactory.addBoolLe(b1, b2);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 3);
+        addBoolLe(b1, b2);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 3);
     }
 
 
@@ -93,9 +95,9 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        SatFactory.addBoolIsEqVar(b1, b2, r);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
+        addBoolIsEqVar(b1, b2, r);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -105,9 +107,9 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        SatFactory.addBoolAndEqVar(b1, b2, r);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
+        addBoolAndEqVar(b1, b2, r);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -117,9 +119,9 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        SatFactory.addBoolOrEqVar(b1, b2, r);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
+        addBoolOrEqVar(b1, b2, r);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -128,9 +130,9 @@ public class SatTest {
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
-        SatFactory.addBoolLt(b1, b2);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
+        addBoolLt(b1, b2);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -140,10 +142,10 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        SatFactory.addBoolIsLeVar(b1, b2, r);
+        addBoolIsLeVar(b1, b2, r);
 //        SMF.log(solver, true, true);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -153,10 +155,10 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        SatFactory.addBoolIsLtVar(b1, b2, r);
+        addBoolIsLtVar(b1, b2, r);
 //        SMF.log(solver, true, true);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 4);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 4);
     }
 
 
@@ -165,11 +167,11 @@ public class SatTest {
         Model model = new Model();
         BoolVar b1;
         b1 = model.boolVar("b1");
-        SatFactory.addTrue(b1);
+        addTrue(b1);
         //        SMF.log(solver, true, true);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(b1.getBooleanValue(), ESat.TRUE);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 1);
+        assertEquals(b1.getBooleanValue(), TRUE);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -177,24 +179,24 @@ public class SatTest {
         Model model = new Model();
         BoolVar b1;
         b1 = model.boolVar("b1");
-        SatFactory.addFalse(b1);
+        addFalse(b1);
         //        SMF.log(solver, true, true);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(b1.getBooleanValue(), ESat.FALSE);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 1);
+        assertEquals(b1.getBooleanValue(), FALSE);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test12() {
         Model model = new Model();
         BoolVar[] bs = model.boolVarArray("b", 3);
-        SatFactory.addBoolOrArrayEqualTrue(bs);
-        SatFactory.addFalse(bs[0]);
-        SatFactory.addFalse(bs[1]);
-        SatFactory.addFalse(bs[2]);
+        addBoolOrArrayEqualTrue(bs);
+        addFalse(bs[0]);
+        addFalse(bs[1]);
+        addFalse(bs[2]);
         //        SMF.log(solver, true, true);
-        model.solveAll();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 0);
+        while (model.solve()) ;
+        assertEquals(model.getMeasures().getSolutionCount(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)

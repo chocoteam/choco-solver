@@ -43,7 +43,11 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.constraints.SatFactory.addClauses;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.*;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
+import static org.testng.Assert.assertEquals;
 
 /**
  * <br/>
@@ -75,13 +79,13 @@ public class ClauseTest {
                     }
                 }
 
-                LogOp or = LogOp.or(bs);
-                SatFactory.addClauses(or, s);
-                s.set(IntStrategyFactory.lexico_LB(bs));
+                LogOp or = or(bs);
+                addClauses(or, s);
+                s.set(lexico_LB(bs));
 
-                s.solveAll();
+                while (s.solve()) ;
                 long sol = s.getMeasures().getSolutionCount();
-                Assert.assertEquals(sol, nSol);
+                assertEquals(sol, nSol);
             }
             nSol = nSol * 2 + 1;
         }
@@ -94,13 +98,13 @@ public class ClauseTest {
         BoolVar[] bs = new BoolVar[1];
         bs[0] = s.boolVar("to be");
 
-        LogOp and = LogOp.and(bs[0], bs[0].not());
+        LogOp and = and(bs[0], bs[0].not());
 
-        SatFactory.addClauses(and, s);
-        s.set(IntStrategyFactory.lexico_LB(bs));
-        s.solveAll();
+        addClauses(and, s);
+        s.set(lexico_LB(bs));
+        while (s.solve()) ;
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 0);
+        assertEquals(sol, 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -109,16 +113,16 @@ public class ClauseTest {
 
         BoolVar b = s.boolVar("to be");
 
-        LogOp or = LogOp.or(b, b.not());
+        LogOp or = or(b, b.not());
 
-        SatFactory.addClauses(or, s);
+        addClauses(or, s);
 
         BoolVar[] bs = new BoolVar[]{b};
-        s.set(IntStrategyFactory.lexico_LB(bs));
+        s.set(lexico_LB(bs));
 //        SMF.log(s, true, true);
-        s.solveAll();
+        while (s.solve()) ;
         long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 2);
+        assertEquals(sol, 2);
     }
 
 
@@ -215,13 +219,13 @@ public class ClauseTest {
             {
                 Model model = new Model();
                 BoolVar[] bvars = model.boolVarArray("b", 3);
-                LogOp tree = LogOp.ifOnlyIf(
-                        LogOp.and(bvars[1], bvars[2]),
+                LogOp tree = ifOnlyIf(
+                        and(bvars[1], bvars[2]),
                         bvars[0]);
-                SatFactory.addClauses(tree, model);
+                addClauses(tree, model);
 
-                model.set(IntStrategyFactory.random_bound(bvars, seed));
-                model.solveAll();
+                model.set(random_bound(bvars, seed));
+                while (model.solve()) ;
                 n1 = model.getMeasures().getSolutionCount();
             }
             {
@@ -230,7 +234,7 @@ public class ClauseTest {
                 model.times(bvars[1], bvars[2], bvars[0]).post();
 
                 model.set(random_bound(bvars, seed));
-                model.solveAll();
+                while (model.solve()) ;
                 n2 = model.getMeasures().getSolutionCount();
             }
             Assert.assertEquals(n2, n1, String.format("seed: %d", seed));

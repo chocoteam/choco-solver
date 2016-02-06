@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
 
@@ -67,7 +68,7 @@ public class ReifiedTest {
             Model s = new Model();
 
             BoolVar b = s.boolVar("b");
-            int[][] values = DomainBuilder.buildFullDomains(2, 0, 15, r, d, false);
+            int[][] values = buildFullDomains(2, 0, 15, r, d, false);
             IntVar x = s.intVar("x", values[0]);
             IntVar y = s.intVar("y", values[1]);
             IntVar[] vars = new IntVar[]{b, x, y};
@@ -76,10 +77,10 @@ public class ReifiedTest {
             Constraint oppCons = s.arithm(x, "!=", y);
 
             s.ifThenElse(b, cons, oppCons);
-            s.set(IntStrategyFactory.lexico_LB(vars));
-            s.solveAll();
+            s.set(lexico_LB(vars));
+            while (s.solve()) ;
             long sol = s.getMeasures().getSolutionCount();
-            Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
+            assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
     }
 
@@ -101,7 +102,7 @@ public class ReifiedTest {
         s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")).post();
 
         s.set(lexico_LB(new IntVar[]{x, y, z}));
-        s.solveAll();
+        while (s.solve()) ;
         long sol = s.getMeasures().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
     }
@@ -114,7 +115,7 @@ public class ReifiedTest {
             Model s = new Model();
 
             BoolVar b = s.boolVar("b");
-            int[][] values = DomainBuilder.buildFullDomains(2, 0, 15, r, d, false);
+            int[][] values = buildFullDomains(2, 0, 15, r, d, false);
             IntVar x = s.intVar("x", values[0]);
             IntVar y = s.intVar("y", values[1]);
             IntVar[] vars = new IntVar[]{b, x, y};
@@ -124,10 +125,10 @@ public class ReifiedTest {
 
             s.ifThenElse(b, cons, oppCons);
 
-            s.set(IntStrategyFactory.lexico_LB(vars));
-            s.solveAll();
+            s.set(lexico_LB(vars));
+            while (s.solve()) ;
             long sol = s.getMeasures().getSolutionCount();
-            Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
+            assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
     }
 
@@ -235,20 +236,20 @@ public class ReifiedTest {
             Random r = new Random(i);
             for (double d = 1.0; d <= 1.0; d += 0.125) {
 
-                int[][] values = DomainBuilder.buildFullDomains(i, 1, i, r, d, false);
+                int[][] values = buildFullDomains(i, 1, i, r, d, false);
                 Model s1 = model1(i, values);
-                s1.solveAll();
+                while (s1.solve()) ;
 
                 ////////////////////////
 
                 Model s2 = model2(i, values);
-                s2.solveAll();
+                while (s2.solve()) ;
 
 
                 ////////////////////////
                 long sol1 = s1.getMeasures().getSolutionCount();
                 long sol2 = s2.getMeasures().getSolutionCount();
-                Assert.assertEquals(sol2, sol1, "nb sol incorrect");
+                assertEquals(sol2, sol1, "nb sol incorrect");
             }
         }
 
@@ -260,18 +261,18 @@ public class ReifiedTest {
         int[][] values; //= DomainBuilder.buildFullDomains(i, 1, i, r, d, false);
         values = new int[][]{{1, 2}, {1}};
         Model s1 = model1(2, values);
-        s1.solveAll();
+        while (s1.solve()) ;
 
         ////////////////////////
 
         Model s2 = model2(2, values);
-        s2.solveAll();
+        while (s2.solve()) ;
 
 
         ////////////////////////
         long sol1 = s1.getMeasures().getSolutionCount();
         long sol2 = s2.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol2, sol1, "nb sol incorrect");
+        assertEquals(sol2, sol1, "nb sol incorrect");
 
     }
 
@@ -338,7 +339,7 @@ public class ReifiedTest {
         int max_abs = 1;
         s.sum(ab, "=", ab.length - max_abs).post();
 
-        s.solveAll();
+        while (s.solve()) ;
 
         assertEquals(s.getMeasures().getSolutionCount(), 2);
 
@@ -374,7 +375,7 @@ public class ReifiedTest {
         int max_abs = 1;
         s.sum(ab, "=", ab.length - max_abs).post();
 
-        s.solveAll();
+        while (s.solve()) ;
 
         assertEquals(s.getMeasures().getSolutionCount(), 2);
 
@@ -411,7 +412,7 @@ public class ReifiedTest {
         s.sum(ab, "=", ab.length - max_abs).post();
 
 //        SearchMonitorFactory.log(s, true, false);
-        s.solveAll();
+        while (s.solve()) ;
 
         assertEquals(s.getMeasures().getSolutionCount(), 2);
 
@@ -448,7 +449,7 @@ public class ReifiedTest {
         s.sum(ab, "=", ab.length - max_abs).post();
 
 //        SearchMonitorFactory.log(s, true, false);
-        s.solveAll();
+        while (s.solve()) ;
 
         assertEquals(s.getMeasures().getSolutionCount(), 5);
 

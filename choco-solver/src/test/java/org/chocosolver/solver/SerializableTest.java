@@ -39,6 +39,9 @@ import org.testng.annotations.Test;
 
 import java.io.*;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 /**
  * <br/>
  *
@@ -200,9 +203,9 @@ public class SerializableTest {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        Assert.assertNotNull(s);
-        s.solveAll();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 92, "nb sol incorrect");
+        assertNotNull(s);
+        while (s.solve()) ;
+        assertEquals(s.getMeasures().getSolutionCount(), 92, "nb sol incorrect");
     }
 
 }

@@ -94,7 +94,7 @@ public class SubcircuitTest {
         IntVar[] vars = model.intVarArray("x", n, 0, n, true);
         IntVar nb = model.intVar("size", min, max, true);
         model.subCircuit(vars, 0, nb).post();
-        model.solveAll();
+        while (model.solve()) ;
         int nbSol = 0;
         for (int i = min; i <= max; i++) {
             nbSol += parmi(i, n) * factorial(i - 1);

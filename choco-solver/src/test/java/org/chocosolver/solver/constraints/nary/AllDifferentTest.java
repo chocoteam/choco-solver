@@ -40,8 +40,10 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * <br/>
@@ -86,7 +88,7 @@ public class AllDifferentTest {
         }
         AbstractStrategy strategy = lexico_LB(vars);
         s.set(strategy);
-        s.solveAll();
+        while (s.solve()) ;
         long sol = s.getMeasures().getSolutionCount();
         assertEquals(sol, nbSol, "nb sol incorrect");
     }
@@ -126,7 +128,7 @@ public class AllDifferentTest {
         }
         s.set(lexico_LB(vars));
         //        ChocoLogging.toSolution();
-        s.solveAll();
+        while (s.solve()) ;
         long sol = s.getMeasures().getSolutionCount();
         assertEquals(sol, 1, "nb sol incorrect");
 
@@ -145,7 +147,7 @@ public class AllDifferentTest {
         vars[4] = s.intVar("v_4", 2, 6, true);
         s.allDifferent(vars, "BC").post();
         s.set(lexico_LB(vars));
-        s.solveAll();
+        while (s.solve()) ;
         long sol = s.getMeasures().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
     }
@@ -160,25 +162,25 @@ public class AllDifferentTest {
                 for (int h = 0; h <= 1; h++) {
                     for (int b = 0; b <= 1; b++) {
                         int n = 1 + rand.nextInt(5);
-                        int[][] domains = DomainBuilder.buildFullDomains(n, 1, 2 * n, rand, d, h == 0);
+                        int[][] domains = buildFullDomains(n, 1, 2 * n, rand, d, h == 0);
 
                         Model neqs = alldiffs(domains, 0, b == 0);
-                        neqs.solveAll();
+                        while (neqs.solve()) ;
 
                         Model clique = alldiffs(domains, 1, b == 0);
-                        clique.solveAll();
-                        Assert.assertEquals(clique.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
-                        Assert.assertEquals(clique.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
+                        while (clique.solve()) ;
+                        assertEquals(clique.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
+                        assertEquals(clique.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
 
                         Model bc = alldiffs(domains, 2, b == 0);
-                        bc.solveAll();
-                        Assert.assertEquals(bc.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
-                        Assert.assertTrue(bc.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
+                        while (bc.solve()) ;
+                        assertEquals(bc.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
+                        assertTrue(bc.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
 
                         Model ac = alldiffs(domains, 3, b == 0);
-                        ac.solveAll();
-                        Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
-                        Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
+                        while (ac.solve()) ;
+                        assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect " + seed);
+                        assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect" + seed);
                     }
                 }
             }
@@ -275,7 +277,7 @@ public class AllDifferentTest {
 
         model.allDifferent(ts, "FC").post();
 
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 10);
         assertEquals(model.getMeasures().getNodeCount(), 23);
     }
@@ -290,7 +292,7 @@ public class AllDifferentTest {
 
         model.allDifferent(ts, "FC").post();
 
-        model.solveAll();
+        while (model.solve()) ;
         assertEquals(model.getMeasures().getSolutionCount(), 10);
         assertEquals(model.getMeasures().getNodeCount(), 19);
     }

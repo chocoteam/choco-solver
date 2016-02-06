@@ -41,6 +41,8 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -94,9 +96,9 @@ public class AllTest {
         prob.buildModel();
         prob.configureSearch();
         efact.plugin(prob.model, false, false);
-        prob.model.solveAll();
+        while (prob.model.solve()) ;
 
-        Assert.assertEquals(nbSol, prob.getModel().getMeasures().getSolutionCount(), "incorrect nb solutions");
+        assertEquals(nbSol, prob.getModel().getMeasures().getSolutionCount(), "incorrect nb solutions");
     }
 
     @Override

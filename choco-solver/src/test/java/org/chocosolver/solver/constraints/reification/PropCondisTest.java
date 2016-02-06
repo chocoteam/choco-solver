@@ -42,10 +42,14 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
 import static org.chocosolver.solver.constraints.SatFactory.addConstructiveDisjunction;
+import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random;
 import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.chocosolver.util.tools.ArrayUtils.append;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * <p>
@@ -62,13 +66,13 @@ public class PropConDisTest {
         IntVar a = s.intVar("A", 0, 10, false);
         BoolVar b1 = s.arithm(a, "=", 9).reify();
         BoolVar b2 = s.arithm(a, "=", 10).reify();
-        SatFactory.addConstructiveDisjunction(b1,b2);
+        addConstructiveDisjunction(b1, b2);
         s.propagate();
-        Assert.assertEquals(a.getDomainSize(), 2);
-        Assert.assertEquals(a.getLB(), 9);
-        Assert.assertEquals(a.getUB(), 10);
-        s.solveAll();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(a.getDomainSize(), 2);
+        assertEquals(a.getLB(), 9);
+        assertEquals(a.getUB(), 10);
+        while (s.solve()) ;
+        assertEquals(s.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -79,20 +83,20 @@ public class PropConDisTest {
         Constraint c1 = s.arithm(X, "-", Y, "<=", -9);
         Constraint c2 = s.arithm(Y, "-", X, "<=", -9);
 
-        SatFactory.addConstructiveDisjunction(c1.reify(),c2.reify());
+        addConstructiveDisjunction(c1.reify(), c2.reify());
         s.propagate();
-        Assert.assertEquals(X.getDomainSize(), 4);
-        Assert.assertEquals(Y.getDomainSize(), 4);
-        Assert.assertTrue(X.contains(0));
-        Assert.assertTrue(X.contains(1));
-        Assert.assertTrue(X.contains(9));
-        Assert.assertTrue(X.contains(10));
-        Assert.assertTrue(Y.contains(0));
-        Assert.assertTrue(Y.contains(1));
-        Assert.assertTrue(Y.contains(9));
-        Assert.assertTrue(Y.contains(10));
-        s.solveAll();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 6);
+        assertEquals(X.getDomainSize(), 4);
+        assertEquals(Y.getDomainSize(), 4);
+        assertTrue(X.contains(0));
+        assertTrue(X.contains(1));
+        assertTrue(X.contains(9));
+        assertTrue(X.contains(10));
+        assertTrue(Y.contains(0));
+        assertTrue(Y.contains(1));
+        assertTrue(Y.contains(9));
+        assertTrue(Y.contains(10));
+        while (s.solve()) ;
+        assertEquals(s.getMeasures().getSolutionCount(), 6);
     }
 
 
@@ -120,15 +124,15 @@ public class PropConDisTest {
         for (int n = 1; n < 4; n += 1) {
             System.out.printf("Size: %d\n", n);
             for (int seed = 0; seed < 5; seed += 1) {
-                System.out.printf("Size: %d (%d)\n", n, seed);
+                out.printf("Size: %d (%d)\n", n, seed);
                 Model or = modelPb(n, seed, rnd, false);
-                or.set(ISF.random((IntVar[]) or.getHook("decvars"), seed));
-                or.solveAll();
+                or.set(random((IntVar[]) or.getHook("decvars"), seed));
+                while (or.solve()) ;
                 Model cd = modelPb(n, seed, rnd, true);
-                cd.set(ISF.random((IntVar[]) cd.getHook("decvars"), seed));
-                cd.solveAll();
-                Assert.assertEquals(cd.getMeasures().getSolutionCount(), or.getMeasures().getSolutionCount(), "wrong nb of solutions");
-                Assert.assertTrue(or.getMeasures().getNodeCount() >= cd.getMeasures().getNodeCount(), "wrong nb of nodes");
+                cd.set(random((IntVar[]) cd.getHook("decvars"), seed));
+                while (cd.solve()) ;
+                assertEquals(cd.getMeasures().getSolutionCount(), or.getMeasures().getSolutionCount(), "wrong nb of solutions");
+                assertTrue(or.getMeasures().getNodeCount() >= cd.getMeasures().getNodeCount(), "wrong nb of nodes");
             }
         }
     }

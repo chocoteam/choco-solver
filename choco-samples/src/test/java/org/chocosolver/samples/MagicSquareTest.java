@@ -40,6 +40,9 @@ import org.chocosolver.solver.variables.Variable;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
+import static org.testng.Assert.assertEquals;
+
 /**
  * <br/>
  *
@@ -62,17 +65,17 @@ public class MagicSquareTest {
         Model sol;
         int j = 3;
         sol = modeler(j);
-        sol.set(new ImpactBased((IntVar[])sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
-        sol.solveAll();
+        sol.set(new ImpactBased((IntVar[]) sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
+        while (sol.solve()) ;
         long nbsol = sol.getMeasures().getSolutionCount();
         long node = sol.getMeasures().getNodeCount();
-        for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
+        for (int t = 0; t < values().length; t++) {
             sol = modeler(j);
-            sol.set(new ImpactBased((IntVar[])sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
-            PropagationEngineFactory.values()[t].make(sol);
-            sol.solveAll();
-            Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
-            Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
+            sol.set(new ImpactBased((IntVar[]) sol.getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
+            values()[t].make(sol);
+            while (sol.solve()) ;
+            assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
+            assertEquals(sol.getMeasures().getNodeCount(), node);
         }
     }
 
@@ -81,15 +84,15 @@ public class MagicSquareTest {
         Model sol;
         for (int j = 3; j < 5; j++) {
             sol = modeler(j);
-            sol.solveAll();
+            while (sol.solve()) ;
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
+            for (int t = 0; t < values().length; t++) {
                 sol = modeler(j);
-                PropagationEngineFactory.values()[t].make(sol);
-                sol.solveAll();
-                Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
-                Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
+                values()[t].make(sol);
+                while (sol.solve()) ;
+                assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
+                assertEquals(sol.getMeasures().getNodeCount(), node);
             }
         }
     }

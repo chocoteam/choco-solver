@@ -133,7 +133,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solveAll();
+        while (model.solve()) ;
     }
 
     @Override

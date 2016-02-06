@@ -37,6 +37,9 @@ import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static java.lang.System.out;
+import static org.testng.Assert.assertEquals;
+
 /**
  * @author Jean-Guillaume Fages
  * @since 22/04/15
@@ -46,16 +49,16 @@ public class ImpactTest {
 
 	@Test(groups="10s", timeOut=60000)
 	public void testCostas() {
-		Model s1 = costasArray(7,false);
-		Model s2 = costasArray(7,true);
+		Model s1 = costasArray(7, false);
+		Model s2 = costasArray(7, true);
 
-		s1.solveAll();
-		System.out.println(s1.getMeasures().getSolutionCount());
+		while (s1.solve()) ;
+		out.println(s1.getMeasures().getSolutionCount());
 
-		s2.solveAll();
+		while (s2.solve()) ;
 
-		System.out.println(s2.getMeasures().getSolutionCount());
-		Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
+		out.println(s2.getMeasures().getSolutionCount());
+		assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
 	}
 
 	private Model costasArray(int n, boolean impact){

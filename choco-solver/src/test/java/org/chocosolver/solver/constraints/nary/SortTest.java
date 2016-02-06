@@ -78,7 +78,7 @@ public class SortTest {
                 System.out.printf("\n\n");
             } while (solver.solve());
         }*/
-        assertEquals(model.solveAll(), 182);
+        assertEquals(model.findAllSolutions(), 182);
 
     }
 

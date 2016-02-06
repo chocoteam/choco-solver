@@ -36,6 +36,11 @@ import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.constraints.SatFactory.*;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifThenElse;
+import static org.chocosolver.solver.constraints.nary.cnf.LogOp.nand;
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+
 /**
  *
  * @author Charles Prud'homme
@@ -48,36 +53,36 @@ public class SatConstraintExamples {
     public void testattmostnminusone() {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
-        SatFactory.addAtMostNMinusOne(BVARS);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addAtMostNMinusOne(BVARS);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testattmostone() {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
-        SatFactory.addAtMostOne(BVARS);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addAtMostOne(BVARS);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testboolandarrayequalfalse() {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
-        SatFactory.addBoolAndArrayEqualFalse(BVARS);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolAndArrayEqualFalse(BVARS);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testboolorarrayequaltrue() {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
-        SatFactory.addBoolOrArrayEqualTrue(BVARS);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolOrArrayEqualTrue(BVARS);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -86,9 +91,9 @@ public class SatConstraintExamples {
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolAndEqVar(L, R, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolAndEqVar(L, R, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -96,9 +101,9 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
-        SatFactory.addBoolEq(L, R);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolEq(L, R);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -107,9 +112,9 @@ public class SatConstraintExamples {
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolIsEqVar(L, R, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolIsEqVar(L, R, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -118,9 +123,9 @@ public class SatConstraintExamples {
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolIsLeVar(L, R, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolIsLeVar(L, R, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -129,9 +134,9 @@ public class SatConstraintExamples {
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolIsLtVar(L, R, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolIsLtVar(L, R, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -140,9 +145,9 @@ public class SatConstraintExamples {
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolIsNeqVar(L, R, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolIsNeqVar(L, R, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -150,9 +155,9 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
-        SatFactory.addBoolLe(L, R);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolLe(L, R);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -160,9 +165,9 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
-        SatFactory.addBoolLt(L, R);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolLt(L, R);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -170,9 +175,9 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
-        SatFactory.addBoolNot(L, R);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolNot(L, R);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -180,9 +185,9 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolAndArrayEqVar(BVARS, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolAndArrayEqVar(BVARS, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -190,9 +195,9 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolOrArrayEqVar(BVARS, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolOrArrayEqVar(BVARS, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -201,9 +206,9 @@ public class SatConstraintExamples {
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolOrEqVar(L, R, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolOrEqVar(L, R, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -212,9 +217,9 @@ public class SatConstraintExamples {
         BoolVar L = model.boolVar("L");
         BoolVar R = model.boolVar("R");
         BoolVar T = model.boolVar("T");
-        SatFactory.addBoolXorEqVar(L, R, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addBoolXorEqVar(L, R, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -224,11 +229,11 @@ public class SatConstraintExamples {
         BoolVar C2 = model.boolVar("C2");
         BoolVar R = model.boolVar("R");
         BoolVar AR = model.boolVar("AR");
-        SatFactory.addClauses(
-                LogOp.ifThenElse(LogOp.nand(C1, C2), R, AR),
+        addClauses(
+                ifThenElse(nand(C1, C2), R, AR),
                 model);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -238,18 +243,18 @@ public class SatConstraintExamples {
         BoolVar P2 = model.boolVar("P2");
         BoolVar P3 = model.boolVar("P3");
         BoolVar N = model.boolVar("N");
-        SatFactory.addClauses(new BoolVar[]{P1, P2, P3}, new BoolVar[]{N});
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addClauses(new BoolVar[]{P1, P2, P3}, new BoolVar[]{N});
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testboolfalse() {
         Model model = new Model();
         BoolVar B = model.boolVar("B");
-        SatFactory.addFalse(B);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addFalse(B);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -257,9 +262,9 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 3);
         BoolVar T = model.boolVar("T");
-        SatFactory.addMaxBoolArrayLessEqVar(BVARS, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addMaxBoolArrayLessEqVar(BVARS, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -267,9 +272,9 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 3);
         BoolVar T = model.boolVar("T");
-        SatFactory.addSumBoolArrayGreaterEqVar(BVARS, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addSumBoolArrayGreaterEqVar(BVARS, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -277,17 +282,17 @@ public class SatConstraintExamples {
         Model model = new Model();
         BoolVar[] BVARS = model.boolVarArray("BS", 3);
         BoolVar T = model.boolVar("T");
-        SatFactory.addSumBoolArrayLessEqVar(BVARS, T);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addSumBoolArrayLessEqVar(BVARS, T);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testbooltrue() {
         Model model = new Model();
         BoolVar B = model.boolVar("B");
-        SatFactory.addTrue(B);
-        Chatterbox.showSolutions(model);
-        model.solveAll();
+        addTrue(B);
+        showSolutions(model);
+        while (model.solve()) ;
     }
 }
