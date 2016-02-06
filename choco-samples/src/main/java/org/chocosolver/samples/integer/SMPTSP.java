@@ -32,11 +32,15 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.solution.BestSolutionsRecorder;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
+
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 
 /**
  * simple CP model to solve a toy SMPTSP instance
@@ -114,11 +118,13 @@ public class SMPTSP extends AbstractProblem {
 			bestObj = nbValues.getValue();
 			System.out.println("Solution found! Objective = "+bestObj);
 		});
+		// searches for all optimal solutions (non-strict optimization)
+		model.getResolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>(nbValues, MAXIMIZE, false));
 	}
 
 	@Override
 	public void solve() {
-		model.findAllOptimalSolutions(ResolutionPolicy.MINIMIZE, nbValues, false);
+		while (model.solve());
 	}
 
 	@Override

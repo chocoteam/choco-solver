@@ -40,6 +40,7 @@ import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.solution.BestSolutionsRecorder;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -237,14 +238,15 @@ public class ObjectiveTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testJL2() {
 		Model model = new Model();
-        IntVar a = model.intVar("a", -2, 2, false);
 
-		model.set(
+        IntVar a = model.intVar("a", -2, 2, false);
+		model.getResolver().set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),
 				ISF.minDom_LB(a));
 		SMF.nogoodRecordingOnSolution(new IntVar[]{a});
 
-		model.findAllOptimalSolutions(ResolutionPolicy.MAXIMIZE, a, false);
+        model.getResolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>(a, MAXIMIZE, false));
+        while (model.solve());
 		Assert.assertEquals(model.hasReachedLimit(),false);
 	}
 }

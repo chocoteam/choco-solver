@@ -61,6 +61,8 @@ import org.chocosolver.util.criteria.Criterion;
 import java.io.*;
 import java.util.*;
 
+import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+
 /**
  * The <code>Model</code> is the header component of Constraint Programming.
  * It embeds the list of <code>Variable</code> (and their <code>Domain</code>), the <code>Constraint</code>'s network,
@@ -153,6 +155,9 @@ public class Model implements Serializable, IModeler{
 
     /** Resolution policy (sat/min/max) */
     private ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
+
+    /** specifies whether or not to restore the best solution for optimisation problems (true by default)*/
+    private boolean restoreBestSolution = true;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
@@ -612,6 +617,15 @@ public class Model implements Serializable, IModeler{
         this.name = name;
     }
 
+	/**
+     * Specifies whether or not to restore the best solution found after an optimisation
+     * Already set to true by default
+     * @param restoreBestSolution whether or not to restore the best solution found after an optimisation
+     */
+    public void setRestoreBestSolution(boolean restoreBestSolution) {
+        this.restoreBestSolution = restoreBestSolution;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////         RELATED TO VAR              ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -875,34 +889,23 @@ public class Model implements Serializable, IModeler{
 
     /**
      * Executes the resolver as it is configured.
-     * Default configuration: Computes a feasible solution (SAT) with the default search strategy
-     * If configured for optimisation, restores last solution by default.
+     *
+     * Default configuration:
+     * - SATISFACTION : Computes a feasible solution. Use while(solve()) to enumerate all solutions.
+     * - OPTIMISATION : If an objective has been defined, searches an optimal solution
+     * (and prove optimality by closing the search space). Then restores the best solution found after solving.
      * @return if at least one new solution has been found.
      * @see {@link Resolver}
      */
     public boolean solve(){
-        return solve(policy != ResolutionPolicy.SATISFACTION);
-    }
-
-    /**
-     * Executes the resolver as it is configured.
-     * Enables to specify not to restore the last solution found (done by default)
-     * @param restoreBestSolution do not restore last solution after solving if set to false
-     * @return if at least one new solution has been found.
-     * @see {@link Resolver}
-     */
-    public boolean solve(boolean restoreBestSolution){
-        if(policy == ResolutionPolicy.SATISFACTION){
-            getResolver().setStopAtFirstSolution(true);
-        }else{
-            if(objectives == null || objectives.length == 0) {
-                throw new SolverException("No objective variable has been defined");
-            }
-            getResolver().setStopAtFirstSolution(false);
+        boolean sat = policy == ResolutionPolicy.SATISFACTION;
+        getResolver().setStopAtFirstSolution(sat);
+        if((objectives == null || objectives.length == 0) && !sat) {
+            throw new SolverException("No objective variable has been defined whereas policy is "+policy);
         }
         long nbsol = getResolver().getMeasures().getSolutionCount();
         getResolver().launch();
-        if(restoreBestSolution){
+        if(restoreBestSolution && !sat){
             try {
                 getResolver().restoreLastSolution();
             } catch (ContradictionException e) {
@@ -927,7 +930,7 @@ public class Model implements Serializable, IModeler{
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // CONTENT TO MOVE INSIDE RESOLVER
+    // TODO refactor
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -951,47 +954,6 @@ public class Model implements Serializable, IModeler{
 
 
 
-    /**
-     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     * Finds and stores all optimal solution.
-     * Calling this method does not restore solution on exit
-     * since multiple equivalent (wrt objective value) solutions may exist.
-     *
-     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @param objective the variable to optimize
-     * @param twoSteps  When set to true it calls two resolution:
-     *                  1) It finds and prove the optimum
-     *                  2) It reset search and enumerates all solutions of optimal cost
-     *                  When set to false, it performs only one resolution but which does impose to find strictly
-     *                  better solutions. This means it will spend time enumerating intermediary solutions equal to the
-     *                  the best cost found so far (but not necessarily optimal).
-     */
-    public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
-        if (twoSteps) {
-            findOptimalSolution(policy, objective);
-            if (getMeasures().getSolutionCount() > 0) {
-                int opt = getObjectiveManager().getBestSolutionValue().intValue();
-                getEngine().flush();
-                getResolver().reset();
-                arithm(objective, "=", opt).post();
-                set(new AllSolutionsRecorder(this));
-                findAllSolutions();
-            }
-        } else {
-            if (policy == ResolutionPolicy.SATISFACTION) {
-                throw new SolverException("Model.findAllOptimalSolutions(...) cannot be called with ResolutionPolicy.SATISFACTION.");
-            }
-            if (objective == null) {
-                throw new SolverException("No objective variable has been defined");
-            }
-            if (!getObjectiveManager().isOptimization()) {
-                set(new ObjectiveManager<IntVar, Integer>(objective, policy, false));
-            }
-            set(new BestSolutionsRecorder(objective));
-            getResolver().setStopAtFirstSolution(false);
-            solve();
-        }
-    }
 
 
 
@@ -1285,7 +1247,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use while({@link #solve(boolean)}) instead
+     * @deprecated use while({@link #solve()}) instead
      *
      * Will be removed in version > 3.4.0
      */
@@ -1293,7 +1255,7 @@ public class Model implements Serializable, IModeler{
     public long findAllSolutions() {
         clearObjectives();
         long nbSols = 0;
-        while (solve(false)){
+        while (solve()){
             nbSols++;
         }
         return nbSols;
@@ -1323,14 +1285,16 @@ public class Model implements Serializable, IModeler{
     // INTS
 
     /**
-     * @deprecated use {@link #solve(boolean)} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * Use {@link #setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
         setObjectives(policy,getObjectives());
-        solve(restoreLastSolution);
+        setRestoreBestSolution(restoreLastSolution);
+        solve();
     }
 
     /**
@@ -1354,28 +1318,31 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use {@link #solve(boolean)} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * Use {@link #setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
         setObjectives(policy,objective);
-        solve(restoreLastSolution);
+        setRestoreBestSolution(restoreLastSolution);
+        solve();
     }
 
     // REALS
 
     /**
-     * @deprecated use {@link #solve(boolean)} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     *
+     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * Use {@link #setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
         setObjectives(policy,objective);
         setPrecision(precision);
-        solve(restoreLastSolution);
+        setRestoreBestSolution(restoreLastSolution);
+        solve();
     }
 
     /**
@@ -1392,13 +1359,15 @@ public class Model implements Serializable, IModeler{
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * Use {@link #setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
         setObjectives(policy,objectives);
-        solve(restoreLastSolution);
+        setRestoreBestSolution(restoreLastSolution);
+        solve();
     }
 
     /**
@@ -1409,5 +1378,21 @@ public class Model implements Serializable, IModeler{
     @Deprecated
     public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
         findParetoFront(policy, true, objectives);
+    }
+
+    /**
+     * @deprecated
+     * if(twoSteps)
+     *      do the two steps in your model (setObj / solve / reset / clearObj / while(solve))
+     * else
+     *      use change objective manager for non strict optimisation
+     *      and use while({@link #solve()}) instead
+     *
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
+        getResolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>(objective, MAXIMIZE, false));
+        while (solve());
     }
 }

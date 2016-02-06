@@ -31,8 +31,10 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.AllSolutionsRecorder;
+import org.chocosolver.solver.search.solution.BestSolutionsRecorder;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -101,10 +103,20 @@ public class BinPacking extends AbstractProblem{
 				while (model.solve()) ;
 				break;
 			case 1:// one step approach (could be slow)
-				model.findAllOptimalSolutions(MAXIMIZE, minLoad, false);
+				// non-strict optimization
+				model.getResolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>(minLoad, MAXIMIZE, false));
+				while (model.solve());
 				break;
 			case 2:// two step approach (find and prove optimum, then enumerate)
-				model.findAllOptimalSolutions(MAXIMIZE, minLoad, true);
+				model.setObjectives(MAXIMIZE, minLoad);
+				if (model.solve()) {
+					int opt = model.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
+					model.getResolver().getEngine().flush();
+					model.getResolver().reset();
+					model.arithm(minLoad, "=", opt).post();
+					model.clearObjectives();
+					while(model.solve());
+				}
 				break;
 			default:
 				throw new UnsupportedOperationException();
