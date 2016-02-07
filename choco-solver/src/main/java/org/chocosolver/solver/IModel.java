@@ -27,28 +27,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver;
 
-import org.chocosolver.solver.Resolver;
-import org.chocosolver.solver.exception.ContradictionException;
-
-import java.io.Serializable;
+import org.chocosolver.solver.constraints.IConstraintFactory;
+import org.chocosolver.solver.variables.IVariableFactory;
+import org.chocosolver.solver.variables.IViewFactory;
 
 /**
- * The "Propagate" component
- * (Inspired from "Unifying search algorithms for CSP" N. Jussien and O. Lhomme, Technical report 02-3-INFO, EMN).
- * <p>
- * The aim of the component is to propagate information throughout the constraint network when a decision is made.
- * <p>
- * Created by cprudhom on 01/09/15.
- * Project: choco.
+ * Interface to ease modeling
+ * Enables to make variables, views and constraints
+ *
+ * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface Propagate extends Serializable{
+public interface IModel extends IVariableFactory, IViewFactory, IConstraintFactory {
 
-    /**
-     * Propagate information throughout the constraint network, that is, apply decision and post dynamic cut (if any).
-     *
-     * @throws ContradictionException if a dead-end is encountered
-     */
-    void execute(Resolver resolver) throws ContradictionException;
 }

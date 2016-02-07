@@ -31,6 +31,7 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -92,10 +93,10 @@ public class MoveSeq implements Move {
         while (i < moves.size() - 1 && !extend) {
             // first, store the world index in which the first decision of this move is taken.
             i++;
-            Decision tmp = resolver.decision;
-            resolver.decision = tds[i - 1];
-            resolver.decision.setPrevious(tmp);
-            resolver.mModel.getEnvironment().worldPush();
+            Decision tmp = resolver.getLastDecision();
+            resolver.setLastDecision(tds[i - 1]);
+            resolver.getLastDecision().setPrevious(tmp);
+            resolver.getModel().getEnvironment().worldPush();
             moves.get(i).setTopDecision(tds[i - 1]);
             extend = moves.get(i).extend(resolver);
         }
@@ -110,8 +111,8 @@ public class MoveSeq implements Move {
         while (i > 0 && !repair) {
             repair = moves.get(--i).repair(resolver);
             if (i > 0) {
-                Decision tmp = resolver.decision;
-                resolver.decision = resolver.decision.getPrevious();
+                Decision tmp = resolver.getLastDecision();
+                resolver.setLastDecision(resolver.getLastDecision().getPrevious());
                 tmp.free();
             }
         }

@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -88,7 +89,7 @@ class LearnExplained implements Learn {
 
     @Override
     public void record(Resolver resolver) {
-        if (nbsol == resolver.mModel.getMeasures().getSolutionCount()) {
+        if (nbsol == resolver.getMeasures().getSolutionCount()) {
             onFailure(resolver);
         } else {
             nbsol++;

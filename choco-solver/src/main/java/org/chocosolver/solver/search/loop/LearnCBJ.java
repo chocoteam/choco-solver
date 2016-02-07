@@ -32,6 +32,7 @@ package org.chocosolver.solver.search.loop;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;

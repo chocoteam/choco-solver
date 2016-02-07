@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search;
 
 
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
@@ -40,7 +39,6 @@ import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.solution.BestSolutionsRecorder;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -245,7 +243,7 @@ public class ObjectiveTest {
 				ISF.minDom_LB(a));
 		SMF.nogoodRecordingOnSolution(new IntVar[]{a});
 
-        model.getResolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>(a, MAXIMIZE, false));
+        model.getResolver().set(new ObjectiveManager<IntVar, Integer>(a, MAXIMIZE, false));
         while (model.solve());
 		Assert.assertEquals(model.hasReachedLimit(),false);
 	}

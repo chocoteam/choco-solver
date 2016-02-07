@@ -31,6 +31,7 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -152,11 +153,11 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
         boolean extend;
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < copen.length) {
-            Decision tmp = resolver.decision;
-            resolver.decision = copen[current++];
-            assert resolver.decision != null;
-            resolver.decision.setPrevious(tmp);
-            resolver.mModel.getEnvironment().worldPush();
+            Decision tmp = resolver.getLastDecision();
+            resolver.setLastDecision(copen[current++]);
+            assert resolver.getLastDecision() != null;
+            resolver.getLastDecision().setPrevious(tmp);
+            resolver.getModel().getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
             extend = super.extend(resolver);
@@ -183,7 +184,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     protected void extractOpenRightBranches(Resolver resolver) {
         // update parameters for restarts
         if (nodesRecompute > 0) {
-            double ratio = nodesRecompute * 1.d / resolver.mMeasures.getNodeCount();
+            double ratio = nodesRecompute * 1.d / resolver.getMeasures().getNodeCount();
             if (ratio > b && Z <= N) {
                 Z *= 2;
             } else if (ratio < a && Z >= 2) {
@@ -206,7 +207,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             // the decision in 0 is the last taken, then the array us reversed
             ArrayUtils.reverse(copen);
             current = 0;
-            nodesRecompute = resolver.mMeasures.getNodeCount() + copen.length;
+            nodesRecompute = resolver.getMeasures().getNodeCount() + copen.length;
         } else{
             // to be sure not to use the previous path
             current = copen.length;
@@ -224,7 +225,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
      */
     private int compareSubpath(Resolver resolver) {
         _unkopen.clear();
-        Decision decision = resolver.decision;
+        Decision decision = resolver.getLastDecision();
         while (decision != topDecision) {
             _unkopen.add(decision);
             decision = decision.getPrevious();
@@ -247,8 +248,8 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     private void extractOB(Resolver resolver, int i) {
         Decision stopAt = _unkopen.get(i).getPrevious();
         // then, goes up in the search tree, and detect open nodes
-        resolver.mModel.getEnvironment().worldPop();
-        Decision decision = resolver.decision;
+        resolver.getModel().getEnvironment().worldPop();
+        Decision decision = resolver.getLastDecision();
         int bound;
         while (decision != stopAt) {
             bound = isMinimization ?
@@ -257,10 +258,10 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             if (decision.hasNext() && isValid(bound)) {
                 opens.add(new Open(decision, bound, isMinimization));
             }
-            resolver.decision = resolver.decision.getPrevious();
+            resolver.setLastDecision(resolver.getLastDecision().getPrevious());
             decision.free();
-            decision = resolver.decision;
-            resolver.mModel.getEnvironment().worldPop();
+            decision = resolver.getLastDecision();
+            resolver.getModel().getEnvironment().worldPop();
         }
     }
 

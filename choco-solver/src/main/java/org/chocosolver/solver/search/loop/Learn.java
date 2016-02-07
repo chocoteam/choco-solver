@@ -29,6 +29,8 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.Resolver;
+
 import java.io.Serializable;
 
 /**

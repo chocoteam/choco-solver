@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -106,11 +107,11 @@ public class MoveLNS implements Move {
         // when a new fragment is needed (condition: at least one solution has been found)
         if (solutions > 0) {
             if (freshRestart) {
-                Decision tmp = resolver.decision;
+                Decision tmp = resolver.getLastDecision();
                 assert tmp == RootDecision.ROOT;
-                resolver.decision = neighbor.fixSomeVariables();
-                resolver.decision.setPrevious(tmp);
-                resolver.mModel.getEnvironment().worldPush();
+                resolver.setLastDecision(neighbor.fixSomeVariables());
+                resolver.getLastDecision().setPrevious(tmp);
+                resolver.getModel().getEnvironment().worldPush();
                 freshRestart = false;
                 extend = true;
             } else {
@@ -170,10 +171,10 @@ public class MoveLNS implements Move {
         boolean repair;
         if(solutions > 0
                 // the second condition is only here for intiale calls, when solutions is not already up to date
-                || resolver.mModel.getMeasures().getSolutionCount() > 0) {
+                || resolver.getMeasures().getSolutionCount() > 0) {
             // the detection of a new solution can only be met here
-            if (solutions < resolver.mModel.getMeasures().getSolutionCount()) {
-                assert solutions == resolver.mModel.getMeasures().getSolutionCount() - 1;
+            if (solutions < resolver.getMeasures().getSolutionCount()) {
+                assert solutions == resolver.getMeasures().getSolutionCount() - 1;
                 solutions++;
                 neighbor.recordSolution();
                 doRestart(resolver);

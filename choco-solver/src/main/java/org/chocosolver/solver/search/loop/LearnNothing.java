@@ -29,6 +29,8 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.Resolver;
+
 /**
  * Created by cprudhom on 02/09/15.
  * Project: choco.

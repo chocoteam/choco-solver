@@ -38,7 +38,7 @@ import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.Move;
 import org.chocosolver.solver.search.loop.MoveRestart;
 import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.loop.Resolver;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
@@ -179,9 +179,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         if(restartAfterEachFail){
             rfMove = new MoveRestart(model.getResolver().getMove(),
                     new MonotonicRestartStrategy(1),
-                    new FailCounter(model.getResolver().getSolver(), 1),
+                    new FailCounter(model.getResolver().getModel(), 1),
                     Integer.MAX_VALUE);
-            model.getResolver().setMove(rfMove);
+            model.getResolver().set(rfMove);
         }
         model.plugMonitor(this);
         decisionPool = new PoolManager<>();
@@ -379,7 +379,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                     Resolver sl = model.getResolver();
                     Move m = sl.getMove();
                     if(m == rfMove){
-                        sl.setMove(rfMove.getChildMoves().get(0));
+                        sl.set(rfMove.getChildMoves().get(0));
                     }else{
                         while(m.getChildMoves()!= null && m.getChildMoves()!= rfMove){
                             m = m.getChildMoves().get(0);

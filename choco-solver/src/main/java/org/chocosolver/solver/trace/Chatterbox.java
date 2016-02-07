@@ -174,7 +174,7 @@ public class Chatterbox {
 
 
     /**
-     * Print a posteriori the solutions found (beware, a solution recorder must has been defined).
+     * Prints a posteriori the solutions found (beware, a solution recorder must have been defined).
      * <p>
      * Recommended usage: to be called after the resolution step.
      *
@@ -182,14 +182,10 @@ public class Chatterbox {
      * @param message the message to print per solution
      */
     public static void printSolutions(Model model, IMessage message) {
-        ISolutionRecorder solrec = model.getSolutionRecorder();
+        ISolutionRecorder solrec = model.getResolver().getSolutionRecorder();
         for (Solution sol : solrec.getSolutions()) {
-            try {
-                model.restoreSolution(sol);
-                out.println(message.print());
-            } catch (ContradictionException e) {
-                throw new SolverException("Unable to restore a found solution");
-            }
+            solrec.restoreSolution(sol);
+            out.println(message.print());
         }
     }
 

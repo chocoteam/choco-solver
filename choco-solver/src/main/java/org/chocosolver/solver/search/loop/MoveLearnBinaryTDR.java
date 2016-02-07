@@ -33,6 +33,7 @@ import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -121,12 +122,12 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
         boolean extend;
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < neighbor.length) {
-            Decision tmp = resolver.decision;
-            resolver.decision = neighbor[current++];
-            assert resolver.decision != null;
-            resolver.decision.setWorldIndex(resolver.mModel.getEnvironment().getWorldIndex());
-            resolver.decision.setPrevious(tmp);
-            resolver.mModel.getEnvironment().worldPush();
+            Decision tmp = resolver.getLastDecision();
+            resolver.setLastDecision(neighbor[current++]);
+            assert resolver.getLastDecision() != null;
+            resolver.getLastDecision().setWorldIndex(resolver.getModel().getEnvironment().getWorldIndex());
+            resolver.getLastDecision().setPrevious(tmp);
+            resolver.getModel().getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
             // TODO: incomplete, have to deal with gamma when extending
@@ -275,7 +276,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
     }
 
     private IntMetaDecision extractConlict(Resolver resolver, Explanation lastExplanation) {
-        int offset = resolver.searchWorldIndex;
+        int offset = resolver.getSearchWorldIndex();
         int wi = mModel.getEnvironment().getWorldIndex() - 1;
         int k = wi - offset;
         int size = lastExplanation.getDecisions().cardinality();
@@ -288,7 +289,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
 
         // start iteration over decisions
         IntMetaDecision md = new IntMetaDecision();
-        Decision decision = resolver.decision;
+        Decision decision = resolver.getLastDecision();
         IntDecision id;
         if (DEBUG) System.out.printf("Conflict: ");
         while (decision != RootDecision.ROOT) { // all decisions needs to be explored

@@ -33,12 +33,8 @@ import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.Move;
 import org.chocosolver.solver.search.loop.MoveLNS;
-import org.chocosolver.solver.search.loop.Resolver;
-import org.chocosolver.solver.search.loop.lns.LNSFactory;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
-import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -143,7 +139,7 @@ public class LimitsTest {
         NodeCounter nodeCounter = new NodeCounter(model, 100);
         INeighbor rnd = random(model, model.retrieveIntVars(true), 30, 0);
         Move currentMove = model.getResolver().getMove();
-        model.getResolver().setMove(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
+        model.getResolver().set(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
             public boolean extend(Resolver resolver) {
                 if (nodeCounter.isMet()) {

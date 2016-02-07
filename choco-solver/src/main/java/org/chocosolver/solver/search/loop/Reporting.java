@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;

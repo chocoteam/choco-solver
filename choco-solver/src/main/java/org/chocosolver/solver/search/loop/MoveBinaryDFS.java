@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
@@ -60,23 +61,23 @@ public class MoveBinaryDFS implements Move {
     @Override
     public boolean extend(Resolver resolver) {
         boolean extended = false;
-        Decision tmp = resolver.decision;
-        resolver.decision = strategy.getDecision();
-        if (resolver.decision != null) { // null means there is no more decision
-            resolver.decision.setPrevious(tmp);
-            resolver.mModel.getEnvironment().worldPush();
+        Decision tmp = resolver.getLastDecision();
+        resolver.setLastDecision(strategy.getDecision());
+        if (resolver.getLastDecision() != null) { // null means there is no more decision
+            resolver.getLastDecision().setPrevious(tmp);
+            resolver.getModel().getEnvironment().worldPush();
             extended = true;
         } else {
-            resolver.decision = tmp;
+            resolver.setLastDecision(tmp);
         }
         return extended;
     }
 
     @Override
     public boolean repair(Resolver resolver) {
-        resolver.mMeasures.incBackTrackCount();
-        resolver.mMeasures.incDepth();
-        resolver.mModel.getEnvironment().worldPop();
+        resolver.getMeasures().incBackTrackCount();
+        resolver.getMeasures().incDepth();
+        resolver.getModel().getEnvironment().worldPop();
         return rewind(resolver);
     }
 
@@ -97,10 +98,10 @@ public class MoveBinaryDFS implements Move {
 
     protected boolean rewind(Resolver resolver) {
         boolean repaired = false;
-        while (!repaired && resolver.decision != topDecision) {
+        while (!repaired && resolver.getLastDecision() != topDecision) {
             resolver.jumpTo--;
-            if (resolver.jumpTo <= 0 && resolver.decision.hasNext()) {
-                resolver.mModel.getEnvironment().worldPush();
+            if (resolver.jumpTo <= 0 && resolver.getLastDecision().hasNext()) {
+                resolver.getModel().getEnvironment().worldPush();
                 repaired = true;
             } else {
                 prevDecision(resolver);
@@ -110,14 +111,14 @@ public class MoveBinaryDFS implements Move {
     }
 
     protected void prevDecision(Resolver resolver) {
-        Decision tmp = resolver.decision;
-        resolver.decision = resolver.decision.getPrevious();
+        Decision tmp = resolver.getLastDecision();
+        resolver.setLastDecision(resolver.getLastDecision().getPrevious());
         tmp.free();
         // goes up in the search tree and makes sure search monitors are correctly informed
         resolver.searchMonitors.afterUpBranch();
-        resolver.mMeasures.incBackTrackCount();
-        resolver.mMeasures.decDepth();
-        resolver.mModel.getEnvironment().worldPop();
+        resolver.getMeasures().incBackTrackCount();
+        resolver.getMeasures().decDepth();
+        resolver.getModel().getEnvironment().worldPop();
         resolver.searchMonitors.beforeUpBranch();
     }
 

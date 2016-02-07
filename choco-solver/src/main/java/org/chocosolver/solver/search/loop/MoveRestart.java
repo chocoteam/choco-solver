@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;

@@ -48,11 +48,9 @@ import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
 import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.loop.Resolver;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.solution.*;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
@@ -78,7 +76,7 @@ import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Model implements Serializable, IModeler{
+public class Model implements Serializable, IModel {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
@@ -109,7 +107,7 @@ public class Model implements Serializable, IModeler{
     private final IEnvironment environment;
 
     /** Resolver of the model, controls propagation and search */
-    private Resolver search;
+    private final Resolver resolver;
 
     /** Array of variable to optimize, possibly empty. */
     private Variable[] objectives;
@@ -181,6 +179,9 @@ public class Model implements Serializable, IModeler{
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objectives = new Variable[0];
         this.hooks = new HashMap<>();
+        this.resolver = new Resolver(this,null,null,null);
+        getResolver().dfs(null);
+        getResolver().set(new LastSolutionRecorder(new Solution(), this));
     }
 
     /**
@@ -300,11 +301,7 @@ public class Model implements Serializable, IModeler{
      * @return the unique and internal <code>Resolver</code> object.
      */
     public Resolver getResolver() {
-        if(search == null){
-            SLF.dfs(this, null);
-            search.set(new LastSolutionRecorder(new Solution(), this));
-        }
-        return search;
+        return resolver;
     }
 
     /**
@@ -518,14 +515,6 @@ public class Model implements Serializable, IModeler{
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Override the default search loop to use in <code>this</code>.
-     * @param resolver the search loop to use
-     */
-    public void set(Resolver resolver) {
-        this.search = resolver;
-    }
-
-    /**
      * Defines the variable(s) to optimize according to <i>policy</i>.
      * In case of multiple variables, all should be optimised in the same direction.
      * @param policy optimisation policy (minimisation or maximisation)
@@ -541,20 +530,20 @@ public class Model implements Serializable, IModeler{
             this.policy = policy;
             if (objectives.length == 1) {
                 if ((objectives[0].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
-                    set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
+                    getResolver().set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
                 } else {
-                    set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
+                    getResolver().set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
                 }
             }else{
                 // BEWARE the usual optimization manager is only defined for mono-objective optimization
                 // so we use a satisfaction manager by default (which does nothing)
                 // with a pareto solution recorder that dynamically adds constraints to skip dominated solutions
-                set(ObjectiveManager.SAT());
+                getResolver().set(ObjectiveManager.SAT());
                 IntVar[] _objectives = new IntVar[objectives.length];
                 for (int i = 0; i < objectives.length; i++) {
                     _objectives[i] = (IntVar) objectives[i];
                 }
-                set(new ParetoSolutionsRecorder(policy, _objectives));
+                getResolver().set(new ParetoSolutionsRecorder(policy, _objectives));
             }
         }
     }
@@ -565,7 +554,7 @@ public class Model implements Serializable, IModeler{
     public void clearObjectives() {
         this.objectives = new Variable[0];
         this.policy = ResolutionPolicy.SATISFACTION;
-        getResolver().setObjectiveManager(ObjectiveManager.SAT());
+        getResolver().set(ObjectiveManager.SAT());
     }
 
     /**
@@ -696,7 +685,8 @@ public class Model implements Serializable, IModeler{
     private void _post(boolean permanent, Constraint... cs) {
         boolean dynAdd = false;
         // check if the resolution already started -> if true, dynamic addition
-        if (getEngine() != NoPropagationEngine.SINGLETON && getEngine().isInitialized()) {
+        IPropagationEngine engine = getResolver().getEngine();
+        if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
             dynAdd = true;
         }
         // then store the constraints
@@ -714,7 +704,7 @@ public class Model implements Serializable, IModeler{
         // specific behavior for dynamic addition and/or reified constraints
         for (int i = 0; i < cs.length; i++) {
             if (dynAdd) {
-                getEngine().dynamicAddition(permanent, cs[i].getPropagators());
+                engine.dynamicAddition(permanent, cs[i].getPropagators());
             }
             if (cs[i].isReified()) {
                 try {
@@ -758,14 +748,15 @@ public class Model implements Serializable, IModeler{
         while (idx < cIdx && cstrs[idx] != c) {
             idx++;
         }
+        IPropagationEngine engine = getResolver().getEngine();
         // 2. remove it from the network
         while (idx < cIdx) {
             Constraint cm = cstrs[--cIdx];
             cstrs[idx] = cm;
             cstrs[cIdx] = null;
             // 3. check if the resolution already started -> if true, dynamic deletion
-            if (getEngine() != NoPropagationEngine.SINGLETON && getEngine().isInitialized()) {
-                getEngine().dynamicDeletion(c.getPropagators());
+            if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
+                engine.dynamicDeletion(c.getPropagators());
             }
             // 4. remove the propagators of the constraint from its variables
             for (Propagator prop : c.getPropagators()) {
@@ -907,7 +898,7 @@ public class Model implements Serializable, IModeler{
         getResolver().launch();
         if(restoreBestSolution && !sat){
             try {
-                getResolver().restoreLastSolution();
+                getResolver().getSolutionRecorder().restoreLastSolution();
             } catch (ContradictionException e) {
                 throw new UnsupportedOperationException("restoring the last solution ended in a failure");
             } finally {
@@ -992,21 +983,21 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use {@link Resolver#restoreLastSolution()} instead
+     * @deprecated use {@link Resolver#getSolutionRecorder().restoreLastSolution()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void restoreLastSolution() throws ContradictionException {
-        getResolver().restoreLastSolution();
+        getResolver().getSolutionRecorder().restoreLastSolution();
     }
 
     /**
-     * @deprecated use {@link Resolver#restoreSolution(Solution)} instead
+     * @deprecated use {@link Resolver#getSolutionRecorder().restoreSolution(Solution)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void restoreSolution(Solution solution) throws ContradictionException {
-        getResolver().restoreSolution(solution);
+        getResolver().getSolutionRecorder().restoreSolution(solution);
     }
 
     /**
@@ -1064,12 +1055,12 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use {@link Resolver#unplugAllMonitors()} instead
+     * @deprecated use {@link Resolver#unplugAllSearchMonitors()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void unplugAllMonitors(){
-        getResolver().unplugAllMonitors();
+        getResolver().unplugAllSearchMonitors();
     }
 
     /**
@@ -1091,7 +1082,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use {@link Resolver#addStopCriterion(Criterion)} instead
+     * @deprecated use {@link Resolver#addStopCriterion(Criterion...)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
@@ -1100,7 +1091,7 @@ public class Model implements Serializable, IModeler{
     }
 
     /**
-     * @deprecated use {@link Resolver#removeStopCriterion(Criterion)} instead
+     * @deprecated use {@link Resolver#removeStopCriterion(Criterion...)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
@@ -1195,23 +1186,16 @@ public class Model implements Serializable, IModeler{
      */
     @Deprecated
     public void set(AbstractStrategy... strategies) {
-        if (strategies == null || strategies.length == 0) {
-            throw new UnsupportedOperationException("no search strategy has been specified");
-        }
-        if (strategies.length == 1) {
-            getResolver().set(strategies[0]);
-        } else {
-            getResolver().set(ISF.sequencer(strategies));
-        }
+        getResolver().set(strategies);
     }
 
     /**
-     * @deprecated use {@link Resolver#setObjectiveManager(ObjectiveManager)} instead
+     * @deprecated use {@link Resolver#set(ObjectiveManager)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void set(ObjectiveManager om) {
-        getResolver().setObjectiveManager(om);
+        getResolver().set(om);
     }
 
     /**
@@ -1392,7 +1376,15 @@ public class Model implements Serializable, IModeler{
      */
     @Deprecated
     public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
-        getResolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>(objective, MAXIMIZE, false));
+        getResolver().set(new ObjectiveManager<IntVar, Integer>(objective, MAXIMIZE, false));
         while (solve());
+    }
+
+    /**
+     * @deprecated Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void set(Resolver resolver) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -192,7 +192,7 @@ public class LearnDBT extends LearnCBJ {
             this.decision_path = new ArrayDeque<>();
             this.mModel = model;
             this.mExplainer = mExplainer;
-            this.mModel.plugMonitor(this);
+            model.getResolver().plugMonitor(this);
         }
 
         protected void clear() {

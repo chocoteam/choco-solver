@@ -31,6 +31,7 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 
 /**
@@ -66,12 +67,12 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
 
     @Override
     public boolean repair(Resolver resolver) {
-        resolver.mMeasures.incBackTrackCount();
-        resolver.mMeasures.incDepth();
-        resolver.mModel.getEnvironment().worldPop();
+        resolver.getMeasures().incBackTrackCount();
+        resolver.getMeasures().incDepth();
+        resolver.getModel().getEnvironment().worldPop();
         boolean repaired = rewind(resolver);
         // increase the discrepancy max, if allowed, when the root node is reached
-        if (resolver.decision == topDecision && dis.get() < DIS) {
+        if (resolver.getLastDecision() == topDecision && dis.get() < DIS) {
             dis.add(1);
             resolver.restart();
             repaired = true;
@@ -82,10 +83,10 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
     @Override
     protected boolean rewind(Resolver resolver) {
         boolean repaired = false;
-        while (!repaired && resolver.decision != topDecision) {
+        while (!repaired && resolver.getLastDecision() != topDecision) {
             resolver.jumpTo--;
-            if (dis.get() > 0 && resolver.jumpTo <= 0 && resolver.decision.hasNext()) {
-                resolver.mModel.getEnvironment().worldPush();
+            if (dis.get() > 0 && resolver.jumpTo <= 0 && resolver.getLastDecision().hasNext()) {
+                resolver.getModel().getEnvironment().worldPush();
                 repaired = true;
                 dis.add(-1);
             } else {

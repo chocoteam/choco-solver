@@ -29,6 +29,9 @@
  */
 package org.chocosolver.solver.search.solution;
 
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -41,4 +44,50 @@ public interface ISolutionRecorder extends Serializable{
 	Solution getLastSolution();
 	/** @return a list of all recorded solutions */
 	List<Solution> getSolutions();
+
+	/**
+	 * Restores the last solution found (if any) in this solver.
+	 * That is, after calling this method:
+	 * <ol>
+	 * <li>the search backtracks to the ROOT node in order to restore the initial state of variables, constraints and any other backtrackable structures</li>
+	 * <li>the initial state is then saved (by calling : {@code this.getEnvironment().worldPush();}).</li>
+	 * <li>each variable is then instantiated to its value in the last recorded solution.</li>
+	 * </ol>
+	 *
+	 * The input state can be rollbacked by calling :  {@code this.getEnvironment().worldPop();}.
+	 * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
+	 * @throws ContradictionException when inconsistency is detected while restoring the solution.
+	 */
+	default void restoreLastSolution() throws ContradictionException {
+		restoreSolution(getLastSolution());
+	}
+
+	/**
+	 * Restores a given solution in this solver.
+	 * That is, after calling this method:
+	 * <ol>
+	 * <li>the search backtracks to the ROOT node in order to restore the initial state of variables, constraints and any other backtrackable structures</li>
+	 * <li>the initial state is then saved (by calling : {@code this.getEnvironment().worldPush();}).</li>
+	 * <li>each variable is then instantiated to its value in the solution.</li>
+	 * </ol>
+	 *
+	 * The input state can be rolled-back by calling :  {@code this.getEnvironment().worldPop();}.
+	 * @param solution the solution to restore
+	 * @return <tt>true</tt> if a solution exists and has been successfully restored in this solver, <tt>false</tt> otherwise.
+	 * @throws ContradictionException when inconsistency is detected while restoring the solution.
+	 */
+	default void restoreSolution(Solution solution){
+		if(solution!=null){
+			try{
+				getModel().getResolver().restoreRootNode();
+				getModel().getEnvironment().worldPush();
+				solution.restore(getModel());
+			}catch (ContradictionException e){
+				throw new UnsupportedOperationException("restoring the solution ended in a failure");
+			}
+			getModel().getResolver().getEngine().flush();
+		}
+	}
+
+	Model getModel();
 }

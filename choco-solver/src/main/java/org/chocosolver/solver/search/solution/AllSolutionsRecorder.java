@@ -48,7 +48,7 @@ public class AllSolutionsRecorder implements ISolutionRecorder {
 	public AllSolutionsRecorder(final Model model){
 		this.model = model;
 		this.solutions = new LinkedList<>();
-		model.plugMonitor(createRecMonitor());
+		model.getResolver().plugMonitor(createRecMonitor());
 	}
 
 	protected IMonitorSolution createRecMonitor() {
@@ -71,5 +71,10 @@ public class AllSolutionsRecorder implements ISolutionRecorder {
 	@Override
 	public List<Solution> getSolutions() {
 		return solutions;
+	}
+
+	@Override
+	public Model getModel() {
+		return model;
 	}
 }
