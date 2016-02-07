@@ -112,7 +112,7 @@ public class LearnCBJ extends LearnExplained {
         }
         int upto = compute(mModel.getEnvironment().getWorldIndex());
         assert upto > 0;
-        resolver.jumpTo = upto;
+        resolver.setJumpTo(upto);
         identifyRefutedDecision(upto);
     }
 

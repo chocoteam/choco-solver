@@ -124,7 +124,7 @@ class LearnExplained implements Learn {
             }
             mExplainer.storeDecisionExplanation(dec, explanation);
         }
-        resolver.jumpTo = 1;
+        resolver.setJumpTo(1);
     }
 
     /**

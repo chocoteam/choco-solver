@@ -99,8 +99,8 @@ public class MoveBinaryDFS implements Move {
     protected boolean rewind(Resolver resolver) {
         boolean repaired = false;
         while (!repaired && resolver.getLastDecision() != topDecision) {
-            resolver.jumpTo--;
-            if (resolver.jumpTo <= 0 && resolver.getLastDecision().hasNext()) {
+            resolver.setJumpTo(resolver.getJumpTo()-1);
+            if (resolver.getJumpTo() <= 0 && resolver.getLastDecision().hasNext()) {
                 resolver.getModel().getEnvironment().worldPush();
                 repaired = true;
             } else {
@@ -115,11 +115,11 @@ public class MoveBinaryDFS implements Move {
         resolver.setLastDecision(resolver.getLastDecision().getPrevious());
         tmp.free();
         // goes up in the search tree and makes sure search monitors are correctly informed
-        resolver.searchMonitors.afterUpBranch();
+        resolver.getSearchMonitors().afterUpBranch();
         resolver.getMeasures().incBackTrackCount();
         resolver.getMeasures().decDepth();
         resolver.getModel().getEnvironment().worldPop();
-        resolver.searchMonitors.beforeUpBranch();
+        resolver.getSearchMonitors().beforeUpBranch();
     }
 
     @Override

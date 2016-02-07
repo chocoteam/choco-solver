@@ -39,7 +39,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.criteria.LongCriterion;
 
 /**
- * @deprecated use {@link Resolver} instead
+ * @deprecated use {@link Resolver}, which extends {@link IMoveFactory}, instead
  * Will be removed after version 3.4.0
  */
 @Deprecated
@@ -53,7 +53,8 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static <V extends Variable> void dfs(Model aModel, AbstractStrategy<V> aSearchStrategy) {
-        aModel.getResolver().dfs(aSearchStrategy);
+        Resolver r = aModel.getResolver();
+        r.set(r.dfs(aSearchStrategy));
     }
 
     /**
@@ -62,7 +63,8 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static <V extends Variable> void lds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
-        aModel.getResolver().lds(aSearchStrategy,discrepancy);
+        Resolver r = aModel.getResolver();
+        r.set(r.lds(aSearchStrategy,discrepancy));
     }
 
     /**
@@ -71,7 +73,8 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static <V extends Variable> void dds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
-        aModel.getResolver().dds(aSearchStrategy,discrepancy);
+        Resolver r = aModel.getResolver();
+        r.set(r.dds(aSearchStrategy,discrepancy));
     }
 
     /**
@@ -80,16 +83,18 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static <V extends Variable> void hbfs(Model aModel, AbstractStrategy<V> aSearchStrategy, double a, double b, long N) {
-        aModel.getResolver().hbfs(aSearchStrategy,a,b,N);
+        Resolver r = aModel.getResolver();
+        r.set(r.hbfs(aSearchStrategy,a,b,N));
     }
 
     /**
-     * @deprecated use {@link Resolver#seq(Move...)} instead
+     * @deprecated use {@link Resolver#seqMoves(Move...)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void seq(Model aModel, Move... moves) {
-        aModel.getResolver().seq(moves);
+        Resolver r = aModel.getResolver();
+        r.set(r.seqMoves(moves));
     }
 
     //****************************************************************************************************************//
@@ -102,7 +107,8 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static void restart(Model aModel, LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
-        aModel.getResolver().restart(restartCriterion,restartStrategy,restartsLimit);
+        Resolver r = aModel.getResolver();
+        r.set(r.restart(restartCriterion,restartStrategy,restartsLimit));
     }
 
     /**
@@ -111,7 +117,8 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static void restartOnSolutions(Model aModel) {
-        aModel.getResolver().restartOnSolutions();
+        Resolver r = aModel.getResolver();
+        r.set(r.restartOnSolutions());
     }
 
     /**
@@ -120,7 +127,8 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static void lns(Model aModel, INeighbor neighbor, ICounter restartCounter) {
-        aModel.getResolver().lns(neighbor,restartCounter);
+        Resolver r = aModel.getResolver();
+        r.set(r.lns(neighbor,restartCounter));
     }
 
 
@@ -130,7 +138,8 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static void lns(Model aModel, INeighbor neighbor) {
-        aModel.getResolver().lns(neighbor);
+        Resolver r = aModel.getResolver();
+        r.set(r.lns(neighbor));
     }
 
     /**
@@ -155,7 +164,8 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static void learnCBJ(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        aModel.getResolver().learnCBJ(nogoodsOn,userFeedbackOn);
+        Resolver r = aModel.getResolver();
+        r.set(r.learnCBJ(nogoodsOn,userFeedbackOn));
     }
 
     /**
@@ -164,6 +174,7 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static void learnDBT(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        aModel.getResolver().learnDBT(nogoodsOn,userFeedbackOn);
+        Resolver r = aModel.getResolver();
+        r.set(r.learnDBT(nogoodsOn,userFeedbackOn));
     }
 }

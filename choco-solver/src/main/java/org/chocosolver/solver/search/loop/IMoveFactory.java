@@ -40,7 +40,12 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.criteria.LongCriterion;
 
-public interface ISearchLoopFactory {
+/**
+ * Interface to define how to explore the search space from a macro perspective
+ * (DFS, LDS, LNS, etc.)
+ * @author Charles Prud'Homme, Jean-Guillaume Fages
+ */
+public interface IMoveFactory {
 
     Resolver _me();
 
@@ -52,8 +57,8 @@ public interface ISearchLoopFactory {
      * @param aSearchStrategy the search strategy to apply
      * @param <V>             the type of variables
      */
-    default <V extends Variable> void dfs(AbstractStrategy<V> aSearchStrategy) {
-        _me().set(new PropagateBasic(), new LearnNothing(), new MoveBinaryDFS(aSearchStrategy));
+    default <V extends Variable> Move dfs(AbstractStrategy<V> aSearchStrategy) {
+        return new MoveBinaryDFS(aSearchStrategy);
     }
 
     /**
@@ -68,9 +73,9 @@ public interface ISearchLoopFactory {
      * @param discrepancy     the maximum discrepancy
      * @param <V>             the type of variables
      */
-    default <V extends Variable> void lds(AbstractStrategy<V> aSearchStrategy, int discrepancy) {
+    default <V extends Variable> Move lds(AbstractStrategy<V> aSearchStrategy, int discrepancy) {
         IEnvironment env = _me().getModel().getEnvironment();
-        _me().set(new PropagateBasic(), new LearnNothing(), new MoveBinaryLDS(aSearchStrategy, discrepancy, env));
+        return new MoveBinaryLDS(aSearchStrategy, discrepancy, env);
     }
 
     /**
@@ -78,27 +83,21 @@ public interface ISearchLoopFactory {
      * <p>
      * [1]:T. Walsh, Depth-bounded Discrepancy Search, IJCAI-97.
      *
-     * The current search loop (if any) will be replaced by this one after that call.
-     * The current search strategy (if any) will also be replaced by the input one.
-     *
      * @param aSearchStrategy the search strategy to apply
      * @param discrepancy     the maximum discrepancy
      * @param <V>             the type of variables
      */
-    default <V extends Variable> void dds(AbstractStrategy<V> aSearchStrategy, int discrepancy) {
+    default <V extends Variable> Move dds(AbstractStrategy<V> aSearchStrategy, int discrepancy) {
         IEnvironment env = _me().getModel().getEnvironment();
-        _me().set(new PropagateBasic(), new LearnNothing(), new MoveBinaryDDS(aSearchStrategy, discrepancy, env));
+        return new MoveBinaryDDS(aSearchStrategy, discrepancy, env);
     }
 
     /**
-     * Hybrid Best-First Search[1] algorithms with binary decisions and no learning.
+     * Creates a move object based on:
+     * Hybrid Best-First Search[1] algorithms with binary decisions.
      * <p>
      * [1]:D. Allouche, S. de Givry, G. Katsirelos, T. Schiex, M. Zytnicki,
      * Anytime Hybrid Best-First Search with Tree Decomposition for Weighted CSP, CP-2015.
-     *
-     *
-     * The current search loop (if any) will be replaced by this one after that call.
-     * The current search strategy (if any) will also be replaced by the input one.
      *
      * @param aSearchStrategy the search strategy to apply
      * @param a               lower bound to limit the rate of redundantly propagated decisions
@@ -106,27 +105,21 @@ public interface ISearchLoopFactory {
      * @param N               backtrack limit for each DFS try, should be large enough to limit redundancy
      * @param <V>             the type of variables
      */
-    default <V extends Variable> void hbfs(AbstractStrategy<V> aSearchStrategy, double a, double b, long N) {
-        _me().set(new PropagateBasic(), new LearnNothing(), new MoveBinaryHBFS(_me().getModel(), aSearchStrategy, a, b, N));
+    default <V extends Variable> Move hbfs(AbstractStrategy<V> aSearchStrategy, double a, double b, long N) {
+        return new MoveBinaryHBFS(_me().getModel(), aSearchStrategy, a, b, N);
     }
 
     /**
      * Combines many Moves. They are considered sequentially.
      * This is a work-in-progress and it may lead to unexpected behavior when repair() is applied.
      * When the selected Move cannot be extended (resp. repaired), the following one (wrt to the input order) is selected.
-     * @param <V> type of variables
      */
-    default <V extends Variable> void seq(Move... moves) {
-        _me().set(new MoveSeq(_me().getModel(), moves));
+    default Move seqMoves(Move... moves) {
+        return new MoveSeq(_me().getModel(), moves);
     }
 
-    //****************************************************************************************************************//
-    //***********************************  MOVE ***********************************************************************//
-    //****************************************************************************************************************//
-
     /**
-     * Fit the <code>aSearchLoop</code> with a restart strategy.
-     * It encapsulates the current move within a restart move.
+     * Creates a Move object that encapsulates the current move within a restart move.
      * Every time the <code>restartCriterion</code> is met, a restart is done, the new restart limit is updated
      * thanks to <code>restartStrategy</code>.
      * There will be at most <code>restartsLimit</code> restarts.
@@ -135,28 +128,23 @@ public interface ISearchLoopFactory {
      * @param restartStrategy  the way restart limit (evaluated in <code>restartCriterion</code>) is updated, that is, computes the next limit
      * @param restartsLimit    number of allowed restarts
      */
-    default void restart(LongCriterion restartCriterion, IRestartStrategy restartStrategy,
-                               int restartsLimit) {
-        Move currentMove = _me().getMove();
-        _me().set(new MoveRestart(currentMove, restartStrategy, restartCriterion, restartsLimit));
+    default Move restart(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
+        return new MoveRestart(_me().getMove(), restartStrategy, restartCriterion, restartsLimit);
     }
 
     /**
-     * Fit the <code>aSearchLoop</code> with a restart strategy triggered on solutions.
-     * It encapsulates the current move within a restart move.
+     * Creates a Move object that encapsulates the current move within a restart move.
      * Every time a solution is found, a restart is done.
      */
-    default void restartOnSolutions() {
-        Move currentMove = _me().getMove();
-       _me().set(
-                new MoveRestart(currentMove,
-                        new MonotonicRestartStrategy(1),
-                        new SolutionCounter(_me().getModel(), 1),
-                        Integer.MAX_VALUE));
+    default Move restartOnSolutions() {
+        return new MoveRestart(_me().getMove(),
+                new MonotonicRestartStrategy(1),
+                new SolutionCounter(_me().getModel(), 1),
+                Integer.MAX_VALUE);
     }
 
     /**
-     * Fit the <code>aSearchLoop</code> with a Large Neighborhood Search.
+     * Creates a Move object based on Large Neighborhood Search.
      * It encapsulates the current move within a LNS move.
      * Anytime a solution is encountered, it is recorded and serves as a basis for the <code>neighbor</code>.
      * The <code>neighbor</code> creates a <i>fragment</i>: selects variables to freeze/unfreeze wrt the last solution found.
@@ -167,14 +155,13 @@ public interface ISearchLoopFactory {
      * @param neighbor         the neighbor for the LNS
      * @param restartCounter the (fast) restart counter. Initial limit gives the frequency.
      */
-    default void lns(INeighbor neighbor, ICounter restartCounter) {
-        Move currentMove = _me().getMove();
-        _me().set(new MoveLNS(currentMove, neighbor, restartCounter));
+    default Move lns(INeighbor neighbor, ICounter restartCounter) {
+        return new MoveLNS(_me().getMove(), neighbor, restartCounter);
     }
 
 
     /**
-     * Fit the <code>aSearchLoop</code> with a Large Neighborhood Search.
+     * Creates a Move object based on Large Neighborhood Search.
      * It encapsulates the current move within a LNS move.
      * Anytime a solution is encountered, it is recorded and serves as a basis for the <code>neighbor</code>.
      * The <code>neighbor</code> creates a <i>fragment</i>: selects variables to freeze/unfreeze wrt the last solution found.
@@ -183,40 +170,7 @@ public interface ISearchLoopFactory {
      * @see #lns(INeighbor, ICounter)
      * @param neighbor         the neighbor for the LNS
      */
-    default void lns(INeighbor neighbor) {
-        Move currentMove = _me().getMove();
-        _me().set(new MoveLNS(currentMove, neighbor, ICounter.Impl.None));
-    }
-
-    //****************************************************************************************************************//
-    //***********************************  LEARN *********************************************************************//
-    //****************************************************************************************************************//
-
-    /**
-     * Conflict-based Backjumping (CBJ) explanation strategy.
-     * It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
-     * @param nogoodsOn set to true to extract nogoods from failures
-     * @param userFeedbackOn set to true to record the propagation in conflict
-     *                       (only relevant when one wants to interpret the explanation of a failure).
-     * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
-     */
-    default void learnCBJ(boolean nogoodsOn, boolean userFeedbackOn) {
-        if (!(_me().getLearn() instanceof LearnCBJ)) {
-            _me().set(new LearnCBJ(_me().getModel(),nogoodsOn, userFeedbackOn));
-        }
-    }
-
-    /**
-     * Dynamic ExplanConflict-based Backjumping (CBJ) explanation strategy.
-     * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
-     * @param nogoodsOn set to true to extract nogoods from failures
-     * @param userFeedbackOn set to true to record the propagation in conflict
-     *                       (only relevant when one wants to interpret the explanation of a failure).
-     * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
-     */
-    default void learnDBT(boolean nogoodsOn, boolean userFeedbackOn) {
-        if (!(_me().getLearn() instanceof LearnDBT)) {
-            _me().set(new LearnDBT(_me().getModel(), nogoodsOn, userFeedbackOn));
-        }
+    default Move lns(INeighbor neighbor) {
+        return new MoveLNS(_me().getMove(), neighbor, ICounter.Impl.None);
     }
 }

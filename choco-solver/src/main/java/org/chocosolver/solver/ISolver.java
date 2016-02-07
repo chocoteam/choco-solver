@@ -29,10 +29,9 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.constraints.IConstraintFactory;
-import org.chocosolver.solver.search.loop.ISearchLoopFactory;
-import org.chocosolver.solver.variables.IVariableFactory;
-import org.chocosolver.solver.variables.IViewFactory;
+import org.chocosolver.solver.search.loop.ILearnFactory;
+import org.chocosolver.solver.search.loop.IMoveFactory;
+import org.chocosolver.solver.search.loop.IPropagateFactory;
 
 /**
  * Interface to ease modeling
@@ -40,6 +39,6 @@ import org.chocosolver.solver.variables.IViewFactory;
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface ISolver extends ISearchLoopFactory {
+public interface ISolver extends IPropagateFactory, ILearnFactory, IMoveFactory {
 
 }

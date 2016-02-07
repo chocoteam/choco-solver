@@ -39,6 +39,7 @@ import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.search.limits.ICounter;
+import org.chocosolver.solver.search.loop.IPropagateFactory;
 import org.chocosolver.solver.search.loop.Learn;
 import org.chocosolver.solver.search.loop.Move;
 import org.chocosolver.solver.search.loop.Propagate;
@@ -96,50 +97,6 @@ import static org.chocosolver.util.ESat.*;
  * @author Charles Prud'homme
  */
 public final class Resolver implements Serializable, ISolver {
-
-    /**
-     * Define the possible actions of SearchLoop
-     */
-    protected enum Action {
-        /**
-         * initialization step
-         */
-        initialize,
-        /**
-         * propagation step
-         */
-        propagate,
-        /**
-         * extension step
-         */
-        extend,
-        /**
-         * validation step
-         */
-        validate,
-        /**
-         * reparation step
-         */
-        repair,
-        /**
-         * ending step
-         */
-        stop,
-    }
-
-    /**
-     * Counter that indicates how many world should be rolled back when backtracking
-     */
-    public int jumpTo;
-
-    /**
-     * List of search monitors attached to this search loop
-     */
-    public SearchMonitorList searchMonitors;
-
-
-
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////    PRIVATE FIELDS     //////////////////////////////////////////////////////
@@ -205,6 +162,9 @@ public final class Resolver implements Serializable, ISolver {
     /** An explanation engine */
     private ExplanationEngine explainer;
 
+    /** List of search monitors attached to this search loop */
+    private SearchMonitorList searchMonitors;
+
     /** A list of filtering monitors to be informed on any variable events */
     private FilteringMonitorList eoList;
 
@@ -213,6 +173,17 @@ public final class Resolver implements Serializable, ISolver {
 
     /** A solution recorder */
     private ISolutionRecorder solutionRecorder;
+
+    /**
+     * Problem feasbility:
+     * - UNDEFINED if unknown,
+     * - TRUE if satisfiable,
+     * - FALSE if unsatisfiable
+     */
+    private ESat feasible = ESat.UNDEFINED;
+
+    /** Counter that indicates how many world should be rolled back when backtracking */
+    private int jumpTo;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
@@ -225,12 +196,35 @@ public final class Resolver implements Serializable, ISolver {
      */
     public Resolver(Model aModel) {
         mModel = aModel;
-        defaultSettings();
+        eoList = new FilteringMonitorList();
+        engine = NoPropagationEngine.SINGLETON;
+        objectivemanager = SAT();
+        decision = RootDecision.ROOT;
+        action = initialize;
+        mMeasures = new MeasuresRecorder(mModel);
+        criteria = new ArrayList<>();
+        crit_met = false;
+        kill = true;
+        entire = false;
+        searchMonitors = new SearchMonitorList();
+        set(propagateBasic());
+        set(noLearning());
+        set(dfs(null));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////     SEARCH LOOP       //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /** Define the possible actions of SearchLoop */
+    protected enum Action {
+        initialize, // initialization step
+        propagate,  // propagation step
+        extend,     // extension step
+        validate,   // validation step
+        repair,     //reparation step
+        stop,       // ending step
+    }
 
     /**
      * Executes the search loop
@@ -287,8 +281,8 @@ public final class Resolver implements Serializable, ISolver {
                     }
                     break;
                 case validate:
-                    assert (TRUE.equals(mModel.isSatisfied())) : fullReport(mModel);
-                    mModel.setFeasible(TRUE);
+                    assert (TRUE.equals(isSatisfied())) : fullReport(mModel);
+                    feasible = TRUE;
                     mMeasures.incSolutionCount();
                     mModel.getObjectiveManager().update();
                     searchMonitors.onSolution();
@@ -314,7 +308,7 @@ public final class Resolver implements Serializable, ISolver {
                         mMeasures.setObjectiveOptimal(false);
                         sat = UNDEFINED;
                     }
-                    mModel.setFeasible(sat);
+                    feasible = sat;
                     if (stopAtFirstSolution()) { // for the next call, if needed
                         jumpTo = 1;
                         action = repair;
@@ -332,59 +326,6 @@ public final class Resolver implements Serializable, ISolver {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      MAIN METHODS     //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Set variables to default their values
-     */
-    private void defaultSettings() {
-        eoList = new FilteringMonitorList();
-        searchMonitors = new SearchMonitorList();
-        engine = NoPropagationEngine.SINGLETON;
-        objectivemanager = SAT();
-        decision = RootDecision.ROOT;
-        action = initialize;
-        mMeasures = new MeasuresRecorder(mModel);
-        criteria = new ArrayList<>();
-        crit_met = false;
-        kill = true;
-        entire = false;
-        unplugAllSearchMonitors();
-    }
-
-    /**
-     * This method enables to reset the search loop, for instance, to solve a problem twice.
-     * <ul>
-     * <li>It backtracks up to the root node of the search tree,</li>
-     * <li>it sets the objective manager to STATISFACTION,</li>
-     * <li>it resets the measures,</li>
-     * <li>and sets the propagation engine to NoPropagationEngine,</li>
-     * <li>remove all search monitors,</li>
-     * <li>remove all stop criteria.</li>
-     * </ul>
-     */
-    public void reset() {
-        // if a resolution has already been done
-        if (rootWorldIndex > -1) {
-            mModel.getEnvironment().worldPopUntil(rootWorldIndex);
-            Decision tmp;
-            while (decision != ROOT) {
-                tmp = decision;
-                decision = tmp.getPrevious();
-                tmp.free();
-            }
-            action = initialize;
-            rootWorldIndex = -1;
-            searchWorldIndex = -1;
-            mMeasures.reset();
-            objectivemanager = SAT();
-            set(SINGLETON);
-            crit_met = false;
-            kill = true;
-            entire = false;
-            unplugAllSearchMonitors();
-            removeAllStopCriteria();
-        }
-    }
 
     /**
      * Preparation of the search:
@@ -439,7 +380,7 @@ public final class Resolver implements Serializable, ISolver {
         }
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
             mModel.getEnvironment().worldPop();
-            setFeasible(FALSE);
+            feasible = FALSE;
             engine.flush();
             getMeasures().incFailCount();
             entire = true;
@@ -453,6 +394,41 @@ public final class Resolver implements Serializable, ISolver {
             if (c instanceof ICounter) {
                 ((ICounter) c).init();
             }
+        }
+    }
+
+    /**
+     * This method enables to reset the search loop, for instance, to solve a problem twice.
+     * <ul>
+     * <li>It backtracks up to the root node of the search tree,</li>
+     * <li>it sets the objective manager to STATISFACTION,</li>
+     * <li>it resets the measures,</li>
+     * <li>and sets the propagation engine to NoPropagationEngine,</li>
+     * <li>remove all search monitors,</li>
+     * <li>remove all stop criteria.</li>
+     * </ul>
+     */
+    public void reset() {
+        // if a resolution has already been done
+        if (rootWorldIndex > -1) {
+            mModel.getEnvironment().worldPopUntil(rootWorldIndex);
+            Decision tmp;
+            while (decision != ROOT) {
+                tmp = decision;
+                decision = tmp.getPrevious();
+                tmp.free();
+            }
+            action = initialize;
+            rootWorldIndex = -1;
+            searchWorldIndex = -1;
+            mMeasures.reset();
+            objectivemanager = SAT();
+            set(SINGLETON);
+            crit_met = false;
+            kill = true;
+            entire = false;
+            unplugAllSearchMonitors();
+            removeAllStopCriteria();
         }
     }
 
@@ -672,21 +648,65 @@ public final class Resolver implements Serializable, ISolver {
         return solutionRecorder;
     }
 
+    /**
+     * Returns information on the feasibility of the current problem defined by the solver.
+     * <p>
+     * Possible back values are:
+     * <br/>- {@link ESat#TRUE}: a solution has been found,
+     * <br/>- {@link ESat#FALSE}: the CSP has been proven to have no solution,
+     * <br/>- {@link ESat#UNDEFINED}: no solution has been found so far (within given limits)
+     * without proving the unfeasibility, though.
+     *
+     * @return an {@link ESat}.
+     */
+    public ESat isFeasible() {
+        return feasible;
+    }
+
+    /**
+     * Return the current state of the CSP.
+     * <p>
+     * Given the current domains, it can return a value among:
+     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
+     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
+     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
+     * <p>
+     * Presumably, not all variables are instantiated.
+     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
+     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
+     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
+     */
+    public ESat isSatisfied() {
+        if (feasible != ESat.FALSE) {
+            int OK = 0;
+            for (Constraint c:mModel.getCstrs()) {
+                ESat satC = c.isSatisfied();
+                if (ESat.FALSE == satC) {
+                    System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
+                    return ESat.FALSE;
+                } else if (ESat.TRUE == satC) {
+                    OK++;
+                }
+            }
+            if (OK == mModel.getCstrs().length) {
+                return ESat.TRUE;
+            } else {
+                return ESat.UNDEFINED;
+            }
+        }
+        return ESat.FALSE;
+    }
+
+	/**
+     * @return how many worlds should be rolled back when backtracking (usually 1)
+     */
+    public int getJumpTo() {
+        return jumpTo;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////        SETTERS        //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Replaces the current propagate, learn and move with <code>p</code>, <code>l</code> and <code>m</code>
-     * @param p the new propagate to apply
-     * @param l the new learn to apply
-     * @param m the new move to apply
-     */
-    public void set(Propagate p, Learn l, Move m){
-        set(p);
-        set(l);
-        set(m);
-    }
 
     /**
      * Replaces the current propagate with <code>p</code>
@@ -724,22 +744,6 @@ public final class Resolver implements Serializable, ISolver {
     }
 
     /**
-     * Completes (or not) the declared search strategy with one over all variables
-     * @param isComplete set to true to complete the current search strategy
-     */
-    public void makeCompleteStrategy(boolean isComplete) {
-        this.completeSearch = isComplete;
-    }
-
-    /**
-     * Replaces the downmost taken decision by <code>ldec</code>.
-     * @param ldec the new downmost decision
-     */
-    public void setLastDecision(Decision ldec) {
-        this.decision = ldec;
-    }
-
-    /**
      * Override the default search strategies to use in <code>this</code>.
      * In case many strategies are given, they will be called in sequence:
      * The first strategy in parameter is first called to compute a decision, if possible.
@@ -772,20 +776,45 @@ public final class Resolver implements Serializable, ISolver {
     }
 
     /**
-     * Indicates whether or not to stop search at the first solution found
-     * @param stopAtFirstSolution whether or not to stop search at the first solution found
-     */
-    public void setStopAtFirstSolution(boolean stopAtFirstSolution) {
-        this.stopAtFirstSolution = stopAtFirstSolution;
-    }
-
-    /**
      * Attaches a propagation engine <code>this</code>.
      * It overrides the previously defined one, if any.
      * @param propagationEngine a propagation strategy
      */
     public void set(IPropagationEngine propagationEngine) {
         this.engine = propagationEngine;
+    }
+
+    /**
+     * Overrides the solution recorder.
+     * Beware : multiple recorders which restore a solution might create a conflict.
+     * @param sr the solution recorder to use
+     */
+    public void set(ISolutionRecorder sr) {
+        this.solutionRecorder = sr;
+    }
+
+    /**
+     * Completes (or not) the declared search strategy with one over all variables
+     * @param isComplete set to true to complete the current search strategy
+     */
+    public void makeCompleteStrategy(boolean isComplete) {
+        this.completeSearch = isComplete;
+    }
+
+    /**
+     * Replaces the downmost taken decision by <code>ldec</code>.
+     * @param ldec the new downmost decision
+     */
+    public void setLastDecision(Decision ldec) {
+        this.decision = ldec;
+    }
+
+    /**
+     * Indicates whether or not to stop search at the first solution found
+     * @param stopAtFirstSolution whether or not to stop search at the first solution found
+     */
+    public void setStopAtFirstSolution(boolean stopAtFirstSolution) {
+        this.stopAtFirstSolution = stopAtFirstSolution;
     }
 
     /**
@@ -836,6 +865,13 @@ public final class Resolver implements Serializable, ISolver {
         this.criteria.clear();
     }
 
+	/**
+     * @return the list of search monitors plugged in this resolver
+     */
+    public SearchMonitorList getSearchMonitors() {
+        return searchMonitors;
+    }
+
     /**
      * Put a search monitor to react on search events (solutions, decisions, fails, ...).
      * Any search monitor is actually plugged just before the search starts.
@@ -875,13 +911,12 @@ public final class Resolver implements Serializable, ISolver {
         searchMonitors.reset();
     }
 
-    /**
-     * Overrides the solution recorder.
-     * Beware : multiple recorders which restore a solution might create a conflict.
-     * @param sr the solution recorder to use
+	/**
+     * Sets how many worlds to rollback when backtracking
+     * @param jto how many worlds to rollback when backtracking
      */
-    public void set(ISolutionRecorder sr) {
-        this.solutionRecorder = sr;
+    public void setJumpTo(int jto) {
+        this.jumpTo = jto;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -893,77 +928,6 @@ public final class Resolver implements Serializable, ISolver {
         return this;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////       TO TREAT        //////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Problem feasbility:
-     * - UNDEFINED if unknown,
-     * - TRUE if satisfiable,
-     * - FALSE if unsatisfiable
-     */
-    ESat feasible = ESat.UNDEFINED;
-
-    /**
-     * Returns information on the feasibility of the current problem defined by the solver.
-     * <p>
-     * Possible back values are:
-     * <br/>- {@link ESat#TRUE}: a solution has been found,
-     * <br/>- {@link ESat#FALSE}: the CSP has been proven to have no solution,
-     * <br/>- {@link ESat#UNDEFINED}: no solution has been found so far (within given limits)
-     * without proving the unfeasibility, though.
-     *
-     * @return an {@link ESat}.
-     */
-    public ESat isFeasible() {
-        return feasible;
-    }
-
-    /**
-     * Changes the current feasibility state of the <code>Model</code> object.
-     * <p>
-     * <b>Commonly called by the search loop, should not used without any knowledge of side effects.</b>
-     *
-     * @param feasible new state
-     */
-    public void setFeasible(ESat feasible) {
-        this.feasible = feasible;
-    }
-
-    /**
-     * Return the current state of the CSP.
-     * <p>
-     * Given the current domains, it can return a value among:
-     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
-     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
-     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
-     * <p>
-     * Presumably, not all variables are instantiated.
-     * @return <tt>ESat.TRUE</tt> if all constraints of the problem are satisfied,
-     * <tt>ESat.FLASE</tt> if at least one constraint is not satisfied,
-     * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
-     */
-    public ESat isSatisfied() {
-        if (isFeasible() != ESat.FALSE) {
-            int OK = 0;
-            for (Constraint c:mModel.getCstrs()) {
-                ESat satC = c.isSatisfied();
-                if (ESat.FALSE == satC) {
-                    System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
-                    return ESat.FALSE;
-                } else if (ESat.TRUE == satC) {
-                    OK++;
-                }
-            }
-            if (OK == mModel.getCstrs().length) {
-                return ESat.TRUE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        }
-        return ESat.FALSE;
-    }
 
 
 
@@ -984,14 +948,15 @@ public final class Resolver implements Serializable, ISolver {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @deprecated use {@link Resolver#set(Propagate, Learn, Move)} instead
+     * @deprecated use {@link Resolver#set(Propagate), Resolver#set(Learn), Resolver#set(Move)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public Resolver(Model aModel, Propagate p, Learn l, Move m) {
         this(aModel);
-        defaultSettings();
-        set(p,l,m);
+        set(p);
+        set(l);
+        set(m);
     }
 
     /**

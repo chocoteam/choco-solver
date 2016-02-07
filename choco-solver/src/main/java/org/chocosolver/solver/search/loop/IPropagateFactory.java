@@ -29,14 +29,17 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.Resolver;
-
 /**
- * @deprecated use {@link Resolver}, which extends {@link IMoveFactory}, instead
- * Will be removed after version 3.4.0
+ * Interface to define how to handle constraint propagation
+ * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-@Deprecated
-public class SLF extends SearchLoopFactory {
-    SLF() {
+public interface IPropagateFactory {
+
+	/**
+     * Creates a basic Propagate object to handle constraint propagation
+     * @return a basic Propagate object to handle constraint propagation
+     */
+    default Propagate propagateBasic(){
+        return new PropagateBasic();
     }
 }

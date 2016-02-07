@@ -84,8 +84,8 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
     protected boolean rewind(Resolver resolver) {
         boolean repaired = false;
         while (!repaired && resolver.getLastDecision() != topDecision) {
-            resolver.jumpTo--;
-            if (dis.get() > 0 && resolver.jumpTo <= 0 && resolver.getLastDecision().hasNext()) {
+            resolver.setJumpTo(resolver.getJumpTo()-1);
+            if (dis.get() > 0 && resolver.getJumpTo() <= 0 && resolver.getLastDecision().hasNext()) {
                 resolver.getModel().getEnvironment().worldPush();
                 repaired = true;
                 dis.add(-1);
