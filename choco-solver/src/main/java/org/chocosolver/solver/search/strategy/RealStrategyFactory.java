@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.solver.search.strategy.selectors.IVarSelectorFactory;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMax;
@@ -38,64 +39,65 @@ import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.RealVar;
 
 /**
- * Strategies over real variables
- * Just there to simplify strategies creation.
- * <br/>
+ * @deprecated : search strategies for reals should be done through the {@link IRealStrategyFactory}
  *
- * @author Charles Prud'homme
- * @since 05/2015
+ * This class will be removed in versions > 3.4.0
  */
+@Deprecated
 public class RealStrategyFactory {
 
-    RealStrategyFactory() {
-    }
+    RealStrategyFactory() {}
 
     /**
-     * Generic strategy to branch on real variables
-     *
-     * @param varS  variable selection strategy
-     * @param valS  integer  selection strategy
-     * @param rvars RealVar array to branch on
-     * @return a strategy to instantiate reals
+     * @deprecated : use {@link IRealStrategyFactory#customRealSearch(VariableSelector, RealValueSelector, RealVar...)} instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static RealStrategy custom(VariableSelector<RealVar> varS, RealValueSelector valS, RealVar... rvars) {
         return new RealStrategy(rvars, varS, valS);
     }
 
     /**
-     * strategy to branch on reals by choosing sequentially the next variable domain to split in two, wrt the middle value
-     *
-     * @param reals variables to branch on
-     * @return a strategy to instantiate reals
+     * @deprecated : use {@link IRealStrategyFactory#realSearch(RealVar...)} instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static RealStrategy cyclic_middle(RealVar... reals) {
         return custom(cyclic(), mid_value_selector(), reals);
     }
 
     /**
-     * Selects sequentially the next non-instantiated real variable to branch on.
+     * @deprecated : use {@link IVarSelectorFactory#nextVarSelector()} instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static VariableSelector<RealVar> cyclic() {
         return new Cyclic();
     }
 
     /**
-     * Selects the variable lower bound
+     * @deprecated : use {@link IRealStrategyFactory#midRValSelector()} instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static RealValueSelector mid_value_selector() {
         return new RealDomainMiddle();
     }
 
     /**
-     * Selects a value at the middle between the variable lower and upper bounds
+     * @deprecated : use {@link IRealStrategyFactory#minRValSelector()} instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static RealValueSelector min_value_selector() {
         return new RealDomainMiddle();
     }
 
     /**
-     * Selects the variable upper  bound
+     * @deprecated : use {@link IRealStrategyFactory#maxRValSelector()} instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static RealValueSelector max_value_selector() {
         return new RealDomainMax();
     }

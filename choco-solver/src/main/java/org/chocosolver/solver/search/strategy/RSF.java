@@ -30,8 +30,9 @@
 package org.chocosolver.solver.search.strategy;
 
 /**
- * @author Charles Prud'homme
+ * @deprecated : search strategies for reals should be done through the {@link IRealStrategyFactory}
+ *
+ * This class will be removed in versions > 3.4.0
  */
-public class RSF extends RealStrategyFactory{
-	// SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
-}
+@Deprecated
+public class RSF extends RealStrategyFactory{}

@@ -27,38 +27,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.selectors.variables;
+package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.solver.search.strategy.selectors.IValSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.IVarSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.Variable;
 
 /**
- * A cyclic variable selector :
- * Iterates over variables according to lexicographic ordering in a cyclic manner (loop back to the first variable)
- *
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 18/07/12
+ * Strategies over real variables
+ * Just there to simplify strategies creation.
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  */
-public class Cyclic <V extends Variable> implements VariableSelector<V> {
+public interface IRealStrategyFactory extends IVarSelectorFactory, IValSelectorFactory{
 
-    protected int current;
-
-    public Cyclic() {
-        this.current = -1;
+    /**
+     * Generic strategy to branch on real variables, based on domain splitting
+     * @param varS  variable selection strategy
+     * @param valS  strategy to select where to split domains
+     * @param rvars RealVar array to branch on
+     * @return a strategy to instantiate reals
+     */
+    default RealStrategy customRealSearch(VariableSelector<RealVar> varS, RealValueSelector valS, RealVar... rvars) {
+        return new RealStrategy(rvars, varS, valS);
     }
 
-    @Override
-    public V getVariable(V[] vars) {
-        int nbvars = vars.length;
-        int start = current == -1 ? nbvars - 1 : current;
-        int n = (current + 1) % nbvars;
-        while (n != start && vars[n].isInstantiated()) {
-            n = (n + 1) % nbvars;
-        }
-        current = n;
-        return vars[current].isInstantiated() ? null : vars[current];
+    /**
+     * strategy to branch on real variables by choosing sequentially the next variable domain
+     * to split in two, wrt the middle value
+     * @param reals variables to branch on
+     * @return a strategy to instantiate real variables
+     */
+    default RealStrategy realSearch(RealVar... reals) {
+        return customRealSearch(nextVarSelector(), midRValSelector(), reals);
     }
 }

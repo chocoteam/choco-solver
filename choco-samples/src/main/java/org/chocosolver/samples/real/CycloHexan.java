@@ -31,6 +31,7 @@ package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
@@ -80,7 +81,8 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
+        Resolver r = model.getResolver();
+        r.set(r.realSearch(vars));
     }
 
     @Override

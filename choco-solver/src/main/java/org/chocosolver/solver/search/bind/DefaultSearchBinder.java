@@ -31,10 +31,9 @@ package org.chocosolver.solver.search.bind;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.RSF;
-import org.chocosolver.solver.search.strategy.RealStrategyFactory;
 import org.chocosolver.solver.search.strategy.SSF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -67,6 +66,7 @@ public class DefaultSearchBinder implements ISearchBinder {
     }
 
     public AbstractStrategy[] getDefault(Model model) {
+        Resolver r = model.getResolver();
         AbstractStrategy[] strats = new AbstractStrategy[4];
         int nb = 0;
 
@@ -142,7 +142,7 @@ public class DefaultSearchBinder implements ISearchBinder {
         // c. cyclic + middle
         RealVar[] rvars = lrvars.toArray(new RealVar[lrvars.size()]);
         if (rvars.length > 0) {
-            strats[nb++] = RealStrategyFactory.cyclic_middle(rvars);
+            strats[nb++] = r.realSearch(rvars);
         }
 
         // d. lexico LB/UB for the objective variable
@@ -160,9 +160,9 @@ public class DefaultSearchBinder implements ISearchBinder {
                     break;
                 case Variable.REAL:
                     if (max) {
-                        strats[nb++] = RSF.custom(RealStrategyFactory.cyclic(), RSF.max_value_selector(), (RealVar) objective);
+                        strats[nb++] = r.customRealSearch(r.nextVarSelector(), r.maxRValSelector(), (RealVar) objective);
                     } else {
-                        strats[nb++] = RSF.custom(RealStrategyFactory.cyclic(), RSF.min_value_selector(), (RealVar) objective);
+                        strats[nb++] = r.customRealSearch(r.nextVarSelector(), r.minRValSelector(), (RealVar) objective);
                     }
                     break;
                 default:
