@@ -30,7 +30,8 @@
 package org.chocosolver.solver.search.strategy;
 
 /**
- * @deprecated : search strategies for reals should be done through the {@link IRealStrategyFactory}
+ * @deprecated : search strategies for reals should be done through {@link org.chocosolver.solver.Resolver}
+  * which implements {@link IRealStrategyFactory}
  *
  * This class will be removed in versions > 3.4.0
  */

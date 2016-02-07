@@ -37,9 +37,7 @@
 package org.chocosolver.samples.set;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.SetStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
@@ -104,8 +102,7 @@ public class Partition extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		// set a search strategy
-		model.set(SetStrategyFactory.force_first(x, y, z, universe));
+		// use default set search strategy
 	}
 
 	@Override

@@ -30,7 +30,8 @@
 package org.chocosolver.solver.search;
 
 import org.chocosolver.solver.search.strategy.IRealStrategyFactory;
+import org.chocosolver.solver.search.strategy.ISetStrategyFactory;
 
-public interface ISearchStrategyFactory extends IRealStrategyFactory{
+public interface ISearchStrategyFactory extends IRealStrategyFactory, ISetStrategyFactory{
 
 }

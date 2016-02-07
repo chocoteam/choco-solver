@@ -39,7 +39,6 @@ import org.chocosolver.solver.variables.Variable;
 import static java.lang.System.arraycopy;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
-import static org.chocosolver.solver.search.strategy.SetStrategyFactory.force_first;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -66,7 +65,6 @@ public interface SetTestModel {
             SetVar[] sets = new SetVar[n - 1];
             arraycopy(vars, 0, sets, 0, n - 1);
             s.union(sets, vars[n - 1]).post();
-            s.set(force_first(vars));
             return s;
         }
     };
@@ -87,7 +85,6 @@ public interface SetTestModel {
             SetVar[] sets = new SetVar[n - 1];
             arraycopy(vars, 0, sets, 0, n - 1);
             s.intersection(sets, vars[n - 1]).post();
-            s.set(force_first(vars));
             return s;
         }
     };
@@ -105,9 +102,7 @@ public interface SetTestModel {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            AbstractStrategy strategy = force_first(vars);
             s.allDisjoint(vars).post();
-            s.set(strategy);
             return s;
         }
     };
@@ -125,9 +120,7 @@ public interface SetTestModel {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            AbstractStrategy strategy = force_first(vars);
             s.allDifferent(vars).post();
-            s.set(strategy);
             return s;
         }
     };
@@ -146,8 +139,6 @@ public interface SetTestModel {
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             s.subsetEq(vars).post();
-            AbstractStrategy strategy = force_first(vars);
-            s.set(strategy);
             return s;
         }
     };
@@ -165,9 +156,7 @@ public interface SetTestModel {
                 vars[i] = s.setVar("s_" + i, domains[i].getSetKer(), domains[i].getSetEnv());
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            AbstractStrategy strategy = force_first(vars);
             s.allEqual(vars).post();
-            s.set(strategy);
             return s;
         }
     };

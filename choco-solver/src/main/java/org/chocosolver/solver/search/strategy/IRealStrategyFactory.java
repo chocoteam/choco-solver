@@ -50,7 +50,7 @@ public interface IRealStrategyFactory extends IVarSelectorFactory, IValSelectorF
      * @param rvars RealVar array to branch on
      * @return a strategy to instantiate reals
      */
-    default RealStrategy customRealSearch(VariableSelector<RealVar> varS, RealValueSelector valS, RealVar... rvars) {
+    default RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS, RealVar... rvars) {
         return new RealStrategy(rvars, varS, valS);
     }
 
@@ -60,7 +60,7 @@ public interface IRealStrategyFactory extends IVarSelectorFactory, IValSelectorF
      * @param reals variables to branch on
      * @return a strategy to instantiate real variables
      */
-    default RealStrategy realSearch(RealVar... reals) {
-        return customRealSearch(nextVarSelector(), midRValSelector(), reals);
+    default RealStrategy realVarSearch(RealVar... reals) {
+        return realVarSearch(nextVarSelector(), midRValSelector(), reals);
     }
 }

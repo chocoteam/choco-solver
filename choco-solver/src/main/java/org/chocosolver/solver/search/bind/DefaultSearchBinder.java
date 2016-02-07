@@ -34,7 +34,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.SSF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.*;
@@ -135,14 +134,14 @@ public class DefaultSearchBinder implements ISearchBinder {
         // b. MinDelta + min domain
         SetVar[] svars = lsvars.toArray(new SetVar[lsvars.size()]);
         if (svars.length > 0) {
-            strats[nb++] = SSF.force_minDelta_first(svars);
+            strats[nb++] = r.setVarSearch(svars);
         }
 
         // REAL VARIABLES DEFAULT SEARCH STRATEGY
         // c. cyclic + middle
         RealVar[] rvars = lrvars.toArray(new RealVar[lrvars.size()]);
         if (rvars.length > 0) {
-            strats[nb++] = r.realSearch(rvars);
+            strats[nb++] = r.realVarSearch(rvars);
         }
 
         // d. lexico LB/UB for the objective variable
@@ -160,9 +159,9 @@ public class DefaultSearchBinder implements ISearchBinder {
                     break;
                 case Variable.REAL:
                     if (max) {
-                        strats[nb++] = r.customRealSearch(r.nextVarSelector(), r.maxRValSelector(), (RealVar) objective);
+                        strats[nb++] = r.realVarSearch(r.nextVarSelector(), r.maxRValSelector(), (RealVar) objective);
                     } else {
-                        strats[nb++] = r.customRealSearch(r.nextVarSelector(), r.minRValSelector(), (RealVar) objective);
+                        strats[nb++] = r.realVarSearch(r.nextVarSelector(), r.minRValSelector(), (RealVar) objective);
                     }
                     break;
                 default:

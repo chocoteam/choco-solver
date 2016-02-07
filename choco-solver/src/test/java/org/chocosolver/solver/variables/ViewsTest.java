@@ -41,7 +41,6 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.constraints.Operator.EQ;
 import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
-import static org.chocosolver.solver.search.strategy.SetStrategyFactory.force_first;
 import static org.testng.Assert.*;
 
 /**
@@ -473,9 +472,8 @@ public class ViewsTest {
         SetVar v1 = model.setVar("{0,1}", new int[]{0, 1});
         SetVar v2 = model.setVar("v2", new int[]{}, new int[]{0, 1, 2, 3});
         model.subsetEq(new SetVar[]{v1, v2}).post();
-        model.set(force_first(new SetVar[]{v1, v2}));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)

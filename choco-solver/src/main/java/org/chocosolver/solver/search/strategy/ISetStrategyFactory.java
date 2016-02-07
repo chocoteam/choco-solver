@@ -27,63 +27,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 18:25
- */
+package org.chocosolver.solver.search.strategy;
 
-package org.chocosolver.samples.set;
-
-import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.search.strategy.selectors.IValSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.IVarSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.MinDelta;
+import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
 import org.chocosolver.solver.variables.SetVar;
 
 /**
- * Small problem to illustrate how to use set variables
- * enumerates sets such that z = union(x,y)
+ * Strategies over set variables
+ * Just there to simplify strategies creation.
+ * <br/>
  *
  * @author Jean-Guillaume Fages
+ * @since 02/2013
  */
-public class SetUnion extends AbstractProblem {
+public interface ISetStrategyFactory extends IVarSelectorFactory, IValSelectorFactory{
 
-    private SetVar x, y, z;
-    private boolean noEmptySet = true;
-
-    public static void main(String[] args) {
-        new SetUnion().execute(args);
+    /**
+     * Generic strategy to branch on set variables
+     *
+     * @param varS         variable selection strategy
+     * @param valS         integer  selection strategy
+     * @param enforceFirst branching order true = enforce first; false = remove first
+	 * @param sets         SetVar array to branch on
+     * @return a strategy to instantiate sets
+     */
+    default SetStrategy setVarSearch(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst, SetVar... sets) {
+        return new SetStrategy(sets, varS, valS, enforceFirst);
     }
 
-    @Override
-    public void buildModel() {
-        model = new Model();
-        // x initial domain
-        x = model.setVar("x", new int[]{1}, new int[]{1, -2, 3});
-        // y initial domain
-        y = model.setVar("y", new int[]{}, new int[]{-6, -2, 7});
-        // z initial domain
-        z = model.setVar("z", new int[]{}, new int[]{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7});
-        // set-union constraint
-        model.union(new SetVar[]{x, y}, z).post();
-        if (noEmptySet) {
-            model.nbEmpty(new SetVar[]{x, y, z}, model.intVar(0)).post();
-        }
-    }
-
-    @Override
-    public void configureSearch() {
-        Resolver r = model.getResolver();
-        r.set(r.setVarSearch(r.firstFreeVarSelector(),r.firstValSelector(),false,x, y, z));
-    }
-
-    @Override
-    public void solve() {
-        while (model.solve()) ;
-    }
-
-    @Override
-    public void prettyOut() {
+    /**
+     * strategy to branch on sets by choosing the first unfixed variable and forcing its first unfixed value
+     *
+     * @param sets variables to branch on
+     * @return a strategy to instantiate sets
+     */
+    default SetStrategy setVarSearch(SetVar... sets) {
+        return setVarSearch(new MinDelta(), new SetDomainMin(), true, sets);
     }
 }

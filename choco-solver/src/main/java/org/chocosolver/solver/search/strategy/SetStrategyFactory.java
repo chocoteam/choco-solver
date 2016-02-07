@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
@@ -39,71 +40,61 @@ import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
 import org.chocosolver.solver.variables.SetVar;
 
 /**
- * Strategies over set variables
- * Just there to simplify strategies creation.
- * <br/>
+ * @deprecated : search strategies for sets should be done through {@link Resolver}
+ * which implements {@link ISetStrategyFactory}
  *
- * @author Jean-Guillaume Fages
- * @since 02/2013
+ * This class will be removed in versions > 3.4.0
  */
+@Deprecated
 public class SetStrategyFactory {
 
     SetStrategyFactory() {
     }
 
     /**
-     * Generic strategy to branch on set variables
-     *
-     * @param varS         variable selection strategy
-     * @param valS         integer  selection strategy
-     * @param enforceFirst branching order true = enforce first; false = remove first
-	 * @param sets         SetVar array to branch on
-     * @return a strategy to instantiate sets
+     * @deprecated : use {@link Resolver#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)} instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static SetStrategy custom(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst, SetVar... sets) {
         return new SetStrategy(sets, varS, valS, enforceFirst);
     }
 
     /**
-     * strategy to branch on sets by choosing the first unfixed variable and forcing its first unfixed value
-     *
-     * @param sets variables to branch on
-     * @return a strategy to instantiate sets
+     * @deprecated : use {@link Resolver#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
+     * and create variable/value selectors directly instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static SetStrategy force_first(SetVar... sets) {
         return custom(new InputOrder<>(), new SetDomainMin(), true, sets);
     }
 
     /**
-     * strategy to branch on sets by choosing the first unfixed variable and removing its first unfixed value
-     *
-     * @param sets variables to branch on
-     * @return a strategy to instantiate sets
+     * @deprecated : use {@link Resolver#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
+     * and create variable/value selectors directly instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static SetStrategy remove_first(SetVar... sets) {
         return custom(new InputOrder<>(), new SetDomainMin(), false, sets);
     }
 
     /**
-     * strategy to branch on sets
-     * by choosing the unfixed variable of minimum delta (envSize-kerSize),
-     * and forcing its first unfixed value
-     *
-     * @param sets variables to branch on
-     * @return a strategy to instantiate sets
+     * @deprecated : use {@link Resolver#setVarSearch(SetVar...)}  instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static SetStrategy force_minDelta_first(SetVar... sets) {
         return custom(new MinDelta(), new SetDomainMin(), true, sets);
     }
 
     /**
-     * strategy to branch on sets
-     * by choosing the unfixed variable of maximum delta (envSize-kerSize),
-     * and forcing its first unfixed value
-     *
-     * @param sets variables to branch on
-     * @return a strategy to instantiate sets
+     * @deprecated : use {@link Resolver#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
+     * and create variable/value selectors directly instead
+     * Will be removed in versions > 3.4.0
      */
+    @Deprecated
     public static SetStrategy force_maxDelta_first(SetVar... sets) {
         return custom(new MaxDelta(), new SetDomainMin(), true, sets);
     }

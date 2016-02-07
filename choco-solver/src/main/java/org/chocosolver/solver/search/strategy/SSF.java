@@ -30,9 +30,10 @@
 package org.chocosolver.solver.search.strategy;
 
 /**
- * A short-name version of {@code SetStrategyFactory}
- * @author Jean-Guillaume Fages
+ * @deprecated : search strategies for sets should be done through {@link org.chocosolver.solver.Resolver}
+ * which implements {@link ISetStrategyFactory}
+ *
+ * This class will be removed in versions > 3.4.0
  */
-public class SSF extends SetStrategyFactory{
-	// SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
-}
+@Deprecated
+public class SSF extends SetStrategyFactory{}

@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.strategy.selectors.IVarSelectorFactory;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
@@ -39,7 +40,8 @@ import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.RealVar;
 
 /**
- * @deprecated : search strategies for reals should be done through the {@link IRealStrategyFactory}
+ * @deprecated : search strategies for reals should be done through {@link Resolver}
+  * which implements {@link IRealStrategyFactory}
  *
  * This class will be removed in versions > 3.4.0
  */
@@ -49,7 +51,7 @@ public class RealStrategyFactory {
     RealStrategyFactory() {}
 
     /**
-     * @deprecated : use {@link IRealStrategyFactory#customRealSearch(VariableSelector, RealValueSelector, RealVar...)} instead
+     * @deprecated : use {@link Resolver#realVarSearch(VariableSelector, RealValueSelector, RealVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -58,7 +60,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link IRealStrategyFactory#realSearch(RealVar...)} instead
+     * @deprecated : use {@link Resolver#realVarSearch(RealVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -67,7 +69,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link IVarSelectorFactory#nextVarSelector()} instead
+     * @deprecated : use {@link Resolver#nextVarSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -76,7 +78,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link IRealStrategyFactory#midRValSelector()} instead
+     * @deprecated : use {@link Resolver#midRValSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -85,7 +87,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link IRealStrategyFactory#minRValSelector()} instead
+     * @deprecated : use {@link Resolver#minRValSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -94,7 +96,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link IRealStrategyFactory#maxRValSelector()} instead
+     * @deprecated : use {@link Resolver#maxRValSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
