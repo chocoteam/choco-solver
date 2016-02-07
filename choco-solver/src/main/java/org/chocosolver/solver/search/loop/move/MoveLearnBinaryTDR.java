@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.move;
 
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -35,6 +35,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.search.loop.learn.LearnExplained;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
@@ -153,7 +154,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
      * {@inheritDoc} main reason we implement this Learn.
      */
     @Override
-    void onFailure(Resolver resolver) {
+    public void onFailure(Resolver resolver) {
         super.onFailure(resolver);
         neighbor(resolver);
     }
@@ -277,7 +278,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
 
     private IntMetaDecision extractConlict(Resolver resolver, Explanation lastExplanation) {
         int offset = resolver.getSearchWorldIndex();
-        int wi = mModel.getEnvironment().getWorldIndex() - 1;
+        int wi = resolver.getModel().getEnvironment().getWorldIndex() - 1;
         int k = wi - offset;
         int size = lastExplanation.getDecisions().cardinality();
         double w = 1d / size;

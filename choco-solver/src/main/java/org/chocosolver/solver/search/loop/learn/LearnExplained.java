@@ -27,13 +27,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
@@ -43,7 +44,7 @@ import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
  * Created by cprudhom on 05/11/2015.
  * Project: choco.
  */
-class LearnExplained implements Learn {
+public class LearnExplained implements Learn {
 
     /**
      * The solver to explain.
@@ -106,7 +107,7 @@ class LearnExplained implements Learn {
      * Actions to do when a solution is found.
      * By default, it records the basic explanation related to the refutation of the last decision.
      */
-    void onSolution(Resolver resolver){
+    public void onSolution(Resolver resolver){
         // we need to prepare a "false" backtrack on this decision
         Decision dec = mModel.getResolver().getLastDecision();
         while ((dec != ROOT) && (!dec.hasNext())) {
@@ -130,7 +131,7 @@ class LearnExplained implements Learn {
     /**
      * Actions to do when a failure is met.
      */
-    void onFailure(Resolver resolver){
+    public void onFailure(Resolver resolver){
         ContradictionException cex = mModel.getEngine().getContradictionException();
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
         lastExplanation = mExplainer.explain(cex);

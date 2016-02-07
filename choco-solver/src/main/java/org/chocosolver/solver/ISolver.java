@@ -29,9 +29,9 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.search.loop.ILearnFactory;
-import org.chocosolver.solver.search.loop.IMoveFactory;
-import org.chocosolver.solver.search.loop.IPropagateFactory;
+import org.chocosolver.solver.search.loop.learn.ILearnFactory;
+import org.chocosolver.solver.search.loop.move.IMoveFactory;
+import org.chocosolver.solver.search.loop.propagate.IPropagateFactory;
 
 /**
  * Interface to ease modeling

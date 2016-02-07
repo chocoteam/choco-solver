@@ -179,7 +179,7 @@ public class Model implements Serializable, IModel {
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objectives = new Variable[0];
         this.hooks = new HashMap<>();
-        this.resolver = new Resolver(this,null,null,null);
+        this.resolver = new Resolver(this);
         getResolver().dfs(null);
         getResolver().set(new LastSolutionRecorder(new Solution(), this));
     }

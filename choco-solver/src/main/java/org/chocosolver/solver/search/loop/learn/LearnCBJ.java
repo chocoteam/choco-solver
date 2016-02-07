@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.learn;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -105,7 +105,7 @@ public class LearnCBJ extends LearnExplained {
     }
 
     @Override
-    void onFailure(Resolver resolver) {
+    public void onFailure(Resolver resolver) {
        super.onFailure(resolver);
         if (this.nogoodFromConflict) {
             postNogood();

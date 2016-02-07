@@ -30,7 +30,7 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.LearnCBJ;
+import org.chocosolver.solver.search.loop.learn.LearnCBJ;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;

@@ -33,6 +33,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
+import org.chocosolver.solver.search.loop.move.MoveBinaryLDS;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;
 import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.trace.Chatterbox;

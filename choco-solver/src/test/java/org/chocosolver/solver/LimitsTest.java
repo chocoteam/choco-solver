@@ -31,8 +31,8 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.loop.Move;
-import org.chocosolver.solver.search.loop.MoveLNS;
+import org.chocosolver.solver.search.loop.move.Move;
+import org.chocosolver.solver.search.loop.move.MoveLNS;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.testng.Assert;

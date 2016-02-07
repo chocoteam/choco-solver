@@ -27,22 +27,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.propagate;
 
 import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 
 /**
  * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
-public class LearnNothing implements Learn {
-    @Override
-    public void record(Resolver resolver) {
-
-    }
+public class PropagateBasic implements Propagate {
 
     @Override
-    public void forget(Resolver resolver) {
-
+    public void execute(Resolver resolver) throws ContradictionException {
+        Decision cd = resolver.getLastDecision();
+        cd.buildNext();
+        resolver.getObjectiveManager().apply(cd);
+        resolver.getObjectiveManager().postDynamicCut();
+        resolver.getEngine().propagate();
     }
 }

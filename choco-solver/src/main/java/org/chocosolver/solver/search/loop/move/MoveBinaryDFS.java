@@ -27,42 +27,50 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.move;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.Variable;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
- * A move dedicated to run an Limited Discrepancy Search[1] (LDS) with binary decisions.
+ * A move dedicated to run a Depth First Search with binary decisions.
  * <p>
- * [1]:W.D. Harvey and M.L.Ginsberg, Limited Discrepancy Search, IJCAI-95.
- * <p>
- * Created by cprudhom on 07/10/15.
+ * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
-public class MoveBinaryLDS extends MoveBinaryDFS {
+public class MoveBinaryDFS implements Move {
 
-    IStateInt dis; // current discrepancy, maintained incrementally
-    int DIS; // max discrepancy allowed
+    AbstractStrategy strategy;
+    Decision topDecision; // the decision taken just before selecting this move.
 
-    /**
-     * Create a DFS with binary decisions
-     *
-     * @param strategy    how (binary) decisions are selected
-     * @param discrepancy maximum discrepancy
-     */
-    public MoveBinaryLDS(AbstractStrategy strategy, int discrepancy, IEnvironment environment) {
-        super(strategy);
-        this.dis = environment.makeInt(0);
-        this.DIS = discrepancy;
+
+    public MoveBinaryDFS(AbstractStrategy strategy) {
+        this.strategy = strategy;
     }
 
     @Override
     public boolean init() {
-        dis.set(0);
-        return super.init();
+        return strategy.init();
+    }
+
+    @Override
+    public boolean extend(Resolver resolver) {
+        boolean extended = false;
+        Decision tmp = resolver.getLastDecision();
+        resolver.setLastDecision(strategy.getDecision());
+        if (resolver.getLastDecision() != null) { // null means there is no more decision
+            resolver.getLastDecision().setPrevious(tmp);
+            resolver.getModel().getEnvironment().worldPush();
+            extended = true;
+        } else {
+            resolver.setLastDecision(tmp);
+        }
+        return extended;
     }
 
     @Override
@@ -70,29 +78,59 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
         resolver.getMeasures().incBackTrackCount();
         resolver.getMeasures().incDepth();
         resolver.getModel().getEnvironment().worldPop();
-        boolean repaired = rewind(resolver);
-        // increase the discrepancy max, if allowed, when the root node is reached
-        if (resolver.getLastDecision() == topDecision && dis.get() < DIS) {
-            dis.add(1);
-            resolver.restart();
-            repaired = true;
-        }
-        return repaired;
+        return rewind(resolver);
     }
 
     @Override
+    public void setTopDecision(Decision topDecision) {
+        this.topDecision = topDecision;
+    }
+
+    @Override
+    public <V extends Variable> AbstractStrategy<V> getStrategy() {
+        return strategy;
+    }
+
+    @Override
+    public <V extends Variable> void setStrategy(AbstractStrategy<V> aStrategy) {
+        this.strategy = aStrategy;
+    }
+
     protected boolean rewind(Resolver resolver) {
         boolean repaired = false;
         while (!repaired && resolver.getLastDecision() != topDecision) {
             resolver.setJumpTo(resolver.getJumpTo()-1);
-            if (dis.get() > 0 && resolver.getJumpTo() <= 0 && resolver.getLastDecision().hasNext()) {
+            if (resolver.getJumpTo() <= 0 && resolver.getLastDecision().hasNext()) {
                 resolver.getModel().getEnvironment().worldPush();
                 repaired = true;
-                dis.add(-1);
             } else {
                 prevDecision(resolver);
             }
         }
         return repaired;
+    }
+
+    protected void prevDecision(Resolver resolver) {
+        Decision tmp = resolver.getLastDecision();
+        resolver.setLastDecision(resolver.getLastDecision().getPrevious());
+        tmp.free();
+        // goes up in the search tree and makes sure search monitors are correctly informed
+        resolver.getSearchMonitors().afterUpBranch();
+        resolver.getMeasures().incBackTrackCount();
+        resolver.getMeasures().decDepth();
+        resolver.getModel().getEnvironment().worldPop();
+        resolver.getSearchMonitors().beforeUpBranch();
+    }
+
+    @Override
+    public List<Move> getChildMoves() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void setChildMoves(List<Move> someMoves) {
+        if(someMoves.size() > 0) {
+            throw new UnsupportedOperationException("This is a terminal Move. No child move can be attached to it.");
+        }
     }
 }

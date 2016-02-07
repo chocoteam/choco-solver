@@ -27,19 +27,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.propagate;
+
+import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.exception.ContradictionException;
+
+import java.io.Serializable;
 
 /**
- * Interface to define how to handle constraint propagation
- * @author Charles Prud'Homme, Jean-Guillaume Fages
+ * The "Propagate" component
+ * (Inspired from "Unifying search algorithms for CSP" N. Jussien and O. Lhomme, Technical report 02-3-INFO, EMN).
+ * <p>
+ * The aim of the component is to propagate information throughout the constraint network when a decision is made.
+ * <p>
+ * Created by cprudhom on 01/09/15.
+ * Project: choco.
  */
-public interface IPropagateFactory {
+public interface Propagate extends Serializable{
 
-	/**
-     * Creates a basic Propagate object to handle constraint propagation
-     * @return a basic Propagate object to handle constraint propagation
+    /**
+     * Propagate information throughout the constraint network, that is, apply decision and post dynamic cut (if any).
+     *
+     * @throws ContradictionException if a dead-end is encountered
      */
-    default Propagate propagateBasic(){
-        return new PropagateBasic();
-    }
+    void execute(Resolver resolver) throws ContradictionException;
 }

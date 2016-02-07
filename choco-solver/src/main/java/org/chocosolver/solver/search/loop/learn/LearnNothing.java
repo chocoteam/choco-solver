@@ -27,46 +27,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.search.loop.learn.Learn;
 
 /**
- * Interface to define how to learn during the solving process (e.g. CBJ, DBT...)
- * @author Charles Prud'Homme, Jean-Guillaume Fages
+ * Created by cprudhom on 02/09/15.
+ * Project: choco.
  */
-public interface ILearnFactory {
+public class LearnNothing implements Learn {
+    @Override
+    public void record(Resolver resolver) {
 
-    Resolver _me();
-
-	/**
-     * @return an object learning nothing during search (default configuration)
-     */
-    default Learn noLearning(){
-        return new LearnNothing();
     }
 
-    /**
-     * Creates a learning object based on Conflict-based Backjumping (CBJ) explanation strategy.
-     * It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
-     * @param nogoodsOn set to true to extract nogoods from failures
-     * @param userFeedbackOn set to true to record the propagation in conflict
-     *                       (only relevant when one wants to interpret the explanation of a failure).
-     * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
-     */
-    default Learn learnCBJ(boolean nogoodsOn, boolean userFeedbackOn) {
-        return new LearnCBJ(_me().getModel(),nogoodsOn, userFeedbackOn);
-    }
+    @Override
+    public void forget(Resolver resolver) {
 
-    /**
-     * Creates a learning object based on Dynamic Backjumping (DBT) explanation strategy.
-     * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
-     * @param nogoodsOn set to true to extract nogoods from failures
-     * @param userFeedbackOn set to true to record the propagation in conflict
-     *                       (only relevant when one wants to interpret the explanation of a failure).
-     * @see org.chocosolver.solver.explanations.ExplanationFactory#DBT
-     */
-    default Learn learnDBT(boolean nogoodsOn, boolean userFeedbackOn) {
-        return new LearnDBT(_me().getModel(), nogoodsOn, userFeedbackOn);
     }
 }

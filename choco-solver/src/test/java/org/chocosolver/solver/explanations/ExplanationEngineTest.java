@@ -34,7 +34,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.LearnCBJ;
+import org.chocosolver.solver.search.loop.learn.LearnCBJ;
 import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.ISF;

@@ -27,24 +27,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.Resolver;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.decision.Decision;
+
+import java.io.Serializable;
 
 /**
- * Created by cprudhom on 02/09/15.
+ * The "Learn" component
+ * (Inspired from "Unifying search algorithms for CSP" N. Jussien and O. Lhomme, Technical report 02-3-INFO, EMN).
+ *
+ * The aim of the component is to make sure that the search mechanism will avoid (as much as possible) to get back to states that have been explored and proved to be solution-less.
+ *
+ * Created by cprudhom on 01/09/15.
  * Project: choco.
  */
-public class PropagateBasic implements Propagate {
+public interface Learn extends Serializable{
 
-    @Override
-    public void execute(Resolver resolver) throws ContradictionException {
-        Decision cd = resolver.getLastDecision();
-        cd.buildNext();
-        resolver.getObjectiveManager().apply(cd);
-        resolver.getObjectiveManager().postDynamicCut();
-        resolver.getEngine().propagate();
-    }
+    /**
+     * Validate and record a new piece of knowledge, that is, the current position is a dead-end.
+     */
+    void record(Resolver resolver);
+
+    /**
+     * Forget some pieces of knowledge.
+     */
+    void forget(Resolver resolver);
+
 }

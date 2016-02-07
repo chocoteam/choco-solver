@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.search.loop.move.IMoveFactory;
 
 /**
  * @deprecated use {@link Resolver}, which extends {@link IMoveFactory}, instead

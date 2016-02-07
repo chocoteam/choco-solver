@@ -27,110 +27,116 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.criteria.LongCriterion;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * A move dedicated to run a Depth First Search with binary decisions.
+ * This {@link Move} implementation enables restarting a search on certain conditions
+ * (most of the time based on a counter). It is not self-content
+ * and needs a underlying {@link Move} to delegate common movements when no restart is needed.
  * <p>
- * Created by cprudhom on 02/09/15.
+ * Created by cprudhom on 03/09/15.
  * Project: choco.
  */
-public class MoveBinaryDFS implements Move {
+public class MoveRestart implements Move {
 
-    AbstractStrategy strategy;
-    Decision topDecision; // the decision taken just before selecting this move.
+    Move move;
+    IRestartStrategy restartStrategy;
+    LongCriterion criterion;
+    int restartFromStrategyCount, restartLimit;
+    long limit;
 
-
-    public MoveBinaryDFS(AbstractStrategy strategy) {
-        this.strategy = strategy;
+    /**
+     * @param move            the default {@link Move} to execute when no restart has to be done
+     * @param restartStrategy defines when restarts happen
+     * @param criterion       defines how to trigger a restart
+     * @param restartLimit    restrict the total number of restart
+     */
+    public MoveRestart(Move move, IRestartStrategy restartStrategy, LongCriterion criterion, int restartLimit) {
+        this.move = move;
+        this.restartStrategy = restartStrategy;
+        this.criterion = criterion;
+        this.restartLimit = restartLimit;
     }
 
     @Override
     public boolean init() {
-        return strategy.init();
+        restartFromStrategyCount = 0;
+        limit = restartStrategy.getFirstCutOff();
+        return move.init();
     }
 
     @Override
     public boolean extend(Resolver resolver) {
-        boolean extended = false;
-        Decision tmp = resolver.getLastDecision();
-        resolver.setLastDecision(strategy.getDecision());
-        if (resolver.getLastDecision() != null) { // null means there is no more decision
-            resolver.getLastDecision().setPrevious(tmp);
-            resolver.getModel().getEnvironment().worldPush();
-            extended = true;
-        } else {
-            resolver.setLastDecision(tmp);
+        boolean extend;
+        if (!criterion.isMet(limit)) {
+            extend =  move.extend(resolver);
+        }else{
+            restart(resolver);
+            extend = true;
         }
-        return extended;
+        return extend;
     }
 
     @Override
     public boolean repair(Resolver resolver) {
-        resolver.getMeasures().incBackTrackCount();
-        resolver.getMeasures().incDepth();
-        resolver.getModel().getEnvironment().worldPop();
-        return rewind(resolver);
+        boolean repair;
+        if (!criterion.isMet(limit)) {
+            repair =  move.repair(resolver);
+        }else{
+            restart(resolver);
+            repair = true;
+        }
+        return repair;
     }
 
     @Override
     public void setTopDecision(Decision topDecision) {
-        this.topDecision = topDecision;
+        this.move.setTopDecision(topDecision);
     }
 
     @Override
     public <V extends Variable> AbstractStrategy<V> getStrategy() {
-        return strategy;
+        return move.getStrategy();
     }
 
     @Override
     public <V extends Variable> void setStrategy(AbstractStrategy<V> aStrategy) {
-        this.strategy = aStrategy;
+        move.setStrategy(aStrategy);
     }
 
-    protected boolean rewind(Resolver resolver) {
-        boolean repaired = false;
-        while (!repaired && resolver.getLastDecision() != topDecision) {
-            resolver.setJumpTo(resolver.getJumpTo()-1);
-            if (resolver.getJumpTo() <= 0 && resolver.getLastDecision().hasNext()) {
-                resolver.getModel().getEnvironment().worldPush();
-                repaired = true;
-            } else {
-                prevDecision(resolver);
-            }
+    protected void restart(Resolver resolver) {
+        // update parameters for restarts
+        restartFromStrategyCount++;
+        if (restartFromStrategyCount >= restartLimit) {
+            limit = Long.MAX_VALUE;
+        } else if(criterion.isMet(limit)){
+            limit += restartStrategy.getNextCutoff(restartFromStrategyCount);
         }
-        return repaired;
-    }
-
-    protected void prevDecision(Resolver resolver) {
-        Decision tmp = resolver.getLastDecision();
-        resolver.setLastDecision(resolver.getLastDecision().getPrevious());
-        tmp.free();
-        // goes up in the search tree and makes sure search monitors are correctly informed
-        resolver.getSearchMonitors().afterUpBranch();
-        resolver.getMeasures().incBackTrackCount();
-        resolver.getMeasures().decDepth();
-        resolver.getModel().getEnvironment().worldPop();
-        resolver.getSearchMonitors().beforeUpBranch();
+        // then do the restart
+        resolver.restart();
     }
 
     @Override
     public List<Move> getChildMoves() {
-        return Collections.emptyList();
+        return Collections.singletonList(move);
     }
 
     @Override
     public void setChildMoves(List<Move> someMoves) {
-        if(someMoves.size() > 0) {
-            throw new UnsupportedOperationException("This is a terminal Move. No child move can be attached to it.");
+        if(someMoves.size() == 1) {
+            this.move = someMoves.get(0);
+        }else{
+            throw new UnsupportedOperationException("Only one child move can be attached to it.");
         }
     }
 }

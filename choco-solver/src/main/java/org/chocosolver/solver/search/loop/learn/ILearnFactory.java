@@ -27,52 +27,46 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Resolver;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 
 /**
- * A move dedicated to run an Depth-bounded Discrepancy Search[1] (DDS) with binary decisions.
- * <p>
- * [1]:T. Walsh, Depth-bounded Discrepancy Search, IJCAI-97.
- * <p>
- * <p>
- * Note that the depth is not maintained since it is useful only when max discrepancy is greater than max depth,
- * which should not happen.
- * Created by cprudhom on 07/10/15.
- * Project: choco.
+ * Interface to define how to learn during the solving process (e.g. CBJ, DBT...)
+ * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public class MoveBinaryDDS extends MoveBinaryLDS {
+public interface ILearnFactory {
 
-    /**
-     * Create a DFS with binary decisions
-     *
-     * @param strategy    how (binary) decisions are selected
-     * @param discrepancy maximum discrepancy
+    Resolver _me();
+
+	/**
+     * @return an object learning nothing during search (default configuration)
      */
-    public MoveBinaryDDS(AbstractStrategy strategy, int discrepancy, IEnvironment environment) {
-        super(strategy, discrepancy, environment);
+    default Learn noLearning(){
+        return new LearnNothing();
     }
 
-    @Override
-    public boolean extend(Resolver resolver) {
-        boolean extended = false;
-        Decision tmp = resolver.getLastDecision();
-        resolver.setLastDecision(strategy.getDecision());
-        if (resolver.getLastDecision() != null) { // null means there is no more decision
-            resolver.getLastDecision().setPrevious(tmp);
-            resolver.getModel().getEnvironment().worldPush();
-            if (dis.get() == 1) {
-                resolver.getLastDecision().buildNext();
-            }
-            dis.add(-1);
-            extended = true;
-        } else {
-            resolver.setLastDecision(tmp);
-        }
-        return extended;
+    /**
+     * Creates a learning object based on Conflict-based Backjumping (CBJ) explanation strategy.
+     * It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
+     * @param nogoodsOn set to true to extract nogoods from failures
+     * @param userFeedbackOn set to true to record the propagation in conflict
+     *                       (only relevant when one wants to interpret the explanation of a failure).
+     * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
+     */
+    default Learn learnCBJ(boolean nogoodsOn, boolean userFeedbackOn) {
+        return new LearnCBJ(_me().getModel(),nogoodsOn, userFeedbackOn);
+    }
+
+    /**
+     * Creates a learning object based on Dynamic Backjumping (DBT) explanation strategy.
+     * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
+     * @param nogoodsOn set to true to extract nogoods from failures
+     * @param userFeedbackOn set to true to record the propagation in conflict
+     *                       (only relevant when one wants to interpret the explanation of a failure).
+     * @see org.chocosolver.solver.explanations.ExplanationFactory#DBT
+     */
+    default Learn learnDBT(boolean nogoodsOn, boolean userFeedbackOn) {
+        return new LearnDBT(_me().getModel(), nogoodsOn, userFeedbackOn);
     }
 }

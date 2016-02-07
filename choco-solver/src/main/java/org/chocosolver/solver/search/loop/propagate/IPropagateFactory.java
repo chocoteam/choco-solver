@@ -27,31 +27,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
-
-import org.chocosolver.solver.Resolver;
-
-import java.io.Serializable;
+package org.chocosolver.solver.search.loop.propagate;
 
 /**
- * The "Learn" component
- * (Inspired from "Unifying search algorithms for CSP" N. Jussien and O. Lhomme, Technical report 02-3-INFO, EMN).
- *
- * The aim of the component is to make sure that the search mechanism will avoid (as much as possible) to get back to states that have been explored and proved to be solution-less.
- *
- * Created by cprudhom on 01/09/15.
- * Project: choco.
+ * Interface to define how to handle constraint propagation
+ * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public interface Learn extends Serializable{
+public interface IPropagateFactory {
 
-    /**
-     * Validate and record a new piece of knowledge, that is, the current position is a dead-end.
+	/**
+     * Creates a basic Propagate object to handle constraint propagation
+     * @return a basic Propagate object to handle constraint propagation
      */
-    void record(Resolver resolver);
-
-    /**
-     * Forget some pieces of knowledge.
-     */
-    void forget(Resolver resolver);
-
+    default Propagate propagateBasic(){
+        return new PropagateBasic();
+    }
 }

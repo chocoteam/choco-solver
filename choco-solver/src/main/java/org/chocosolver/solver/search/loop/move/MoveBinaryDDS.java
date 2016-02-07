@@ -27,28 +27,52 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop;
+package org.chocosolver.solver.search.loop.move;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Resolver;
-import org.chocosolver.solver.exception.ContradictionException;
-
-import java.io.Serializable;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 
 /**
- * The "Propagate" component
- * (Inspired from "Unifying search algorithms for CSP" N. Jussien and O. Lhomme, Technical report 02-3-INFO, EMN).
+ * A move dedicated to run an Depth-bounded Discrepancy Search[1] (DDS) with binary decisions.
  * <p>
- * The aim of the component is to propagate information throughout the constraint network when a decision is made.
+ * [1]:T. Walsh, Depth-bounded Discrepancy Search, IJCAI-97.
  * <p>
- * Created by cprudhom on 01/09/15.
+ * <p>
+ * Note that the depth is not maintained since it is useful only when max discrepancy is greater than max depth,
+ * which should not happen.
+ * Created by cprudhom on 07/10/15.
  * Project: choco.
  */
-public interface Propagate extends Serializable{
+public class MoveBinaryDDS extends MoveBinaryLDS {
 
     /**
-     * Propagate information throughout the constraint network, that is, apply decision and post dynamic cut (if any).
+     * Create a DFS with binary decisions
      *
-     * @throws ContradictionException if a dead-end is encountered
+     * @param strategy    how (binary) decisions are selected
+     * @param discrepancy maximum discrepancy
      */
-    void execute(Resolver resolver) throws ContradictionException;
+    public MoveBinaryDDS(AbstractStrategy strategy, int discrepancy, IEnvironment environment) {
+        super(strategy, discrepancy, environment);
+    }
+
+    @Override
+    public boolean extend(Resolver resolver) {
+        boolean extended = false;
+        Decision tmp = resolver.getLastDecision();
+        resolver.setLastDecision(strategy.getDecision());
+        if (resolver.getLastDecision() != null) { // null means there is no more decision
+            resolver.getLastDecision().setPrevious(tmp);
+            resolver.getModel().getEnvironment().worldPush();
+            if (dis.get() == 1) {
+                resolver.getLastDecision().buildNext();
+            }
+            dis.add(-1);
+            extended = true;
+        } else {
+            resolver.setLastDecision(tmp);
+        }
+        return extended;
+    }
 }

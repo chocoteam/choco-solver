@@ -33,6 +33,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.move.IMoveFactory;
+import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;

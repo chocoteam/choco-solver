@@ -856,7 +856,7 @@ Even if many `Move` and `Learn` implementation are already provided, it may be r
 
 	The `Propagate` component is less prone to be modified, it will not be described here.
 	However, its interface is minimalist and can be easily implemented.
-	A look to `org.chocosolver.solver.search.loop.PropagateBasic.java` is a good starting point.
+	A look to `org.chocosolver.solver.search.loop.propagate.PropagateBasic.java` is a good starting point.
 
 The two components can be easily set in the `Solver` search loop: 
 
@@ -910,7 +910,7 @@ Here is the API of `Move`:
 	It defines a search strategy and erases the previously defined one, that is, a service which computes and returns decisions.
  
 
-``org.chocosolver.solver.search.loop.MoveBinaryDFS.java`` is good starting point to see how a `Move` is implemented.
+``org.chocosolver.solver.search.loop.move.MoveBinaryDFS.java`` is good starting point to see how a `Move` is implemented.
 It defines a Depth-First Search with binary decisions. 
 
 Learn
@@ -926,7 +926,7 @@ The aim of the component is to make sure that the search mechanism will avoid (a
 	It forgets some pieces of knowledge.
 	This is alwasy called *after* calling `Move.repair(SearchLoop)`.
 
-``org.chocosolver.solver.search.loop.LearnCBJ`` is good, yet not trivial, example of `Learn`.
+``org.chocosolver.solver.search.loop.learn.LearnCBJ`` is good, yet not trivial, example of `Learn`.
 
 .. _47_ibex:
 
