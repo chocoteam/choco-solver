@@ -39,7 +39,7 @@ import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
-import org.chocosolver.solver.constraints.reification.ConDisConstraint;
+import org.chocosolver.solver.constraints.reification.ConDisConstraintTmp;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -147,7 +147,7 @@ public class Model implements Serializable, IModel {
     private NogoodConstraint nogoods;
 
     /** A CondisConstraint instance adapted to constructive disjunction management */
-    private ConDisConstraint condis;
+    private ConDisConstraintTmp condis;
 
     /** An Ibex (continuous constraint model) instance */
     private Ibex ibex;
@@ -496,9 +496,9 @@ public class Model implements Serializable, IModel {
      * A call to this method will create and post the constraint if it does not exist already.
      * @return the constructive disjunction constraint
      */
-    public ConDisConstraint getConDisStore(){
+    public ConDisConstraintTmp getConDisStore(){
         if (condis == null) {
-            condis = new ConDisConstraint(this);
+            condis = new ConDisConstraintTmp(this);
             condis.post();
         }
         return condis;

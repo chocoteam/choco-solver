@@ -40,20 +40,20 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 26/01/2016.
  */
-public class ConDisConstraint extends Constraint{
+public class ConDisConstraintTmp extends Constraint{
 
     /**
      * Unique constructive disjunction propagator
      */
-    final PropConDis condissol;
+    final PropConDisTmp condissol;
 
     /**
      * A constraint to deal with constructive disjunction (unique in a model instance)
      * @param model declaring model
      */
-    public ConDisConstraint(Model model) {
-        super("CondisConstraint",new PropConDis(model));
-        condissol = (PropConDis) propagators[0];
+    public ConDisConstraintTmp(Model model) {
+        super("CondisConstraint",new PropConDisTmp(model));
+        condissol = (PropConDisTmp) propagators[0];
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ConDisConstraint extends Constraint{
         return so;
     }
 
-    public PropConDis getPropCondis() {
+    public PropConDisTmp getPropCondis() {
         return condissol;
     }
 

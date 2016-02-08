@@ -54,7 +54,7 @@ import static org.testng.Assert.assertTrue;
  * @author Charles Prud'homme
  * @since 26/01/2016.
  */
-public class PropConDisTest {
+public class PropConDisTmpTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testCD1() throws ContradictionException {
