@@ -29,7 +29,6 @@
  */
 package org.chocosolver.samples.explanation;
 
-
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
@@ -68,11 +67,8 @@ public class ExplainedOCProblem extends AbstractProblem {
     @Override
     public void solve() {
         ExplanationFactory.CBJ.plugin(model, false, false);
-        if (model.solve()) {
-            do {
-                this.prettyOut();
-            }
-            while (model.solve());
+        while (model.solve()){
+            prettyOut();
         }
     }
 

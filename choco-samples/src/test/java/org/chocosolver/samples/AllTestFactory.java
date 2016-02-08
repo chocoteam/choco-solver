@@ -30,7 +30,6 @@
 package org.chocosolver.samples;
 
 import org.chocosolver.memory.Environments;
-import org.chocosolver.samples.integer.AbsoluteEvaluation;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.testng.annotations.Factory;
@@ -48,8 +47,6 @@ public class AllTestFactory {
 
     AbstractProblem[] problems = new AbstractProblem[]{
 //            new AllIntervalSeries()
-            new AbsoluteEvaluation(),
-            new AbsoluteEvaluation()
     };
 
     String[][] arguments = new String[][]{

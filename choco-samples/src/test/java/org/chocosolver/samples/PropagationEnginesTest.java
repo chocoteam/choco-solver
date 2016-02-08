@@ -52,7 +52,6 @@ public class PropagationEnginesTest {
 
 
     private static AbstractProblem[] problems = new AbstractProblem[]{
-            new Alpha(),
             new AllIntervalSeries(),
             //new BACP(),
             new BIBD(),
@@ -67,7 +66,6 @@ public class PropagationEnginesTest {
             new Langford(),
             new LatinSquare(),
             new MagicSequence(),
-            new MagicSeries(),
             //new MagicSquare(),
             //new MarioKart(),
             new Nonogram(),
@@ -75,7 +73,6 @@ public class PropagationEnginesTest {
             new Ordering(),
             //new OrthoLatinSquare(),
             new Partition(),
-            //new Photo(),
             //new RLFAP(),
             new SchurLemma(),
             //new SocialGolfer(),

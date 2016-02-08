@@ -31,8 +31,12 @@ package org.chocosolver.util;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 
+import static java.lang.Math.max;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
@@ -166,4 +170,51 @@ public class ProblemMaker {
         return model;
     }
 
+    public static Model makeEq5(){
+        Model model = new Model("Eq5");
+        IntVar[] vars = new IntVar[15];
+        vars[0] = model.intVar("A90397", -20, 20, false);
+        vars[1] = model.intVar("A90429", -20, 20, false);
+        vars[2] = model.intVar("A90461", -20, 20, false);
+        vars[3] = model.intVar("A90493", -20, 20, false);
+        vars[4] = model.intVar("A90525", -20, 20, false);
+        vars[5] = model.intVar("A90557", -20, 20, false);
+        vars[6] = model.intVar("A90589", -20, 20, false);
+        vars[7] = model.intVar("A90621", -20, 20, false);
+        vars[8] = model.intVar("A90653", -20, 20, false);
+        vars[9] = model.intVar("A90685", -20, 20, false);
+        vars[10] = model.intVar("A90717", -20, 20, false);
+        vars[11] = model.intVar("A90749", -20, 20, false);
+        vars[12] = model.intVar("A90781", -20, 20, false);
+        vars[13] = model.intVar("A90813", -20, 20, false);
+        vars[14] = model.intVar("A90845", -20, 20, false);
+
+        model.scalar(vars, new int[]{1, 3, 9, 27, 81, 1, 3, 9, 27, 1, 3, 9, 1, 3, 1}, "=", 380).post();
+        model.scalar(vars, new int[]{81, 108, 144, 192, 256, 27, 36, 48, 64, 9, 12, 16, 3, 4, 1}, "=", 1554).post();
+        model.scalar(vars, new int[]{1296, 1080, 900, 750, 625, 216, 180, 150, 125, 36, 30, 25, 6, 5, 1}, "=", 4392).post();
+        model.scalar(vars, new int[]{16, 56, 496, 686, 2401, 8, 28, 98, 343, 4, 14, 49, 2, 7, 1}, "=", 16510).post();
+        model.scalar(vars, new int[]{194481, 55566, 15876, 4536, 1296, 9261, 2646, 756, 216, 441, 126, 36, 21, 6, 1}, "=", 12012).post();
+
+        model.getResolver().set(new IntStrategy(vars, new InputOrder<>(), new IntDomainMiddle(true)));
+
+        return model;
+    }
+
+    public static Model makeContrived(){
+        Model model = new Model("Contrived");
+        int l = 100;
+        int d = l + 1;
+        IntVar[] v = model.intVarArray("v", 5, 1, 50, true);
+        IntVar[] w = model.intVarArray("v", l, 1, d, true);
+
+        model.allDifferent(v, "BC").post();
+        model.allDifferent(w, "BC").post();
+        model.arithm(v[3], "=", v[4]).post();
+        model.arithm(v[0], "=", w[0]).post();
+        model.arithm(v[1], "=", w[1]).post();
+        model.arithm(v[2], "=", w[2]).post();
+        model.arithm(v[3], "=", w[3]).post();
+
+        return model;
+    }
 }
