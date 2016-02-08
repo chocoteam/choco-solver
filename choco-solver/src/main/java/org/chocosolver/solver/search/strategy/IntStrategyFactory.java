@@ -30,14 +30,13 @@
 package org.chocosolver.solver.search.strategy;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
-import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
 import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;

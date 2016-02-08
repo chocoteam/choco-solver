@@ -29,8 +29,6 @@
  */
 package org.chocosolver.solver.search.strategy;
 
-import org.chocosolver.solver.objective.ObjectiveStrategy;
-import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
@@ -251,28 +249,5 @@ public class SearchStrategyFactory {
      */
     public static IntStrategy minDomUBSearch(IntVar... vars) {
         return intVarSearch(minDomVarSelector(), maxValSelector(), vars);
-    }
-
-    /**
-     * Create a search strategy which selects the variables with the largest domain and split it
-     * @param vars variables to branch on
-     * @return a search strategy halving IntVar domains
-     */
-    public static IntStrategy maxDomSplitSearch(IntVar... vars){
-        return intVarSearch(maxDomVarSelector(), midValSelector(true), DecisionOperator.int_split, vars);
-    }
-
-    // ************************************************************************************
-    // OBJECTIVE STRATEGIES
-    // ************************************************************************************
-
-    /**
-     * A branching strategy over the objective variable.
-     * It is activated on the first solution, and iterates over the domain in increasing order (lower bound first).
-     * @param obj integer objective variable
-     * @return objective strategy
-     */
-    public static ObjectiveStrategy objectiveDichotomicBranching(IntVar obj){
-        return new ObjectiveStrategy(obj, OptimizationPolicy.DICHOTOMIC);
     }
 }

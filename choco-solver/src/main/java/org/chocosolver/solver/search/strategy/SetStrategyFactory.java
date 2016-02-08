@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.search.strategy;
 
-import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
 import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
