@@ -42,7 +42,7 @@ public interface ILearnFactory {
 	/**
      * @return an object learning nothing during search (default configuration)
      */
-    default void doNotLearn(){
+    default void setNoLearning(){
         _me().set(new LearnNothing());
     }
 
@@ -54,7 +54,7 @@ public interface ILearnFactory {
      *                       (only relevant when one wants to interpret the explanation of a failure).
      * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
      */
-    default void learnCBJ(boolean nogoodsOn, boolean userFeedbackOn) {
+    default void setCBJLearning(boolean nogoodsOn, boolean userFeedbackOn) {
         _me().set(new LearnCBJ(_me().getModel(),nogoodsOn, userFeedbackOn));
     }
 
@@ -66,7 +66,7 @@ public interface ILearnFactory {
      *                       (only relevant when one wants to interpret the explanation of a failure).
      * @see org.chocosolver.solver.explanations.ExplanationFactory#DBT
      */
-    default void learnDBT(boolean nogoodsOn, boolean userFeedbackOn) {
+    default void setDBTLearning(boolean nogoodsOn, boolean userFeedbackOn) {
         _me().set(new LearnDBT(_me().getModel(), nogoodsOn, userFeedbackOn));
     }
 }

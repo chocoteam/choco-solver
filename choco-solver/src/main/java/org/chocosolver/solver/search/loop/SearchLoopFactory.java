@@ -159,20 +159,20 @@ public class SearchLoopFactory {
     //****************************************************************************************************************//
 
     /**
-     * @deprecated use {@link Resolver#learnCBJ(boolean, boolean)} instead
+     * @deprecated use {@link Resolver#setCBJLearning(boolean, boolean)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void learnCBJ(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        aModel.getResolver().learnCBJ(nogoodsOn,userFeedbackOn);
+        aModel.getResolver().setCBJLearning(nogoodsOn,userFeedbackOn);
     }
 
     /**
-     * @deprecated use {@link Resolver#learnDBT(boolean, boolean)} instead
+     * @deprecated use {@link Resolver#setDBTLearning(boolean, boolean)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void learnDBT(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        aModel.getResolver().learnDBT(nogoodsOn,userFeedbackOn);
+        aModel.getResolver().setDBTLearning(nogoodsOn,userFeedbackOn);
     }
 }

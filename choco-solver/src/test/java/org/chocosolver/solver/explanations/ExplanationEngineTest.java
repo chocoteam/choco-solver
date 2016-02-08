@@ -210,7 +210,7 @@ public class ExplanationEngineTest {
             model.getResolver().set(model.getResolver().firstLBSearch(vars));
 
             Resolver r = model.getResolver();
-            model.getResolver().learnCBJ(false, false);
+            model.getResolver().setCBJLearning(false, false);
             assertFalse(model.solve());
 
             assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
@@ -229,7 +229,7 @@ public class ExplanationEngineTest {
             Resolver r = model.getResolver();
             r.set(r.firstLBSearch(vars));
 
-            model.getResolver().learnCBJ(false, false);
+            r.setCBJLearning(false, false);
             assertFalse(model.solve());
 
             assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
@@ -246,7 +246,7 @@ public class ExplanationEngineTest {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
 
-            model.getResolver().learnCBJ(false, false);
+            model.getResolver().setCBJLearning(false, false);
             assertFalse(model.solve());
 
             assertEquals(model.getResolver().getMeasures().getNodeCount(), 0);
@@ -264,7 +264,7 @@ public class ExplanationEngineTest {
             }
             model.getResolver().set(model.getResolver().firstLBSearch(vars));
 
-            model.getResolver().learnCBJ(false, false);
+            model.getResolver().setCBJLearning(false, false);
             assertFalse(model.solve());
 
             assertEquals(model.getResolver().getMeasures().getNodeCount(), 0);
@@ -288,7 +288,7 @@ public class ExplanationEngineTest {
             model.arithm(p[9], "+", p[8], ">", 4).post();
             model.getResolver().set(model.getResolver().randomSearch(p, seed));
 
-            model.getResolver().learnCBJ(false, false);
+            model.getResolver().setCBJLearning(false, false);
 
             showShortStatistics(model);
             assertFalse(model.solve());
@@ -311,7 +311,7 @@ public class ExplanationEngineTest {
         Resolver r = model.getResolver();
         r.set(r.firstLBSearch(p[0], p[1], p[9], p[8], bs[0]));
 
-        model.getResolver().learnCBJ(false, false);
+        r.setCBJLearning(false, false);
 
         showStatistics(model);
         showSolutions(model);
@@ -336,7 +336,7 @@ public class ExplanationEngineTest {
         Resolver r = model.getResolver();
         r.set(r.firstLBSearch(p[0], p[1], bs[0], p[9], p[8]));
 
-        model.getResolver().learnCBJ(false, false);
+        r.setCBJLearning(false, false);
 
         showStatistics(model);
         showSolutions(model);
@@ -840,7 +840,7 @@ public class ExplanationEngineTest {
         Constraint xE1 = s.arithm(x, "=", one);
         xE1.post();
 
-        s.getResolver().learnCBJ(false, true);
+        s.getResolver().setCBJLearning(false, true);
         LearnCBJ cbj = (LearnCBJ) s.getResolver().getLearn();
         showDecisions(s);
         assertFalse(s.solve());

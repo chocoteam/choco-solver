@@ -51,23 +51,23 @@ public enum ExplanationFactory {
     /**
      * add a Conflict-based Backjumping policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
-     * @see org.chocosolver.solver.Resolver#learnCBJ(boolean, boolean)
+     * @see org.chocosolver.solver.Resolver#setCBJLearning(boolean, boolean)
      */
     CBJ {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
-            model.getResolver().learnCBJ(nogoodsOn, userFeedbackOn);
+            model.getResolver().setCBJLearning(nogoodsOn, userFeedbackOn);
         }
     },
     /**
      * add a Dynamic-Backtracking policy on contradiction to an explained solver.
      * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
-     * @see org.chocosolver.solver.Resolver#learnDBT(boolean, boolean)
+     * @see org.chocosolver.solver.Resolver#setDBTLearning(boolean, boolean)
      */
     DBT {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
-            model.getResolver().learnDBT(nogoodsOn, userFeedbackOn);
+            model.getResolver().setDBTLearning(nogoodsOn, userFeedbackOn);
         }
     };
 

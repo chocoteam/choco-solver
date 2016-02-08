@@ -49,8 +49,6 @@ import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
-import org.chocosolver.solver.search.solution.LastSolutionRecorder;
-import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -212,8 +210,8 @@ public final class Resolver implements Serializable, ISolver {
         entire = false;
         searchMonitors = new SearchMonitorList();
         setDFS(null);
-        useStandardPropagation();
-        doNotLearn();
+        setStandardPropagation();
+        setNoLearning();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

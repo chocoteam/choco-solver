@@ -43,7 +43,7 @@ public interface IPropagateFactory {
      * Creates a basic Propagate object to handle constraint propagation
      * @return a basic Propagate object to handle constraint propagation
      */
-    default void useStandardPropagation(){
+    default void setStandardPropagation(){
         _me().set(new PropagateBasic());
     }
 }

@@ -154,10 +154,10 @@ public class LimitsTest {
                     super.repair(resolver);
                 } else if (this.solutions > 0
                         // the second condition is only here for intiale calls, when solutions is not already up to date
-                        || model.getResolver().getMeasures().getSolutionCount() > 0) {
+                        || resolver.getMeasures().getSolutionCount() > 0) {
                     // the detection of a new solution can only be met here
-                    if (solutions < model.getResolver().getMeasures().getSolutionCount()) {
-                        assert solutions == model.getResolver().getMeasures().getSolutionCount() - 1;
+                    if (solutions < resolver.getMeasures().getSolutionCount()) {
+                        assert solutions == resolver.getMeasures().getSolutionCount() - 1;
                         solutions++;
                         neighbor.recordSolution();
                     }

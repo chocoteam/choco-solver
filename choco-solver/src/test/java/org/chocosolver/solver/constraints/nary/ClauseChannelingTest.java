@@ -59,7 +59,7 @@ public class ClauseChannelingTest {
                 Resolver r = model.getResolver();
                 r.set(r.randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                 while (model.solve()) ;
-                assertEquals(model.getResolver().getMeasures().getSolutionCount(), i);
+                assertEquals(r.getMeasures().getSolutionCount(), i);
             }
         }
     }
@@ -78,7 +78,7 @@ public class ClauseChannelingTest {
                 Resolver r = model.getResolver();
                 r.set(r.randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                 while (model.solve()) ;
-                assertEquals(model.getResolver().getMeasures().getSolutionCount(), i);
+                assertEquals(r.getMeasures().getSolutionCount(), i);
             }
         }
     }
