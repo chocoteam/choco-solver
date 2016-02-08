@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 
 import static java.lang.Math.ceil;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.printSolutions;
 
@@ -75,18 +74,18 @@ public class LNSTest {
                 break;
             case 1:
                 model.getResolver().setLNS(new RandomNeighborhood(model, objects, 200, 123456L));
-                limitTime(model, 10000);
+                model.getResolver().limitTime(10000);
                 break;
             case 2:
                 model.getResolver().setLNS(new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10));
-                limitTime(model, 10000);
+                model.getResolver().limitTime(10000);
                 break;
             case 3:
                 model.getResolver().setLNS(new SequenceNeighborhood(
                         new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
                         new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10)
                 ));
-                limitTime(model, 10000);
+                model.getResolver().limitTime(10000);
                 break;
             case 4:
                 model.getResolver().setLNS(new SequenceNeighborhood(
@@ -94,22 +93,22 @@ public class LNSTest {
                         new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
                         new RandomNeighborhood(model, objects, 200, 123456L)
                 ));
-                limitTime(model, 10000);
+                model.getResolver().limitTime(10000);
                 break;
             case 5:
                 model.getResolver().setLNS(new ExplainingCut(model, 200, 123456L));
-                limitTime(model, 10000);
+                model.getResolver().limitTime(10000);
                 break;
             case 6:
                 model.getResolver().setLNS(new ExplainingObjective(model, 200, 123456L));
-                limitTime(model, 10000);
+                model.getResolver().limitTime(10000);
                 break;
             case 7:
                 model.getResolver().setLNS(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(model, objects, 200, 123456L)));
-                limitTime(model, 10000);
+                model.getResolver().limitTime(10000);
                 break;
         }
 //        Chatterbox.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());

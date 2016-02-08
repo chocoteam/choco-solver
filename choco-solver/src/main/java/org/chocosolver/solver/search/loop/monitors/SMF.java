@@ -29,13 +29,13 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
+import org.chocosolver.solver.Resolver;
+
 /**
- * A short-named version of {@code SearchMonitorFactory}
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 15/05/13
+ * @deprecated use {@link Resolver}, which extends {@link ISearchMonitorFactory}, instead
+ * Will be removed after version 3.4.0
  */
+@Deprecated
 public final class SMF extends SearchMonitorFactory {
     // SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
 }

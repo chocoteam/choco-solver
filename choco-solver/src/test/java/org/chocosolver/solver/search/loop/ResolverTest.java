@@ -40,8 +40,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitSearch;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitSolution;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
@@ -173,8 +171,8 @@ public class ResolverTest {
         Resolver r = model.getResolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
-        model.getResolver().setLNS(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
-        limitSearch(model, () -> model.getResolver().getMeasures().getNodeCount() >= 1000);
+        r.setLNS(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
+        r.limitSearch(() -> r.getMeasures().getNodeCount() >= 1000);
         model.solve();
         printShortStatistics(model);
         assertEquals(model.getResolver().getMeasures().getRestartCount(), 314);
@@ -223,7 +221,7 @@ public class ResolverTest {
         r.setLDS(1);
         showSolutions(model);
 //        Chatterbox.showDecisions(solver);
-        limitSolution(model, 10);
+        r.limitSolution(10);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
 
@@ -245,7 +243,7 @@ public class ResolverTest {
         );
         showSolutions(model);
         showDecisions(model);
-        limitSolution(model, 10);
+        r.limitSolution(10);
         while (model.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 4);
 

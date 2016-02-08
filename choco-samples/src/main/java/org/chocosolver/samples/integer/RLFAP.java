@@ -35,7 +35,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
@@ -163,12 +162,12 @@ public class RLFAP extends AbstractProblem {
     @Override
     public void configureSearch() {
         model.getResolver().set(domOverWDegSearch(vars));
-        SearchMonitorFactory.luby(model, 2, 2, new FailCounter(model, 2), 25000);
+        model.getResolver().setLubyRestart(2, 2, new FailCounter(model, 2), 25000);
     }
 
     @Override
     public void solve() {
-        SearchMonitorFactory.limitNode(model, 10000);
+        model.getResolver().limitNode(10000);
         if (opt) {
             model.setObjectives(MAXIMIZE, nb0);
         }

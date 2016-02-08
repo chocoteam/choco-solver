@@ -38,7 +38,6 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.*;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.testng.Assert.assertEquals;
@@ -78,7 +77,7 @@ public class NoGoodOnSolutionTest {
         s.sum(costOf, "=", z).post();
         s.circuit(vars).post();
         s.getResolver().set(randomSearch(vars, 0));
-        limitSolution(s, MAX_NB_SOLS);
+        s.getResolver().limitSolution(MAX_NB_SOLS);
         return s;
     }
 
@@ -105,7 +104,7 @@ public class NoGoodOnSolutionTest {
     public void testRoSNG() {
         // restarts on solutions with no goods on solutions (ok)
         Model s = makeProblem();
-        nogoodRecordingOnSolution(s.retrieveIntVars(true));
+        s.getResolver().setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
         s.getResolver().setRestartOnSolutions();
         while (s.solve()) ;
         out.println(s.getResolver().getMeasures());
@@ -128,7 +127,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Model s = makeProblem();
         Resolver r = s.getResolver();
-        nogoodRecordingOnSolution(s.retrieveIntVars(true));
+        r.setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
         r.set(activityBasedSearch(s.retrieveIntVars(true)));
         showSolutions(s);
         while (s.solve()) ;
@@ -151,7 +150,7 @@ public class NoGoodOnSolutionTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        nogoodRecordingOnSolution(model.retrieveIntVars(true));
+        model.getResolver().setNoGoodRecordingFromSolutions(model.retrieveIntVars(true));
         model.getResolver().set(randomSearch(vars, 0));
 
         model.getResolver().setRestartOnSolutions();
@@ -175,8 +174,8 @@ public class NoGoodOnSolutionTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        nogoodRecordingOnSolution(model.retrieveIntVars(false));
-        nogoodRecordingFromRestarts(model);
+        model.getResolver().setNoGoodRecordingFromSolutions(model.retrieveIntVars(false));
+        model.getResolver().setNoGoodRecordingFromRestarts();
         model.getResolver().set(randomSearch(vars, 0));
         model.getResolver().setRestartOnSolutions();
         while (model.solve()) ;
@@ -199,7 +198,7 @@ public class NoGoodOnSolutionTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        nogoodRecordingOnSolution(new IntVar[]{vars[0]});
+        model.getResolver().setNoGoodRecordingFromSolutions(vars[0]);
         showSolutions(model);
         model.getResolver().set(inputOrderLBSearch(vars));
         while (model.solve()) ;
@@ -222,7 +221,7 @@ public class NoGoodOnSolutionTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        nogoodRecordingOnSolution(new IntVar[]{vars[0], vars[1]});
+        model.getResolver().setNoGoodRecordingFromSolutions(vars[0], vars[1]);
         showSolutions(model);
         model.getResolver().set(inputOrderLBSearch(vars));
 //        Chatterbox.showDecisions(solver);

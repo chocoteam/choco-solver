@@ -37,7 +37,6 @@ import org.chocosolver.solver.variables.Task;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 
@@ -156,7 +155,7 @@ public class CumulativeTest {
 		model.cumulative(t, h, capa, graph).post();
 		Resolver r = model.getResolver();
 		r.set(lastConflict(randomSearch(model.retrieveIntVars(false), seed)));
-		limitTime(model, 5000);
+		model.getResolver().limitTime(5000);
 		switch (mode) {
 			case 0:
 				model.solve();

@@ -31,7 +31,6 @@ package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
@@ -85,7 +84,7 @@ public class HybridCycloHexan extends AbstractProblem {
 	@Override
 	public void configureSearch() {
 		model.getResolver().set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
-		SearchMonitorFactory.limitTime(model,10000);
+		model.getResolver().limitTime(10000);
 	}
 
 	@Override

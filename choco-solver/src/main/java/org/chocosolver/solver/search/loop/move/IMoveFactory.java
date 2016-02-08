@@ -34,7 +34,9 @@ import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
+import org.chocosolver.solver.search.restart.LubyRestartStrategy;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.util.criteria.LongCriterion;
 
@@ -105,6 +107,31 @@ public interface IMoveFactory {
      */
     default void setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
         _me().set(new MoveRestart(_me().getMove(), restartStrategy, restartCriterion, restartsLimit));
+    }
+
+    /**
+     * Branch a luby restart strategy to the model
+     *
+     * @param scaleFactor          scale factor
+     * @param geometricalFactor    increasing factor
+     * @param restartStrategyLimit restart trigger
+     * @param restartLimit         restart limits (limit of number of restarts)
+     */
+    default void setLubyRestart(int scaleFactor, int geometricalFactor, ICounter restartStrategyLimit, int restartLimit) {
+        _me().setRestarts(restartStrategyLimit, new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
+    }
+
+    /**
+     * Build a geometrical restart strategy
+     *
+     * @param scaleFactor          scale factor
+     * @param geometricalFactor    increasing factor
+     * @param restartStrategyLimit restart trigger
+     * @param restartLimit         restart limits (limit of number of restarts)
+     */
+    default void setGeometricalRestart(int scaleFactor, double geometricalFactor,
+                                   ICounter restartStrategyLimit, int restartLimit) {
+        _me().setRestarts(restartStrategyLimit, new GeometricalRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**

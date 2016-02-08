@@ -34,7 +34,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
@@ -82,7 +81,7 @@ public class CostasArrays extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		limitTime(model, "20s");
+		model.getResolver().limitTime("20s");
 		model.getResolver().set(inputOrderLBSearch(vectors));
 	}
 

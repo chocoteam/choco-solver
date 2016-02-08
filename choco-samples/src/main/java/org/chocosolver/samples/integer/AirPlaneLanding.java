@@ -52,7 +52,6 @@ import static java.util.Arrays.copyOfRange;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
 import static org.chocosolver.solver.search.loop.lns.LNSFactory.pglns;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 
@@ -194,7 +193,7 @@ public class AirPlaneLanding extends AbstractProblem {
     public void solve() {
         IntVar[] ivars = model.retrieveIntVars(true);
         pglns(model, ivars, 30, 10, 200, 0, new FailCounter(model, 100));
-        limitTime(model, "15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
+        model.getResolver().limitTime("15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
         model.setObjectives(MINIMIZE, objective);
         model.solve();
     }

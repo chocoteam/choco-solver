@@ -51,7 +51,6 @@ import static java.util.Arrays.fill;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
 import static org.chocosolver.solver.explanations.ExplanationFactory.DBT;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
 import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.midIntVal;
@@ -400,7 +399,7 @@ public class ExplanationEngineTest {
 
         configure(model, a);
         showShortStatistics(model);
-        limitTime(model, "5m");
+        model.getResolver().limitTime("5m");
         assertTrue(model.solve() || model.getResolver().hasReachedLimit());
     }
 
@@ -440,7 +439,7 @@ public class ExplanationEngineTest {
 
         configure(model, a);
         showShortStatistics(model);
-        limitTime(model, "5m");
+        model.getResolver().limitTime("5m");
         assertTrue(model.solve());
     }
 
@@ -487,7 +486,7 @@ public class ExplanationEngineTest {
 
         configure(model, a);
         showShortStatistics(model);
-        limitTime(model, "5m");
+        model.getResolver().limitTime("5m");
         model.setObjectives(MINIMIZE, ticks[m - 1]);
         model.solve();
         assertTrue(model.getResolver().getMeasures().getSolutionCount() > 0);
@@ -517,7 +516,7 @@ public class ExplanationEngineTest {
 
         configure(model, a);
         showShortStatistics(model);
-        limitTime(model, "5m");
+        model.getResolver().limitTime("5m");
         assertTrue(model.solve());
     }
 
@@ -579,7 +578,7 @@ public class ExplanationEngineTest {
 
         configure(model, a);
         showShortStatistics(model);
-        limitTime(model, "5m");
+        model.getResolver().limitTime("5m");
         assertTrue(model.solve() || r.hasReachedLimit());
     }
 
@@ -658,7 +657,7 @@ public class ExplanationEngineTest {
 
         configure(model, a);
         showShortStatistics(model);
-        limitTime(model, "5m");
+        model.getResolver().limitTime("5m");
         assertTrue(model.solve() || model.getResolver().hasReachedLimit());
     }
 

@@ -38,7 +38,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.memory.Environments.TRAIL;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.*;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
@@ -74,7 +73,7 @@ public class RestartTest {
     @Test(groups="1s", timeOut=60000)
     public void testGeometricalRestart1() {
         Model model = buildQ(4);
-        geometrical(model, 2, 1.1, new NodeCounter(model, 2), 2);
+        model.getResolver().setGeometricalRestart(2, 1.1, new NodeCounter(model, 2), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
@@ -85,7 +84,7 @@ public class RestartTest {
     @Test(groups="1s", timeOut=60000)
     public void testLubyRestart1() {
         Model model = buildQ(4);
-        luby(model, 2, 2, new NodeCounter(model, 2), 2);
+        model.getResolver().setLubyRestart(2, 2, new NodeCounter(model, 2), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
@@ -138,8 +137,7 @@ public class RestartTest {
             }
             model.getResolver().setRestartOnSolutions();
             model.getResolver().set(inputOrderLBSearch(X));
-//            SMF.log(solver, false, false);
-            limitSolution(model, 100);
+            model.getResolver().limitSolution(100);
             while (model.solve()) ;
             //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());
         }
@@ -148,11 +146,10 @@ public class RestartTest {
     @Test(groups="1s", timeOut=60000)
     public void testGeometricalRestart2() {
         Model model = buildQ(8);
-        geometrical(model, 10, 1.2, new FailCounter(model, 10), 2);
+        model.getResolver().setGeometricalRestart(10, 1.2, new FailCounter(model, 10), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
         assertEquals(model.getResolver().getMeasures().getRestartCount(), 2);
     }
-
 }

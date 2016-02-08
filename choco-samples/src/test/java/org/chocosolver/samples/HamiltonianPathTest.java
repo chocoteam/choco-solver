@@ -41,7 +41,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertTrue;
 
@@ -107,7 +106,7 @@ public class HamiltonianPathTest {
 		} else {
 			model.getResolver().set(new ConstructorIntHeur(succ, offset));
 		}
-		limitTime(model, TIME_LIMIT);
+		model.getResolver().limitTime(TIME_LIMIT);
 		model.solve();
 		IMeasures mes = model.getResolver().getMeasures();
 		// the problem has at least one solution

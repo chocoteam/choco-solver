@@ -30,6 +30,7 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.search.loop.learn.ILearnFactory;
+import org.chocosolver.solver.search.loop.monitors.ISearchMonitorFactory;
 import org.chocosolver.solver.search.loop.move.IMoveFactory;
 import org.chocosolver.solver.search.loop.propagate.IPropagateFactory;
 
@@ -39,6 +40,6 @@ import org.chocosolver.solver.search.loop.propagate.IPropagateFactory;
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface ISolver extends IPropagateFactory, ILearnFactory, IMoveFactory {
+public interface ISolver extends IPropagateFactory, ILearnFactory, IMoveFactory, ISearchMonitorFactory {
 
 }

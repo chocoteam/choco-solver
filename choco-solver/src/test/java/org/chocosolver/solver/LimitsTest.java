@@ -32,14 +32,13 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
-import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
+import org.chocosolver.util.tools.TimeUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.loop.lns.LNSFactory.random;
-import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.*;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -56,7 +55,7 @@ public class LimitsTest {
     public void testTime() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long tl = 500;
-        limitTime(s, tl);
+        s.getResolver().limitTime(tl);
         while (s.solve()) ;
         int tc = (int) (s.getResolver().getMeasures().getTimeCount() * 1000);
         assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
@@ -66,7 +65,7 @@ public class LimitsTest {
     public void testThreadTime() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long tl = 500;
-        limitTime(s, tl);
+        s.getResolver().limitTime(tl);
         while (s.solve()) ;
         int tc = (int) (s.getResolver().getMeasures().getTimeCount() * 1000);
         assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
@@ -76,7 +75,7 @@ public class LimitsTest {
     public void testNode() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long nl = 50;
-        limitNode(s, nl);
+        s.getResolver().limitNode(nl);
         while (s.solve()) ;
         long nc = s.getResolver().getMeasures().getNodeCount();
         assertEquals(nc, nl);
@@ -86,7 +85,7 @@ public class LimitsTest {
     public void testBacktrack() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long bl = 50;
-        limitBacktrack(s, bl);
+        s.getResolver().limitBacktrack(bl);
         while (s.solve()) ;
         long bc = s.getResolver().getMeasures().getBackTrackCount();
         assertEquals(bc, bl);
@@ -96,7 +95,7 @@ public class LimitsTest {
     public void testFail() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long fl = 50;
-        limitFail(s, fl);
+        s.getResolver().limitFail(fl);
         while (s.solve()) ;
         long fc = s.getResolver().getMeasures().getFailCount();
         assertEquals(fc, fl);
@@ -106,7 +105,7 @@ public class LimitsTest {
     public void testSolution() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long sl = 50;
-        limitSolution(s, sl);
+        s.getResolver().limitSolution(sl);
         while (s.solve()) ;
         long sc = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sc, sl);
@@ -114,21 +113,21 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void durationTest() {
-        long d = SMF.convertInMilliseconds("0.50s");
+        long d = TimeUtils.convertInMilliseconds("0.50s");
         Assert.assertEquals(d, 500);
-        d += SMF.convertInMilliseconds("30s");
+        d += TimeUtils.convertInMilliseconds("30s");
         Assert.assertEquals(d, 30500);
-        d += SMF.convertInMilliseconds("30m");
+        d += TimeUtils.convertInMilliseconds("30m");
         Assert.assertEquals(d, 1830500);
-        d += SMF.convertInMilliseconds("12h");
+        d += TimeUtils.convertInMilliseconds("12h");
         Assert.assertEquals(d, 45030500);
-        d += SMF.convertInMilliseconds("2d");
+        d += TimeUtils.convertInMilliseconds("2d");
         Assert.assertEquals(d, 217830500);
 
-        long t = SMF.convertInMilliseconds("2d12h30m30.5s");
+        long t = TimeUtils.convertInMilliseconds("2d12h30m30.5s");
         Assert.assertEquals(t, d);
 
-        d = SMF.convertInMilliseconds("71s");
+        d = TimeUtils.convertInMilliseconds("71s");
         Assert.assertEquals(d, 71000);
     }
 

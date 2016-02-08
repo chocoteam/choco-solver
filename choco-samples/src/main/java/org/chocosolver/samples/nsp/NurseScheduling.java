@@ -36,7 +36,6 @@
 package org.chocosolver.samples.nsp;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -157,7 +156,7 @@ public class NurseScheduling {
 
         Model model = new Model();
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
-        SearchMonitorFactory.limitTime(model, 180000);
+        model.getResolver().limitTime(180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
         model.getResolver().set(strategy.getGoal(model, vars));
         if (Boolean.TRUE == model.solve()) {
@@ -200,7 +199,7 @@ public class NurseScheduling {
         System.out.println(strategy.name() + "\t " + patternOptions.name() + "\t " + basisOptions.name());
         Model model = new Model();
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
-        SearchMonitorFactory.limitTime(model, 180000);
+        model.getResolver().limitTime(180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
         model.getResolver().set(strategy.getGoal(model, vars));
         String solved = "0";

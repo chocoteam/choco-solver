@@ -30,155 +30,126 @@
 package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.tools.TimeUtils;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 09/05/11
+ * @deprecated use {@link Resolver}, which extends {@link ISearchMonitorFactory}, instead
+ * Will be removed after version 3.4.0
  */
+@Deprecated
 public class SearchMonitorFactory {
-    /**
-     * Constructor
-     */
-    SearchMonitorFactory() {
-    }
+    SearchMonitorFactory() {}
 
     /**
-     * To convert milliseconds in nanoseconds
+     * @deprecated use {@link TimeUtils} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     private static final long MILLISECONDS_IN_NANOSECONDS = 1000 * 1000;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Branch a luby restart strategy to the model
-     *
-     * @param model               the model
-     * @param scaleFactor          scale factor
-     * @param geometricalFactor    increasing factor
-     * @param restartStrategyLimit restart trigger
-     * @param restartLimit         restart limits (limit of number of restarts)
+     * @deprecated use {@link Resolver#setLubyRestart(int, int, ICounter, int)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void luby(Model model, int scaleFactor, int geometricalFactor, ICounter restartStrategyLimit, int restartLimit) {
         model.getResolver().setRestarts(restartStrategyLimit, new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**
-     * Build a geometrical restart strategy
-     *
-     * @param model               the solver
-     * @param scaleFactor          scale factor
-     * @param geometricalFactor    increasing factor
-     * @param restartStrategyLimit restart trigger
-     * @param restartLimit         restart limits (limit of number of restarts)
+     * @deprecated use {@link Resolver#setGeometricalRestart(int, double, ICounter, int)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void geometrical(Model model, int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
         model.getResolver().setRestarts(restartStrategyLimit, new GeometricalRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**
-     * Defines a limit on the number of nodes allowed in the tree search.
-     * When the limit is reached, the resolution is stopped.
-     *
-     * @param model the solver to instrument
-     * @param limit maximal number of nodes to open
+     * @deprecated use {@link Resolver#limitNode(long)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void limitNode(Model model, long limit) {
         NodeCounter counter = new NodeCounter(model, limit);
         model.getResolver().addStopCriterion(counter);
     }
 
     /**
-     * Defines a limit over the number of solutions found during the resolution.
-     * WHen the limit is reached, the resolution is stopped.
-     *
-     * @param model the solver to instrument
-     * @param limit maximal number of solutions
+     * @deprecated use {@link Resolver#limitSolution(long)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void limitSolution(Model model, long limit) {
         SolutionCounter counter = new SolutionCounter(model, limit);
         model.getResolver().addStopCriterion(counter);
     }
 
-
     /**
-     * Defines a limit over the run time.
-     * When the limit is reached, the resolution is stopped.
-     * <br/>
-     * <br/>
-     * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(long)}, that runs the limit in a separated thread.</b>
-     *
-     * @param model the solver subject to the time limit
-     * @param limit  maximal resolution time in millisecond
+     * @deprecated use {@link Resolver#limitTime(long)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void limitTime(Model model, long limit) {
         TimeCounter counter = new TimeCounter(model, limit * MILLISECONDS_IN_NANOSECONDS);
         model.getResolver().addStopCriterion(counter);
     }
 
     /**
-     * Defines a limit over the run time.
-     * When the limit is reached, the resolution is stopped.
-     * <br/>
-     * <br/>
-     * <b>One must consider also {@code SearchMonitorFactory.limitThreadTime(String)}, that runs the limit in a separated thread.</b>
-     * <p>
-     * Based on {@code SearchMonitorFactory.convertInMilliseconds(String duration)}
-     *
-     * @param model the solver to instrument
-     * @param duration a String which states the duration like "WWd XXh YYm ZZs".
-     * @see SearchMonitorFactory#convertInMilliseconds(String)
+     * @deprecated use {@link Resolver#limitTime(String)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void limitTime(Model model, String duration) {
-        limitTime(model, convertInMilliseconds(duration));
+        model.getResolver().limitTime(convertInMilliseconds(duration));
     }
 
     /**
-     * Pattern for days
+     * @deprecated use {@link TimeUtils} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     private static Pattern Dp = Pattern.compile("(\\d+)d");
 
     /**
-     * Pattern for hours
+     * @deprecated use {@link TimeUtils} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     private static Pattern Hp = Pattern.compile("(\\d+)h");
 
     /**
-     * Pattern for minutes
+     * @deprecated use {@link TimeUtils} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     private static Pattern Mp = Pattern.compile("(\\d+)m");
 
     /**
-     * Pattern for seconds
+     * @deprecated use {@link TimeUtils} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     private static Pattern Sp = Pattern.compile("(\\d+(\\.\\d+)?)s");
 
-
     /**
-     * Convert a string which represents a duration. It can be composed of days, hours, minutes and seconds.
-     * Examples:
-     * <p>
-     * - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
-     * - "2h30m": two hours and 30 minutes<p/>
-     * - "30.5s": 30 seconds and 500 ms<p/>
-     * - "180s": three minutes
-     *
-     * @param duration a String which describes the duration
-     * @return the duration in milliseconds
+     * @deprecated use {@link TimeUtils} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static long convertInMilliseconds(String duration) {
         long milliseconds = 0;
         duration = duration.replaceAll("\\s+", "");
@@ -209,17 +180,10 @@ public class SearchMonitorFactory {
     }
 
     /**
-     * Convert a string which represents a duration. It can be composed of days, hours, minutes and seconds.
-     * Examples:
-     * <p>
-     * - "1d2h3m4.5s": one day, two hours, three minutes, four seconds and 500 milliseconds<p/>
-     * - "2h30m": two hours and 30 minutes<p/>
-     * - "30.5s": 30 seconds and 500 ms<p/>
-     * - "180s": three minutes
-     *
-     * @param duration a String which describes the duration
-     * @return the duration in seconds
+     * @deprecated use {@link TimeUtils} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static long convertInSeconds(String duration) {
         long milliseconds = 0;
         duration = duration.replaceAll("\\s+", "");
@@ -250,107 +214,57 @@ public class SearchMonitorFactory {
     }
 
     /**
-     * Defines a limit over the number of fails allowed during the resolution.
-     * WHen the limit is reached, the resolution is stopped.
-     * @param model the solver to instrument
-     * @param limit maximal number of fails
+     * @deprecated use {@link Resolver#limitFail(long)} instead
+     * Will be removed after version 3.4.0
      */
-
+    @Deprecated
     public static void limitFail(Model model, long limit) {
         FailCounter counter = new FailCounter(model, limit);
         model.getResolver().addStopCriterion(counter);
     }
 
     /**
-     * Defines a limit over the number of backtracks allowed during the resolution.
-     * WHen the limit is reached, the resolution is stopped.
-     *
-     * @param model the solver to instrument
-     * @param limit maximal number of backtracks
+     * @deprecated use {@link Resolver#limitBacktrack(long)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void limitBacktrack(Model model, long limit) {
         BacktrackCounter counter = new BacktrackCounter(model, limit);
         model.getResolver().addStopCriterion(counter);
     }
 
     /**
-     * Limit the exploration of the search space with the help of a <code>aStopCriterion</code>.
-     * When the condition depicted in the criterion is met,
-     * the search stops.
-     *
-     * @param model the solver to instrument
-     * @param aStopCriterion the stop criterion which, when met, stops the search.
+     * @deprecated use {@link Resolver#limitSearch(Criterion)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void limitSearch(Model model, Criterion aStopCriterion) {
         model.getResolver().addStopCriterion(aStopCriterion);
     }
 
     /**
-     * Record nogoods from solution, that is, anytime a solution is found, a nogood is produced to prevent from
-     * finding the same solution later during the search.
-     * <code>vars</code> are the decision variables (to reduce ng size).
-     *
-     * @param vars array of decision variables
+     * @deprecated use {@link Resolver#setNoGoodRecordingFromSolutions(IntVar...)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void nogoodRecordingOnSolution(IntVar[] vars) {
         vars[0].getModel().getResolver().plugMonitor(new NogoodFromSolutions(vars));
     }
 
     /**
-     * * Record nogoods from restart, that is, anytime the search restarts, a nogood is produced, based on the decision path, to prevent from
-     * scanning the same sub-search tree.
-     *
-     * @param model the solver to observe
+     * @deprecated use {@link Resolver#setNoGoodRecordingFromRestarts()} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void nogoodRecordingFromRestarts(final Model model) {
         model.getResolver().plugMonitor(new NogoodFromRestarts(model));
     }
 
     /**
-     * @deprecated Use instead {@link org.chocosolver.solver.ParallelResolution} which centralizes parallel resolution process
-     * and offers more services.
+     * @deprecated use {@link Resolver#connectocpprofiler()} instead
+     * Will be removed after version 3.4.0
      */
     @Deprecated
-    public static void prepareForParallelResolution(List<Model> models) {
-        if (models.get(0).getObjectives() != null &&
-                models.get(0).getObjectives().length == 1) {
-            // share the best known bound
-            models.stream().forEach(s -> s.getResolver().plugMonitor(
-                    (IMonitorSolution) () -> {
-                        synchronized (s.getResolver().getObjectiveManager()) {
-                            switch (s.getResolver().getObjectiveManager().getPolicy()) {
-                                case MAXIMIZE:
-                                    int lb = s.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
-                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestLB(lb));
-                                    break;
-                                case MINIMIZE:
-                                    int ub = s.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
-                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestUB(ub));
-                                    break;
-                            }
-                        }
-                    }
-            ));
-        }
-        AtomicInteger finishers = new AtomicInteger(0);
-        models.stream().forEach(s -> s.getResolver().addStopCriterion(()->finishers.get()>0));
-        models.stream().forEach(s -> s.getResolver().plugMonitor(new IMonitorClose() {
-            @Override
-            public void afterClose() {
-                int count = finishers.addAndGet(1);
-                if(count == models.size()){
-                    finishers.set(0); //reset the counter to 0
-                }
-            }
-        }));
-    }
-
-    /**
-     * Connect and send data to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
-     * This requires to have installed the library and to start it before launching the resolution.
-     * @param aModel solver to visualize
-     */
-    @SuppressWarnings("unused")
     public static void connectocpprofiler(Model aModel){
         aModel.getResolver().plugMonitor(new CPProfiler(aModel));
     }

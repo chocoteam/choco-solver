@@ -31,7 +31,6 @@ package org.chocosolver.solver.search;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Resolver;
-import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
@@ -67,7 +66,7 @@ public class ImpactTest {
 		IntVar[] vectors = (IntVar[]) model.getHook("vectors");
 
 		Resolver r = model.getResolver();
-		SMF.limitTime(model, 20000);
+		r.limitTime(20000);
 		if(impact){
 			r.set(new ImpactBased(vectors,2,3,10,0,true));
 		}else{
