@@ -48,6 +48,9 @@ public class MoveBinaryDFS implements Move {
     AbstractStrategy strategy;
     Decision topDecision; // the decision taken just before selecting this move.
 
+    public MoveBinaryDFS(){
+        this(null);
+    }
 
     public MoveBinaryDFS(AbstractStrategy strategy) {
         this.strategy = strategy;

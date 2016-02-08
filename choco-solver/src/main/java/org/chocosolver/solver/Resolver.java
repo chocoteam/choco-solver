@@ -44,6 +44,7 @@ import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
 import org.chocosolver.solver.search.loop.move.Move;
+import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveSeq;
 import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
@@ -209,7 +210,7 @@ public final class Resolver implements Serializable, ISolver {
         kill = true;
         entire = false;
         searchMonitors = new SearchMonitorList();
-        setDFS(null);
+        set(new MoveBinaryDFS());
         setStandardPropagation();
         setNoLearning();
     }

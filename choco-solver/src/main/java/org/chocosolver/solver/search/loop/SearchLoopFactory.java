@@ -50,43 +50,47 @@ public class SearchLoopFactory {
     SearchLoopFactory() {}
 
     /**
-     * @deprecated use {@link Resolver#setDFS(AbstractStrategy)} instead
+     * @deprecated use {@link Resolver#setDFS()} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void dfs(Model aModel, AbstractStrategy<V> aSearchStrategy) {
         Resolver r = aModel.getResolver();
-        r.setDFS(aSearchStrategy);
+        r.setDFS();
+        r.set(aSearchStrategy);
     }
 
     /**
-     * @deprecated use {@link Resolver#setLDS(AbstractStrategy, int)} instead
+     * @deprecated use {@link Resolver#setLDS(int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void lds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
         Resolver r = aModel.getResolver();
-        r.setLDS(aSearchStrategy, discrepancy);
+        r.set(aSearchStrategy);
+        r.setLDS(discrepancy);
     }
 
     /**
-     * @deprecated use {@link Resolver#setDDS(AbstractStrategy, int)} instead
+     * @deprecated use {@link Resolver#setDDS(int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void dds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
         Resolver r = aModel.getResolver();
-        r.setDDS(aSearchStrategy, discrepancy);
+        r.set(aSearchStrategy);
+        r.setDDS(discrepancy);
     }
 
     /**
-     * @deprecated use {@link Resolver#setHBFS(AbstractStrategy, double, double, long)} instead
+     * @deprecated use {@link Resolver#setHBFS(double, double, long)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void hbfs(Model aModel, AbstractStrategy<V> aSearchStrategy, double a, double b, long N) {
         Resolver r = aModel.getResolver();
-        r.setHBFS(aSearchStrategy, a, b, N);
+        r.set(aSearchStrategy);
+        r.setHBFS(a, b, N);
     }
 
     /**

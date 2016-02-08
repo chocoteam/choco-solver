@@ -49,43 +49,34 @@ public interface IMoveFactory {
     Resolver _me();
 
     /**
-     * Depth-First Search algorithm with binary decisions and no learning.
-     * The current search loop (if any) will be replaced by this one after that call.
-     * The current search strategy (if any) will also be replaced by the input one.
-     *
-     * @param aSearchStrategy the search strategy to apply
+     * Depth-First Search algorithm with binary decisions
      */
-    default void setDFS(AbstractStrategy aSearchStrategy) {
-        _me().set(new MoveBinaryDFS(aSearchStrategy));
+    default void setDFS() {
+        _me().set(new MoveBinaryDFS(_me().getStrategy()));
     }
 
     /**
-     * Limited Discrepancy Search[1] algorithms with binary decisions and no learning.
+     * Limited Discrepancy Search[1] algorithms with binary decisions
      * <p>
      * [1]:W.D. Harvey and M.L.Ginsberg, Limited Discrepancy Search, IJCAI-95.
      *
-     * The current search loop (if any) will be replaced by this one after that call.
-     * The current search strategy (if any) will also be replaced by the input one.
-     *
-     * @param aSearchStrategy the search strategy to apply
      * @param discrepancy     the maximum discrepancy
      */
-    default void setLDS(AbstractStrategy aSearchStrategy, int discrepancy) {
+    default void setLDS(int discrepancy) {
         IEnvironment env = _me().getModel().getEnvironment();
-        _me().set(new MoveBinaryLDS(aSearchStrategy, discrepancy, env));
+        _me().set(new MoveBinaryLDS(_me().getStrategy(), discrepancy, env));
     }
 
     /**
-     * Depth-bounded Discrepancy Search[1] algorithms with binary decisions and no learning.
+     * Depth-bounded Discrepancy Search[1] algorithms with binary decisions
      * <p>
      * [1]:T. Walsh, Depth-bounded Discrepancy Search, IJCAI-97.
      *
-     * @param aSearchStrategy the search strategy to apply
      * @param discrepancy     the maximum discrepancy
      */
-    default void setDDS(AbstractStrategy aSearchStrategy, int discrepancy) {
+    default void setDDS(int discrepancy) {
         IEnvironment env = _me().getModel().getEnvironment();
-        _me().set(new MoveBinaryDDS(aSearchStrategy, discrepancy, env));
+        _me().set(new MoveBinaryDDS(_me().getStrategy(), discrepancy, env));
     }
 
     /**
@@ -95,13 +86,12 @@ public interface IMoveFactory {
      * [1]:D. Allouche, S. de Givry, G. Katsirelos, T. Schiex, M. Zytnicki,
      * Anytime Hybrid Best-First Search with Tree Decomposition for Weighted CSP, CP-2015.
      *
-     * @param aSearchStrategy the search strategy to apply
      * @param a               lower bound to limit the rate of redundantly propagated decisions
      * @param b               upper bound to limit the rate of redundantly propagated decisions.
      * @param N               backtrack limit for each DFS try, should be large enough to limit redundancy
      */
-    default void setHBFS(AbstractStrategy aSearchStrategy, double a, double b, long N) {
-        _me().set(new MoveBinaryHBFS(_me().getModel(), aSearchStrategy, a, b, N));
+    default void setHBFS(double a, double b, long N) {
+        _me().set(new MoveBinaryHBFS(_me().getModel(), _me().getStrategy(), a, b, N));
     }
 
     /**
