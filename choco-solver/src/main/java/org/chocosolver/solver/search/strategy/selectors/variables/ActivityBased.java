@@ -53,6 +53,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.IntMap;
 
 import java.util.*;
+import java.util.Random;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -171,11 +172,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         assert a > 0;
         this.a = a;
         sampling = true;
-        random = new java.util.Random(seed);
+        random = new Random(seed);
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
-        model.getResolver().set(model.getResolver().restartOnSolutions());
+        model.getResolver().setRestartOnSolutions();
         if (restartAfterEachFail) {
             rfMove = new MoveRestart(model.getResolver().getMove(),
                     new MonotonicRestartStrategy(1),

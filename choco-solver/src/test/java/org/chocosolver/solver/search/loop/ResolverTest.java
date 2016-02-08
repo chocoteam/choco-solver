@@ -161,7 +161,7 @@ public class ResolverTest {
         Model model = makeGolombRuler(5);
         Resolver r = model.getResolver();
         r.setDFS(r.firstLBSearch(model.retrieveIntVars(false)));
-        model.getResolver().set(model.getResolver().lns(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10)));
+        model.getResolver().setLNS(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         limitSearch(model, () -> model.getResolver().getMeasures().getNodeCount() >= 1000);
         model.solve();
         printShortStatistics(model);
@@ -173,7 +173,7 @@ public class ResolverTest {
         Model model = makeGolombRuler(6);
         Resolver r = model.getResolver();
         r.setDFS(r.firstLBSearch(model.retrieveIntVars(false)));
-        model.getResolver().set(model.getResolver().lns(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10)));
+        model.getResolver().setLNS(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
         model.solve();
         printShortStatistics(model);

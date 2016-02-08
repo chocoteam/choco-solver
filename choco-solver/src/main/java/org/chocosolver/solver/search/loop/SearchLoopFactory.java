@@ -113,34 +113,33 @@ public class SearchLoopFactory {
     }
 
     /**
-     * @deprecated use {@link Resolver#restartOnSolutions()} instead
+     * @deprecated use {@link Resolver#setRestartOnSolutions()} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void restartOnSolutions(Model aModel) {
         Resolver r = aModel.getResolver();
-        r.set(r.restartOnSolutions());
+        r.setRestartOnSolutions();
     }
 
     /**
-     * @deprecated use {@link Resolver#lns(INeighbor, ICounter)} instead
+     * @deprecated use {@link Resolver#setLNS(INeighbor, ICounter)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void lns(Model aModel, INeighbor neighbor, ICounter restartCounter) {
-        Resolver r = aModel.getResolver();
-        r.set(r.lns(neighbor,restartCounter));
+        aModel.getResolver().setLNS(neighbor,restartCounter);
     }
 
 
     /**
-     * @deprecated use {@link Resolver#lns(INeighbor)} instead
+     * @deprecated use {@link Resolver#setLNS(INeighbor)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void lns(Model aModel, INeighbor neighbor) {
         Resolver r = aModel.getResolver();
-        r.set(r.lns(neighbor));
+        r.setLNS(neighbor);
     }
 
     /**

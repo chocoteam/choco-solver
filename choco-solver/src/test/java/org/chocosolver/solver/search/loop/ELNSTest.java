@@ -63,12 +63,11 @@ public class ELNSTest {
         CBJ.plugin(model, false, false);
 
         Resolver r = model.getResolver();
-        r.set(r.lns(new SequenceNeighborhood(
+        r.setLNS(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(model, vars, 200, 123456L)
-                ), None)
-        );
+                ), None);
         r.set(r.randomSearch(vars, seed));
 
 

@@ -73,41 +73,41 @@ public class LNSTest {
             case 0:
                 break;
             case 1:
-                model.getResolver().set(model.getResolver().lns(new RandomNeighborhood(model, objects, 200, 123456L)));
+                model.getResolver().setLNS(new RandomNeighborhood(model, objects, 200, 123456L));
                 limitTime(model, 10000);
                 break;
             case 2:
-                model.getResolver().set(model.getResolver().lns(new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10)));
+                model.getResolver().setLNS(new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10));
                 limitTime(model, 10000);
                 break;
             case 3:
-                model.getResolver().set(model.getResolver().lns(new SequenceNeighborhood(
+                model.getResolver().setLNS(new SequenceNeighborhood(
                         new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
                         new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10)
-                )));
+                ));
                 limitTime(model, 10000);
                 break;
             case 4:
-                model.getResolver().set(model.getResolver().lns(new SequenceNeighborhood(
+                model.getResolver().setLNS(new SequenceNeighborhood(
                         new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
                         new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
                         new RandomNeighborhood(model, objects, 200, 123456L)
-                )));
+                ));
                 limitTime(model, 10000);
                 break;
             case 5:
-                model.getResolver().set(model.getResolver().lns(new ExplainingCut(model, 200, 123456L)));
+                model.getResolver().setLNS(new ExplainingCut(model, 200, 123456L));
                 limitTime(model, 10000);
                 break;
             case 6:
-                model.getResolver().set(model.getResolver().lns(new ExplainingObjective(model, 200, 123456L)));
+                model.getResolver().setLNS(new ExplainingObjective(model, 200, 123456L));
                 limitTime(model, 10000);
                 break;
             case 7:
-                model.getResolver().set(model.getResolver().lns(new SequenceNeighborhood(
+                model.getResolver().setLNS(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
-                        new RandomNeighborhood(model, objects, 200, 123456L))));
+                        new RandomNeighborhood(model, objects, 200, 123456L)));
                 limitTime(model, 10000);
                 break;
         }

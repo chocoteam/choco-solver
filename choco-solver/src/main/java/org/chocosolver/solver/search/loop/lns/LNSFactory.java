@@ -97,11 +97,10 @@ public class LNSFactory {
      * @param level     the number of tries for each size of fragment
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @see org.chocosolver.solver.Resolver#lns(INeighbor)
+     * @see org.chocosolver.solver.Resolver#setLNS(INeighbor)
      */
     public static void rlns(Model model, IntVar[] vars, int level, long seed, ACounter frcounter) {
-        Resolver r = model.getResolver();
-        r.set(r.lns(new RandomNeighborhood(model, vars, level, seed), frcounter));
+        model.getResolver().setLNS(new RandomNeighborhood(model, vars, level, seed), frcounter);
     }
 
     /**
@@ -117,13 +116,13 @@ public class LNSFactory {
      */
     public static void pglns(Model model, IntVar[] vars, int fgmtSize, int listSize, int level, long seed, ACounter frcounter) {
         Resolver r = model.getResolver();
-        r.set(r.lns(
+        r.setLNS(
                 new SequenceNeighborhood(
                         pg(model, vars, fgmtSize, listSize, seed),
                         rpg(model, vars, fgmtSize, listSize, seed),
                         pg(model, vars, fgmtSize, 0, seed) // <= state of the art configuration
                 ),
-                frcounter));
+                frcounter);
     }
 
     /**
@@ -142,7 +141,6 @@ public class LNSFactory {
         INeighbor neighbor3 = new RandomNeighborhood(model, vars, level, seed);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
-        Resolver r = model.getResolver();
-        r.set(r.lns(neighbor, frcounter));
+        model.getResolver().setLNS(neighbor, frcounter);
     }
 }

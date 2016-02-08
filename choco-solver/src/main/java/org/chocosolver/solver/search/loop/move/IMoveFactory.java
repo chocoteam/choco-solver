@@ -37,7 +37,6 @@ import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.criteria.LongCriterion;
 
 /**
@@ -123,11 +122,11 @@ public interface IMoveFactory {
      * Creates a Move object that encapsulates the current move within a restart move.
      * Every time a solution is found, a restart is done.
      */
-    default Move restartOnSolutions() {
-        return new MoveRestart(_me().getMove(),
+    default void setRestartOnSolutions() {
+        _me().set(new MoveRestart(_me().getMove(),
                 new MonotonicRestartStrategy(1),
                 new SolutionCounter(_me().getModel(), 1),
-                Integer.MAX_VALUE);
+                Integer.MAX_VALUE));
     }
 
     /**
@@ -142,8 +141,8 @@ public interface IMoveFactory {
      * @param neighbor         the neighbor for the LNS
      * @param restartCounter the (fast) restart counter. Initial limit gives the frequency.
      */
-    default Move lns(INeighbor neighbor, ICounter restartCounter) {
-        return new MoveLNS(_me().getMove(), neighbor, restartCounter);
+    default void setLNS(INeighbor neighbor, ICounter restartCounter) {
+        _me().set(new MoveLNS(_me().getMove(), neighbor, restartCounter));
     }
 
 
@@ -154,10 +153,10 @@ public interface IMoveFactory {
      * The <code>neighbor</code> creates a <i>fragment</i>: selects variables to freeze/unfreeze wrt the last solution found.
      * If a fragment cannot be extended to a solution, a new one is selected by restarting the search.
      *
-     * @see #lns(INeighbor, ICounter)
+     * @see #setLNS(INeighbor, ICounter)
      * @param neighbor         the neighbor for the LNS
      */
-    default Move lns(INeighbor neighbor) {
-        return new MoveLNS(_me().getMove(), neighbor, ICounter.Impl.None);
+    default void setLNS(INeighbor neighbor) {
+        setLNS(neighbor, ICounter.Impl.None);
     }
 }

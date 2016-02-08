@@ -135,7 +135,7 @@ public class RestartTest {
             for (int i = 0; i < n; i++) {
                 model.arithm(Y[i], "=", X[i], "+", n).post();
             }
-            model.getResolver().set(model.getResolver().restartOnSolutions());
+            model.getResolver().setRestartOnSolutions();
             model.getResolver().set(model.getResolver().firstLBSearch(X));
 //            SMF.log(solver, false, false);
             limitSolution(model, 100);

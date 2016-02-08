@@ -106,7 +106,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         this.coefLB = coefs[0];
         this.coefUB = coefs[1];
         this.optPolicy = policy;
-        model.getResolver().set(model.getResolver().restartOnSolutions());
+        model.getResolver().setRestartOnSolutions();
         if (coefLB < 0 || coefUB < 0 || coefLB + coefUB == 0) {
             throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
         }
