@@ -39,6 +39,8 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+
 /**
  * <br/>
  *
@@ -82,7 +84,7 @@ public abstract class AbstractBinaryTest {
         }
         make(vars, s).post();
         Resolver r = s.getResolver();
-        r.set(r.randomSearch(vars,seed));
+        r.set(randomSearch(vars,seed));
         return s;
     }
 

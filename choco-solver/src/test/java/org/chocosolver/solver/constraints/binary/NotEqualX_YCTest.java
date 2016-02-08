@@ -35,6 +35,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -57,7 +58,7 @@ public class NotEqualX_YCTest {
         }
         s.arithm(vars[0], "!=", vars[1]).post();
 
-        s.getResolver().set(s.getResolver().firstLBSearch(vars));
+        s.getResolver().set(firstLBSearch(vars));
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 6, "nb sol incorrect");
@@ -75,7 +76,7 @@ public class NotEqualX_YCTest {
             vars[i] = s.intVar("v_" + i, 0, n, true);
         }
         s.arithm(vars[0], "!=", vars[1]).post();
-        s.getResolver().set(s.getResolver().firstLBSearch(vars));
+        s.getResolver().set(firstLBSearch(vars));
 //        ChocoLogging.toSolution();
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -93,7 +94,7 @@ public class NotEqualX_YCTest {
             vars[i] = s.intVar("v_" + i, 0, n, true);
         }
         s.arithm(vars[0], "!=", vars[1]).post();
-        s.getResolver().set(s.getResolver().firstLBSearch(vars));
+        s.getResolver().set(firstLBSearch(vars));
 
         try {
             s.getResolver().propagate();

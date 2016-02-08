@@ -38,6 +38,7 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -59,7 +60,7 @@ public class OffsetViewTest {
 
         s.arithm(Y, "!=", 4).post();
 
-        s.getResolver().set(s.getResolver().firstLBSearch(vars));
+        s.getResolver().set(firstLBSearch(vars));
         while (s.solve()) ;
         assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
     }
@@ -76,7 +77,7 @@ public class OffsetViewTest {
 
         s.arithm(Y, "!=", -2).post();
 
-        s.getResolver().set(s.getResolver().firstLBSearch(vars));
+        s.getResolver().set(firstLBSearch(vars));
         while (s.solve()) ;
         assertEquals(s.getResolver().getMeasures().getSolutionCount(), 4);
     }
@@ -92,7 +93,7 @@ public class OffsetViewTest {
         s.arithm(Y, ">=", low + coeff - 1).post();
         s.arithm(Y, "<=", upp - coeff - 1).post();
 
-        s.getResolver().set(s.getResolver().firstLBSearch(vars));
+        s.getResolver().set(firstLBSearch(vars));
         return s;
     }
 
@@ -108,7 +109,7 @@ public class OffsetViewTest {
         s.arithm(Y, "<=", upp - coeff - 1).post();
         s.arithm(X, "=", Y, "+", coeff).post();
 
-        s.getResolver().set(s.getResolver().firstLBSearch(vars));
+        s.getResolver().set(firstLBSearch(vars));
         return s;
     }
 

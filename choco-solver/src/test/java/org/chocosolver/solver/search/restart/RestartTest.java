@@ -39,6 +39,7 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.memory.Environments.TRAIL;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.*;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -66,7 +67,7 @@ public class RestartTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
         return model;
     }
 
@@ -136,7 +137,7 @@ public class RestartTest {
                 model.arithm(Y[i], "=", X[i], "+", n).post();
             }
             model.getResolver().setRestartOnSolutions();
-            model.getResolver().set(model.getResolver().firstLBSearch(X));
+            model.getResolver().set(firstLBSearch(X));
 //            SMF.log(solver, false, false);
             limitSolution(model, 100);
             while (model.solve()) ;

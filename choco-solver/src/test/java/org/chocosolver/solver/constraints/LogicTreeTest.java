@@ -43,6 +43,7 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.and;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifOnlyIf;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -242,7 +243,7 @@ public class LogicTreeTest {
                     and(rCNF[1], rCNF[2])
             );
             addClauses(tree, sCNF);
-            sCNF.getResolver().set(sCNF.getResolver().randomSearch(rCNF, seed));
+            sCNF.getResolver().set(randomSearch(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);
             while (sCNF.solve()) ;

@@ -39,7 +39,7 @@ import org.chocosolver.solver.variables.IntVar;
  *
  * @author Jean-Guillaume Fages, Charles Prud'homme
  */
-public interface IVarSelectorFactory {
+public class VarSelectorFactory {
 
     // ************************************************************************************
     // GENERIC SELECTORS
@@ -49,7 +49,7 @@ public interface IVarSelectorFactory {
      * Selects the first free (non-instantiated) variable
      * @return a variable selector choosing always the first non-instantiated variable
      */
-    default VariableSelector firstVarSelector() {
+    public static VariableSelector firstVarSelector() {
         return new InputOrder<>();
     }
 
@@ -61,7 +61,7 @@ public interface IVarSelectorFactory {
      * example : selects vars[0], then vars[1] even if vars[0] is still uninstantiated
      * @return a variable selector iterating over variables one by one
      */
-    default VariableSelector nextVarSelector() {
+    public static VariableSelector nextVarSelector() {
         return new Cyclic<>();
     }
 
@@ -69,7 +69,7 @@ public interface IVarSelectorFactory {
      * Selects randomly a non-instantiated variable
      * @return a variable selector choosing variables randomly
      */
-    default VariableSelector randomVarSelector(){
+    public static VariableSelector randomVarSelector(){
         return new Random<>(0);
     }
 
@@ -77,7 +77,7 @@ public interface IVarSelectorFactory {
      * Selects the non instantiated variable involved in the largest number of constraints
      * @return a variable selector choosing the variable involved in the largest number of constraints
      */
-    default VariableSelector maxCstrsVarSelector(){
+    public static VariableSelector maxCstrsVarSelector(){
         return new Occurrence<>();
     }
 
@@ -85,7 +85,7 @@ public interface IVarSelectorFactory {
      * Selects the non instantiated variable with the smallest domain
      * @return a variable selector choosing the variable with the smallest domain
      */
-    default VariableSelector leastFreeVarSelector(){
+    public static VariableSelector leastFreeVarSelector(){
         return new GeneralizedMinDomVarSelector();
     }
 
@@ -93,7 +93,7 @@ public interface IVarSelectorFactory {
      * Selects the non instantiated variable with the largest domain
      * @return a variable selector choosing the variable with the largest domain
      */
-    default VariableSelector mostFreeVarSelector(){
+    public static VariableSelector mostFreeVarSelector(){
         return new GeneralizedMinDomVarSelector(false);
     }
 
@@ -106,7 +106,7 @@ public interface IVarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the smallest domain
      */
-    default VariableSelector<IntVar> minDomVarSelector(){
+    public static VariableSelector<IntVar> minDomVarSelector(){
         return new FirstFail();
     }
 
@@ -115,7 +115,7 @@ public interface IVarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the largest domain
      */
-    default VariableSelector<IntVar> maxDomVarSelector(){
+    public static VariableSelector<IntVar> maxDomVarSelector(){
         return new AntiFirstFail();
     }
 
@@ -124,7 +124,7 @@ public interface IVarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the smallest lower bound
      */
-    default VariableSelector<IntVar> minLBVarSelector(){
+    public static VariableSelector<IntVar> minLBVarSelector(){
         return new Smallest();
     }
 
@@ -133,7 +133,7 @@ public interface IVarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the upper bound
      */
-    default VariableSelector<IntVar> maxUBVarSelector(){
+    public static VariableSelector<IntVar> maxUBVarSelector(){
         return new Largest();
     }
 }

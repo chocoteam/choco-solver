@@ -52,7 +52,10 @@ import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
 import static org.chocosolver.solver.explanations.ExplanationFactory.DBT;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.midValSelector;
+import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.minDomVarSelector;
 import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 import static org.testng.Assert.*;
@@ -148,7 +151,7 @@ public class ExplanationEngineTest {
             model3(expl, n);
 
             Resolver r = model.getResolver();
-            IntStrategy is = r.firstLBSearch(expl.retrieveIntVars(false));
+            IntStrategy is = firstLBSearch(expl.retrieveIntVars(false));
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation ex = null;
             try {
@@ -184,7 +187,7 @@ public class ExplanationEngineTest {
         ExplanationEngine ee = new ExplanationEngine(model, true, true);
         Explanation ex = null;
         Resolver r = model.getResolver();
-        IntStrategy is = r.firstLBSearch(vs);
+        IntStrategy is = firstLBSearch(vs);
         try {
             r.propagate();
             for (int i = 0; i < n; i++) {
@@ -207,7 +210,7 @@ public class ExplanationEngineTest {
             IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
             model.arithm(vars[n - 2], "=", vars[n - 1]).post();
             model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-            model.getResolver().set(model.getResolver().firstLBSearch(vars));
+            model.getResolver().set(firstLBSearch(vars));
 
             Resolver r = model.getResolver();
             model.getResolver().setCBJLearning(false, false);
@@ -227,7 +230,7 @@ public class ExplanationEngineTest {
             model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
 
             Resolver r = model.getResolver();
-            r.set(r.firstLBSearch(vars));
+            r.set(firstLBSearch(vars));
 
             r.setCBJLearning(false, false);
             assertFalse(model.solve());
@@ -262,7 +265,7 @@ public class ExplanationEngineTest {
             for (int i = 0; i < n - 1; i++) {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
-            model.getResolver().set(model.getResolver().firstLBSearch(vars));
+            model.getResolver().set(firstLBSearch(vars));
 
             model.getResolver().setCBJLearning(false, false);
             assertFalse(model.solve());
@@ -286,7 +289,7 @@ public class ExplanationEngineTest {
 
             model.sum(copyOfRange(p, 0, 8), "=", 5).post();
             model.arithm(p[9], "+", p[8], ">", 4).post();
-            model.getResolver().set(model.getResolver().randomSearch(p, seed));
+            model.getResolver().set(randomSearch(p, seed));
 
             model.getResolver().setCBJLearning(false, false);
 
@@ -309,7 +312,7 @@ public class ExplanationEngineTest {
         model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(p[0], p[1], p[9], p[8], bs[0]));
+        r.set(firstLBSearch(p[0], p[1], p[9], p[8], bs[0]));
 
         r.setCBJLearning(false, false);
 
@@ -334,7 +337,7 @@ public class ExplanationEngineTest {
         model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(p[0], p[1], bs[0], p[9], p[8]));
+        r.set(firstLBSearch(p[0], p[1], bs[0], p[9], p[8]));
 
         r.setCBJLearning(false, false);
 
@@ -387,7 +390,7 @@ public class ExplanationEngineTest {
             model.allDifferent(col, "FC").post();
             model.allDifferent(row, "FC").post();
         }
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 //        solver.set(ISF.custom(
 //                ISF.lexico_var_selector(),
 //                ISF.min_value_selector(),
@@ -433,7 +436,7 @@ public class ExplanationEngineTest {
         // symmetry-breaking
         model.arithm(vars[0], "<", vars[n - 1]).post();
 
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 
         configure(model, a);
         showShortStatistics(model);
@@ -480,7 +483,7 @@ public class ExplanationEngineTest {
             model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
 
-        model.getResolver().set(model.getResolver().firstLBSearch(ticks));
+        model.getResolver().set(firstLBSearch(ticks));
 
         configure(model, a);
         showShortStatistics(model);
@@ -510,7 +513,7 @@ public class ExplanationEngineTest {
         }
         model.allDifferent(position, "FC").post();
         Resolver r = model.getResolver();
-        r.set(r.minDomUBSearch(position));
+        r.set(minDomUBSearch(position));
 
         configure(model, a);
         showShortStatistics(model);
@@ -572,7 +575,7 @@ public class ExplanationEngineTest {
         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
         Resolver r = model.getResolver();
-        r.set(r.intVarSearch(r.minDomVarSelector(),r.midValSelector(true), vars));
+        r.set(intVarSearch(minDomVarSelector(),midValSelector(true), vars));
 
         configure(model, a);
         showShortStatistics(model);
@@ -651,7 +654,7 @@ public class ExplanationEngineTest {
         model.allDifferent(xy, "FC").post();
 
 
-        model.getResolver().set(model.getResolver().minDomLBSearch(Ovars));
+        model.getResolver().set(minDomLBSearch(Ovars));
 
         configure(model, a);
         showShortStatistics(model);
@@ -683,7 +686,7 @@ public class ExplanationEngineTest {
         Explanation ex = null;
         try {
             r.propagate();
-            IntStrategy is = r.firstLBSearch(bs);
+            IntStrategy is = firstLBSearch(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
@@ -709,7 +712,7 @@ public class ExplanationEngineTest {
         Resolver r = model.getResolver();
         try {
             r.propagate();
-            IntStrategy is = r.firstLBSearch(bs);
+            IntStrategy is = firstLBSearch(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
@@ -737,7 +740,7 @@ public class ExplanationEngineTest {
         Resolver r = model.getResolver();
         try {
             r.propagate();
-            IntStrategy is = r.firstLBSearch(bs);
+            IntStrategy is = firstLBSearch(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
@@ -765,7 +768,7 @@ public class ExplanationEngineTest {
         Resolver r = model.getResolver();
         try {
             r.propagate();
-            IntStrategy is = r.firstUBSearch(bs);
+            IntStrategy is = firstUBSearch(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
@@ -861,7 +864,7 @@ public class ExplanationEngineTest {
         }
         CBJ.plugin(model, false, false);
         Resolver r = model.getResolver();
-        r.set(r.firstUBSearch(B), r.greedySearch(r.firstLBSearch(X)));
+        r.set(firstUBSearch(B), greedySearch(firstLBSearch(X)));
         showDecisions(model);
         showSolutions(model);
         while (model.solve()) ;

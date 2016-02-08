@@ -32,7 +32,6 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.search.loop.learn.ILearnFactory;
 import org.chocosolver.solver.search.loop.move.IMoveFactory;
 import org.chocosolver.solver.search.loop.propagate.IPropagateFactory;
-import org.chocosolver.solver.search.strategy.ISearchStrategyFactory;
 
 /**
  * Interface to ease modeling
@@ -40,6 +39,6 @@ import org.chocosolver.solver.search.strategy.ISearchStrategyFactory;
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface ISolver extends IPropagateFactory, ILearnFactory, IMoveFactory, ISearchStrategyFactory {
+public interface ISolver extends IPropagateFactory, ILearnFactory, IMoveFactory {
 
 }

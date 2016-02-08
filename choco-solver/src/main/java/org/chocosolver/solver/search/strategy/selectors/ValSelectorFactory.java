@@ -38,7 +38,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.*;
  *
  * @author Jean-Guillaume Fages, Charles Prud'homme
  */
-public interface IValSelectorFactory {
+public class ValSelectorFactory {
 
     // ************************************************************************************
     // GENERIC SELECTORS
@@ -54,7 +54,7 @@ public interface IValSelectorFactory {
      * Selects the variable lower bound
      * @return a value selector
      */
-    default IntValueSelector minValSelector() {
+    public static IntValueSelector minValSelector() {
         return new IntDomainMin();
     }
 
@@ -69,7 +69,7 @@ public interface IValSelectorFactory {
      *              Can lead to infinite loop when not correctly selected.
      * @return a value selector
      */
-    default IntValueSelector midValSelector(boolean floor) {
+    public static IntValueSelector midValSelector(boolean floor) {
         return new IntDomainMiddle(floor);
     }
 
@@ -78,7 +78,7 @@ public interface IValSelectorFactory {
      *
      * @return a value selector
      */
-    default IntValueSelector maxValSelector() {
+    public static IntValueSelector maxValSelector() {
         return new IntDomainMax();
     }
 
@@ -89,7 +89,7 @@ public interface IValSelectorFactory {
      * @param SEED the seed for randomness
      * @return a value selector
      */
-    default IntValueSelector randomBoundSelector(long SEED) {
+    public static IntValueSelector randomBoundSelector(long SEED) {
         return new IntDomainRandomBound(SEED);
     }
 
@@ -103,7 +103,7 @@ public interface IValSelectorFactory {
      * @param SEED the seed for randomness
      * @return a value selector
      */
-    default IntValueSelector randomValSelector(long SEED) {
+    public static IntValueSelector randomValSelector(long SEED) {
         return new IntDomainRandom(SEED);
     }
 
@@ -115,21 +115,21 @@ public interface IValSelectorFactory {
      * Value selector for halving domains of real variables.
      * @return a value selector to split real variable domains.
      */
-    default RealValueSelector midRValSelector() {
+    public static RealValueSelector midRValSelector() {
         return new RealDomainMiddle();
     }
 
     /**
      * @return a value selector to select real lower bounds. (use with caution)
      */
-    default RealValueSelector minRValSelector() {
+    public static RealValueSelector minRValSelector() {
         return new RealDomainMin();
     }
 
     /**
      * @return a value selector to select real upper bounds. (use with caution)
      */
-    default RealValueSelector maxRValSelector() {
+    public static RealValueSelector maxRValSelector() {
         return new RealDomainMax();
     }
 
@@ -137,7 +137,7 @@ public interface IValSelectorFactory {
     // SETVAR SELECTORS
     // ************************************************************************************
 
-    default SetValueSelector firstValSelector(){
+    public static SetValueSelector firstValSelector(){
         return new SetDomainMin();
     }
 }

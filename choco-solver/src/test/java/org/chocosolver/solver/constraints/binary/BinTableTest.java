@@ -36,6 +36,7 @@ import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -135,7 +136,7 @@ public class BinTableTest {
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 absolute(tv1, tv2, a).post();
-                tsolver.getResolver().set(tsolver.getResolver().randomSearch(new IntVar[]{tv1, tv2}, s));
+                tsolver.getResolver().set(randomSearch(new IntVar[]{tv1, tv2}, s));
                 long nbSolutions = 0;
                 while (tsolver.solve()) {
                     nbSolutions++;
@@ -171,7 +172,7 @@ public class BinTableTest {
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 arithmLT(tv1, tv2, a).post();
-                tsolver.getResolver().set(tsolver.getResolver().randomSearch(new IntVar[]{tv1, tv2}, s));
+                tsolver.getResolver().set(randomSearch(new IntVar[]{tv1, tv2}, s));
                 long nbSolutions = 0;
                 while (tsolver.solve()) {
                     nbSolutions++;
@@ -207,7 +208,7 @@ public class BinTableTest {
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 arithmNQ(tv1, tv2, a).post();
-                tsolver.getResolver().set(tsolver.getResolver().randomSearch(new IntVar[]{tv1, tv2}, s));
+                tsolver.getResolver().set(randomSearch(new IntVar[]{tv1, tv2}, s));
                 long nbSolutions = 0;
                 while (tsolver.solve()) {
                     nbSolutions++;
@@ -232,7 +233,7 @@ public class BinTableTest {
                 IntVar[] vars = model.intVarArray("X", 2, -1, 1, false);
                 model.table(vars[0], vars[1], tuples, a).post();
 
-                model.getResolver().set(model.getResolver().randomSearch(vars, i));
+                model.getResolver().set(randomSearch(vars, i));
                 long nbSolutions = 0;
                 while (model.solve()) {
                     nbSolutions++;
@@ -256,7 +257,7 @@ public class BinTableTest {
                 IntVar[] vars = model.intVarArray("X", 2, -1, 1, false);
                 model.table(vars[0], vars[1], tuples, a).post();
 
-                model.getResolver().set(model.getResolver().randomSearch(vars, i));
+                model.getResolver().set(randomSearch(vars, i));
                 long nbSolutions = 0;
                 while (model.solve()) {
                     nbSolutions++;

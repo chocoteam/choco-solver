@@ -52,6 +52,7 @@ import org.kohsuke.args4j.Option;
 import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.implies;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 public class StableMarriage extends AbstractProblem {
@@ -329,7 +330,7 @@ public class StableMarriage extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().minDomLBSearch(append(husband, wife)));
+        model.getResolver().set(minDomLBSearch(append(husband, wife)));
     }
 
     @Override

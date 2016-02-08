@@ -38,6 +38,8 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+
 /**
  * <br/>
  *
@@ -85,7 +87,7 @@ public abstract class AbstractTernaryTest {
         }
         Constraint div = make(vars, s);
         div.post();
-        s.getResolver().set(s.getResolver().randomSearch(vars,seed));
+        s.getResolver().set(randomSearch(vars,seed));
         return s;
     }
 

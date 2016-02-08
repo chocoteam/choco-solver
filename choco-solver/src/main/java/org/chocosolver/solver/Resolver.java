@@ -50,6 +50,7 @@ import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -802,7 +803,7 @@ public final class Resolver implements Serializable, ISolver {
                     "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
                     "An iteration over it child moves is needed: this.getMove().getChildMoves().");
         } else {
-            M.setStrategy(strategies.length == 1?strategies[0]:sequencer(strategies));
+            M.setStrategy(strategies.length == 1?strategies[0]: SearchStrategyFactory.sequencer(strategies));
         }
     }
 

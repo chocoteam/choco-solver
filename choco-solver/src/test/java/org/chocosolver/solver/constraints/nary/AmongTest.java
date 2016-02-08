@@ -43,6 +43,7 @@ import java.util.Random;
 
 import static java.util.Arrays.asList;
 import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -94,7 +95,7 @@ public class AmongTest {
             int value = 1;
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.getResolver().set(model.getResolver().randomSearch(allvars,i));
+            model.getResolver().set(randomSearch(allvars,i));
             model.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
@@ -111,7 +112,7 @@ public class AmongTest {
             int[] values = {1, 2, 0};
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.getResolver().set(model.getResolver().randomSearch(allvars,i));
+            model.getResolver().set(randomSearch(allvars,i));
             model.among(occ, vars, values).post();
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
@@ -176,7 +177,7 @@ public class AmongTest {
             }
             model.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]).post();
 
-            model.getResolver().set(model.getResolver().randomSearch(vars,seed));
+            model.getResolver().set(randomSearch(vars,seed));
             while (model.solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getResolver().getMeasures().getSolutionCount();
@@ -230,7 +231,7 @@ public class AmongTest {
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
 
-            model.getResolver().set(model.getResolver().randomSearch(vars,seed));
+            model.getResolver().set(randomSearch(vars,seed));
             while (model.solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getResolver().getMeasures().getSolutionCount();

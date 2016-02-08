@@ -42,6 +42,7 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitSearch;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitSolution;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithOneAlldifferent;
@@ -57,7 +58,7 @@ public class ResolverTest {
     public void test1DFS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(model.retrieveIntVars(true)));
+        r.set(firstLBSearch(model.retrieveIntVars(true)));
         r.setDFS();
         showSolutions(model);
         model.solve();
@@ -69,7 +70,7 @@ public class ResolverTest {
     public void test1LDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(model.retrieveIntVars(false)));
+        r.set(firstLBSearch(model.retrieveIntVars(false)));
         r.setLDS(4);
         model.solve();
         assertEquals(r.getMeasures().getSolutionCount(), 1);
@@ -80,7 +81,7 @@ public class ResolverTest {
     public void test1DDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(model.retrieveIntVars(true)));
+        r.set(firstLBSearch(model.retrieveIntVars(true)));
         r.setDDS(4);
         model.solve();
         assertEquals(r.getMeasures().getSolutionCount(), 1);
@@ -91,7 +92,7 @@ public class ResolverTest {
     public void test1HBFS() {
         Model model = makeGolombRuler(8);
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(model.retrieveIntVars(false)));
+        r.set(firstLBSearch(model.retrieveIntVars(false)));
         r.setHBFS(.05, .1, 32);
         model.solve();
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 7);
@@ -103,7 +104,7 @@ public class ResolverTest {
         Model model = makeNQueenWithOneAlldifferent(8);
         Resolver r = model.getResolver();
         r.setDFS();
-        r.set(r.firstLBSearch(model.retrieveIntVars(true)));
+        r.set(firstLBSearch(model.retrieveIntVars(true)));
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 92);
         assertEquals(model.getResolver().getMeasures().getNodeCount(), 480);
@@ -113,7 +114,7 @@ public class ResolverTest {
     public void test2LDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(model.retrieveIntVars(false)));
+        r.set(firstLBSearch(model.retrieveIntVars(false)));
         r.setLDS(4);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 7);
@@ -124,7 +125,7 @@ public class ResolverTest {
     public void test2DDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(model.retrieveIntVars(false)));
+        r.set(firstLBSearch(model.retrieveIntVars(false)));
         r.setDDS(5);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
@@ -136,7 +137,7 @@ public class ResolverTest {
         Model model = new Model();
         Resolver r = model.getResolver();
         IntVar[] bs = model.boolVarArray("b", 4);
-        r.set(r.firstLBSearch(bs));
+        r.set(firstLBSearch(bs));
         r.setDDS(3);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 8);
@@ -147,7 +148,7 @@ public class ResolverTest {
         Model model = makeGolombRuler(6);
         Resolver r = model.getResolver();
         r.setDFS();
-        r.set(r.firstLBSearch(model.retrieveIntVars(false)));
+        r.set(firstLBSearch(model.retrieveIntVars(false)));
         model.solve();
         printShortStatistics(model);
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3);
@@ -159,7 +160,7 @@ public class ResolverTest {
         Model model = makeNQueenWithOneAlldifferent(8);
         Resolver r = model.getResolver();
         r.setDFS();
-        r.set(r.firstLBSearch(model.retrieveIntVars(false)));
+        r.set(firstLBSearch(model.retrieveIntVars(false)));
         model.getResolver().setRestarts(limit -> model.getResolver().getMeasures().getNodeCount() >= limit, new LubyRestartStrategy(2, 2), 2);
         while (model.solve()) ;
         printShortStatistics(model);
@@ -171,7 +172,7 @@ public class ResolverTest {
         Model model = makeGolombRuler(5);
         Resolver r = model.getResolver();
         r.setDFS();
-        r.set(r.firstLBSearch(model.retrieveIntVars(false)));
+        r.set(firstLBSearch(model.retrieveIntVars(false)));
         model.getResolver().setLNS(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         limitSearch(model, () -> model.getResolver().getMeasures().getNodeCount() >= 1000);
         model.solve();
@@ -184,7 +185,7 @@ public class ResolverTest {
         Model model = makeGolombRuler(6);
         Resolver r = model.getResolver();
         r.setDFS();
-        r.set(r.firstLBSearch(model.retrieveIntVars(false)));
+        r.set(firstLBSearch(model.retrieveIntVars(false)));
         model.getResolver().setLNS(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
         model.solve();
@@ -199,7 +200,7 @@ public class ResolverTest {
         int n = 3;
         BoolVar[] B = model.boolVarArray("b", n - 1);
         Resolver r = model.getResolver();
-        r.set(r.firstUBSearch(B));
+        r.set(firstUBSearch(B));
         r.setLDS(1);
         showSolutions(model);
         showDecisions(model);
@@ -218,7 +219,7 @@ public class ResolverTest {
             model.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
         Resolver r = model.getResolver();
-        r.set(r.firstUBSearch(B), r.greedySearch(r.firstLBSearch(X)));
+        r.set(firstUBSearch(B), greedySearch(firstLBSearch(X)));
         r.setLDS(1);
         showSolutions(model);
 //        Chatterbox.showDecisions(solver);
@@ -239,8 +240,8 @@ public class ResolverTest {
         }
 
         Resolver r = model.getResolver();
-        r.set(new MoveBinaryLDS(r.firstUBSearch(B), 1,model.getEnvironment()),
-                new MoveBinaryDFS(r.greedySearch(r.firstLBSearch(X)))
+        r.set(new MoveBinaryLDS(firstUBSearch(B), 1,model.getEnvironment()),
+                new MoveBinaryDFS(greedySearch(firstLBSearch(X)))
         );
         showSolutions(model);
         showDecisions(model);

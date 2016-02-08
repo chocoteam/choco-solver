@@ -36,6 +36,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.ESat.TRUE;
 
 /**
@@ -74,7 +75,7 @@ public class DivTest extends AbstractTernaryTest {
             IntVar c = s.intVar("c", new int[]{-3, 1, 4});
             s.div(a, b, c).post();
             Resolver r = s.getResolver();
-            r.set(r.randomSearch(new IntVar[]{a, b, c}, i));
+            r.set(randomSearch(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);
             r.plugMonitor((IMonitorSolution) () -> {
                 if (!TRUE.equals(r.isSatisfied())) {

@@ -39,6 +39,8 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.Random;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
@@ -154,8 +156,7 @@ public class MarioKart extends AbstractProblem {
 			}
 		});
 		/* Heuristic choices */
-		r.set(r.firstLBSearch(next));
-		r.useLastConflict();
+		r.set(lastConflict(firstLBSearch(next)));
 	}
 
 	@Override

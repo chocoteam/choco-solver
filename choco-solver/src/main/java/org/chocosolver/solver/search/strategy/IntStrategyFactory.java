@@ -36,6 +36,8 @@ import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
@@ -43,7 +45,7 @@ import org.chocosolver.solver.variables.IntVar;
 
 /**
  * @deprecated : search strategies for integer variables should be done through
- * {@link org.chocosolver.solver.Resolver} which implements {@link IIntStrategyFactory}
+ * {@link SearchStrategyFactory}, {@link VarSelectorFactory} and {@link ValSelectorFactory}
  *
  * This class will be removed in versions > 3.4.0
  */
@@ -60,7 +62,7 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * @deprecated : use {@link Resolver#firstVarSelector()} instead
+     * @deprecated : use {@link SearchStrategyFactory#} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -69,7 +71,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#randomVarSelector()} instead
+     * @deprecated : use {@link VarSelectorFactory#randomVarSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -78,7 +80,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#minDomVarSelector()} instead
+     * @deprecated : use {@link VarSelectorFactory#minDomVarSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -87,7 +89,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#maxDomVarSelector()} instead
+     * @deprecated : use {@link VarSelectorFactory#maxDomVarSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -109,7 +111,7 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * @deprecated : use {@link Resolver#minValSelector()} instead
+     * @deprecated : use {@link ValSelectorFactory#minValSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -118,7 +120,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#midValSelector(boolean)} instead
+     * @deprecated : use {@link ValSelectorFactory#midValSelector(boolean)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -127,7 +129,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#maxValSelector()} instead
+     * @deprecated : use {@link ValSelectorFactory#maxValSelector()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -136,7 +138,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#randomValSelector(long)} instead
+     * @deprecated : use {@link ValSelectorFactory#randomValSelector(long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -145,7 +147,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#randomValSelector(long)} instead
+     * @deprecated : use {@link ValSelectorFactory#randomValSelector(long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -198,7 +200,7 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -210,7 +212,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -221,7 +223,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -234,7 +236,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#greedySearch(AbstractStrategy)} instead
+     * @deprecated : use {@link SearchStrategyFactory#greedySearch(AbstractStrategy)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -246,7 +248,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#greedySearch(AbstractStrategy)} instead
+     * @deprecated : use {@link SearchStrategyFactory#greedySearch(AbstractStrategy)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -260,7 +262,7 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -269,7 +271,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#firstLBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#firstLBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -278,7 +280,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -287,7 +289,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -296,7 +298,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#firstUBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#firstUBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -305,7 +307,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#minDomLBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#minDomLBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -314,7 +316,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -323,7 +325,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -332,7 +334,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#minDomUBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#minDomUBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -341,7 +343,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#intVarSearch(VariableSelector, IntValueSelector, DecisionOperator, IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -350,7 +352,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#firstLBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#firstLBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -359,7 +361,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#firstUBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#firstUBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -368,7 +370,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#randomSearch(IntVar[], long)} instead
+     * @deprecated : use {@link SearchStrategyFactory#randomSearch(IntVar[], long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -386,7 +388,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#randomSearch(IntVar[], long)} instead
+     * @deprecated : use {@link SearchStrategyFactory#randomSearch(IntVar[], long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -395,7 +397,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#randomSearch(IntVar[], long)} instead
+     * @deprecated : use {@link SearchStrategyFactory#randomSearch(IntVar[], long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -404,7 +406,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#randomSearch(IntVar[], long)} instead
+     * @deprecated : use {@link SearchStrategyFactory#randomSearch(IntVar[], long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -419,7 +421,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#randomSearch(IntVar[], long)} instead
+     * @deprecated : use {@link SearchStrategyFactory#randomSearch(IntVar[], long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -428,7 +430,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#sequencer(AbstractStrategy[])} instead
+     * @deprecated : use {@link SearchStrategyFactory#sequencer(AbstractStrategy[])} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -441,7 +443,7 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * @deprecated : use {@link Resolver#domOverWDegSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#domOverWDegSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -450,7 +452,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#domOverWDegSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#domOverWDegSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -459,7 +461,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#activityBasedSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#activityBasedSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -468,7 +470,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#activityBasedSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#activityBasedSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -495,7 +497,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use directly {@link Resolver#useLastConflict()} instead
+     * @deprecated : use directly {@link SearchStrategyFactory#lastConflict(AbstractStrategy)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -504,7 +506,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use directly {@link Resolver#useLastConflict()} instead
+     * @deprecated : use directly {@link SearchStrategyFactory#lastConflict(AbstractStrategy)}  instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -513,7 +515,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use directly {@link Resolver#useLastConflict()} instead
+     * @deprecated : use directly {@link SearchStrategyFactory#lastConflict(AbstractStrategy)}  instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated

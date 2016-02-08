@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.testng.Assert.assertEquals;
@@ -77,7 +78,7 @@ public class RegularTest {
         auto.addTransition(end, start, 0, 1);
 
         model.regular(vars, auto).post();
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 59049);
@@ -119,7 +120,7 @@ public class RegularTest {
         assertEquals(auto.getNbStates(), 54);
 
         model.regular(vars, auto).post();
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 25980);
@@ -149,7 +150,7 @@ public class RegularTest {
         auto.addTransition(end, start, 0, 1);
 
         model.regular(vars, auto).post();
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 531441);
@@ -180,7 +181,7 @@ public class RegularTest {
         auto.addTransition(end, start, 0, 1);
 
         model.regular(vars, auto).post();
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1594323);
@@ -197,7 +198,7 @@ public class RegularTest {
             vars[i] = model.intVar("x_" + i, 0, 2, false);
         }
         model.regular(vars, auto).post();
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4371696);
@@ -214,7 +215,7 @@ public class RegularTest {
             vars[i] = model.intVar("x_" + i, new int[]{0, 10, 20});
         }
         model.regular(vars, auto).post();
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 
         showSolutions(model);
         while (model.solve()) ;
@@ -312,7 +313,7 @@ public class RegularTest {
 //            System.out.printf("\n");
             return "";
         });
-        model.getResolver().set(model.getResolver().firstLBSearch(CS));
+        model.getResolver().set(firstLBSearch(CS));
 //        Chatterbox.showDecisions(solver);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 84);
@@ -324,7 +325,7 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 3, new int[]{43, 59, 117});
         model.regular(CS, new FiniteAutomaton("<43><59><117>")).post();
-        model.getResolver().set(model.getResolver().firstLBSearch(CS));
+        model.getResolver().set(firstLBSearch(CS));
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
 

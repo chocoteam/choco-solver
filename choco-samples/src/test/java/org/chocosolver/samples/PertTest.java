@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -81,7 +82,7 @@ public class PertTest {
         precedence(garden, 1, objective).post();
         precedence(painting, 2, objective).post();
 
-        model.getResolver().set(model.getResolver().minDomLBSearch(new IntVar[]{masonry, carpentry, plumbing, ceiling,
+        model.getResolver().set(minDomLBSearch(new IntVar[]{masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden, objective}));
         return model;
 

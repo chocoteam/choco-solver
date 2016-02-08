@@ -40,6 +40,7 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -127,7 +128,7 @@ public class ViewMinusTest {
                 xs[0] = ref.intVar("x", 1, 15, true);
                 xs[1] = ref.intVar("y", -15, -1, true);
                 ref.sum(xs, "=", 0).post();
-                ref.getResolver().set(ref.getResolver().randomSearch(xs, seed));
+                ref.getResolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -135,7 +136,7 @@ public class ViewMinusTest {
                 xs[0] = model.intVar("x", 1, 15, true);
                 xs[1] = model.intMinusView(xs[0]);
                 model.sum(xs, "=", 0).post();
-                model.getResolver().set(model.getResolver().randomSearch(xs, seed));
+                model.getResolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
@@ -155,7 +156,7 @@ public class ViewMinusTest {
                 xs[0] = ref.intVar("x", 1, 15, false);
                 xs[1] = ref.intVar("y", -15, -1, false);
                 ref.sum(xs, "=", 0).post();
-                ref.getResolver().set(ref.getResolver().randomSearch(xs, seed));
+                ref.getResolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -163,7 +164,7 @@ public class ViewMinusTest {
                 xs[0] = model.intVar("x", 1, 15, false);
                 xs[1] = model.intMinusView(xs[0]);
                 model.sum(xs, "=", 0).post();
-                model.getResolver().set(model.getResolver().randomSearch(xs, seed));
+                model.getResolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;

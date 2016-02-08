@@ -35,6 +35,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+
 /**
  * Created by cprudhom on 07/07/15.
  * Project: choco.
@@ -63,7 +65,7 @@ public class IntValuePrecedeChainTest {
                 Model model = new Model();
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 model.intValuePrecedeChain(vars, 1, 2).post();
-                model.getResolver().set(model.getResolver().randomSearch(vars, 0));
+                model.getResolver().set(randomSearch(vars, 0));
                 while (model.solve()) ;
                 s1 = model.getResolver().getMeasures().getSolutionCount();
             }
@@ -71,7 +73,7 @@ public class IntValuePrecedeChainTest {
                 Model model = new Model();
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 int_value_precede_chain_dec(vars, 1, 2);
-                model.getResolver().set(model.getResolver().randomSearch(vars, 0));
+                model.getResolver().set(randomSearch(vars, 0));
                 while (model.solve()) ;
                 s2 = model.getResolver().getMeasures().getSolutionCount();
             }

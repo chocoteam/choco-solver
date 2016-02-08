@@ -39,6 +39,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static java.lang.Math.pow;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -66,7 +67,7 @@ public class LexTest {
                 vs2[i] = model.intVar("" + i, 0, k, true);
             }
             model.lexLessEq(vs1, vs2).post();
-            model.getResolver().set(model.getResolver().randomSearch(append(vs1, vs2), seed));
+            model.getResolver().set(randomSearch(append(vs1, vs2), seed));
             while (model.solve()) ;
             int kpn = (int) pow(k + 1, n1 / 2);
             assertEquals(model.getResolver().getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
@@ -86,7 +87,7 @@ public class LexTest {
                 vs2[i] = model.intVar("" + i, 0, k, true);
             }
             model.lexLess(vs1, vs2).post();
-            model.getResolver().set(model.getResolver().randomSearch(append(vs1, vs2), seed));
+            model.getResolver().set(randomSearch(append(vs1, vs2), seed));
 
             while (model.solve()) ;
             assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3240);

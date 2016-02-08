@@ -33,6 +33,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.IntVar;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.printStatistics;
 
 /**
@@ -53,7 +54,7 @@ public class Overview {
         model.arithm(x, "+", y, "<", 5).post();
         // 4. Define the search strategy
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(x, y));
+        r.set(firstLBSearch(x, y));
         // 5. Launch the resolution process
         model.solve();
         //6. Print search statistics

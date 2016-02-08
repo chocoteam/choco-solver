@@ -36,6 +36,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -68,7 +69,7 @@ public class ConstraintTest {
         model.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
 
         Resolver r = model.getResolver();
-        r.set(r.randomSearch(ivs, 0));
+        r.set(randomSearch(ivs, 0));
         while (model.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 48);
         assertEquals(r.getMeasures().getNodeCount(), 100);

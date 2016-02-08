@@ -37,6 +37,7 @@ import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
 import static java.util.Arrays.fill;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 
 /**
  * CSPLib prob049:<br/>
@@ -132,7 +133,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().minDomLBSearch(Ovars));
+        model.getResolver().set(minDomLBSearch(Ovars));
     }
 
     @Override

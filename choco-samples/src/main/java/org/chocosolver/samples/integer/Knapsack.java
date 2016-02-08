@@ -37,6 +37,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstUBSearch;
 
 /**
  * <a href="http://en.wikipedia.org/wiki/Knapsack_problem">wikipedia</a>:<br/>
@@ -110,7 +112,7 @@ public class Knapsack extends AbstractProblem {
     public void configureSearch() {
         Resolver r = model.getResolver();
         // trick : top-down maximization
-        r.set(r.firstUBSearch(power), r.firstLBSearch(objects));
+        r.set(firstUBSearch(power), firstLBSearch(objects));
         Chatterbox.showDecisions(model);
     }
 

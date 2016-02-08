@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -75,7 +76,7 @@ public class MaxViewTest {
                 xs[2] = ref.intVar("z", domains[2][0], domains[2][1], true);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.getResolver().set(ref.getResolver().randomSearch(xs, seed));
+                ref.getResolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -85,7 +86,7 @@ public class MaxViewTest {
                 xs[2] = model.intVar("z", domains[1][0], domains[2][1], true);
                 max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getResolver().set(model.getResolver().randomSearch(xs, seed));
+                model.getResolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
@@ -108,7 +109,7 @@ public class MaxViewTest {
                 xs[2] = ref.intVar("z", domains[2]);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.getResolver().set(ref.getResolver().randomSearch(xs, seed));
+                ref.getResolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -118,7 +119,7 @@ public class MaxViewTest {
                 xs[2] = model.intVar("z", domains[2]);
                 max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getResolver().set(model.getResolver().randomSearch(xs, seed));
+                model.getResolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;

@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.Variable;
 
 import static java.lang.System.arraycopy;
 import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -184,7 +185,7 @@ public interface SetTestModel {
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             s.sum(bools, "=", vars[n - 1]).post();
-            s.getResolver().set(s.getResolver().firstLBSearch(vars));
+            s.getResolver().set(firstLBSearch(vars));
             return s;
         }
     };
@@ -205,7 +206,7 @@ public interface SetTestModel {
 //                System.out.printf("");
             }
             s.arithm(vars[0], "=", vars[1]).post();
-            s.getResolver().set(s.getResolver().firstLBSearch(vars));
+            s.getResolver().set(firstLBSearch(vars));
             return s;
         }
     };
@@ -226,7 +227,7 @@ public interface SetTestModel {
             }
             IntVar[] allvars = append(X, Y);
             s.inverseChanneling(X, Y, 0, 0).post();
-            s.getResolver().set(s.getResolver().firstLBSearch(allvars));
+            s.getResolver().set(firstLBSearch(allvars));
             return s;
         }
     };
@@ -248,7 +249,7 @@ public interface SetTestModel {
             }
             Resolver r = s.getResolver();
             s.nValues(decvars, vars[n - 1]).post();
-            r.set(r.firstLBSearch(vars));
+            r.set(firstLBSearch(vars));
             return s;
         }
     };

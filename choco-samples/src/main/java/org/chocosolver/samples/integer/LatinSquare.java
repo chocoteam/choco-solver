@@ -37,6 +37,8 @@ import org.kohsuke.args4j.Option;
 
 import java.text.MessageFormat;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+
 /**
  * <a href="http://en.wikipedia.org/wiki/Latin_square">wikipedia</a>:<br/>
  * "A Latin square is an n x n array filled with n different Latin letters,
@@ -76,7 +78,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
     }
 
     @Override

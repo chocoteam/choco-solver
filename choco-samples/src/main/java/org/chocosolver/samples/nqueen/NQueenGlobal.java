@@ -33,6 +33,8 @@ package org.chocosolver.samples.nqueen;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
+
 /**
  * <br/>
  *
@@ -61,7 +63,7 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().minDomLBSearch(vars));
+        model.getResolver().set(minDomLBSearch(vars));
     }
 
     public static void main(String[] args) {

@@ -53,6 +53,8 @@ import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
 import static org.chocosolver.solver.search.loop.lns.LNSFactory.pglns;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 
 /**
  * OR-LIBRARY:<br/>
@@ -185,7 +187,7 @@ public class AirPlaneLanding extends AbstractProblem {
     public void configureSearch() {
         Arrays.sort(planes, (o1, o2) -> maxCost.get(o2) - maxCost.get(o1));
         Resolver r = model.getResolver();
-        r.set(r.randomSearch(bVars, seed), r.firstLBSearch(planes));
+        r.set(randomSearch(bVars, seed), firstLBSearch(planes));
     }
 
     @Override

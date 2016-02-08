@@ -41,6 +41,7 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
 import static org.chocosolver.solver.search.limits.ICounter.Impl.None;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 
 /**
@@ -68,7 +69,7 @@ public class ELNSTest {
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(model, vars, 200, 123456L)
                 ), None);
-        r.set(r.randomSearch(vars, seed));
+        r.set(randomSearch(vars, seed));
 
 
 //        SMF.log(solver, true, true, new IMessage() {

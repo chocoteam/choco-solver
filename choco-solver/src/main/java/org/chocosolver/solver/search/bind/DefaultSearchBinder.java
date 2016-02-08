@@ -41,6 +41,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.maxRValSelector;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.minRValSelector;
+import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.nextVarSelector;
+
 /**
  * A search binder, which configures but not overrides, a search strategy if none is defined.
  * The method is called after the initial propagation step, for single model.
@@ -60,7 +65,7 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         Resolver r = model.getResolver();
         r.set(getDefault(model));
-        r.useLastConflict();
+        r.set(lastConflict(r.getStrategy()));
     }
 
     public AbstractStrategy[] getDefault(Model model) {
@@ -126,21 +131,21 @@ public class DefaultSearchBinder implements ISearchBinder {
         // a. Dom/Wdeg on integer/boolean variables
         IntVar[] ivars = livars.toArray(new IntVar[livars.size()]);
         if (ivars.length > 0) {
-            strats[nb++] = r.domOverWDegSearch(ivars);
+            strats[nb++] = domOverWDegSearch(ivars);
         }
 
         // SET VARIABLES DEFAULT SEARCH STRATEGY
         // b. MinDelta + min domain
         SetVar[] svars = lsvars.toArray(new SetVar[lsvars.size()]);
         if (svars.length > 0) {
-            strats[nb++] = r.setVarSearch(svars);
+            strats[nb++] = setVarSearch(svars);
         }
 
         // REAL VARIABLES DEFAULT SEARCH STRATEGY
         // c. cyclic + middle
         RealVar[] rvars = lrvars.toArray(new RealVar[lrvars.size()]);
         if (rvars.length > 0) {
-            strats[nb++] = r.realVarSearch(rvars);
+            strats[nb++] = realVarSearch(rvars);
         }
 
         // d. lexico LB/UB for the objective variable
@@ -151,16 +156,16 @@ public class DefaultSearchBinder implements ISearchBinder {
                 case Variable.INT:
                 case Variable.BOOL:
                     if (max) {
-                        strats[nb++] = r.minDomUBSearch((IntVar) objective);
+                        strats[nb++] = minDomUBSearch((IntVar) objective);
                     } else {
-                        strats[nb++] = r.minDomLBSearch((IntVar) objective);
+                        strats[nb++] = minDomLBSearch((IntVar) objective);
                     }
                     break;
                 case Variable.REAL:
                     if (max) {
-                        strats[nb++] = r.realVarSearch(r.nextVarSelector(), r.maxRValSelector(), (RealVar) objective);
+                        strats[nb++] = realVarSearch(nextVarSelector(), maxRValSelector(), (RealVar) objective);
                     } else {
-                        strats[nb++] = r.realVarSearch(r.nextVarSelector(), r.minRValSelector(), (RealVar) objective);
+                        strats[nb++] = realVarSearch(nextVarSelector(), minRValSelector(), (RealVar) objective);
                     }
                     break;
                 default:
@@ -170,7 +175,7 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         if (nb == 0) {
             // simply to avoid null pointers in case all variables are instantiated
-            strats[nb++] = r.minDomLBSearch(model.ONE());
+            strats[nb++] = minDomLBSearch(model.ONE());
         }
         return Arrays.copyOf(strats, nb);
     }

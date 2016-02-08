@@ -45,6 +45,8 @@ import java.util.Random;
 import static java.lang.Boolean.TRUE;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.asList;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 
@@ -115,7 +117,7 @@ public class CountTest {
             model.count(value, vars, occ).post();
 
             Resolver r = model.getResolver();
-            r.set(r.randomSearch(allvars,i));
+            r.set(randomSearch(allvars,i));
 
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
@@ -167,7 +169,7 @@ public class CountTest {
 //            }
 
             Resolver r = model.getResolver();
-            r.set(r.randomSearch(vars, seed));
+            r.set(randomSearch(vars, seed));
             while (model.solve()) ;
             if (nbsol == -1) {
                 nbsol = r.getMeasures().getSolutionCount();
@@ -193,7 +195,7 @@ public class CountTest {
         IntVar[] vars = model.intVarArray("e", vs.length + 1, 0, ub, false);
 
         Tuples tuples = new Tuples(true);
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
         model.solve();
         do {
             int[] tuple = new int[vars.length];

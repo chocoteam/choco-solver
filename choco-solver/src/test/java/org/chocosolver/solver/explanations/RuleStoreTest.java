@@ -30,7 +30,6 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -40,6 +39,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 
 /**
  * Created by cprudhom on 10/12/14.
@@ -371,8 +372,7 @@ public class RuleStoreTest {
         RuleStore rs = new RuleStore(model, true, true);
         rs.init(new Explanation(null, false));
 
-        Resolver re = model.getResolver();
-        IntStrategy is = re.firstLBSearch(E, I, B);
+        IntStrategy is = firstLBSearch(E, I, B);
         Decision d1 = null, d2 = null, d3 = null;
         try {
             d1 = is.getDecision();

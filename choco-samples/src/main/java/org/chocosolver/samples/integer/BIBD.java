@@ -36,6 +36,7 @@ import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
 import static java.lang.String.format;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
@@ -130,7 +131,7 @@ public class BIBD extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().firstLBSearch(flatten(vars)));
+        model.getResolver().set(firstLBSearch(flatten(vars)));
     }
 
     @Override

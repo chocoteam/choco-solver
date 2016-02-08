@@ -45,6 +45,8 @@ import org.chocosolver.solver.variables.Task;
 import java.util.Random;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 
 public class CumulativeSample extends AbstractProblem{
 
@@ -85,8 +87,7 @@ public class CumulativeSample extends AbstractProblem{
 	@Override
 	public void configureSearch() {
 		Resolver r = model.getResolver();
-		r.set(r.minDomLBSearch(start));
-		r.useLastConflict();
+		r.set(lastConflict(minDomLBSearch(start)));
 	}
 
 	@Override

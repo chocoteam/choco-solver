@@ -52,6 +52,8 @@ import static java.lang.System.nanoTime;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.chocosolver.util.ESat.*;
 import static org.testng.Assert.assertEquals;
 
@@ -222,7 +224,7 @@ public class ObjectiveTest {
         int bestvalue = b1.getValue();
         r.reset();
         model.arithm(b1, "=", bestvalue).post();
-        r.set(r.firstLBSearch(new BoolVar[]{b1, b2}));
+        r.set(firstLBSearch(new BoolVar[]{b1, b2}));
         int count = 0;
         if (model.solve()) {
             do {
@@ -240,7 +242,7 @@ public class ObjectiveTest {
         IntVar a = model.intVar("a", -2, 2, false);
 		model.getResolver().set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),
-				model.getResolver().minDomLBSearch(a));
+				minDomLBSearch(a));
 		SMF.nogoodRecordingOnSolution(new IntVar[]{a});
 
         model.getResolver().set(new ObjectiveManager<IntVar, Integer>(a, MAXIMIZE, false));

@@ -38,6 +38,7 @@ import org.testng.annotations.Test;
 
 import static java.lang.String.format;
 import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.chocosolver.util.tools.StatisticUtils.*;
 import static org.chocosolver.util.tools.StringUtils.pad;
 
@@ -61,7 +62,7 @@ public class CycleLtTest {
             s.arithm(vars[i], "<", vars[i + 1]).post();
         }
         s.arithm(vars[n - 1], "<", vars[0]).post();
-        s.getResolver().set(s.getResolver().firstLBSearch(vars));
+        s.getResolver().set(firstLBSearch(vars));
         return s;
     }
 

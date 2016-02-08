@@ -38,6 +38,7 @@ import org.chocosolver.util.ProblemMaker;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -70,7 +71,7 @@ public class ImpactTest {
 		if(impact){
 			r.set(new ImpactBased(vectors,2,3,10,0,true));
 		}else{
-			r.set(r.domOverWDegSearch(vectors));
+			r.set(domOverWDegSearch(vectors));
 		}
 		return model;
 	}

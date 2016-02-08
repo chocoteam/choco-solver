@@ -34,6 +34,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.variables.IntVar;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+
 /**
  * Created by IntelliJ IDEA.
  * User: njussien
@@ -60,7 +62,7 @@ public class ExplainedOCProblem extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
     }
 
 

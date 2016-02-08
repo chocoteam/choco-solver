@@ -39,6 +39,7 @@ import static java.lang.Double.NEGATIVE_INFINITY;
 import static java.lang.Double.POSITIVE_INFINITY;
 import static java.lang.String.format;
 import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.realVarSearch;
 
 /**
  * The cyclo hexan problem.
@@ -79,7 +80,7 @@ public class CycloHexan extends AbstractProblem {
     @Override
     public void configureSearch() {
         Resolver r = model.getResolver();
-        r.set(r.realVarSearch(vars));
+        r.set(realVarSearch(vars));
     }
 
     @Override

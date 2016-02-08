@@ -44,6 +44,8 @@ import java.util.Random;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.*;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -78,7 +80,7 @@ public class ClauseTest {
 
                 LogOp or = or(bs);
                 addClauses(or, s);
-                s.getResolver().set(s.getResolver().firstLBSearch(bs));
+                s.getResolver().set(firstLBSearch(bs));
 
                 while (s.solve()) ;
                 long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -98,7 +100,7 @@ public class ClauseTest {
         LogOp and = and(bs[0], bs[0].not());
 
         addClauses(and, s);
-        s.getResolver().set(s.getResolver().firstLBSearch(bs));
+        s.getResolver().set(firstLBSearch(bs));
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 0);
@@ -115,7 +117,7 @@ public class ClauseTest {
         addClauses(or, s);
 
         BoolVar[] bs = new BoolVar[]{b};
-        s.getResolver().set(s.getResolver().firstLBSearch(bs));
+        s.getResolver().set(firstLBSearch(bs));
 //        SMF.log(s, true, true);
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -221,7 +223,7 @@ public class ClauseTest {
                         bvars[0]);
                 addClauses(tree, model);
 
-                model.getResolver().set(model.getResolver().randomSearch(bvars, seed));
+                model.getResolver().set(randomSearch(bvars, seed));
                 while (model.solve()) ;
                 n1 = model.getResolver().getMeasures().getSolutionCount();
             }
@@ -230,7 +232,7 @@ public class ClauseTest {
                 BoolVar[] bvars = model.boolVarArray("b", 3);
                 model.times(bvars[1], bvars[2], bvars[0]).post();
 
-                model.getResolver().set(model.getResolver().randomSearch(bvars, seed));
+                model.getResolver().set(randomSearch(bvars, seed));
                 while (model.solve()) ;
                 n2 = model.getResolver().getMeasures().getSolutionCount();
             }

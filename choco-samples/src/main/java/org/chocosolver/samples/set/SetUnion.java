@@ -41,6 +41,10 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.SetVar;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.setVarSearch;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.firstValSelector;
+import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.firstVarSelector;
+
 /**
  * Small problem to illustrate how to use set variables
  * enumerates sets such that z = union(x,y)
@@ -75,7 +79,7 @@ public class SetUnion extends AbstractProblem {
     @Override
     public void configureSearch() {
         Resolver r = model.getResolver();
-        r.set(r.setVarSearch(r.firstVarSelector(),r.firstValSelector(),false,x, y, z));
+        r.set(setVarSearch(firstVarSelector(),firstValSelector(),false,x, y, z));
     }
 
     @Override

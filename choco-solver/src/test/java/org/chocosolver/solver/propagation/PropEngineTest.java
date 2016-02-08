@@ -45,6 +45,7 @@ import org.testng.annotations.Test;
 import static java.util.Arrays.sort;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.PropagatorPriority.UNARY;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.IntEventType.VOID;
 import static org.chocosolver.util.ESat.TRUE;
@@ -178,7 +179,7 @@ public class PropEngineTest {
                     return TRUE;
                 }
             }).post();
-            model.getResolver().set(model.getResolver().randomSearch(X, 0));
+            model.getResolver().set(randomSearch(X, 0));
             while (model.solve()) ;
             assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
         }

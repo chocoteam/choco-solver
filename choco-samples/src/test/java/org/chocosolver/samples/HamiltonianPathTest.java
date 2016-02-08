@@ -42,6 +42,7 @@ import org.chocosolver.util.PoolManager;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -102,7 +103,7 @@ public class HamiltonianPathTest {
 		model.path(succ, model.intVar(offset), model.intVar(n - 1 + offset), offset).post();
 		// configure solver
 		if (rd) {
-			model.getResolver().set(model.getResolver().randomSearch(succ, seed));
+			model.getResolver().set(randomSearch(succ, seed));
 		} else {
 			model.getResolver().set(new ConstructorIntHeur(succ, offset));
 		}

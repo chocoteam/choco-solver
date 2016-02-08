@@ -42,6 +42,7 @@ import java.util.Random;
 import static java.lang.System.currentTimeMillis;
 import static org.chocosolver.solver.constraints.binary.element.ElementFactory.detect;
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.chocosolver.util.tools.ArrayUtils.toArray;
 import static org.testng.Assert.assertEquals;
@@ -62,7 +63,7 @@ public class ElementTest {
         IntVar[] allvars = toArray(index, var);
 
         Resolver r = s.getResolver();
-        r.set(r.randomSearch(allvars, currentTimeMillis()));
+        r.set(randomSearch(allvars, currentTimeMillis()));
         while (s.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
@@ -162,7 +163,7 @@ public class ElementTest {
             indicesr[i] = ref.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = flatten(toArray(varsr, indicesr));
-        ref.getResolver().set(ref.getResolver().randomSearch(allvarsr, seed));
+        ref.getResolver().set(randomSearch(allvarsr, seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
             ref.element(varsr[i], values, indicesr[i], 0).post();
@@ -188,7 +189,7 @@ public class ElementTest {
             IntVar I = model.intVar("I", 0, 5, false);
             IntVar R = model.intVar("R", 0, 10, false);
             model.element(R, new int[]{0, 2, 4, 6, 7}, I).post();
-            model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{I, R}, i));
+            model.getResolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
             assertEquals(model.getResolver().getMeasures().getSolutionCount(), 5);
         }
@@ -201,7 +202,7 @@ public class ElementTest {
             IntVar I = model.intVar("I", 0, 5, false);
             IntVar R = model.intVar("R", 0, 10, false);
             model.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
-            model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{I, R}, i));
+            model.getResolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
             assertEquals(model.getResolver().getMeasures().getSolutionCount(), 5);
         }
@@ -214,7 +215,7 @@ public class ElementTest {
             IntVar I = model.intVar("I", 0, 13, false);
             IntVar R = model.intVar("R", 0, 21, false);
             model.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I).post();
-            model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{I, R}, i));
+            model.getResolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
             assertEquals(model.getResolver().getMeasures().getSolutionCount(), 14);
         }
@@ -227,7 +228,7 @@ public class ElementTest {
             IntVar I = model.intVar("I", 0, 3, true);
             IntVar R = model.intVar("R", -1, 0, false);
             model.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1).post();
-            model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{I, R}, i));
+            model.getResolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
             assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
         }

@@ -31,6 +31,8 @@ package org.chocosolver.solver.search.strategy;
 
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
@@ -40,8 +42,8 @@ import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
 import org.chocosolver.solver.variables.SetVar;
 
 /**
- * @deprecated : search strategies for sets should be done through {@link Resolver}
- * which implements {@link ISetStrategyFactory}
+ * @deprecated : search strategies for set variables should be done through
+ * {@link SearchStrategyFactory}, {@link VarSelectorFactory} and {@link ValSelectorFactory}
  *
  * This class will be removed in versions > 3.4.0
  */
@@ -52,7 +54,7 @@ public class SetStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -61,7 +63,7 @@ public class SetStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
+     * @deprecated : use {@link SearchStrategyFactory#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
      * and create variable/value selectors directly instead
      * Will be removed in versions > 3.4.0
      */
@@ -71,7 +73,7 @@ public class SetStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
+     * @deprecated : use {@link SearchStrategyFactory#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
      * and create variable/value selectors directly instead
      * Will be removed in versions > 3.4.0
      */
@@ -81,7 +83,7 @@ public class SetStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#setVarSearch(SetVar...)}  instead
+     * @deprecated : use {@link SearchStrategyFactory#setVarSearch(SetVar...)}  instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -90,7 +92,7 @@ public class SetStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link Resolver#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
+     * @deprecated : use {@link SearchStrategyFactory#setVarSearch(VariableSelector, SetValueSelector, boolean, SetVar...)}
      * and create variable/value selectors directly instead
      * Will be removed in versions > 3.4.0
      */

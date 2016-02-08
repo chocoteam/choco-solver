@@ -48,6 +48,7 @@ import java.util.*;
 
 import static java.util.Arrays.sort;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
 
 /**
  * <a href="http://www.inra.fr/mia/T/schiex/Doc/CELAR.shtml">CELAR Radio Link Frequency Assignment Problem</a>:
@@ -161,7 +162,7 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().domOverWDegSearch(vars));
+        model.getResolver().set(domOverWDegSearch(vars));
         SearchMonitorFactory.luby(model, 2, 2, new FailCounter(model, 2), 25000);
     }
 

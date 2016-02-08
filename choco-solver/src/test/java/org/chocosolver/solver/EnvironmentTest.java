@@ -38,6 +38,7 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
@@ -66,7 +67,7 @@ public class EnvironmentTest {
 		model.allDifferent(vars, "AC").post();
 		model.allDifferent(vectors, "BC").post();
 		Resolver r = model.getResolver();
-		r.set(r.domOverWDegSearch(append(vectors, vars)));
+		r.set(domOverWDegSearch(append(vectors, vars)));
 		model.solve();
 	}
 }

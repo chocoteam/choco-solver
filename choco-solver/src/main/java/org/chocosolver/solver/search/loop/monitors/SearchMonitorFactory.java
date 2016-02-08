@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;

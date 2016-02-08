@@ -52,6 +52,7 @@ import java.util.Random;
 
 import static java.lang.String.format;
 import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.ESat.TRUE;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.testng.Assert.assertEquals;
@@ -102,7 +103,7 @@ public class LexChainTest {
         }
 
         SatFactory.addClauses(LogOp.and(trees), model);
-        model.getResolver().set(model.getResolver().randomSearch(ArrayUtils.flatten(X), seed));
+        model.getResolver().set(randomSearch(ArrayUtils.flatten(X), seed));
         return model;
     }
 
@@ -115,7 +116,7 @@ public class LexChainTest {
                     model.intVarArray("X_" + i, m, 0, k, false);
         }
         model.lexChainLess(X).post();
-        model.getResolver().set(model.getResolver().randomSearch(flatten(X),seed));
+        model.getResolver().set(randomSearch(flatten(X),seed));
         return model;
     }
 

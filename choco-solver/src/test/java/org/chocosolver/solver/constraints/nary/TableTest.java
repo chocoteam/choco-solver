@@ -54,6 +54,7 @@ import static java.lang.System.out;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.scalar;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 
 public class TableTest {
@@ -109,7 +110,7 @@ public class TableTest {
                     IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                     allEquals(tsolver, tvars, a);
                     Resolver r = tsolver.getResolver();
-                    r.set(r.randomSearch(tvars, s));
+                    r.set(randomSearch(tvars, s));
                     long nbSolutions = 0;
                     while (tsolver.solve()) {
                         nbSolutions++;
@@ -150,7 +151,7 @@ public class TableTest {
                     IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                     allDifferent(tsolver, tvars, a);
                     Resolver r = tsolver.getResolver();
-                    r.set(r.randomSearch(tvars, s));
+                    r.set(randomSearch(tvars, s));
                     long nbSolutions = 0;
                     while (tsolver.solve()) {
                         nbSolutions++;
@@ -267,7 +268,7 @@ public class TableTest {
                 rnd.setSeed(seed);
                 Tuples tuples = generateTuples(values -> rnd.nextBoolean(), true, vars);
                 model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-                model.getResolver().set(model.getResolver().randomSearch(vars, seed));
+                model.getResolver().set(randomSearch(vars, seed));
                 long nbs = 0;
                 while (model.solve()) {
                     nbs++;
@@ -278,7 +279,7 @@ public class TableTest {
                         Model tsolver = new Model(ALGOS[a]);
                         IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                         model.table(tvars, tuples, ALGOS[a]).post();
-                        tsolver.getResolver().set(tsolver.getResolver().randomSearch(tvars, s));
+                        tsolver.getResolver().set(randomSearch(tvars, s));
                         long nbSolutions = 0;
                         while (tsolver.solve()) {
                             nbSolutions++;

@@ -36,6 +36,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -78,7 +79,7 @@ public class ModTest extends AbstractTernaryTest {
 		IntVar remainder = s.intVar("remainder", 1, 2, false);
 		s.mod(dividend, divisor, remainder).getOpposite().post();
 		Resolver r = s.getResolver();
-		r.set(r.firstLBSearch(dividend, divisor, remainder));
+		r.set(firstLBSearch(dividend, divisor, remainder));
 		s.solve();
 	}
 }

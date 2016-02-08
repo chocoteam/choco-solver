@@ -41,6 +41,7 @@ import java.util.Deque;
 
 import static java.lang.Math.max;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 
 
 /**
@@ -104,7 +105,7 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+        model.getResolver().set(firstLBSearch(vars));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];

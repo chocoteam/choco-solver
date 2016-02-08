@@ -40,6 +40,7 @@ import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.testng.Assert.assertEquals;
 
@@ -67,7 +68,7 @@ public class TreeTest {
 					new PropKLoops(VS, 0, NT)
 			).post();
 		}
-		model.getResolver().set(model.getResolver().randomSearch(VS, 0));
+		model.getResolver().set(randomSearch(VS, 0));
 		showShortStatistics(model);
 		return model;
 	}

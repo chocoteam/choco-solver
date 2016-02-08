@@ -36,6 +36,8 @@ import org.kohsuke.args4j.Option;
 
 import java.util.Scanner;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+
 /**
  * CSPLib prob001:<br/>
  * "A number of cars are to be produced;
@@ -119,7 +121,7 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().firstLBSearch(cars));
+        model.getResolver().set(firstLBSearch(cars));
     }
 
     @Override

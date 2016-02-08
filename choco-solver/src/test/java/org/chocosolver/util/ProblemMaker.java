@@ -36,7 +36,6 @@ import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 
-import static java.lang.Math.max;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**

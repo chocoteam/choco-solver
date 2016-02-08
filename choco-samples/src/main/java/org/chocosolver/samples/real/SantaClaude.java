@@ -40,6 +40,7 @@ import java.util.Random;
 
 import static java.lang.String.format;
 import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -98,7 +99,7 @@ public class SantaClaude extends AbstractProblem {
     @Override
     public void configureSearch() {
         Resolver r = model.getResolver();
-        r.set(r.domOverWDegSearch(kid_gift));
+        r.set(domOverWDegSearch(kid_gift));
     }
 
     @Override

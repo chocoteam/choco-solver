@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.chocosolver.util.tools.ArrayUtils.toArray;
 import static org.testng.Assert.assertEquals;
@@ -83,10 +84,10 @@ public class EqualXYCExplTest {
             indicess[i] = sol.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = flatten(toArray(varsr, indicesr));
-        ref.getResolver().set(ref.getResolver().firstLBSearch(allvarsr));
+        ref.getResolver().set(firstLBSearch(allvarsr));
 
         IntVar[] allvarss = flatten(toArray(varss, indicess));
-        sol.getResolver().set(sol.getResolver().firstLBSearch(allvarss));
+        sol.getResolver().set(firstLBSearch(allvarss));
 
 
         for (int i = 0; i < varsr.length - 1; i++) {

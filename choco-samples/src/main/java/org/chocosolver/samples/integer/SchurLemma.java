@@ -35,6 +35,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
@@ -86,7 +87,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().firstLBSearch(flatten(M)));
+        model.getResolver().set(firstLBSearch(flatten(M)));
     }
 
     @Override

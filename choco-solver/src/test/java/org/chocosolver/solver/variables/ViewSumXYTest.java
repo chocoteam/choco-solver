@@ -38,6 +38,7 @@ import java.util.Random;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 import static org.chocosolver.solver.Cause.Null;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.*;
 
 /**
@@ -123,7 +124,7 @@ public class ViewSumXYTest {
                 xs[1] = ref.intVar("y", 1, 5, true);
                 xs[2] = ref.intVar("z", 2, 10, true);
                 ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
-                ref.getResolver().set(ref.getResolver().randomSearch(xs, seed));
+                ref.getResolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -133,7 +134,7 @@ public class ViewSumXYTest {
                 IntVar Z = model.intVar("Z", 0, 200, false);
                 model.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getResolver().set(model.getResolver().randomSearch(xs, seed));
+                model.getResolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
@@ -154,7 +155,7 @@ public class ViewSumXYTest {
                 xs[1] = ref.intVar("y", 1, 5, false);
                 xs[2] = ref.intVar("z", 2, 10, false);
                 ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
-                ref.getResolver().set(ref.getResolver().randomSearch(xs, seed));
+                ref.getResolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -164,7 +165,7 @@ public class ViewSumXYTest {
                 IntVar Z = model.intVar("Z", 0, 200, false);
                 model.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getResolver().set(model.getResolver().randomSearch(xs, seed));
+                model.getResolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;

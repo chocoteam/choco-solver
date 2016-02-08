@@ -35,6 +35,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 
 /**
  * CSPLib prob006:<br/>
@@ -92,7 +93,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(model.getResolver().firstLBSearch(ticks));
+        model.getResolver().set(firstLBSearch(ticks));
     }
 
     @Override

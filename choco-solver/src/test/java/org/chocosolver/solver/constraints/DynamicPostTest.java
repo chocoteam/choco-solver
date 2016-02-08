@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.util.ESat.*;
@@ -212,7 +214,7 @@ public class DynamicPostTest {
                 model.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
         Resolver r = model.getResolver();
-        r.set(r.firstLBSearch(a, b, c, lbA, lbB));
+        r.set(firstLBSearch(a, b, c, lbA, lbB));
         int nbSolution = 0;
         while (model.solve()) {
             int bestA;
@@ -287,7 +289,7 @@ public class DynamicPostTest {
     private Model costasArray(int n, boolean dynamic) {
         Model model = ProblemMaker.makeCostasArrays(n);
         IntVar[] vectors = (IntVar[]) model.getHook("vectors");
-        model.getResolver().set(model.getResolver().domOverWDegSearch(vectors));
+        model.getResolver().set(domOverWDegSearch(vectors));
         if (dynamic) {
             // should not change anything (the constraint is already posted)
             model.getResolver().plugMonitor((IMonitorSolution) () -> model.allDifferent(vectors, "BC").post());

@@ -36,6 +36,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstUBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
@@ -157,7 +158,7 @@ public class SocialGolfer extends AbstractProblem {
     @Override
     public void configureSearch() {
         BoolVar[] vars = flatten(P);
-        model.getResolver().set(model.getResolver().firstUBSearch(vars));
+        model.getResolver().set(firstUBSearch(vars));
     }
 
     @Override

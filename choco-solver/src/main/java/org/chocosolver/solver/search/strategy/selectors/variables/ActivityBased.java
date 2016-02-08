@@ -52,7 +52,8 @@ import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.IntMap;
 
-import java.util.*;
+import java.util.BitSet;
+import java.util.Comparator;
 import java.util.Random;
 
 import static java.lang.Integer.MAX_VALUE;

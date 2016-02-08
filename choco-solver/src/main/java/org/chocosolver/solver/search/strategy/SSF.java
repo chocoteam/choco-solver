@@ -29,9 +29,12 @@
  */
 package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
+
 /**
- * @deprecated : search strategies for sets should be done through {@link org.chocosolver.solver.Resolver}
- * which implements {@link ISetStrategyFactory}
+ * @deprecated : search strategies for set variables should be done through
+ * {@link SearchStrategyFactory}, {@link VarSelectorFactory} and {@link ValSelectorFactory}
  *
  * This class will be removed in versions > 3.4.0
  */

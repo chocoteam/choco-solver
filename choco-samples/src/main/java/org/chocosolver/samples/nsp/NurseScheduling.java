@@ -46,6 +46,8 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+
 /**
  * @author Sophie Demassey
  */
@@ -61,17 +63,17 @@ public class NurseScheduling {
         },*/
         INC_DOMWDEG {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return s.getResolver().domOverWDegSearch(vars);
+                return domOverWDegSearch(vars);
             }
         },
         FORCE_INPUT {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return s.getResolver().minDomLBSearch(cast(s.getVars()));
+                return minDomLBSearch(cast(s.getVars()));
             }
         },
         FORCE_DOMWDEG {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return s.getResolver().domOverWDegSearch(cast(s.getVars()));
+                return domOverWDegSearch(cast(s.getVars()));
             }
         },
         /*DOMWDEG {
@@ -81,7 +83,7 @@ public class NurseScheduling {
         },*/
         MIN_DOM {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return s.getResolver().minDomLBSearch(vars);
+                return minDomLBSearch(vars);
             }
         },
 
@@ -92,7 +94,7 @@ public class NurseScheduling {
         },*/
         RAND {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return s.getResolver().randomSearch(vars, 0);
+                return randomSearch(vars, 0);
             }
         };
 

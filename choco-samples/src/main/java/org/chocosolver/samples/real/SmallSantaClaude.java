@@ -37,6 +37,7 @@ import org.chocosolver.solver.variables.RealVar;
 import static java.lang.String.format;
 import static java.lang.System.out;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 import static org.chocosolver.util.tools.ArrayUtils.append;
@@ -91,7 +92,7 @@ public class SmallSantaClaude {
         model.realIbexGenericConstraint("({0}+{1}+{2})/3={3};(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}", allRV).post();
 
         // set search strategy (ABS)
-        model.getResolver().set(model.getResolver().minDomLBSearch(kid_gift));
+        model.getResolver().set(minDomLBSearch(kid_gift));
         // displays resolution statistics
         showStatistics(model);
         showSolutions(model);

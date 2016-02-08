@@ -36,7 +36,6 @@ import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.criteria.LongCriterion;
 
 /**
