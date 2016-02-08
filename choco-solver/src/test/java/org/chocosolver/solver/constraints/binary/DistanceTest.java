@@ -40,7 +40,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -148,7 +148,7 @@ public class DistanceTest {
         IntVar Z = model.intVar("Z", 0, 10, true);
         model.distance(X, Y, "=", Z).post();
         Resolver r = model.getResolver();
-        r.set(firstLBSearch(new IntVar[]{Z, X, Y, Z}));
+        r.set(inputOrderLBSearch(new IntVar[]{Z, X, Y, Z}));
         while (model.solve()) ;
     }
 

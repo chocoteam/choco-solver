@@ -44,7 +44,7 @@ import java.util.Random;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.*;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertEquals;
 
@@ -80,7 +80,7 @@ public class ClauseTest {
 
                 LogOp or = or(bs);
                 addClauses(or, s);
-                s.getResolver().set(firstLBSearch(bs));
+                s.getResolver().set(inputOrderLBSearch(bs));
 
                 while (s.solve()) ;
                 long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -100,7 +100,7 @@ public class ClauseTest {
         LogOp and = and(bs[0], bs[0].not());
 
         addClauses(and, s);
-        s.getResolver().set(firstLBSearch(bs));
+        s.getResolver().set(inputOrderLBSearch(bs));
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 0);
@@ -117,7 +117,7 @@ public class ClauseTest {
         addClauses(or, s);
 
         BoolVar[] bs = new BoolVar[]{b};
-        s.getResolver().set(firstLBSearch(bs));
+        s.getResolver().set(inputOrderLBSearch(bs));
 //        SMF.log(s, true, true);
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();

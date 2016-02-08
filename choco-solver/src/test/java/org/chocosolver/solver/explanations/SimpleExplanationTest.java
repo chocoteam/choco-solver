@@ -33,7 +33,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -63,7 +63,7 @@ public class SimpleExplanationTest {
         s.arithm(vars[1], "<", vars[2]).post();
         s.arithm(vars[0], "!=", vars[1]).post();
         // configure Solver
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
         // solve
         s.solve();
         long sol = s.getResolver().getMeasures().getSolutionCount();

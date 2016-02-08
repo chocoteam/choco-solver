@@ -39,7 +39,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstUBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderUBSearch;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -90,7 +90,7 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(firstUBSearch(itemCost));
+        model.getResolver().set(inputOrderUBSearch(itemCost));
     }
 
     @Override

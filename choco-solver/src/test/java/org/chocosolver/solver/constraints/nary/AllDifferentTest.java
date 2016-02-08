@@ -39,7 +39,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -85,7 +85,7 @@ public class AllDifferentTest {
             s.allDifferent(diag2, "BC").post();
         }
         Resolver r = s.getResolver();
-        r.set(firstLBSearch(vars));
+        r.set(inputOrderLBSearch(vars));
         while (s.solve()) ;
         long sol = r.getMeasures().getSolutionCount();
         assertEquals(sol, nbSol, "nb sol incorrect");
@@ -124,7 +124,7 @@ public class AllDifferentTest {
                 s.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
         //        ChocoLogging.toSolution();
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -144,7 +144,7 @@ public class AllDifferentTest {
         vars[3] = s.intVar("v_3", 2, 6, true);
         vars[4] = s.intVar("v_4", 2, 6, true);
         s.allDifferent(vars, "BC").post();
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
@@ -218,7 +218,7 @@ public class AllDifferentTest {
                 s.allDifferent(vars, "AC").post();
                 break;
         }
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
         return s;
     }
 

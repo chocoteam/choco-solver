@@ -42,9 +42,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
-import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.maxRValSelector;
-import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.minRValSelector;
-import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.nextVarSelector;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.maxRealVal;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.minRealVal;
+import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.roundRobinVar;
 
 /**
  * A search binder, which configures but not overrides, a search strategy if none is defined.
@@ -163,9 +163,9 @@ public class DefaultSearchBinder implements ISearchBinder {
                     break;
                 case Variable.REAL:
                     if (max) {
-                        strats[nb++] = realVarSearch(nextVarSelector(), maxRValSelector(), (RealVar) objective);
+                        strats[nb++] = realVarSearch(roundRobinVar(), maxRealVal(), (RealVar) objective);
                     } else {
-                        strats[nb++] = realVarSearch(nextVarSelector(), minRValSelector(), (RealVar) objective);
+                        strats[nb++] = realVarSearch(roundRobinVar(), minRealVal(), (RealVar) objective);
                     }
                     break;
                 default:

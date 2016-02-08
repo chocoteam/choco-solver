@@ -44,7 +44,7 @@ import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
 
@@ -74,7 +74,7 @@ public class ReifiedTest {
             Constraint oppCons = s.arithm(x, "!=", y);
 
             s.ifThenElse(b, cons, oppCons);
-            s.getResolver().set(firstLBSearch(vars));
+            s.getResolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
             long sol = s.getResolver().getMeasures().getSolutionCount();
             assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
@@ -98,7 +98,7 @@ public class ReifiedTest {
 
         s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")).post();
 
-        s.getResolver().set(firstLBSearch(new IntVar[]{x, y, z}));
+        s.getResolver().set(inputOrderLBSearch(new IntVar[]{x, y, z}));
         while (s.solve()) ;
         long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
@@ -122,7 +122,7 @@ public class ReifiedTest {
 
             s.ifThenElse(b, cons, oppCons);
 
-            s.getResolver().set(firstLBSearch(vars));
+            s.getResolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
             long sol = s.getResolver().getMeasures().getSolutionCount();
             assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
@@ -150,7 +150,7 @@ public class ReifiedTest {
 
         s1.allDifferent(vars1, "AC").post();
 
-        s1.getResolver().set(firstLBSearch(vars1));
+        s1.getResolver().set(inputOrderLBSearch(vars1));
         return s1;
     }
 
@@ -216,7 +216,7 @@ public class ReifiedTest {
             }
         }
 
-        s2.getResolver().set(firstLBSearch(X));
+        s2.getResolver().set(inputOrderLBSearch(X));
         return s2;
     }
 

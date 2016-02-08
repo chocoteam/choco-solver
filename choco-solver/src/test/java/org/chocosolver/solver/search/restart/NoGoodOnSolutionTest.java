@@ -201,7 +201,7 @@ public class NoGoodOnSolutionTest {
         }
         nogoodRecordingOnSolution(new IntVar[]{vars[0]});
         showSolutions(model);
-        model.getResolver().set(firstLBSearch(vars));
+        model.getResolver().set(inputOrderLBSearch(vars));
         while (model.solve()) ;
         out.println(model.getResolver().getMeasures());
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 8);
@@ -224,7 +224,7 @@ public class NoGoodOnSolutionTest {
         }
         nogoodRecordingOnSolution(new IntVar[]{vars[0], vars[1]});
         showSolutions(model);
-        model.getResolver().set(firstLBSearch(vars));
+        model.getResolver().set(inputOrderLBSearch(vars));
 //        Chatterbox.showDecisions(solver);
         while (model.solve()) ;
         out.println(model.getResolver().getMeasures());

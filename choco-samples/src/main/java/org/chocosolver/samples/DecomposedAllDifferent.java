@@ -38,7 +38,7 @@ import org.kohsuke.args4j.Option;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 
 /**
  * <br/>
@@ -114,7 +114,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(firstLBSearch(X));
+        model.getResolver().set(inputOrderLBSearch(X));
         /*IPropagationEngine engine = model.getResolver().getEngine();;
         engine.addGroup(
                 Group.buildGroup(

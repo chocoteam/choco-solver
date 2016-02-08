@@ -46,7 +46,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.testng.Assert.assertFalse;
 
@@ -93,7 +93,7 @@ public class DeltaTest {
         final BoolVar b0 = model.boolVar("b0");
         final BoolVar b1 = model.boolVar("b1");
         final IntVar i0 = model.boolVar("i0");
-        model.getResolver().set(firstLBSearch(i0));
+        model.getResolver().set(inputOrderLBSearch(i0));
         model.setBoolsChanneling(new BoolVar[]{b0, b1}, s0, 0).post();
         model.cardinality(s0, model.intVar(0)).post();
 

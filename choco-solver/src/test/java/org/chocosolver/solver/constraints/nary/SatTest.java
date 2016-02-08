@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.constraints.SatFactory.*;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
 import static org.testng.Assert.assertEquals;
@@ -212,7 +212,7 @@ public class SatTest {
         addBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
         addBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
         // SEARCH
-        model.getResolver().set(firstLBSearch(var));
+        model.getResolver().set(inputOrderLBSearch(var));
 
         model.setObjectives(MAXIMIZE, var);
         model.solve();

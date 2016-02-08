@@ -38,7 +38,7 @@ import org.kohsuke.args4j.Option;
 import java.text.MessageFormat;
 
 import static java.util.Arrays.fill;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 
 /**
  * CSPLib prob019:<br/>
@@ -103,7 +103,7 @@ public class MagicSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(firstLBSearch(vars));
+        model.getResolver().set(inputOrderLBSearch(vars));
     }
 
     @Override

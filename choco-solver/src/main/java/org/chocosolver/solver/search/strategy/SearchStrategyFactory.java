@@ -34,13 +34,8 @@ import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
-import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.ActivityBased;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
-import org.chocosolver.solver.search.strategy.selectors.variables.MinDelta;
-import org.chocosolver.solver.search.strategy.selectors.variables.Random;
 import org.chocosolver.solver.search.strategy.strategy.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -101,7 +96,7 @@ public class SearchStrategyFactory {
      * @return a strategy to instantiate sets
      */
     public static SetStrategy setVarSearch(SetVar... sets) {
-        return setVarSearch(new MinDelta(), new SetDomainMin(), true, sets);
+        return setVarSearch(minDomVar(), minSetVal(), true, sets);
     }
 
     // ************************************************************************************
@@ -126,7 +121,7 @@ public class SearchStrategyFactory {
      * @return a strategy to instantiate real variables
      */
     public static RealStrategy realVarSearch(RealVar... reals) {
-        return realVarSearch(nextVarSelector(), midRValSelector(), reals);
+        return realVarSearch(roundRobinVar(), midRealVal(), reals);
     }
 
     // ************************************************************************************
@@ -171,7 +166,7 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> domOverWDegSearch(IntVar... vars) {
-        return new DomOverWDeg(vars, 0, minValSelector());
+        return new DomOverWDeg(vars, 0, minIntVal());
     }
 
     /**
@@ -199,8 +194,8 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy randomSearch(IntVar[] vars, long seed) {
-        IntValueSelector value = new IntDomainRandom(seed);
-        IntValueSelector bound = new IntDomainRandomBound(seed);
+        IntValueSelector value = randomIntVal(seed);
+        IntValueSelector bound = randomIntBound(seed);
         IntValueSelector selector = (IntValueSelector) var -> {
             if (var.hasEnumeratedDomain()) {
                 return value.selectValue(var);
@@ -208,7 +203,7 @@ public class SearchStrategyFactory {
                 return bound.selectValue(var);
             }
         };
-        return intVarSearch(new Random<IntVar>(seed), selector, vars);
+        return intVarSearch(randomVar(seed), selector, vars);
     }
 
     // ************************************************************************************
@@ -220,8 +215,8 @@ public class SearchStrategyFactory {
      * @param vars list of variables
      * @return int strategy based on value assignments
      */
-    public static IntStrategy firstLBSearch(IntVar... vars) {
-        return intVarSearch(firstVarSelector(), minValSelector(), vars);
+    public static IntStrategy inputOrderLBSearch(IntVar... vars) {
+        return intVarSearch(inputOrderVar(), minIntVal(), vars);
     }
 
     /**
@@ -229,8 +224,8 @@ public class SearchStrategyFactory {
      * @param vars list of variables
      * @return assignment strategy
      */
-    public static IntStrategy firstUBSearch(IntVar... vars) {
-        return intVarSearch(firstVarSelector(), maxValSelector(), vars);
+    public static IntStrategy inputOrderUBSearch(IntVar... vars) {
+        return intVarSearch(inputOrderVar(), maxIntVal(), vars);
     }
 
     /**
@@ -239,7 +234,7 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy minDomLBSearch(IntVar... vars) {
-        return intVarSearch(minDomVarSelector(), minValSelector(), vars);
+        return intVarSearch(minDomIntVar(), minIntVal(), vars);
     }
 
     /**
@@ -248,6 +243,6 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy minDomUBSearch(IntVar... vars) {
-        return intVarSearch(minDomVarSelector(), maxValSelector(), vars);
+        return intVarSearch(minDomIntVar(), maxIntVal(), vars);
     }
 }

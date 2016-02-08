@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 import static java.lang.Math.ceil;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.printSolutions;
 
 /**
@@ -68,7 +68,7 @@ public class LNSTest {
         model.scalar(objects, volumes, "=", scalar).post();
         model.scalar(objects, energies, "=", power).post();
         model.knapsack(objects, scalar, power, volumes, energies).post();
-        model.getResolver().set(firstLBSearch(objects));
+        model.getResolver().set(inputOrderLBSearch(objects));
 //        SearchMonitorFactory.log(solver, true, false);
         switch (lns) {
             case 0:

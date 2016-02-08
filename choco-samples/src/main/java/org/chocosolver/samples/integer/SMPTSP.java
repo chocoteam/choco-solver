@@ -39,7 +39,7 @@ import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 
 /**
@@ -107,7 +107,7 @@ public class SMPTSP extends AbstractProblem {
 	public void configureSearch() {
 		// bottom-up optimisation, then classical branching
 		Resolver r = model.getResolver();
-		r.set(firstLBSearch(nbValues), minDomLBSearch(assignment));
+		r.set(inputOrderLBSearch(nbValues), minDomLBSearch(assignment));
 		// displays the root lower bound
 		r.plugMonitor(new IMonitorInitialize() {
 			@Override

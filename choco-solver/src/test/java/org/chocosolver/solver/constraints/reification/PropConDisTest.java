@@ -42,7 +42,7 @@ import java.util.Random;
 import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
 import static org.chocosolver.solver.constraints.SatFactory.addConstructiveDisjunction;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.chocosolver.util.tools.ArrayUtils.append;
@@ -105,8 +105,8 @@ public class PropConDisTest {
             out.printf("Size: %d\n", n);
             Model or = modelPb(n, n, rnd, false);
             Model cd = modelPb(n, n, rnd, true);
-            or.getResolver().set(firstLBSearch((IntVar[]) or.getHook("decvars")));
-            cd.getResolver().set(firstLBSearch((IntVar[]) cd.getHook("decvars")));
+            or.getResolver().set(inputOrderLBSearch((IntVar[]) or.getHook("decvars")));
+            cd.getResolver().set(inputOrderLBSearch((IntVar[]) cd.getHook("decvars")));
             or.solve();
             cd.solve();
             assertEquals(cd.getSolutionRecorder().getLastSolution().getIntVal((IntVar) cd.getObjectives()[0]),

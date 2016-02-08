@@ -45,7 +45,7 @@ import java.util.Random;
 import static java.lang.Boolean.TRUE;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.asList;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
@@ -195,7 +195,7 @@ public class CountTest {
         IntVar[] vars = model.intVarArray("e", vs.length + 1, 0, ub, false);
 
         Tuples tuples = new Tuples(true);
-        model.getResolver().set(firstLBSearch(vars));
+        model.getResolver().set(inputOrderLBSearch(vars));
         model.solve();
         do {
             int[] tuple = new int[vars.length];

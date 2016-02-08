@@ -42,8 +42,8 @@ import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.SetVar;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.setVarSearch;
-import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.firstValSelector;
-import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.firstVarSelector;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.minSetVal;
+import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.inputOrderVar;
 
 /**
  * Small problem to illustrate how to use set variables
@@ -79,7 +79,7 @@ public class SetUnion extends AbstractProblem {
     @Override
     public void configureSearch() {
         Resolver r = model.getResolver();
-        r.set(setVarSearch(firstVarSelector(),firstValSelector(),false,x, y, z));
+        r.set(setVarSearch(x, y, z));
     }
 
     @Override

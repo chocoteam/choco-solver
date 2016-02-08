@@ -49,7 +49,7 @@ public class VarSelectorFactory {
      * Selects the first free (non-instantiated) variable
      * @return a variable selector choosing always the first non-instantiated variable
      */
-    public static VariableSelector firstVarSelector() {
+    public static VariableSelector inputOrderVar() {
         return new InputOrder<>();
     }
 
@@ -61,23 +61,32 @@ public class VarSelectorFactory {
      * example : selects vars[0], then vars[1] even if vars[0] is still uninstantiated
      * @return a variable selector iterating over variables one by one
      */
-    public static VariableSelector nextVarSelector() {
+    public static VariableSelector roundRobinVar() {
         return new Cyclic<>();
     }
 
-	/**
+    /**
+     * Selects randomly a non-instantiated variable
+     * @param seed randomness seed
+     * @return a variable selector choosing variables randomly
+     */
+    public static VariableSelector randomVar(long seed){
+        return new Random<>(seed);
+    }
+
+    /**
      * Selects randomly a non-instantiated variable
      * @return a variable selector choosing variables randomly
      */
-    public static VariableSelector randomVarSelector(){
-        return new Random<>(0);
+    public static VariableSelector randomVar(){
+        return randomVar(0);
     }
 
-	/**
+    /**
      * Selects the non instantiated variable involved in the largest number of constraints
      * @return a variable selector choosing the variable involved in the largest number of constraints
      */
-    public static VariableSelector maxCstrsVarSelector(){
+    public static VariableSelector maxCstrsVar(){
         return new Occurrence<>();
     }
 
@@ -85,7 +94,7 @@ public class VarSelectorFactory {
      * Selects the non instantiated variable with the smallest domain
      * @return a variable selector choosing the variable with the smallest domain
      */
-    public static VariableSelector leastFreeVarSelector(){
+    public static VariableSelector minDomVar(){
         return new GeneralizedMinDomVarSelector();
     }
 
@@ -93,7 +102,7 @@ public class VarSelectorFactory {
      * Selects the non instantiated variable with the largest domain
      * @return a variable selector choosing the variable with the largest domain
      */
-    public static VariableSelector mostFreeVarSelector(){
+    public static VariableSelector maxDomVar(){
         return new GeneralizedMinDomVarSelector(false);
     }
 
@@ -106,7 +115,7 @@ public class VarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the smallest domain
      */
-    public static VariableSelector<IntVar> minDomVarSelector(){
+    public static VariableSelector<IntVar> minDomIntVar(){
         return new FirstFail();
     }
 
@@ -115,7 +124,7 @@ public class VarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the largest domain
      */
-    public static VariableSelector<IntVar> maxDomVarSelector(){
+    public static VariableSelector<IntVar> maxDomIntVar(){
         return new AntiFirstFail();
     }
 
@@ -124,7 +133,7 @@ public class VarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the smallest lower bound
      */
-    public static VariableSelector<IntVar> minLBVarSelector(){
+    public static VariableSelector<IntVar> minLBVar(){
         return new Smallest();
     }
 
@@ -133,7 +142,7 @@ public class VarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the upper bound
      */
-    public static VariableSelector<IntVar> maxUBVarSelector(){
+    public static VariableSelector<IntVar> maxUBVar(){
         return new Largest();
     }
 }

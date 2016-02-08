@@ -46,7 +46,7 @@ import java.text.MessageFormat;
 
 import static org.chocosolver.memory.Environments.COPY;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.chocosolver.solver.variables.IVariableFactory.MAX_INT_BOUND;
 import static org.chocosolver.solver.variables.IVariableFactory.MIN_INT_BOUND;
@@ -83,7 +83,7 @@ public class ModelTest {
         s.scalar(objects, volumes, "=", s.intVar("capa", capacites[0], capacites[1], true)).post();
         s.scalar(objects, energies, "=", power).post();
         s.setObjectives(MAXIMIZE, power);
-        s.getResolver().set(firstLBSearch(objects));
+        s.getResolver().set(inputOrderLBSearch(objects));
         showShortStatistics(s);
         return s;
     }
@@ -377,7 +377,7 @@ public class ModelTest {
         IntVar[] w = model.boolVarArray("w", 2);
         model.arithm(v[0], "!=", v[1]).post();
         model.arithm(w[0], "!=", w[1]).post();
-        model.getResolver().set(firstLBSearch(v));
+        model.getResolver().set(inputOrderLBSearch(v));
         model.getResolver().makeCompleteStrategy(true);
         model.solve();
         assertEquals(model.getResolver().isSatisfied(), TRUE);

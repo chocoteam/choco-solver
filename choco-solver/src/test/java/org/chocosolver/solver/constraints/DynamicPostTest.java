@@ -46,7 +46,7 @@ import java.util.List;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.util.ESat.*;
@@ -214,7 +214,7 @@ public class DynamicPostTest {
                 model.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
         Resolver r = model.getResolver();
-        r.set(firstLBSearch(a, b, c, lbA, lbB));
+        r.set(inputOrderLBSearch(a, b, c, lbA, lbB));
         int nbSolution = 0;
         while (model.solve()) {
             int bestA;

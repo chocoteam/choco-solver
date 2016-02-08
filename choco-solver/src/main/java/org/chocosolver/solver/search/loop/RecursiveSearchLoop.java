@@ -40,7 +40,7 @@ import org.chocosolver.util.ESat;
 
 import java.util.Arrays;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 
 /**
  * A list of service, just for fun
@@ -219,7 +219,7 @@ class RecursiveSearchLoop {
         r.set(new SevenQueuesPropagatorEngine(model));
         r.getEngine().initialize();
 //        System.out.printf("%d solutions\n", setDFS(solver, ISF.lexico_LB(X)));
-        System.out.printf("%d solutions\n", lds(model, firstLBSearch(X), 3));
+        System.out.printf("%d solutions\n", lds(model, inputOrderLBSearch(X), 3));
 //        for (int d = 2; d < 3; d++) {
 //            System.out.printf("%d solutions\n", ilds(solver, ISF.lexico_LB(X), d, X.length));
 //        }

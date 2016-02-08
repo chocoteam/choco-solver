@@ -33,7 +33,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.propagation.PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -62,7 +62,7 @@ public class TestSolveur {
                 }
             }
 
-            s.getResolver().set(firstLBSearch(vars));
+            s.getResolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
             assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
@@ -83,7 +83,7 @@ public class TestSolveur {
             for (int i = 0; i < m; i++) {
                 s.allDifferent(vars, "BC").post();
             }
-            s.getResolver().set(firstLBSearch(vars));
+            s.getResolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
             assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
@@ -104,7 +104,7 @@ public class TestSolveur {
         }
         //System.out.println("C("+vars[n-1]+","+vars[0]+")");
         s.arithm(vars[k - 1], "!=", vars[0]).post();
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
         assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
         assertEquals(s.getResolver().getMeasures().getNodeCount(), nbNod, "nb nod");
@@ -142,7 +142,7 @@ public class TestSolveur {
             //System.out.println("C("+vars[n-1]+","+vars[0]+")");
             s.arithm(vars[k - 1], "<", vars[0]).post();
 
-            s.getResolver().set(firstLBSearch(vars));
+            s.getResolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
             assertEquals(s.getResolver().getMeasures().getSolutionCount(), 0, "nb sol");
             assertEquals(s.getResolver().getMeasures().getNodeCount(), 0, "nb nod");
@@ -172,7 +172,7 @@ public class TestSolveur {
         s.arithm(vars[(n / 2) - 1], "<", vars[n / 2]).post();
         //System.out.println(cstrs[(n/2)-1]);
 
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
         assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
         assertEquals(s.getResolver().getMeasures().getNodeCount(), nbNod, "nb nod");
@@ -204,7 +204,7 @@ public class TestSolveur {
         }
         s.arithm(vars[(n / 2) - 1], "<", vars[n / 2]).post();
 
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
         s.getResolver().getMeasures().getSolutionCount();
         assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
@@ -232,7 +232,7 @@ public class TestSolveur {
         }
         model.arithm(vars[0], "=", vars[n - 1]).post();
 
-        model.getResolver().set(firstLBSearch(vars));
+        model.getResolver().set(inputOrderLBSearch(vars));
         TWOBUCKETPROPAGATIONENGINE.make(model);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 0, "nb sol");

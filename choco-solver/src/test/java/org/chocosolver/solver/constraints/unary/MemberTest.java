@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -90,7 +90,7 @@ public class MemberTest {
 
                 s.member(vars[0], values[1]).post();
 
-                s.getResolver().set(firstLBSearch(vars));
+                s.getResolver().set(inputOrderLBSearch(vars));
 
                 while (s.solve()) ;
                 long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -117,7 +117,7 @@ public class MemberTest {
 
                 s.member(vars[0], values[1]).post();
 
-                s.getResolver().set(firstLBSearch(vars));
+                s.getResolver().set(inputOrderLBSearch(vars));
 
                 while (s.solve()) ;
                 long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -135,7 +135,7 @@ public class MemberTest {
         int[] values = new int[]{0, 2, 4, 6, 8};
 
         s.member(vars, values).post();
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
 
         while (s.solve()) ;
 

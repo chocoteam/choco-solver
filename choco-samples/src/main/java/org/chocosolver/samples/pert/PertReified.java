@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 
 /**
  * <br/>
@@ -88,8 +88,8 @@ public class PertReified extends Pert {
     public void configureSearch() {
         Resolver r = model.getResolver();
         r.set(
-                firstLBSearch(bvars),
-                firstLBSearch(vars)
+                inputOrderLBSearch(bvars),
+                inputOrderLBSearch(vars)
         );
     }
 

@@ -70,7 +70,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link VarSelectorFactory#randomVarSelector()} instead
+     * @deprecated : use {@link VarSelectorFactory#randomVar()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -79,7 +79,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link VarSelectorFactory#minDomVarSelector()} instead
+     * @deprecated : use {@link VarSelectorFactory#minDomIntVar()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -88,7 +88,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link VarSelectorFactory#maxDomVarSelector()} instead
+     * @deprecated : use {@link VarSelectorFactory#maxDomIntVar()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -110,7 +110,7 @@ public class IntStrategyFactory {
     // ************************************************************************************
 
     /**
-     * @deprecated : use {@link ValSelectorFactory#minValSelector()} instead
+     * @deprecated : use {@link ValSelectorFactory#minIntVal()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -119,7 +119,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link ValSelectorFactory#midValSelector(boolean)} instead
+     * @deprecated : use {@link ValSelectorFactory#midIntVal(boolean)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -128,7 +128,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link ValSelectorFactory#maxValSelector()} instead
+     * @deprecated : use {@link ValSelectorFactory#maxIntVal()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -137,7 +137,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link ValSelectorFactory#randomValSelector(long)} instead
+     * @deprecated : use {@link ValSelectorFactory#randomIntVal(long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -146,7 +146,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link ValSelectorFactory#randomValSelector(long)} instead
+     * @deprecated : use {@link ValSelectorFactory#randomIntVal(long)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -270,7 +270,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link SearchStrategyFactory#firstLBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#inputOrderLBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -297,7 +297,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link SearchStrategyFactory#firstUBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#inputOrderUBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -351,7 +351,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link SearchStrategyFactory#firstLBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#inputOrderLBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -360,7 +360,7 @@ public class IntStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link SearchStrategyFactory#firstUBSearch(IntVar...)} instead
+     * @deprecated : use {@link SearchStrategyFactory#inputOrderUBSearch(IntVar...)} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated

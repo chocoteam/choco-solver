@@ -39,7 +39,7 @@ import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.explanations.ExplanationFactory.DBT;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.testng.Assert.assertEquals;
@@ -65,7 +65,7 @@ public class ExplanationTest {
                     IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
                     model.arithm(vars[n - 2], "=", vars[n - 1]).post();
                     model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-                    model.getResolver().set(firstLBSearch(vars));
+                    model.getResolver().set(inputOrderLBSearch(vars));
                     engines[e].plugin(model, ng == 1, false);
                     assertFalse(model.solve());
                     out.printf("\t%s", model.getResolver().getMeasures().toOneShortLineString());
@@ -85,7 +85,7 @@ public class ExplanationTest {
         IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
         model.arithm(vars[n - 2], "=", vars[n - 1]).post();
         model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-        model.getResolver().set(firstLBSearch(vars));
+        model.getResolver().set(inputOrderLBSearch(vars));
 
         model.getResolver().setCBJLearning(false, true);
         LearnCBJ cbj = (LearnCBJ) model.getResolver().getLearn();
@@ -205,7 +205,7 @@ public class ExplanationTest {
                 model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
-                model.getResolver().set(firstLBSearch(p[0], p[1], p[9], p[8], bs[0]));
+                model.getResolver().set(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
                 engines[e].plugin(model, ng == 1, false);
                 showStatistics(model);
                 showSolutions(model);
@@ -229,7 +229,7 @@ public class ExplanationTest {
                 model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
-                model.getResolver().set(firstLBSearch(p[0], p[1], bs[0], p[9], p[8]));
+                model.getResolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
                 engines[e].plugin(model, ng == 1, false);
                 showStatistics(model);
                 showSolutions(model);
@@ -256,7 +256,7 @@ public class ExplanationTest {
             bs[1] = model.arithm(p[3], "!=", p[4]).reify();
             model.arithm(bs[0], "=", bs[1]).post();
 
-            model.getResolver().set(firstLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
+            model.getResolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
             DBT.plugin(model, ng == 1, false);
             showStatistics(model);
             showSolutions(model);

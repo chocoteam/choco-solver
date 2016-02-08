@@ -39,7 +39,7 @@ import org.kohsuke.args4j.Option;
 
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -127,7 +127,7 @@ public class WarehouseLocation extends AbstractProblem {
     @Override
     public void configureSearch() {
         Resolver r = model.getResolver();
-        r.set(firstLBSearch(suppliers), firstLBSearch(costPerStore));
+        r.set(inputOrderLBSearch(suppliers), inputOrderLBSearch(costPerStore));
     }
 
     @Override

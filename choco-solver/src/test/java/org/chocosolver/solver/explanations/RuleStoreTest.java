@@ -40,7 +40,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 
 /**
  * Created by cprudhom on 10/12/14.
@@ -372,7 +372,7 @@ public class RuleStoreTest {
         RuleStore rs = new RuleStore(model, true, true);
         rs.init(new Explanation(null, false));
 
-        IntStrategy is = firstLBSearch(E, I, B);
+        IntStrategy is = inputOrderLBSearch(E, I, B);
         Decision d1 = null, d2 = null, d3 = null;
         try {
             d1 = is.getDecision();

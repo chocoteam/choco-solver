@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -89,7 +89,7 @@ public class NotMemberTest {
                 vars[0] = s.intVar("v", values[0]);
 
                 s.notMember(vars[0], values[1]).post();
-                s.getResolver().set(firstLBSearch(vars));
+                s.getResolver().set(inputOrderLBSearch(vars));
 
                 while (s.solve()) ;
                 long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -115,7 +115,7 @@ public class NotMemberTest {
                 vars[0] = s.intVar("v", lb, ub, true);
 
                 s.notMember(vars[0], values[1]).post();
-                s.getResolver().set(firstLBSearch(vars));
+                s.getResolver().set(inputOrderLBSearch(vars));
 
                 while (s.solve()) ;
                 long sol = s.getResolver().getMeasures().getSolutionCount();
@@ -133,7 +133,7 @@ public class NotMemberTest {
         int[] values = new int[]{0, 2, 8, 9, 10, 5, 6};
 
         s.notMember(vars, values).post();
-        s.getResolver().set(firstLBSearch(vars));
+        s.getResolver().set(inputOrderLBSearch(vars));
 
         while (s.solve()) ;
         assertEquals(s.getResolver().getMeasures().getSolutionCount(), 4);

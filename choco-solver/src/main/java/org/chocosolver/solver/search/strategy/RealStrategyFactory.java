@@ -69,7 +69,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link VarSelectorFactory#nextVarSelector()} instead
+     * @deprecated : use {@link VarSelectorFactory#roundRobinVar()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -78,7 +78,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link ValSelectorFactory#midRValSelector()} instead
+     * @deprecated : use {@link ValSelectorFactory#midRealVal()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -87,7 +87,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link ValSelectorFactory#minRValSelector()} instead
+     * @deprecated : use {@link ValSelectorFactory#minRealVal()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -96,7 +96,7 @@ public class RealStrategyFactory {
     }
 
     /**
-     * @deprecated : use {@link ValSelectorFactory#maxRValSelector()} instead
+     * @deprecated : use {@link ValSelectorFactory#maxRealVal()} instead
      * Will be removed in versions > 3.4.0
      */
     @Deprecated

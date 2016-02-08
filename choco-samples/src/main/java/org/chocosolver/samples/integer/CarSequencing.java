@@ -36,7 +36,7 @@ import org.kohsuke.args4j.Option;
 
 import java.util.Scanner;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 
 /**
  * CSPLib prob001:<br/>
@@ -121,7 +121,7 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(firstLBSearch(cars));
+        model.getResolver().set(inputOrderLBSearch(cars));
     }
 
     @Override

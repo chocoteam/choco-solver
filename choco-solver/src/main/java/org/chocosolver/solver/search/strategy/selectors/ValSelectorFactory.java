@@ -54,7 +54,7 @@ public class ValSelectorFactory {
      * Selects the variable lower bound
      * @return a value selector
      */
-    public static IntValueSelector minValSelector() {
+    public static IntValueSelector minIntVal() {
         return new IntDomainMin();
     }
 
@@ -69,7 +69,7 @@ public class ValSelectorFactory {
      *              Can lead to infinite loop when not correctly selected.
      * @return a value selector
      */
-    public static IntValueSelector midValSelector(boolean floor) {
+    public static IntValueSelector midIntVal(boolean floor) {
         return new IntDomainMiddle(floor);
     }
 
@@ -78,7 +78,7 @@ public class ValSelectorFactory {
      *
      * @return a value selector
      */
-    public static IntValueSelector maxValSelector() {
+    public static IntValueSelector maxIntVal() {
         return new IntDomainMax();
     }
 
@@ -89,7 +89,7 @@ public class ValSelectorFactory {
      * @param SEED the seed for randomness
      * @return a value selector
      */
-    public static IntValueSelector randomBoundSelector(long SEED) {
+    public static IntValueSelector randomIntBound(long SEED) {
         return new IntDomainRandomBound(SEED);
     }
 
@@ -103,7 +103,7 @@ public class ValSelectorFactory {
      * @param SEED the seed for randomness
      * @return a value selector
      */
-    public static IntValueSelector randomValSelector(long SEED) {
+    public static IntValueSelector randomIntVal(long SEED) {
         return new IntDomainRandom(SEED);
     }
 
@@ -115,21 +115,21 @@ public class ValSelectorFactory {
      * Value selector for halving domains of real variables.
      * @return a value selector to split real variable domains.
      */
-    public static RealValueSelector midRValSelector() {
+    public static RealValueSelector midRealVal() {
         return new RealDomainMiddle();
     }
 
     /**
      * @return a value selector to select real lower bounds. (use with caution)
      */
-    public static RealValueSelector minRValSelector() {
+    public static RealValueSelector minRealVal() {
         return new RealDomainMin();
     }
 
     /**
      * @return a value selector to select real upper bounds. (use with caution)
      */
-    public static RealValueSelector maxRValSelector() {
+    public static RealValueSelector maxRealVal() {
         return new RealDomainMax();
     }
 
@@ -137,7 +137,7 @@ public class ValSelectorFactory {
     // SETVAR SELECTORS
     // ************************************************************************************
 
-    public static SetValueSelector firstValSelector(){
+    public static SetValueSelector minSetVal(){
         return new SetDomainMin();
     }
 }

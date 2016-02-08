@@ -52,7 +52,7 @@ import static java.lang.System.nanoTime;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.chocosolver.util.ESat.*;
 import static org.testng.Assert.assertEquals;
@@ -224,7 +224,7 @@ public class ObjectiveTest {
         int bestvalue = b1.getValue();
         r.reset();
         model.arithm(b1, "=", bestvalue).post();
-        r.set(firstLBSearch(new BoolVar[]{b1, b2}));
+        r.set(inputOrderLBSearch(new BoolVar[]{b1, b2}));
         int count = 0;
         if (model.solve()) {
             do {

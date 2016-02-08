@@ -40,7 +40,7 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 import static org.testng.Assert.assertEquals;
@@ -55,7 +55,7 @@ public class SetIntUnion {
         s.union(x, values).post();
         showStatistics(s);
         showSolutions(s);
-        s.getResolver().set(firstLBSearch(x));
+        s.getResolver().set(inputOrderLBSearch(x));
         while (s.solve()) ;
     }
 
@@ -73,7 +73,7 @@ public class SetIntUnion {
         s.union(x, values).post();
         showStatistics(s);
         showSolutions(s);
-        s.getResolver().set(firstLBSearch(x));
+        s.getResolver().set(inputOrderLBSearch(x));
         while (s.solve()) ;
         assertEquals(s.getResolver().getMeasures().getSolutionCount(), 0);
     }
@@ -92,7 +92,7 @@ public class SetIntUnion {
         s.union(x, values).post();
         showStatistics(s);
         showSolutions(s);
-        s.getResolver().set(firstLBSearch(x));
+        s.getResolver().set(inputOrderLBSearch(x));
         while (s.solve()) ;
         out.println(values);
         assertEquals(s.getResolver().getMeasures().getSolutionCount(), 1);

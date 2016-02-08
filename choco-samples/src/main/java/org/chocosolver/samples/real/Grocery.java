@@ -34,7 +34,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.firstUBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderUBSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 
@@ -82,7 +82,7 @@ public class Grocery extends AbstractProblem {
         // choco branching
         showStatistics(model);
         showSolutions(model);
-        model.getResolver().set(firstUBSearch(itemCost));
+        model.getResolver().set(inputOrderUBSearch(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));
     }
