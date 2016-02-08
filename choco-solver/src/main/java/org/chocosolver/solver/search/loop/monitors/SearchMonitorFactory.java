@@ -73,8 +73,7 @@ public class SearchMonitorFactory {
      * @param restartLimit         restart limits (limit of number of restarts)
      */
     public static void luby(Model model, int scaleFactor, int geometricalFactor, ICounter restartStrategyLimit, int restartLimit) {
-        Resolver r = model.getResolver();
-        r.set(r.restart(restartStrategyLimit, new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit));
+        model.getResolver().setRestarts(restartStrategyLimit, new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**
@@ -88,10 +87,7 @@ public class SearchMonitorFactory {
      */
     public static void geometrical(Model model, int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        Resolver r = model.getResolver();
-        r.set(r.restart(restartStrategyLimit,
-                new GeometricalRestartStrategy(scaleFactor, geometricalFactor),
-                restartLimit));
+        model.getResolver().setRestarts(restartStrategyLimit, new GeometricalRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**

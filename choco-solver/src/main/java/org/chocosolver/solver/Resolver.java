@@ -31,6 +31,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
@@ -43,10 +44,13 @@ import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
 import org.chocosolver.solver.search.loop.move.Move;
+import org.chocosolver.solver.search.loop.move.MoveSeq;
 import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
+import org.chocosolver.solver.search.solution.LastSolutionRecorder;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -182,6 +186,9 @@ public final class Resolver implements Serializable, ISolver {
     /** Counter that indicates how many world should be rolled back when backtracking */
     private int jumpTo;
 
+    /** specifies whether or not to restore the best solution for optimisation problems (true by default)*/
+    private boolean restoreBestSolution = true;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,14 +211,45 @@ public final class Resolver implements Serializable, ISolver {
         kill = true;
         entire = false;
         searchMonitors = new SearchMonitorList();
-        set(propagateBasic());
-        set(noLearning());
-        set(dfs(null));
+        setDFS(null);
+        useStandardPropagation();
+        doNotLearn();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////     SEARCH LOOP       //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Executes the resolver as it is configured.
+     *
+     * Default configuration:
+     * - SATISFACTION : Computes a feasible solution. Use while(solve()) to enumerate all solutions.
+     * - OPTIMISATION : If an objective has been defined, searches an optimal solution
+     * (and prove optimality by closing the search space). Then restores the best solution found after solving.
+     * @return if at least one new solution has been found.
+     * @see {@link Resolver}
+     */
+    public boolean solve(){
+        boolean sat = getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION;
+        setStopAtFirstSolution(sat);
+        Variable[] objectives = getModel().getObjectives();
+        if((objectives == null || objectives.length == 0) && !sat) {
+            throw new SolverException("No objective variable has been defined whereas policy implies optimization");
+        }
+        long nbsol = getMeasures().getSolutionCount();
+        launch();
+        if(restoreBestSolution && !sat){
+            try {
+                getSolutionRecorder().restoreLastSolution();
+            } catch (ContradictionException e) {
+                throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+            } finally {
+                getEngine().flush();
+            }
+        }
+        return (getMeasures().getSolutionCount() - nbsol) > 0;
+    }
 
     /** Define the possible actions of SearchLoop */
     protected enum Action {
@@ -226,7 +264,7 @@ public final class Resolver implements Serializable, ISolver {
     /**
      * Executes the search loop
      */
-    void launch() {
+    private void launch() {
         boolean left = true;
         do {
             switch (action) {
@@ -694,7 +732,7 @@ public final class Resolver implements Serializable, ISolver {
         return ESat.FALSE;
     }
 
-	/**
+    /**
      * @return how many worlds should be rolled back when backtracking (usually 1)
      */
     public int getJumpTo() {
@@ -731,7 +769,7 @@ public final class Resolver implements Serializable, ISolver {
         }else if (m.length == 1){
             this.M = m[0];
         }else{
-            this.M = seqMoves(m);
+            this.M = new MoveSeq(getModel(),m);
         }
     }
 
@@ -868,7 +906,7 @@ public final class Resolver implements Serializable, ISolver {
         this.criteria.clear();
     }
 
-	/**
+    /**
      * @return the list of search monitors plugged in this resolver
      */
     public SearchMonitorList getSearchMonitors() {
@@ -914,12 +952,21 @@ public final class Resolver implements Serializable, ISolver {
         searchMonitors.reset();
     }
 
-	/**
+    /**
      * Sets how many worlds to rollback when backtracking
      * @param jto how many worlds to rollback when backtracking
      */
     public void setJumpTo(int jto) {
         this.jumpTo = jto;
+    }
+
+    /**
+     * Specifies whether or not to restore the best solution found after an optimisation
+     * Already set to true by default
+     * @param restoreBestSolution whether or not to restore the best solution found after an optimisation
+     */
+    public void setRestoreBestSolution(boolean restoreBestSolution) {
+        this.restoreBestSolution = restoreBestSolution;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

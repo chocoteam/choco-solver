@@ -53,7 +53,7 @@ public class NogoodTest {
         IntVar[] vars = model.intVarArray("vars", 3, 0, 2, false);
         nogoodRecordingFromRestarts(model);
         model.getResolver().set(model.getResolver().randomSearch(vars, 29091981L));
-        model.getResolver().set(model.getResolver().restart(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3));
+        model.getResolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 27);
         assertEquals(model.getResolver().getMeasures().getBackTrackCount(), 51);
@@ -65,8 +65,7 @@ public class NogoodTest {
         IntVar[] vars = model.intVarArray("vars", 3, 0, 3, false);
         nogoodRecordingFromRestarts(model);
         model.getResolver().set(model.getResolver().randomSearch(vars, 29091981L));
-        model.getResolver().set(model.getResolver().restart(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 1000)
-        );
+        model.getResolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 1000);
         limitTime(model, 2000);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 64);

@@ -50,53 +50,52 @@ public class SearchLoopFactory {
     SearchLoopFactory() {}
 
     /**
-     * @deprecated use {@link Resolver#dfs(AbstractStrategy)} instead
+     * @deprecated use {@link Resolver#setDFS(AbstractStrategy)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void dfs(Model aModel, AbstractStrategy<V> aSearchStrategy) {
         Resolver r = aModel.getResolver();
-        r.set(r.dfs(aSearchStrategy));
+        r.setDFS(aSearchStrategy);
     }
 
     /**
-     * @deprecated use {@link Resolver#lds(AbstractStrategy, int)} instead
+     * @deprecated use {@link Resolver#setLDS(AbstractStrategy, int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void lds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
         Resolver r = aModel.getResolver();
-        r.set(r.lds(aSearchStrategy,discrepancy));
+        r.setLDS(aSearchStrategy, discrepancy);
     }
 
     /**
-     * @deprecated use {@link Resolver#dds(AbstractStrategy, int)} instead
+     * @deprecated use {@link Resolver#setDDS(AbstractStrategy, int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void dds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
         Resolver r = aModel.getResolver();
-        r.set(r.dds(aSearchStrategy,discrepancy));
+        r.setDDS(aSearchStrategy, discrepancy);
     }
 
     /**
-     * @deprecated use {@link Resolver#hbfs(AbstractStrategy, double, double, long)} instead
+     * @deprecated use {@link Resolver#setHBFS(AbstractStrategy, double, double, long)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void hbfs(Model aModel, AbstractStrategy<V> aSearchStrategy, double a, double b, long N) {
         Resolver r = aModel.getResolver();
-        r.set(r.hbfs(aSearchStrategy,a,b,N));
+        r.setHBFS(aSearchStrategy, a, b, N);
     }
 
     /**
-     * @deprecated use {@link Resolver#seqMoves(Move...)} instead
+     * @deprecated use {@link Resolver#set(Move...)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void seq(Model aModel, Move... moves) {
-        Resolver r = aModel.getResolver();
-        r.set(r.seqMoves(moves));
+        aModel.getResolver().set(moves);
     }
 
     //****************************************************************************************************************//
@@ -104,13 +103,13 @@ public class SearchLoopFactory {
     //****************************************************************************************************************//
 
     /**
-     * @deprecated use {@link Resolver#restart(LongCriterion, IRestartStrategy, int)} instead
+     * @deprecated use {@link Resolver#setRestarts(LongCriterion, IRestartStrategy, int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void restart(Model aModel, LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
         Resolver r = aModel.getResolver();
-        r.set(r.restart(restartCriterion,restartStrategy,restartsLimit));
+        r.setRestarts(restartCriterion, restartStrategy, restartsLimit);
     }
 
     /**
@@ -166,8 +165,7 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static void learnCBJ(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        Resolver r = aModel.getResolver();
-        r.set(r.learnCBJ(nogoodsOn,userFeedbackOn));
+        aModel.getResolver().learnCBJ(nogoodsOn,userFeedbackOn);
     }
 
     /**
@@ -176,7 +174,6 @@ public class SearchLoopFactory {
      */
     @Deprecated
     public static void learnDBT(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        Resolver r = aModel.getResolver();
-        r.set(r.learnDBT(nogoodsOn,userFeedbackOn));
+        aModel.getResolver().learnDBT(nogoodsOn,userFeedbackOn);
     }
 }

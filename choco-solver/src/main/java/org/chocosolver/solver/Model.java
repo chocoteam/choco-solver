@@ -158,9 +158,6 @@ public class Model implements Serializable, IModel {
     /** Resolution policy (sat/min/max) */
     private ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
 
-    /** specifies whether or not to restore the best solution for optimisation problems (true by default)*/
-    private boolean restoreBestSolution = true;
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +181,6 @@ public class Model implements Serializable, IModel {
         this.objectives = new Variable[0];
         this.hooks = new HashMap<>();
         this.resolver = new Resolver(this);
-        getResolver().dfs(null);
         getResolver().set(new LastSolutionRecorder(new Solution(), this));
     }
 
@@ -608,15 +604,6 @@ public class Model implements Serializable, IModel {
         this.name = name;
     }
 
-	/**
-     * Specifies whether or not to restore the best solution found after an optimisation
-     * Already set to true by default
-     * @param restoreBestSolution whether or not to restore the best solution found after an optimisation
-     */
-    public void setRestoreBestSolution(boolean restoreBestSolution) {
-        this.restoreBestSolution = restoreBestSolution;
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////         RELATED TO VAR              ////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -881,33 +868,17 @@ public class Model implements Serializable, IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Executes the resolver as it is configured.
+     * Solves the model by executing {@link Resolver#solve()}.
      *
      * Default configuration:
      * - SATISFACTION : Computes a feasible solution. Use while(solve()) to enumerate all solutions.
      * - OPTIMISATION : If an objective has been defined, searches an optimal solution
      * (and prove optimality by closing the search space). Then restores the best solution found after solving.
      * @return if at least one new solution has been found.
-     * @see {@link Resolver}
+     * @see {@link Resolver#solve()}
      */
     public boolean solve(){
-        boolean sat = policy == ResolutionPolicy.SATISFACTION;
-        getResolver().setStopAtFirstSolution(sat);
-        if((objectives == null || objectives.length == 0) && !sat) {
-            throw new SolverException("No objective variable has been defined whereas policy is "+policy);
-        }
-        long nbsol = getResolver().getMeasures().getSolutionCount();
-        getResolver().launch();
-        if(restoreBestSolution && !sat){
-            try {
-                getResolver().getSolutionRecorder().restoreLastSolution();
-            } catch (ContradictionException e) {
-                throw new UnsupportedOperationException("restoring the last solution ended in a failure");
-            } finally {
-                getResolver().getEngine().flush();
-            }
-        }
-        return (getResolver().getMeasures().getSolutionCount() - nbsol) > 0;
+        return getResolver().solve();
     }
 
 
@@ -1226,14 +1197,14 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link #setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
+     * Use {@link Resolver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
         setObjectives(policy,getObjectives());
-        setRestoreBestSolution(restoreLastSolution);
+        getResolver().setRestoreBestSolution(restoreLastSolution);
         solve();
     }
 
@@ -1259,14 +1230,14 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link #setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
+     * Use {@link Resolver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
         setObjectives(policy,objective);
-        setRestoreBestSolution(restoreLastSolution);
+        getResolver().setRestoreBestSolution(restoreLastSolution);
         solve();
     }
 
@@ -1274,14 +1245,14 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link #setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
+     * Use {@link Resolver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
         setObjectives(policy,objective);
         setPrecision(precision);
-        setRestoreBestSolution(restoreLastSolution);
+        getResolver().setRestoreBestSolution(restoreLastSolution);
         solve();
     }
 
@@ -1299,14 +1270,14 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link #setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
+     * Use {@link Resolver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
         setObjectives(policy,objectives);
-        setRestoreBestSolution(restoreLastSolution);
+        getResolver().setRestoreBestSolution(restoreLastSolution);
         solve();
     }
 

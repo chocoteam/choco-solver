@@ -29,17 +29,21 @@
  */
 package org.chocosolver.solver.search.loop.propagate;
 
+import org.chocosolver.solver.Resolver;
+
 /**
  * Interface to define how to handle constraint propagation
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
 public interface IPropagateFactory {
 
+	Resolver _me();
+
 	/**
      * Creates a basic Propagate object to handle constraint propagation
      * @return a basic Propagate object to handle constraint propagation
      */
-    default Propagate propagateBasic(){
-        return new PropagateBasic();
+    default void useStandardPropagation(){
+        _me().set(new PropagateBasic());
     }
 }

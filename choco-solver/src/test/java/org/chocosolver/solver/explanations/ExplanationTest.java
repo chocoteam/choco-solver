@@ -85,7 +85,7 @@ public class ExplanationTest {
         model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
         model.getResolver().set(model.getResolver().firstLBSearch(vars));
 
-        model.getResolver().set(model.getResolver().learnCBJ(false, true));
+        model.getResolver().learnCBJ(false, true);
         LearnCBJ cbj = (LearnCBJ) model.getResolver().getLearn();
         assertFalse(model.solve());
         Explanation exp = cbj.getLastExplanation();

@@ -56,7 +56,7 @@ public enum ExplanationFactory {
     CBJ {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
-            model.getResolver().set(model.getResolver().learnCBJ(nogoodsOn, userFeedbackOn));
+            model.getResolver().learnCBJ(nogoodsOn, userFeedbackOn);
         }
     },
     /**
@@ -67,7 +67,7 @@ public enum ExplanationFactory {
     DBT {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
-            model.getResolver().set(model.getResolver().learnDBT(nogoodsOn, userFeedbackOn));
+            model.getResolver().learnDBT(nogoodsOn, userFeedbackOn);
         }
     };
 

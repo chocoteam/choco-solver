@@ -55,10 +55,9 @@ public interface IMoveFactory {
      * The current search strategy (if any) will also be replaced by the input one.
      *
      * @param aSearchStrategy the search strategy to apply
-     * @param <V>             the type of variables
      */
-    default <V extends Variable> Move dfs(AbstractStrategy<V> aSearchStrategy) {
-        return new MoveBinaryDFS(aSearchStrategy);
+    default void setDFS(AbstractStrategy aSearchStrategy) {
+        _me().set(new MoveBinaryDFS(aSearchStrategy));
     }
 
     /**
@@ -71,11 +70,10 @@ public interface IMoveFactory {
      *
      * @param aSearchStrategy the search strategy to apply
      * @param discrepancy     the maximum discrepancy
-     * @param <V>             the type of variables
      */
-    default <V extends Variable> Move lds(AbstractStrategy<V> aSearchStrategy, int discrepancy) {
+    default void setLDS(AbstractStrategy aSearchStrategy, int discrepancy) {
         IEnvironment env = _me().getModel().getEnvironment();
-        return new MoveBinaryLDS(aSearchStrategy, discrepancy, env);
+        _me().set(new MoveBinaryLDS(aSearchStrategy, discrepancy, env));
     }
 
     /**
@@ -85,11 +83,10 @@ public interface IMoveFactory {
      *
      * @param aSearchStrategy the search strategy to apply
      * @param discrepancy     the maximum discrepancy
-     * @param <V>             the type of variables
      */
-    default <V extends Variable> Move dds(AbstractStrategy<V> aSearchStrategy, int discrepancy) {
+    default void setDDS(AbstractStrategy aSearchStrategy, int discrepancy) {
         IEnvironment env = _me().getModel().getEnvironment();
-        return new MoveBinaryDDS(aSearchStrategy, discrepancy, env);
+        _me().set(new MoveBinaryDDS(aSearchStrategy, discrepancy, env));
     }
 
     /**
@@ -103,19 +100,9 @@ public interface IMoveFactory {
      * @param a               lower bound to limit the rate of redundantly propagated decisions
      * @param b               upper bound to limit the rate of redundantly propagated decisions.
      * @param N               backtrack limit for each DFS try, should be large enough to limit redundancy
-     * @param <V>             the type of variables
      */
-    default <V extends Variable> Move hbfs(AbstractStrategy<V> aSearchStrategy, double a, double b, long N) {
-        return new MoveBinaryHBFS(_me().getModel(), aSearchStrategy, a, b, N);
-    }
-
-    /**
-     * Combines many Moves. They are considered sequentially.
-     * This is a work-in-progress and it may lead to unexpected behavior when repair() is applied.
-     * When the selected Move cannot be extended (resp. repaired), the following one (wrt to the input order) is selected.
-     */
-    default Move seqMoves(Move... moves) {
-        return new MoveSeq(_me().getModel(), moves);
+    default void setHBFS(AbstractStrategy aSearchStrategy, double a, double b, long N) {
+        _me().set(new MoveBinaryHBFS(_me().getModel(), aSearchStrategy, a, b, N));
     }
 
     /**
@@ -128,8 +115,8 @@ public interface IMoveFactory {
      * @param restartStrategy  the way restart limit (evaluated in <code>restartCriterion</code>) is updated, that is, computes the next limit
      * @param restartsLimit    number of allowed restarts
      */
-    default Move restart(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
-        return new MoveRestart(_me().getMove(), restartStrategy, restartCriterion, restartsLimit);
+    default void setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
+        _me().set(new MoveRestart(_me().getMove(), restartStrategy, restartCriterion, restartsLimit));
     }
 
     /**

@@ -216,7 +216,7 @@ class RecursiveSearchLoop {
         Resolver r = model.getResolver();
         r.set(new SevenQueuesPropagatorEngine(model));
         r.getEngine().initialize();
-//        System.out.printf("%d solutions\n", dfs(solver, ISF.lexico_LB(X)));
+//        System.out.printf("%d solutions\n", setDFS(solver, ISF.lexico_LB(X)));
         System.out.printf("%d solutions\n", lds(model, r.firstLBSearch(X), 3));
 //        for (int d = 2; d < 3; d++) {
 //            System.out.printf("%d solutions\n", ilds(solver, ISF.lexico_LB(X), d, X.length));
