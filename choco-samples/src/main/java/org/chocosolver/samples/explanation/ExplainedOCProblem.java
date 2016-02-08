@@ -31,7 +31,6 @@ package org.chocosolver.samples.explanation;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
@@ -68,7 +67,7 @@ public class ExplainedOCProblem extends AbstractProblem {
 
     @Override
     public void solve() {
-        ExplanationFactory.CBJ.plugin(model, false, false);
+        model.getResolver().setCBJLearning(false, false);
         while (model.solve()){
             prettyOut();
         }

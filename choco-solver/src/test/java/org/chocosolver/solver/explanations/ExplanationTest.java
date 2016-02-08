@@ -38,7 +38,6 @@ import org.testng.annotations.Test;
 import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
-import static org.chocosolver.solver.explanations.ExplanationFactory.DBT;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.trace.Chatterbox.*;
@@ -54,19 +53,21 @@ import static org.testng.Assert.assertFalse;
  */
 public class ExplanationTest {
 
-    private final ExplanationFactory[] engines = {ExplanationFactory.NONE, ExplanationFactory.CBJ, ExplanationFactory.DBT};
-
     @Test(groups="5m", timeOut=300000)
     public void testNosol0() {
         for (int n = 500; n < 4501; n += 500) {
-            for (int e = 1; e < engines.length; e++) {
+            for (int e = 1; e < 4; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Model model = new Model();
                     IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
                     model.arithm(vars[n - 2], "=", vars[n - 1]).post();
                     model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
                     model.getResolver().set(inputOrderLBSearch(vars));
-                    engines[e].plugin(model, ng == 1, false);
+                    switch (e){
+                        case 1:model.getResolver().setNoLearning();break;
+                        case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
+                        case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                    }
                     assertFalse(model.solve());
                     out.printf("\t%s", model.getResolver().getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
@@ -98,13 +99,17 @@ public class ExplanationTest {
     public void testPigeons() {
         for (int n = 5; n < 9; n++) {
             for (long seed = 0; seed < 25; seed++) {
-                for (int e = 0; e < engines.length; e++) {
+                for (int e = 1; e < 4; e++) {
                     for (int ng = 0; ng < 2; ng++) {
                         final Model model = new Model();
                         IntVar[] pigeons = model.intVarArray("p", n, 0, n - 2, false);
                         model.allDifferent(pigeons, "NEQS").post();
                         model.getResolver().set(randomSearch(pigeons, seed));
-                        engines[e].plugin(model, ng == 1, false);
+                        switch (e){
+                            case 1:model.getResolver().setNoLearning();break;
+                            case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
+                            case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                        }
                         assertFalse(model.solve());
                         printShortStatistics(model);
                     }
@@ -117,7 +122,7 @@ public class ExplanationTest {
     public void testMS() {
         for (int n = 2; n < 5; n++) {
             for (long seed = 0; seed < 25; seed++) {
-                for (int e = 0; e < engines.length; e++) {
+                for (int e = 1; e < 4; e++) {
                     for (int ng = 0; ng < 2; ng++) {
                         int ms = n * (n * n + 1) / 2;
 
@@ -159,7 +164,11 @@ public class ExplanationTest {
                         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
                         model.getResolver().set(randomSearch(vars, seed));
 
-                        engines[e].plugin(model, ng == 1, false);
+                        switch (e){
+                            case 1:model.getResolver().setNoLearning();break;
+                            case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
+                            case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                        }
 //                    SMF.shortlog(solver);
                         assertEquals(n > 2, model.solve());
                     }
@@ -171,7 +180,7 @@ public class ExplanationTest {
     @Test(groups="1s", timeOut=60000)
     public void testReif() {
         for (long seed = 0; seed < 1; seed++) {
-            for (int e = 1; e < engines.length - 1; e++) {
+            for (int e = 1; e < 4; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Model model = new Model();
                     IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
@@ -183,7 +192,11 @@ public class ExplanationTest {
                     model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                     model.arithm(p[9], "+", p[8], ">", 4).post();
                     model.getResolver().set(randomSearch(p, seed));
-                    engines[e].plugin(model, ng == 1, false);
+                    switch (e){
+                        case 1:model.getResolver().setNoLearning();break;
+                        case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
+                        case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                    }
                     showShortStatistics(model);
                     assertFalse(model.solve());
                 }
@@ -193,7 +206,7 @@ public class ExplanationTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testReif2() { // to test PropagatorActivation, from bs to p
-        for (int e = 0; e < engines.length; e++) {
+        for (int e = 1; e < 4; e++) {
             for (int ng = 0; ng < 2; ng++) {
                 final Model model = new Model();
                 IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
@@ -206,7 +219,11 @@ public class ExplanationTest {
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
                 model.getResolver().set(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
-                engines[e].plugin(model, ng == 1, false);
+                switch (e){
+                    case 1:model.getResolver().setNoLearning();break;
+                    case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
+                    case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                }
                 showStatistics(model);
                 showSolutions(model);
                 showDecisions(model);
@@ -217,7 +234,7 @@ public class ExplanationTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testReif3() { // to test PropagatorActivation, from bs to p
-        for (int e = 0; e < engines.length; e++) {
+        for (int e = 1; e < 4; e++) {
             for (int ng = 0; ng < 2; ng++) {
                 final Model model = new Model();
                 IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
@@ -230,7 +247,11 @@ public class ExplanationTest {
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
                 model.getResolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
-                engines[e].plugin(model, ng == 1, false);
+                switch (e){
+                    case 1:model.getResolver().setNoLearning();break;
+                    case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
+                    case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                }
                 showStatistics(model);
                 showSolutions(model);
                 showDecisions(model);
@@ -257,7 +278,7 @@ public class ExplanationTest {
             model.arithm(bs[0], "=", bs[1]).post();
 
             model.getResolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
-            DBT.plugin(model, ng == 1, false);
+            model.getResolver().setDBTLearning(ng == 1, false);
             showStatistics(model);
             showSolutions(model);
             showDecisions(model);

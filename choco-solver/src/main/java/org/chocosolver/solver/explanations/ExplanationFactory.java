@@ -30,18 +30,22 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 
 /**
- * A non exhaustive list of ways to plug and exploit explanations.
- * <br/>
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 19/10/11
- * Time: 19:22
+ * @deprecated : use {@link Resolver}
+ * which implements {@link org.chocosolver.solver.search.loop.learn.ILearnFactory} instead
+ *
+ * This class will be removed in versions > 3.4.0
  */
+@Deprecated
 public enum ExplanationFactory {
 
-
+    /**
+     * @deprecated : use {@link Resolver#setNoLearning()} instead
+     * This class will be removed in versions > 3.4.0
+     */
+    @Deprecated
     NONE {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
@@ -49,10 +53,10 @@ public enum ExplanationFactory {
         }
     },
     /**
-     * add a Conflict-based Backjumping policy on contradiction to an explained solver.
-     * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
-     * @see org.chocosolver.solver.Resolver#setCBJLearning(boolean, boolean)
+     * @deprecated : use {@link Resolver#setCBJLearning(boolean, boolean)} instead
+     * This class will be removed in versions > 3.4.0
      */
+    @Deprecated
     CBJ {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
@@ -60,24 +64,21 @@ public enum ExplanationFactory {
         }
     },
     /**
-     * add a Dynamic-Backtracking policy on contradiction to an explained solver.
-     * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
-     * @see org.chocosolver.solver.Resolver#setDBTLearning(boolean, boolean)
+     * @deprecated : use {@link Resolver#setDBTLearning(boolean, boolean)} instead
+     * This class will be removed in versions > 3.4.0
      */
+    @Deprecated
     DBT {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
             model.getResolver().setDBTLearning(nogoodsOn, userFeedbackOn);
         }
     };
-
     /**
-     * Plug explanations into coe<code>solver</code>.
-     *
-     * @param model         the solver to observe
-     * @param nogoodsOn      extract nogoods from conflict
-     * @param userFeedbackOn user feedback on: propagators in conflict are available for consultation
+     * @deprecated : use {@link Resolver} instead
+     * This class will be removed in versions > 3.4.0
      */
+    @Deprecated
     public abstract void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn);
 
 }

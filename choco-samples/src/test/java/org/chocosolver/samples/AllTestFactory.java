@@ -30,9 +30,9 @@
 package org.chocosolver.samples;
 
 import org.chocosolver.memory.Environments;
-import org.chocosolver.solver.explanations.ExplanationFactory;
+import org.chocosolver.samples.integer.AllIntervalSeries;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,46 +45,47 @@ import java.util.List;
  */
 public class AllTestFactory {
 
-    AbstractProblem[] problems = new AbstractProblem[]{
-//            new AllIntervalSeries()
-    };
+    @Test
+    public void testDifferentConfigurations() {
 
-    String[][] arguments = new String[][]{
+        AbstractProblem[] problems = new AbstractProblem[]{
+                new AllIntervalSeries()
+        };
 
-            {"-seed", "1234"},
-            {"-seed", "1236"},
+        String[][] arguments = new String[][]{
+                {"-seed", "1234"},
+                {"-seed", "1236"},
+        };
 
+        long[] nbSol = new long[]{
+                6, 18
+        };
 
-    };
+        Environments[] envFact = new Environments[]{
+                Environments.TRAIL,
+                Environments.COPY
+        };
 
-    long[] nbSol = new long[]{
-            6, 18
-    };
-
-    Environments[] envFact = new Environments[]{
-            Environments.TRAIL,
-            Environments.COPY
-    };
-
-    ExplanationFactory[] expFact = new ExplanationFactory[]{
-            ExplanationFactory.NONE,
-            ExplanationFactory.CBJ,
-            ExplanationFactory.DBT,
-    };
-
-
-    @Factory
-    public Object[] createInstances() {
         List<Object> lresult = new ArrayList<>(12);
 
         PropagationEngineFactory[] pol = PropagationEngineFactory.values();
 
-        for (int p = 0; p < problems.length; p++)
-            for (ExplanationFactory x : expFact)
-                for (Environments e : envFact)
-                    for (PropagationEngineFactory st : pol)
-                        lresult.add(new AllTest(problems[p], arguments[p], e.make(), st, x, nbSol[p]));
-
-        return lresult.toArray();
+        for (int p = 0; p < problems.length; p++) {
+            System.out.println(problems[p].getClass().getSimpleName());
+            for (String exp : new String[]{"NONE", "CBJ", "DBT"}) {
+                System.out.println("\t"+exp);
+                for (Environments e : envFact) {
+                    System.out.println("\t\t"+e);
+                    for (PropagationEngineFactory st : pol) {
+                        System.out.println("\t\t\t"+pol);
+                        lresult.add(new AllTest(problems[p], arguments[p], e.make(), st, exp, nbSol[p]));
+                        System.out.println("\t\t\tDONE");
+                    }
+                    System.out.println("\t\tDONE");
+                }
+                System.out.println("\tDONE");
+            }
+            System.out.println("DONE");
+        }
     }
 }

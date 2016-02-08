@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.chocosolver.util.tools.ArrayUtils.toArray;
@@ -71,7 +70,7 @@ public class EqualXYCExplTest {
         ref.set(nset);
         sol.set(nset);
 
-        CBJ.plugin(sol, false, false);
+        sol.getResolver().setCBJLearning(false, false);
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];

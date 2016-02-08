@@ -49,8 +49,6 @@ import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
-import static org.chocosolver.solver.explanations.ExplanationFactory.DBT;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
 import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.midIntVal;
@@ -354,22 +352,22 @@ public class ExplanationEngineTest {
                 break;
             case 1: {
                 System.out.printf("cbj    :");
-                ExplanationFactory.CBJ.plugin(model, false, false);
+                model.getResolver().setCBJLearning(false, false);
             }
             break;
             case 2: {
                 System.out.printf("cbj+ng :");
-                ExplanationFactory.CBJ.plugin(model, true, false);
+                model.getResolver().setCBJLearning(true, false);
             }
             break;
             case 3: {
                 System.out.printf("dbt    :");
-                ExplanationFactory.DBT.plugin(model, false, false);
+                model.getResolver().setDBTLearning(false, false);
             }
             break;
             case 4: {
                 System.out.printf("dbt+ng :");
-                ExplanationFactory.DBT.plugin(model, true, false);
+                model.getResolver().setDBTLearning(true, false);
             }
             break;
         }
@@ -803,9 +801,9 @@ public class ExplanationEngineTest {
         s.arithm(x[n - 2], "=", x[n - 1]).post();
         // explanations
         if (expMode == 2) {
-            CBJ.plugin(s, false, true);
+            s.getResolver().setCBJLearning(false, true);
         } else if (expMode == 3) {
-            DBT.plugin(s, false, true);
+            s.getResolver().setDBTLearning(false, true);
         }
         // logging and solution
         showStatistics(s);
@@ -861,8 +859,8 @@ public class ExplanationEngineTest {
         for (int i = 0; i < n; i++) {
             model.arithm(X[i], ">", i).reifyWith(B[i]);
         }
-        CBJ.plugin(model, false, false);
         Resolver r = model.getResolver();
+        r.setCBJLearning(false, false);
         r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         showDecisions(model);
         showSolutions(model);

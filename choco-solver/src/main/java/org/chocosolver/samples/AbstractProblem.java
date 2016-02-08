@@ -70,6 +70,7 @@ public abstract class AbstractProblem {
     protected long seed = 29091981;
 
     @Option(name = "-ee", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
+    @Deprecated
     ExplanationFactory expeng = ExplanationFactory.NONE;
 
     @Option(name = "-ng", aliases = "--nogoods", usage = "Extract nogoods from explanations (required \"-ee\").", required = false)

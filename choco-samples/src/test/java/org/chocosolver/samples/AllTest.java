@@ -33,8 +33,8 @@ import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.samples.integer.AllIntervalSeries;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.testng.annotations.Test;
 
@@ -55,21 +55,21 @@ public class AllTest {
     long nbSol;
     IEnvironment environment;
     PropagationEngineFactory strat;
-    ExplanationFactory efact;
+    String explanation;
 
 
     public AllTest() {
         this(new AllIntervalSeries(), new String[]{"-o", "5"},
                 Environments.TRAIL.make(),
                 PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE,
-                ExplanationFactory.NONE,
+                "NONE",
                 2);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,
                    PropagationEngineFactory strat,
-                   ExplanationFactory e,
+                   String explanation,
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;
@@ -79,7 +79,7 @@ public class AllTest {
         this.environment = env;
         this.strat = strat;
         this.nbSol = nbSol;
-        this.efact = e;
+        this.explanation = explanation;
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -94,7 +94,12 @@ public class AllTest {
         });
         prob.buildModel();
         prob.configureSearch();
-        efact.plugin(prob.model, false, false);
+        Resolver r = prob.model.getResolver();
+        switch (explanation){
+            case "NONE" : r.setNoLearning();break;
+            case "CBJ" : r.setCBJLearning(false,false);break;
+            case "DBT" : r.setDBTLearning(false,false);break;
+        }
         while (prob.model.solve()) ;
 
         assertEquals(nbSol, prob.getModel().getResolver().getMeasures().getSolutionCount(), "incorrect nb solutions");

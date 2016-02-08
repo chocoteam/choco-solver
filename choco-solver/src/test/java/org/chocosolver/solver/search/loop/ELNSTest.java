@@ -39,7 +39,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
 import static org.chocosolver.solver.search.limits.ICounter.Impl.None;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
@@ -61,7 +60,7 @@ public class ELNSTest {
         model.arithm(vars[0], "+", vars[1], "<", 2).post();
         model.arithm(vars[4], "+", vars[5], ">", 3).post();
 
-        CBJ.plugin(model, false, false);
+        model.getResolver().setCBJLearning(false, false);
 
         Resolver r = model.getResolver();
         r.setLNS(new SequenceNeighborhood(

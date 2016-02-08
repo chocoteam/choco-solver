@@ -52,7 +52,6 @@ public interface ILearnFactory {
      * @param nogoodsOn set to true to extract nogoods from failures
      * @param userFeedbackOn set to true to record the propagation in conflict
      *                       (only relevant when one wants to interpret the explanation of a failure).
-     * @see org.chocosolver.solver.explanations.ExplanationFactory#CBJ
      */
     default void setCBJLearning(boolean nogoodsOn, boolean userFeedbackOn) {
         _me().set(new LearnCBJ(_me().getModel(),nogoodsOn, userFeedbackOn));
@@ -64,7 +63,6 @@ public interface ILearnFactory {
      * @param nogoodsOn set to true to extract nogoods from failures
      * @param userFeedbackOn set to true to record the propagation in conflict
      *                       (only relevant when one wants to interpret the explanation of a failure).
-     * @see org.chocosolver.solver.explanations.ExplanationFactory#DBT
      */
     default void setDBTLearning(boolean nogoodsOn, boolean userFeedbackOn) {
         _me().set(new LearnDBT(_me().getModel(), nogoodsOn, userFeedbackOn));

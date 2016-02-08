@@ -41,7 +41,6 @@ import java.util.Random;
 
 import static java.lang.System.currentTimeMillis;
 import static org.chocosolver.solver.constraints.binary.element.ElementFactory.detect;
-import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.chocosolver.util.tools.ArrayUtils.toArray;
@@ -120,7 +119,7 @@ public class ElementTest {
                 return true;
             }
         });
-        CBJ.plugin(s, false, false);
+        s.getResolver().setCBJLearning(false, false);
 
         Random r = new Random(125);
         int[] values = new int[10];
