@@ -42,8 +42,6 @@ import org.chocosolver.util.PoolManager;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -104,20 +102,16 @@ public class HamiltonianPathTest {
 		model.path(succ, model.intVar(offset), model.intVar(n - 1 + offset), offset).post();
 		// configure solver
 		if (rd) {
-			if (enumerated) {
-				model.set(random_value(succ, seed));
-			} else {
-				model.set(random_bound(succ, seed));
-			}
+			model.getResolver().set(model.getResolver().randomSearch(succ, seed));
 		} else {
-			model.set(new ConstructorIntHeur(succ, offset));
+			model.getResolver().set(new ConstructorIntHeur(succ, offset));
 		}
 		limitTime(model, TIME_LIMIT);
 		model.solve();
-		IMeasures mes = model.getMeasures();
+		IMeasures mes = model.getResolver().getMeasures();
 		// the problem has at least one solution
-		assertTrue(mes.getSolutionCount() == 1 || model.hasReachedLimit(),
-				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + model.hasReachedLimit());
+		assertTrue(mes.getSolutionCount() == 1 || model.getResolver().hasReachedLimit(),
+				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + model.getResolver().hasReachedLimit());
 	}
 
 	private static boolean[][] transformMatrix(boolean[][] m) {

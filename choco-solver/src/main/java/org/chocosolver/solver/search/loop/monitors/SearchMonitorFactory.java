@@ -30,15 +30,12 @@
 package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.limits.*;
-import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.loop.SearchLoopFactory;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
-import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.criteria.Criterion;
-import org.chocosolver.util.criteria.LongCriterion;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -74,12 +71,10 @@ public class SearchMonitorFactory {
      * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
-     * @see SearchLoopFactory#restart(Model, LongCriterion, IRestartStrategy, int)
      */
-    public static void luby(Model model, int scaleFactor, int geometricalFactor,
-                            ICounter restartStrategyLimit, int restartLimit) {
-        SLF.restart(model, restartStrategyLimit,
-                new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
+    public static void luby(Model model, int scaleFactor, int geometricalFactor, ICounter restartStrategyLimit, int restartLimit) {
+        Resolver r = model.getResolver();
+        r.set(r.restart(restartStrategyLimit, new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit));
     }
 
     /**
@@ -90,13 +85,13 @@ public class SearchMonitorFactory {
      * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
-     * @see SearchLoopFactory#restart(Model, LongCriterion, IRestartStrategy, int)
      */
     public static void geometrical(Model model, int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        SLF.restart(model, restartStrategyLimit,
+        Resolver r = model.getResolver();
+        r.set(r.restart(restartStrategyLimit,
                 new GeometricalRestartStrategy(scaleFactor, geometricalFactor),
-                restartLimit);
+                restartLimit));
     }
 
     /**
@@ -108,7 +103,7 @@ public class SearchMonitorFactory {
      */
     public static void limitNode(Model model, long limit) {
         NodeCounter counter = new NodeCounter(model, limit);
-        model.addStopCriterion(counter);
+        model.getResolver().addStopCriterion(counter);
     }
 
     /**
@@ -120,7 +115,7 @@ public class SearchMonitorFactory {
      */
     public static void limitSolution(Model model, long limit) {
         SolutionCounter counter = new SolutionCounter(model, limit);
-        model.addStopCriterion(counter);
+        model.getResolver().addStopCriterion(counter);
     }
 
 
@@ -136,7 +131,7 @@ public class SearchMonitorFactory {
      */
     public static void limitTime(Model model, long limit) {
         TimeCounter counter = new TimeCounter(model, limit * MILLISECONDS_IN_NANOSECONDS);
-        model.addStopCriterion(counter);
+        model.getResolver().addStopCriterion(counter);
     }
 
     /**
@@ -268,7 +263,7 @@ public class SearchMonitorFactory {
 
     public static void limitFail(Model model, long limit) {
         FailCounter counter = new FailCounter(model, limit);
-        model.addStopCriterion(counter);
+        model.getResolver().addStopCriterion(counter);
     }
 
     /**
@@ -280,7 +275,7 @@ public class SearchMonitorFactory {
      */
     public static void limitBacktrack(Model model, long limit) {
         BacktrackCounter counter = new BacktrackCounter(model, limit);
-        model.addStopCriterion(counter);
+        model.getResolver().addStopCriterion(counter);
     }
 
     /**
@@ -292,7 +287,7 @@ public class SearchMonitorFactory {
      * @param aStopCriterion the stop criterion which, when met, stops the search.
      */
     public static void limitSearch(Model model, Criterion aStopCriterion) {
-        model.addStopCriterion(aStopCriterion);
+        model.getResolver().addStopCriterion(aStopCriterion);
     }
 
     /**
@@ -303,7 +298,7 @@ public class SearchMonitorFactory {
      * @param vars array of decision variables
      */
     public static void nogoodRecordingOnSolution(IntVar[] vars) {
-        vars[0].getModel().plugMonitor(new NogoodFromSolutions(vars));
+        vars[0].getModel().getResolver().plugMonitor(new NogoodFromSolutions(vars));
     }
 
     /**
@@ -313,7 +308,7 @@ public class SearchMonitorFactory {
      * @param model the solver to observe
      */
     public static void nogoodRecordingFromRestarts(final Model model) {
-        model.plugMonitor(new NogoodFromRestarts(model));
+        model.getResolver().plugMonitor(new NogoodFromRestarts(model));
     }
 
     /**
@@ -325,16 +320,16 @@ public class SearchMonitorFactory {
         if (models.get(0).getObjectives() != null &&
                 models.get(0).getObjectives().length == 1) {
             // share the best known bound
-            models.stream().forEach(s -> s.plugMonitor(
+            models.stream().forEach(s -> s.getResolver().plugMonitor(
                     (IMonitorSolution) () -> {
-                        synchronized (s.getObjectiveManager()) {
-                            switch (s.getObjectiveManager().getPolicy()) {
+                        synchronized (s.getResolver().getObjectiveManager()) {
+                            switch (s.getResolver().getObjectiveManager().getPolicy()) {
                                 case MAXIMIZE:
-                                    int lb = s.getObjectiveManager().getBestSolutionValue().intValue();
+                                    int lb = s.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
                                     models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestLB(lb));
                                     break;
                                 case MINIMIZE:
-                                    int ub = s.getObjectiveManager().getBestSolutionValue().intValue();
+                                    int ub = s.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
                                     models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestUB(ub));
                                     break;
                             }
@@ -343,8 +338,8 @@ public class SearchMonitorFactory {
             ));
         }
         AtomicInteger finishers = new AtomicInteger(0);
-        models.stream().forEach(s -> s.addStopCriterion(()->finishers.get()>0));
-        models.stream().forEach(s -> s.plugMonitor(new IMonitorClose() {
+        models.stream().forEach(s -> s.getResolver().addStopCriterion(()->finishers.get()>0));
+        models.stream().forEach(s -> s.getResolver().plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
                 int count = finishers.addAndGet(1);
@@ -362,7 +357,7 @@ public class SearchMonitorFactory {
      */
     @SuppressWarnings("unused")
     public static void connectocpprofiler(Model aModel){
-        aModel.plugMonitor(new CPProfiler(aModel));
+        aModel.getResolver().plugMonitor(new CPProfiler(aModel));
     }
 
 }

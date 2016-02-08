@@ -233,7 +233,7 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public Number getBestSolutionValue() {
-        return model.getObjectiveManager().getBestSolutionValue();
+        return model.getResolver().getObjectiveManager().getBestSolutionValue();
     }
 
     @Override
@@ -318,7 +318,7 @@ public final class MeasuresRecorder implements IMeasures {
         st.append("Model[").append(model.getName()).append("], ");
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
-            st.append(model.getObjectiveManager()).append(", ");
+            st.append(model.getResolver().getObjectiveManager()).append(", ");
         }
         st.append(String.format("Building time : %,.3fs, " +
                         "Resolution time %,.3fs, " +
@@ -343,7 +343,7 @@ public final class MeasuresRecorder implements IMeasures {
         st.append("Model[").append(model.getName()).append("], ");
         st.append(String.format("%d Solutions, ", solutionCount));
         if (hasObjective()) {
-            st.append(model.getObjectiveManager()).append(", ");
+            st.append(model.getResolver().getObjectiveManager()).append(", ");
         }
         st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
                 getTimeCount(),
@@ -360,7 +360,7 @@ public final class MeasuresRecorder implements IMeasures {
         updateTime();
         StringBuilder st = new StringBuilder(256);
 //        st.append("- Search statistics\n");
-        if (model.hasReachedLimit()) {
+        if (model.getResolver().hasReachedLimit()) {
             st.append("- Incomplete search - Limit reached.\n");
         } else if (model.getResolver().hasEndedUnexpectedly()) {
             st.append("- Incomplete search - Unexpected interruption.\n");
@@ -378,7 +378,7 @@ public final class MeasuresRecorder implements IMeasures {
         st.append("\tModel[").append(model.getName()).append("]\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
-            st.append("\t").append(model.getObjectiveManager()).append(",\n");
+            st.append("\t").append(model.getResolver().getObjectiveManager()).append(",\n");
         }
         st.append(String.format("\tBuilding time : %,.3fs" +
                         "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +

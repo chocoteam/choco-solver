@@ -31,10 +31,10 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.loop.move.Move;
-import org.chocosolver.solver.search.loop.move.MoveLNS;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.monitors.SMF;
+import org.chocosolver.solver.search.loop.move.Move;
+import org.chocosolver.solver.search.loop.move.MoveLNS;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -58,7 +58,7 @@ public class LimitsTest {
         long tl = 500;
         limitTime(s, tl);
         while (s.solve()) ;
-        int tc = (int) (s.getMeasures().getTimeCount() * 1000);
+        int tc = (int) (s.getResolver().getMeasures().getTimeCount() * 1000);
         assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
 
@@ -68,7 +68,7 @@ public class LimitsTest {
         long tl = 500;
         limitTime(s, tl);
         while (s.solve()) ;
-        int tc = (int) (s.getMeasures().getTimeCount() * 1000);
+        int tc = (int) (s.getResolver().getMeasures().getTimeCount() * 1000);
         assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl + " vs. " + tc);
     }
 
@@ -78,7 +78,7 @@ public class LimitsTest {
         long nl = 50;
         limitNode(s, nl);
         while (s.solve()) ;
-        long nc = s.getMeasures().getNodeCount();
+        long nc = s.getResolver().getMeasures().getNodeCount();
         assertEquals(nc, nl);
     }
 
@@ -88,7 +88,7 @@ public class LimitsTest {
         long bl = 50;
         limitBacktrack(s, bl);
         while (s.solve()) ;
-        long bc = s.getMeasures().getBackTrackCount();
+        long bc = s.getResolver().getMeasures().getBackTrackCount();
         assertEquals(bc, bl);
     }
 
@@ -98,7 +98,7 @@ public class LimitsTest {
         long fl = 50;
         limitFail(s, fl);
         while (s.solve()) ;
-        long fc = s.getMeasures().getFailCount();
+        long fc = s.getResolver().getMeasures().getFailCount();
         assertEquals(fc, fl);
     }
 
@@ -108,7 +108,7 @@ public class LimitsTest {
         long sl = 50;
         limitSolution(s, sl);
         while (s.solve()) ;
-        long sc = s.getMeasures().getSolutionCount();
+        long sc = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sc, sl);
     }
 
@@ -154,10 +154,10 @@ public class LimitsTest {
                     super.repair(resolver);
                 } else if (this.solutions > 0
                         // the second condition is only here for intiale calls, when solutions is not already up to date
-                        || model.getMeasures().getSolutionCount() > 0) {
+                        || model.getResolver().getMeasures().getSolutionCount() > 0) {
                     // the detection of a new solution can only be met here
-                    if (solutions < model.getMeasures().getSolutionCount()) {
-                        assert solutions == model.getMeasures().getSolutionCount() - 1;
+                    if (solutions < model.getResolver().getMeasures().getSolutionCount()) {
+                        assert solutions == model.getResolver().getMeasures().getSolutionCount() - 1;
                         solutions++;
                         neighbor.recordSolution();
                     }
@@ -166,7 +166,7 @@ public class LimitsTest {
             }
         });
         while (model.solve()) ;
-        long sc = model.getMeasures().getSolutionCount();
+        long sc = model.getResolver().getMeasures().getSolutionCount();
         assertEquals(sc, 11);
     }
 }

@@ -32,7 +32,6 @@ package org.chocosolver.samples.explanation;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -58,7 +57,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.minDom_LB(vars));
+        model.getResolver().set(model.getResolver().minDomLBSearch(vars));
     }
 
     @Override

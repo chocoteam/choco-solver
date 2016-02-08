@@ -35,7 +35,7 @@ IntVar y = VariableFactory.bounded("Y", 0, 5, solver);
 // 3. Create and post constraints by using constraint factories
 solver.post(solver.arithm(x, "+", y, "<", 5));
 // 4. Define the search strategy
-solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y}));
+solver.set(ISF.lexico_LB(new IntVar[]{x, y}));
 // 5. Launch the resolution process
 solver.solve();
 //6. Print search statistics

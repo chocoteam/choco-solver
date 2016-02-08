@@ -31,12 +31,12 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
+
+import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
  * CSPLib prob010:<br/>
@@ -156,8 +156,8 @@ public class SocialGolfer extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        BoolVar[] vars = ArrayUtils.flatten(P);
-        model.set(IntStrategyFactory.lexico_UB(vars));
+        BoolVar[] vars = flatten(P);
+        model.getResolver().set(model.getResolver().firstUBSearch(vars));
     }
 
     @Override
@@ -169,7 +169,7 @@ public class SocialGolfer extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("Social golfer(%d,%d,%d)", g, s, w));
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             int p = g * s;
             for (int i = 0; i < w; i++) {
                 st.append("\tWeek ").append(i + 1).append("\n");

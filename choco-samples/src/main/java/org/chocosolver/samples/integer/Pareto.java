@@ -35,8 +35,8 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -82,7 +82,7 @@ public class Pareto extends AbstractProblem {
 
 	@Override
 	public void prettyOut() {
-		List<Solution> paretoFront = model.getSolutionRecorder().getSolutions();
+		List<Solution> paretoFront = model.getResolver().getSolutionRecorder().getSolutions();
 		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
 		for(Solution s:paretoFront){
 			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));

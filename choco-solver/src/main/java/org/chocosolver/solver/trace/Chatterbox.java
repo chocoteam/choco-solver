@@ -30,8 +30,6 @@
 package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.solution.Solution;
@@ -135,7 +133,7 @@ public class Chatterbox {
     public static void printStatistics(Model model) {
         printVersion(model);
         printFeatures(model);
-        out.println(model.getMeasures().toString());
+        out.println(model.getResolver().getMeasures().toString());
     }
 
     /**
@@ -151,7 +149,7 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void printShortStatistics(Model model) {
-        out.println(model.getMeasures().toOneLineString());
+        out.println(model.getResolver().getMeasures().toOneLineString());
     }
 
     /**
@@ -169,7 +167,7 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void printCSVStatistics(Model model) {
-        out.println(model.getMeasures().toCSV());
+        out.println(model.getResolver().getMeasures().toCSV());
     }
 
 
@@ -210,7 +208,7 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void showStatistics(final Model model) {
-        model.plugMonitor(new IMonitorInitialize() {
+        model.getResolver().plugMonitor(new IMonitorInitialize() {
 
             @Override
             public void beforeInitialize() {
@@ -218,10 +216,10 @@ public class Chatterbox {
                 printFeatures(model);
             }
         });
-        model.plugMonitor(new IMonitorClose() {
+        model.getResolver().plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
-                out.println(model.getMeasures().toString());
+                out.println(model.getResolver().getMeasures().toString());
             }
         });
     }
@@ -234,10 +232,10 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void showShortStatistics(final Model model) {
-        model.plugMonitor(new IMonitorClose() {
+        model.getResolver().plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                out.println(model.getMeasures().toOneShortLineString());
+                out.println(model.getResolver().getMeasures().toOneShortLineString());
             }
         });
     }
@@ -251,7 +249,7 @@ public class Chatterbox {
      * @param message the message to print.
      */
     public static void showSolutions(Model model, final IMessage message) {
-        model.plugMonitor((IMonitorSolution) () -> out.println(message.print()));
+        model.getResolver().plugMonitor((IMonitorSolution) () -> out.println(message.print()));
     }
 
     /**
@@ -275,7 +273,7 @@ public class Chatterbox {
      * @param message the message to print.
      */
     public static void showDecisions(final Model model, final IMessage message) {
-        model.plugMonitor(new IMonitorDownBranch() {
+        model.getResolver().plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownBranch(boolean left) {
                 Decision d = model.getResolver().getLastDecision();
@@ -307,7 +305,7 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void showContradiction(Model model) {
-        model.plugMonitor((IMonitorContradiction) cex -> out.println(String.format("\t/!\\ %s", cex.toString())));
+        model.getResolver().plugMonitor((IMonitorContradiction) cex -> out.println(String.format("\t/!\\ %s", cex.toString())));
     }
 
     /**
@@ -318,7 +316,7 @@ public class Chatterbox {
      */
     public static void showStatisticsDuringResolution(Model model, long f) {
         if (f > 0) {
-            model.plugMonitor(new LogStatEveryXXms(model, f));
+            model.getResolver().plugMonitor(new LogStatEveryXXms(model, f));
         }
     }
 
@@ -340,9 +338,9 @@ public class Chatterbox {
         public String print() {
             return String.format("%s- Solution #%s found. %s \n\t%s.%s",
                     model.getSettings().outputWithANSIColors()?ANSI_GREEN:"",
-                    model.getMeasures().getSolutionCount(),
-                    model.getMeasures().toOneShortLineString(),
-                    print(model.getStrategy().getVariables()),
+                    model.getResolver().getMeasures().getSolutionCount(),
+                    model.getResolver().getMeasures().toOneShortLineString(),
+                    print(model.getResolver().getStrategy().getVariables()),
                     model.getSettings().outputWithANSIColors()?ANSI_RESET:""
             );
         }
@@ -371,7 +369,7 @@ public class Chatterbox {
         @Override
         public String print() {
             int limit = 120;
-            Variable[] vars = model.getStrategy().getVariables();
+            Variable[] vars = model.getResolver().getStrategy().getVariables();
             StringBuilder s = new StringBuilder(32);
             for (int i = 0; i < vars.length && s.length() < limit; i++) {
                 s.append(vars[i]).append(' ');

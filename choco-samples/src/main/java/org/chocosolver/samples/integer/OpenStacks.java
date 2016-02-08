@@ -30,10 +30,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -130,7 +127,6 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.minDom_LB(scheds));
     }
 
     @Override
@@ -151,7 +147,7 @@ public class OpenStacks extends AbstractProblem {
             st.append("(").append(norders[i]).append(")\n\t");
         }
         st.append("\n\t");
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             for (int j = 0; j < np; j++) {
                 st.append(scheds[j].getValue()).append(" ");
             }

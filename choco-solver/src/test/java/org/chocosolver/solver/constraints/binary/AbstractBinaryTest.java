@@ -30,6 +30,7 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.variables.IntVar;
@@ -37,9 +38,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
-
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 
 /**
  * <br/>
@@ -83,11 +81,8 @@ public abstract class AbstractBinaryTest {
             }
         }
         make(vars, s).post();
-        if (bounded) {
-            s.set(random_bound(vars, seed));
-        } else {
-            s.set(random_value(vars, seed));
-        }
+        Resolver r = s.getResolver();
+        r.set(r.randomSearch(vars,seed));
         return s;
     }
 
@@ -123,7 +118,7 @@ public abstract class AbstractBinaryTest {
                 System.err.printf("seed: %d\n", seed);
                 throw ae;
             }
-            long cp = s.getMeasures().getSolutionCount();
+            long cp = s.getResolver().getMeasures().getSolutionCount();
             Assert.assertEquals(cp, base, "found: " + cp + " solutions, while " + base + " are expected (" + seed + ")");
         }
     }

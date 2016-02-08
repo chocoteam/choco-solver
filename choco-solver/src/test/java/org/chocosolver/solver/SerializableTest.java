@@ -205,7 +205,7 @@ public class SerializableTest {
         }
         assertNotNull(s);
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), 92, "nb sol incorrect");
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 92, "nb sol incorrect");
     }
 
 }

@@ -31,13 +31,11 @@ package org.chocosolver.samples.integer;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.loop.lns.LNSFactory;
-import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -186,10 +184,8 @@ public class AirPlaneLanding extends AbstractProblem {
     @Override
     public void configureSearch() {
         Arrays.sort(planes, (o1, o2) -> maxCost.get(o2) - maxCost.get(o1));
-        model.set(
-                IntStrategyFactory.random_bound(bVars, seed),
-                IntStrategyFactory.lexico_LB(planes)
-        );
+        Resolver r = model.getResolver();
+        r.set(r.randomSearch(bVars, seed), r.firstLBSearch(planes));
     }
 
     @Override
@@ -205,7 +201,7 @@ public class AirPlaneLanding extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("Air plane landing(%s)", mData));
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() != ESat.TRUE) {
+        if (model.getResolver().isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
         } else {
             for (int i = 0; i < n; i++) {

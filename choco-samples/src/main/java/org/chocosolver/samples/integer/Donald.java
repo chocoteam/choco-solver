@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -80,7 +79,6 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.minDom_UB(letters));
     }
 
     @Override

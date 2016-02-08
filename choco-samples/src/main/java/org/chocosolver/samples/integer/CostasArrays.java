@@ -31,11 +31,10 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
+import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
@@ -82,8 +81,8 @@ public class CostasArrays extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		SMF.limitTime(model,"20s");
-		model.set(ISF.lexico_LB(vectors));
+		limitTime(model, "20s");
+		model.getResolver().set(model.getResolver().firstLBSearch(vectors));
 	}
 
     @Override

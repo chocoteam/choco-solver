@@ -38,9 +38,6 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
-
 /**
  * <br/>
  *
@@ -88,11 +85,7 @@ public abstract class AbstractTernaryTest {
         }
         Constraint div = make(vars, s);
         div.post();
-        if (bounded) {
-            s.set(random_bound(vars, seed));
-        } else {
-            s.set(random_value(vars, seed));
-        }
+        s.getResolver().set(s.getResolver().randomSearch(vars,seed));
         return s;
     }
 
@@ -125,7 +118,7 @@ public abstract class AbstractTernaryTest {
                 System.err.printf("seed: %d\n", seed);
                 throw ae;
             }
-            long cp = s.getMeasures().getSolutionCount();
+            long cp = s.getResolver().getMeasures().getSolutionCount();
             Assert.assertEquals(cp, base, "found: " + cp + " solutions, while " + base + " are expected (" + seed + ")");
         }
     }

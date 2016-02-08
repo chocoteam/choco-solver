@@ -112,7 +112,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
         try {
             update();
         } catch (ContradictionException cex) {
-            mModel.getEngine().flush();
+            mModel.getResolver().getEngine().flush();
         }
         mModel.getEnvironment().worldPop();
         epsilon = (.95 * epsilon) + (.05 * (logSum / fgmtSize));
@@ -128,7 +128,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
             // 2. fix it to its solution value
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
                 impose(id);
-                mModel.propagate();
+                mModel.getResolver().propagate();
                 fragment.clear(id);
 
                 logSum = 0;

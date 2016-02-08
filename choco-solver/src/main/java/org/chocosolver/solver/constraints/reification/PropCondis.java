@@ -303,7 +303,7 @@ public class PropConDis extends Propagator<BoolVar> {
         allvars = Arrays.copyOf(allvars, k);
         cardinalities = new int[k];
         // get a copy of the current propagation engine
-        masterEngine = model.getEngine();
+        masterEngine = model.getResolver().getEngine();
         // create internalEngine
         internalEngine = new SevenQueuesPropagatorEngine(model);
         internalEngine.initialize();

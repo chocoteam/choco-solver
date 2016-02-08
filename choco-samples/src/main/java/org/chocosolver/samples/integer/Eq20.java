@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
@@ -84,7 +83,7 @@ public class Eq20 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.minDom_LB(vars));
+        model.getResolver().set(model.getResolver().minDomLBSearch(vars));
     }
 
     @Override
@@ -95,7 +94,7 @@ public class Eq20 extends AbstractProblem {
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder("20 equations\n");
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(", ");
             }

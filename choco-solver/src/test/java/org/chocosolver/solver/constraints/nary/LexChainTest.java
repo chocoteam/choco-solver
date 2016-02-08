@@ -43,19 +43,15 @@ import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
 
 import static java.lang.String.format;
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.chocosolver.util.ESat.TRUE;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.testng.Assert.assertEquals;
@@ -106,11 +102,7 @@ public class LexChainTest {
         }
 
         SatFactory.addClauses(LogOp.and(trees), model);
-		if(bounded){
-			model.set(IntStrategyFactory.random_bound(ArrayUtils.flatten(X), seed));
-		}else{
-			model.set(IntStrategyFactory.random_value(ArrayUtils.flatten(X), seed));
-		}
+        model.getResolver().set(model.getResolver().randomSearch(ArrayUtils.flatten(X), seed));
         return model;
     }
 
@@ -123,11 +115,7 @@ public class LexChainTest {
                     model.intVarArray("X_" + i, m, 0, k, false);
         }
         model.lexChainLess(X).post();
-        if (bounded) {
-            model.set(random_bound(flatten(X), seed));
-        } else {
-            model.set(random_value(flatten(X), seed));
-        }
+        model.getResolver().set(model.getResolver().randomSearch(flatten(X),seed));
         return model;
     }
 
@@ -146,7 +134,7 @@ public class LexChainTest {
             while (refor.solve()) ;
             while (lex.solve()) ;
 
-            assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), format("seed:%d", seed));
+            assertEquals(refor.getResolver().getMeasures().getSolutionCount(), lex.getResolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
         }
     }
 
@@ -165,7 +153,7 @@ public class LexChainTest {
             while (refor.solve()) ;
             while (lex.solve()) ;
 
-            assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), format("seed:%d", seed));
+            assertEquals(refor.getResolver().getMeasures().getSolutionCount(), lex.getResolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
         }
     }
 
@@ -176,7 +164,7 @@ public class LexChainTest {
         Model lex = lex(n, m, k, seed, true);
         while (refor.solve()) ;
         while (lex.solve()) ;
-        assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), format("seed:%d", seed));
+        assertEquals(refor.getResolver().getMeasures().getSolutionCount(), lex.getResolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -191,14 +179,14 @@ public class LexChainTest {
 
 
         try {
-            model.propagate();
+            model.getResolver().propagate();
             X[0][0].updateLowerBound(1, Null);
             X[0][1].updateLowerBound(1, Null);
             X[1][0].updateLowerBound(1, Null);
             X[2][1].updateLowerBound(1, Null);
-            model.propagate();
+            model.getResolver().propagate();
             X[2][1].instantiateTo(1, Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException e) {
             fail();
         }

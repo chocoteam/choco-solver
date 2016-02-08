@@ -29,18 +29,14 @@
  */
 package org.chocosolver.solver.explanations;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
 
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.chocosolver.util.tools.ArrayUtils.toArray;
 import static org.testng.Assert.assertEquals;
@@ -87,10 +83,10 @@ public class EqualXYCExplTest {
             indicess[i] = sol.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = flatten(toArray(varsr, indicesr));
-        ref.set(lexico_LB(allvarsr));
+        ref.getResolver().set(ref.getResolver().firstLBSearch(allvarsr));
 
         IntVar[] allvarss = flatten(toArray(varss, indicess));
-        sol.set(lexico_LB(allvarss));
+        sol.getResolver().set(sol.getResolver().firstLBSearch(allvarss));
 
 
         for (int i = 0; i < varsr.length - 1; i++) {
@@ -104,8 +100,8 @@ public class EqualXYCExplTest {
         while (sol.solve()) ;
 
 
-        assertEquals(sol.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
-        assertTrue(sol.getMeasures().getBackTrackCount() <= ref.getMeasures().getBackTrackCount());
+        assertEquals(sol.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount());
+        assertTrue(sol.getResolver().getMeasures().getBackTrackCount() <= ref.getResolver().getMeasures().getBackTrackCount());
     }
 
     @Test(groups="1s", timeOut=60000)

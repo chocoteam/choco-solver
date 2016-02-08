@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
@@ -76,7 +75,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.lexico_UB(vars));
+        model.getResolver().set(model.getResolver().firstUBSearch(vars));
     }
 
     @Override
@@ -88,7 +87,7 @@ public class MagicSeries extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("Magic series(%d)", n));
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             st.append("\t");
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(" ");

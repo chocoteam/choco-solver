@@ -34,7 +34,6 @@ import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
@@ -81,10 +80,10 @@ public class LearnExplained implements Learn {
      */
     public LearnExplained(Model mModel, boolean partialExplanationsOn, boolean recordCauses) {
         this.mModel = mModel;
-        if (mModel.getExplainer() == null) {
-            mModel.set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));
+        if (mModel.getResolver().getExplainer() == null) {
+            mModel.getResolver().set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));
         }
-        this.mExplainer = mModel.getExplainer();
+        this.mExplainer = mModel.getResolver().getExplainer();
         this.saveCauses = recordCauses;
     }
 
@@ -132,7 +131,7 @@ public class LearnExplained implements Learn {
      * Actions to do when a failure is met.
      */
     public void onFailure(Resolver resolver){
-        ContradictionException cex = mModel.getEngine().getContradictionException();
+        ContradictionException cex = mModel.getResolver().getEngine().getContradictionException();
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
         lastExplanation = mExplainer.explain(cex);
     }

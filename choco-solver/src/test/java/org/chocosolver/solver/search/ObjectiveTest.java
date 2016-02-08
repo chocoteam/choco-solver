@@ -31,6 +31,7 @@ package org.chocosolver.solver.search;
 
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.objective.ObjectiveManager;
@@ -39,7 +40,6 @@ import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -52,7 +52,6 @@ import static java.lang.System.nanoTime;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.ESat.*;
 import static org.testng.Assert.assertEquals;
 
@@ -97,8 +96,8 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
             model.solve();
-            Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
-            Assert.assertEquals(model.getMeasures().getNodeCount(), 2);
+            Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
+            Assert.assertEquals(model.getResolver().getMeasures().getNodeCount(), 2);
         }
     }
 
@@ -107,8 +106,8 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 11);
-            assertEquals(model.getMeasures().getNodeCount(), 21);
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 11);
+            assertEquals(model.getResolver().getMeasures().getNodeCount(), 21);
         }
     }
 
@@ -117,8 +116,8 @@ public class ObjectiveTest {
             model.getResolver().reset();
             model.setObjectives(MINIMIZE, iv);
             model.solve();
-            assertEquals(model.getMeasures().getBestSolutionValue(), 0);
-            assertEquals(model.getMeasures().getNodeCount(), 2);
+            assertEquals(model.getResolver().getMeasures().getBestSolutionValue(), 0);
+            assertEquals(model.getResolver().getMeasures().getNodeCount(), 2);
         }
     }
 
@@ -127,8 +126,8 @@ public class ObjectiveTest {
             model.getResolver().reset();
             model.setObjectives(MAXIMIZE, iv);
             model.solve();
-            assertEquals(model.getMeasures().getBestSolutionValue(), 10);
-            assertEquals(model.getMeasures().getNodeCount(), 21);
+            assertEquals(model.getResolver().getMeasures().getBestSolutionValue(), 10);
+            assertEquals(model.getResolver().getMeasures().getNodeCount(), 21);
         }
     }
 
@@ -140,13 +139,13 @@ public class ObjectiveTest {
 
         model.setObjectives(MINIMIZE, iv);
         model.solve();
-        assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
 
         model.getResolver().reset();
 
         model.setObjectives(MINIMIZE, iv);
         model.solve();
-        assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -161,7 +160,7 @@ public class ObjectiveTest {
                         new Constraint[]{model.TRUE()}) {
                     @Override
                     public ESat checkCondition() {
-                        int nbNode = (int) this.model.getMeasures().getNodeCount();
+                        int nbNode = (int) this.model.getResolver().getMeasures().getNodeCount();
                         switch (nbNode) {
                             case 0:
                             case 1:
@@ -178,7 +177,7 @@ public class ObjectiveTest {
         assertEquals(iv.getValue(), 2);
 
         model.getResolver().reset();
-        model.plugMonitor((IMonitorSolution) () -> model.arithm(iv, ">=", 6).post());
+        model.getResolver().plugMonitor((IMonitorSolution) () -> model.arithm(iv, ">=", 6).post());
         model.solve();
         assertEquals(iv.getValue(), 2);
 
@@ -209,20 +208,21 @@ public class ObjectiveTest {
         BoolVar b1 = model.boolVar("b1");
         BoolVar b2 = model.boolVar("b2");
         model.arithm(b1, "<=", b2).post();
+        Resolver r = model.getResolver();
 //        SMF.log(solver, true, true);
-        model.set(new ObjectiveManager<IntVar, Integer>(b1, MINIMIZE, true));
+        r.set(new ObjectiveManager<IntVar, Integer>(b1, MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
-        if (model.getEngine() == SINGLETON) {
-            model.getResolver().set(new SevenQueuesPropagatorEngine(model));
+        if (r.getEngine() == SINGLETON) {
+            r.set(new SevenQueuesPropagatorEngine(model));
         }
-        model.getMeasures().setReadingTimeCount(nanoTime());
-        model.getResolver().setStopAtFirstSolution(false);
+        r.getMeasures().setReadingTimeCount(nanoTime());
+        r.setStopAtFirstSolution(false);
         model.solve();
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
-        model.getResolver().reset();
+        r.reset();
         model.arithm(b1, "=", bestvalue).post();
-        model.set(lexico_LB(new BoolVar[]{b1, b2}));
+        r.set(r.firstLBSearch(new BoolVar[]{b1, b2}));
         int count = 0;
         if (model.solve()) {
             do {
@@ -240,11 +240,11 @@ public class ObjectiveTest {
         IntVar a = model.intVar("a", -2, 2, false);
 		model.getResolver().set(
 				new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),
-				ISF.minDom_LB(a));
+				model.getResolver().minDomLBSearch(a));
 		SMF.nogoodRecordingOnSolution(new IntVar[]{a});
 
         model.getResolver().set(new ObjectiveManager<IntVar, Integer>(a, MAXIMIZE, false));
         while (model.solve());
-		Assert.assertEquals(model.hasReachedLimit(),false);
+		Assert.assertEquals(model.getResolver().hasReachedLimit(),false);
 	}
 }

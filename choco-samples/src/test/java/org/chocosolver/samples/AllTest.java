@@ -32,11 +32,10 @@ package org.chocosolver.samples;
 import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.samples.integer.AllIntervalSeries;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -98,7 +97,7 @@ public class AllTest {
         efact.plugin(prob.model, false, false);
         while (prob.model.solve()) ;
 
-        assertEquals(nbSol, prob.getModel().getMeasures().getSolutionCount(), "incorrect nb solutions");
+        assertEquals(nbSol, prob.getModel().getResolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
     }
 
     @Override

@@ -30,10 +30,6 @@
 package org.chocosolver.solver.search.strategy.selectors;
 
 import org.chocosolver.solver.search.strategy.selectors.values.*;
-import org.chocosolver.solver.search.strategy.selectors.variables.*;
-import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
 
 /**
  * Strategies over real variables

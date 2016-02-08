@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -89,11 +88,11 @@ public class NotMemberTest {
                 vars[0] = s.intVar("v", values[0]);
 
                 s.notMember(vars[0], values[1]).post();
-                s.set(lexico_LB(vars));
+                s.getResolver().set(s.getResolver().firstLBSearch(vars));
 
                 while (s.solve()) ;
-                long sol = s.getMeasures().getSolutionCount();
-                long nod = s.getMeasures().getNodeCount();
+                long sol = s.getResolver().getMeasures().getSolutionCount();
+                long nod = s.getResolver().getMeasures().getNodeCount();
                 assertEquals(sol, intersectionSize(values[0], values[1]), "nb sol incorrect");
                 assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb sol incorrect");
             }
@@ -115,11 +114,11 @@ public class NotMemberTest {
                 vars[0] = s.intVar("v", lb, ub, true);
 
                 s.notMember(vars[0], values[1]).post();
-                s.set(lexico_LB(vars));
+                s.getResolver().set(s.getResolver().firstLBSearch(vars));
 
                 while (s.solve()) ;
-                long sol = s.getMeasures().getSolutionCount();
-                long nod = s.getMeasures().getNodeCount();
+                long sol = s.getResolver().getMeasures().getSolutionCount();
+                long nod = s.getResolver().getMeasures().getNodeCount();
                 assertEquals(sol, unionSize(lb, ub, values[1]), "nb sol incorrect");
                 assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb nod incorrect");
             }
@@ -133,10 +132,10 @@ public class NotMemberTest {
         int[] values = new int[]{0, 2, 8, 9, 10, 5, 6};
 
         s.notMember(vars, values).post();
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
 
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), 4);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 4);
 
     }
 

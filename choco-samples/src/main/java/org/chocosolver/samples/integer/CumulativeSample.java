@@ -37,9 +37,8 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
@@ -85,8 +84,9 @@ public class CumulativeSample extends AbstractProblem{
 
 	@Override
 	public void configureSearch() {
-		model.set(ISF.minDom_LB(start));
-		model.set(ISF.lastConflict(model, model.getStrategy()));
+		Resolver r = model.getResolver();
+		r.set(r.minDomLBSearch(start));
+		r.useLastConflict();
 	}
 
 	@Override

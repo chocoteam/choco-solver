@@ -33,7 +33,6 @@ package org.chocosolver.samples.explanation;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -62,7 +61,7 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
     @Override
     public void configureSearch() {
 //        model.set(StrategyFactory.random(vars, model.getEnvironment()));
-        model.set(IntStrategyFactory.lexico_LB(vars));
+        model.getResolver().set(model.getResolver().firstLBSearch(vars));
     }
 
     @Override

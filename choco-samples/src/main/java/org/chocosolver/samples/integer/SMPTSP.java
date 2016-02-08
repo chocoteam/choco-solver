@@ -31,11 +31,11 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.Solution;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
@@ -104,20 +104,21 @@ public class SMPTSP extends AbstractProblem {
 	@Override
 	public void configureSearch() {
 		// bottom-up optimisation, then classical branching
-		model.set(ISF.lexico_LB(nbValues), ISF.minDom_LB(assignment));
+		Resolver r = model.getResolver();
+		r.set(r.firstLBSearch(nbValues), r.minDomLBSearch(assignment));
 		// displays the root lower bound
-		model.plugMonitor(new IMonitorInitialize() {
+		r.plugMonitor(new IMonitorInitialize() {
 			@Override
 			public void afterInitialize() {
 				System.out.println("bound after initial propagation : " + nbValues);
 			}
 		});
-		model.plugMonitor((IMonitorSolution) () -> {
+		r.plugMonitor((IMonitorSolution) () -> {
 			bestObj = nbValues.getValue();
 			System.out.println("Solution found! Objective = "+bestObj);
 		});
 		// searches for all optimal solutions (non-strict optimization)
-		model.getResolver().set(new ObjectiveManager<IntVar, Integer>(nbValues, MAXIMIZE, false));
+		r.set(new ObjectiveManager<IntVar, Integer>(nbValues, MAXIMIZE, false));
 	}
 
 	@Override
@@ -128,7 +129,7 @@ public class SMPTSP extends AbstractProblem {
 	@Override
 	public void prettyOut() {
 		int nb = 1;
-		for(Solution s: model.getSolutionRecorder().getSolutions()){
+		for(Solution s: model.getResolver().getSolutionRecorder().getSolutions()){
 			System.out.println("Optimal solution : "+nb);
 			for(int i=0;i<5;i++){
 				System.out.println(assignment[i].getName()+" = "+s.getIntVal(assignment[i]));

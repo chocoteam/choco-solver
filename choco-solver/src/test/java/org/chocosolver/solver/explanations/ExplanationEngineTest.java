@@ -30,21 +30,16 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.learn.LearnCBJ;
-import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.search.strategy.strategy.OnDemandIntStrategy;
-import org.chocosolver.solver.search.strategy.strategy.Once;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -56,9 +51,7 @@ import static java.util.Arrays.fill;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
 import static org.chocosolver.solver.explanations.ExplanationFactory.DBT;
-import static org.chocosolver.solver.search.loop.SearchLoopFactory.learnCBJ;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
 import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -94,7 +87,7 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {
-                expl.propagate();
+                expl.getResolver().propagate();
                 Assert.fail();
             } catch (ContradictionException e) {
                 r = ee.explain(e);
@@ -126,7 +119,7 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {
-                expl.propagate();
+                expl.getResolver().propagate();
                 Assert.fail();
             } catch (ContradictionException e) {
                 r = ee.explain(e);
@@ -154,24 +147,25 @@ public class ExplanationEngineTest {
             Model expl = new Model();
             model3(expl, n);
 
-            IntStrategy is = ISF.lexico_LB(expl.retrieveIntVars(false));
+            Resolver r = model.getResolver();
+            IntStrategy is = r.firstLBSearch(expl.retrieveIntVars(false));
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
-            Explanation r = null;
+            Explanation ex = null;
             try {
-                expl.propagate();
+                r.propagate();
                 for (int i = 0; i < n; i++) {
                     Decision d = is.getDecision();
                     d.buildNext();
                     d.apply();
-                    expl.propagate();
+                    r.propagate();
                 }
                 Assert.fail();
             } catch (ContradictionException e) {
-                r = ee.explain(e);
+                ex = ee.explain(e);
             }
-            Assert.assertNotNull(r);
-            Assert.assertEquals(r.nbCauses(), 2);
-            Assert.assertEquals(r.nbDecisions(), 1);
+            Assert.assertNotNull(ex);
+            Assert.assertEquals(ex.nbCauses(), 2);
+            Assert.assertEquals(ex.nbDecisions(), 1);
         }
     }
 
@@ -187,22 +181,23 @@ public class ExplanationEngineTest {
         new Constraint((n - 2) + ">" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 2], vs[n - 1]}, 1)).post();
         new Constraint((n - 2) + "<" + (n - 1), new PropGreaterOrEqualX_YC(new IntVar[]{vs[n - 1], vs[n - 2]}, 1)).post();
 
-        IntStrategy is = lexico_LB(vs);
         ExplanationEngine ee = new ExplanationEngine(model, true, true);
-        Explanation r = null;
+        Explanation ex = null;
+        Resolver r = model.getResolver();
+        IntStrategy is = r.firstLBSearch(vs);
         try {
-            model.propagate();
+            r.propagate();
             for (int i = 0; i < n; i++) {
                 Decision d = is.getDecision();
                 d.apply();
-                model.propagate();
+                r.propagate();
             }
             fail();
         } catch (ContradictionException e) {
-            r = ee.explain(e);
+            ex = ee.explain(e);
         }
-        assertNotNull(r);
-        assertEquals(r.nbCauses(), 2);
+        assertNotNull(ex);
+        assertEquals(ex.nbCauses(), 2);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -212,13 +207,14 @@ public class ExplanationEngineTest {
             IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
             model.arithm(vars[n - 2], "=", vars[n - 1]).post();
             model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-            model.set(lexico_LB(vars));
+            model.getResolver().set(model.getResolver().firstLBSearch(vars));
 
-            learnCBJ(model, false, false);
+            Resolver r = model.getResolver();
+            model.getResolver().set(model.getResolver().learnCBJ(false, false));
             assertFalse(model.solve());
 
-            assertEquals(model.getMeasures().getNodeCount(), (n - 2) * 2);
-            assertEquals(model.getMeasures().getFailCount(), n - 1);
+            assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
+            assertEquals(r.getMeasures().getFailCount(), n - 1);
         }
     }
 
@@ -229,13 +225,15 @@ public class ExplanationEngineTest {
             IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
             model.arithm(vars[n - 2], "=", vars[n - 1]).post();
             model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-            model.set(lexico_LB(vars));
 
-            learnCBJ(model, false, false);
+            Resolver r = model.getResolver();
+            r.set(r.firstLBSearch(vars));
+
+            model.getResolver().set(model.getResolver().learnCBJ(false, false));
             assertFalse(model.solve());
 
-            assertEquals(model.getMeasures().getNodeCount(), (n - 2) * 2);
-            assertEquals(model.getMeasures().getFailCount(), n - 1);
+            assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
+            assertEquals(r.getMeasures().getFailCount(), n - 1);
         }
     }
 
@@ -248,11 +246,11 @@ public class ExplanationEngineTest {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
 
-            SLF.learnCBJ(model, false, false);
-            Assert.assertFalse(model.solve());
+            model.getResolver().set(model.getResolver().learnCBJ(false, false));
+            assertFalse(model.solve());
 
-            Assert.assertEquals(model.getMeasures().getNodeCount(), 0);
-            Assert.assertEquals(model.getMeasures().getFailCount(), 1);
+            assertEquals(model.getResolver().getMeasures().getNodeCount(), 0);
+            assertEquals(model.getResolver().getMeasures().getFailCount(), 1);
         }
     }
 
@@ -264,13 +262,13 @@ public class ExplanationEngineTest {
             for (int i = 0; i < n - 1; i++) {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
-            model.set(ISF.lexico_LB(vars));
+            model.getResolver().set(model.getResolver().firstLBSearch(vars));
 
-            SLF.learnCBJ(model, false, false);
-            Assert.assertFalse(model.solve());
+            model.getResolver().set(model.getResolver().learnCBJ(false, false));
+            assertFalse(model.solve());
 
-            Assert.assertEquals(model.getMeasures().getNodeCount(), 0);
-            Assert.assertEquals(model.getMeasures().getFailCount(), 1);
+            assertEquals(model.getResolver().getMeasures().getNodeCount(), 0);
+            assertEquals(model.getResolver().getMeasures().getFailCount(), 1);
         }
     }
 
@@ -288,9 +286,9 @@ public class ExplanationEngineTest {
 
             model.sum(copyOfRange(p, 0, 8), "=", 5).post();
             model.arithm(p[9], "+", p[8], ">", 4).post();
-            model.set(random_value(p, seed));
+            model.getResolver().set(model.getResolver().randomSearch(p, seed));
 
-            learnCBJ(model, false, false);
+            model.getResolver().set(model.getResolver().learnCBJ(false, false));
 
             showShortStatistics(model);
             assertFalse(model.solve());
@@ -310,9 +308,10 @@ public class ExplanationEngineTest {
         model.sum(copyOfRange(p, 0, 8), "=", 5).post();
         model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
-        model.set(lexico_LB(p[0], p[1], p[9], p[8], bs[0]));
+        Resolver r = model.getResolver();
+        r.set(r.firstLBSearch(p[0], p[1], p[9], p[8], bs[0]));
 
-        learnCBJ(model, false, false);
+        model.getResolver().set(model.getResolver().learnCBJ(false, false));
 
         showStatistics(model);
         showSolutions(model);
@@ -334,9 +333,10 @@ public class ExplanationEngineTest {
         model.sum(copyOfRange(p, 0, 8), "=", 5).post();
         model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
-        model.set(lexico_LB(p[0], p[1], bs[0], p[9], p[8]));
+        Resolver r = model.getResolver();
+        r.set(r.firstLBSearch(p[0], p[1], bs[0], p[9], p[8]));
 
-        learnCBJ(model, false, false);
+        model.getResolver().set(model.getResolver().learnCBJ(false, false));
 
         showStatistics(model);
         showSolutions(model);
@@ -387,8 +387,8 @@ public class ExplanationEngineTest {
             model.allDifferent(col, "FC").post();
             model.allDifferent(row, "FC").post();
         }
-        model.set(IntStrategyFactory.lexico_LB(vars));
-//        solver.set(IntStrategyFactory.custom(
+        model.getResolver().set(model.getResolver().firstLBSearch(vars));
+//        solver.set(ISF.custom(
 //                ISF.lexico_var_selector(),
 //                ISF.min_value_selector(),
 //                ISF.remove(),
@@ -396,9 +396,9 @@ public class ExplanationEngineTest {
 
 
         configure(model, a);
-        Chatterbox.showShortStatistics(model);
-        SMF.limitTime(model, "5m");
-        Assert.assertTrue(model.solve() || model.hasReachedLimit());
+        showShortStatistics(model);
+        limitTime(model, "5m");
+        assertTrue(model.solve() || model.getResolver().hasReachedLimit());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -433,7 +433,7 @@ public class ExplanationEngineTest {
         // symmetry-breaking
         model.arithm(vars[0], "<", vars[n - 1]).post();
 
-        model.set(lexico_LB(vars));
+        model.getResolver().set(model.getResolver().firstLBSearch(vars));
 
         configure(model, a);
         showShortStatistics(model);
@@ -480,14 +480,14 @@ public class ExplanationEngineTest {
             model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
 
-        model.set(lexico_LB(ticks));
+        model.getResolver().set(model.getResolver().firstLBSearch(ticks));
 
         configure(model, a);
         showShortStatistics(model);
         limitTime(model, "5m");
         model.setObjectives(MINIMIZE, ticks[m - 1]);
         model.solve();
-        assertTrue(model.getMeasures().getSolutionCount() > 0);
+        assertTrue(model.getResolver().getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -509,7 +509,8 @@ public class ExplanationEngineTest {
             }
         }
         model.allDifferent(position, "FC").post();
-        model.set(minDom_UB(position));
+        Resolver r = model.getResolver();
+        r.set(r.minDomUBSearch(position));
 
         configure(model, a);
         showShortStatistics(model);
@@ -570,12 +571,13 @@ public class ExplanationEngineTest {
         model.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
-        model.set(minDom_MidValue(true, vars));
+        Resolver r = model.getResolver();
+        r.set(r.intVarSearch(r.minDomVarSelector(),r.midValSelector(true), vars));
 
         configure(model, a);
         showShortStatistics(model);
         limitTime(model, "5m");
-        assertTrue(model.solve() || model.hasReachedLimit());
+        assertTrue(model.solve() || r.hasReachedLimit());
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -649,12 +651,12 @@ public class ExplanationEngineTest {
         model.allDifferent(xy, "FC").post();
 
 
-        model.set(minDom_LB(Ovars));
+        model.getResolver().set(model.getResolver().minDomLBSearch(Ovars));
 
         configure(model, a);
         showShortStatistics(model);
         limitTime(model, "5m");
-        assertTrue(model.solve() || model.hasReachedLimit());
+        assertTrue(model.solve() || model.getResolver().hasReachedLimit());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -677,18 +679,19 @@ public class ExplanationEngineTest {
         SatFactory.addBoolNot(bs[0], bs[n - 1]);
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
-        Explanation r = null;
+        Resolver r = model.getResolver();
+        Explanation ex = null;
         try {
-            model.propagate();
-            IntStrategy is = ISF.lexico_LB(bs);
+            r.propagate();
+            IntStrategy is = r.firstLBSearch(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
-            model.propagate();
+            r.propagate();
         } catch (ContradictionException c) {
-            r = ee.explain(c);
+            ex = ee.explain(c);
         }
-        Assert.assertNotNull(r);
+        Assert.assertNotNull(ex);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -702,18 +705,19 @@ public class ExplanationEngineTest {
         SatFactory.addBoolNot(bs[0], bs[1]);
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
-        Explanation r = null;
+        Explanation ex = null;
+        Resolver r = model.getResolver();
         try {
-            model.propagate();
-            IntStrategy is = ISF.lexico_LB(bs);
+            r.propagate();
+            IntStrategy is = r.firstLBSearch(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
-            model.propagate();
+            r.propagate();
         } catch (ContradictionException c) {
-            r = ee.explain(c);
+            ex = ee.explain(c);
         }
-        Assert.assertNotNull(r);
+        Assert.assertNotNull(ex);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -729,22 +733,23 @@ public class ExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
-        Explanation r = null;
+        Explanation ex = null;
+        Resolver r = model.getResolver();
         try {
-            model.propagate();
-            IntStrategy is = ISF.lexico_LB(bs);
+            r.propagate();
+            IntStrategy is = r.firstLBSearch(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
-            model.propagate();
+            r.propagate();
             d = is.getDecision();
             d.buildNext();
             d.apply();
-            model.propagate();
+            r.propagate();
         } catch (ContradictionException c) {
-            r = ee.explain(c);
+            ex = ee.explain(c);
         }
-        Assert.assertNotNull(r);
+        Assert.assertNotNull(ex);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -756,22 +761,23 @@ public class ExplanationEngineTest {
         SatFactory.addClauses(new BoolVar[]{}, new BoolVar[]{bs[0], bs[1], bs[2]});
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
-        Explanation r = null;
+        Explanation ex = null;
+        Resolver r = model.getResolver();
         try {
-            model.propagate();
-            IntStrategy is = ISF.lexico_UB(bs);
+            r.propagate();
+            IntStrategy is = r.firstUBSearch(bs);
             Decision d = is.getDecision();
             d.buildNext();
             d.apply();
-            model.propagate();
+            r.propagate();
             d = is.getDecision();
             d.buildNext();
             d.apply();
-            model.propagate();
+            r.propagate();
         } catch (ContradictionException c) {
-            r = ee.explain(c);
+            ex = ee.explain(c);
         }
-        Assert.assertNotNull(r);
+        Assert.assertNotNull(ex);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -781,10 +787,10 @@ public class ExplanationEngineTest {
         Model s1 = test(n, m, 1);
         Model s2 = test(n, m, 2);
         Model s3 = test(n, m, 3);
-        Assert.assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
-        Assert.assertEquals(s1.getMeasures().getSolutionCount(), s3.getMeasures().getSolutionCount());
-        Assert.assertTrue(s1.getMeasures().getNodeCount() >= s2.getMeasures().getNodeCount());
-        Assert.assertTrue(s2.getMeasures().getNodeCount() >= s3.getMeasures().getNodeCount());
+        Assert.assertEquals(s1.getResolver().getMeasures().getSolutionCount(), s2.getResolver().getMeasures().getSolutionCount());
+        Assert.assertEquals(s1.getResolver().getMeasures().getSolutionCount(), s3.getResolver().getMeasures().getSolutionCount());
+        Assert.assertTrue(s1.getResolver().getMeasures().getNodeCount() >= s2.getResolver().getMeasures().getNodeCount());
+        Assert.assertTrue(s2.getResolver().getMeasures().getNodeCount() >= s3.getResolver().getMeasures().getNodeCount());
     }
 
     private Model test(int n, int m, int expMode) {
@@ -834,7 +840,7 @@ public class ExplanationEngineTest {
         Constraint xE1 = s.arithm(x, "=", one);
         xE1.post();
 
-        learnCBJ(s, false, true);
+        s.getResolver().set(s.getResolver().learnCBJ(false, true));
         LearnCBJ cbj = (LearnCBJ) s.getResolver().getLearn();
         showDecisions(s);
         assertFalse(s.solve());
@@ -854,7 +860,8 @@ public class ExplanationEngineTest {
             model.arithm(X[i], ">", i).reifyWith(B[i]);
         }
         CBJ.plugin(model, false, false);
-        model.set(lexico_UB(B), new Once(X, lexico_var_selector(), min_value_selector()));
+        Resolver r = model.getResolver();
+        r.set(r.firstUBSearch(B), r.greedySearch(r.firstLBSearch(X)));
         showDecisions(model);
         showSolutions(model);
         while (model.solve()) ;
@@ -874,7 +881,7 @@ public class ExplanationEngineTest {
         ExplanationEngine ee = new ExplanationEngine(model, false, false);
 
         model.getEnvironment().worldPush();
-        model.propagate();
+        model.getResolver().propagate();
         assertEquals(x.getLB(), 1);
         assertEquals(y.getUB(), 2);
         assertEquals(z.getUB(), 0);
@@ -883,7 +890,7 @@ public class ExplanationEngineTest {
         IntDecision d1 = strategy.makeIntDecision(x, int_split, 2);
         d1.buildNext();
         d1.apply();
-        model.propagate();
+        model.getResolver().propagate();
         assertEquals(z.getUB(), -1);
         model.getEnvironment().worldPush();
         IntDecision d2 = strategy.makeIntDecision(x, int_split, 1);
@@ -891,7 +898,7 @@ public class ExplanationEngineTest {
         d2.apply();
         ContradictionException c = null;
         try {
-            model.propagate();
+            model.getResolver().propagate();
             fail();
         } catch (ContradictionException ce) {
             c = ce;
@@ -908,7 +915,7 @@ public class ExplanationEngineTest {
 
         model.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2).post();
 
-        model.propagate();
+        model.getResolver().propagate();
         out.printf("%s\n", model);
     }
 

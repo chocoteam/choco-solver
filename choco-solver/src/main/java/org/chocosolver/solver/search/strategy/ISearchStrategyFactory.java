@@ -27,59 +27,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples.explanation;
+package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.GreedyBranching;
+import org.chocosolver.solver.search.strategy.strategy.LastConflict;
+import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 
-import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.variables.IntVar;
+public interface ISearchStrategyFactory extends IRealStrategyFactory, ISetStrategyFactory, IIntStrategyFactory{
 
-/**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 01/05/11
- * Time: 13:26
- */
-public class ExplainedOCProblem extends AbstractProblem {
+	// ************************************************************************************
+	// GENERIC PATTERNS
+	// ************************************************************************************
 
-    IntVar[] vars;
-    int n = 4;
-    int vals = n - 1;
+	/**
+	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic
+	 * Should be set after specifying a search strategy.
+	 * @return last conflict strategy
+	 */
+	default void useLastConflict() {
+		_me().set(new LastConflict(_me().getModel(), _me().getStrategy(),1));
+	}
 
+	/**
+	 * Make the input search strategy greedy, that is, decisions can be applied but not refuted.
+	 * @param search a search heuristic building branching decisions
+	 * @return a greedy form of search
+	 */
+	default AbstractStrategy greedySearch(AbstractStrategy search){
+		return new GreedyBranching(search);
+	}
 
-    @Override
-    public void buildModel() {
-        model = new Model();
-        vars = model.intVarArray("x", 2 * n, 1, vals, false);
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                model.arithm(vars[2 * i], "!=", vars[2 * j]).post();
-            }
-        }
-    }
-
-    @Override
-    public void configureSearch() {
-        model.getResolver().set(model.getResolver().firstLBSearch(vars));
-    }
-
-
-    @Override
-    public void solve() {
-        ExplanationFactory.CBJ.plugin(model, false, false);
-        if (model.solve()) {
-            do {
-                this.prettyOut();
-            }
-            while (model.solve());
-        }
-    }
-
-    @Override
-    public void prettyOut() {}
-
-    public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
-    }
+	default AbstractStrategy sequencer(AbstractStrategy... searches){
+		return new StrategiesSequencer(searches);
+	}
 }

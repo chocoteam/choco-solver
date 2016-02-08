@@ -33,11 +33,9 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeMultiResources;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 
@@ -100,7 +98,7 @@ public class MultiCostRegularTest {
         ICostAutomaton costAutomaton = makeMultiResources(auto, costMatrix, bounds);
         model.multiCostRegular(sequence, bounds, costAutomaton).post();
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
-        model.set(random_bound(append(sequence, bounds), seed));
+        model.getResolver().set(model.getResolver().randomSearch(append(sequence, bounds), seed));
         return model;
     }
 
@@ -111,7 +109,7 @@ public class MultiCostRegularTest {
         for (int i = 0; i < 2000; i++) {
             Model model = make(5, i + seed);
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 4, "seed:" + (seed + i));
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4, "seed:" + (seed + i));
         }
     }
 
@@ -121,7 +119,7 @@ public class MultiCostRegularTest {
         for (int i = 0; i < 2000; i++) {
             Model model = make(7, i);
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 6, "seed:" + (seed + i));
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 6, "seed:" + (seed + i));
         }
     }
 
@@ -131,7 +129,7 @@ public class MultiCostRegularTest {
         for (int i = 0; i < 2000; i++) {
             Model model = make(14, i);
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 141, "seed:" + (seed + i));
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 141, "seed:" + (seed + i));
         }
     }
 
@@ -141,7 +139,7 @@ public class MultiCostRegularTest {
         for (int i = 0; i < 2000; i++) {
             Model model = make(21, i);
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 85, "seed:" + (seed + i));
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 85, "seed:" + (seed + i));
         }
     }
 

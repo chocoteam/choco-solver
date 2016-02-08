@@ -91,8 +91,11 @@ public class MemberSetTest {
                     IntVar i = model.intVar("i", doms[1]);
                     model.member(i, s).post();
                     //Chatterbox.showSolutions(solver);
-                    assertEquals(model.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
-                            Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
+                    long nbSolutions = 0;
+                    while (model.solve()) {
+                        nbSolutions++;
+                    }
+                    assertEquals(nbSolutions, sizeInterseaction(doms[0], doms[1]), Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
                 }
             }
         }
@@ -120,8 +123,11 @@ public class MemberSetTest {
                     IntVar i = model.intVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
                     model.member(i, s).post();
                     //Chatterbox.showSolutions(solver);
-                    assertEquals(model.findAllSolutions(), sizeInterseaction(doms[0], doms[1]),
-                            Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
+                    long nbSolutions = 0;
+                    while (model.solve()) {
+                        nbSolutions++;
+                    }
+                    assertEquals(nbSolutions, sizeInterseaction(doms[0], doms[1]), Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
                 }
             }
         }

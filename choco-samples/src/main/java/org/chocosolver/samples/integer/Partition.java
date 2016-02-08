@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
@@ -133,7 +132,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.minDom_LB(Ovars));
+        model.getResolver().set(model.getResolver().minDomLBSearch(Ovars));
     }
 
     @Override
@@ -144,7 +143,7 @@ public class Partition extends AbstractProblem {
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder();
-        if (ESat.TRUE == model.isFeasible()) {
+        if (ESat.TRUE == model.getResolver().isFeasible()) {
             int sum1 = 0, sum2 = 0;
             int i = 0;
             st.append(vars[i].getValue());

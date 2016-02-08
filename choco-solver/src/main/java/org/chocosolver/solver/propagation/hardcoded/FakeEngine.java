@@ -68,7 +68,7 @@ class FakeEngine implements IPropagationEngine {
                 }
                 break;
             case error:
-                IPropagationEngine engine = lastProp.getModel().getEngine();
+                IPropagationEngine engine = lastProp.getModel().getResolver().getEngine();
                 lastProp.getModel().getResolver().set(singleton);
                 if (lastProp.isActive()) {
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());

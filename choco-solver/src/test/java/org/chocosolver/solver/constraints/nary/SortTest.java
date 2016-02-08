@@ -78,7 +78,11 @@ public class SortTest {
                 System.out.printf("\n\n");
             } while (solver.solve());
         }*/
-        assertEquals(model.findAllSolutions(), 182);
+        long nbSolutions = 0;
+        while (model.solve()) {
+            nbSolutions++;
+        }
+        assertEquals(nbSolutions, 182);
 
     }
 
@@ -98,7 +102,7 @@ public class SortTest {
 
         model.sort(X, Y).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
             assertEquals(X[1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -121,7 +125,7 @@ public class SortTest {
 
         model.sort(X, Y).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
             assertEquals(X[1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -144,7 +148,7 @@ public class SortTest {
 
         model.sort(X, Y).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
             assertEquals(X[0].getValue(), 7);
         } catch (ContradictionException e) {
             e.printStackTrace();

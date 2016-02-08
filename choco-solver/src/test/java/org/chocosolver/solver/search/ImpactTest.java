@@ -30,11 +30,11 @@
 package org.chocosolver.solver.search;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
@@ -53,24 +53,24 @@ public class ImpactTest {
 		Model s2 = costasArray(7, true);
 
 		while (s1.solve()) ;
-		out.println(s1.getMeasures().getSolutionCount());
+		out.println(s1.getResolver().getMeasures().getSolutionCount());
 
 		while (s2.solve()) ;
 
-		out.println(s2.getMeasures().getSolutionCount());
-		assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
+		out.println(s2.getResolver().getMeasures().getSolutionCount());
+		assertEquals(s1.getResolver().getMeasures().getSolutionCount(), s2.getResolver().getMeasures().getSolutionCount());
 	}
 
 	private Model costasArray(int n, boolean impact){
 		Model model = ProblemMaker.makeCostasArrays(n);
 		IntVar[] vectors = (IntVar[]) model.getHook("vectors");
-		model.set(ISF.domOverWDeg(vectors, 0));
-		SMF.limitTime(model, 20000);
 
+		Resolver r = model.getResolver();
+		SMF.limitTime(model, 20000);
 		if(impact){
-			model.set(ISF.impact(vectors, 0));
+			r.set(new ImpactBased(vectors,2,3,10,0,true));
 		}else{
-			model.set(ISF.domOverWDeg(vectors, 0));
+			r.set(r.domOverWDegSearch(vectors));
 		}
 		return model;
 	}

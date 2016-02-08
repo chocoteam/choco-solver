@@ -303,9 +303,9 @@ It is possible create other types of decision by defining a decision operator ``
 
 **API**
 
-    IntStrategyFactory.custom(VariableSelector<IntVar> VAR_SELECTOR, IntValueSelector VAL_SELECTOR,
+    ISF.custom(VariableSelector<IntVar> VAR_SELECTOR, IntValueSelector VAL_SELECTOR,
                               DecisionOperator<IntVar> DEC_OPERATOR, IntVar... VARS)
-    IntStrategyFactory.custom(VariableSelector<IntVar> VAR_SELECTOR, IntValueSelector VAL_SELECTOR,
+    ISF.custom(VariableSelector<IntVar> VAR_SELECTOR, IntValueSelector VAL_SELECTOR,
                               IntVar... VARS)
 
     new IntStrategy(IntVar[] scope, VariableSelector<IntVar> varSelector, IntValueSelector valSelector)
@@ -444,7 +444,7 @@ If no search strategy is specified in the model, Choco |version| will rely on th
 In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
 The default search strategy distinguishes variables per types and defines a specific search strategy per each type, sequentially applied:
 
-#. integer variables and boolean variables : ``IntStrategyFactory.domOverWDeg(ivars, 0)``
+#. integer variables and boolean variables : ``ISF.domOverWDeg(ivars, 0)``
 #. set variables: :code:`SetStrategyFactory.force_minDelta_first(svars)`
 #. real variables :code:`RealStrategyFactory.cyclic_middle(rvars)`
 #. objective variable, if any: lower bound or upper bound, depending on the `ResolutionPolicy`
@@ -493,7 +493,7 @@ When an environment is given in parameter, the last active strategy is stored.
 
 **API**
 
-    IntStrategyFactory.sequencer(AbstractStrategy... strategies)
+    ISF.sequencer(AbstractStrategy... strategies)
 
 Note that a strategy sequencer is automatically generated when setting multiple strategies at the same time:
 

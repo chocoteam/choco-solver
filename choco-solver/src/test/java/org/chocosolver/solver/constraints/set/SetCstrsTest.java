@@ -35,7 +35,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
@@ -65,8 +64,8 @@ public class SetCstrsTest {
 		while (v1[0].getModel().solve()) ;
 		while (v2[0].getModel().solve()) ;
 		assertEquals(
-				v1[0].getModel().getMeasures().getSolutionCount(),
-				v2[0].getModel().getMeasures().getSolutionCount()
+				v1[0].getModel().getResolver().getMeasures().getSolutionCount(),
+				v2[0].getModel().getResolver().getMeasures().getSolutionCount()
 		);
 	}
 
@@ -103,7 +102,7 @@ public class SetCstrsTest {
 		showStatistics(s);
 		showSolutions(s);
 		try {
-			s.propagate();
+			s.getResolver().propagate();
 		} catch (ContradictionException e) {
 			e.printStackTrace();
 		}

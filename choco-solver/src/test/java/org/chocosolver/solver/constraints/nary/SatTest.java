@@ -31,17 +31,13 @@ package org.chocosolver.solver.constraints.nary;
 
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ESat;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.constraints.SatFactory.*;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
 import static org.testng.Assert.assertEquals;
@@ -62,7 +58,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         addBoolEq(b1, b2);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -73,7 +69,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         addBoolNot(b1, b2);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -84,7 +80,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         addBoolLe(b1, b2);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 3);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3);
     }
 
 
@@ -97,7 +93,7 @@ public class SatTest {
         r = model.boolVar("r");
         addBoolIsEqVar(b1, b2, r);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -109,7 +105,7 @@ public class SatTest {
         r = model.boolVar("r");
         addBoolAndEqVar(b1, b2, r);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -121,7 +117,7 @@ public class SatTest {
         r = model.boolVar("r");
         addBoolOrEqVar(b1, b2, r);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -132,7 +128,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         addBoolLt(b1, b2);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 1);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -145,7 +141,7 @@ public class SatTest {
         addBoolIsLeVar(b1, b2, r);
 //        SMF.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -158,7 +154,7 @@ public class SatTest {
         addBoolIsLtVar(b1, b2, r);
 //        SMF.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
 
@@ -170,7 +166,7 @@ public class SatTest {
         addTrue(b1);
         //        SMF.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 1);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
         assertEquals(b1.getBooleanValue(), TRUE);
     }
 
@@ -182,7 +178,7 @@ public class SatTest {
         addFalse(b1);
         //        SMF.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 1);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
         assertEquals(b1.getBooleanValue(), FALSE);
     }
 
@@ -196,7 +192,7 @@ public class SatTest {
         addFalse(bs[2]);
         //        SMF.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 0);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -215,11 +211,11 @@ public class SatTest {
         addBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
         addBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
         // SEARCH
-        model.set(lexico_LB(var));
+        model.getResolver().set(model.getResolver().firstLBSearch(var));
 
         model.setObjectives(MAXIMIZE, var);
         model.solve();
-        assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(var).intValue(), 2);
+        assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(var).intValue(), 2);
 
     }
 }

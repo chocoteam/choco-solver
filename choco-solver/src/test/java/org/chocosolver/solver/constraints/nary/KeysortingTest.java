@@ -30,11 +30,11 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.testng.Assert.assertEquals;
@@ -241,7 +241,11 @@ public class KeysortingTest {
         Y[4][0] = model.intVar("Y5", 14, 18, true);
 
         model.keySort(X, null, Y, 1).post();
-        assertEquals(model.findAllSolutions(), 182);
+        long nbSolutions = 0;
+        while (model.solve()) {
+            nbSolutions++;
+        }
+        assertEquals(nbSolutions, 182);
 
     }
 
@@ -261,7 +265,7 @@ public class KeysortingTest {
 
         model.keySort(X, null, Y, 1).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
             assertEquals(X[0][1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -284,7 +288,7 @@ public class KeysortingTest {
 
         model.keySort(X, null, Y, 1).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
             assertEquals(X[0][1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -307,7 +311,7 @@ public class KeysortingTest {
 
         model.keySort(X, null, Y, 1).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
             assertEquals(X[0][0].getValue(), 7);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -340,10 +344,11 @@ public class KeysortingTest {
 
 
         model.keySort(X, null, Y, 2).post();
-        model.set(lexico_LB(flatten(X)), lexico_LB(flatten(Y)));
+        Resolver r = model.getResolver();
+        r.set(r.firstLBSearch(flatten(X)), r.firstLBSearch(flatten(Y)));
         showSolutions(model);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 16);
+        assertEquals(r.getMeasures().getSolutionCount(), 16);
     }
 
 
@@ -365,9 +370,10 @@ public class KeysortingTest {
 
 
         model.keySort(X, null, Y, 1).post();
-        model.set(lexico_LB(flatten(X)), lexico_LB(flatten(Y)));
+        Resolver r = model.getResolver();
+        r.set(r.firstLBSearch(flatten(X)), r.firstLBSearch(flatten(Y)));
         showSolutions(model);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 16);
+        assertEquals(r.getMeasures().getSolutionCount(), 16);
     }
 }

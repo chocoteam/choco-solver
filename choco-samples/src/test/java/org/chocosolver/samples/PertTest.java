@@ -29,18 +29,14 @@
  */
 package org.chocosolver.samples;
 
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.minDom_LB;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -85,7 +81,7 @@ public class PertTest {
         precedence(garden, 1, objective).post();
         precedence(painting, 2, objective).post();
 
-        model.set(minDom_LB(new IntVar[]{masonry, carpentry, plumbing, ceiling,
+        model.getResolver().set(model.getResolver().minDomLBSearch(new IntVar[]{masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden, objective}));
         return model;
 
@@ -111,15 +107,15 @@ public class PertTest {
         values()[0].make(sol);
         sol.setObjectives(MINIMIZE, objective);
         sol.solve();
-        long nbsol = sol.getMeasures().getSolutionCount();
-        long node = sol.getMeasures().getNodeCount();
+        long nbsol = sol.getResolver().getMeasures().getSolutionCount();
+        long node = sol.getResolver().getMeasures().getNodeCount();
         for (int t = 1; t < values().length; t++) {
             sol = modeler();
             values()[t].make(sol);
             sol.setObjectives(MINIMIZE, objective);
             sol.solve();
-            assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
-            assertEquals(sol.getMeasures().getNodeCount(), node);
+            assertEquals(sol.getResolver().getMeasures().getSolutionCount(), nbsol);
+            assertEquals(sol.getResolver().getMeasures().getNodeCount(), node);
         }
     }
 }

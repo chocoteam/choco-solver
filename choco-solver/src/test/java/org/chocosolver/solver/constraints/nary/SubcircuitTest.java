@@ -53,7 +53,7 @@ public class SubcircuitTest {
         IntVar[] x = model.intVarArray("x", 10, 0, 20, true);
         model.subCircuit(x, 0, model.intVar("length", 0, x.length - 1, true)).post();
         model.solve();
-        assertEquals(1, model.getMeasures().getSolutionCount());
+        assertEquals(1, model.getResolver().getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -64,7 +64,7 @@ public class SubcircuitTest {
         IntVar[] vars = append(x, y);
         model.subCircuit(vars, 0, model.intVar("length", 0, vars.length - 1, true)).post();
         model.solve();
-        assertTrue(model.getMeasures().getSolutionCount() > 0);
+        assertTrue(model.getResolver().getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -82,7 +82,7 @@ public class SubcircuitTest {
         }
         model.subCircuit(vars, 0, model.intVar("length", 0, vars.length - 1, true)).post();
         model.solve();
-        assertTrue(model.getMeasures().getSolutionCount() == 0);
+        assertTrue(model.getResolver().getMeasures().getSolutionCount() == 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -99,7 +99,7 @@ public class SubcircuitTest {
         for (int i = min; i <= max; i++) {
             nbSol += parmi(i, n) * factorial(i - 1);
         }
-        assertEquals(model.getMeasures().getSolutionCount(), nbSol);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), nbSol);
     }
 
     private static int factorial(int n) {

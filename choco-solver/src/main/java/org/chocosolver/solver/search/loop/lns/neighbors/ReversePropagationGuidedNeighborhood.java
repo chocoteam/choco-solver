@@ -61,7 +61,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
 
                 mModel.getEnvironment().worldPush();
                 vars[id].instantiateTo(bestSolution[id], Cause.Null);
-                mModel.propagate();
+                mModel.getResolver().propagate();
                 fragment.clear(id);
 
                 for (int i = 0; i < n; i++) {
@@ -102,7 +102,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                 impose(i);
             }
         }
-        mModel.propagate();
+        mModel.getResolver().propagate();
 
         logSum = 0;
         for (int i = 0; i < n; i++) {

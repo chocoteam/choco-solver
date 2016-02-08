@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Random;
@@ -84,7 +83,7 @@ public class Table extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		model.set(ISF.minDom_LB(vars));
+		model.getResolver().set(model.getResolver().minDomLBSearch(vars));
 	}
 
 	@Override

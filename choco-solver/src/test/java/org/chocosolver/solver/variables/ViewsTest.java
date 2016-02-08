@@ -31,16 +31,15 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
-import org.chocosolver.solver.constraints.ternary.Max;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.constraints.Operator.EQ;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
+import static org.chocosolver.solver.constraints.ternary.Max.var;
 import static org.testng.Assert.*;
 
 /**
@@ -63,19 +62,19 @@ public class ViewsTest {
 //            System.out.printf("%s\n", solver.toString());
             model.solve();
         }
-        Assert.assertEquals(model.getMeasures().getSolutionCount(),
-                ref.getMeasures().getSolutionCount(), "solutions (" + seed + ")");
-//        System.out.printf("%d : %d vs. %d  -- ", seed, ref.getMeasures().getNodeCount(),
+        Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(),
+                ref.getResolver().getMeasures().getSolutionCount(), "solutions (" + seed + ")");
+//        System.out.printf("%d : %d vs. %d  -- ", seed, ref.getResolver().getMeasures().getNodeCount(),
 //                solver.getMeasures().getNodeCount());
         if (strict) {
-            Assert.assertEquals(model.getMeasures().getNodeCount(), ref.getMeasures().getNodeCount(), "nodes (" + seed + ")");
+            Assert.assertEquals(model.getResolver().getMeasures().getNodeCount(), ref.getResolver().getMeasures().getNodeCount(), "nodes (" + seed + ")");
         } else {
-            Assert.assertTrue(ref.getMeasures().getNodeCount() >=
-                    model.getMeasures().getNodeCount(), seed + "");
+            Assert.assertTrue(ref.getResolver().getMeasures().getNodeCount() >=
+                    model.getResolver().getMeasures().getNodeCount(), seed + "");
         }
-//        System.out.printf("%d : %d vs. %d (%f)\n", seed, ref.getMeasures().getTimeCount(),
+//        System.out.printf("%d : %d vs. %d (%f)\n", seed, ref.getResolver().getMeasures().getTimeCount(),
 //                solver.getMeasures().getTimeCount(),
-//                ref.getMeasures().getTimeCount() / (float) solver.getMeasures().getTimeCount());
+//                ref.getResolver().getMeasures().getTimeCount() / (float) solver.getMeasures().getTimeCount());
     }
 
 
@@ -91,7 +90,7 @@ public class ViewsTest {
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", 0, 4, false);
                 new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, 2, EQ, 0)).post();
-                ref.set(random_value(new IntVar[]{x, y, z}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
             {
@@ -99,7 +98,7 @@ public class ViewsTest {
                 IntVar y = model.intVar("y", 0, 2, false);
                 IntVar z = model.intVar("Z", 0, 200, false);
                 model.sum(new IntVar[]{x, y}, "=", z).post();
-                model.set(random_value(new IntVar[]{x, y, z}, seed));
+                model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, model, seed, false, true);
@@ -117,7 +116,7 @@ public class ViewsTest {
                 IntVar y = ref.intVar("y", 0, 2, true);
                 IntVar z = ref.intVar("z", 0, 4, true);
                 new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, 2, EQ, 0)).post();
-                ref.set(random_bound(new IntVar[]{x, y, z}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
             {
@@ -125,7 +124,7 @@ public class ViewsTest {
                 IntVar y = model.intVar("y", 0, 2, true);
                 IntVar z = model.intVar("Z", 0, 200, false);
                 model.sum(new IntVar[]{x, y}, "=", z).post();
-                model.set(random_bound(new IntVar[]{x, y, z}, seed));
+                model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, model, seed, true, true);
@@ -143,14 +142,14 @@ public class ViewsTest {
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", 0, 2, true);
                 ref.max(z, x, y).post();
-                ref.set(random_bound(new IntVar[]{x, y, z}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = model.intVar("x", 0, 2, false);
                 IntVar y = model.intVar("y", 0, 2, false);
-                IntVar z = Max.var(x, y);
-                model.set(IntStrategyFactory.random_bound(new IntVar[]{x, y, z}, seed));
+                IntVar z = var(x, y);
+                model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, model, seed, false, true);
@@ -168,12 +167,12 @@ public class ViewsTest {
                 IntVar z = ref.intVar("z", 0, 2, false);
 
                 ref.absolute(z, x).post();
-                ref.set(random_value(new IntVar[]{x, z}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
                 IntVar z = model.intAbsView(x);
-                model.set(IntStrategyFactory.random_bound(new IntVar[]{x, z}, seed));
+                model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{x, z}, seed));
 
             }
             check(ref, model, seed, true, true);
@@ -191,12 +190,13 @@ public class ViewsTest {
                 IntVar z = ref.intVar("z", -1, 3, false);
 
                 ref.arithm(z, "=", x, "+", 1).post();
-                ref.set(random_value(new IntVar[]{x, z}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
                 IntVar z = model.intOffsetView(x, 1);
-                model.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
+                Resolver r = model.getResolver();
+                r.set(r.randomSearch(new IntVar[]{x, z}, seed));
 
             }
             check(ref, model, seed, true, true);
@@ -214,12 +214,13 @@ public class ViewsTest {
                 IntVar z = ref.intVar("z", -4, 4, false);
 
                 ref.times(x, ref.intVar(2), z).post();
-                ref.set(random_value(new IntVar[]{x, z}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
                 IntVar z = model.intScaleView(x, 2);
-                model.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
+                Resolver r = model.getResolver();
+                r.set(r.randomSearch(new IntVar[]{x, z}, seed));
 
             }
             check(ref, model, seed, false, true);
@@ -237,13 +238,13 @@ public class ViewsTest {
                 IntVar z = ref.intVar("z", -2, 0, false);
 
                 ref.arithm(z, "+", x, "=", 0).post();
-                ref.set(random_value(new IntVar[]{x, z}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = model.intVar("x", 0, 2, false);
                 IntVar z = model.intMinusView(x);
-                model.set(IntStrategyFactory.random_value(new IntVar[]{x, z}, seed));
-
+                Resolver r = model.getResolver();
+                r.set(r.randomSearch(new IntVar[]{x, z}, seed));
             }
             check(ref, model, seed, true, true);
         }
@@ -259,7 +260,7 @@ public class ViewsTest {
             {
                 IntVar[] x = ref.intVarArray("x", n, 0, 2, false);
                 ref.sum(x, "=", n).post();
-                ref.set(minDom_LB(x));
+                ref.getResolver().set(ref.getResolver().minDomLBSearch(x));
             }
             {
                 IntVar[] x = model.intVarArray("x", n, 0, 2, false);
@@ -270,7 +271,7 @@ public class ViewsTest {
                 }
                 model.sum(y, "=", n).post();
 
-                model.set(minDom_LB(x));
+                model.getResolver().set(model.getResolver().minDomLBSearch(x));
 
             }
             check(ref, model, seed, true, true);
@@ -313,7 +314,7 @@ public class ViewsTest {
                 IntVar z = ref.intVar("z", -2, 2, false);
                 new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
 //				System.out.println(cstr);
-                ref.set(random_value(new IntVar[]{x, y, z}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
             {
@@ -323,7 +324,7 @@ public class ViewsTest {
                 Constraint cstr = model.sum(new IntVar[]{z, y}, "=", x);
                 cstr.post();
 //				System.out.println(cstr);
-                model.set(random_value(new IntVar[]{x, y, z}, seed));
+                model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, model, seed, false, true);
@@ -343,7 +344,7 @@ public class ViewsTest {
                 IntVar az = ref.intVar("az", 0, 2, false);
                 new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
                 ref.absolute(az, z).post();
-                ref.set(random_bound(new IntVar[]{x, y, az}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, y, az}, seed));
             }
             {
                 IntVar x = model.intVar("x", 0, 2, false);
@@ -351,7 +352,7 @@ public class ViewsTest {
                 IntVar z = model.intVar("Z", -2, 2, false);
                 IntVar az = model.intAbsView(z);
                 model.sum(new IntVar[]{z, y}, "=", x).post();
-                model.set(random_bound(new IntVar[]{x, y, az}, seed));
+                model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{x, y, az}, seed));
             }
             check(ref, model, seed, true, true);
         }
@@ -371,7 +372,7 @@ public class ViewsTest {
                 new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
                 ref.absolute(az, z).post();
                 ref.allDifferent(new IntVar[]{x, y, az}, "BC").post();
-                ref.set(random_bound(new IntVar[]{x, y, az}, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(new IntVar[]{x, y, az}, seed));
             }
             {
                 IntVar x = model.intVar("x", 0, 2, false);
@@ -380,7 +381,7 @@ public class ViewsTest {
                 new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
                 IntVar az = model.intAbsView(z);
                 model.allDifferent(new IntVar[]{x, y, az}, "BC").post();
-                model.set(random_bound(new IntVar[]{x, y, az}, seed));
+                model.getResolver().set(model.getResolver().randomSearch(new IntVar[]{x, y, az}, seed));
             }
             check(ref, model, seed, true, true);
         }
@@ -405,7 +406,7 @@ public class ViewsTest {
                 ref.allDifferent(t, "BC").post();
                 ref.arithm(x[1], ">", x[0]).post();
                 ref.arithm(t[0], ">", t[k - 2]).post();
-                ref.set(random_value(x, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(x, seed));
             }
             {
                 IntVar[] x = model.intVarArray("x", k, 0, k - 1, false);
@@ -419,7 +420,7 @@ public class ViewsTest {
                 model.allDifferent(t, "BC").post();
                 model.arithm(x[1], ">", x[0]).post();
                 model.arithm(t[0], ">", t[k - 2]).post();
-                model.set(random_value(x, seed));
+                model.getResolver().set(model.getResolver().randomSearch(x, seed));
             }
             check(ref, model, k, true, true);
         }
@@ -461,7 +462,7 @@ public class ViewsTest {
         s.arithm(v1, "=", v2).post();
         s.arithm(v2, "!=", 1).post();
 
-        s.propagate();
+        s.getResolver().propagate();
 
         assertFalse(v1.contains(1));
     }
@@ -484,7 +485,7 @@ public class ViewsTest {
                 "=",
                 model.intMinusView(model.boolVar("bool"))).post();
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -495,9 +496,10 @@ public class ViewsTest {
         SetVar set = s.setVar("set", new int[]{}, new int[]{0, 1});
         s.setBoolsChanneling(new BoolVar[]{view, bool}, set, 0).post();
         s.member(s.ONE(), set).post();
-        s.set(minDom_UB(bool));
+        Resolver r = s.getResolver();
+        r.set(r.minDomUBSearch(bool));
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), 1);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -508,7 +510,7 @@ public class ViewsTest {
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
-        s.propagate();
+        s.getResolver().propagate();
         assertEquals(sum.isInstantiated(), true);
     }
 
@@ -520,7 +522,7 @@ public class ViewsTest {
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
-        s.propagate();
+        s.getResolver().propagate();
         assertEquals(sum.isInstantiated(), true);
     }
 
@@ -532,7 +534,7 @@ public class ViewsTest {
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
-        s.propagate();
+        s.getResolver().propagate();
         assertEquals(sum.isInstantiated(), true);
     }
 
@@ -544,7 +546,7 @@ public class ViewsTest {
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
-        s.propagate();
+        s.getResolver().propagate();
         assertEquals(sum.isInstantiated(), true);
     }
 
@@ -558,7 +560,7 @@ public class ViewsTest {
         int[] coef = new int[]{5, 3, 2};
         model.scalar(av, coef, ">=", 7).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
         } catch (Exception ignored) {
         }
         assertTrue(x3.isInstantiated());

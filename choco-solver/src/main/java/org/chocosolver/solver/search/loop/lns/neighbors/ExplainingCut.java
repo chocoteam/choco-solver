@@ -102,10 +102,10 @@ public class ExplainingCut implements INeighbor {
     @Override
     public void recordSolution() {
         if (mExplanationEngine == null) {
-            if (mModel.getExplainer() == null) {
-                mModel.set(new ExplanationEngine(mModel, false, false));
+            if (mModel.getResolver().getExplainer() == null) {
+                mModel.getResolver().set(new ExplanationEngine(mModel, false, false));
             }
-            this.mExplanationEngine = mModel.getExplainer();
+            this.mExplanationEngine = mModel.getResolver().getExplainer();
         }
         clonePath();
         forceCft = true;
@@ -228,7 +228,7 @@ public class ExplainingCut implements INeighbor {
             Decision previous = mModel.getResolver().getLastDecision();
             assert previous == RootDecision.ROOT;
             // 2. apply the decisions
-            mExplanationEngine.getSolver().getObjectiveManager().postDynamicCut();
+            mExplanationEngine.getSolver().getResolver().getObjectiveManager().postDynamicCut();
             for (i = path.size() - 1; i >= 0; i--) {
                 if ((d = decisionPool.getE()) == null) {
                     d = new IntDecision(decisionPool);
@@ -237,7 +237,7 @@ public class ExplainingCut implements INeighbor {
                 d.setPrevious(previous);
                 d.buildNext();
                 d.apply();
-                mModel.propagate();
+                mModel.getResolver().propagate();
                 previous = d;
             }
             //mModel.propagate();
@@ -250,7 +250,7 @@ public class ExplainingCut implements INeighbor {
                 if (explanation.getDecisions().isEmpty()) {
                     isTerminated = true;
                     mModel.getEnvironment().worldPop();
-                    mModel.getEngine().flush();
+                    mModel.getResolver().getEngine().flush();
                     return;
                 }
 
@@ -270,7 +270,7 @@ public class ExplainingCut implements INeighbor {
             }
         }
         mModel.getEnvironment().worldPop();
-        mModel.getEngine().flush();
+        mModel.getResolver().getEngine().flush();
 
         nbFixedVariables = related.cardinality() - 1;
         nbCall = 0;

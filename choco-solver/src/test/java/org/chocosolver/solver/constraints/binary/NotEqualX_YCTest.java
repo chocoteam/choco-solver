@@ -35,7 +35,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -58,9 +57,9 @@ public class NotEqualX_YCTest {
         }
         s.arithm(vars[0], "!=", vars[1]).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         while (s.solve()) ;
-        long sol = s.getMeasures().getSolutionCount();
+        long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 6, "nb sol incorrect");
 
     }
@@ -76,10 +75,10 @@ public class NotEqualX_YCTest {
             vars[i] = s.intVar("v_" + i, 0, n, true);
         }
         s.arithm(vars[0], "!=", vars[1]).post();
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
 //        ChocoLogging.toSolution();
         while (s.solve()) ;
-        long sol = s.getMeasures().getSolutionCount();
+        long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 6, "nb sol incorrect");
     }
 
@@ -94,16 +93,16 @@ public class NotEqualX_YCTest {
             vars[i] = s.intVar("v_" + i, 0, n, true);
         }
         s.arithm(vars[0], "!=", vars[1]).post();
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
 
         try {
-            s.propagate();
+            s.getResolver().propagate();
             vars[0].instantiateTo(1, Null);
-            s.propagate();
+            s.getResolver().propagate();
             assertEquals(vars[1].getLB(), 0);
             assertEquals(vars[1].getUB(), 2);
             vars[1].removeValue(2, Null);
-            s.propagate();
+            s.getResolver().propagate();
             assertEquals(vars[1].getLB(), 0);
             assertEquals(vars[1].getUB(), 0);
         } catch (ContradictionException e) {

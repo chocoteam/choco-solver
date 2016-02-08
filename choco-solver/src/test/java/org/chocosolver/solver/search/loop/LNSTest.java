@@ -36,9 +36,7 @@ import org.testng.annotations.Test;
 
 import static java.lang.Math.ceil;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.loop.SearchLoopFactory.lns;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.solver.trace.Chatterbox.printSolutions;
 
 /**
@@ -69,51 +67,47 @@ public class LNSTest {
         model.scalar(objects, volumes, "=", scalar).post();
         model.scalar(objects, energies, "=", power).post();
         model.knapsack(objects, scalar, power, volumes, energies).post();
-        model.set(lexico_LB(objects));
+        model.getResolver().set(model.getResolver().firstLBSearch(objects));
 //        SearchMonitorFactory.log(solver, true, false);
         switch (lns) {
             case 0:
                 break;
             case 1:
-                lns(model, new RandomNeighborhood(model, objects, 200, 123456L));
+                model.getResolver().set(model.getResolver().lns(new RandomNeighborhood(model, objects, 200, 123456L)));
                 limitTime(model, 10000);
                 break;
             case 2:
-                lns(model, new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10));
+                model.getResolver().set(model.getResolver().lns(new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10)));
                 limitTime(model, 10000);
                 break;
             case 3:
-                lns(model,
-                        new SequenceNeighborhood(
-                                new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
-                                new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10)
-                        ));
+                model.getResolver().set(model.getResolver().lns(new SequenceNeighborhood(
+                        new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
+                        new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10)
+                )));
                 limitTime(model, 10000);
                 break;
             case 4:
-                lns(model,
-                        new SequenceNeighborhood(
-                                new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
-                                new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
-                                new RandomNeighborhood(model, objects, 200, 123456L)
-                        ));
+                model.getResolver().set(model.getResolver().lns(new SequenceNeighborhood(
+                        new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
+                        new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
+                        new RandomNeighborhood(model, objects, 200, 123456L)
+                )));
                 limitTime(model, 10000);
                 break;
             case 5:
-                lns(model,
-                        new ExplainingCut(model, 200, 123456L));
+                model.getResolver().set(model.getResolver().lns(new ExplainingCut(model, 200, 123456L)));
                 limitTime(model, 10000);
                 break;
             case 6:
-                lns(model,
-                        new ExplainingObjective(model, 200, 123456L));
+                model.getResolver().set(model.getResolver().lns(new ExplainingObjective(model, 200, 123456L)));
                 limitTime(model, 10000);
                 break;
             case 7:
-                lns(model, new SequenceNeighborhood(
+                model.getResolver().set(model.getResolver().lns(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
-                        new RandomNeighborhood(model, objects, 200, 123456L)));
+                        new RandomNeighborhood(model, objects, 200, 123456L))));
                 limitTime(model, 10000);
                 break;
         }

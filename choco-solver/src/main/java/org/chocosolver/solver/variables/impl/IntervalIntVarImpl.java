@@ -134,7 +134,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int sup = getUB();
         if (value == inf && value == sup) {
             if (_plugexpl) {
-                model.getEventObserver().removeValue(this, value, cause);
+                model.getResolver().getEventObserver().removeValue(this, value, cause);
             }
             this.contradiction(cause, MSG_REMOVE);
         } else if (inf == value || value == sup) {
@@ -161,12 +161,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
                 if (_plugexpl) {
-                    model.getEventObserver().removeValue(this, value, cause);
+                    model.getResolver().getEventObserver().removeValue(this, value, cause);
                 }
                 this.contradiction(cause, MSG_EMPTY);
             }
             if (_plugexpl) {
-                model.getEventObserver().removeValue(this, value, cause);
+                model.getResolver().getEventObserver().removeValue(this, value, cause);
             }
             return true;
         }
@@ -247,7 +247,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    model.getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
+                    model.getResolver().getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, MSG_INST);
             }
@@ -271,13 +271,13 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             this.SIZE.set(1);
 
             if (_plugexpl) {
-                model.getEventObserver().instantiateTo(this, value, cause, lb, ub);
+                model.getResolver().getEventObserver().instantiateTo(this, value, cause, lb, ub);
             }
             this.notifyPropagators(e, cause);
             return true;
         } else {
             if (_plugexpl) {
-                model.getEventObserver().instantiateTo(this, value, cause, LB.get(), UB.get());
+                model.getResolver().getEventObserver().instantiateTo(this, value, cause, LB.get(), UB.get());
             }
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
@@ -309,7 +309,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int oub = this.getUB();
             if (oub < value) {
                 if (_plugexpl) {
-                    model.getEventObserver().updateLowerBound(this, oub + 1, old, cause);
+                    model.getResolver().getEventObserver().updateLowerBound(this, oub + 1, old, cause);
                 }
                 this.contradiction(cause, MSG_LOW);
             } else {
@@ -326,7 +326,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
 
                 if (_plugexpl) {
-                    model.getEventObserver().updateLowerBound(this, value, old, cause);
+                    model.getResolver().getEventObserver().updateLowerBound(this, value, old, cause);
                 }
                 return true;
 
@@ -360,7 +360,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             int olb = this.getLB();
             if (olb > value) {
                 if (_plugexpl) {
-                    model.getEventObserver().updateUpperBound(this, olb - 1, old, cause);
+                    model.getResolver().getEventObserver().updateUpperBound(this, olb - 1, old, cause);
                 }
                 this.contradiction(cause, MSG_UPP);
             } else {
@@ -377,7 +377,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    model.getEventObserver().updateUpperBound(this, value, old, cause);
+                    model.getResolver().getEventObserver().updateUpperBound(this, value, old, cause);
                 }
                 return true;
             }
@@ -418,20 +418,20 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
 
                 if (_plugexpl) {
-                    if (olb < lb) model.getEventObserver().updateLowerBound(this, lb, olb, cause);
-                    if (oub > ub) model.getEventObserver().updateUpperBound(this, ub, oub, cause);
+                    if (olb < lb) model.getResolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
+                    if (oub > ub) model.getResolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 }
                 update = true;
             } else { // fails
                 if (oub < lb) {
                     if (_plugexpl) {
-                        model.getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
+                        model.getResolver().getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
                     }
                     this.contradiction(cause, MSG_LOW);
                 } else {
                     //if (olb > ub) {
                     if (_plugexpl) {
-                        model.getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
+                        model.getResolver().getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
                     }
                     this.contradiction(cause, MSG_UPP);
                 }
@@ -591,7 +591,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
-        model.getEngine().fails(cause, this, message);
+        model.getResolver().getEngine().fails(cause, this, message);
     }
 
     @Override

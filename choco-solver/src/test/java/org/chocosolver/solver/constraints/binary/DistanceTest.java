@@ -31,6 +31,7 @@ package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -39,8 +40,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -64,38 +63,24 @@ public class DistanceTest {
                 model.sum(new IntVar[]{Y, diff}, "=", X).post();
                 IntVar Z = model.intAbsView(diff);
                 model.arithm(Z, "=", 5).post();
-                model.set(random_value(new IntVar[]{X, Y}, i));
-//				solver.getResolver().plugSearchMonitor(new IMonitorSolution() {
-//					@Override
-//					public void onSolution() {
-//						System.out.println("REF");
-//						for(Variable v:solver.getVars()){
-//							System.out.println(v+" inst? "+v.instantiated());
-//						}
-//					}
-//				});
+
+
+                Resolver r = model.getResolver();
+                r.set(r.randomSearch(new IntVar[]{X, Y}, i));
                 while (model.solve()) ;
-                nbSol = model.getMeasures().getSolutionCount();
-                nbNod = model.getMeasures().getNodeCount();
+                nbSol = r.getMeasures().getSolutionCount();
+                nbNod = r.getMeasures().getNodeCount();
             }
             {
                 final Model model = new Model();
                 IntVar X = model.intVar("X", 1, 10, false);
                 IntVar Y = model.intVar("Y", 1, 10, false);
                 model.distance(X, Y, "=", 5).post();
-                model.set(random_value(new IntVar[]{X, Y}, i));
-//				solver.getResolver().plugSearchMonitor(new IMonitorSolution() {
-//					@Override
-//					public void onSolution() {
-//						System.out.println("NO REF");
-//						for(Variable v:solver.getVars()){
-//							System.out.println(v);
-//						}
-//					}
-//				});
+                Resolver r = model.getResolver();
+                r.set(r.randomSearch(new IntVar[]{X, Y}, i));
                 while (model.solve()) ;
-                assertEquals(model.getMeasures().getSolutionCount(), nbSol);
-                assertTrue(model.getMeasures().getNodeCount() <= nbNod);
+                assertEquals(r.getMeasures().getSolutionCount(), nbSol);
+                assertTrue(r.getMeasures().getNodeCount() <= nbNod);
             }
         }
     }
@@ -123,8 +108,8 @@ public class DistanceTest {
             }
 
             try {
-                s1.propagate();
-                s2.propagate();
+                s1.getResolver().propagate();
+                s2.getResolver().propagate();
                 Assert.assertEquals(vs1[0].getDomainSize(), vs2[0].getDomainSize());
                 Assert.assertEquals(vs1[1].getDomainSize(), vs2[1].getDomainSize());
 
@@ -137,7 +122,7 @@ public class DistanceTest {
                     vs1[0].removeValue(val, Cause.Null);
                     vs2[0].removeValue(val, Cause.Null);
 
-                    s1.propagate();
+                    s1.getResolver().propagate();
                     p2.propagate(0);
 
                     Assert.assertEquals(vs1[0].getDomainSize(), vs2[0].getDomainSize());
@@ -160,10 +145,9 @@ public class DistanceTest {
         IntVar Y = model.intVar("Y", -5, 5, true);
         IntVar Z = model.intVar("Z", 0, 10, true);
         model.distance(X, Y, "=", Z).post();
-        model.set(lexico_LB(new IntVar[]{Z, X, Y, Z}));
-//        SearchMonitorFactory.log(solver, true, true);
+        Resolver r = model.getResolver();
+        r.set(r.firstLBSearch(new IntVar[]{Z, X, Y, Z}));
         while (model.solve()) ;
-//        System.out.printf("end\n");
     }
 
 }

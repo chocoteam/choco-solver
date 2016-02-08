@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
@@ -83,7 +82,7 @@ public class Contrived extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.domOverWDeg(v, 0));
+        model.getResolver().set(model.getResolver().domOverWDegSearch(v));
     }
 
     @Override
@@ -95,7 +94,7 @@ public class Contrived extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("Contrived problem (%d,%d)", l, d));
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             st.append("\tV :");
             for (int i = 0; i < v.length; i++) {
                 st.append(v[i].getValue()).append(" ");

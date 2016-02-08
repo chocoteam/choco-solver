@@ -33,16 +33,12 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.memory.Environments.TRAIL;
-import static org.chocosolver.solver.search.loop.SearchLoopFactory.restartOnSolutions;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.*;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -70,7 +66,7 @@ public class RestartTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        model.set(ISF.lexico_LB(vars));
+        model.getResolver().set(model.getResolver().firstLBSearch(vars));
         return model;
     }
 
@@ -80,9 +76,9 @@ public class RestartTest {
         geometrical(model, 2, 1.1, new NodeCounter(model, 2), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
-        assertEquals(model.getMeasures().getRestartCount(), 2);
-        assertEquals(model.getMeasures().getNodeCount(), 12);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getRestartCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getNodeCount(), 12);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -91,9 +87,9 @@ public class RestartTest {
         luby(model, 2, 2, new NodeCounter(model, 2), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
-        assertEquals(model.getMeasures().getRestartCount(), 2);
-        assertEquals(model.getMeasures().getNodeCount(), 11);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getRestartCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getNodeCount(), 11);
     }
 
 
@@ -139,8 +135,8 @@ public class RestartTest {
             for (int i = 0; i < n; i++) {
                 model.arithm(Y[i], "=", X[i], "+", n).post();
             }
-            restartOnSolutions(model);
-            model.set(lexico_LB(X));
+            model.getResolver().set(model.getResolver().restartOnSolutions());
+            model.getResolver().set(model.getResolver().firstLBSearch(X));
 //            SMF.log(solver, false, false);
             limitSolution(model, 100);
             while (model.solve()) ;
@@ -155,7 +151,7 @@ public class RestartTest {
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
-        assertEquals(model.getMeasures().getRestartCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getRestartCount(), 2);
     }
 
 }

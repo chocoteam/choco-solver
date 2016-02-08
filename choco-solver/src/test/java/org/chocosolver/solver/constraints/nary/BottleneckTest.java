@@ -34,7 +34,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.minDom_LB;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -67,7 +66,7 @@ public class BottleneckTest {
             IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 
 
-            model.set(minDom_LB(allvars));
+            model.getResolver().set(model.getResolver().minDomLBSearch(allvars));
             model.setObjectives(MAXIMIZE, sum);
             model.solve();
         }
@@ -95,7 +94,7 @@ public class BottleneckTest {
             IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 
             // Heuristic val
-            model.set(minDom_LB(allvars));
+            model.getResolver().set(model.getResolver().minDomLBSearch(allvars));
 
             model.solve();
         }

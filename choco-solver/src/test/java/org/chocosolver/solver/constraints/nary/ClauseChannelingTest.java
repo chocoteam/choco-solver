@@ -30,15 +30,12 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 
@@ -59,9 +56,10 @@ public class ClauseChannelingTest {
 
                 model.clausesIntChanneling(iv, eqs, lqs).post();
 
-                model.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
+                Resolver r = model.getResolver();
+                r.set(r.randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                 while (model.solve()) ;
-                assertEquals(model.getMeasures().getSolutionCount(), i);
+                assertEquals(model.getResolver().getMeasures().getSolutionCount(), i);
             }
         }
     }
@@ -77,9 +75,10 @@ public class ClauseChannelingTest {
 
                 model.clausesIntChanneling(iv, eqs, lqs).post();
 
-                model.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
+                Resolver r = model.getResolver();
+                r.set(r.randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                 while (model.solve()) ;
-                assertEquals(model.getMeasures().getSolutionCount(), i);
+                assertEquals(model.getResolver().getMeasures().getSolutionCount(), i);
             }
         }
     }
@@ -102,7 +101,8 @@ public class ClauseChannelingTest {
                         sr.arithm(iv, "<=", j).reifyWith(lqs[j - 1]);
                     }
 
-                    sr.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
+                    Resolver r = sr.getResolver();
+                    r.set(r.randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                     while (sr.solve()) ;
                 }
                 {
@@ -112,12 +112,13 @@ public class ClauseChannelingTest {
 
                     sc.clausesIntChanneling(iv, eqs, lqs).post();
 
-                    sc.set(random_value(append(new IntVar[]{iv}, eqs, lqs), seed));
+                    Resolver r = sc.getResolver();
+                    r.set(r.randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                     while (sc.solve()) ;
                 }
-                Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);
-                Assert.assertEquals(sc.getMeasures().getSolutionCount(), i);
-                Assert.assertEquals(sc.getMeasures().getNodeCount(), sr.getMeasures().getNodeCount());
+                Assert.assertEquals(sr.getResolver().getMeasures().getSolutionCount(), i);
+                Assert.assertEquals(sc.getResolver().getMeasures().getSolutionCount(), i);
+                Assert.assertEquals(sc.getResolver().getMeasures().getNodeCount(), sr.getResolver().getMeasures().getNodeCount());
 
             }
         }
@@ -141,7 +142,8 @@ public class ClauseChannelingTest {
                         sr.arithm(iv, "<=", j).reifyWith(lqs[j - 1]);
                     }
 
-                    sr.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
+                    Resolver r = sr.getResolver();
+                    r.set(r.randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                     while (sr.solve()) ;
                 }
                 {
@@ -151,12 +153,13 @@ public class ClauseChannelingTest {
 
                     sc.clausesIntChanneling(iv, eqs, lqs).post();
 
-                    sc.set(random_bound(append(new IntVar[]{iv}, eqs, lqs), seed));
+                    Resolver r = sc.getResolver();
+                    r.set(r.randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                     while (sc.solve()) ;
                 }
-                Assert.assertEquals(sr.getMeasures().getSolutionCount(), i);
-                Assert.assertEquals(sc.getMeasures().getSolutionCount(), i);
-                Assert.assertEquals(sc.getMeasures().getNodeCount(), sr.getMeasures().getNodeCount());
+                Assert.assertEquals(sr.getResolver().getMeasures().getSolutionCount(), i);
+                Assert.assertEquals(sc.getResolver().getMeasures().getSolutionCount(), i);
+                Assert.assertEquals(sc.getResolver().getMeasures().getNodeCount(), sr.getResolver().getMeasures().getNodeCount());
 
             }
         }

@@ -32,21 +32,17 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 import static java.util.Arrays.asList;
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -98,11 +94,11 @@ public class AmongTest {
             int value = 1;
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.set(random_bound(allvars, i));
+            model.getResolver().set(model.getResolver().randomSearch(allvars,i));
             model.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -115,12 +111,12 @@ public class AmongTest {
             int[] values = {1, 2, 0};
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.set(random_bound(allvars, i));
+            model.getResolver().set(model.getResolver().randomSearch(allvars,i));
             model.among(occ, vars, values).post();
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -132,11 +128,11 @@ public class AmongTest {
         IntVar occ = model.intVar("oc", 0, 4, true);
         model.among(occ, vars, values).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
 
             vars[0].removeValue(1, Null);
             vars[0].removeValue(2, Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException e) {
             fail();
         }
@@ -180,16 +176,12 @@ public class AmongTest {
             }
             model.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]).post();
 
-            if (!enumvar) {
-                model.set(random_bound(vars, seed));
-            } else {
-                model.set(random_value(vars, seed));
-            }
+            model.getResolver().set(model.getResolver().randomSearch(vars,seed));
             while (model.solve()) ;
             if (nbsol == -1) {
-                nbsol = model.getMeasures().getSolutionCount();
+                nbsol = model.getResolver().getMeasures().getSolutionCount();
             } else {
-                assertEquals(model.getMeasures().getSolutionCount(), nbsol);
+                assertEquals(model.getResolver().getMeasures().getSolutionCount(), nbsol);
             }
 
         }
@@ -238,16 +230,12 @@ public class AmongTest {
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
 
-            if (!enumvar) {
-                model.set(random_bound(vars, seed));
-            } else {
-                model.set(random_value(vars, seed));
-            }
+            model.getResolver().set(model.getResolver().randomSearch(vars,seed));
             while (model.solve()) ;
             if (nbsol == -1) {
-                nbsol = model.getMeasures().getSolutionCount();
+                nbsol = model.getResolver().getMeasures().getSolutionCount();
             } else {
-                assertEquals(model.getMeasures().getSolutionCount(), nbsol);
+                assertEquals(model.getResolver().getMeasures().getSolutionCount(), nbsol);
             }
 
         }

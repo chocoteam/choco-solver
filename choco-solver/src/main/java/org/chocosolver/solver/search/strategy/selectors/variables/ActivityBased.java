@@ -34,13 +34,12 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.loop.move.Move;
-import org.chocosolver.solver.search.loop.move.MoveRestart;
-import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
+import org.chocosolver.solver.search.loop.move.Move;
+import org.chocosolver.solver.search.loop.move.MoveRestart;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -53,8 +52,9 @@ import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.IntMap;
 
-import java.util.BitSet;
-import java.util.Comparator;
+import java.util.*;
+
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  * Implementation of the search described in:
@@ -175,17 +175,21 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
-        SLF.restartOnSolutions(model);
-        if(restartAfterEachFail){
+        model.getResolver().set(model.getResolver().restartOnSolutions());
+        if (restartAfterEachFail) {
             rfMove = new MoveRestart(model.getResolver().getMove(),
                     new MonotonicRestartStrategy(1),
                     new FailCounter(model.getResolver().getModel(), 1),
-                    Integer.MAX_VALUE);
+                    MAX_VALUE);
             model.getResolver().set(rfMove);
         }
-        model.plugMonitor(this);
+        model.getResolver().plugMonitor(this);
         decisionPool = new PoolManager<>();
 //        init(vars);
+    }
+
+    public ActivityBased(IntVar[] vars){
+        this(vars[0].getModel(),vars,0.999d, 0.2d, 8, 1,0);
     }
 
     @Override

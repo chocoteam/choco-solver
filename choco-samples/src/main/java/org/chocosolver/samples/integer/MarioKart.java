@@ -30,11 +30,9 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -147,7 +145,8 @@ public class MarioKart extends AbstractProblem {
 	@Override
 	public void configureSearch() {
 		/* Listeners */
-		model.plugMonitor(new IMonitorSolution() {
+		Resolver r = model.getResolver();
+		r.plugMonitor(new IMonitorSolution() {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void onSolution() {
@@ -155,9 +154,8 @@ public class MarioKart extends AbstractProblem {
 			}
 		});
 		/* Heuristic choices */
-		AbstractStrategy strat = IntStrategyFactory.minDom_LB(next);
-		model.set(IntStrategyFactory.lastConflict(model,strat));
-//		solver.set(strat);
+		r.set(r.firstLBSearch(next));
+		r.useLastConflict();
 	}
 
 	@Override

@@ -27,11 +27,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search;
+package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.search.strategy.IRealStrategyFactory;
-import org.chocosolver.solver.search.strategy.ISetStrategyFactory;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.variables.Variable;
 
-public interface ISearchStrategyFactory extends IRealStrategyFactory, ISetStrategyFactory{
+public class GreedyBranching extends AbstractStrategy {
 
+    AbstractStrategy mainSearch;
+
+    public GreedyBranching(AbstractStrategy mainSearch){
+        super(mainSearch.getVariables());
+        this.mainSearch = mainSearch;
+    }
+
+    @Override
+    public Decision getDecision() {
+        Decision d = mainSearch.getDecision();
+        if (d != null) {
+            d.once(true);
+        }
+        return d;
+    }
+
+    @Override
+    public Decision computeDecision(Variable variable) {
+        Decision d = mainSearch.computeDecision(variable);
+        if (d != null) {
+            d.once(true);
+        }
+        return d;
+    }
 }

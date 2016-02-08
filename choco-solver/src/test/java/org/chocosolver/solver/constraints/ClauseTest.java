@@ -35,7 +35,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.PropSat;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -45,8 +44,6 @@ import java.util.Random;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.*;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -81,10 +78,10 @@ public class ClauseTest {
 
                 LogOp or = or(bs);
                 addClauses(or, s);
-                s.set(lexico_LB(bs));
+                s.getResolver().set(s.getResolver().firstLBSearch(bs));
 
                 while (s.solve()) ;
-                long sol = s.getMeasures().getSolutionCount();
+                long sol = s.getResolver().getMeasures().getSolutionCount();
                 assertEquals(sol, nSol);
             }
             nSol = nSol * 2 + 1;
@@ -101,9 +98,9 @@ public class ClauseTest {
         LogOp and = and(bs[0], bs[0].not());
 
         addClauses(and, s);
-        s.set(lexico_LB(bs));
+        s.getResolver().set(s.getResolver().firstLBSearch(bs));
         while (s.solve()) ;
-        long sol = s.getMeasures().getSolutionCount();
+        long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 0);
     }
 
@@ -118,10 +115,10 @@ public class ClauseTest {
         addClauses(or, s);
 
         BoolVar[] bs = new BoolVar[]{b};
-        s.set(lexico_LB(bs));
+        s.getResolver().set(s.getResolver().firstLBSearch(bs));
 //        SMF.log(s, true, true);
         while (s.solve()) ;
-        long sol = s.getMeasures().getSolutionCount();
+        long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 2);
     }
 
@@ -134,10 +131,10 @@ public class ClauseTest {
         SatFactory.addClauses(tree, model);
 
         try {
-            model.propagate();
+            model.getResolver().propagate();
             bvars[1].instantiateTo(0, Cause.Null);
             bvars[0].instantiateTo(1, Cause.Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -151,10 +148,10 @@ public class ClauseTest {
         SatFactory.addClauses(tree, model);
 
         try {
-            model.propagate();
+            model.getResolver().propagate();
             bvars[1].instantiateTo(1, Cause.Null);
             bvars[0].instantiateTo(0, Cause.Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -168,9 +165,9 @@ public class ClauseTest {
         SatFactory.addClauses(tree, model);
 
         try {
-            model.propagate();
+            model.getResolver().propagate();
             bvars[0].instantiateTo(0, Cause.Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -185,9 +182,9 @@ public class ClauseTest {
         SatFactory.addClauses(tree, model);
 
         try {
-            model.propagate();
+            model.getResolver().propagate();
             bvars[1].instantiateTo(1, Cause.Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -202,11 +199,11 @@ public class ClauseTest {
         SatFactory.addClauses(tree, model);
 
         try {
-            model.propagate();
+            model.getResolver().propagate();
             bvars[0].instantiateTo(0, Cause.Null);
             bvars[2].instantiateTo(0, Cause.Null);
             bvars[1].instantiateTo(1, Cause.Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -224,18 +221,18 @@ public class ClauseTest {
                         bvars[0]);
                 addClauses(tree, model);
 
-                model.set(random_bound(bvars, seed));
+                model.getResolver().set(model.getResolver().randomSearch(bvars, seed));
                 while (model.solve()) ;
-                n1 = model.getMeasures().getSolutionCount();
+                n1 = model.getResolver().getMeasures().getSolutionCount();
             }
             {
                 Model model = new Model();
                 BoolVar[] bvars = model.boolVarArray("b", 3);
                 model.times(bvars[1], bvars[2], bvars[0]).post();
 
-                model.set(random_bound(bvars, seed));
+                model.getResolver().set(model.getResolver().randomSearch(bvars, seed));
                 while (model.solve()) ;
-                n2 = model.getMeasures().getSolutionCount();
+                n2 = model.getResolver().getMeasures().getSolutionCount();
             }
             Assert.assertEquals(n2, n1, String.format("seed: %d", seed));
         }
@@ -263,7 +260,7 @@ public class ClauseTest {
                         bvars[0]);
                 SatFactory.addClauses(tree, model);
                 try {
-                    model.propagate();
+                    model.getResolver().propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);
                     bvars[n2].instantiateTo(b2 ? 1 : 0, Cause.Null);
                     s1 = true;
@@ -276,7 +273,7 @@ public class ClauseTest {
                 BoolVar[] bvars = model.boolVarArray("b", 3);
                 model.times(bvars[1], bvars[2], bvars[0]).post();
                 try {
-                    model.propagate();
+                    model.getResolver().propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Null);
                     bvars[n2].instantiateTo(b2 ? 1 : 0, Null);
                     s2 = true;
@@ -300,18 +297,18 @@ public class ClauseTest {
         PropSat sat = s.getMinisat().getPropSat();
 
         e.worldPush();
-        s.propagate();
+        s.getResolver().propagate();
         for (int i = 1; i < n; i++) {
             e.worldPush();
             bs[i] = s.boolVar("b" + i);
             sat.addLearnt(sat.Literal(bs[i]));
-            s.propagate();
+            s.getResolver().propagate();
             Assert.assertTrue(bs[i].isInstantiatedTo(1));
         }
         for (int i = n - 1; i > 0; i--) {
             e.worldPop();
             Assert.assertFalse(bs[i].isInstantiated());
-            s.propagate();
+            s.getResolver().propagate();
             Assert.assertTrue(bs[i].isInstantiatedTo(1));
         }
     }

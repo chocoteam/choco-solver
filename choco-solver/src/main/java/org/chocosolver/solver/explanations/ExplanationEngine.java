@@ -72,7 +72,7 @@ public class ExplanationEngine implements FilteringMonitor {
         this.enablePartialExplanation = partialExplanationsOn;
         eventStore = new ArrayEventStore(model.getEnvironment());
         ruleStore = new RuleStore(model, saveCauses, enablePartialExplanation);
-        model.set(this);
+        model.getResolver().set(this);
         this.explanationPool = new PoolManager<>();
     }
 

@@ -65,7 +65,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     the other ones are eagerly stopped.
  *     Moreover, when dealing with an optimization problem, cut on the objective variable's value is propagated
  *     to all models on solution.
- *     It is essential to eagerly declare the objective variable(s) with {@link Model#setObjectives(Variable...)}.
+ *     It is essential to eagerly declare the objective variable(s) with {@link Model#setObjectives(ResolutionPolicy, Variable...)}.
  *
  * </p>
  * <p>
@@ -137,7 +137,7 @@ public class ParallelResolution {
      *  </li>
      *  <li>
      *      when dealing with optimization problems, the objective variables <b>HAVE</b> to be declared eagerly with
-     *      {@link Model#setObjectives(Variable...)}.
+     *      {@link Model#setObjectives(ResolutionPolicy, Variable...)}.
      *  </li>
      *  </ul>
      *
@@ -219,8 +219,8 @@ public class ParallelResolution {
      * When dealing with optimization problem, add {@link IMonitorSolution} to share cuts.
      */
     private void setUpResolution(ResolutionPolicy policy){
-        models.stream().forEach(s -> s.addStopCriterion(()->finishers.get()>0));
-        models.stream().forEach(s -> s.plugMonitor(new IMonitorClose() {
+        models.stream().forEach(s -> s.getResolver().addStopCriterion(()->finishers.get()>0));
+        models.stream().forEach(s -> s.getResolver().plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
                 int count = finishers.addAndGet(1);
@@ -231,16 +231,16 @@ public class ParallelResolution {
         }));
         if(policy != ResolutionPolicy.SATISFACTION){
             // share the best known bound
-            models.stream().forEach(s -> s.plugMonitor(
+            models.stream().forEach(s -> s.getResolver().plugMonitor(
                     (IMonitorSolution) () -> {
-                        synchronized (s.getObjectiveManager()) {
-                            switch (s.getObjectiveManager().getPolicy()) {
+                        synchronized (s.getResolver().getObjectiveManager()) {
+                            switch (s.getResolver().getObjectiveManager().getPolicy()) {
                                 case MAXIMIZE:
-                                    Number lb = s.getObjectiveManager().getBestSolutionValue();
+                                    Number lb = s.getResolver().getObjectiveManager().getBestSolutionValue();
                                     models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestLB(lb));
                                     break;
                                 case MINIMIZE:
-                                    int ub = s.getObjectiveManager().getBestSolutionValue().intValue();
+                                    int ub = s.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
                                     models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestUB(ub));
                                     break;
                                 case SATISFACTION:
@@ -273,7 +273,7 @@ public class ParallelResolution {
         models.parallelStream().forEach(Model::findSolution);
         long nsol = 0;
         for (Model s : models) {
-            nsol += s.getMeasures().getSolutionCount();
+            nsol += s.getResolver().getMeasures().getSolutionCount();
         }
         return nsol > 0;
     }
@@ -336,21 +336,21 @@ public class ParallelResolution {
      * @return the first model which finds a solution (or the best one) or <tt>null</tt> if no such model exists.
      */
     public Model getFinder(){
-        ResolutionPolicy policy = models.get(0).getObjectiveManager().getPolicy();
+        ResolutionPolicy policy = models.get(0).getResolver().getObjectiveManager().getPolicy();
         check(policy);
         if (policy == ResolutionPolicy.SATISFACTION) {
             for (Model s : models) {
-                if (s.getMeasures().getSolutionCount() > 0) {
+                if (s.getResolver().getMeasures().getSolutionCount() > 0) {
                     return s;
                 }
             }
             return null;
         }else{
-            boolean min = models.get(0).getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
+            boolean min = models.get(0).getResolver().getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
             Model best = null;
             int cost = 0;
             for (Model s : models) {
-                if (s.getMeasures().getSolutionCount() > 0) {
+                if (s.getResolver().getMeasures().getSolutionCount() > 0) {
                     int solVal = s.getSolutionRecorder().getLastSolution().getIntVal((IntVar)s.getObjectives()[0]);
                     if (best == null
                             || (cost > solVal && min)
@@ -388,7 +388,7 @@ public class ParallelResolution {
         models.parallelStream().forEach(Model::solve);
         long nsol = 0;
         for (Model s : models) {
-            nsol += s.getMeasures().getSolutionCount();
+            nsol += s.getResolver().getMeasures().getSolutionCount();
         }
         return nsol > 0;
     }

@@ -31,10 +31,10 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
+
+import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
  * <a href="">wikipedia</a>:<br/>
@@ -95,7 +95,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.minDom_LB(ArrayUtils.append(rows)));
+        model.getResolver().set(model.getResolver().minDomLBSearch(append(rows)));
 
     }
 

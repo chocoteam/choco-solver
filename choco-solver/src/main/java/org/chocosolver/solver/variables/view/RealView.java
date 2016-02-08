@@ -168,7 +168,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
-        model.getEngine().fails(cause, this, message);
+        model.getResolver().getEngine().fails(cause, this, message);
     }
 
     @Override

@@ -30,12 +30,12 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -63,7 +63,7 @@ public class ModTest extends AbstractTernaryTest {
 		IntVar res = model.intVar("r", 1, 2, true);
 		model.mod(res, model.intVar(2), model.intVar(1)).post();
 		try {
-			model.propagate();
+			model.getResolver().propagate();
 			assertTrue(res.isInstantiatedTo(1));
 		} catch (ContradictionException e) {
 			fail();
@@ -77,7 +77,8 @@ public class ModTest extends AbstractTernaryTest {
 		IntVar divisor = s.intVar(1);
 		IntVar remainder = s.intVar("remainder", 1, 2, false);
 		s.mod(dividend, divisor, remainder).getOpposite().post();
-		s.set(lexico_LB(dividend, divisor, remainder));
+		Resolver r = s.getResolver();
+		r.set(r.firstLBSearch(dividend, divisor, remainder));
 		s.solve();
 	}
 }

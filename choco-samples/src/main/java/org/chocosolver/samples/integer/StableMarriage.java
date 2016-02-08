@@ -44,16 +44,15 @@ package org.chocosolver.samples.integer; /**
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.implies;
+import static org.chocosolver.util.tools.ArrayUtils.append;
 
 public class StableMarriage extends AbstractProblem {
 
@@ -330,7 +329,7 @@ public class StableMarriage extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.minDom_LB(ArrayUtils.append(husband, wife)));
+        model.getResolver().set(model.getResolver().minDomLBSearch(append(husband, wife)));
     }
 
     @Override
@@ -341,7 +340,7 @@ public class StableMarriage extends AbstractProblem {
     @Override
     public void prettyOut() {
 
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             int num_sols = 0;
             do {
 

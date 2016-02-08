@@ -30,9 +30,8 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -126,9 +125,8 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.lexico_LB(suppliers),
-				IntStrategyFactory.maxReg_LB(costPerStore)
-		);
+        Resolver r = model.getResolver();
+        r.set(r.firstLBSearch(suppliers), r.firstLBSearch(costPerStore));
     }
 
     @Override
@@ -141,7 +139,7 @@ public class WarehouseLocation extends AbstractProblem {
     public void prettyOut() {
         System.out.println("Warehouse location problem");
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < nWH; i++) {
                 if (open[i].getValue() > 0) {
                     st.append(String.format("\tw#%d:\n\t", i));

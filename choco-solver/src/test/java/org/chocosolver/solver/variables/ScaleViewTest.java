@@ -38,7 +38,6 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -56,9 +55,9 @@ public class ScaleViewTest {
         IntVar Y = s.intScaleView(X, 2);
         IntVar[] vars = {X, Y};
         s.arithm(Y, "!=", 4).post();
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
 
@@ -72,9 +71,9 @@ public class ScaleViewTest {
 
         s.arithm(Y, "!=", -2).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), 4);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
     private Model bijective(int low, int upp, int coeff) {
@@ -88,7 +87,7 @@ public class ScaleViewTest {
         s.arithm(Y, ">=", low + coeff - 1).post();
         s.arithm(Y, "<=", upp - coeff - 1).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         return s;
     }
 
@@ -105,7 +104,7 @@ public class ScaleViewTest {
         s.arithm(Y, "<=", upp - coeff - 1).post();
         s.times(X, C, Y).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         return s;
     }
 
@@ -122,8 +121,8 @@ public class ScaleViewTest {
             Model sc = contraint(low, upp, coeff);
             while (sb.solve()) ;
             while (sc.solve()) ;
-            assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
-            //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+            assertEquals(sc.getResolver().getMeasures().getSolutionCount(), sb.getResolver().getMeasures().getSolutionCount());
+            //Assert.assertEquals(sc.getResolver().getMeasures().getNodeCount(), sb.getResolver().getMeasures().getNodeCount());
         }
     }
 
@@ -133,8 +132,8 @@ public class ScaleViewTest {
         Model sc = contraint(1, 9999, 3);
         while (sb.solve()) ;
         while (sc.solve()) ;
-        assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
-        //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+        assertEquals(sc.getResolver().getMeasures().getSolutionCount(), sb.getResolver().getMeasures().getSolutionCount());
+        //Assert.assertEquals(sc.getResolver().getMeasures().getNodeCount(), sb.getResolver().getMeasures().getNodeCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -184,7 +183,7 @@ public class ScaleViewTest {
 				try {
 					// currently, the propagation is not sufficient (bound)
 					// could be fixed with an extension filtering
-					model.propagate();
+					model.getResolver().propagate();
 				}catch (Exception e){
 					e.printStackTrace();
 					throw new UnsupportedOperationException();

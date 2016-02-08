@@ -46,7 +46,7 @@ public abstract class ACounter implements ICounter {
 
     public ACounter(Model model, long limit) {
         this.max = limit;
-        this.measures = model.getMeasures();
+        this.measures = model.getResolver().getMeasures();
     }
 
     @Override

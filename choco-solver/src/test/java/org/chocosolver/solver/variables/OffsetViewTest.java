@@ -38,7 +38,6 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -60,9 +59,9 @@ public class OffsetViewTest {
 
         s.arithm(Y, "!=", 4).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
 
@@ -77,9 +76,9 @@ public class OffsetViewTest {
 
         s.arithm(Y, "!=", -2).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), 4);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
     private Model bijective(int low, int upp, int coeff) {
@@ -93,7 +92,7 @@ public class OffsetViewTest {
         s.arithm(Y, ">=", low + coeff - 1).post();
         s.arithm(Y, "<=", upp - coeff - 1).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         return s;
     }
 
@@ -109,7 +108,7 @@ public class OffsetViewTest {
         s.arithm(Y, "<=", upp - coeff - 1).post();
         s.arithm(X, "=", Y, "+", coeff).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         return s;
     }
 
@@ -126,8 +125,8 @@ public class OffsetViewTest {
             Model sc = contraint(low, upp, coeff);
             while (sb.solve()) ;
             while (sc.solve()) ;
-            assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
-            assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+            assertEquals(sc.getResolver().getMeasures().getSolutionCount(), sb.getResolver().getMeasures().getSolutionCount());
+            assertEquals(sc.getResolver().getMeasures().getNodeCount(), sb.getResolver().getMeasures().getNodeCount());
 
         }
     }
@@ -138,8 +137,8 @@ public class OffsetViewTest {
         Model sc = contraint(1, 1999, 3);
         while (sb.solve()) ;
         while (sc.solve()) ;
-        assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
-        assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+        assertEquals(sc.getResolver().getMeasures().getSolutionCount(), sb.getResolver().getMeasures().getSolutionCount());
+        assertEquals(sc.getResolver().getMeasures().getNodeCount(), sb.getResolver().getMeasures().getNodeCount());
 
     }
 
@@ -151,8 +150,8 @@ public class OffsetViewTest {
             Model sc = contraint(1, N, 3);
             while (sb.solve()) ;
             while (sc.solve()) ;
-            assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
-            assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+            assertEquals(sc.getResolver().getMeasures().getSolutionCount(), sb.getResolver().getMeasures().getSolutionCount());
+            assertEquals(sc.getResolver().getMeasures().getNodeCount(), sb.getResolver().getMeasures().getNodeCount());
         }
 
     }
@@ -202,7 +201,7 @@ public class OffsetViewTest {
             IntVar v = model.intOffsetView(o, 2);
 			if(!model.getSettings().enableViews()){
 				try {
-					model.propagate();
+					model.getResolver().propagate();
 				}catch (Exception e){
 					e.printStackTrace();
 					throw new UnsupportedOperationException();

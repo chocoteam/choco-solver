@@ -48,7 +48,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
@@ -80,7 +79,7 @@ public class MagicSequence extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.lexico_LB(x));
+        model.getResolver().set(model.getResolver().firstLBSearch(x));
     }
 
     @Override
@@ -92,7 +91,7 @@ public class MagicSequence extends AbstractProblem {
     @Override
     public void prettyOut() {
 
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             int num_solutions = 0;
             do {
 

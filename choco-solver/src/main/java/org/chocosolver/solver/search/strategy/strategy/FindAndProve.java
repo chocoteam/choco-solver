@@ -78,7 +78,7 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 
 	@Override
 	public Decision getDecision() {
-		if (model.getMeasures().getSolutionCount() == 0) {
+		if (model.getResolver().getMeasures().getSolutionCount() == 0) {
 			return find.getDecision();
 		}
 		return prove.getDecision();
@@ -86,7 +86,7 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 
 	@Override
 	public Decision<V> computeDecision(V variable) {
-		if (model.getMeasures().getSolutionCount() == 0) {
+		if (model.getResolver().getMeasures().getSolutionCount() == 0) {
 			return find.computeDecision(variable);
 		}
 		return prove.computeDecision(variable);

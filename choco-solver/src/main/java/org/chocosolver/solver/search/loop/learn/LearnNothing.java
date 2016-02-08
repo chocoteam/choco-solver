@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.Resolver;
-import org.chocosolver.solver.search.loop.learn.Learn;
 
 /**
  * Created by cprudhom on 02/09/15.

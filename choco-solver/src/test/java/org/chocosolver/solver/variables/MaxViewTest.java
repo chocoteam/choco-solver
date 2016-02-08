@@ -31,17 +31,12 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.SatFactory;
-import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
 
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -80,7 +75,7 @@ public class MaxViewTest {
                 xs[2] = ref.intVar("z", domains[2][0], domains[2][1], true);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.set(random_bound(xs, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -90,12 +85,12 @@ public class MaxViewTest {
                 xs[2] = model.intVar("z", domains[1][0], domains[2][1], true);
                 max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                model.set(random_bound(xs, seed));
+                model.getResolver().set(model.getResolver().randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
-            assertTrue(model.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            assertTrue(model.getResolver().getMeasures().getNodeCount() <= ref.getResolver().getMeasures().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 
@@ -113,7 +108,7 @@ public class MaxViewTest {
                 xs[2] = ref.intVar("z", domains[2]);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.set(random_value(xs, seed));
+                ref.getResolver().set(ref.getResolver().randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -123,14 +118,14 @@ public class MaxViewTest {
                 xs[2] = model.intVar("z", domains[2]);
                 max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                model.set(random_value(xs, seed));
+                model.getResolver().set(model.getResolver().randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
             // BEWARE: MAX does not ensure AC, unlike reformulation; so nb of nodes can be different...
-//            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + "): "
-//                    + solver.getMeasures().getNodeCount() + " vs. " + ref.getMeasures().getNodeCount());
+//            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getResolver().getMeasures().getNodeCount(), "NODES (" + seed + "): "
+//                    + solver.getMeasures().getNodeCount() + " vs. " + ref.getResolver().getMeasures().getNodeCount());
         }
     }
 }

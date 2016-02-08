@@ -33,7 +33,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.propagation.PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -62,9 +61,9 @@ public class TestSolveur {
                 }
             }
 
-            s.set(lexico_LB(vars));
+            s.getResolver().set(s.getResolver().firstLBSearch(vars));
             while (s.solve()) ;
-            assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
+            assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
     }
 
@@ -83,9 +82,9 @@ public class TestSolveur {
             for (int i = 0; i < m; i++) {
                 s.allDifferent(vars, "BC").post();
             }
-            s.set(lexico_LB(vars));
+            s.getResolver().set(s.getResolver().firstLBSearch(vars));
             while (s.solve()) ;
-            assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
+            assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
     }
 
@@ -104,10 +103,10 @@ public class TestSolveur {
         }
         //System.out.println("C("+vars[n-1]+","+vars[0]+")");
         s.arithm(vars[k - 1], "!=", vars[0]).post();
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
-        assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
+        assertEquals(s.getResolver().getMeasures().getNodeCount(), nbNod, "nb nod");
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -142,10 +141,10 @@ public class TestSolveur {
             //System.out.println("C("+vars[n-1]+","+vars[0]+")");
             s.arithm(vars[k - 1], "<", vars[0]).post();
 
-            s.set(lexico_LB(vars));
+            s.getResolver().set(s.getResolver().firstLBSearch(vars));
             while (s.solve()) ;
-            assertEquals(s.getMeasures().getSolutionCount(), 0, "nb sol");
-            assertEquals(s.getMeasures().getNodeCount(), 0, "nb nod");
+            assertEquals(s.getResolver().getMeasures().getSolutionCount(), 0, "nb sol");
+            assertEquals(s.getResolver().getMeasures().getNodeCount(), 0, "nb nod");
         }
     }
 
@@ -172,10 +171,10 @@ public class TestSolveur {
         s.arithm(vars[(n / 2) - 1], "<", vars[n / 2]).post();
         //System.out.println(cstrs[(n/2)-1]);
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
-        assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
+        assertEquals(s.getResolver().getMeasures().getNodeCount(), nbNod, "nb nod");
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -204,11 +203,11 @@ public class TestSolveur {
         }
         s.arithm(vars[(n / 2) - 1], "<", vars[n / 2]).post();
 
-        s.set(lexico_LB(vars));
+        s.getResolver().set(s.getResolver().firstLBSearch(vars));
         while (s.solve()) ;
-        s.getMeasures().getSolutionCount();
-        assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
-        assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
+        s.getResolver().getMeasures().getSolutionCount();
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
+        assertEquals(s.getResolver().getMeasures().getNodeCount(), nbNod, "nb nod");
     }
 
 
@@ -232,11 +231,11 @@ public class TestSolveur {
         }
         model.arithm(vars[0], "=", vars[n - 1]).post();
 
-        model.set(lexico_LB(vars));
+        model.getResolver().set(model.getResolver().firstLBSearch(vars));
         TWOBUCKETPROPAGATIONENGINE.make(model);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 0, "nb sol");
-        assertEquals(model.getMeasures().getNodeCount(), 0, "nb nod");
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 0, "nb sol");
+        assertEquals(model.getResolver().getMeasures().getNodeCount(), 0, "nb nod");
     }
 
 

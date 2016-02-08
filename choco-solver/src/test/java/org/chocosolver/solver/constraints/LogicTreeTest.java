@@ -35,7 +35,6 @@ import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -44,7 +43,6 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.and;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifOnlyIf;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -234,7 +232,7 @@ public class LogicTreeTest {
                 model.arithm(rows[1], "+", rows[2], "<=", 1));
         //SearchMonitorFactory.log(solver, true, true);
         while (model.solve()) ;
-        long nbSol = model.getMeasures().getSolutionCount();
+        long nbSol = model.getResolver().getMeasures().getSolutionCount();
 
         for (int seed = 0; seed < 2000; seed++) {
             Model sCNF = new Model();
@@ -244,11 +242,11 @@ public class LogicTreeTest {
                     and(rCNF[1], rCNF[2])
             );
             addClauses(tree, sCNF);
-            sCNF.set(random_bound(rCNF, seed));
+            sCNF.getResolver().set(sCNF.getResolver().randomSearch(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);
             while (sCNF.solve()) ;
-            assertEquals(sCNF.getMeasures().getSolutionCount(), nbSol);
+            assertEquals(sCNF.getResolver().getMeasures().getSolutionCount(), nbSol);
         }
     }
 
@@ -303,9 +301,9 @@ public class LogicTreeTest {
         );
         SatFactory.addClauses(l, model);
         try {
-            model.propagate();
+            model.getResolver().propagate();
             b1.instantiateTo(1, Cause.Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -325,9 +323,9 @@ public class LogicTreeTest {
         LogOp l = LogOp.or(b1.not(), b2.not());
         SatFactory.addClauses(l, model);
         try {
-            model.propagate();
+            model.getResolver().propagate();
             b1.instantiateTo(1, Cause.Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }
@@ -347,9 +345,9 @@ public class LogicTreeTest {
 
         SatFactory.addClauses(new BoolVar[0], new BoolVar[]{b1, b2});
         try {
-            model.propagate();
+            model.getResolver().propagate();
             b1.instantiateTo(1, Cause.Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
         }

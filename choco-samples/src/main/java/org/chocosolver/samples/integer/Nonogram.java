@@ -33,7 +33,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
@@ -107,7 +106,6 @@ public class Nonogram extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.minDom_LB(ArrayUtils.flatten(vars)));
     }
 
     @Override

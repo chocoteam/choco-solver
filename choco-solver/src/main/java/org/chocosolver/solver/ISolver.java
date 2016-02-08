@@ -29,10 +29,10 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.search.ISearchStrategyFactory;
 import org.chocosolver.solver.search.loop.learn.ILearnFactory;
 import org.chocosolver.solver.search.loop.move.IMoveFactory;
 import org.chocosolver.solver.search.loop.propagate.IPropagateFactory;
+import org.chocosolver.solver.search.strategy.ISearchStrategyFactory;
 
 /**
  * Interface to ease modeling

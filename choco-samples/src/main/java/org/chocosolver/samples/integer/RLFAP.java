@@ -33,11 +33,9 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
@@ -163,7 +161,7 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.domOverWDeg(vars, seed));
+        model.getResolver().set(model.getResolver().domOverWDegSearch(vars));
         SearchMonitorFactory.luby(model, 2, 2, new FailCounter(model, 2), 25000);
     }
 
@@ -180,7 +178,7 @@ public class RLFAP extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("RLFAP %s", dir));
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             st.append("\t");
             for (int i = 0; i < vars.length; i++) {
                 st.append(vars[i].getValue()).append(" ");

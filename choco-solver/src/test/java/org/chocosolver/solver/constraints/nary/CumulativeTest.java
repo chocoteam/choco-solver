@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -38,8 +38,6 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lastConflict;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
 
 /**
  * Tests the various filtering algorithms of the cumulative constraint
@@ -153,25 +151,25 @@ public class CumulativeTest {
 			t[i] = new Task(s[i], d[i], e[i]);
 			model.arithm(e[i], "<=", last).post();
 		}
-		Constraint c = model.cumulative(t, h, capa, graph);
-		c.post();
-		model.set(random_bound(model.retrieveIntVars(false), seed));
-		model.set(lastConflict(model, model.getStrategy()));
+		model.cumulative(t, h, capa, graph).post();
+		Resolver r = model.getResolver();
+		r.set(r.randomSearch(model.retrieveIntVars(false), seed));
+		r.useLastConflict();
 		limitTime(model, 5000);
 		switch (mode) {
 			case 0:
 				model.solve();
-				if (model.hasReachedLimit()) return -1;
-				return model.getMeasures().getSolutionCount();
+				if (r.hasReachedLimit()) return -1;
+				return r.getMeasures().getSolutionCount();
 			case 1:
 				model.setObjectives(MINIMIZE, last);
 				model.solve();
-				if (model.hasReachedLimit()) return -1;
-				return model.getMeasures().getBestSolutionValue().longValue();
+				if (r.hasReachedLimit()) return -1;
+				return r.getMeasures().getBestSolutionValue().longValue();
 			case 2:
 				while (model.solve()) ;// too many solutions to be used
-				if (model.hasReachedLimit()) return -1;
-				return model.getMeasures().getSolutionCount();
+				if (r.hasReachedLimit()) return -1;
+				return r.getMeasures().getSolutionCount();
 			default:
 				throw new UnsupportedOperationException();
 		}

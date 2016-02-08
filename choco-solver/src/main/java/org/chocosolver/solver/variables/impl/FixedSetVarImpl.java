@@ -220,7 +220,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
-        model.getEngine().fails(cause, this, message);
+        model.getResolver().getEngine().fails(cause, this, message);
     }
 
     @Override

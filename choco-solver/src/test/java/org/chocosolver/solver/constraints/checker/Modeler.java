@@ -35,7 +35,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -44,8 +43,6 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.copyOfRange;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -74,7 +71,7 @@ public interface Modeler {
 //                System.out.printf("");
             }
             s.arithm(vars[0], "=", vars[1]).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -98,7 +95,7 @@ public interface Modeler {
             }
             IntVar[] allvars = append(X, Y);
             s.inverseChanneling(X, Y, 0, 0).post();
-            s.set(random_value(allvars));
+            s.getResolver().set(s.getResolver().randomSearch(allvars, 0));
             return s;
         }
 
@@ -131,7 +128,7 @@ public interface Modeler {
             }
             IntVar[] allvars = append(X, Y);
             s.inverseChanneling(X, Y, 0, 0).post();
-            s.set(random_bound(allvars));
+            s.getResolver().set(s.getResolver().randomSearch(allvars, 0));
             return s;
         }
 
@@ -151,7 +148,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.arithm(vars[0], "!=", vars[1]).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -171,7 +168,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.allDifferent(vars, "AC").post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -191,7 +188,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.allDifferent(vars, "BC").post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -219,7 +216,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i + n / 2], cards[i]);
             }
             s.globalCardinality(vars, values, cards, closed).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -239,7 +236,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.times(vars[0], vars[1], vars[2]).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -259,7 +256,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.absolute(vars[0], vars[1]).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -293,7 +290,7 @@ public interface Modeler {
             IntVar tmp = s.intVar("occ", 0, vars.length, true);
             s.arithm(tmp, ro, occVar).post();
             s.count(params[1], vars, tmp).post();
-            s.set(ISF.random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -327,7 +324,7 @@ public interface Modeler {
             IntVar tmp = s.intVar("occ", 0, vars.length, true);
             s.count(params[1], vars, tmp).post();
             s.arithm(tmp, ro, occVar).post();
-            s.set(ISF.random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -353,7 +350,7 @@ public interface Modeler {
             }
             Constraint ctr = (Boolean) parameters ? s.lexLess(X, Y) : s.lexLessEq(X, Y);
             ctr.post();
-            s.set(random_value(append(X, Y)));
+            s.getResolver().set(s.getResolver().randomSearch(append(X, Y), 0));
             return s;
         }
 
@@ -384,7 +381,7 @@ public interface Modeler {
             }
             Constraint ctr = (Boolean) parameters ? s.lexChainLess(X, Y, Z) : s.lexChainLessEq(X, Y, Z);
             ctr.post();
-            s.set(random_value(append(X, Y, Z)));
+            s.getResolver().set(s.getResolver().randomSearch(append(X, Y, Z), 0));
             return s;
         }
 
@@ -404,7 +401,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -427,7 +424,7 @@ public interface Modeler {
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             s.among(occVar, vars, params).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -450,7 +447,7 @@ public interface Modeler {
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             s.among(occVar, vars, params).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -490,7 +487,7 @@ public interface Modeler {
                         throw new UnsupportedOperationException();
                 }
             }
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -518,7 +515,7 @@ public interface Modeler {
             int[] values = vals.toArray();
             IntVar[] cards = s.boolVarArray("cards", values.length);
             s.globalCardinality(vars, values, cards, false).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -543,7 +540,7 @@ public interface Modeler {
             }
             IntVar nbRoots = vars[n - 1];
             s.tree(succs, nbRoots, 0).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -563,7 +560,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.circuit(vars).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -587,7 +584,7 @@ public interface Modeler {
             IntVar to = s.intVar("v_" + (n - 1), domains[n - 1]);
             if (map != null) map.put(domains[n - 1], to);
             s.path(vars, from, to, 0).post();
-            s.set(random_value(append(vars, new IntVar[]{from, to})));
+            s.getResolver().set(s.getResolver().randomSearch(append(vars, new IntVar[]{from, to}), 0));
             return s;
         }
 
@@ -607,7 +604,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.subCircuit(vars, 0, s.intVar("length", 0, vars.length - 1, true)).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -641,7 +638,7 @@ public interface Modeler {
                 dy[i] = vars[i + 3 * k];
             }
             s.diffN(x, y, dx, dy, true).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -672,7 +669,7 @@ public interface Modeler {
             }
             IntVar capa = vars[vars.length - 1];
             model.cumulative(tasks, h, capa, true).post();
-            model.set(random_bound(vars));
+            model.getResolver().set(model.getResolver().randomSearch(vars, 0));
             return model;
         }
 
@@ -698,9 +695,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], Y[i - n / 2]);
             }
             s.sort(X, Y).post();
-
-            AbstractStrategy strategy = random_bound(append(X, Y), currentTimeMillis());
-            s.set(strategy);
+            s.getResolver().set(s.getResolver().randomSearch(append(X, Y), currentTimeMillis()));
             return s;
         }
 
@@ -721,7 +716,7 @@ public interface Modeler {
             }
 
             s.mddc(vars, (MultivaluedDecisionDiagram) parameters).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -742,7 +737,7 @@ public interface Modeler {
             }
 
             s.intValuePrecedeChain(vars, 1, 2).post();
-            s.set(random_value(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -763,7 +758,7 @@ public interface Modeler {
             }
 
             s.max(vars[0], copyOfRange(vars, 1, vars.length)).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -784,7 +779,7 @@ public interface Modeler {
             }
 
             s.min(vars[0], copyOfRange(vars, 1, vars.length)).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -806,7 +801,7 @@ public interface Modeler {
             }
 
             s.max(vars[0], copyOfRange(vars, 1, vars.length)).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -828,7 +823,7 @@ public interface Modeler {
             }
 
             s.min(vars[0], copyOfRange(vars, 1, vars.length)).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -849,7 +844,7 @@ public interface Modeler {
             }
 
             s.arithm(vars[0], "+", vars[1], "=", vars[2]).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 
@@ -870,7 +865,7 @@ public interface Modeler {
             }
 
             s.arithm(vars[0], "+", vars[1], "=", vars[2]).post();
-            s.set(random_bound(vars));
+            s.getResolver().set(s.getResolver().randomSearch(vars, 0));
             return s;
         }
 

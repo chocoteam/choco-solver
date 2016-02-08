@@ -128,7 +128,7 @@ public class MeetingScheduling extends AbstractProblem {
         System.out.println(String.format("Meeting Scheduling Problem (%s)", mData));
 
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() != ESat.TRUE) {
+        if (model.getResolver().isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
         } else {
             for (int i = 0; i < mspdata.numberOfMeetings; i++) {

@@ -31,10 +31,11 @@ package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
+
+import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
+import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -78,9 +79,9 @@ public class Grocery extends AbstractProblem {
     @Override
     public void configureSearch() {
         // choco branching
-        Chatterbox.showStatistics(model);
-        Chatterbox.showSolutions(model);
-        model.set(IntStrategyFactory.lexico_UB(itemCost));
+        showStatistics(model);
+        showSolutions(model);
+        model.getResolver().set(model.getResolver().firstUBSearch(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));
     }

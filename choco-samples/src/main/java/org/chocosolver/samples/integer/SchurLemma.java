@@ -31,11 +31,11 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
+
+import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
  * CSPLib: prob015:<br/>
@@ -86,7 +86,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.lexico_LB(ArrayUtils.flatten(M)));
+        model.getResolver().set(model.getResolver().firstLBSearch(flatten(M)));
     }
 
     @Override
@@ -98,7 +98,7 @@ public class SchurLemma extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("Schur's lemma (%d,%d)", n, k));
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < k; i++) {
                 st.append("\tBox #").append(i + 1).append(": ");
                 for (int j = 0; j < n; j++) {

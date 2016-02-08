@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.strategy;
 
 import org.chocosolver.solver.Resolver;
-import org.chocosolver.solver.search.strategy.selectors.IVarSelectorFactory;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMax;

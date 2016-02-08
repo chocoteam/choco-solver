@@ -189,7 +189,7 @@ public enum Attribute {
     NMDV {
         @Override
         public double evaluate(Model model) {
-            AbstractStrategy strat = model.getStrategy();
+            AbstractStrategy strat = model.getResolver().getStrategy();
             if (strat != null) {
                 return strat.getVariables().length * 1.0 / model.getVars().length;
             } else return 1.0;

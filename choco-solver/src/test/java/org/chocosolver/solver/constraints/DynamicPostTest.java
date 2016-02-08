@@ -30,24 +30,21 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.util.ESat.*;
@@ -80,7 +77,7 @@ public class DynamicPostTest {
         final IntVar Z = model.intVar("Z", 1, 2, false);
         model.getResolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 8);
     }
 
 
@@ -97,7 +94,7 @@ public class DynamicPostTest {
                         new Constraint[]{}) {
                     @Override
                     public ESat checkCondition() {
-                        int nbNode = (int) this.model.getMeasures().getNodeCount();
+                        int nbNode = (int) this.model.getResolver().getMeasures().getNodeCount();
                         switch (nbNode) {
                             case 0:
                             case 1:
@@ -112,7 +109,7 @@ public class DynamicPostTest {
                 }).post();
         model.getResolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 7);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 7);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -121,14 +118,14 @@ public class DynamicPostTest {
         final IntVar X = model.intVar("X", 1, 2, false);
         final IntVar Y = model.intVar("Y", 1, 2, false);
         final IntVar Z = model.intVar("Z", 1, 2, false);
-        model.plugMonitor(new IMonitorOpenNode() {
+        model.getResolver().plugMonitor(new IMonitorOpenNode() {
             @Override
             public void beforeOpenNode() {
             }
 
             @Override
             public void afterOpenNode() {
-                if (model.getMeasures().getNodeCount() == 1) {
+                if (model.getResolver().getMeasures().getNodeCount() == 1) {
                     model.arithm(X, "=", Y).post();
                     model.arithm(Y, "=", Z).post();
                 }
@@ -138,7 +135,7 @@ public class DynamicPostTest {
         showSolutions(model);
         model.getResolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -155,7 +152,7 @@ public class DynamicPostTest {
         model.unpost(c1);
         model.getResolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 8);
         assertEquals(model.getNbCstrs(), 0);
     }
 
@@ -169,13 +166,13 @@ public class DynamicPostTest {
         final Constraint c2 = model.arithm(X, "=", Z);
         c1.post();
         c2.post();
-        model.plugMonitor((IMonitorSolution) () -> {
+        model.getResolver().plugMonitor((IMonitorSolution) () -> {
             model.unpost(c1);
             model.unpost(c2);
         });
         model.getResolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 5);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 5);
         assertEquals(model.getNbCstrs(), 0);
     }
 
@@ -214,7 +211,8 @@ public class DynamicPostTest {
                 model.and(aSBetter, bBetter),
                 model.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
-        model.set(lexico_LB(a, b, c, lbA, lbB));
+        Resolver r = model.getResolver();
+        r.set(r.firstLBSearch(a, b, c, lbA, lbB));
         int nbSolution = 0;
         while (model.solve()) {
             int bestA;
@@ -236,7 +234,7 @@ public class DynamicPostTest {
             push(model.arithm(lbA, "=", bestA), stack, model);
             push(model.arithm(lbB, "=", bestB), stack, model);
 
-            model.getEngine().flush();
+            model.getResolver().getEngine().flush();
             model.getResolver().reset();
 
             if (model.solve()) {
@@ -248,7 +246,7 @@ public class DynamicPostTest {
 
             popAll(stack, model);
 
-            model.getEngine().flush();
+            model.getResolver().getEngine().flush();
             model.getResolver().reset();
 
             model.or(
@@ -278,22 +276,21 @@ public class DynamicPostTest {
         Model s2 = costasArray(7, true);
 
         while (s1.solve()) ;
-        out.println(s1.getMeasures().getSolutionCount());
+        out.println(s1.getResolver().getMeasures().getSolutionCount());
 
         while (s2.solve()) ;
 
-        out.println(s2.getMeasures().getSolutionCount());
-        assertEquals(s1.getMeasures().getSolutionCount(), s2.getMeasures().getSolutionCount());
+        out.println(s2.getResolver().getMeasures().getSolutionCount());
+        assertEquals(s1.getResolver().getMeasures().getSolutionCount(), s2.getResolver().getMeasures().getSolutionCount());
     }
 
     private Model costasArray(int n, boolean dynamic) {
         Model model = ProblemMaker.makeCostasArrays(n);
         IntVar[] vectors = (IntVar[]) model.getHook("vectors");
-        model.set(ISF.domOverWDeg(vectors, 0));
-
+        model.getResolver().set(model.getResolver().domOverWDegSearch(vectors));
         if (dynamic) {
             // should not change anything (the constraint is already posted)
-            model.plugMonitor((IMonitorSolution) () -> model.allDifferent(vectors, "BC").post());
+            model.getResolver().plugMonitor((IMonitorSolution) () -> model.allDifferent(vectors, "BC").post());
         }
         return model;
     }

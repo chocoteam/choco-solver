@@ -37,7 +37,6 @@ import java.util.List;
 
 import static java.lang.Math.abs;
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.ESat.TRUE;
 
 /**
@@ -81,14 +80,14 @@ public class DominatingSetOfQueens {
 			}
 		}
 
-		pb.set(lexico_LB(X));
+		pb.getResolver().set(pb.getResolver().firstLBSearch(X));
 
 		pb.solve();
-		out.println("Back  : " + pb.getMeasures().getBackTrackCount());
-		out.println("Time  : " + pb.getMeasures().getTimeCount() + " (sec)");
+		out.println("Back  : " + pb.getResolver().getMeasures().getBackTrackCount());
+		out.println("Time  : " + pb.getResolver().getMeasures().getTimeCount() + " (sec)");
 
 		List<Integer> values = new LinkedList<>();
-		if (pb.isFeasible() == TRUE) {
+		if (pb.getResolver().isFeasible() == TRUE) {
 			for (int i = 0; i < n * n; i++) {
 				if (!values.contains(X[i].getValue()))
 					values.add(X[i].getValue());

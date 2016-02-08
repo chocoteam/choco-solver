@@ -37,10 +37,9 @@
 package org.chocosolver.solver.objective;
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
@@ -48,6 +47,8 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
+
+import static org.chocosolver.solver.objective.OptimizationPolicy.DICHOTOMIC;
 
 /**
  * Class that defines a branching strategy over the objective variable
@@ -105,11 +106,11 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         this.coefLB = coefs[0];
         this.coefUB = coefs[1];
         this.optPolicy = policy;
-		SLF.restartOnSolutions(model);
+        model.getResolver().set(model.getResolver().restartOnSolutions());
         if (coefLB < 0 || coefUB < 0 || coefLB + coefUB == 0) {
             throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
         }
-        if (coefLB + coefUB != 1 && policy != OptimizationPolicy.DICHOTOMIC) {
+        if (coefLB + coefUB != 1 && policy != DICHOTOMIC) {
             throw new UnsupportedOperationException("Invalid coefficients for BOTTOM_UP or TOP_DOWN optimization" +
                     "\nuse signature public ObjectiveStrategy(IntVar obj, OptimizationPolicy policy, Model model) instead");
         }
@@ -151,13 +152,13 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     //***********************************************************************************
 
     public boolean init() {
-        decOperator = getOperator(optPolicy, model.getObjectiveManager().getPolicy());
+        decOperator = getOperator(optPolicy, model.getResolver().getObjectiveManager().getPolicy());
         return true;
     }
     @Override
     public Decision getDecision() {
-        if (model.getMeasures().getSolutionCount() == 0
-                || (nbSols == model.getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
+        if (model.getResolver().getMeasures().getSolutionCount() == 0
+                || (nbSols == model.getResolver().getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
             return null;
         }
         if (obj.isInstantiated()) {
@@ -168,7 +169,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
             globalLB = obj.getLB();
             globalUB = obj.getUB();
         }
-        nbSols = model.getMeasures().getSolutionCount();
+        nbSols = model.getResolver().getMeasures().getSolutionCount();
         globalLB = Math.max(globalLB, obj.getLB());//check
         globalUB = Math.min(globalUB, obj.getUB());//check
 //        ObjectiveManager man = model.getResolver().getObjectiveManager();

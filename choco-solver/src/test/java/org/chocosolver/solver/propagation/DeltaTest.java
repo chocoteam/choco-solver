@@ -46,7 +46,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
 import static org.testng.Assert.assertFalse;
 
 /**
@@ -75,11 +74,11 @@ public class DeltaTest {
 
         model.arithm(x, "=", y).post();
 
-        model.propagate();
+        model.getResolver().propagate();
 
         x.removeValue(4, Null);
 
-        model.propagate();
+        model.getResolver().propagate();
 
         assertFalse(y.contains(4));
 
@@ -92,7 +91,7 @@ public class DeltaTest {
         final BoolVar b0 = model.boolVar("b0");
         final BoolVar b1 = model.boolVar("b1");
         final IntVar i0 = model.boolVar("i0");
-        model.set(lexico_LB(i0));
+        model.getResolver().set(model.getResolver().firstLBSearch(i0));
         model.setBoolsChanneling(new BoolVar[]{b0, b1}, s0, 0).post();
         model.cardinality(s0, model.intVar(0)).post();
 
@@ -110,7 +109,7 @@ public class DeltaTest {
             final IntVar j = s.intVar("j", -2, 2, false);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
-            s.set(random_value(new IntVar[]{i, j}));
+            s.getResolver().set(s.getResolver().randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             while (s.solve()) ;
         }
@@ -124,7 +123,7 @@ public class DeltaTest {
             final IntVar j = s.intVar("j", -2, 2, true);
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
-            s.set(random_bound(new IntVar[]{i, j}));
+            s.getResolver().set(s.getResolver().randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             while (s.solve()) ;
         }
@@ -138,7 +137,7 @@ public class DeltaTest {
             final IntVar j = s.boolVar("j");
             //Chatterbox.showDecisions(s);
             //Chatterbox.showSolutions(s);
-            s.set(random_value(new IntVar[]{i, j}));
+            s.getResolver().set(s.getResolver().randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             while (s.solve()) ;
         }

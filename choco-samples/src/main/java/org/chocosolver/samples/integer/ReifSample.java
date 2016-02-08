@@ -40,7 +40,6 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 
 import static java.lang.System.out;
@@ -75,12 +74,12 @@ public class ReifSample extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		model.set(ISF.lexico_LB(new IntVar[]{x, y, z}));
+		model.getResolver().set(model.getResolver().firstLBSearch(new IntVar[]{x, y, z}));
 	}
 
 	@Override
 	public void solve() {
-		model.plugMonitor((IMonitorSolution) () -> {
+		model.getResolver().plugMonitor((IMonitorSolution) () -> {
 			out.println("////////////////");
 			out.println(x);
 			out.println(y);

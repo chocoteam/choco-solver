@@ -101,7 +101,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     public void afterInitialize() {
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
-                mModel.getMeasures().getRestartCount());
+                mModel.getResolver().getMeasures().getRestartCount());
         connector.connect(6565); // 6565 is the port used by cpprofiler by default
         connector.restart(0); // starting a new tree (also used in case of a restart)
         alt_stack.push(-1); // -1 is alt for the root node
@@ -154,7 +154,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     public void afterRestart() {
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
-                mModel.getMeasures().getRestartCount());
+                mModel.getResolver().getMeasures().getRestartCount());
         connector.restart(++rid);
         pid_stack.clear();
         alt_stack.clear();

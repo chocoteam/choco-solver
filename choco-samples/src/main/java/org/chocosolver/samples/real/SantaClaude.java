@@ -31,8 +31,8 @@ package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 
@@ -97,12 +97,13 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.random_value(kid_gift, 29091981));
+        Resolver r = model.getResolver();
+        r.set(r.domOverWDegSearch(kid_gift));
     }
 
     @Override
     public void solve() {
-        model.plugMonitor((IMonitorSolution) () -> {
+        model.getResolver().plugMonitor((IMonitorSolution) () -> {
             out.println("*******************");
             for (int i = 0; i < n_kids; i++) {
                 out.println(format("Kids #%d has received the gift #%d at a cost of %d euros",

@@ -30,11 +30,8 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
@@ -111,9 +108,9 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        AbstractStrategy strat = IntStrategyFactory.lexico_LB(objects);
+        Resolver r = model.getResolver();
         // trick : top-down maximization
-        model.set(ISF.objective_top_bottom(power), strat);
+        r.set(r.firstUBSearch(power), r.firstLBSearch(objects));
         Chatterbox.showDecisions(model);
     }
 

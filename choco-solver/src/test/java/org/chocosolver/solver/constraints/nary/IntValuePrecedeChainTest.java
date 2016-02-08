@@ -30,13 +30,10 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random;
 
 /**
  * Created by cprudhom on 07/07/15.
@@ -66,17 +63,17 @@ public class IntValuePrecedeChainTest {
                 Model model = new Model();
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 model.intValuePrecedeChain(vars, 1, 2).post();
-                model.set(random(vars, i));
+                model.getResolver().set(model.getResolver().randomSearch(vars, 0));
                 while (model.solve()) ;
-                s1 = model.getMeasures().getSolutionCount();
+                s1 = model.getResolver().getMeasures().getSolutionCount();
             }
             {
                 Model model = new Model();
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 int_value_precede_chain_dec(vars, 1, 2);
-                model.set(random(vars, i));
+                model.getResolver().set(model.getResolver().randomSearch(vars, 0));
                 while (model.solve()) ;
-                s2 = model.getMeasures().getSolutionCount();
+                s2 = model.getResolver().getMeasures().getSolutionCount();
             }
             Assert.assertEquals(s1, s2);
 

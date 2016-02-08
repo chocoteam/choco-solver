@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -89,7 +88,7 @@ public class BinTableTest {
             s.table(v1, v2, feasible, a).post();
 
             while (s.solve()) ;
-            assertEquals(5, s.getMeasures().getSolutionCount());
+            assertEquals(5, s.getResolver().getMeasures().getSolutionCount());
         }
         tearDown();
     }
@@ -105,7 +104,7 @@ public class BinTableTest {
             s.table(v1, v2, infeasible, a).post();
 
             while (s.solve()) ;
-            assertEquals((16 - 5), s.getMeasures().getSolutionCount());
+            assertEquals((16 - 5), s.getResolver().getMeasures().getSolutionCount());
         }
         tearDown();
     }
@@ -125,17 +124,24 @@ public class BinTableTest {
         IntVar v1 = model.intVar("v1", -10, 10, false);
         IntVar v2 = model.intVar("v2", -10, 10, false);
         absolute(v1, v2, -1).post();
-        long nbs = model.findAllSolutions();
-        long nbn = model.getMeasures().getNodeCount();
+        long nbs = 0;
+        while (model.solve()) {
+            nbs++;
+        }
+        long nbn = model.getResolver().getMeasures().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
                 Model tsolver = new Model();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 absolute(tv1, tv2, a).post();
-                tsolver.set(random_value(new IntVar[]{tv1, tv2}));
-                assertEquals(tsolver.findAllSolutions(), nbs);
-                if (a > 1) assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+                tsolver.getResolver().set(tsolver.getResolver().randomSearch(new IntVar[]{tv1, tv2}, s));
+                long nbSolutions = 0;
+                while (tsolver.solve()) {
+                    nbSolutions++;
+                }
+                assertEquals(nbSolutions, nbs);
+                if (a > 1) assertEquals(tsolver.getResolver().getMeasures().getNodeCount(), nbn);
             }
         }
     }
@@ -154,17 +160,24 @@ public class BinTableTest {
         IntVar v1 = model.intVar("v1", -10, 10, false);
         IntVar v2 = model.intVar("v2", -10, 10, false);
         arithmLT(v1, v2, -1).post();
-        long nbs = model.findAllSolutions();
-        long nbn = model.getMeasures().getNodeCount();
+        long nbs = 0;
+        while (model.solve()) {
+            nbs++;
+        }
+        long nbn = model.getResolver().getMeasures().getNodeCount();
         for (int s = 0; s < 20; s++) {
             for (int a = 0; a < ALGOS.length; a++) {
                 Model tsolver = new Model();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 arithmLT(tv1, tv2, a).post();
-                tsolver.set(random_value(new IntVar[]{tv1, tv2}));
-                assertEquals(tsolver.findAllSolutions(), nbs);
-                if (a > 1) assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+                tsolver.getResolver().set(tsolver.getResolver().randomSearch(new IntVar[]{tv1, tv2}, s));
+                long nbSolutions = 0;
+                while (tsolver.solve()) {
+                    nbSolutions++;
+                }
+                assertEquals(nbSolutions, nbs);
+                if (a > 1) assertEquals(tsolver.getResolver().getMeasures().getNodeCount(), nbn);
             }
         }
     }
@@ -183,17 +196,24 @@ public class BinTableTest {
         IntVar v1 = model.intVar("v1", -10, 10, false);
         IntVar v2 = model.intVar("v2", -10, 10, false);
         arithmNQ(v1, v2, -1).post();
-        long nbs = model.findAllSolutions();
-        long nbn = model.getMeasures().getNodeCount();
+        long nbs = 0;
+        while (model.solve()) {
+            nbs++;
+        }
+        long nbn = model.getResolver().getMeasures().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
                 Model tsolver = new Model();
                 IntVar tv1 = tsolver.intVar("tv1", -10, 10, false);
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 arithmNQ(tv1, tv2, a).post();
-                tsolver.set(random_value(new IntVar[]{tv1, tv2}));
-                assertEquals(tsolver.findAllSolutions(), nbs);
-                if (a > 1) assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+                tsolver.getResolver().set(tsolver.getResolver().randomSearch(new IntVar[]{tv1, tv2}, s));
+                long nbSolutions = 0;
+                while (tsolver.solve()) {
+                    nbSolutions++;
+                }
+                assertEquals(nbSolutions, nbs);
+                if (a > 1) assertEquals(tsolver.getResolver().getMeasures().getNodeCount(), nbn);
             }
         }
     }
@@ -212,8 +232,12 @@ public class BinTableTest {
                 IntVar[] vars = model.intVarArray("X", 2, -1, 1, false);
                 model.table(vars[0], vars[1], tuples, a).post();
 
-                model.set(random_value(vars));
-                assertEquals(model.findAllSolutions(), 3);
+                model.getResolver().set(model.getResolver().randomSearch(vars, i));
+                long nbSolutions = 0;
+                while (model.solve()) {
+                    nbSolutions++;
+                }
+                assertEquals(nbSolutions, 3);
             }
         }
     }
@@ -232,8 +256,12 @@ public class BinTableTest {
                 IntVar[] vars = model.intVarArray("X", 2, -1, 1, false);
                 model.table(vars[0], vars[1], tuples, a).post();
 
-                model.set(random_value(vars));
-                assertEquals(model.findAllSolutions(), 3);
+                model.getResolver().set(model.getResolver().randomSearch(vars, i));
+                long nbSolutions = 0;
+                while (model.solve()) {
+                    nbSolutions++;
+                }
+                assertEquals(nbSolutions, 3);
             }
         }
     }

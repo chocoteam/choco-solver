@@ -120,7 +120,7 @@ public class ConsistencyChecker {
         Model ref = modeler.model(nbVar, domains, map, parameters);
 //        LOGGER.error(ref.toString());
         try {
-            ref.propagate();
+            ref.getResolver().propagate();
         } catch (ContradictionException e) {
 //            System.out.printf("Pas de solution pour ce probleme => rien a tester !");
             return null;

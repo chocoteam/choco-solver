@@ -29,11 +29,10 @@
  */
 package org.chocosolver.solver.search.bind;
 
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.*;
@@ -59,9 +58,9 @@ public class DefaultSearchBinder implements ISearchBinder {
             Chatterbox.err.printf("No search strategies defined.\nSet to default ones.");
         }
 
-        model.set(getDefault(model));
-        // + last conflict
-        model.set(ISF.lastConflict(model));
+        Resolver r = model.getResolver();
+        r.set(getDefault(model));
+        r.useLastConflict();
     }
 
     public AbstractStrategy[] getDefault(Model model) {
@@ -127,7 +126,7 @@ public class DefaultSearchBinder implements ISearchBinder {
         // a. Dom/Wdeg on integer/boolean variables
         IntVar[] ivars = livars.toArray(new IntVar[livars.size()]);
         if (ivars.length > 0) {
-            strats[nb++] = ISF.domOverWDeg(ivars, 0);
+            strats[nb++] = r.domOverWDegSearch(ivars);
         }
 
         // SET VARIABLES DEFAULT SEARCH STRATEGY
@@ -152,9 +151,9 @@ public class DefaultSearchBinder implements ISearchBinder {
                 case Variable.INT:
                 case Variable.BOOL:
                     if (max) {
-                        strats[nb++] = ISF.minDom_UB((IntVar) objective);
+                        strats[nb++] = r.minDomUBSearch((IntVar) objective);
                     } else {
-                        strats[nb++] = ISF.minDom_LB((IntVar) objective);
+                        strats[nb++] = r.minDomLBSearch((IntVar) objective);
                     }
                     break;
                 case Variable.REAL:
@@ -171,7 +170,7 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         if (nb == 0) {
             // simply to avoid null pointers in case all variables are instantiated
-            strats[nb++] = ISF.minDom_LB(model.ONE());
+            strats[nb++] = r.minDomLBSearch(model.ONE());
         }
         return Arrays.copyOf(strats, nb);
     }

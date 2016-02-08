@@ -84,7 +84,7 @@ public class HybridCycloHexan extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		model.set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
+		model.getResolver().set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
 		SearchMonitorFactory.limitTime(model,10000);
 	}
 

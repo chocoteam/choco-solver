@@ -35,6 +35,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
@@ -42,7 +43,6 @@ import org.chocosolver.solver.constraints.extension.nary.LargeRelation;
 import org.chocosolver.solver.constraints.extension.nary.TuplesLargeTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.Assert;
@@ -54,7 +54,6 @@ import static java.lang.System.out;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.scalar;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.testng.Assert.assertEquals;
 
 public class TableTest {
@@ -98,18 +97,26 @@ public class TableTest {
             Model model = new Model();
             IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
             allEquals(model, vars, -1);
-            long nbs = model.findAllSolutions();
-            long nbn = model.getMeasures().getNodeCount();
+            long nbs = 0;
+            while (model.solve()) {
+                nbs++;
+            }
+            long nbn = model.getResolver().getMeasures().getNodeCount();
 //            System.out.printf("%s\n", solver.getMeasures().toOneLineString());
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 10; s++) {
                     Model tsolver = new Model(ALGOS[a]);
                     IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                     allEquals(tsolver, tvars, a);
-                    tsolver.set(ISF.random_value(tvars, s));
-                    Assert.assertEquals(tsolver.findAllSolutions(), nbs);
-                    if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
-//                    System.out.printf("%s\n", tsolver.getMeasures().toOneLineString());
+                    Resolver r = tsolver.getResolver();
+                    r.set(r.randomSearch(tvars, s));
+                    long nbSolutions = 0;
+                    while (tsolver.solve()) {
+                        nbSolutions++;
+                    }
+                    assertEquals(nbSolutions, nbs);
+                    if (a > 1) assertEquals(tsolver.getResolver().getMeasures().getNodeCount(), nbn);
+//                    System.out.printf("%s\n", tsolver.getResolver().getMeasures().toOneLineString());
                 }
             }
         }
@@ -131,18 +138,26 @@ public class TableTest {
             Model model = new Model();
             IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
             allDifferent(model, vars, -1);
-            long nbs = model.findAllSolutions();
-            long nbn = model.getMeasures().getNodeCount();
+            long nbs = 0;
+            while (model.solve()) {
+                nbs++;
+            }
+            long nbn = model.getResolver().getMeasures().getNodeCount();
 //            System.out.printf("%s\n===\n", solver.getMeasures().toOneLineString());
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 1; s++) {
                     Model tsolver = new Model(ALGOS[a]);
                     IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                     allDifferent(tsolver, tvars, a);
-                    tsolver.set(ISF.random_value(tvars, s));
-                    Assert.assertEquals(tsolver.findAllSolutions(), nbs);
-                    if (a > 1) Assert.assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
-//                    System.out.printf("%s\n", tsolver.getMeasures().toOneLineString());
+                    Resolver r = tsolver.getResolver();
+                    r.set(r.randomSearch(tvars, s));
+                    long nbSolutions = 0;
+                    while (tsolver.solve()) {
+                        nbSolutions++;
+                    }
+                    assertEquals(nbSolutions, nbs);
+                    if (a > 1) assertEquals(r.getMeasures().getNodeCount(), nbn);
+//                    System.out.printf("%s\n", tsolver.getResolver().getMeasures().toOneLineString());
                 }
             }
 //            System.out.printf("===\n%s\n", solver.getMeasures().toOneLineString());
@@ -182,17 +197,17 @@ public class TableTest {
         model.sum(reified, "=", sum).post();
         model.setObjectives(MINIMIZE, sum);
         model.solve();
-        if (model.getMeasures().getSolutionCount() > 0) {
+        if (model.getResolver().getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
-                out.print(model.getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");
+                out.print(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");
             }
             out.println("");
             for (int i = 0; i < reified.length; i++) {
                 out.print(reified[i].getValue() + "\t");
             }
-            out.println("\n" + "obj = " + model.getSolutionRecorder().getLastSolution().getIntVal(sum) + ", backtracks = " + model.getMeasures().getBackTrackCount());
+            out.println("\n" + "obj = " + model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(sum) + ", backtracks = " + model.getResolver().getMeasures().getBackTrackCount());
         }
-        assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
+        assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -225,7 +240,7 @@ public class TableTest {
         tuples.add(1, 1, 1);
         model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -237,7 +252,7 @@ public class TableTest {
         tuples.add(2, 1, 0);
         model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
 
@@ -252,17 +267,24 @@ public class TableTest {
                 rnd.setSeed(seed);
                 Tuples tuples = generateTuples(values -> rnd.nextBoolean(), true, vars);
                 model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-                model.set(random_value(vars, seed));
-                long nbs = model.findAllSolutions();
-                long nbn = model.getMeasures().getNodeCount();
+                model.getResolver().set(model.getResolver().randomSearch(vars, seed));
+                long nbs = 0;
+                while (model.solve()) {
+                    nbs++;
+                }
+                long nbn = model.getResolver().getMeasures().getNodeCount();
                 for (int a = 0; a < ALGOS.length; a++) {
                     for (int s = 0; s < 1; s++) {
                         Model tsolver = new Model(ALGOS[a]);
                         IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                         model.table(tvars, tuples, ALGOS[a]).post();
-                        tsolver.set(random_value(tvars, s));
-                        assertEquals(tsolver.findAllSolutions(), nbs);
-                        if (a > 1) assertEquals(tsolver.getMeasures().getNodeCount(), nbn);
+                        tsolver.getResolver().set(tsolver.getResolver().randomSearch(tvars, s));
+                        long nbSolutions = 0;
+                        while (tsolver.solve()) {
+                            nbSolutions++;
+                        }
+                        assertEquals(nbSolutions, nbs);
+                        if (a > 1) assertEquals(tsolver.getResolver().getMeasures().getNodeCount(), nbn);
                     }
                 }
             }
@@ -415,7 +437,7 @@ public class TableTest {
             Tuples ts = scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
             model.table(new IntVar[]{x, z, z, y}, ts, a).post();
             while (model.solve()) ;
-            assertEquals(1, model.getMeasures().getSolutionCount());
+            assertEquals(1, model.getResolver().getMeasures().getSolutionCount());
         }
     }
 }

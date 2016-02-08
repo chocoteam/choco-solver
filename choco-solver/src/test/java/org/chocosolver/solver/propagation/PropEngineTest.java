@@ -29,8 +29,8 @@
  */
 package org.chocosolver.solver.propagation;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -45,7 +45,6 @@ import org.testng.annotations.Test;
 import static java.util.Arrays.sort;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.PropagatorPriority.UNARY;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.IntEventType.VOID;
 import static org.chocosolver.util.ESat.TRUE;
@@ -78,11 +77,11 @@ public class PropEngineTest {
         Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
         model.post(CSTR, CSTR);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 3);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3);
         model.getResolver().reset();
         model.unpost(CSTR);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
     }
 
     // test clone in propagators
@@ -99,9 +98,9 @@ public class PropEngineTest {
         model.allDifferent(vars).post();
         sort(vars, (o1, o2) -> o2.getId() - o1.getId());
 
-        model.propagate();
+        model.getResolver().propagate();
         vars[0].instantiateTo(0, Null);
-        model.propagate();
+        model.getResolver().propagate();
         assertFalse(vars[0].isInstantiatedTo(0));
     }
 
@@ -117,7 +116,7 @@ public class PropEngineTest {
         Model model = makeNQueenWithBinaryConstraints(8);
         model.getResolver().set(new SevenQueuesPropagatorEngine(model));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 92);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -125,7 +124,7 @@ public class PropEngineTest {
         Model model = makeNQueenWithBinaryConstraints(8);
         model.getResolver().set(new TwoBucketPropagationEngine(model));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 92);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -133,8 +132,8 @@ public class PropEngineTest {
         Model model = ProblemMaker.makeGolombRuler(10);
         model.getResolver().set(new SevenQueuesPropagatorEngine(model));
         model.solve();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
+        Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -142,8 +141,8 @@ public class PropEngineTest {
         Model model = ProblemMaker.makeGolombRuler(10);
         model.getResolver().set(new TwoBucketPropagationEngine(model));
         model.solve();
-        Assert.assertEquals(model.getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(model.getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
+        Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }
     
     @Test(groups="1s", timeOut=60000)
@@ -179,9 +178,9 @@ public class PropEngineTest {
                     return TRUE;
                 }
             }).post();
-            model.set(random(X, i));
+            model.getResolver().set(model.getResolver().randomSearch(X, 0));
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
         }
     }
 }

@@ -29,8 +29,8 @@
  */
 package org.chocosolver.solver.search.loop.move;
 
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
@@ -139,7 +139,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     @Override
     public boolean init() {
         boolean init = super.init();
-        ObjectiveManager<IntVar, Integer> om = mModel.getObjectiveManager();
+        ObjectiveManager<IntVar, Integer> om = mModel.getResolver().getObjectiveManager();
         this.objectiveManager = om;
         if (objectiveManager.getPolicy() == ResolutionPolicy.SATISFACTION) {
             throw new UnsupportedOperationException("HBFS is not adapted to satisfaction problems.");

@@ -31,27 +31,23 @@ package org.chocosolver.solver.search;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.LastConflict;
 import org.chocosolver.solver.search.strategy.strategy.Once;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.*;
 import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -75,12 +71,11 @@ public class StrategyTest {
         for (int i = 0; i < n; i++) {
             variables[i] = s.intVar("V" + i, i, n + i, false);
         }
-        AbstractStrategy asg = IntStrategyFactory.lexico_LB(variables);
-
-        s.set(asg);
+        Resolver r = s.getResolver();
+        r.set(r.firstLBSearch(variables));
 
         env.worldPush();
-        Decision decision = asg.getDecision();
+        Decision decision = r.getStrategy().getDecision();
         for (int i = 0; i < n; i++) {
             decision.buildNext();
             try {
@@ -91,7 +86,7 @@ public class StrategyTest {
             Assert.assertTrue(variables[i].isInstantiated());
             Assert.assertEquals(variables[i].getValue(), i);
             Decision tmp = decision;
-            decision = asg.getDecision();
+            decision = r.getStrategy().getDecision();
             if (decision != null) {
                 decision.setPrevious(tmp);
             } else {
@@ -119,6 +114,7 @@ public class StrategyTest {
         int n = 100;
 
         Model s = new Model();
+        Resolver r = s.getResolver();
         IEnvironment env = s.getEnvironment();
 
         AbstractStrategy[] asgs = new AbstractStrategy[n];
@@ -126,15 +122,12 @@ public class StrategyTest {
         IntVar[] variables = new IntVar[n];
         for (int i = 0; i < n; i++) {
             variables[i] = s.intVar("V" + i, i, n + i, false);
-            asgs[i] = IntStrategyFactory.lexico_LB(variables[i]);
+            asgs[i] = r.firstLBSearch(variables[i]);
         }
-
-        AbstractStrategy sts = ISF.sequencer(asgs);
-
-        s.set(sts);
+        r.set(asgs);
 
         env.worldPush();
-        Decision decision = sts.getDecision();
+        Decision decision = r.getStrategy().getDecision();
         for (int i = 0; i < n; i++) {
             decision.buildNext();
             try {
@@ -145,7 +138,7 @@ public class StrategyTest {
             Assert.assertTrue(variables[i].isInstantiated());
             Assert.assertEquals(variables[i].getValue(), i);
             Decision tmp = decision;
-            decision = sts.getDecision();
+            decision = r.getStrategy().getDecision();
             if (decision != null) {
                 decision.setPrevious(tmp);
             } else {
@@ -179,7 +172,7 @@ public class StrategyTest {
         VariableSelector varsel = new InputOrder<>();
         IntValueSelector valsel = new IntDomainMin();
         DecisionOperator assgnt = DecisionOperator.int_eq;
-        model.set(new Once(v, varsel, valsel, assgnt));
+        model.getResolver().set(new Once(v, varsel, valsel, assgnt));
         model.solve();
         Assert.assertTrue(x.getValue() == 1);
     }
@@ -192,7 +185,7 @@ public class StrategyTest {
         model.allDifferent(x).post();
         model.member(x[0], y).post();
         model.solve();
-        AbstractStrategy strat = model.getStrategy();
+        AbstractStrategy strat = model.getResolver().getStrategy();
         assertTrue(strat instanceof LastConflict);
     }
 
@@ -371,20 +364,22 @@ public class StrategyTest {
     public void testFH3321() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        model.set(custom(minDomainSize_var_selector(), new IntDomainMiddle(true), split(), X));
+        Resolver r = model.getResolver();
+        r.set(r.intVarSearch(r.minDomVarSelector(), r.midValSelector(true), DecisionOperator.int_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testFH3322() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        model.set(custom(minDomainSize_var_selector(), new IntDomainMiddle(false), reverse_split(), X));
+        Resolver r = model.getResolver();
+        r.set(r.intVarSearch(r.minDomVarSelector(), r.midValSelector(false), DecisionOperator.int_reverse_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
     }
 
 
@@ -392,19 +387,21 @@ public class StrategyTest {
     public void testFH33232() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        model.set(dichotomic(minDomainSize_var_selector(), true, X));
+        Resolver r = model.getResolver();
+        r.set(r.intVarSearch(r.minDomVarSelector(), r.midValSelector(true), DecisionOperator.int_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testFH3324() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        model.set(dichotomic(minDomainSize_var_selector(), false, X));
+        Resolver r = model.getResolver();
+        r.set(r.intVarSearch(r.minDomVarSelector(), r.midValSelector(false), DecisionOperator.int_reverse_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
     }
 }

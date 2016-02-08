@@ -88,7 +88,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
 
     @SuppressWarnings("unchecked")
     private void extractNogoodFromPath() {
-        int d = (int) png.getModel().getMeasures().getNodeCount();
+        int d = (int) png.getModel().getResolver().getMeasures().getNodeCount();
         Decision<IntVar> decision = png.getModel().getResolver().getLastDecision();
         while (decision != RootDecision.ROOT) {
             decisions.addLast(decision);

@@ -34,7 +34,6 @@ import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
-import org.chocosolver.solver.search.loop.learn.LearnCBJ;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
@@ -96,7 +95,7 @@ public class LearnDBT extends LearnCBJ {
     @Override
     void identifyRefutedDecision(int nworld) {
         dbTstrategy.clear();
-        if (nworld == 1 || mModel.getEngine().getContradictionException().c == mModel.getObjectiveManager()) {
+        if (nworld == 1 || mModel.getResolver().getEngine().getContradictionException().c == mModel.getResolver().getObjectiveManager()) {
             super.identifyRefutedDecision(nworld);
             return;
         }
@@ -211,9 +210,9 @@ public class LearnDBT extends LearnCBJ {
 
         @Override
         public void afterInitialize() {
-            this.mainStrategy = mModel.getStrategy();
+            this.mainStrategy = mModel.getResolver().getStrategy();
             // put this strategy before any other ones.
-            mModel.set(this);
+            mModel.getResolver().set(this);
         }
 
         @Override

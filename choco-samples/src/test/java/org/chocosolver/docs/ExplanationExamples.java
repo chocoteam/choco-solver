@@ -30,15 +30,11 @@
 package org.chocosolver.docs;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 
 /**
@@ -55,7 +51,7 @@ public class ExplanationExamples {
         BoolVar[] bvars = model.boolVarArray("B", 4);
         model.arithm(bvars[2], "=", bvars[3]).post();
         model.arithm(bvars[2], "!=", bvars[3]).post();
-        model.set(lexico_LB(bvars));
+        model.getResolver().set(model.getResolver().firstLBSearch(bvars));
         CBJ.plugin(model, false, false);
         showStatistics(model);
         while (model.solve()) ;
@@ -70,7 +66,7 @@ public class ExplanationExamples {
                 model.arithm(pigeon[i], "!=", pigeon[j]).post();
             }
         }
-        model.set(lexico_LB(pigeon));
+        model.getResolver().set(model.getResolver().firstLBSearch(pigeon));
         CBJ.plugin(model, false, false);
         showStatistics(model);
         while (model.solve()) ;

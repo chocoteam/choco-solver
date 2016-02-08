@@ -30,9 +30,9 @@
 package org.chocosolver.docs;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.IntVar;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.solver.trace.Chatterbox.printStatistics;
 
 /**
@@ -52,7 +52,8 @@ public class Overview {
         // 3. Create and post constraints by using constraint factories
         model.arithm(x, "+", y, "<", 5).post();
         // 4. Define the search strategy
-        model.set(lexico_LB(x, y));
+        Resolver r = model.getResolver();
+        r.set(r.firstLBSearch(x, y));
         // 5. Launch the resolution process
         model.solve();
         //6. Print search statistics

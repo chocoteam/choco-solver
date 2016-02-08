@@ -38,6 +38,5 @@ import org.chocosolver.solver.search.loop.move.IMoveFactory;
  */
 @Deprecated
 public class SLF extends SearchLoopFactory {
-    SLF() {
-    }
+    SLF() {}
 }

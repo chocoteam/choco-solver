@@ -89,7 +89,7 @@ public class Eq5 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(new IntStrategy(vars, new InputOrder<>(), new IntDomainMiddle(true)));
+        model.getResolver().set(new IntStrategy(vars, new InputOrder<>(), new IntDomainMiddle(true)));
     }
 
     @Override
@@ -101,7 +101,7 @@ public class Eq5 extends AbstractProblem {
     public void prettyOut() {
         System.out.println("15 equations");
         StringBuilder st = new StringBuilder();
-        if (model.isFeasible() == ESat.TRUE) {
+        if (model.getResolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < 15; i++) {
                 st.append(vars[i].getValue()).append(", ");
             }

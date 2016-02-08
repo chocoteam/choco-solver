@@ -61,7 +61,7 @@ public enum Reporting {
         while (!stack.isEmpty()) {
             sb.append(stack.removeFirst().toString()).append(" & ");
         }
-        sb.append("\n").append(model.getObjectiveManager().toString());
+        sb.append("\n").append(model.getResolver().getObjectiveManager().toString());
         return sb.toString();
     }
 
@@ -98,7 +98,7 @@ public enum Reporting {
         sb.append(onUnsatisfiedConstraints(model)).append("\n");
         sb.append(StringUtils.pad("", 50, "=")).append("\n");
         sb.append(onDecisions(model)).append("\n");
-        sb.append(model.getMeasures().toOneShortLineString());
+        sb.append(model.getResolver().getMeasures().toOneShortLineString());
         sb.append(StringUtils.pad("", 50, "#")).append("\n");
         return sb.toString();
     }

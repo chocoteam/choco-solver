@@ -32,14 +32,12 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality.reformulate;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -72,9 +70,9 @@ public class BoundGlobalCardinlityTest {
         vars[4].instantiateTo(0, Null);
         vars[5].instantiateTo(0, Null);
 
-        model.set(lexico_LB(append(vars, card)));
+        model.getResolver().set(model.getResolver().firstLBSearch(append(vars, card)));
         while (model.solve()) ;
-        assertTrue(model.getMeasures().getSolutionCount() > 0);
+        assertTrue(model.getResolver().getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -97,7 +95,7 @@ public class BoundGlobalCardinlityTest {
                 IntVar[] cards = model.intVarArray("cards", m, 0, n, true);
                 model.globalCardinality(vars, values, cards, false).post();
 //              solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
-                model.set(lexico_LB(append(vars, cards)));
+                model.getResolver().set(model.getResolver().firstLBSearch(append(vars, cards)));
             }
             // reformulation
             Model ref = new Model();
@@ -105,12 +103,12 @@ public class BoundGlobalCardinlityTest {
                 IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);
                 IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
                 reformulate(vars, cards, ref).post();
-                ref.set(lexico_LB(append(vars, cards)));
+                ref.getResolver().set(ref.getResolver().firstLBSearch(append(vars, cards)));
             }
 //            SearchMonitorFactory.log(solver, false, true);
             while (model.solve()) ;
             while (ref.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount());
 
         }
     }
@@ -134,7 +132,7 @@ public class BoundGlobalCardinlityTest {
                 IntVar[] cards = model.intVarArray("cards", m, 0, n, true);
                 model.globalCardinality(vars, values, cards, false).post();
 //                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
-                model.set(lexico_LB(vars));
+                model.getResolver().set(model.getResolver().firstLBSearch(vars));
             }
             // reformulation
             Model ref = new Model();
@@ -142,12 +140,12 @@ public class BoundGlobalCardinlityTest {
                 IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
                 IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);
                 reformulate(vars, cards, ref).post();
-                ref.set(lexico_LB(vars));
+                ref.getResolver().set(ref.getResolver().firstLBSearch(vars));
             }
 //            SearchMonitorFactory.log(solver, false, true);
             while (model.solve()) ;
             while (ref.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount());
 
         }
     }

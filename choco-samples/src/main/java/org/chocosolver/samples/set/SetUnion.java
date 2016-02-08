@@ -75,7 +75,7 @@ public class SetUnion extends AbstractProblem {
     @Override
     public void configureSearch() {
         Resolver r = model.getResolver();
-        r.set(r.setVarSearch(r.firstFreeVarSelector(),r.firstValSelector(),false,x, y, z));
+        r.set(r.setVarSearch(r.firstVarSelector(),r.firstValSelector(),false,x, y, z));
     }
 
     @Override

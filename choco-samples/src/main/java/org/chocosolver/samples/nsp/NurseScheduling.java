@@ -37,7 +37,6 @@ package org.chocosolver.samples.nsp;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -62,17 +61,17 @@ public class NurseScheduling {
         },*/
         INC_DOMWDEG {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return IntStrategyFactory.domOverWDeg(vars, System.currentTimeMillis());
+                return s.getResolver().domOverWDegSearch(vars);
             }
         },
         FORCE_INPUT {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return IntStrategyFactory.minDom_LB(cast(s.getVars()));
+                return s.getResolver().minDomLBSearch(cast(s.getVars()));
             }
         },
         FORCE_DOMWDEG {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return IntStrategyFactory.domOverWDeg(cast(s.getVars()), System.currentTimeMillis());
+                return s.getResolver().domOverWDegSearch(cast(s.getVars()));
             }
         },
         /*DOMWDEG {
@@ -82,7 +81,7 @@ public class NurseScheduling {
         },*/
         MIN_DOM {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return IntStrategyFactory.minDom_LB(vars);
+                return s.getResolver().minDomLBSearch(vars);
             }
         },
 
@@ -93,7 +92,7 @@ public class NurseScheduling {
         },*/
         RAND {
             AbstractStrategy getGoal(Model s, IntVar[] vars) {
-                return IntStrategyFactory.random_bound(vars, 0);
+                return s.getResolver().randomSearch(vars, 0);
             }
         };
 
@@ -158,7 +157,7 @@ public class NurseScheduling {
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
         SearchMonitorFactory.limitTime(model, 180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
-        model.set(strategy.getGoal(model, vars));
+        model.getResolver().set(strategy.getGoal(model, vars));
         if (Boolean.TRUE == model.solve()) {
             m.printSolution(model);
             NSChecker checker = new NSChecker(data);
@@ -166,8 +165,8 @@ public class NurseScheduling {
                 System.out.println("Solution checked.");
         }
         String content =
-                model.getMeasures().getTimeCount() + " ms,\t " + model.getMeasures().getNodeCount() + " nodes,\t "
-                        + model.getMeasures().getBackTrackCount() + " bks,\t "
+                model.getResolver().getMeasures().getTimeCount() + " ms,\t " + model.getResolver().getMeasures().getNodeCount() + " nodes,\t "
+                        + model.getResolver().getMeasures().getBackTrackCount() + " bks,\t "
                         + strategy.name() + "\t " + patternOptions.name() + "\t "
                         + m.getDescription() + "\n";
         System.out.println(content);
@@ -184,7 +183,7 @@ public class NurseScheduling {
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
 
-        model.set(strategy.getGoal(model, vars));
+        model.getResolver().set(strategy.getGoal(model, vars));
 
         System.out.printf("%s\n", model.toString());
         if (Boolean.TRUE == model.solve()) {
@@ -201,7 +200,7 @@ public class NurseScheduling {
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
         SearchMonitorFactory.limitTime(model, 180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
-        model.set(strategy.getGoal(model, vars));
+        model.getResolver().set(strategy.getGoal(model, vars));
         String solved = "0";
         if (Boolean.TRUE == model.solve()) {
             m.printSolution(model);
@@ -211,15 +210,15 @@ public class NurseScheduling {
             solved = "1";
         }
         String content =
-                solved + ",\t" + model.getMeasures().getTimeCount() + " ms,\t "
-                        + model.getMeasures().getNodeCount() + " nodes,\t "
-                        + model.getMeasures().getBackTrackCount() + " bks,\t "
+                solved + ",\t" + model.getResolver().getMeasures().getTimeCount() + " ms,\t "
+                        + model.getResolver().getMeasures().getNodeCount() + " nodes,\t "
+                        + model.getResolver().getMeasures().getBackTrackCount() + " bks,\t "
                         + strategy.name() + "\t " + patternOptions.name() + "\t " + basisOptions.name() + "\t "
                         + m.getDescription() + "\n";
         String contentCSV =
-                solved + "," + model.getMeasures().getTimeCount() + ","
-                        + model.getMeasures().getNodeCount() + ","
-                        + model.getMeasures().getBackTrackCount() + ","
+                solved + "," + model.getResolver().getMeasures().getTimeCount() + ","
+                        + model.getResolver().getMeasures().getNodeCount() + ","
+                        + model.getResolver().getMeasures().getBackTrackCount() + ","
                         + strategy.name() + "," + patternOptions.name() + "," + basisOptions.name() + ","
                         + m.getDescription() + "\n";
         System.out.println(content);

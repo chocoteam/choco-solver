@@ -30,9 +30,9 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
@@ -371,7 +371,8 @@ public class RuleStoreTest {
         RuleStore rs = new RuleStore(model, true, true);
         rs.init(new Explanation(null, false));
 
-        IntStrategy is = ISF.lexico_LB(E, I, B);
+        Resolver re = model.getResolver();
+        IntStrategy is = re.firstLBSearch(E, I, B);
         Decision d1 = null, d2 = null, d3 = null;
         try {
             d1 = is.getDecision();

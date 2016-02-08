@@ -90,7 +90,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
         assert k > 0 : "parameter K of last conflict must be strictly positive!";
         this.model = model;
         this.mainStrategy = mainStrategy;
-        model.plugMonitor(this);
+        model.getResolver().plugMonitor(this);
         conflictingVariables = new Variable[k];
         nbCV = 0;
         active = false;

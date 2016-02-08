@@ -127,7 +127,7 @@ public class NurseSchedulingProblem {
      * @param s the CPModel
      */
     public String solutionToString(Model s) {
-        if (ESat.TRUE != s.isFeasible()) {
+        if (ESat.TRUE != s.getResolver().isFeasible()) {
             return null;
         }
         StringBuilder buf = new StringBuilder(100);
@@ -152,7 +152,7 @@ public class NurseSchedulingProblem {
      * @param s the CPModel
      */
     public void printSolution(Model s) {
-        if (ESat.TRUE != s.isFeasible()) {
+        if (ESat.TRUE != s.getResolver().isFeasible()) {
             System.out.println("No solution found.");
             return;
         }
@@ -176,7 +176,7 @@ public class NurseSchedulingProblem {
      * @return the current solver solution as the assignment table [nbEmployees][nbDays] if exists, null otherwise
      */
     public int[][] getSolution(Model s) {
-        if (ESat.TRUE != s.isFeasible()) {
+        if (ESat.TRUE != s.getResolver().isFeasible()) {
             return null;
         }
         int[][] solution = new int[shifts.length][shifts[0].length];

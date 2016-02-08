@@ -30,10 +30,8 @@
 package org.chocosolver.samples.pert;
 
 import org.chocosolver.samples.AbstractProblem;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
@@ -41,6 +39,7 @@ import java.util.ArrayDeque;
 import java.util.BitSet;
 import java.util.Deque;
 
+import static java.lang.Math.max;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 
 
@@ -105,7 +104,7 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.set(IntStrategyFactory.lexico_LB(vars));
+        model.getResolver().set(model.getResolver().firstLBSearch(vars));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];
@@ -118,7 +117,7 @@ public class Pert extends AbstractProblem {
             treated[i] = true;
             for (int j = 0; j < n; j++) {
                 if (graph[i][j] == 1) {
-                    rank[j] = Math.max(rank[i] + 1, rank[j]);
+                    rank[j] = max(rank[i] + 1, rank[j]);
                     if (!treated[j] && !toTreat.contains(j)) {
                         toTreat.push(j);
                     }

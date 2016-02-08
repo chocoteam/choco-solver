@@ -32,12 +32,9 @@ package org.chocosolver.solver.constraints.reification;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -47,7 +44,6 @@ import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.testng.Assert.assertEquals;
 
 
@@ -77,9 +73,9 @@ public class ReifiedTest {
             Constraint oppCons = s.arithm(x, "!=", y);
 
             s.ifThenElse(b, cons, oppCons);
-            s.set(lexico_LB(vars));
+            s.getResolver().set(s.getResolver().firstLBSearch(vars));
             while (s.solve()) ;
-            long sol = s.getMeasures().getSolutionCount();
+            long sol = s.getResolver().getMeasures().getSolutionCount();
             assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
     }
@@ -101,9 +97,9 @@ public class ReifiedTest {
 
         s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")).post();
 
-        s.set(lexico_LB(new IntVar[]{x, y, z}));
+        s.getResolver().set(s.getResolver().firstLBSearch(new IntVar[]{x, y, z}));
         while (s.solve()) ;
-        long sol = s.getMeasures().getSolutionCount();
+        long sol = s.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
     }
 
@@ -125,9 +121,9 @@ public class ReifiedTest {
 
             s.ifThenElse(b, cons, oppCons);
 
-            s.set(lexico_LB(vars));
+            s.getResolver().set(s.getResolver().firstLBSearch(vars));
             while (s.solve()) ;
-            long sol = s.getMeasures().getSolutionCount();
+            long sol = s.getResolver().getMeasures().getSolutionCount();
             assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
     }
@@ -153,7 +149,7 @@ public class ReifiedTest {
 
         s1.allDifferent(vars1, "AC").post();
 
-        s1.set(lexico_LB(vars1));
+        s1.getResolver().set(s1.getResolver().firstLBSearch(vars1));
         return s1;
     }
 
@@ -219,7 +215,7 @@ public class ReifiedTest {
             }
         }
 
-        s2.set(IntStrategyFactory.lexico_LB(X));
+        s2.getResolver().set(s2.getResolver().firstLBSearch(X));
         return s2;
     }
 
@@ -247,8 +243,8 @@ public class ReifiedTest {
 
 
                 ////////////////////////
-                long sol1 = s1.getMeasures().getSolutionCount();
-                long sol2 = s2.getMeasures().getSolutionCount();
+                long sol1 = s1.getResolver().getMeasures().getSolutionCount();
+                long sol2 = s2.getResolver().getMeasures().getSolutionCount();
                 assertEquals(sol2, sol1, "nb sol incorrect");
             }
         }
@@ -270,8 +266,8 @@ public class ReifiedTest {
 
 
         ////////////////////////
-        long sol1 = s1.getMeasures().getSolutionCount();
-        long sol2 = s2.getMeasures().getSolutionCount();
+        long sol1 = s1.getResolver().getMeasures().getSolutionCount();
+        long sol2 = s2.getResolver().getMeasures().getSolutionCount();
         assertEquals(sol2, sol1, "nb sol incorrect");
 
     }
@@ -298,11 +294,11 @@ public class ReifiedTest {
         }
 
         try {
-            model.propagate();
+            model.getResolver().propagate();
             cp.updateUpperBound(5, Null);
-            model.propagate();
+            model.getResolver().propagate();
             bv[0].instantiateTo(1, Null);
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -341,7 +337,7 @@ public class ReifiedTest {
 
         while (s.solve()) ;
 
-        assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
 
     }
 
@@ -377,7 +373,7 @@ public class ReifiedTest {
 
         while (s.solve()) ;
 
-        assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
 
     }
 
@@ -414,7 +410,7 @@ public class ReifiedTest {
 //        SearchMonitorFactory.log(s, true, false);
         while (s.solve()) ;
 
-        assertEquals(s.getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
 
     }
 
@@ -451,7 +447,7 @@ public class ReifiedTest {
 //        SearchMonitorFactory.log(s, true, false);
         while (s.solve()) ;
 
-        assertEquals(s.getMeasures().getSolutionCount(), 5);
+        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 5);
 
     }
 }

@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingObjective;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
@@ -40,8 +41,6 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.explanations.ExplanationFactory.CBJ;
 import static org.chocosolver.solver.search.limits.ICounter.Impl.None;
-import static org.chocosolver.solver.search.loop.SearchLoopFactory.lns;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
 import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 
 /**
@@ -63,14 +62,14 @@ public class ELNSTest {
 
         CBJ.plugin(model, false, false);
 
-        lns(model,
-                new SequenceNeighborhood(
+        Resolver r = model.getResolver();
+        r.set(r.lns(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(model, vars, 200, 123456L)
-                ),
-                None);
-        model.set(random_bound(vars, seed));
+                ), None)
+        );
+        r.set(r.randomSearch(vars, seed));
 
 
 //        SMF.log(solver, true, true, new IMessage() {

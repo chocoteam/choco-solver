@@ -84,7 +84,7 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.plugMonitor((IMonitorSolution) () -> {
+        model.getResolver().plugMonitor((IMonitorSolution) () -> {
             StringBuilder st = new StringBuilder();
             st.append("\t");
             for (int i = 0; i < vars.length; i++) {

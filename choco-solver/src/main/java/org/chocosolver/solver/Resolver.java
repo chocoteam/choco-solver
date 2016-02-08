@@ -40,14 +40,13 @@ import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.learn.Learn;
-import org.chocosolver.solver.search.loop.move.Move;
-import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
+import org.chocosolver.solver.search.loop.move.Move;
+import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.solution.ISolutionRecorder;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -63,10 +62,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.chocosolver.solver.Resolver.Action.*;
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
 import static org.chocosolver.solver.search.loop.Reporting.fullReport;
-import static org.chocosolver.solver.Resolver.Action.*;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 import static org.chocosolver.util.ESat.*;
 
@@ -282,7 +281,7 @@ public final class Resolver implements Serializable, ISolver {
                     assert (TRUE.equals(isSatisfied())) : fullReport(mModel);
                     feasible = TRUE;
                     mMeasures.incSolutionCount();
-                    mModel.getObjectiveManager().update();
+                    getObjectiveManager().update();
                     searchMonitors.onSolution();
                     if (stopAtFirstSolution()) {
                         action = stop;
@@ -454,7 +453,7 @@ public final class Resolver implements Serializable, ISolver {
         searchMonitors.beforeRestart();
         restoreRootNode();
         mModel.getEnvironment().worldPush();
-        mModel.getMeasures().incRestartCount();
+        mModel.getResolver().getMeasures().incRestartCount();
         try {
             objectivemanager.postDynamicCut();
             P.execute(this);
@@ -726,8 +725,14 @@ public final class Resolver implements Serializable, ISolver {
      * Replaces the current move with <code>m</code>
      * @param m the new move to apply
      */
-    public void set(Move m) {
-        this.M = m;
+    public void set(Move... m) {
+        if(m == null) {
+            this.M = null;
+        }else if (m.length == 1){
+            this.M = m[0];
+        }else{
+            this.M = seqMoves(m);
+        }
     }
 
     /**
@@ -760,7 +765,7 @@ public final class Resolver implements Serializable, ISolver {
                     "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
                     "An iteration over it child moves is needed: this.getMove().getChildMoves().");
         } else {
-            M.setStrategy(strategies.length == 1?strategies[0]:ISF.sequencer(strategies));
+            M.setStrategy(strategies.length == 1?strategies[0]:sequencer(strategies));
         }
     }
 

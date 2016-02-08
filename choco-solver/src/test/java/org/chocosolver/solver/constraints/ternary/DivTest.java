@@ -30,12 +30,12 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.chocosolver.util.ESat.TRUE;
 
 /**
@@ -73,10 +73,11 @@ public class DivTest extends AbstractTernaryTest {
             IntVar b = s.intVar("b", new int[]{-1, 1, 3, 4});
             IntVar c = s.intVar("c", new int[]{-3, 1, 4});
             s.div(a, b, c).post();
-            s.set(random_value(new IntVar[]{a, b, c}, i));
+            Resolver r = s.getResolver();
+            r.set(r.randomSearch(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);
-            s.plugMonitor((IMonitorSolution) () -> {
-                if (!TRUE.equals(s.isSatisfied())) {
+            r.plugMonitor((IMonitorSolution) () -> {
+                if (!TRUE.equals(r.isSatisfied())) {
                     throw new Error(s.toString());
                 }
             });

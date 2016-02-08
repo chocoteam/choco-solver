@@ -30,9 +30,9 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -42,9 +42,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import static java.lang.Boolean.TRUE;
+import static java.lang.System.arraycopy;
 import static java.util.Arrays.asList;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 
@@ -78,14 +78,14 @@ public class CountTest {
     public void testMS4() {
         Model model = modelit(4);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMS8() {
         Model model = modelit(8);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 1);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -112,12 +112,15 @@ public class CountTest {
             int value = 1;
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.set(random_bound(allvars, i));
             model.count(value, vars, occ).post();
+
+            Resolver r = model.getResolver();
+            r.set(r.randomSearch(allvars,i));
+
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -163,16 +166,13 @@ public class CountTest {
 //                SearchMonitorFactory.log(solver, true, true);
 //            }
 
-            if (!enumvar) {
-                model.set(random_bound(vars, seed));
-            } else {
-                model.set(random_value(vars, seed));
-            }
+            Resolver r = model.getResolver();
+            r.set(r.randomSearch(vars, seed));
             while (model.solve()) ;
             if (nbsol == -1) {
-                nbsol = model.getMeasures().getSolutionCount();
+                nbsol = r.getMeasures().getSolutionCount();
             } else {
-                assertEquals(model.getMeasures().getSolutionCount(), nbsol);
+                assertEquals(r.getMeasures().getSolutionCount(), nbsol);
             }
 
         }
@@ -193,7 +193,7 @@ public class CountTest {
         IntVar[] vars = model.intVarArray("e", vs.length + 1, 0, ub, false);
 
         Tuples tuples = new Tuples(true);
-        model.set(IntStrategyFactory.lexico_LB(vars));
+        model.getResolver().set(model.getResolver().firstLBSearch(vars));
         model.solve();
         do {
             int[] tuple = new int[vars.length];
@@ -207,10 +207,10 @@ public class CountTest {
             if (checkocc == tuple[tuple.length - 1]) {
                 tuples.add(tuple);
             }
-        } while (model.solve() == Boolean.TRUE);
+        } while (model.solve() == TRUE);
 
         IntVar[] newvs = new IntVar[vs.length + 1];
-        System.arraycopy(vs, 0, newvs, 0, vs.length);
+        arraycopy(vs, 0, newvs, 0, vs.length);
         newvs[vs.length] = occ;
 
         return model.table(newvs, tuples);

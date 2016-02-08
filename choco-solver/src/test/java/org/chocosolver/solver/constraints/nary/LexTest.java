@@ -39,7 +39,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static java.lang.Math.pow;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_bound;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -67,10 +66,10 @@ public class LexTest {
                 vs2[i] = model.intVar("" + i, 0, k, true);
             }
             model.lexLessEq(vs1, vs2).post();
-            model.set(random_bound(append(vs1, vs2), seed));
+            model.getResolver().set(model.getResolver().randomSearch(append(vs1, vs2), seed));
             while (model.solve()) ;
             int kpn = (int) pow(k + 1, n1 / 2);
-            assertEquals(model.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
         }
     }
 
@@ -87,10 +86,10 @@ public class LexTest {
                 vs2[i] = model.intVar("" + i, 0, k, true);
             }
             model.lexLess(vs1, vs2).post();
-            model.set(random_bound(append(vs1, vs2), seed));
+            model.getResolver().set(model.getResolver().randomSearch(append(vs1, vs2), seed));
 
             while (model.solve()) ;
-            assertEquals(model.getMeasures().getSolutionCount(), 3240);
+            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3240);
         }
     }
 
@@ -131,14 +130,14 @@ public class LexTest {
 
         model.lexLess(a, b).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
 
         } catch (ContradictionException e) {
             fail();
         }
 //        SearchMonitorFactory.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(6, model.getMeasures().getSolutionCount());
+        assertEquals(6, model.getResolver().getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -155,14 +154,14 @@ public class LexTest {
 
         model.lexLess(a, b).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException e) {
             fail();
         }
         assertEquals(5, a[0].getUB());
 //        SearchMonitorFactory.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -180,13 +179,13 @@ public class LexTest {
 
         model.lexLess(a, b).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException e) {
             fail();
         }
         assertEquals(-2, a[0].getUB());
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -204,11 +203,11 @@ public class LexTest {
 
         model.lexLess(a, b).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
             fail();
         } catch (ContradictionException ignored) {
         }
-        assertEquals(model.getMeasures().getSolutionCount(), 0);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -232,11 +231,11 @@ public class LexTest {
 
         model.lexLess(a, b).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException ignored) {
         }
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 216);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 216);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -256,13 +255,13 @@ public class LexTest {
 
         model.lexLess(a, b).post();
         try {
-            model.propagate();
+            model.getResolver().propagate();
         } catch (ContradictionException e) {
             fail();
         }
         assertEquals(-1, b[0].getLB());
 //        SearchMonitorFactory.log(solver, true, false);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 30);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 30);
     }
 }

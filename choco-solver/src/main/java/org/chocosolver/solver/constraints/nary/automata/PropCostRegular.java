@@ -217,8 +217,8 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     private void checkWorld() {
         int currentworld = model.getEnvironment().getWorldIndex();
-        long currentbt = model.getMeasures().getBackTrackCount();
-        long currentrestart = model.getMeasures().getRestartCount();
+        long currentbt = model.getResolver().getMeasures().getBackTrackCount();
+        long currentrestart = model.getResolver().getMeasures().getRestartCount();
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
             this.toRemove.clear();
             this.graph.inStack.clear();

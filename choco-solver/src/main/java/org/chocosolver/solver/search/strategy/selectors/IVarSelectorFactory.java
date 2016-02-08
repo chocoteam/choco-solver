@@ -49,7 +49,7 @@ public interface IVarSelectorFactory {
      * Selects the first free (non-instantiated) variable
      * @return a variable selector choosing always the first non-instantiated variable
      */
-    default VariableSelector firstFreeVarSelector() {
+    default VariableSelector firstVarSelector() {
         return new InputOrder<>();
     }
 

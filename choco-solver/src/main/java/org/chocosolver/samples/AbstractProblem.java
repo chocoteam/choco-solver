@@ -32,7 +32,6 @@ package org.chocosolver.samples;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.trace.Chatterbox;
-import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -123,7 +122,7 @@ public abstract class AbstractProblem {
     }
 
     protected void overrideExplanation() {
-        if (model.getExplainer() == null) {
+        if (model.getResolver().getExplainer() == null) {
             expeng.plugin(model, ng, false);
         }
     }
@@ -150,7 +149,7 @@ public abstract class AbstractProblem {
                 public void run() {
                     if (userInterruption()) {
                         if (level.getLevel() > SILENT.getLevel()) {
-                            System.out.println(model.getMeasures().toString());
+                            System.out.println(model.getResolver().getMeasures().toString());
                         }
                     }
 

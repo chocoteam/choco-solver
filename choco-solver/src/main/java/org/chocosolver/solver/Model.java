@@ -47,17 +47,21 @@ import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.search.loop.SLF;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.search.solution.*;
+import org.chocosolver.solver.search.solution.ISolutionRecorder;
+import org.chocosolver.solver.search.solution.LastSolutionRecorder;
+import org.chocosolver.solver.search.solution.ParetoSolutionsRecorder;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
 
 import java.io.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 
@@ -296,8 +300,6 @@ public class Model implements Serializable, IModel {
 
     /**
      * Returns the unique and internal propagation and search object to solve this model.
-     * Set to null when this model is created, and lazily created when this method is called.
-     * Creates {@link SLF#dfs(Model, AbstractStrategy)} by default.
      * @return the unique and internal <code>Resolver</code> object.
      */
     public Resolver getResolver() {
@@ -784,7 +786,7 @@ public class Model implements Serializable, IModel {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("\n Model[%s]\n", name));
         st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
-        st.append(String.format("Feasability: %s\n", isFeasible()));
+        st.append(String.format("Feasability: %s\n", getResolver().isFeasible()));
         st.append("== variables ==\n");
         for (int v = 0; v < vIdx; v++) {
             st.append(vars[v].toString()).append('\n');

@@ -30,12 +30,12 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -55,7 +55,7 @@ public class ConstraintTest {
         SetVar s2 = model.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         model.or(model.allEqual(new SetVar[]{s1, s2}), model.setBoolsChanneling(bs, s1, 0)).post();
         while (model.solve()) ;
-        assertEquals(2040, model.getMeasures().getSolutionCount());
+        assertEquals(2040, model.getResolver().getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -67,10 +67,11 @@ public class ConstraintTest {
         model.arithm(ivs[0], ">=", ivs[2]).post(); // INST + UB or INST + LB
         model.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
 
-        model.set(random_value(ivs, 0));
+        Resolver r = model.getResolver();
+        r.set(r.randomSearch(ivs, 0));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 48);
-        assertEquals(model.getMeasures().getNodeCount(), 100);
+        assertEquals(r.getMeasures().getSolutionCount(), 48);
+        assertEquals(r.getMeasures().getNodeCount(), 100);
     }
 
     @Test(groups="1s", timeOut=60000)

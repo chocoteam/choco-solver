@@ -39,7 +39,6 @@ import org.testng.annotations.Test;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.max;
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 
 /**
  * Created by cprudhom on 18/02/15.
@@ -93,7 +92,7 @@ public class ParetoTest {
         s.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1).post();
         s.knapsack(occurrences, totalWeight, totalProfit_2, weights, profits_2).post();
         // --- Monitor
-        s.plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
+        s.getResolver().plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
         // --- solve
         s.setObjectives(ResolutionPolicy.MAXIMIZE,totalProfit_1, totalProfit_2);
         s.solve();

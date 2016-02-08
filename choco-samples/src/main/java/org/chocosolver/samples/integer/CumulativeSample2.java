@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.ESat;
@@ -83,8 +82,8 @@ public class CumulativeSample2 extends AbstractProblem {
 	}
 
 	@Override
-	public void configureSearch(){
-		model.set(IntStrategyFactory.lexico_LB(starts));
+	public void configureSearch() {
+		model.getResolver().set(model.getResolver().firstLBSearch(starts));
 	}
 
 	@Override
@@ -94,7 +93,7 @@ public class CumulativeSample2 extends AbstractProblem {
 
 	@Override
 	public void prettyOut(){
-		if (model.isFeasible() == ESat.TRUE) {
+		if (model.getResolver().isFeasible() == ESat.TRUE) {
 			System.out.println("solution found");
 		}
 	}

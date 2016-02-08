@@ -31,18 +31,12 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
-import org.chocosolver.solver.search.loop.SLF;
-import org.chocosolver.solver.search.loop.monitors.SMF;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.loop.SearchLoopFactory.restart;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.limitTime;
 import static org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory.nogoodRecordingFromRestarts;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.random_value;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -58,14 +52,11 @@ public class NogoodTest {
         final Model model = new Model();
         IntVar[] vars = model.intVarArray("vars", 3, 0, 2, false);
         nogoodRecordingFromRestarts(model);
-        model.set(random_value(vars, 29091981L));
-        restart(model,
-                new BacktrackCounter(model, 0),
-                new MonotonicRestartStrategy(30), 3);
-//        SMF.limitTime(solver, 2000);
+        model.getResolver().set(model.getResolver().randomSearch(vars, 29091981L));
+        model.getResolver().set(model.getResolver().restart(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3));
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 27);
-        assertEquals(model.getMeasures().getBackTrackCount(), 51);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 27);
+        assertEquals(model.getResolver().getMeasures().getBackTrackCount(), 51);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -73,14 +64,13 @@ public class NogoodTest {
         final Model model = new Model();
         IntVar[] vars = model.intVarArray("vars", 3, 0, 3, false);
         nogoodRecordingFromRestarts(model);
-        model.set(random_value(vars, 29091981L));
-        restart(model,
-                new BacktrackCounter(model, 0),
-                new MonotonicRestartStrategy(30), 1000);
+        model.getResolver().set(model.getResolver().randomSearch(vars, 29091981L));
+        model.getResolver().set(model.getResolver().restart(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 1000)
+        );
         limitTime(model, 2000);
         while (model.solve()) ;
-        assertEquals(model.getMeasures().getSolutionCount(), 64);
-        assertEquals(model.getMeasures().getBackTrackCount(), 121);
+        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 64);
+        assertEquals(model.getResolver().getMeasures().getBackTrackCount(), 121);
     }
 
 }

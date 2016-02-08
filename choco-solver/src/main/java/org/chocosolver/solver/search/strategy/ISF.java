@@ -30,12 +30,10 @@
 package org.chocosolver.solver.search.strategy;
 
 /**
- * A short-name version of {@code IntStrategyFactory}
- * <br/>
+ * @deprecated : search strategies for integer variables should be done through
+ * {@link org.chocosolver.solver.Resolver} which implements {@link IIntStrategyFactory}
  *
- * @author Charles Prud'homme
- * @since 15/05/13
+ * This class will be removed in versions > 3.4.0
  */
-public class ISF extends IntStrategyFactory{
-    // SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
-}
+@Deprecated
+public class ISF extends IntStrategyFactory{}

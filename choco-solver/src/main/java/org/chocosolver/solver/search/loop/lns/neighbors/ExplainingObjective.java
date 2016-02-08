@@ -32,8 +32,9 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -125,15 +126,16 @@ public class ExplainingObjective extends ExplainingCut{
 
     @Override
     public void init() {
-        om = mModel.getObjectiveManager();
+        Resolver r = mModel.getResolver();
+        om = r.getObjectiveManager();
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();
         if (mExplanationEngine == null) {
-            if (mModel.getExplainer() == null) {
-                mModel.set(new ExplanationEngine(mModel, false, false));
+            if (r.getExplainer() == null) {
+                r.set(new ExplanationEngine(mModel, false, false));
             }
-            this.mExplanationEngine = mModel.getExplainer();
+            this.mExplanationEngine = r.getExplainer();
         }
     }
 

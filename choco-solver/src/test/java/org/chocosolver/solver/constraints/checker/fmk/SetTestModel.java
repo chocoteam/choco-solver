@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.checker.fmk;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -38,7 +38,6 @@ import org.chocosolver.solver.variables.Variable;
 
 import static java.lang.System.arraycopy;
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.search.strategy.IntStrategyFactory.lexico_LB;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -185,7 +184,7 @@ public interface SetTestModel {
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             s.sum(bools, "=", vars[n - 1]).post();
-            s.set(lexico_LB(vars));
+            s.getResolver().set(s.getResolver().firstLBSearch(vars));
             return s;
         }
     };
@@ -206,7 +205,7 @@ public interface SetTestModel {
 //                System.out.printf("");
             }
             s.arithm(vars[0], "=", vars[1]).post();
-            s.set(lexico_LB(vars));
+            s.getResolver().set(s.getResolver().firstLBSearch(vars));
             return s;
         }
     };
@@ -227,7 +226,7 @@ public interface SetTestModel {
             }
             IntVar[] allvars = append(X, Y);
             s.inverseChanneling(X, Y, 0, 0).post();
-            s.set(lexico_LB(allvars));
+            s.getResolver().set(s.getResolver().firstLBSearch(allvars));
             return s;
         }
     };
@@ -247,9 +246,9 @@ public interface SetTestModel {
                     decvars[i] = vars[i];
                 }
             }
-            AbstractStrategy strategy = lexico_LB(vars);
+            Resolver r = s.getResolver();
             s.nValues(decvars, vars[n - 1]).post();
-            s.set(strategy);
+            r.set(r.firstLBSearch(vars));
             return s;
         }
     };

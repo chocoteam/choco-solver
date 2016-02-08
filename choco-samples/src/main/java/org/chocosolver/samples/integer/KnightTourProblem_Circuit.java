@@ -32,8 +32,8 @@ package org.chocosolver.samples.integer;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
@@ -85,9 +85,10 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
 
     @Override
     public void configureSearch() {
+        Resolver r = model.getResolver();
 		SMF.limitTime(model, limit);
-		model.set(ISF.custom(
-				ISF.minDomainSize_var_selector(),
+		r.set(r.intVarSearch(
+				r.minDomVarSelector(),
                 var -> {
                     int ub = var.getUB();
                     int size = succ.length + 1;
