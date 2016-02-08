@@ -70,7 +70,7 @@ import java.util.List;
  * @author Jean-Guillaume Fages
  * @since 25/01/2016.
  */
-public class PropConDisTmp extends Propagator<BoolVar> {
+public class PropConDis extends Propagator<BoolVar> {
 
     /**
      * List of known boolvars
@@ -123,7 +123,7 @@ public class PropConDisTmp extends Propagator<BoolVar> {
      * A propagator to deal with constructive disjunction
      * @param model a model
      */
-    public PropConDisTmp(Model model) {
+    public PropConDis(Model model) {
         super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds model.ONE to fit to the super constructor
         this.vars = new BoolVar[0];    // erase model.ONE from the variable scope
         domains = new TIntObjectHashMap<>();
