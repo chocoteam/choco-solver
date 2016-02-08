@@ -32,88 +32,60 @@ package org.chocosolver.solver.search.loop.lns;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.limits.ACounter;
+import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
- * A Factory for Large Neighborhood Search, with pre-defined configurations.
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 04/07/13
+ * @deprecated use {@link INeighborFactory} instead
+ * Will be removed after version 3.4.0
  */
+@Deprecated
 public class LNSFactory {
 
     // LIST OF AVAILABLE NEIGHBORS
 
     /**
-     * Create a random neighborhood
-     *
-     * @param model the model concerned
-     * @param vars   the pool of variables to choose from
-     * @param level  the number of tries for each size of fragment
-     * @param seed   a seed for the random selection
-     * @return a random neighborhood
+     * @deprecated use {@link INeighborFactory#random(IntVar[])} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static INeighbor random(Model model, IntVar[] vars, int level, long seed) {
-        return new RandomNeighborhood(model, vars, level, seed);
+        return new RandomNeighborhood(vars, level, seed);
     }
 
     /**
-     * Create a propagation guided neighborhood
-     *
-     * @param model   the model concerned
-     * @param vars     the pool of variables to choose from
-     * @param fgmtSize fragment size (evaluated against log value)
-     * @param listSize size of the list
-     * @param seed     a seed for the random selection
-     * @return a propagation-guided neighborhood
+     * @deprecated use {@link INeighborFactory#propagationGuided(IntVar[])} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static INeighbor pg(Model model, IntVar[] vars, int fgmtSize, int listSize, long seed) {
-        return new PropagationGuidedNeighborhood(model, vars, seed, fgmtSize, listSize);
+        return new PropagationGuidedNeighborhood(vars, fgmtSize, listSize, seed);
     }
 
     /**
-     * Create a reverse propagation guided neighborhood
-     *
-     * @param model    the model concerned
-     * @param vars      the pool of variables to choose from
-     * @param fgmtSize  the limit size for PG and RPG
-     * @param listSize  size of the list
-     * @param seed      a seed for the random selection
-     * @return a reverse propagation-guided neighborhood
+     * @deprecated use {@link INeighborFactory#reversedPropagationGuided(IntVar[])} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static INeighbor rpg(Model model, IntVar[] vars, int fgmtSize, int listSize, long seed) {
-        return new ReversePropagationGuidedNeighborhood(model, vars, seed, fgmtSize, listSize);
+        return new ReversePropagationGuidedNeighborhood(vars, fgmtSize, listSize, seed);
     }
 
-    // PREDEFINED LNS
-
     /**
-     * Create a LNS based on a random neighborhood.
-     *
-     * @param model    the model
-     * @param vars      the pool of variables to choose from
-     * @param level     the number of tries for each size of fragment
-     * @param seed      a seed for the random selection
-     * @param frcounter a fast restart counter (can be null)
-     * @see org.chocosolver.solver.Resolver#setLNS(INeighbor)
+     * @deprecated use {@link Resolver#setLNS(INeighbor, ICounter)}
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void rlns(Model model, IntVar[] vars, int level, long seed, ACounter frcounter) {
-        model.getResolver().setLNS(new RandomNeighborhood(model, vars, level, seed), frcounter);
+        model.getResolver().setLNS(new RandomNeighborhood(vars, level, seed), frcounter);
     }
 
     /**
-     * Create a PGLNS, based on "Propagation-Guided LNS", Perronn Shaw and Furnon, CP2004.
-     *
-     * @param model    the model
-     * @param vars      the pool of variables to choose from
-     * @param fgmtSize  fragment size (evaluated against log value)
-     * @param listSize  size of the list
-     * @param level     the number of tries for each size of fragment
-     * @param seed      a seed for the random selection
-     * @param frcounter a fast restart counter (can be null)
+     * @deprecated use {@link Resolver#setLNS(INeighbor, ICounter)}
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void pglns(Model model, IntVar[] vars, int fgmtSize, int listSize, int level, long seed, ACounter frcounter) {
         Resolver r = model.getResolver();
         r.setLNS(
@@ -126,19 +98,16 @@ public class LNSFactory {
     }
 
     /**
-     * Create a ELNS, an Explanation based LNS
-     *
-     * @param model the model
-     * @param vars   the pool of variables to choose from
-     * @param level  the number of tries for each size of fragment
-     * @param seed   a seed for the random selection
-     * @param frcounter a fast restart counter (can be null) for neighborhoods
+     * @deprecated use {@link Resolver#setLNS(INeighbor, ICounter)}
+     * and {@link INeighborFactory#explanationBased(IntVar...)} instead
+     * Will be removed after version 3.4.0
      */
+    @Deprecated
     public static void elns(Model model, IntVar[] vars, int level, long seed,
                             ACounter frcounter) {
         INeighbor neighbor1 = new ExplainingObjective(model, level, seed);
         INeighbor neighbor2 = new ExplainingCut(model, level, seed);
-        INeighbor neighbor3 = new RandomNeighborhood(model, vars, level, seed);
+        INeighbor neighbor3 = new RandomNeighborhood(vars, level, seed);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
         model.getResolver().setLNS(neighbor, frcounter);

@@ -117,6 +117,13 @@ public abstract class Decision<E> implements ICause {
         return max_branching;
     }
 
+	/**
+     * @return true iff this decision is a meta decision (over multiple variables)
+     */
+    public boolean isMeta(){
+        return false;
+    }
+
     /**
      * Apply the current decision
      *

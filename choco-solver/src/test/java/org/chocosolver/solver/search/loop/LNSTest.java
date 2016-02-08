@@ -30,13 +30,16 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static java.lang.Math.ceil;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
 import static org.chocosolver.solver.trace.Chatterbox.printSolutions;
 
 /**
@@ -47,15 +50,12 @@ import static org.chocosolver.solver.trace.Chatterbox.printSolutions;
  */
 public class LNSTest {
 
-    Model model;
-    IntVar[] vars;
-
     private void knapsack20(final int lns) {
         int[] capacities = {99, 1101};
         int[] volumes = {54, 12, 47, 33, 30, 65, 56, 57, 91, 88, 77, 99, 29, 23, 39, 86, 12, 85, 22, 64};
         int[] energies = {38, 57, 69, 90, 79, 89, 28, 70, 38, 71, 46, 41, 49, 43, 36, 68, 92, 33, 84, 90};
 
-        model = new Model();
+        Model model = new Model();
         int nos = 20;
         // occurrence of each item
         IntVar[] objects = new IntVar[nos];
@@ -67,48 +67,50 @@ public class LNSTest {
         model.scalar(objects, volumes, "=", scalar).post();
         model.scalar(objects, energies, "=", power).post();
         model.knapsack(objects, scalar, power, volumes, energies).post();
-        model.getResolver().set(inputOrderLBSearch(objects));
+
+        Resolver r = model.getResolver();
+        r.set(lastConflict(domOverWDegSearch(objects)));
 //        SearchMonitorFactory.log(solver, true, false);
         switch (lns) {
             case 0:
                 break;
             case 1:
-                model.getResolver().setLNS(new RandomNeighborhood(model, objects, 200, 123456L));
-                model.getResolver().limitTime(10000);
+                r.setLNS(new RandomNeighborhood(objects, 200, 123456L));
+                r.limitTime(10000);
                 break;
             case 2:
-                model.getResolver().setLNS(new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10));
-                model.getResolver().limitTime(10000);
+                r.setLNS(new PropagationGuidedNeighborhood(objects, 100, 10, 123456L));
+                r.limitTime(10000);
                 break;
             case 3:
-                model.getResolver().setLNS(new SequenceNeighborhood(
-                        new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
-                        new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10)
+                r.setLNS(new SequenceNeighborhood(
+                        new PropagationGuidedNeighborhood(objects, 100, 10, 123456L),
+                        new ReversePropagationGuidedNeighborhood(objects, 100, 10, 123456L)
                 ));
-                model.getResolver().limitTime(10000);
+                r.limitTime(10000);
                 break;
             case 4:
-                model.getResolver().setLNS(new SequenceNeighborhood(
-                        new PropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
-                        new ReversePropagationGuidedNeighborhood(model, objects, 123456L, 100, 10),
-                        new RandomNeighborhood(model, objects, 200, 123456L)
+                r.setLNS(new SequenceNeighborhood(
+                        new PropagationGuidedNeighborhood(objects, 100, 10, 123456L),
+                        new ReversePropagationGuidedNeighborhood(objects, 100, 10, 123456L),
+                        new RandomNeighborhood(objects, 200, 123456L)
                 ));
-                model.getResolver().limitTime(10000);
+                r.limitTime(10000);
                 break;
             case 5:
-                model.getResolver().setLNS(new ExplainingCut(model, 200, 123456L));
-                model.getResolver().limitTime(10000);
+                r.setLNS(new ExplainingCut(model, 200, 123456L));
+                r.limitTime(10000);
                 break;
             case 6:
-                model.getResolver().setLNS(new ExplainingObjective(model, 200, 123456L));
-                model.getResolver().limitTime(10000);
+                r.setLNS(new ExplainingObjective(model, 200, 123456L));
+                r.limitTime(10000);
                 break;
             case 7:
-                model.getResolver().setLNS(new SequenceNeighborhood(
+                r.setLNS(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
-                        new RandomNeighborhood(model, objects, 200, 123456L)));
-                model.getResolver().limitTime(10000);
+                        new RandomNeighborhood(objects, 200, 123456L)));
+                r.limitTime(10000);
                 break;
         }
 //        Chatterbox.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());

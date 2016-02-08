@@ -171,7 +171,7 @@ public class ResolverTest {
         Resolver r = model.getResolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
-        r.setLNS(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
+        r.setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.limitSearch(() -> r.getMeasures().getNodeCount() >= 1000);
         model.solve();
         printShortStatistics(model);
@@ -184,7 +184,7 @@ public class ResolverTest {
         Resolver r = model.getResolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
-        model.getResolver().setLNS(new RandomNeighborhood(model, model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
+        model.getResolver().setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
         model.solve();
         printShortStatistics(model);

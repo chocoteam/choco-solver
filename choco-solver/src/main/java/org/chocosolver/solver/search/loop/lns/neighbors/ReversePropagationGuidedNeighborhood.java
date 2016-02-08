@@ -45,8 +45,8 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeighborhood {
 
-    public ReversePropagationGuidedNeighborhood(Model model, IntVar[] vars, long seed, int fgmtSize, int listSize) {
-        super(model, vars, seed, fgmtSize, listSize);
+    public ReversePropagationGuidedNeighborhood(IntVar[] vars, int fgmtSize, int listSize, long seed) {
+        super(vars, fgmtSize, listSize, seed);
     }
 
     @Override

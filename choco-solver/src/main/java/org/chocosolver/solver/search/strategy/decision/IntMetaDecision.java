@@ -166,4 +166,9 @@ public class IntMetaDecision extends Decision<IntVar[]> {
         System.arraycopy(val, 0, valBigger, 0, oldCapacity);
         val = valBigger;
     }
+
+    @Override
+    public boolean isMeta(){
+        return true;
+    }
 }

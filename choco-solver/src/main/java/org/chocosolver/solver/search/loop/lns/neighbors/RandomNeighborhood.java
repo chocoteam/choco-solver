@@ -60,9 +60,8 @@ public class RandomNeighborhood implements INeighbor {
     IntMetaDecision decision;
     Model mModel;
 
-
-    public RandomNeighborhood(Model aModel, IntVar[] vars, int level, long seed) {
-        this.mModel = aModel;
+    public RandomNeighborhood(IntVar[] vars, int level, long seed) {
+        this.mModel = vars[0].getModel();
         this.n = vars.length;
         this.vars = vars.clone();
         this.level = level;

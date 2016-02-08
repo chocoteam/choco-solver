@@ -127,15 +127,17 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        Variable curDecVar = (Variable) model.getResolver().getLastDecision().getDecisionVariables();
-        if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
-        if (inScope(curDecVar)) {
-            if (nbCV < conflictingVariables.length) {
-                conflictingVariables[nbCV++] = curDecVar;
-            } else {
-                assert nbCV == conflictingVariables.length;
-                System.arraycopy(conflictingVariables, 1, conflictingVariables, 0, nbCV - 1);
-                conflictingVariables[nbCV - 1] = curDecVar;
+        if(!model.getResolver().getLastDecision().isMeta()) {
+            Variable curDecVar = (Variable) model.getResolver().getLastDecision().getDecisionVariables();
+            if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
+            if (inScope(curDecVar)) {
+                if (nbCV < conflictingVariables.length) {
+                    conflictingVariables[nbCV++] = curDecVar;
+                } else {
+                    assert nbCV == conflictingVariables.length;
+                    System.arraycopy(conflictingVariables, 1, conflictingVariables, 0, nbCV - 1);
+                    conflictingVariables[nbCV - 1] = curDecVar;
+                }
             }
         }
     }

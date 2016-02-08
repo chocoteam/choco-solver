@@ -68,9 +68,8 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     IntMetaDecision decision;
     Model mModel;
 
-
-    public PropagationGuidedNeighborhood(Model model, IntVar[] vars, long seed, int fgmtSize, int listSize) {
-        this.mModel = model;
+    public PropagationGuidedNeighborhood(IntVar[] vars, int fgmtSize, int listSize, long seed) {
+        this.mModel = vars[0].getModel();
 
         this.n = vars.length;
         this.vars = vars.clone();

@@ -66,7 +66,7 @@ public class ELNSTest {
         r.setLNS(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
-                        new RandomNeighborhood(model, vars, 200, 123456L)
+                        new RandomNeighborhood(vars, 200, 123456L)
                 ), None);
         r.set(randomSearch(vars, seed));
 

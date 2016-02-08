@@ -32,10 +32,8 @@ package org.chocosolver.samples.integer;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -51,7 +49,6 @@ import static java.lang.Math.max;
 import static java.util.Arrays.copyOfRange;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
-import static org.chocosolver.solver.search.loop.lns.LNSFactory.pglns;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 
@@ -175,7 +172,7 @@ public class AirPlaneLanding extends AbstractProblem {
         model.sum(new IntVar[]{obj_e, obj_t}, "=", objective).post();
 
         model.allDifferent(planes, "BC").post();
-        model.setObjectives(ResolutionPolicy.MINIMIZE,objective);
+        model.setObjectives(MINIMIZE, objective);
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {
@@ -191,10 +188,6 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void solve() {
-        IntVar[] ivars = model.retrieveIntVars(true);
-        pglns(model, ivars, 30, 10, 200, 0, new FailCounter(model, 100));
-        model.getResolver().limitTime("15m"); // because PGLNS is not complete (due to Fast Restarts), we add a time limit
-        model.setObjectives(MINIMIZE, objective);
         model.solve();
     }
 

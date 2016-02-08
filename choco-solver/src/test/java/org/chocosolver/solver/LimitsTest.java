@@ -31,6 +31,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
+import org.chocosolver.solver.search.loop.lns.INeighborFactory;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
@@ -38,7 +39,6 @@ import org.chocosolver.util.tools.TimeUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.loop.lns.LNSFactory.random;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -136,7 +136,7 @@ public class LimitsTest {
     public void testGregy4() {
         Model model = makeNQueenWithBinaryConstraints(12);
         NodeCounter nodeCounter = new NodeCounter(model, 100);
-        INeighbor rnd = random(model, model.retrieveIntVars(true), 30, 0);
+        INeighbor rnd = INeighborFactory.random(model.retrieveIntVars(true));
         Move currentMove = model.getResolver().getMove();
         model.getResolver().set(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
