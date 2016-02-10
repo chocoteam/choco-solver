@@ -161,6 +161,16 @@ public class SearchStrategyFactory {
     }
 
     /**
+     * Builds a default search heuristics of integer variables
+     * Relies on {@link #domOverWDegSearch(IntVar...)}
+     * @param vars         variables to branch on
+     * @return a default search strategy
+     */
+    public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
+        return domOverWDegSearch(vars);
+    }
+
+    /**
      * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign it to its lower bound
      * @param vars list of variables
      * @return assignment strategy

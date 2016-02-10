@@ -1,276 +1,22 @@
-****************
-Solving problems
-****************
+###################
+Tuning the Resolver
+###################
 
-.. _31_solving_label:
+Each ``Model`` is associated with a ``Resolver`` that is in charge of alternating constraint-propagation with search, and possibly learning,
+to compute solutions. This object may be configured in various ways.
 
-Finding solutions
-=================
-
-Choco |version| provides different API, offered by ``Solver``, to launch the problem resolution.
-Before everything, there are two methods which help interpreting the results.
-
-**Feasibility**:
- Once the resolution ends, a call to the ``solver.isFeasible()`` method will return a boolean which indicates whether or not the problem is feasible.
-
- - ``true``: at least one solution has been found, the problem is proven to be feasible,
-
- - ``false``: in principle, the problem has no solution. More precisely, if the search space is guaranteed to be explored entirely, it is proven that the problem has no solution.
-
-
-**Limitation**:
-  When the resolution is limited (See :ref:`Limiting the resolution <33_searches_limit_label>` for details and examples), one may guess if a limit has been reached.
-  The ``solver.hasReachedLimit()`` method returns ``true`` if a limit has bypassed the search process, ``false`` if it has ended *naturally*.
-
-.. _Limits: 31_solving.html#limiting-the-resolution
-
-.. warning::
-
- In some cases, the search may not be complete.
- For instance, if one enables restart on each failure with a static search strategy,
- there is a possibility that the same sub-tree is explored permanently.
- In those cases, the search may never stop or the two above methods may not be sufficient to confirm the lack of solution.
-
-Satisfaction problems
----------------------
-
-Finding a solution
-^^^^^^^^^^^^^^^^^^
-
-A call to ``solver.solve()`` launches a resolution which stops on the first solution found, if any.
-
-.. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/Overview.java
-   :language: java
-   :lines: 47-59
-   :linenos:
-
-If a solution has been found, the resolution process stops on that solution,
-thus each variable is instantiated to a value, and the method returns ``true``.
-
-If the method returns ``false``, two cases must be considered:
-
-- A limit has been reached.
-  There may be a solution, but the solver has not been able to find it in the given limit
-  or there is no solution but the solver has not been able to prove it (i.e., to close to search tree) in the given limit.
-  The resolution process stops in no particular place in the search tree and the resolution can be run again.
-- No limit has been declared. The problem has no solution, the complete exploration of the search tree proved it.
-
-To ensure the problem has no solution, one may call ``solver.hasReachedLimit()``.
-It returns ``true`` if a limit has been reached, ``false`` otherwise.
-
-
-
-Enumerating solutions
-^^^^^^^^^^^^^^^^^^^^^
-
-Once the resolution has been started by a call to ``solver.solve()`` and if the problem is feasible,
-the resolution can be resumed using ``solver.solve()`` from the last solution found.
-The method returns ``true`` if a new solution is found, ``false`` otherwise (a call to ``solver.hasReachedLimit()`` must confirm the lack of new solution).
-If a solution has been found, alike ``solver.solve()``, the resolution stops on this solution,
-each variable is instantiated, and the resolution can be resumed again until there is no more new solution.
-
-One may enumerate all solution like this::
-
- if(solver.solve()){
-    do{
-        // do something, e.g. print out variables' value
-    }while(solver.solve());
- }
-
-``solver.solve()`` and  ``solver.solve()`` are the only ways to resume a resolution process which has already began.
-
-.. tip::
-
-    On a solution, one can get the value assigned to each variable by calling ::
-
-        ivar.getValue(); // instantiation value of an IntVar, return a int
-        svar.getValues(); // instantiation values of a SerVar, return a int[]
-        rvar.getLB(); // lower bound of a RealVar, return a double
-        rvar.getUB(); // upper bound of a RealVar, return a double
-
-
-
-An alternative is to call ``solver.findAllSolutions()``. It attempts to find all solutions of the problem.
-It returns the number of solutions found (in the given limit if any).
-
-
-Optimization problems
----------------------
-
-Choco |version| enables to solve optimization problems, that is, in which a variable must be optimized.
-
-.. tip::
-
- For functions, one should declare an objective variable and declare it as the result of the function::
-
-   // Function to maximize: 3X + 4Y
-   IntVar OBJ = VariableFactory.bounded("objective", 0, 999, solver);
-   solver.post(solver.scalar(new IntVar[]{X,Y}, new int[]{3,4}, OBJ));
-   solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, OBJ);
-
-
-Finding one optimal solution
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Finding one optimal solution is made through a call to the ``solver.findOptimalSolution(ResolutionPolicy, IntVar)`` method.
-The first argument defines the kind of optimization required: minimization (``ResolutionPolicy.MINIMIZE``)
-or maximization (``ResolutionPolicy.MAXIMIZE``).
-The second argument indicates the variable to optimize.
-
-For instance::
-
- solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, OBJ);
-
-states that the variable ``OBJ`` must be maximized.
-
-The method does not return any value.
-However, the best solution found so far can be restored (see below).
-
-The best solution found is the optimal one if the entire search space has been explored.
-
-The process is the following: anytime a solution is found, the value of the objective variable is stored and a *cut* is posted.
-The cut is an additional constraint which states that the next solution must be strictly better than the current one,
-ie in minimization, strictly smaller.
-
-Finding all optimal solutions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-There could be more than one optimal solutions.
-To find them all, one can call ``findAllOptimalSolutions(ResolutionPolicy, IntVar, boolean)``.
-The two first arguments defines the optimisation policy and the variable to optimize.
-The last argument states the way the solutions are computed.
-Set to ``true`` the resolution will be achieved in two steps: first finding and proving an optimal solution,
-then enumerating all solutions of optimal cost.
-Set to ``false``, the posted cuts are *soft*.
-When an equivalent solution is found, it is stored and the resolution goes on.
-When a strictly better solution is found, previous solutions are removed.
-Setting the boolean to ``false`` allow finding non-optimal intermediary solutions, which may be time consuming.
-
-
-
-Multi-objective optimization problems
--------------------------------------
-
-Finding the pareto front
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-It is possible to solve a multi-objective optimization problems with Choco |version|,
-using ``solver.findParetoFront(ResolutionPolicy policy, IntVar... objectives)``.
-The first argument define the resolution policy, which can be ``Resolution.MINIMIZE`` or ``ResolutionPolicy.MAXIMIZE``.
-Then, the second argument defines the list of variables to optimize.
-
-.. note::
-
- All variables should respect the same resolution policy.
-
-The underlying approach is naive, but it simplifies the process.
-Anytime a solution is found, a cut is posted which states that at least one of the objective variables must be better.
-Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n` where :math:`X_i` is the ith objective variable and :math:`b_i`
-its best known value.
-
-Here is a simple illustration:
-
-.. literalinclude:: /../../choco-samples/src/main/java/samples/org/chocosolver/integer/Pareto.java
-   :language: java
-   :lines: 71,72,73,75,83,88-92
-   :linenos:
-
-Propagation
------------
-
-One may want to propagate each constraint manually.
-This can be achieved by calling ``solver.propagate()``.
-This method runs, in turn, the domain reduction algorithms of the constraints until it reaches a fix point.
-It may throw a ``ContradictionException`` if a contradiction occurs.
-In that case, the propagation engine must be flushed calling ``solver.getEngine().flush()``
-to ensure there is no pending events.
-
-.. warning::
-
- If there are still pending events in the propagation engine, the propagation may results in unexpected results.
-
-Recording solutions
-===================
-
-Choco |version| requires that each decision variable (that is, which is declared in the search strategy) is instantiated in a solution.
-Otherwise, an exception will be thrown.
-Non decision variables can be uninstantiated in a solution, however, if WARN logging is enable, a trace is shown to inform the user.
-Choco |version| includes several ways to record solutions, the recommended way is to plug a `ISolutionMonitor` in.
-See :ref:`44_monitors_label` for more details.
-
-Solution storage
-----------------
-
-A solution is usually stored through a ``Solution`` object which maps every variable with its current value.
-Such an object can be erased to store new solutions.
-
-Solution recording
-------------------
-
-Built-in solution recorders
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A solution recorder (``ISolutionRecorder``) is an object in charge of recording variable values in solutions.
-There exists many built-in solution recorders:
-
-
-``LastSolutionRecorder`` only keeps variable values of the last solution found. It is the default solution recorder.
-Furthermore, it is possible to restore that solution after the search process ends.
-
-
-``AllSolutionsRecorder`` records all solutions that are found.
-As this may result in a memory explosion, it is not used by default.
-
-
-``BestSolutionsRecorder`` records all solutions but removes from the solution set each solution that is worse than the best solution value found so far.
-This may be used to enumerate all optimal (or at least, best) solutions of a problem.
-
-``ParetoSolutionsRecorder`` records all solutions of the pareto front of the multi-objective problem.
-
-Custom recorder
-^^^^^^^^^^^^^^^
-
-You can build you own way of manipulating and recording solutions by either implementing your own ``ISolutionRecorder`` object
-or by simply using an ``ISolutionMonitor``, as follows:
-
-.. literalinclude:: /../../choco-samples/src/main/java/samples/org/chocosolver/integer/SMPTSP.java
-   :language: java
-   :lines: 118-124
-   :linenos:
-
-Solution restoration
---------------------
-
-A ``Solution`` object can be restored, i.e. variables are fixed back to their values in that solution.
-This is achieved through the `Solver` by the calling one of the two following methods: ::
-
-    solver.restoreLastSolution();
-    // or
-    Solution aSolution= ...;
-    solver.restoreSolution(aSolution);
-
-.. note::
-
-    The restoration may detect inconsistency, for instance when the model has been externally modified since the solution to be restored to has been found.
-
+*****************
 Search Strategies
-=================
+*****************
 
-Principle
----------
-
-The search space induces by variables' domain is equal to  :math:`S=|d_1|*|d_2|*...*|d_n|` where :math:`d_i` is the domain of the :math:`i^{th}` variable.
-Most of the time (not to say always), constraint propagation is not sufficient to build a solution, that is, to remove all values but one from (integer) variables' domain.
+The search space induced by variable domains is equal to  :math:`S=|d_1|*|d_2|*...*|d_n|` where :math:`d_i` is the domain of the :math:`i^{th}` variable.
+Most of the time (not to say always), constraint propagation is not sufficient to build a solution, that is, to remove all values but one from variable domains.
 Thus, the search space needs to be explored using one or more *search strategies*.
-A search strategy performs a performs a `Depth First Search <http://en.wikipedia.org/wiki/Depth-first_search>`_  and reduces the search space by making *decisions*.
-A decision involves a variables, a value and an operator, for instance :math:`x = 5`.
-Decisions are computed and applied until all the variables are instantiated, that is, a solution is found, or a failure has been detected.
-
- Choco |release| build a binary search tree: each decision can be refuted.
- When a decision has to be computed, the search strategy is called to provide one, for instance :math:`x = 5`.
- The decision is then applied, the variable, the domain of ``x`` is reduced to ``5``, and the decision is validated thanks to the propagation.
- If the application of the decision leads to a failure, the search backtracks and the decision is refuted (:math:`x \neq 5`) and validated through propagation.
- Otherwise, if there is no more free variables then a solution has been found, else a new decision is computed.
+A search strategy defines how to explore the search space by computing *decisions*.
+A decision involves a variables, a value and an operator, e.g. :math:`x = 5`, and triggers new constraint propagation.
+Decisions are computed and applied until all the variables are instantiated, that is, a solution has been found, or a failure has been detected (backtrack occurs).
+Choco |release| builds a binary search tree: each decision can be refuted (if :math:`x = 5` leads to no solution, then :math:`x != 5` is applied).
+The classical search is based on `Depth First Search <http://en.wikipedia.org/wiki/Depth-first_search>`_.
 
 .. note::
 
@@ -278,234 +24,197 @@ Decisions are computed and applied until all the variables are instantiated, tha
     Search strategies or heuristics have a strong impact on resolution performances.
     Thus, it is strongly recommended to adapt the search space exploration to the problem treated.
 
+Default search strategy
+=======================
 
-.. _31_zoom:
+If no search strategy is specified to the resolver, Choco |version| will rely on the default one (defined by a ``DefaultSearchBinder`` in ``Settings``).
+In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
+The default search strategy splits variables according to their type and defines specific search strategies for each type that are sequentially applied:
 
-Zoom on IntStrategy
--------------------
+#. integer variables and boolean variables : ``intVarSearch(ivars)`` (calls ``domOverWDegSearch``)
+#. set variables: :code:`setVarSearch(svars)`
+#. real variables :code:`realVarSearch(rvars)`
+#. objective variable, if any: lower bound or upper bound, depending on the `ResolutionPolicy`
 
-A search strategy ``IntStrategy`` is dedicated to ``IntVar`` only.
-It is based on a list of variables ``scope``, a selector of variable ``varSelector``, a value selector ``valSelector`` and an optional ``decOperator``.
+Note that `ISF.lastConflict(solver)` is also plugged-in.
 
-#. ``scope``: array of variables to branch on.
-#. ``varSelector``:  a variable selector, defines how to select the next variable to branch on.
-#. ``valSelector``: a value selector, defines how to select a value in the domain of the selected variable.
-#. ``decOperator``: a decision operator, defines how to modify the domain of the selected variable with the selected value.
+Specifying a search strategy
+============================
 
+You may specify a search strategy to the resolver by using ``resolver.set(...)`` method as follows: ::
 
-On a call to ``IntStrategy.getDecision()``, ``varSelector`` try to find, among ``scope``, a variable not yet instantiated.
-If such a variable does not exist, the method returns ``null``, saying that it can not compute decision anymore.
-Otherwise, ``valSelector`` selects a value, within the domain of the selected variable.
-A decision can then be computed with the selected variable and the selected value, and is returned to the caller.
+        // to use the default SetVar search on mySetVars
+        Resolver r = model.getResolver();
+        r.set(setVarSearch(mySetVars));
 
-By default, the decision built is an assignment: its application leads to an instantiation, its refutation, to a value removal.
-It is possible create other types of decision by defining a decision operator ``DecisionOperator``.
+        // to use activity based search on myIntVars
+        Resolver r = model.getResolver();
+        r.set(activityBasedSearch(myIntVars));
 
-**API**
-
-    ISF.custom(VariableSelector<IntVar> VAR_SELECTOR, IntValueSelector VAL_SELECTOR,
-                              DecisionOperator<IntVar> DEC_OPERATOR, IntVar... VARS)
-    ISF.custom(VariableSelector<IntVar> VAR_SELECTOR, IntValueSelector VAL_SELECTOR,
-                              IntVar... VARS)
-
-    new IntStrategy(IntVar[] scope, VariableSelector<IntVar> varSelector, IntValueSelector valSelector)
-    new IntStrategy(IntVar[] scope, VariableSelector<IntVar> varSelector, IntValueSelector valSelector,
-    					   DecisionOperator<IntVar> decOperator)
-
-Sometimes, on a call to the variable selector, several variables could be selected.
-In that case, the order induced by ``VARS`` is used to break tie: the variable with the smallest index is selected.
-However, it is possible to break tie with other ``VAR_SELECTOR``s.
-They should be declared as parameters of ``VariablesSelectorWithTies``. ::
-
-    solver.set(ISF.custom(
-        new VariableSelectorWithTies(new FirstFail(), new Random(123L)),
-        new IntDomainMin(), vars);
-
-The variable with the smallest domain is selected first. If there are more than one variable whose
-domain size is the smallest, ties are randomly broken.
+        // to use activity based search on myIntVars
+        // then the default SetValSelectorFactoryVar search on mySetVars
+        Resolver r = model.getResolver();
+        r.set(activityBasedSearch(myIntVars), setVarSearch(mySetVars));
 
 .. note::
-    Only variable selectors which implement ``VariableEvaluator`` can be used to break ties.
+
+    Search strategies generally hold on some particular variable kinds only (e.g. integers, sets, etc.).
+
+Example
+-------
+
+Let us consider we have two integer variables ``x`` and ``y`` and we want our strategy to select
+the variable of smallest domain and assign it to its lower bound.
+There are several ways to achieve this: ::
+
+    // 1) verbose approach using usual imports
+
+    import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+    import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+    import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
+    import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
 
 
-Very similar operations are achieved in ``SetStrategy`` and ``RealStrategy``.
+        Resolver r = model.getResolver();
+        r.set(SearchStrategyFactory.intVarSearch(
+                        // selects the variable of smallest domain
+                        VarSelectorFactory.minDomIntVar(),
+                        // selects the smallest domain value (lower bound)
+                        ValSelectorFactory.minIntVal(),
+                        // apply equality (var = val)
+                        DecisionOperator.int_eq,
+                        // variables to branch on
+                        x, y
+        ));
 
-See ``solver.search.strategy.IntStrategyFactory`` and ``solver.search.strategy.SetStrategyFactory`` for built-in strategies and selectors.
+    // 2) Shorter approach using static imports
 
-Available variable selectors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    For integer variables
-:ref:`51_svarsel_lex`,
-:ref:`51_svarsel_rnd`,
-:ref:`51_svarsel_mind`,
-:ref:`51_svarsel_maxd`,
-:ref:`51_svarsel_maxr`.
-
-    For set variables
-
-See ``solver.search.strategy.selectors.variables.MaxDelta``,
-    ``solver.search.strategy.selectors.variables.MinDelta``.
-
-    For real variables
-
-See ``solver.search.strategy.selectors.variables.Cyclic``.
+    import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+    import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.*;
+    import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.*;
+    import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.*;
 
 
-Available value selectors
-^^^^^^^^^^^^^^^^^^^^^^^^^
+        Resolver r = model.getResolver();
+        r.set(intVarSearch(
+                minDomIntVar(),
+                minIntVal(),
+                int_eq, // not required field (used by default)
+                x, y
+        ));
 
-    For integer variables
 
-:ref:`51_svalsel_minv`,
-:ref:`51_svalsel_midv`,
-:ref:`51_svalsel_maxv`,
-:ref:`51_svalsel_rndb`,
-:ref:`51_svalsel_rndv`.
+    // 3) Short approach using built-in strategies imports
 
-    For set variables
+    import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
-See ``solver.search.strategy.selectors.values.SetDomainMin``.
-
-    For real variables
-
-See ``solver.search.strategy.selectors.values.RealDomainMiddle``,
-    ``solver.search.strategy.selectors.values.RealDomainMin``
-    ``solver.search.strategy.selectors.values.RealDomainMax``.
-
-Available decision operators
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`51_sdecop_ass`,
-:ref:`51_sdecop_rem`,
-:ref:`51_sdecop_spl`,
-:ref:`51_sdecop_rspl`.
-
-Available strategies
-^^^^^^^^^^^^^^^^^^^^
-
-    For integer variables
-
-:ref:`51_sstrat_cus`,
-:ref:`51_sstrat_dic`,
-:ref:`51_sstrat_once`,
-:ref:`51_sstrat_seq`.
-
-:ref:`51_sstrat_lexlb`,
-:ref:`51_sstrat_lexnlb`,
-:ref:`51_sstrat_lexspl`,
-:ref:`51_sstrat_lexub`,
-:ref:`51_sstrat_minlb`,
-:ref:`51_sstrat_midlb`,
-:ref:`51_sstrat_maxspl`,
-:ref:`51_sstrat_minub`,
-:ref:`51_sstrat_maxrlb`,
-:ref:`51_sstrat_objbu`,
-:ref:`51_sstrat_objdi`,
-:ref:`51_sstrat_objtd`,
-:ref:`51_sstrat_rndb`,
-:ref:`51_sstrat_rndv`.
-
-:ref:`51_sstrat_dwdeg`,
-:ref:`51_sstrat_act`,
-:ref:`51_sstrat_imp`.
-
-:ref:`51_sstrat_lf`.
-
-:ref:`51_sstrat_gat`.
-
-    For set variables
-
-:ref:`51_sstrat_cus`, :ref:`51_sstrat_seq`.
-
-:ref:`51_sstrat_lexfi`,
-:ref:`51_sstrat_maxdfi`,
-:ref:`51_sstrat_mindfi`,
-:ref:`51_sstrat_remfi`.
-
-:ref:`51_sstrat_lf`.
-
+        Resolver r = model.getResolver();
+        r.set(minDomLBSearch(x, y));
 
 .. important:: Black-box search strategies
 
     There are many ways of choosing a variable and computing a decision on it.
-    Designing specific search strategies can be a very tough task to do.
-    The concept of `Black-box search heuristic` (or adaptive search strategy) has naturally emerged from this statement.
-    Most common black-box search strategies observe aspects of the CSP resolution in order to drive the variable selection, and eventually the decision computation (presumably, a value assignment).
-    Three main families of heuristic, stemming from the concepts of variable impact, conflict and variable activity, can be found in Choco|release|.
+    Designing specific search strategies can be a very tough task.
+    The concept of `Black-box search heuristic` has naturally emerged from this statement.
+    Most common black-box search strategies observe aspects of the CSP resolution in order to drive the variable selection,
+    and eventually the decision computation (presumably, a value assignment).
+    Three main families of heuristic, stemming from the concepts of variable conflict, activity and impact may be found in Choco|release|.
     Black-box strategies can be augmented with restarts.
 
+List of available search strategy
+=================================
+
+Available search strategies are listed in ``SearchStrategyFactory``.
+This factory enables you to create search strategies using static methods.
+Most search strategies rely on :
+ - variable selectors (see ``VarSelectorFactory``)
+ - value selectors (see ``ValSelectorFactory``)
+ - operators (see ``DecisionOperator``)
 
 
-Default search strategies
--------------------------
+Designing your own search strategy
+==================================
 
-If no search strategy is specified in the model, Choco |version| will rely on the default one (defined by a ``DefaultSearchBinder`` in ``Settings``).
-In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
-The default search strategy distinguishes variables per types and defines a specific search strategy per each type, sequentially applied:
+Using selectors
+---------------
 
-#. integer variables and boolean variables : ``ISF.domOverWDeg(ivars, 0)``
-#. set variables: :code:`SetStrategyFactory.force_minDelta_first(svars)`
-#. real variables :code:`RealStrategyFactory.cyclic_middle(rvars)`
-#. objective variable, if any: lower bound or upper bound, depending on the `ResolutionPolicy`
+To design your own strategy using SearchStrategyFactory.intVarSearch, you simply have to implement
+your own variable and value selectors: ::
 
-Note that `ISF.lastConflict(solver)` is also plugged-in.
-Constants are excluded from search strategies' variable scope and the creation order is maintained per types.
+    public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
+                                        IntValueSelector valSelector,
+                                        IntVar... vars)
 
-``IntStrategyFactory``, ``SetStrategyFactory`` and ``RealStrategyFactory`` offer several built-in search strategies and a simple framework to build custom searches.
+For instance, to select the first non instantiated variable and assign it to its lower bound: ::
 
 
-.. _31_searchbinder:
+        Resolver r = model.getResolver();
+        r.set(intVarSearch(
+                // variable selector
+                (VariableSelector<IntVar>) variables -> {
+                    for(IntVar v:variables){
+                        if(!v.isInstantiated()){
+                            return v;
+                        }
+                    }
+                    return null;
+                },
+                // value selector
+                (IntValueSelector) var -> var.getLB(),
+                // variables to branch on
+                x, y
+        ));
 
-Search binder
-^^^^^^^^^^^^^
+.. note::
 
-It is possible to override the default search strategy by implementing an ``ISearchBinder``.
-By default, a ``Solver`` is created with a ``DefaultSearchBinder`` declared in its settings.
+    When all variables are instantiated, a ``VariableSelector`` must return ``null``.
 
+From scratch
+------------
 
-An ``ISearchBinder`` has the following API:
+You can design your own strategy by creating ``Decision`` objects directly as follows: ::
 
-``void configureSearch(Solver solver)``
-    Configure the search strategy, and even more, of the given solver.
-    The method is called from the search loop, after the initial propagation, if no search strategy is defined.
-    Otherwise, it should be called before running the resolution.
+        r.set(new AbstractStrategy<IntVar>(x,y) {
+            // enables to recycle decision objects (good practice)
+            PoolManager<IntDecision> pool = new PoolManager();
+            @Override
+            public Decision getDecision() {
+                IntDecision d = pool.getE();
+                if(d==null) d = new IntDecision(pool);
+                IntVar next = null;
+                for(IntVar v:vars){
+                    if(!v.isInstantiated()){
+                        next = v; break;
+                    }
+                }
+                if(next == null){
+                    return null;
+                }else {
+                    // next decision is assigning nextVar to its lower bound
+                    d.set(next,next.getLB(), DecisionOperator.int_eq);
+                    return d;
+                }
+            }
+        });
 
-The search binder to use must be declared in the ``Setting`` attached to a ``Solver`` (see :ref:`41_settings_label`).
+.. attention::
 
+    A particular attention should be made while using ``IntVar`` and their type of domain.
+    Indeed, bounded domains do not support making holes in their domain.
+    Thus, removing a value which is not a current bound will be missed, and can lead to an infinite loop.
 
+Making a decision greedy
+========================
 
-Composition of strategies
--------------------------
+You can make a decision non-refutable by using ``decision.setRefutable(false)``
 
-Most of the time, it is necessary to combine various strategies.
-A ``StrategiesSequencer`` enables to compose various ``AbstractStrategy``.
-It is created on the basis of a list of ``AbstractStrategy``.
-The current active strategy is called to compute a decision through its ``getDecision()`` method.
-When no more decision can be computed for the current strategy, the following one becomes active.
-The intersection of variables from each strategy does not have to be empty.
-When a variable appears in various strategy, it is ignored as soon as it is instantiated.
+To make an entire search strategy greedy, use: ::
 
-When no environment is given in parameter,
-the last active strategy is not stored, and strategies are evaluated in lexicographical order to find the first active one, based on its capacity to return a decision.
-
-When an environment is given in parameter, the last active strategy is stored.
-
-**API**
-
-    ISF.sequencer(AbstractStrategy... strategies)
-
-Note that a strategy sequencer is automatically generated when setting multiple strategies at the same time:
-
-``solver.set(strategy1,strategy2);`` is equivalent to
-
-``solver.set(ISF.sequencer(strategy1,strategy2));``
-
-Finally, one can create its own strategy, see :ref:`Defining its own search <45_define_search_label>` for more details.
-
+        Resolver r = model.getResolver();
+        r.set(greedySearch(inputOrderLBSearch(x,y,z)));
 
 Restarts
---------
+========
 
 Restart means stopping the current tree search, then starting a new tree search from the root node.
 Restarting makes sense only when coupled with randomized dynamic branching strategies ensuring that the same enumeration tree is not constructed twice.
@@ -513,24 +222,21 @@ The branching strategies based on the past experience of the search, such as ada
 
 Unless the number of allowed restarts is limited, a tree search with restarts is not complete anymore. It is a good strategy, though, when optimizing an NP-hard problem in a limited time.
 
-
-
 Some adaptive search strategies resolutions are improved by sometimes restarting the search exploration from the root node.
 Thus, the statistics computed on the bottom of the tree search can be applied on the top of it.
 
-There a two restart strategies available in ``SearchMonitorFactory``: ::
+Several restart strategies are available in ``Resolver``: ::
 
-    geometrical(Solver solver, int base, double grow, ICounter counter, int limit)
+    // Restarts after after each new solution.
+    resolver.setRestartOnSolutions()
 
-It performs a search with restarts controlled by the resolution event [#f1]_ ``counter`` which counts events occurring during the search.
+Geometrical restarts perform a search with restarts controlled by the resolution event [#f1]_ ``counter`` which counts events occurring during the search.
 Parameter ``base`` indicates the maximal number of events allowed in the first search tree.
 Once this limit is reached, a restart occurs and the search continues until ``base``*``grow`` events are done, and so on.
 After each restart, the limit number of events is increased by the geometric factor ``grow``.
-``limit`` states the maximum number of restarts.
+``limit`` states the maximum number of restarts. ::
 
-and: ::
-
-    luby(Solver solver, int base, int grow, ICounter counter, int limit)
+    resolver.setGeometricalRestart(int base, double grow, ICounter counter, int limit)
 
 The `Luby <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.47.5558>`_ ’s restart policy is an alternative to the geometric restart policy.
 It performs a search with restarts controlled by the number of resolution events [#f1]_ counted by ``counter``.
@@ -540,18 +246,76 @@ starting from the first prefix :math:`1`, the :math:`(k+1)^th` prefix is the :ma
 immediately followed by coefficient ``grow``:math:`^k`.
 
 - the first coefficients for ``grow`` =2: [1,1,2,1,1,2,4,1,1,2,1,1,2,4,8,1,...]
-- the first coefficients for ``grow`` =3 : [1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 9,...]
+- the first coefficients for ``grow`` =3 : [1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 9,...] ::
 
-.. _33_searches_limit_label:
+    resolver.setLubyRestart(int base, int grow, ICounter counter, int limit)
 
-Limiting the resolution
------------------------
+You can design your own restart strategies using: ::
+
+    resolver.setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit)
+
+***************
+Search monitors
+***************
+
+Principle
+---------
+
+A search monitor is an observer of the resolver.
+It gives user access before and after executing each main step of the solving process:
+
+- `initialize`: when the solving process starts and the initial propagation is run,
+- `open node`: when a decision is computed,
+- `down branch`: on going down in the tree search applying or refuting a decision,
+- `up branch`: on going up in the tree search to reconsider a decision,
+- `solution`: when a solution is got,
+- `restart search`: when the search is restarted to a previous node, commonly the root node,
+- `close`: when the solving process ends,
+- `contradiction`: on a failure,
+
+With the accurate search monitor, one can easily observe with the resolver, from pretty printing of a solution to learning nogoods from restart, or many other actions.
+
+The interfaces to implement are:
+
+- ``IMonitorInitialize``,
+- ``IMonitorOpenNode``,
+- ``IMonitorDownBranch``,
+- ``IMonitorUpBranch``,
+- ``IMonitorSolution``,
+- ``IMonitorRestart``,
+- ``IMonitorContradiction``,
+- ``IMonitorClose``.
+
+Most of them gives the opportunity to do something before and after a step. The other ones are called after a step.
+
+.. important::
+
+	A search monitor should not modify the resolver behavior (forcing restart and interrupting the search, for instance).
+	This is the goal of the Move component of a resolver :ref:`440_loops_label`.
+
+Simple example to print every solution: ::
+
+        Resolver r = model.getResolver();
+        r.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                System.out.println("x = "+x.getValue());
+            }
+        });
+
+In Java 8 style: ::
+
+        Resolver r = model.getResolver();
+        r.plugMonitor((IMonitorSolution) () -> {System.out.println("x = "+x.getValue());});
+
+*************
+Search limits
+*************
 
 Built-in search limits
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
-The exploration of the search tree can be limited in various ways.
-Some usual limits are provided in ``SearchMonitorFactory``, or ``SMF`` for short:
+Search can be limited in various ways using the ``Resolver`` (from ``model.getResolver()``).
 
 - ``limitTime`` stops the search when the given time limit has been reached. This is the most common limit, as many applications have a limited available runtime.
 
@@ -563,31 +327,34 @@ Some usual limits are provided in ``SearchMonitorFactory``, or ``SMF`` for short
 - ``limitFail`` stops the search when the given fail limit has been reached.
 - ``limitBacktrack`` stops the search when the given backtrack limit has been reached.
 
+For instance, to interrupt search after 10 seconds: ::
+
+    Resolver r = model.getResolver();
+    r.limitTime("10s");
+    model.solve();
+
 Custom search limits
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
-You can decide to interrupt the search process whenever you want with one of the following instructions: ::
+You can design you own search limit by implementing a ``Criterion`` and using ``resolver.limitSearch(Criterion c)``: ::
 
- solver.getSearchLoop().reachLimit();
- solver.getSearchLoop().interrupt(String message);
+        Resolver r = model.getResolver();
+        r.limitSearch(new Criterion() {
+            @Override
+            public boolean isMet() {
+                // todo return true if you want to stop search
+            }
+        });
 
-Both options will interrupt the search process but only the first one will inform the solver that the search stops because of a limit. In other words, calling ::
+In Java 8, this can be shortened using lambda expressions: ::
 
- solver.hasReachedLimit()
+        Resolver r = model.getResolver();
+        r.limitSearch(() -> { /*todo return true if you want to stop search*/ });
 
-will return false if the second option is used.
 
-
-.. [#f1] Resolution events are: backtracks, fails, nodes, solutions, time or user-defined ones.
-
-.. admonition:: Going further
-
-    :ref:`Large Neighborhood Search <41_LNS_label>`, :ref:`Explanations <43_explanations_label>`.
-
-.. _34_chatternbox_label:
-
-Resolution statistics
-=====================
+***************************
+Using resolution statistics
+***************************
 
 Resolution data are available thanks to the ``Chatterbox`` class, which outputs by default to ``System.out``.
 It centralises widely used methods to have comprehensive feedback about the resolution process.
@@ -685,3 +452,468 @@ A decision is prefixed with ``[R]`` and a refutation is prefixed by ``[L]``.
     ``Chatterbox.printDecisions(Solver solver)`` prints the tree search during the resolution.
     Printing the decisions slows down the search process.
 
+************
+Moves (TODO)
+************
+
+Large Neighborhood Search (LNS)
+===============================
+
+Local search techniques are very effective to solve hard optimization problems.
+Most of them are, by nature, incomplete.
+In the context of constraint programming (CP) for optimization problems, one of the most well-known and widely used local search techniques is the Large Neighborhood Search (LNS) algorithm [#q1]_.
+The basic idea is to iteratively relax a part of the problem, then to use constraint programming to evaluate and bound the new solution.
+
+
+.. [#q1] Paul Shaw. Using constraint programming and local search methods to solve vehicle routing problems. In Michael Maher and Jean-Francois Puget, editors, *Principles and Practice of Constraint Programming, CP98*, volume 1520 of *Lecture Notes in Computer Science*, pages 417–431. Springer Berlin Heidelberg, 1998.
+
+Principle
+---------
+
+LNS is a two-phase algorithm which partially relaxes a given solution and repairs it.
+Given a solution as input, the relaxation phase builds a partial solution (or neighborhood) by choosing a set of variables to reset to their initial domain;
+The remaining ones are assigned to their value in the solution.
+This phase is directly inspired from the classical Local Search techniques.
+Even though there are various ways to repair the partial solution, we focus on the technique in which Constraint Programming is used to bound the objective variable and
+to assign a value to variables not yet instantiated.
+These two phases are repeated until the search stops (optimality proven or limit reached).
+
+The ``LNSFactory`` provides pre-defined configurations.
+Here is the way to declare LNS to solve a problem: ::
+
+    LNSFactory.rlns(solver, ivars, 30, 20140909L, new FailCounter(solver, 100));
+    solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+
+It declares a *random* LNS which, on a solution, computes a partial solution based on ``ivars``.
+If no solution are found within 100 fails (``FailCounter(solver, 100)``), a restart is forced.
+Then, every ``30`` calls to this neighborhood, the number of fixed variables is randomly picked.
+``20140909L`` is the seed for the ``java.util.Random``.
+
+
+The instruction ``LNSFactory.rlns(solver, vars, level, seed, frcounter)`` runs:
+
+.. literalinclude:: /../../choco-solver/src/main/java/org/chocosolver/solver/search/loop/lns/LNSFactory.java
+   :language: java
+   :lines: 112-114
+   :linenos:
+
+The factory provides other LNS configurations together with built-in neighbors.
+
+Neighbors
+---------
+
+While the implementation of LNS is straightforward, the main difficulty lies in the design of neighborhoods able to move the search further.
+Indeed, the balance between diversification (i.e., evaluating unexplored sub-tree) and intensification (i.e., exploring them exhaustively) should be well-distributed.
+
+
+Generic neighbors
+^^^^^^^^^^^^^^^^^
+
+One drawback of LNS is that the relaxation process is quite often problem dependent.
+Some works have been dedicated to the selection of variables to relax through general concept not related to the class of the problem treated [5,24].
+However, in conjunction with CP, only one generic approach, namely Propagation-Guided LNS [24], has been shown to be very competitive with dedicated ones on a variation of the Car Sequencing Problem.
+Nevertheless, such generic approaches have been evaluated on a single class of problem and need to be thoroughly parametrized at the instance level, which may be a tedious task to do.
+It must, in a way, automatically detect the problem structure in order to be efficient.
+
+
+Combining neighborhoods
+^^^^^^^^^^^^^^^^^^^^^^^
+
+There are two ways to combine neighbors.
+
+Sequential
+""""""""""
+
+Declare an instance of ``SequenceNeighborhood(n1, n2, ..., nm)``.
+Each neighbor ni is applied in a sequence until one of them leads to a solution.
+At step k, the :math:`(k \mod m)^{th}` neighbor is selected.
+The sequence stops if at least one of the neighbor is complete.
+
+Adaptive
+""""""""
+
+Declare an instance of ``AdaptiveNeighborhood(1L, n1, n2, ..., nm)``.
+At the beginning a weight of 1 at assigned to each neighbor ni.
+Then, if a neighbor leads to solution, its weight :math:`w_i` is increased by 1.
+Any time a partial solution has to be computed, a value ``W`` between 1 and :math:`w_1+w_2+...+w_n` is randomly picked (``1L`` is the seed).
+Then the weight of each neighbor is subtracted from ``W``, as soon as ``W``:math:`\leq 0`, the corresponding neighbor is selected.
+For instance, let's consider three neighbors n1, n2 and n3, their respective weights w1=2, w2=4, w3=1.
+``W`` = 3  is randomly picked between 1 and 7.
+Then, the weight of n1 is subtracted, ``W``2-=1; the weight of n2 is subtracted, ``W``-4 = -3, ``W`` is less than 0 and n2 is selected.
+
+
+Defining its own neighborhoods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+One can define its own neighbor by extending the abstract class ``INeighbor``.
+It forces to implements the following methods:
+
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| **Method**                                                             |   **Definition**                                                                                                       |
++========================================================================+========================================================================================================================+
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| ``void recordSolution()``                                              | Action to perform on a solution (typicallu, storing the current variables' value).                                     |
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| ``Decision fixSomeVariables()``                                        | Fix some variables to their value in the last solution, computing a partial solution and returns it as a decision.     |
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| ``void restrictLess()``                                                | Relax the number of variables fixed. Called when no solution was found during a LNS run (trapped into a local optimum).|
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+| ``boolean isSearchComplete()``                                         | Indicates whether the neighbor is complete, that is, can end.                                                          |
++------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
+
+Restarts
+--------
+
+A generic and common way to reinforce diversification of LNS is to introduce restart during the search process.
+This technique has proven to be very flexible and to be easily integrated within standard backtracking procedures [#q2]_.
+
+.. [#q2] Laurent Perron. Fast restart policies and large neighborhood search. In Francesca Rossi, editor, *Principles and Practice of Constraint Programming at CP 2003*, volume 2833 of *Lecture Notes in Computer Science*. Springer Berlin Heidelberg, 2003.
+
+
+Walking
+-------
+
+A complementary technique that appear to be efficient in practice is named `Walking` and consists in accepting equivalent intermediate solutions in a search iteration instead of requiring a strictly better one.
+This can be achieved by defining an ``ObjectiveManager`` like this: ::
+
+    solver.set(new ObjectiveManager(objective, ResolutionPolicy.MAXIMIZE, false));
+
+Where the last parameter, named ``strict`` must be set to false to accept equivalent intermediate solutions.
+
+Other optimization policies may be encoded by using either search monitors or a custom ``ObjectiveManager``.
+
+.. _43_explanations_label:
+
+
+List of available moves
+=======================
+
+Designing your own move
+=======================
+
+***************
+Learning (TODO)
+***************
+
+Explanations
+============
+
+Choco |version| natively support explanations [#1]_. However, no explanation engine is plugged-in by default.
+
+
+.. [#1] Narendra Jussien. The versatility of using explanations within constraint programming. Technical Report 03-04-INFO, 2003.
+
+
+Principle
+---------
+
+Nogoods and explanations have long been used in various paradigms for improving search.
+An explanation records some sufficient information to justify an inference made by the solver (domain reduction, contradiction, etc.).
+It is made of a subset of the original propagators of the problem and a subset of decisions applied during search.
+Explanations represent the logical chain of inferences made by the solver during propagation in an efficient and usable manner.
+In a way, they provide some kind of a trace of the behavior of the solver as any operation needs to be explained.
+
+Explanations have been successfully used for improving constraint programming search process.
+Both complete (as the mac-dbt algorithm) and incomplete (as the decision-repair algorithm) techniques have been proposed.
+Those techniques follow a similar pattern: learning from failures by recording each domain modification with its associated explanation (provided by the solver) and taking advantage of the information gathered to be able to react upon failure by directly pointing to relevant decisions to be undone.
+Complete techniques follow a most-recent based pattern while incomplete technique design heuristics to be used to focus on decisions more prone to allow a fast recovery upon failure.
+
+The current explanation engine is coded to be *Asynchronous, Reverse, Low-intrusive and Lazy*:
+
+Asynchronous:
+    Explanations are not computed during the propagation.
+
+Reverse:
+    Explanations are computed in a bottom-up way, from the conflict to the first event generated, *keeping* only relevant events to compute the explanation of the conflict.
+
+Low-intrusive:
+    Basically, propagators need to implement only one method to furnish a convenient explanation schema.
+
+Lazy:
+    Explanations are computed on request.
+
+
+To do so, all events are stored during the descent to a conflict/solution, and are then evaluated and kept if relevant, to get the explanation.
+
+In practice
+-----------
+
+Consider the following example:
+
+.. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/ExplanationExamples.java
+   :language: java
+   :lines: 52-56,59
+   :linenos:
+
+The problem has no solution since the two constraints cannot be satisfied together.
+A naive strategy such as ``ISF.lexico_LB(bvars)`` (which selects the variables in lexicographical order) will detect lately and many times the failure.
+By plugging-in an explanation engine, on each failure, the reasons of the conflict will be explained.
+
+.. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/ExplanationExamples.java
+   :language: java
+   :lines: 57
+   :linenos:
+
+The explanation engine records *deductions* and *causes* in order to compute explanations.
+In that small example, when an explanation engine is plugged-in, the two first failures will enable to conclude that the problem has no solution.
+Only three nodes are created to close the search, seven are required without explanations.
+
+.. note::
+
+    Only unary, binary, ternary and limited number of nary propagators over integer variables have a dedicated explanation algorithm.
+    Although global constraints over integer variables are compatible with explanations, they should be either accurately explained or reformulated to fully benefit from explanations.
+
+
+Cause
+^^^^^
+
+A cause implements ``ICause`` and must defined the ``boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value)`` method.
+Such a method add new *event filtering* rules to the ruleStore in parameter in order to *filter* relevant events among all generated during the search.
+Every time a variable is modified, the cause is specified in order to compute explanations afterwards.
+For instance, when a propagator updates the bound of an integer variable, the cause is the propagator itself.
+So do decisions, objective manager, etc.
+
+Computing explanations
+^^^^^^^^^^^^^^^^^^^^^^
+
+When a contradiction occurs during propagation, it can only be thrown by:
+
+- a propagator which detects unsatisfiability, based on the current domain of its variables;
+- or a variable whom domain became empty.
+
+Consequently, in addition to causes, variables can also explain the current state of their domain.
+Computing the explanation of a failure consists in going up in the stack of all events generated in the current branch of the search tree and filtering the one relative to the conflict.
+The entry point is either a the unsatisfiabable propagator or the empty variable.
+
+.. note::
+
+    Explanations can be computed without failure. The entry point is a variable, and only removed values can be explained.
+
+
+Each propagator embeds its own explanation algorithm which relies on the relation it defines over variables.
+
+
+.. warning::
+
+    Even if a naive (and weak) explanation algorithm could be provided by all constraints, we made the choice to throw an `SolverException` whenever a propagator does not defined its own explanation algorithm.
+    This is restrictive, but almost all non-global constraints support explanation, which enables reformulation.
+    The missing explanation schemas will be integrated all needs long.
+
+
+
+For instance, here is the algorithm of ``PropGreaterOrEqualX_YC`` (:math:`x \geq y + c`, ``x`` and ``y`` are integer variables, ``c`` is a constant):
+
+.. literalinclude:: /../../choco-solver/src/main/java/org/chocosolver/solver/constraints/binary/PropGreaterOrEqualX_YC.java
+   :language: java
+   :lines: 112-122
+   :linenos:
+
+The first lines indicates that the deduction is due to the application of the propagator (l.2), maybe through reification.
+Then, depending on the variable touched by the deduction, either the lower bound of ``y`` (l.4) or the upper bound of ``x`` (l.6) explains the deduction.
+Indeed, such a propagator only updates lower bound of ``y`` based on the upper bound of ``x`` and *vice versa*.
+
+Let consider that the deduction involves ``x`` and is explained by the lower bound of ``y``.
+The lower bound ``y`` needs to be explained.
+A new rule is added to the ruleStore to specify that events on the lower bound of ``y`` needs to be kept during the event stack analyse (only events generated before the current are relevant).
+When such events are found, the ruleStore can be updated, until the first event is analyzed.
+
+The results is a set of branching decisions, and a set a propagators, which applied altogether leads the conflict and thus, explained it.
+
+
+Explanations for the system
+---------------------------
+
+Explanations for the system, which try to reduce the search space, differ from the ones giving feedback to a user about the unsatisfiability of its model.
+Both rely on the capacity of the explanation engine to motivate a failure, during the search form system explanations and once the search is complete for user ones.
+
+.. important::
+
+    Most of the time, explanations are raw and need to be processed to be easily interpreted by users.
+
+
+Conflict-based backjumping
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When Conflict-based Backjumping (CBJ) is plugged-in, the search is hacked in the following way.
+On a failure, explanations are retrieved.
+From all left branch decisions explaining the failure, the last taken, *return decision*, is stored to jump back to it.
+Decisions from the current one to the return decision (excluded) are erased.
+Then, the return decision is refuted and the search goes on.
+If the explanation is made of no left branch decision, the problem is proven to have no solution and search stops.
+
+
+**Factory**: ``solver.explanations.ExplanationFactory``
+
+**API**: ::
+
+    CBJ.plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn)
+
+
++ *solver*: the solver to explain.
++ *nogoodsOn*: set to `true` to extract nogood from each conflict,. Extracting nogoods slows down the overall resolution but can reduce the search space.
++ *userFeedbackOn*: set to `true` to store the very last explanation of the search (recommended value: `false`).
+
+Dynamic backtracking
+^^^^^^^^^^^^^^^^^^^^
+
+This strategy, Dynamic backtracking (DBT) corrects a lack of deduction of Conflict-based backjumping.
+On a failure, explanations are retrieved.
+From all left branch decisions explaining the failure, the last taken, *return decision*, is stored to jump back to it.
+Decisions from the current one to the return decision (excluded) are maintained, only the return decision is refuted and the search goes on.
+If the explanation is made of no left branch decision, the problem is proven to have no solution and search stops.
+
+
+**Factory**: ``solver.explanations.ExplanationFactory``
+
+**API**: ::
+
+    DBT.plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn)
+
++ *solver*: the solver to explain.
++ *nogoodsOn*: set to `true` to extract nogood from each conflict,. Extracting nogoods slows down the overall resolution but can reduce the search space.
++ *userFeedbackOn*: set to `true` to store the very last explanation of the search (recommended value: `false`).
+
+Explanations for the end-user
+-----------------------------
+
+Explaining the last failure of a complete search without solution provides information about the reasons why a problem has no solution.
+For the moment, there is no simplified way to get such explanations.
+CBJ and DBT enable retrieving an explanation of the last conflict. ::
+
+    // .. problem definition ..
+    // First manually plug CBJ, or DBT
+    ExplanationEngine ee = new ExplanationEngine(solver, userFeedbackOn);
+    ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, nogoodsOn);
+    solver.plugMonitor(cbj);
+    if(!solver.solve()){
+        // If the problem has no solution, the end-user explanation can be retrieved
+        System.out.println(cbj.getLastExplanation());
+    }
+
+Incomplete search leads to incomplete explanations: as far as at least one decision is part of the explanation, there is no guarantee the failure does not come from that decision.
+On the other hand, when there is no decision, the explanation is complete.
+
+
+.. _440_loops_label:
+
+Search loop
+===========
+
+The search loop whichs drives the search is a freely-adapted version PLM [#PLM]_.
+PLM stands for: Propagate, Learn and Move.
+Indeed, the search loop is composed of three parts, each of them with a specific goal.
+
+- Propagate: it aims at propagating information throughout the constraint network when a decision is made,
+- Learn: it aims at ensuring that the search mechanism will avoid (as much as possible) to get back to states that have been explored and proved to be solution-less,
+- Move: it aims at, unlike the former ones, not pruning the search space but rather exploring it.
+
+.. [#PLM] Narendra Jussien and Olivier Lhomme. Unifying search algorithms for CSP. Technical report 02-3-INFO, EMN.
+
+Any component can be freely implemented and attached to the search loop in order to customize its behavior.
+There exists some pre-defined `Move` and `Learn` implementations, avaiable in :ref:`550_slf`.
+
+**Move**:
+
+:ref:`550_slfdfs`,
+:ref:`550_slflds`,
+:ref:`550_slfdds`,
+:ref:`550_slfhbfs`,
+:ref:`550_slfseq`,
+:ref:`550_slfrestart`,
+:ref:`550_slfrestartonsol`,
+:ref:`550_slflns`.
+
+**Learn**:
+
+:ref:`550_slfcbj`,
+:ref:`550_slfdbt`,
+
+One can also define its own `Move` or `Learn` implementation, more details are given in :ref:`48_plm`.
+
+
+.. _45_define_search_label:
+
+Implementing a search loop component
+====================================
+
+A search loop is made of three components, each of them dealing with a specific aspect of the search.
+Even if many `Move` and `Learn` implementation are already provided, it may be relevant to define its own component.
+
+.. note::
+
+	The `Propagate` component is less prone to be modified, it will not be described here.
+	However, its interface is minimalist and can be easily implemented.
+	A look to `org.chocosolver.solver.search.loop.propagate.PropagateBasic.java` is a good starting point.
+
+The two components can be easily set in the `Solver` search loop:
+
+``void setMove(Move m)``
+	The current `Move` component is replaced by `m`.
+
+``Move getMove()``
+	The current `Move` component is returned.
+
+`void setLearn(Learn l)` and `Learn getLearn()` are also avaiable.
+
+Having access to the current `Move` (resp. `Learn`) component can be useful to combined it with another one.
+For instance, the `MoveLNS` is activated on a solution and creates a partial solution.
+It needs another `Move` to find the first solution and to complete the partial solution.
+
+Move
+----
+
+Here is the API of `Move`:
+
+
+``boolean extend(SearchLoop searchLoop)``
+	Perform a move when the CSP associated to the current node of the search space is not proven to be not consistent.
+	It returns `true` if an extension can be done, `false` when no more extension is possible.
+	It has to maintain the correctness of the reversibility of the action by pushing a backup world when needed.
+	An extension is commonly based on a decision, which may be made on one or many variables.
+	If a decision is created (thanks to the search strategy), it has to be linked to the previous one.
+
+``boolean repair(SearchLoop searchLoop)``
+	Perform a move when the CSP associated to the current node of the search space is proven to be not consistent.
+	It returns `true` if a reparation can be done, `false` when no more reparation is possible.
+	It has to backtracking backup worlds when needed, and unlinked useless decisions.
+	The depth and number of backtracks have to be updated too, and "up branch" search monitors of the search loop have to called
+ 	(be careful, when many `Move` are combined).
+
+
+``Move getChildMove()``
+	It returns the child `Move` or `null`.
+
+``void setChildMove(Move aMove)``
+	It defined the child `Move` and erases the previously defined one, if any.
+
+``boolean init()``
+	Called before the search starts, it should initialize the search strategy, if any, and its child `Move`.
+     	It should return `false` if something goes wrong (the problem has trivially no solution), `true` otherwise.
+
+``AbstractStrategy<V> getStrategy()``
+	It returns the search strategy in use, which may be `null` if none has been defined.
+
+``void setStrategy(AbstractStrategy<V> aStrategy)``
+	It defines a search strategy and erases the previously defined one, that is, a service which computes and returns decisions.
+
+
+``org.chocosolver.solver.search.loop.move.MoveBinaryDFS.java`` is good starting point to see how a `Move` is implemented.
+It defines a Depth-First Search with binary decisions.
+
+Learn
+-----
+
+The aim of the component is to make sure that the search mechanism will avoid (as much as possible) to get back to states that have been explored and proved to be solution-less. Here is the API of `Learn`
+
+``void record(SearchLoop searchLoop)``
+	It validates and records a new piece of knowledge, that is, the current position is a dead-end.
+	This is alwasy called *before* calling `Move.repair(SearchLoop)`.
+
+``void forget(SearchLoop searchLoop)``
+	It forgets some pieces of knowledge.
+	This is alwasy called *after* calling `Move.repair(SearchLoop)`.
+
+``org.chocosolver.solver.search.loop.learn.LearnCBJ`` is good, yet not trivial, example of `Learn`.

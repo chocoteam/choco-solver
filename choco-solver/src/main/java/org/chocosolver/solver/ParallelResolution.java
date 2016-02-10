@@ -88,7 +88,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *      pares.addModel(modeller());
  * }
  * pares.solve();
- * Chatterbox.printSolutions(pares.getFinder());
+ * Chatterbox.printSolutions(pares.getBestModel());
  * </code>
  * </pre>
  *
@@ -114,7 +114,7 @@ public class ParallelResolution {
      * Integer which stores the number of ending models.
      * Needed for synchronization purpose.
      */
-    private final AtomicInteger finishers = new AtomicInteger(0);
+    public final AtomicInteger finishers = new AtomicInteger(0);
 
     /**
      * Creates a new instance of this parallel resolution helper.
@@ -218,7 +218,8 @@ public class ParallelResolution {
      * a stop {@link org.chocosolver.util.criteria.Criterion} and a {@link IMonitorClose}.
      * When dealing with optimization problem, add {@link IMonitorSolution} to share cuts.
      */
-    private void setUpResolution(ResolutionPolicy policy){
+    public void prepare(){
+        ResolutionPolicy policy = models.get(0).getResolutionPolicy();
         models.stream().forEach(s -> s.getResolver().addStopCriterion(()->finishers.get()>0));
         models.stream().forEach(s -> s.getResolver().plugMonitor(new IMonitorClose() {
             @Override
@@ -253,67 +254,6 @@ public class ParallelResolution {
     }
 
     /**
-     * <p>
-     * Attempts to find the first solution of the declared problem.
-     * The fist model which finds a solution (or hit a limit), sends a message to the other ones for stop searching.
-     * </p>
-     * <p>
-     * A call to {@link #getFinder()} returns a model which finds a solution.
-     * </p>
-     * <p>
-     *     Each model is set up with a stop {@link org.chocosolver.util.criteria.Criterion},
-     *     a {@link IMonitorClose}.
-     * </p>
-     * @return <code>true</code> if and only if at least one solution has been found.
-     * @throws SolverException if no model or only model has been added.
-     */
-    public boolean findSolution() {
-        check(ResolutionPolicy.SATISFACTION);
-        setUpResolution(ResolutionPolicy.SATISFACTION);
-        models.parallelStream().forEach(Model::findSolution);
-        long nsol = 0;
-        for (Model s : models) {
-            nsol += s.getResolver().getMeasures().getSolutionCount();
-        }
-        return nsol > 0;
-    }
-
-    /**
-     * <p>
-     * Attempts optimize the value of the <i>objective</i> variable w.r.t. to the optimization <i>policy</i>
-     * and restores the last solution found (if any) on exit for each model.
-     * The fist model which finds the best solution (or hit a limit), sends a message to the other ones for stop searching.
-     * </p>
-     * <p>
-     *     <b>Important:</b>
-     *     </br>
-     *     This method only deals with mono-objective integer variable optimization problem.
-     * </p>
-     *
-     * </p>
-     * <p>
-     * Note that, for a given model, the last solution restored MAY NOT be the best one wrt other models.
-     * </p>
-     * <p>
-     * A call to {@link #getFinder()} returns a model which finds the best solution.
-     * </p>
-     * <p>
-     *     Each model is set up with a stop {@link org.chocosolver.util.criteria.Criterion},
-     *     a {@link IMonitorClose} and a {@link IMonitorSolution}.
-     * </p>
-     * @param policy optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-     * @throws SolverException if no model or only model has been added,
-     *                          if no objective variable is declared,
-     *                          if real variable objective optimization problem is declared or
-     *                          if multi-objective optimization problem is declared.
-     */
-    public void findOptimalSolution(ResolutionPolicy policy) {
-        check(policy);
-        setUpResolution(policy);
-        models.parallelStream().forEach(s -> s.findOptimalSolution(policy, true));
-    }
-
-    /**
      * @return the (mutable!) list of models used in this parallel resolution helper.
      */
     public List<Model> getModels(){
@@ -335,7 +275,7 @@ public class ParallelResolution {
      *
      * @return the first model which finds a solution (or the best one) or <tt>null</tt> if no such model exists.
      */
-    public Model getFinder(){
+    public Model getBestModel(){
         ResolutionPolicy policy = models.get(0).getResolver().getObjectiveManager().getPolicy();
         check(policy);
         if (policy == ResolutionPolicy.SATISFACTION) {
@@ -381,15 +321,45 @@ public class ParallelResolution {
     }
 
 
+    /**
+     * Run the solve() instruction of every model of the portfolio in parallel.
+     * Be sure you have call {@link #prepare()} before calling this method
+     *
+     * <p>
+     * Note that a call to {@link #getBestModel()} returns a model which has found the best solution.
+     * </p>
+     * @return <code>true</code> if and only if at least one new solution has been found.
+     * @throws SolverException if no model or only model has been added.
+     */
     public boolean solve() {
         ResolutionPolicy policy = models.get(0).getResolutionPolicy();
         check(policy);
-        setUpResolution(policy);
-        models.parallelStream().forEach(Model::solve);
         long nsol = 0;
+        for (Model s : models) {
+            nsol -= s.getResolver().getMeasures().getSolutionCount();
+        }
+        models.parallelStream().forEach(Model::solve);
         for (Model s : models) {
             nsol += s.getResolver().getMeasures().getSolutionCount();
         }
         return nsol > 0;
+    }
+
+	/**
+     * @deprecated use {@link #solve()} instead
+     * Will be removed after version 3.4.0
+     */
+    @Deprecated
+    public boolean findSolution() {
+        return solve();
+    }
+
+    /**
+     * @deprecated use {@link #solve()} instead
+     * Will be removed after version 3.4.0
+     */
+    @Deprecated
+    public void findOptimalSolution(ResolutionPolicy policy) {
+        solve();
     }
 }

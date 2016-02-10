@@ -171,7 +171,16 @@ public interface SetVar extends Variable {
      *
      * @return the current value (or kernel if not yet instantiated).
      */
-    int[] getValues();
+    int[] getValue();
+
+	/**
+	 * @deprecated use {@link #getValue()} instead
+	 * will be removed after version 3.4.0
+	 */
+	@Deprecated
+	default int[] getValues(){
+		return getValue();
+	}
 
     /**
      * Allow propagator to monitor element removal/enforcing of this

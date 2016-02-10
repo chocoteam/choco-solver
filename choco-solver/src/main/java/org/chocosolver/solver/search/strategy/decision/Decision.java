@@ -106,11 +106,23 @@ public abstract class Decision<E> implements ICause {
     }
 
     /**
-     * Indicate the number of possible branches from that decision
-     * @param once set to true to disable refutation
+     * Indicate whether or not this decision can be refuted
+     * if set to false, if the decision(e.g. x=3) fails
+     * instead of backtracking once and applying its negation (e.g. x!=3)
+     * the resolver will backtrack twice and negates the previous decision.
+     * @param once set to false to disable refutation
      */
+    public final void setRefutable(boolean isRefutable) {
+        max_branching = isRefutable ? 2 : 1;
+    }
+
+    /**
+     * @deprecated use {@link #setRefutable} instead
+     * Will be removed after version 3.4.0
+     */
+    @Deprecated
     public final void once(boolean once) {
-        max_branching = once ? 1 : 2;
+        setRefutable(!once);
     }
 
     public final int getArity(){

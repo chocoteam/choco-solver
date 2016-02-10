@@ -137,7 +137,7 @@ public class Solution implements Serializable, ICause {
                             break;
                         case Variable.SET:
                             SetVar s = (SetVar) var;
-                            setmap.put(s.getId(), s.getValues());
+                            setmap.put(s.getId(), s.getValue());
                             break;
                     }
                 }
@@ -259,7 +259,7 @@ public class Solution implements Serializable, ICause {
         if (setmap.containsKey(s.getId())) {
             return setmap.get(s.getId());
         } else if ((s.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
-            return s.getValues();
+            return s.getValue();
         } else {
             return null;
         }

@@ -203,7 +203,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public int[] getValues() {
+    public int[] getValue() {
         int[] lb = new int[kernel.getSize()];
         int k = 0;
         for (int i = kernel.getFirstElement(); i >= 0; i = kernel.getNextElement()) {

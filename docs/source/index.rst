@@ -3,25 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. warning::
+.. .. warning::
   This is a work-in-progress documentation. If you have any questions, suggestions or requests, please send an email to choco3-support@mines-nantes.fr.
 
 .. _index:
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
-   1_overview
-   2_modelling
-   3_solving
-   4_advanced
-   5_elements
-   6_extensions
-..  glossary
-..  faq
-
-##########
-References
-##########
-
-.. bibliography:: refs.bib
+ 1_overview
+ 2_modelling
+ 3_solving
+ 4_advanced

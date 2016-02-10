@@ -56,7 +56,7 @@ public class Once extends IntStrategy {
     public Decision<IntVar> computeDecision(IntVar variable) {
         Decision<IntVar> d = super.computeDecision(variable);
         if (d != null) {
-            d.once(true);
+            d.setRefutable(true);
         }
         return d;
     }

@@ -325,6 +325,17 @@ public interface IIntConstraintFactory {
 		}
 	}
 
+	/**
+	 * Creates a multiplication constraint: X * Y = Z
+	 *
+	 * @param X first variable
+	 * @param Y second variable
+	 * @param Z a constant (result)
+	 */
+	default Constraint times(IntVar X, IntVar Y, int Z) {
+		return times(X, Y, X.getModel().intVar(Z));
+	}
+
 	//##################################################################################################################
 	//TERNARIES ########################################################################################################
 	//##################################################################################################################

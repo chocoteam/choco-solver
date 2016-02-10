@@ -131,7 +131,7 @@ public class DefaultSearchBinder implements ISearchBinder {
         // a. Dom/Wdeg on integer/boolean variables
         IntVar[] ivars = livars.toArray(new IntVar[livars.size()]);
         if (ivars.length > 0) {
-            strats[nb++] = domOverWDegSearch(ivars);
+            strats[nb++] = intVarSearch(ivars);
         }
 
         // SET VARIABLES DEFAULT SEARCH STRATEGY

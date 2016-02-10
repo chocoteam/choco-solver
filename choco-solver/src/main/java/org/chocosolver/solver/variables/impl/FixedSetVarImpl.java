@@ -171,7 +171,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public int[] getValues() {
+    public int[] getValue() {
         return values;
     }
 
@@ -230,7 +230,7 @@ public class FixedSetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public SetVar duplicate() {
-        return new FixedSetVarImpl(StringUtils.randomName(), this.getValues(), model);
+        return new FixedSetVarImpl(StringUtils.randomName(), this.getValue(), model);
     }
 
 }

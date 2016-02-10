@@ -261,8 +261,8 @@ public class ModelTest {
             m.clearObjectives();
         }
         pares.solve();
-        Chatterbox.printSolutions(pares.getFinder());
-        Assert.assertEquals(pares.getFinder().getResolver().getMeasures().getSolutionCount(), 1);
+        Chatterbox.printSolutions(pares.getBestModel());
+        Assert.assertEquals(pares.getBestModel().getResolver().getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -274,10 +274,10 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
-            pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
-            Assert.assertTrue(pares.getFinder()!=null);
-            Chatterbox.printSolutions(pares.getFinder());
-            Assert.assertEquals(pares.getFinder().getResolver().getObjectiveManager().getBestSolutionValue(), 51);
+            pares.solve();
+            Assert.assertTrue(pares.getBestModel()!=null);
+            Chatterbox.printSolutions(pares.getBestModel());
+            Assert.assertEquals(pares.getBestModel().getResolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
@@ -299,9 +299,9 @@ public class ModelTest {
                 pares.addModel(knapsack(true));
                 pares.addModel(knapsack(false));
             }
-            pares.findOptimalSolution(ResolutionPolicy.MAXIMIZE);
-            Chatterbox.printSolutions(pares.getFinder());
-            Assert.assertEquals(pares.getFinder().getResolver().getObjectiveManager().getBestSolutionValue(), 51);
+            pares.solve();
+            Chatterbox.printSolutions(pares.getBestModel());
+            Assert.assertEquals(pares.getBestModel().getResolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 

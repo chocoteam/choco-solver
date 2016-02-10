@@ -202,8 +202,9 @@ latex_elements = {
 #'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+    'preamble': '\setcounter{tocdepth}{2}'
 }
+
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
@@ -219,7 +220,7 @@ latex_logo = 'CHOCO_cmjn.jpg'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-latex_use_parts = True
+latex_use_parts = False
 
 # If true, show page references after internal links.
 #latex_show_pagerefs = False

@@ -34,7 +34,6 @@
  */
 package org.chocosolver.samples.integer;
 
-import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.search.solution.Solution;
@@ -47,49 +46,25 @@ import java.util.List;
  *
  * @author Jimmy Liang, Jean-Guillaume Fages
  */
-public class Pareto extends AbstractProblem {
+public class Pareto {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
-
-	IntVar a,b,c;
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-
-	@Override
-	public void buildModel() {
-		model = new Model();
-		// the problem is to maximize a and b
-		a = model.intVar("a", 0, 2, false);
-		b = model.intVar("b", 0, 2, false);
-		c = model.intVar("c", 0, 2, false);
+	public static void main(String[] args){
+		Model model = new Model();
+		IntVar a = model.intVar("a", 0, 2, false);
+		IntVar b = model.intVar("b", 0, 2, false);
+		IntVar c = model.intVar("c", 0, 2, false);
 
 		model.arithm(a, "+", b, "<", 3).post();
-	}
 
-	@Override
-	public void configureSearch() {}
-
-	@Override
-	public void solve() {
+		// the problem is to maximize a and b
 		model.setObjectives(ResolutionPolicy.MAXIMIZE,a,b);
-		model.solve();
-	}
 
-	@Override
-	public void prettyOut() {
+		model.solve();
+
 		List<Solution> paretoFront = model.getResolver().getSolutionRecorder().getSolutions();
 		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
 		for(Solution s:paretoFront){
 			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
 		}
-	}
-
-	public static void main(String[] args){
-	    new Pareto().execute(args);
 	}
 }

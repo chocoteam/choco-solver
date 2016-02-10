@@ -45,7 +45,7 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
 
     protected final V[] vars;
 
-    protected AbstractStrategy(V[] variables) {
+    protected AbstractStrategy(V... variables) {
         this.vars = variables.clone();
     }
 
