@@ -243,6 +243,6 @@ public class ObjectiveTest {
 		r.setNoGoodRecordingFromSolutions(a);
         r.set(new ObjectiveManager<IntVar, Integer>(a, MAXIMIZE, false));
         while (model.solve());
-		Assert.assertEquals(model.getResolver().hasReachedLimit(),false);
+		Assert.assertEquals(model.getResolver().isStopCriterionMet(),false);
 	}
 }

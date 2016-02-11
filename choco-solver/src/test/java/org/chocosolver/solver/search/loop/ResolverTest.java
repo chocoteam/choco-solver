@@ -224,7 +224,6 @@ public class ResolverTest {
         r.limitSolution(10);
         while (model.solve()) ;
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
-
     }
 
     @Test(groups="1s", timeOut=60000)

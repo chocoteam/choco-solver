@@ -1081,12 +1081,12 @@ public class Model implements Serializable, IModel {
     }
 
     /**
-     * @deprecated use {@link Resolver#hasReachedLimit()} instead
+     * @deprecated use {@link Resolver#isStopCriterionMet()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public boolean hasReachedLimit() {
-        return getResolver().hasReachedLimit();
+        return getResolver().isStopCriterionMet();
     }
 
     /**

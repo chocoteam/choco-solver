@@ -396,7 +396,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         model.getResolver().limitTime("5m");
-        assertTrue(model.solve() || model.getResolver().hasReachedLimit());
+        assertTrue(model.solve() || model.getResolver().isStopCriterionMet());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -575,7 +575,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         model.getResolver().limitTime("5m");
-        assertTrue(model.solve() || r.hasReachedLimit());
+        assertTrue(model.solve() || r.isStopCriterionMet());
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -654,7 +654,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         model.getResolver().limitTime("5m");
-        assertTrue(model.solve() || model.getResolver().hasReachedLimit());
+        assertTrue(model.solve() || model.getResolver().isStopCriterionMet());
     }
 
     @Test(groups="5m", timeOut=300000)

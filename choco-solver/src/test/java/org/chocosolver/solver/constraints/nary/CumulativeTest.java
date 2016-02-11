@@ -159,16 +159,16 @@ public class CumulativeTest {
 		switch (mode) {
 			case 0:
 				model.solve();
-				if (r.hasReachedLimit()) return -1;
+				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getSolutionCount();
 			case 1:
 				model.setObjectives(MINIMIZE, last);
 				model.solve();
-				if (r.hasReachedLimit()) return -1;
+				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getBestSolutionValue().longValue();
 			case 2:
 				while (model.solve()) ;// too many solutions to be used
-				if (r.hasReachedLimit()) return -1;
+				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getSolutionCount();
 			default:
 				throw new UnsupportedOperationException();

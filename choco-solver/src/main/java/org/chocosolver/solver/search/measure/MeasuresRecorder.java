@@ -360,7 +360,7 @@ public final class MeasuresRecorder implements IMeasures {
         updateTime();
         StringBuilder st = new StringBuilder(256);
 //        st.append("- Search statistics\n");
-        if (model.getResolver().hasReachedLimit()) {
+        if (model.getResolver().isStopCriterionMet()) {
             st.append("- Incomplete search - Limit reached.\n");
         } else if (model.getResolver().hasEndedUnexpectedly()) {
             st.append("- Incomplete search - Unexpected interruption.\n");

@@ -110,8 +110,8 @@ public class HamiltonianPathTest {
 		model.solve();
 		IMeasures mes = model.getResolver().getMeasures();
 		// the problem has at least one solution
-		assertTrue(mes.getSolutionCount() == 1 || model.getResolver().hasReachedLimit(),
-				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + model.getResolver().hasReachedLimit());
+		assertTrue(mes.getSolutionCount() == 1 || model.getResolver().isStopCriterionMet(),
+				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + model.getResolver().isStopCriterionMet());
 	}
 
 	private static boolean[][] transformMatrix(boolean[][] m) {

@@ -68,7 +68,6 @@ import java.util.List;
 
 import static org.chocosolver.solver.Resolver.Action.*;
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
-import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
 import static org.chocosolver.solver.search.loop.Reporting.fullReport;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 import static org.chocosolver.util.ESat.*;
@@ -142,9 +141,6 @@ public final class Resolver implements Serializable, ISolver {
      */
     private List<Criterion> criteria;
 
-    /** Indicates if a stop criterion is satisfied (set to <tt>true</tt> in that case). */
-    private boolean crit_met;
-
     /** Indicates if the search loops unexpectedly ends (set to <tt>true</tt> in that case). */
     private boolean kill;
 
@@ -204,7 +200,6 @@ public final class Resolver implements Serializable, ISolver {
         action = initialize;
         mMeasures = new MeasuresRecorder(mModel);
         criteria = new ArrayList<>();
-        crit_met = false;
         kill = true;
         searchMonitors = new SearchMonitorList();
         set(new MoveBinaryDFS());
@@ -332,9 +327,9 @@ public final class Resolver implements Serializable, ISolver {
                     if (mMeasures.getSolutionCount() > 0) {
                         sat = TRUE;
                         if (objectivemanager.isOptimization()) {
-                            mMeasures.setObjectiveOptimal(!crit_met);
+                            mMeasures.setObjectiveOptimal(!isStopCriterionMet());
                         }
-                    } else if (crit_met) {
+                    } else if (isStopCriterionMet()) {
                         mMeasures.setObjectiveOptimal(false);
                         sat = UNDEFINED;
                     }
@@ -346,9 +341,8 @@ public final class Resolver implements Serializable, ISolver {
                     searchMonitors.afterClose();
                     return;
             }
-            if (metCriterion()) {
+            if (isStopCriterionMet()) {
                 action = stop;
-                crit_met = true;
             }
         } while (true);
     }
@@ -585,8 +579,12 @@ public final class Resolver implements Serializable, ISolver {
     /**
      * @return <tt>true</tt> if the search loops encountered at least one of the stop criteria declared.
      */
-    public boolean hasReachedLimit() {
-        return crit_met;
+    public boolean isStopCriterionMet() {
+        boolean ismet = false;
+        for (int i = 0; i < criteria.size() && !ismet; i++) {
+            ismet = criteria.get(i).isMet();
+        }
+        return ismet;
     }
 
     /**
@@ -639,17 +637,6 @@ public final class Resolver implements Serializable, ISolver {
      */
     public FilteringMonitor getEventObserver() {
         return this.eoList;
-    }
-
-    /**
-     * @return true if at least one stop criteria is met
-     */
-    private boolean metCriterion() {
-        boolean ismet = false;
-        for (int i = 0; i < criteria.size() && !ismet; i++) {
-            ismet = criteria.get(i).isMet();
-        }
-        return ismet;
     }
 
     /**
@@ -995,8 +982,6 @@ public final class Resolver implements Serializable, ISolver {
         return getModel();
     }
 
-
-
     /**
      * @deprecated : computation is not safe
      * Will be removed after version 3.4.0
@@ -1004,5 +989,23 @@ public final class Resolver implements Serializable, ISolver {
     @Deprecated
     public boolean isComplete() {
         return true;
+    }
+
+    /**
+     * @deprecated : use {@link #isStopCriterionMet()} instead
+     * Will be removed after version 3.4.0
+     */
+    @Deprecated
+    private boolean metCriterion() {
+        return isStopCriterionMet();
+    }
+
+    /**
+     * @deprecated : use {@link #isStopCriterionMet()} instead
+     * Will be removed after version 3.4.0
+     */
+    @Deprecated
+    public boolean hasReachedLimit() {
+        return isStopCriterionMet();
     }
 }
