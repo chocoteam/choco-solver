@@ -52,30 +52,21 @@ import static org.testng.Assert.*;
 public class ViewsTest {
 
     public static void check(Model ref, Model model, long seed, boolean strict, boolean solveAll) {
-//        SearchMonitorFactory.log(ref, true, true);
-//        SearchMonitorFactory.log(solver, true, true);
         if (solveAll) {
             while (ref.solve()) ;
             while (model.solve()) ;
         } else {
-//            System.out.printf("%s\n", ref.toString());
             ref.solve();
-//            System.out.printf("%s\n", solver.toString());
             model.solve();
         }
         Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(),
                 ref.getResolver().getMeasures().getSolutionCount(), "solutions (" + seed + ")");
-//        System.out.printf("%d : %d vs. %d  -- ", seed, ref.getResolver().getMeasures().getNodeCount(),
-//                solver.getMeasures().getNodeCount());
         if (strict) {
             Assert.assertEquals(model.getResolver().getMeasures().getNodeCount(), ref.getResolver().getMeasures().getNodeCount(), "nodes (" + seed + ")");
         } else {
             Assert.assertTrue(ref.getResolver().getMeasures().getNodeCount() >=
                     model.getResolver().getMeasures().getNodeCount(), seed + "");
         }
-//        System.out.printf("%d : %d vs. %d (%f)\n", seed, ref.getResolver().getMeasures().getTimeCount(),
-//                solver.getMeasures().getTimeCount(),
-//                ref.getResolver().getMeasures().getTimeCount() / (float) solver.getMeasures().getTimeCount());
     }
 
 
@@ -337,7 +328,6 @@ public class ViewsTest {
         // Z = |X - Y|
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
-            Model model = new Model();
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -347,6 +337,7 @@ public class ViewsTest {
                 ref.absolute(az, z).post();
                 ref.getResolver().set(randomSearch(new IntVar[]{x, y, az}, seed));
             }
+            Model model = new Model();
             {
                 IntVar x = model.intVar("x", 0, 2, false);
                 IntVar y = model.intVar("y", 0, 2, false);

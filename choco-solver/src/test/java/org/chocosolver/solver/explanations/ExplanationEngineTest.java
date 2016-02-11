@@ -142,12 +142,10 @@ public class ExplanationEngineTest {
     public void test3() {
         for (int n = 3; n < 64000; n *= 2) {
             System.out.printf("n = %d : ", n);
-            Model model = new Model();
-            model3(model, n);
             Model expl = new Model();
             model3(expl, n);
 
-            Resolver r = model.getResolver();
+            Resolver r = expl.getResolver();
             IntStrategy is = inputOrderLBSearch(expl.retrieveIntVars(false));
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation ex = null;

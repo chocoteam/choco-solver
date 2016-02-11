@@ -246,7 +246,5 @@ public class ResolverTest {
         r.limitSolution(10);
         while (model.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 4);
-
     }
-
 }
