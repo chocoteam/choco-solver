@@ -107,8 +107,8 @@ public class DefaultSearchBinder implements ISearchBinder {
             }
         }
         // d. extract the objective variable if any
-        if (model.getResolver().getObjectiveManager().isOptimization()) {
-            objective = model.getResolver().getObjectiveManager().getObjective();
+        if (r.getObjectiveManager().isOptimization()) {
+            objective = r.getObjectiveManager().getObjective();
             int kind = objective.getTypeAndKind() & Variable.KIND;
             switch (kind) {
                 case Variable.INT:
@@ -150,7 +150,7 @@ public class DefaultSearchBinder implements ISearchBinder {
 
         // d. lexico LB/UB for the objective variable
         if (objective != null) {
-            boolean max = model.getResolver().getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
+            boolean max = r.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
             int kind = objective.getTypeAndKind() & Variable.KIND;
             switch (kind) {
                 case Variable.INT:
