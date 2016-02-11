@@ -88,17 +88,12 @@ To use a portfolio of solvers in parallel, use ``ParallelResolution`` as follows
         for(int s=0;s<nbModels;s++){
             portfolio.addModel(makeModel(s));
         }
-        portfolio.prepare();
         portfolio.solve();
 
 In this example, ``makeModel(int)`` is a method you have to implement to create a ``Model`` of the problem.
 The parameter ``s`` enables to change the search strategy (e.g. with a ``switch``).
 
-Before running the resolution, a call to ``portfolio.prepare()`` is required
-to establish communication so that the different models share the objective variable bound (if any),
-and to synchronize interruption.
-
-Finally, ``portfolio.solve()`` enables to solve the problem.
+``portfolio.solve()`` enables to solve the problem.
 
 When dealing with multithreading resolution, very few data is shared between threads:
 everytime a solution has been found its value is shared among solvers. Moreover,

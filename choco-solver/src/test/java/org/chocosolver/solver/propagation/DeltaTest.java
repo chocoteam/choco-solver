@@ -94,8 +94,8 @@ public class DeltaTest {
         final BoolVar b1 = model.boolVar("b1");
         final IntVar i0 = model.boolVar("i0");
         model.getResolver().set(inputOrderLBSearch(i0));
-        model.setBoolsChanneling(new BoolVar[]{b0, b1}, s0, 0).post();
-        model.cardinality(s0, model.intVar(0)).post();
+        model.setBoolsChanneling(new BoolVar[]{b0, b1}, s0).post();
+        model.cardinality(s0, model.ZERO()).post();
 
         model.solve();
         model.getResolver().reset();

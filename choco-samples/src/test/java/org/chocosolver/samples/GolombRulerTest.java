@@ -53,7 +53,6 @@ public class GolombRulerTest {
     protected Model modeler(int m) {
         GolombRuler pb = new GolombRuler();
         pb.readArgs("-m", Integer.toString(m));
-        pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
         return pb.getModel();
