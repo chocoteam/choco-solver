@@ -442,6 +442,7 @@ public final class Resolver implements Serializable, ISolver {
             action = initialize;
             mMeasures.reset();
             objectivemanager = SAT();
+            set(NoPropagationEngine.SINGLETON); // necessary
         }
     }
 
