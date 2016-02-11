@@ -150,9 +150,6 @@ public final class Resolver implements Serializable, ISolver {
     /** Indicates if a complementary search strategy should be added (set to <tt>true</tt> in that case). */
     private boolean completeSearch = false;
 
-    /** Indicates whether to stop at the first solution found or continue search */
-    private boolean stopAtFirstSolution = true;
-
     /** An explanation engine */
     private ExplanationEngine explainer;
 
@@ -222,15 +219,36 @@ public final class Resolver implements Serializable, ISolver {
      * @see {@link Resolver}
      */
     public boolean solve(){
-        boolean sat = getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION;
-        setStopAtFirstSolution(sat);
-        Variable[] objectives = getModel().getObjectives();
-        if((objectives == null || objectives.length == 0) && !sat) {
+        // prepare
+        boolean satPb = getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION;
+        if((getModel().getObjectives() == null || getModel().getObjectives().length == 0) && !satPb) {
             throw new SolverException("No objective variable has been defined whereas policy implies optimization");
         }
+        kill = true;
+        stop = false;
         long nbsol = getMeasures().getSolutionCount();
-        launch();
-        if(restoreBestSolution && !sat){
+        // solve
+        searchLoop();
+        // close
+        searchMonitors.beforeClose();
+        mMeasures.updateTime();
+        kill = false;
+        ESat sat = FALSE;
+        if (mMeasures.getSolutionCount() > 0) {
+            sat = TRUE;
+            if (objectivemanager.isOptimization()) {
+                mMeasures.setObjectiveOptimal(!isStopCriterionMet());
+            }
+        } else if (isStopCriterionMet()) {
+            mMeasures.setObjectiveOptimal(false);
+            sat = UNDEFINED;
+        }
+        feasible = sat;
+        searchMonitors.afterClose();
+        // to return
+        boolean newSolutionFound = (getMeasures().getSolutionCount() - nbsol) > 0;
+        // restoration
+        if(restoreBestSolution && (!newSolutionFound) && !satPb){
             try {
                 getSolutionRecorder().restoreLastSolution();
             } catch (ContradictionException e) {
@@ -239,7 +257,7 @@ public final class Resolver implements Serializable, ISolver {
                 getEngine().flush();
             }
         }
-        return (getMeasures().getSolutionCount() - nbsol) > 0;
+        return newSolutionFound;
     }
 
     /** Define the possible actions of SearchLoop */
@@ -249,16 +267,23 @@ public final class Resolver implements Serializable, ISolver {
         extend,     // extension step
         validate,   // validation step
         repair,     //reparation step
-        stop,       // ending step
     }
+
+    private boolean stop;
 
     /**
      * Executes the search loop
      */
-    private void launch() {
+    private void searchLoop() {
         kill = true;
         boolean left = true;
         do {
+            if (isStopCriterionMet()) {
+                stop = true;
+            }
+            if(stop){
+                return;
+            }
             switch (action) {
                 case initialize:
                     searchMonitors.beforeInitialize();
@@ -301,7 +326,7 @@ public final class Resolver implements Serializable, ISolver {
                     boolean repaired = M.repair(this);
                     searchMonitors.afterUpBranch();
                     if (!repaired) {
-                        action = stop;
+                        stop = true;
                     } else {
                         L.forget(this);
                     }
@@ -312,37 +337,10 @@ public final class Resolver implements Serializable, ISolver {
                     mMeasures.incSolutionCount();
                     getObjectiveManager().update();
                     searchMonitors.onSolution();
-                    if (stopAtFirstSolution()) {
-                        action = stop;
-                    } else {
-                        jumpTo = 1;
-                        action = repair;
-                    }
+                    jumpTo = 1;
+                    action = repair;
+                    stop = true;
                     break;
-                case stop:
-                    searchMonitors.beforeClose();
-                    mMeasures.updateTime();
-                    kill = false;
-                    ESat sat = FALSE;
-                    if (mMeasures.getSolutionCount() > 0) {
-                        sat = TRUE;
-                        if (objectivemanager.isOptimization()) {
-                            mMeasures.setObjectiveOptimal(!isStopCriterionMet());
-                        }
-                    } else if (isStopCriterionMet()) {
-                        mMeasures.setObjectiveOptimal(false);
-                        sat = UNDEFINED;
-                    }
-                    feasible = sat;
-                    if (stopAtFirstSolution()) { // for the next call, if needed
-                        jumpTo = 1;
-                        action = repair;
-                    }
-                    searchMonitors.afterClose();
-                    return;
-            }
-            if (isStopCriterionMet()) {
-                action = stop;
             }
         } while (true);
     }
@@ -388,7 +386,7 @@ public final class Resolver implements Serializable, ISolver {
             searchMonitors.onContradiction(ce);
             L.record(this);
             mModel.getEnvironment().worldPop();
-            action = stop;
+            stop = true;
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
@@ -407,7 +405,7 @@ public final class Resolver implements Serializable, ISolver {
             feasible = FALSE;
             engine.flush();
             getMeasures().incFailCount();
-            action = stop;
+            stop = true;
         }
         // Indicates which decision was previously applied before selecting the move.
         // Always sets to ROOT for the first move
@@ -477,9 +475,8 @@ public final class Resolver implements Serializable, ISolver {
             action = extend;
         } catch (ContradictionException e) {
             // trivial inconsistency is detected, due to the cut
-            action = stop;
+            stop = true;
         }
-
         searchMonitors.afterRestart();
     }
 
@@ -617,13 +614,6 @@ public final class Resolver implements Serializable, ISolver {
      */
     public ExplanationEngine getExplainer() {
         return explainer;
-    }
-
-    /**
-     * @return whether or not to stop search at the first solution found
-     */
-    public boolean stopAtFirstSolution() {
-        return stopAtFirstSolution;
     }
 
     /**
@@ -816,14 +806,6 @@ public final class Resolver implements Serializable, ISolver {
     }
 
     /**
-     * Indicates whether or not to stop search at the first solution found
-     * @param stopAtFirstSolution whether or not to stop search at the first solution found
-     */
-    public void setStopAtFirstSolution(boolean stopAtFirstSolution) {
-        this.stopAtFirstSolution = stopAtFirstSolution;
-    }
-
-    /**
      * Adds a stop criterion, which, when met, stops the search loop.
      * There can be multiple stop criteria, a logical OR is then applied.
      * The stop criteria are declared to the search loop just before launching the search,
@@ -1008,5 +990,21 @@ public final class Resolver implements Serializable, ISolver {
     @Deprecated
     public boolean hasReachedLimit() {
         return isStopCriterionMet();
+    }
+
+    /**
+     * @deprecated : always stop at first solution met
+     * Will be removed after version 3.4.0
+     */
+    @Deprecated
+    public void setStopAtFirstSolution(boolean stopAtFirstSolution) {}
+
+    /**
+     * @deprecated : always stop at first solution met
+     * Will be removed after version 3.4.0
+     */
+    @Deprecated
+    public boolean stopAtFirstSolution() {
+        return true;
     }
 }
