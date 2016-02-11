@@ -100,21 +100,27 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * <p>
  * Project: choco.
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 23/12/2015.
  */
 public class ParallelResolution {
 
-    /**
-     * List of {@link Model}s to be executed in parallel.
-     */
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////       VARIABLES       //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /** List of {@link Model}s to be executed in parallel. */
     private final List<Model> models;
 
-    /**
-     * Integer which stores the number of ending models.
-     * Needed for synchronization purpose.
-     */
-    public final AtomicInteger finishers = new AtomicInteger(0);
+    /** Stores whether or not prepare() method has been called */
+    private boolean isPrepared = false;
+
+    /** Integer which stores the number of ending models. Needed for synchronization purpose. */
+    private final AtomicInteger finishers = new AtomicInteger(0);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Creates a new instance of this parallel resolution helper.
@@ -123,6 +129,10 @@ public class ParallelResolution {
     public ParallelResolution() {
         this.models = new LinkedList<>();
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////          API          //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * <p>
@@ -149,115 +159,21 @@ public class ParallelResolution {
     }
 
     /**
-     * @deprecated use {@link #addModel(Model)} instead
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public void addSolver(Solver s){
-        addModel(s);
-    }
-
-    /**
-     * <p>
-     * Removes a model from the list of models to run in parallel.
-     * </p>
-     * <p>
-     *     The <i>solver</i> is <b>NOT</b> automatically un-instrumented of
-     *     stop {@link org.chocosolver.util.criteria.Criterion} and a {@link IMonitorClose}
-     *     added before solving a problem.
-     * </p>
-     * @param model a model to remove
-     */
-    public void removeModel(Model model){
-        this.models.remove(model);
-    }
-
-    /**
-     * @deprecated use {@link #removeModel(Model)} instead
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public void removeSolver(Solver s){
-        removeModel(s);
-    }
-
-    /**
-     * Returns the model at the specified position in this list.
+     * Run the solve() instruction of every model of the portfolio in parallel.
      *
-     * @param index index of the element to return
-     * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
+     * <p>
+     * Note that a call to {@link #getBestModel()} returns a model which has found the best solution.
+     * </p>
+     * @return <code>true</code> if and only if at least one new solution has been found.
+     * @throws SolverException if no model or only model has been added.
      */
-    public Model getModel(int index){
-        return models.get(index);
-    }
-
-    /**
-     * @deprecated use {@link #getModel(int)}  instead
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public Solver getSolver(int i){
-        return (Solver)getModel(i);
-    }
-
-    /**
-     * Returns the number of models in this parallel resolution helper.
-     * If this list contains more than <tt>Integer.MAX_VALUE</tt> models, returns
-     * <tt>Integer.MAX_VALUE</tt>.
-     *
-     * @return the number of models in this parallel resolution helper.
-     */
-    public int size(){
-        return models.size();
-    }
-
-    /**
-     * Instruments all models to be run in parallel by adding
-     * a stop {@link org.chocosolver.util.criteria.Criterion} and a {@link IMonitorClose}.
-     * When dealing with optimization problem, add {@link IMonitorSolution} to share cuts.
-     */
-    public void prepare(){
-        ResolutionPolicy policy = models.get(0).getResolutionPolicy();
-        models.stream().forEach(s -> s.getResolver().addStopCriterion(()->finishers.get()>0));
-        models.stream().forEach(s -> s.getResolver().plugMonitor(new IMonitorClose() {
-            @Override
-            public void afterClose() {
-                int count = finishers.addAndGet(1);
-                if(count == models.size()){
-                    finishers.set(0); //reset the counter to 0
-                }
-            }
-        }));
-        if(policy != ResolutionPolicy.SATISFACTION){
-            // share the best known bound
-            models.stream().forEach(s -> s.getResolver().plugMonitor(
-                    (IMonitorSolution) () -> {
-                        synchronized (s.getResolver().getObjectiveManager()) {
-                            switch (s.getResolver().getObjectiveManager().getPolicy()) {
-                                case MAXIMIZE:
-                                    Number lb = s.getResolver().getObjectiveManager().getBestSolutionValue();
-                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestLB(lb));
-                                    break;
-                                case MINIMIZE:
-                                    int ub = s.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
-                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestUB(ub));
-                                    break;
-                                case SATISFACTION:
-                                    break;
-                            }
-                        }
-                    }
-            ));
-        }
-    }
-
-    /**
-     * @return the (mutable!) list of models used in this parallel resolution helper.
-     */
-    public List<Model> getModels(){
-        return models;
+    public boolean solve() {
+        if(!isPrepared){ prepare(); }
+        long nsol = 0;
+        for (Model s : models) { nsol -= s.getResolver().getMeasures().getSolutionCount(); }
+        models.parallelStream().forEach(Model::solve);
+        for (Model s : models) { nsol += s.getResolver().getMeasures().getSolutionCount(); }
+        return nsol > 0;
     }
 
     /**
@@ -304,6 +220,54 @@ public class ParallelResolution {
         }
     }
 
+    /**
+     * @return the (mutable!) list of models used in this parallel resolution helper.
+     */
+    public List<Model> getModels(){
+        return models;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////   INTERNAL METHODS    //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void prepare(){
+        isPrepared = true;
+        ResolutionPolicy policy = models.get(0).getResolutionPolicy();
+        check(policy);
+        models.stream().forEach(s -> s.getResolver().addStopCriterion(()->finishers.get()>0));
+        models.stream().forEach(s -> s.getResolver().plugMonitor(new IMonitorClose() {
+            @Override
+            public void afterClose() {
+                int count = finishers.addAndGet(1);
+                if(count == models.size()){
+                    finishers.set(0); //reset the counter to 0
+                }
+            }
+        }));
+        if(policy != ResolutionPolicy.SATISFACTION){
+            // share the best known bound
+            models.stream().forEach(s -> s.getResolver().plugMonitor(
+                    (IMonitorSolution) () -> {
+                        synchronized (s.getResolver().getObjectiveManager()) {
+                            switch (s.getResolver().getObjectiveManager().getPolicy()) {
+                                case MAXIMIZE:
+                                    Number lb = s.getResolver().getObjectiveManager().getBestSolutionValue();
+                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestLB(lb));
+                                    break;
+                                case MINIMIZE:
+                                    int ub = s.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
+                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestUB(ub));
+                                    break;
+                                case SATISFACTION:
+                                    break;
+                            }
+                        }
+                    }
+            ));
+        }
+    }
+
     private void check(ResolutionPolicy policy){
         if (models.size() <= 1) {
             throw new SolverException("Try to run " + models.size() + " model in parallel (should be >1).");
@@ -320,30 +284,9 @@ public class ParallelResolution {
         }
     }
 
-
-    /**
-     * Run the solve() instruction of every model of the portfolio in parallel.
-     * Be sure you have call {@link #prepare()} before calling this method
-     *
-     * <p>
-     * Note that a call to {@link #getBestModel()} returns a model which has found the best solution.
-     * </p>
-     * @return <code>true</code> if and only if at least one new solution has been found.
-     * @throws SolverException if no model or only model has been added.
-     */
-    public boolean solve() {
-        ResolutionPolicy policy = models.get(0).getResolutionPolicy();
-        check(policy);
-        long nsol = 0;
-        for (Model s : models) {
-            nsol -= s.getResolver().getMeasures().getSolutionCount();
-        }
-        models.parallelStream().forEach(Model::solve);
-        for (Model s : models) {
-            nsol += s.getResolver().getMeasures().getSolutionCount();
-        }
-        return nsol > 0;
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////       TO REMOVE       //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
      * @deprecated use {@link #solve()} instead
@@ -361,5 +304,59 @@ public class ParallelResolution {
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy) {
         solve();
+    }
+
+    /**
+     * @deprecated use {@link #addModel(Model)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void addSolver(Solver s){
+        addModel(s);
+    }
+
+    /**
+     * @deprecated use {@link #getModel(int)}  instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public Solver getSolver(int i){
+        return (Solver)getModel(i);
+    }
+
+    /**
+     * @deprecated use {@link #removeModel(Model)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void removeSolver(Solver s){
+        removeModel(s);
+    }
+
+    /**
+     * @deprecated use {@link #getModels().get(int)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public Model getModel(int index){
+        return models.get(index);
+    }
+
+    /**
+     * @deprecated use {@link #getModels().getSize()} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public int size(){
+        return models.size();
+    }
+
+    /**
+     * @deprecated use {@link #getModels().remove(Model)} instead
+     * Will be removed in version > 3.4.0
+     */
+    @Deprecated
+    public void removeModel(Model model){
+        this.models.remove(model);
     }
 }
