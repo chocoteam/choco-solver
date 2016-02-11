@@ -55,11 +55,6 @@ import org.chocosolver.util.objects.IntMap;
 public class DomOverWDeg extends AbstractStrategy<IntVar>{
 
     /**
-     * List of decision variables
-     */
-    IntVar[] variables;
-
-    /**
      * Failure per propagators counter
      */
     FailPerPropagator counter;
@@ -98,7 +93,6 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
      */
     public DomOverWDeg(IntVar[] variables, long seed, IntValueSelector valueSelector) {
         super(variables);
-        this.variables = variables.clone();
         Model model = variables[0].getModel();
         counter = new FailPerPropagator(model.getCstrs(), model);
         pid2arity = new IntMap(model.getCstrs().length * 3 / 2 + 1, -1);
@@ -131,9 +125,9 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
         long _d1 = Integer.MAX_VALUE;
         long _d2 = 0;
         for (int idx = 0; idx < vars.length; idx++) {
-            int dsize = variables[idx].getDomainSize();
+            int dsize = vars[idx].getDomainSize();
             if (dsize > 1) {
-                int weight = weight(variables[idx]);
+                int weight = weight(vars[idx]);
                 long c1 = dsize * _d2;
                 long c2 = _d1 * weight;
                 if (c1 < c2) {
