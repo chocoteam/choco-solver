@@ -49,8 +49,7 @@ import static java.lang.Math.max;
 import static java.util.Arrays.copyOfRange;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
 /**
  * OR-LIBRARY:<br/>
@@ -114,6 +113,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void buildModel() {
+        level = Level.SILENT;
         model = new Model("Air plane landing");
         data = parse(mData.source());
         n = data.length;
@@ -125,9 +125,6 @@ public class AirPlaneLanding extends AbstractProblem {
         IntVar ZERO = model.intVar(0);
         for (int i = 0; i < n; i++) {
             planes[i] = model.intVar("p_" + i, data[i][ELT], data[i][LLT], true);
-
-//            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
-//            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
 
             obj_ub += max(
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
@@ -163,7 +160,6 @@ public class AirPlaneLanding extends AbstractProblem {
             maxCost.put(planes[i], max(data[i][PCBT], data[i][PCAT]));
         }
 
-//        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
         IntVar obj_e = model.intVar("obj_e", 0, obj_ub, true);
         model.scalar(earliness, copyOfRange(costLAT, 0, n), "=", obj_e).post();
 
@@ -188,7 +184,9 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        while(model.solve()){
+            System.out.println("New solution found : "+objective);
+        }
     }
 
     @Override

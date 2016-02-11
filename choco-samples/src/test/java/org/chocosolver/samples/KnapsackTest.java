@@ -79,10 +79,8 @@ public class KnapsackTest {
             }
             // end of trick
             s.setObjectives(MAXIMIZE, power);
-            s.solve();
-        } else {
-            while (s.solve()) ;
         }
+        while(s.solve());
         times.add(s.getResolver().getMeasures().getTimeCount());
     }
 
@@ -145,6 +143,9 @@ public class KnapsackTest {
         Model s = ks.modelIt("k20", 15);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getResolver().getMeasures().getBestSolutionValue().intValue(), 2657, "obj val");
+
+        // This test was true when the default search strategy did not use Last Conflict
+        // TODO update test
         Assert.assertEquals(s.getResolver().getMeasures().getSolutionCount(), 29, "nb sol");
 //        Assert.assertEquals(s.getResolver().getMeasures().getNodeCount(), 1153919, "nb nod");
     }

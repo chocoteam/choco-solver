@@ -95,6 +95,6 @@ public class ParetoTest {
         s.getResolver().plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
         // --- solve
         s.setObjectives(ResolutionPolicy.MAXIMIZE,totalProfit_1, totalProfit_2);
-        s.solve();
+        while(s.solve());
     }
 }

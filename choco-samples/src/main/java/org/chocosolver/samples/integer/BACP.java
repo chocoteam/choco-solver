@@ -31,6 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -115,6 +116,8 @@ public class BACP extends AbstractProblem {
             model.arithm(load[i], "<=", objective).post();
         }
 
+        model.setObjectives(MINIMIZE, objective);
+
         prerequisite(3, 1);
         prerequisite(4, 1);
         prerequisite(5, 1);
@@ -190,18 +193,17 @@ public class BACP extends AbstractProblem {
 
 
     @Override
-    public void configureSearch() {
-    }
+    public void configureSearch() {}
 
     @Override
     public void solve() {
-        model.setObjectives(MINIMIZE, objective);
-        model.solve();
+        while(model.solve()){
+            System.out.println("New solution found : "+objective);
+        }
     }
 
     @Override
-    public void prettyOut() {
-    }
+    public void prettyOut() {}
 
     public static void main(String[] args) {
         new BACP().execute(args);

@@ -116,7 +116,7 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
             model.setObjectives(MINIMIZE, iv);
-            model.solve();
+            while(model.solve());
             assertEquals(model.getResolver().getMeasures().getBestSolutionValue(), 0);
             assertEquals(model.getResolver().getMeasures().getNodeCount(), 2);
         }
@@ -126,7 +126,7 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getResolver().reset();
             model.setObjectives(MAXIMIZE, iv);
-            model.solve();
+            while(model.solve());
             assertEquals(model.getResolver().getMeasures().getBestSolutionValue(), 10);
             assertEquals(model.getResolver().getMeasures().getNodeCount(), 21);
         }
@@ -139,13 +139,13 @@ public class ObjectiveTest {
         model.arithm(iv, ">=", 2).post();
 
         model.setObjectives(MINIMIZE, iv);
-        model.solve();
+        while(model.solve());
         assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
 
         model.getResolver().reset();
 
         model.setObjectives(MINIMIZE, iv);
-        model.solve();
+        while(model.solve());
         assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
     }
 
@@ -194,12 +194,12 @@ public class ObjectiveTest {
         BoolVar v = model.arithm(iv, "<=", 2).reify();
 
         model.setObjectives(MINIMIZE, v);
-        model.solve();
+        while(model.solve());
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
         model.getResolver().reset();
 
         model.setObjectives(MINIMIZE, v);
-        model.solve();
+        while(model.solve());
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
@@ -217,8 +217,7 @@ public class ObjectiveTest {
             r.set(new SevenQueuesPropagatorEngine(model));
         }
         r.getMeasures().setReadingTimeCount(nanoTime());
-        r.setStopAtFirstSolution(false);
-        model.solve();
+        while(model.solve());
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         r.reset();

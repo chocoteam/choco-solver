@@ -115,7 +115,7 @@ public class LNSTest {
         }
 //        Chatterbox.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());
         model.setObjectives(MAXIMIZE, power);
-        model.solve();
+        while(model.solve());
         printSolutions(model);
     }
 

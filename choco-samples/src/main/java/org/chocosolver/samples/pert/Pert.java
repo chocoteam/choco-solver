@@ -131,7 +131,7 @@ public class Pert extends AbstractProblem {
     @Override
     public void solve() {
         model.setObjectives(MINIMIZE, vars[n - 1]);
-        model.solve();
+        while(model.solve());
     }
 
     @Override

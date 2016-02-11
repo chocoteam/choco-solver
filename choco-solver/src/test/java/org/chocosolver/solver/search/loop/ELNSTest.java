@@ -70,16 +70,9 @@ public class ELNSTest {
                 ), None);
         r.set(randomSearch(vars, seed));
 
-
-//        SMF.log(solver, true, true, new IMessage() {
-//            @Override
-//            public String print() {
-//                return Arrays.toString(vars) + " o:" + obj;
-//            }
-//        });
         showSolutions(model);
         model.setObjectives(MINIMIZE, obj);
-        model.solve();
+        while(model.solve());
     }
 
 

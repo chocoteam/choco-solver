@@ -65,6 +65,7 @@ public class BinPacking extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
+		level = Level.SILENT;
 		model = new Model("bin packing sample");
 		// input
 		nbItems = d1_w.length;
@@ -79,25 +80,21 @@ public class BinPacking extends AbstractProblem{
 	}
 
 	@Override
-	public void configureSearch() {
-		model.getResolver().plugMonitor((IMonitorSolution) () -> {
-            String s = minLoad+" : ";
-            for(IntVar l:loads){
-                s+=" "+l.getValue();
-            }
-            System.out.println(s);
-        });
-	}
+	public void configureSearch() {}
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
 	public void solve() {
-		int mode = 2;
+		int nbOpt = 2;
+		int mode = 0;
 		switch (mode) {
 			case 0:// to check
 				model.arithm(minLoad, "=", 17).post();
 				model.getResolver().set(new AllSolutionsRecorder(model));
-				while (model.solve()) ;
+				while(model.solve()){
+					nbOpt ++;
+				}
+				System.out.println("There are "+nbOpt+" optima");
 				break;
 			case 1:// one step approach (could be slow)
 				// non-strict optimization
@@ -106,13 +103,19 @@ public class BinPacking extends AbstractProblem{
 				break;
 			case 2:// two step approach (find and prove optimum, then enumerate)
 				model.setObjectives(MAXIMIZE, minLoad);
-				if (model.solve()) {
-					int opt = model.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
-					model.getResolver().getEngine().flush();
+				int opt = -1;
+				while(model.solve()){
+					System.out.println("better solution found : "+minLoad);
+					opt = minLoad.getValue();
+				}
+				if (opt != -1) {
 					model.getResolver().reset();
 					model.arithm(minLoad, "=", opt).post();
 					model.clearObjectives();
-					while(model.solve());
+					while(model.solve()){
+						nbOpt ++;
+					}
+					System.out.println("There are "+nbOpt+" optima");
 				}
 				break;
 			default:

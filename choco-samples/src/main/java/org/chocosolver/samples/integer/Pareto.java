@@ -59,7 +59,7 @@ public class Pareto {
 		// the problem is to maximize a and b
 		model.setObjectives(ResolutionPolicy.MAXIMIZE,a,b);
 
-		model.solve();
+		while(model.solve());
 
 		List<Solution> paretoFront = model.getResolver().getSolutionRecorder().getSolutions();
 		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");

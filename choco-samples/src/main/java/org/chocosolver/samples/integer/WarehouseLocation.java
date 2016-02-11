@@ -133,7 +133,7 @@ public class WarehouseLocation extends AbstractProblem {
     @Override
     public void solve() {
         model.setObjectives(MINIMIZE, totCost);
-        model.solve();
+        while(model.solve());
     }
 
     @Override

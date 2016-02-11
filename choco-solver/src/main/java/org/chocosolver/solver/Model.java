@@ -1205,7 +1205,7 @@ public class Model implements Serializable, IModel {
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
         setObjectives(policy,getObjectives());
         getResolver().setRestoreBestSolution(restoreLastSolution);
-        solve();
+        while(solve());
     }
 
     /**
@@ -1238,7 +1238,7 @@ public class Model implements Serializable, IModel {
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
         setObjectives(policy,objective);
         getResolver().setRestoreBestSolution(restoreLastSolution);
-        solve();
+        while(solve());
     }
 
     // REALS
@@ -1253,7 +1253,7 @@ public class Model implements Serializable, IModel {
         setObjectives(policy,objective);
         setPrecision(precision);
         getResolver().setRestoreBestSolution(restoreLastSolution);
-        solve();
+        while(solve());
     }
 
     /**
@@ -1278,7 +1278,7 @@ public class Model implements Serializable, IModel {
     public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
         setObjectives(policy,objectives);
         getResolver().setRestoreBestSolution(restoreLastSolution);
-        solve();
+        while(solve());
     }
 
     /**

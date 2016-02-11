@@ -148,13 +148,6 @@ public class MarioKart extends AbstractProblem {
 	public void configureSearch() {
 		/* Listeners */
 		Resolver r = model.getResolver();
-		r.plugMonitor(new IMonitorSolution() {
-			private static final long serialVersionUID = 1L;
-			@Override
-			public void onSolution() {
-				prettyOut();
-			}
-		});
 		/* Heuristic choices */
 		r.set(lastConflict(inputOrderLBSearch(next)));
 	}
@@ -162,7 +155,9 @@ public class MarioKart extends AbstractProblem {
 	@Override
 	public void solve() {
 		model.setObjectives(MAXIMIZE, goldFound);
-		model.solve();
+		while(model.solve()){
+			prettyOut();
+		}
 		printInputData();
 	}
 

@@ -111,8 +111,8 @@ public class PropConDisTest {
             Model cd = modelPb(n, n, rnd, true, true);
             or.getResolver().set(inputOrderLBSearch((IntVar[]) or.getHook("decvars")));
             cd.getResolver().set(inputOrderLBSearch((IntVar[]) cd.getHook("decvars")));
-            or.solve();
-            cd.solve();
+            while(or.solve());
+            while(cd.solve());
             assertEquals(cd.getSolutionRecorder().getLastSolution().getIntVal((IntVar) cd.getObjectives()[0]),
                     or.getSolutionRecorder().getLastSolution().getIntVal((IntVar) or.getObjectives()[0]));
             assertEquals(cd.getResolver().getMeasures().getSolutionCount(), or.getResolver().getMeasures().getSolutionCount(), "wrong nb of solutions");

@@ -63,6 +63,7 @@ public class CumulativeSample extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
+		level = Level.SILENT;
 		model = new Model("Cumulative example: makespan minimisation");
 		IntVar capa = model.intVar(6);
 		int n = 10;
@@ -93,7 +94,9 @@ public class CumulativeSample extends AbstractProblem{
 	@Override
 	public void solve() {
 		model.setObjectives(MINIMIZE, makespan);
-		model.solve();
+		while(model.solve()){
+			System.out.println("New solution found : "+makespan);
+		}
 	}
 
 	@Override

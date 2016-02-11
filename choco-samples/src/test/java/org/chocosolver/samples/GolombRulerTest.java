@@ -64,14 +64,18 @@ public class GolombRulerTest {
         for (int j = 0; j < OPTIMAL_RULER.length; j++) {
             sol = modeler(OPTIMAL_RULER[j][0]);
             sol.setObjectives(MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
-            sol.solve();
+            int nb=0;
+            while(sol.solve()){
+                nb++;
+            }
             long sols = sol.getResolver().getMeasures().getSolutionCount();
+            assertEquals(nb, sols);
             long nodes = sol.getResolver().getMeasures().getNodeCount();
             for (int k = 1; k < values().length; k++) {
                 sol = modeler(OPTIMAL_RULER[j][0]);
                 values()[k].make(sol);
                 sol.setObjectives(MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
-                sol.solve();
+                while(sol.solve());
                 assertEquals(sol.getResolver().getMeasures().getSolutionCount(), sols);
                 assertEquals(sol.getResolver().getMeasures().getNodeCount(), nodes);
 

@@ -110,7 +110,7 @@ public class SmallSantaClaude {
         // find optimal solution (Santa Claus is stingy)
         model.setObjectives(MINIMIZE, average_deviation);
         model.setPrecision(precision);
-        model.solve();
+        while(model.solve());
         // free IBEX structures from memory
         model.getIbex().release();
     }

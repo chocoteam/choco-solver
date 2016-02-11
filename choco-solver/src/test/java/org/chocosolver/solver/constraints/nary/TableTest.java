@@ -197,7 +197,7 @@ public class TableTest {
         }
         model.sum(reified, "=", sum).post();
         model.setObjectives(MINIMIZE, sum);
-        model.solve();
+        while(model.solve());
         if (model.getResolver().getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
                 out.print(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");

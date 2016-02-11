@@ -119,7 +119,9 @@ public class Knapsack extends AbstractProblem {
     @Override
     public void solve() {
         model.setObjectives(MAXIMIZE, power);
-        model.solve();
+        while(model.solve()){
+            System.out.println(power);
+        }
     }
 
     @Override

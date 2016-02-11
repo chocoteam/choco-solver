@@ -274,7 +274,7 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
-            pares.solve();
+            while(pares.solve());
             Assert.assertTrue(pares.getBestModel()!=null);
             Chatterbox.printSolutions(pares.getBestModel());
             Assert.assertEquals(pares.getBestModel().getResolver().getObjectiveManager().getBestSolutionValue(), 51);
@@ -285,7 +285,7 @@ public class ModelTest {
     public void testParBug2() {
         for (int iter = 0; iter < 50; iter++) {
             Model s = knapsack(true);
-            s.solve();
+            while(s.solve());
             Chatterbox.printSolutions(s);
             Assert.assertEquals(s.getResolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
@@ -299,7 +299,7 @@ public class ModelTest {
                 pares.addModel(knapsack(true));
                 pares.addModel(knapsack(false));
             }
-            pares.solve();
+            while(pares.solve());
             Chatterbox.printSolutions(pares.getBestModel());
             Assert.assertEquals(pares.getBestModel().getResolver().getObjectiveManager().getBestSolutionValue(), 51);
         }

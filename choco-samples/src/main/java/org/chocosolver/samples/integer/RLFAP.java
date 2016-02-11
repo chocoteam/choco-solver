@@ -171,7 +171,9 @@ public class RLFAP extends AbstractProblem {
         if (opt) {
             model.setObjectives(MAXIMIZE, nb0);
         }
-        model.solve();
+        while(model.solve()){
+            System.out.println(nb0);
+        }
     }
 
     @Override

@@ -83,6 +83,8 @@ public class LimitsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBacktrack() {
+        // This test was true when the default search strategy did not use Last Conflict
+        // TODO update test
         Model s = makeNQueenWithBinaryConstraints(12);
         long bl = 50;
         s.getResolver().limitBacktrack(bl);

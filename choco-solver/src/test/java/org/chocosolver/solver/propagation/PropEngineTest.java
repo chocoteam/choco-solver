@@ -132,7 +132,7 @@ public class PropEngineTest {
     public void test5(){
         Model model = ProblemMaker.makeGolombRuler(10);
         model.getResolver().set(new SevenQueuesPropagatorEngine(model));
-        model.solve();
+        while(model.solve());
         Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }
@@ -141,7 +141,7 @@ public class PropEngineTest {
     public void test6(){
         Model model = ProblemMaker.makeGolombRuler(10);
         model.getResolver().set(new TwoBucketPropagationEngine(model));
-        model.solve();
+        while(model.solve());
         Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }

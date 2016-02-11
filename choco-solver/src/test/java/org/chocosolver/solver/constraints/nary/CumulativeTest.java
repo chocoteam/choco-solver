@@ -163,7 +163,7 @@ public class CumulativeTest {
 				return r.getMeasures().getSolutionCount();
 			case 1:
 				model.setObjectives(MINIMIZE, last);
-				model.solve();
+				while(model.solve());
 				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getBestSolutionValue().longValue();
 			case 2:

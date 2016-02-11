@@ -92,7 +92,7 @@ public class ResolverTest {
         Resolver r = model.getResolver();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setHBFS(.05, .1, 32);
-        model.solve();
+        while(model.solve());
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 7);
         assertEquals(model.getResolver().getMeasures().getNodeCount(), 7522);
     }
@@ -147,7 +147,7 @@ public class ResolverTest {
         Resolver r = model.getResolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
-        model.solve();
+        while(model.solve());
         printShortStatistics(model);
         assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3);
         assertEquals(model.getResolver().getMeasures().getNodeCount(), 16);
@@ -173,7 +173,7 @@ public class ResolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.limitSearch(() -> r.getMeasures().getNodeCount() >= 1000);
-        model.solve();
+        while(model.solve());
         printShortStatistics(model);
         assertEquals(model.getResolver().getMeasures().getRestartCount(), 314);
     }
@@ -186,7 +186,7 @@ public class ResolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         model.getResolver().setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
-        model.solve();
+        while(model.solve());
         printShortStatistics(model);
         assertEquals(r.getMeasures().getRestartCount(), 972);
     }

@@ -109,7 +109,7 @@ public class Partition extends AbstractProblem {
 	public void solve() {
 		// find the optimum
 		model.setObjectives(MINIMIZE, sum);
-		model.solve();
+		while(model.solve());
 	}
 
 	@Override
