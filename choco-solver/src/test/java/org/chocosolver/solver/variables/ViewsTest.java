@@ -41,6 +41,8 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.constraints.Operator.EQ;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.*;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.*;
 import static org.testng.Assert.*;
 
 /**
@@ -335,7 +337,7 @@ public class ViewsTest {
                 IntVar az = ref.intVar("az", 0, 2, false);
                 new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
                 ref.absolute(az, z).post();
-                ref.getResolver().set(randomSearch(new IntVar[]{x, y, az}, seed));
+                ref.getResolver().set(intVarSearch(randomVar(seed), randomIntBound(seed),new IntVar[]{x, y, az}));
             }
             Model model = new Model();
             {
@@ -344,7 +346,7 @@ public class ViewsTest {
                 IntVar z = model.intVar("Z", -2, 2, false);
                 IntVar az = model.intAbsView(z);
                 model.sum(new IntVar[]{z, y}, "=", x).post();
-                model.getResolver().set(randomSearch(new IntVar[]{x, y, az}, seed));
+                model.getResolver().set(intVarSearch(randomVar(seed), randomIntBound(seed),new IntVar[]{x, y, az}));
             }
             check(ref, model, seed, true, true);
         }
