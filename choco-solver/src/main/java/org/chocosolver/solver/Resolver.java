@@ -148,9 +148,6 @@ public final class Resolver implements Serializable, ISolver {
     /** Indicates if the search loops unexpectedly ends (set to <tt>true</tt> in that case). */
     private boolean kill;
 
-    /** Indicates if the entire search space has been explored (set to <tt>true</tt> in that case). */
-    private boolean entire;
-
     /** Indicates if the default search loop is in use (set to <tt>true</tt> in that case). */
     private boolean defaultSearch = false;
 
@@ -209,7 +206,6 @@ public final class Resolver implements Serializable, ISolver {
         criteria = new ArrayList<>();
         crit_met = false;
         kill = true;
-        entire = false;
         searchMonitors = new SearchMonitorList();
         set(new MoveBinaryDFS());
         setStandardPropagation();
@@ -265,6 +261,7 @@ public final class Resolver implements Serializable, ISolver {
      * Executes the search loop
      */
     private void launch() {
+        kill = true;
         boolean left = true;
         do {
             switch (action) {
@@ -309,7 +306,6 @@ public final class Resolver implements Serializable, ISolver {
                     boolean repaired = M.repair(this);
                     searchMonitors.afterUpBranch();
                     if (!repaired) {
-                        entire = true;
                         action = stop;
                     } else {
                         L.forget(this);
@@ -332,7 +328,6 @@ public final class Resolver implements Serializable, ISolver {
                     searchMonitors.beforeClose();
                     mMeasures.updateTime();
                     kill = false;
-                    entire = (decision == ROOT);
                     ESat sat = FALSE;
                     if (mMeasures.getSolutionCount() > 0) {
                         sat = TRUE;
@@ -418,7 +413,6 @@ public final class Resolver implements Serializable, ISolver {
             feasible = FALSE;
             engine.flush();
             getMeasures().incFailCount();
-            entire = true;
             action = stop;
         }
         // Indicates which decision was previously applied before selecting the move.
@@ -439,8 +433,6 @@ public final class Resolver implements Serializable, ISolver {
      * <li>it sets the objective manager to STATISFACTION,</li>
      * <li>it resets the measures,</li>
      * <li>and sets the propagation engine to NoPropagationEngine,</li>
-     * <li>remove all search monitors,</li>
-     * <li>remove all stop criteria.</li>
      * </ul>
      */
     public void reset() {
@@ -454,16 +446,8 @@ public final class Resolver implements Serializable, ISolver {
                 tmp.free();
             }
             action = initialize;
-            rootWorldIndex = -1;
-            searchWorldIndex = -1;
             mMeasures.reset();
             objectivemanager = SAT();
-            set(SINGLETON);
-            crit_met = false;
-            kill = true;
-            entire = false;
-            unplugAllSearchMonitors();
-            removeAllStopCriteria();
         }
     }
 
@@ -589,13 +573,6 @@ public final class Resolver implements Serializable, ISolver {
      */
     public boolean isSearchCompleted() {
         return completeSearch;
-    }
-
-    /**
-     * @return <tt>true</tt> if the search loops explores the entire search space, <tt>false</tt> otherwise.
-     */
-    public boolean isComplete() {
-        return entire;
     }
 
     /**
@@ -1019,4 +996,13 @@ public final class Resolver implements Serializable, ISolver {
     }
 
 
+
+    /**
+     * @deprecated : computation is not safe
+     * Will be removed after version 3.4.0
+     */
+    @Deprecated
+    public boolean isComplete() {
+        return true;
+    }
 }
