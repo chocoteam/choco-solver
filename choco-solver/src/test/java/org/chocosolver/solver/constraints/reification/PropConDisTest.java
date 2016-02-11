@@ -33,8 +33,11 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
+import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
@@ -43,6 +46,7 @@ import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
 import static org.chocosolver.solver.constraints.SatFactory.addConstructiveDisjunction;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.intVarSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.chocosolver.util.tools.ArrayUtils.append;
@@ -103,8 +107,8 @@ public class PropConDisTest {
         Random rnd = new Random();
         for (int n = 1; n < 20; n += 1) {
             out.printf("Size: %d\n", n);
-            Model or = modelPb(n, n, rnd, false);
-            Model cd = modelPb(n, n, rnd, true);
+            Model or = modelPb(n, n, rnd, false, true);
+            Model cd = modelPb(n, n, rnd, true, true);
             or.getResolver().set(inputOrderLBSearch((IntVar[]) or.getHook("decvars")));
             cd.getResolver().set(inputOrderLBSearch((IntVar[]) cd.getHook("decvars")));
             or.solve();
@@ -123,10 +127,10 @@ public class PropConDisTest {
             System.out.printf("Size: %d\n", n);
             for (int seed = 0; seed < 5; seed += 1) {
                 out.printf("Size: %d (%d)\n", n, seed);
-                Model or = modelPb(n, seed, rnd, false);
+                Model or = modelPb(n, seed, rnd, false, false);
                 or.getResolver().set(randomSearch((IntVar[]) or.getHook("decvars"), 0));
                 while (or.solve()) ;
-                Model cd = modelPb(n, seed, rnd, true);
+                Model cd = modelPb(n, seed, rnd, true, false);
                 cd.getResolver().set(randomSearch((IntVar[]) cd.getHook("decvars"), 0));
                 while (cd.solve()) ;
                 assertEquals(cd.getResolver().getMeasures().getSolutionCount(), or.getResolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
@@ -135,7 +139,7 @@ public class PropConDisTest {
         }
     }
 
-    private Model modelPb(int size, long seed, Random rnd, boolean cd) {
+    private Model modelPb(int size, long seed, Random rnd, boolean cd, boolean optimize) {
         rnd.setSeed(seed);
         int[] os = new int[size * 2];
         int[] ls = new int[size * 2];
@@ -167,9 +171,11 @@ public class PropConDisTest {
         }
         IntVar horizon = model.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);
         model.sum(new IntVar[]{OS[size - 1], LS[size - 1]}, "=", horizon).post();
-        model.setObjectives(ResolutionPolicy.MINIMIZE, horizon);
+        if (optimize) {
+            model.setObjectives(ResolutionPolicy.MINIMIZE, horizon);
+        }
         model.addHook("decvars", append(OS, LS));
-        showShortStatistics(model);
+//        showShortStatistics(model);
         return model;
     }
 }
