@@ -27,8 +27,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver;
+package org.chocosolver;
 
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Resolver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
@@ -44,81 +46,59 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
+ * These tests are true in the current solver configuration
+ * They may not be satisfied if that configuration changes.
+ *
+ * Those tests are here to warn of any unexpected change
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 29 juil. 2010
+ * @author Jean-Guillaume Fages
  */
-public class LimitsTest {
-
-    @Test(groups="1s", timeOut=60000)
-    public void testTime() {
-        Model s = makeNQueenWithBinaryConstraints(12);
-        long tl = 500;
-        s.getResolver().limitTime(tl);
-        while (s.solve()) ;
-        int tc = (int) (s.getResolver().getMeasures().getTimeCount() * 1000);
-        assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testNode() {
-        Model s = makeNQueenWithBinaryConstraints(12);
-        long nl = 50;
-        s.getResolver().limitNode(nl);
-        while (s.solve()) ;
-        long nc = s.getResolver().getMeasures().getNodeCount();
-        assertEquals(nc, nl);
-    }
+public class SuspiciousTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testBacktrack() {
-        for(long bl=10;bl<200;bl+=7) {
-            Model s = makeNQueenWithBinaryConstraints(12);
-            s.getResolver().limitBacktrack(bl);
-            while (s.solve()) ;
-            long bc = s.getResolver().getMeasures().getBackTrackCount();
-            assertTrue(bc <= bl + s.getResolver().getMeasures().getNodeCount());
-        }
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testFail() {
         Model s = makeNQueenWithBinaryConstraints(12);
-        long fl = 50;
-        s.getResolver().limitFail(fl);
+        s.getResolver().limitBacktrack(50);
         while (s.solve()) ;
-        long fc = s.getResolver().getMeasures().getFailCount();
-        assertEquals(fc, fl);
+        long bc = s.getResolver().getMeasures().getBackTrackCount();
+        assertEquals(bc, 52);
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testSolution() {
-        Model s = makeNQueenWithBinaryConstraints(12);
-        long sl = 50;
-        s.getResolver().limitSolution(sl);
-        while (s.solve()) ;
-        long sc = s.getResolver().getMeasures().getSolutionCount();
-        assertEquals(sc, sl);
-    }
+    public void testGregy4() {
+        Model model = makeNQueenWithBinaryConstraints(12);
+        NodeCounter nodeCounter = new NodeCounter(model, 100);
+        INeighbor rnd = INeighborFactory.random(model.retrieveIntVars(true));
+        Move currentMove = model.getResolver().getMove();
+        model.getResolver().set(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
+            @Override
+            public boolean extend(Resolver resolver) {
+                if (nodeCounter.isMet()) {
+                    super.extend(resolver);
+                }
+                return currentMove.extend(resolver);
+            }
 
-    @Test(groups="1s", timeOut=60000)
-    public void durationTest() {
-        long d = TimeUtils.convertInMilliseconds("0.50s");
-        Assert.assertEquals(d, 500);
-        d += TimeUtils.convertInMilliseconds("30s");
-        Assert.assertEquals(d, 30500);
-        d += TimeUtils.convertInMilliseconds("30m");
-        Assert.assertEquals(d, 1830500);
-        d += TimeUtils.convertInMilliseconds("12h");
-        Assert.assertEquals(d, 45030500);
-        d += TimeUtils.convertInMilliseconds("2d");
-        Assert.assertEquals(d, 217830500);
-
-        long t = TimeUtils.convertInMilliseconds("2d12h30m30.5s");
-        Assert.assertEquals(t, d);
-
-        d = TimeUtils.convertInMilliseconds("71s");
-        Assert.assertEquals(d, 71000);
+            @Override
+            public boolean repair(Resolver resolver) {
+                if (nodeCounter.isMet()) {
+                    super.repair(resolver);
+                } else if (this.solutions > 0
+                        // the second condition is only here for intiale calls, when solutions is not already up to date
+                        || resolver.getMeasures().getSolutionCount() > 0) {
+                    // the detection of a new solution can only be met here
+                    if (solutions < resolver.getMeasures().getSolutionCount()) {
+                        assert solutions == resolver.getMeasures().getSolutionCount() - 1;
+                        solutions++;
+                        neighbor.recordSolution();
+                    }
+                }
+                return currentMove.repair(resolver);
+            }
+        });
+        while (model.solve()) ;
+        long sc = model.getResolver().getMeasures().getSolutionCount();
+        assertEquals(sc, 11);
     }
 }
