@@ -45,6 +45,7 @@ import org.testng.annotations.Test;
 import static java.util.Arrays.sort;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.PropagatorPriority.UNARY;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.IntEventType.VOID;
@@ -132,6 +133,7 @@ public class PropEngineTest {
     public void test5(){
         Model model = ProblemMaker.makeGolombRuler(10);
         model.getResolver().set(new SevenQueuesPropagatorEngine(model));
+        model.getResolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
         while(model.solve());
         Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
@@ -141,6 +143,7 @@ public class PropEngineTest {
     public void test6(){
         Model model = ProblemMaker.makeGolombRuler(10);
         model.getResolver().set(new TwoBucketPropagationEngine(model));
+        model.getResolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
         while(model.solve());
         Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
