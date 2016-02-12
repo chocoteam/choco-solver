@@ -226,6 +226,11 @@ public final class Resolver implements Serializable, ISolver {
         }
         kill = true;
         stop = false;
+        if(action == initialize){
+            searchMonitors.beforeInitialize();
+            initialize();
+            searchMonitors.afterInitialize();
+        }
         long nbsol = getMeasures().getSolutionCount();
         // solve
         searchLoop();
@@ -285,11 +290,7 @@ public final class Resolver implements Serializable, ISolver {
                 return;
             }
             switch (action) {
-                case initialize:
-                    searchMonitors.beforeInitialize();
-                    initialize();
-                    searchMonitors.afterInitialize();
-                    break;
+                case initialize: throw new UnsupportedOperationException("should not initialize during search loop");
                 case propagate:
                     searchMonitors.beforeDownBranch(left);
                     mMeasures.incDepth();
