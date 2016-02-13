@@ -37,13 +37,10 @@ import org.chocosolver.solver.search.loop.lns.INeighborFactory;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
-import org.chocosolver.util.tools.TimeUtils;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * These tests are true in the current solver configuration

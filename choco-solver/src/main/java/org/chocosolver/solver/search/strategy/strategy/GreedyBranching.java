@@ -45,7 +45,7 @@ public class GreedyBranching extends AbstractStrategy {
     public Decision getDecision() {
         Decision d = mainSearch.getDecision();
         if (d != null) {
-            d.setRefutable(true);
+            d.setRefutable(false);
         }
         return d;
     }
@@ -54,7 +54,7 @@ public class GreedyBranching extends AbstractStrategy {
     public Decision computeDecision(Variable variable) {
         Decision d = mainSearch.computeDecision(variable);
         if (d != null) {
-            d.setRefutable(true);
+            d.setRefutable(false);
         }
         return d;
     }

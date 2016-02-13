@@ -110,7 +110,7 @@ public abstract class Decision<E> implements ICause {
      * if set to false, if the decision(e.g. x=3) fails
      * instead of backtracking once and applying its negation (e.g. x!=3)
      * the resolver will backtrack twice and negates the previous decision.
-     * @param once set to false to disable refutation
+     * @param isRefutable set to false to disable refutation
      */
     public final void setRefutable(boolean isRefutable) {
         max_branching = isRefutable ? 2 : 1;
