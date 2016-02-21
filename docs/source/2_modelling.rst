@@ -61,7 +61,7 @@ It is then possible to build directly arrays and matrices of variables having th
     - numeric overflow/underflow operations during propagation.
 
     If *undefined* domain is really required, the following range should be considered:
-    ``[IVariableFactory.MIN_INT_BOUND, IVariableFactory.MAX_INT_BOUND]``.
+    ``[IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND]``.
     Such an interval defines `42949673` values, from `-21474836` to `21474836`.
 
 There exists different ways to encode the domain of an integer variable.

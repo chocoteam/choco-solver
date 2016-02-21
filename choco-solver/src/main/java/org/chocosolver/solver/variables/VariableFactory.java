@@ -51,14 +51,14 @@ public class VariableFactory {
     public static final String CSTE_NAME = "cste -- ";
 
     /**
-     * @deprecated : use {@link Model#MIN_INT_BOUND} instead
+     * @deprecated : use {@link IntVar#MIN_INT_BOUND} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated
     public static final int MIN_INT_BOUND = Integer.MIN_VALUE / 100;
 
     /**
-     * @deprecated : use {@link Model#MAX_INT_BOUND} instead
+     * @deprecated : use {@link IntVar#MAX_INT_BOUND} instead
      * This will be removed in versions > 3.4.0
      */
     @Deprecated

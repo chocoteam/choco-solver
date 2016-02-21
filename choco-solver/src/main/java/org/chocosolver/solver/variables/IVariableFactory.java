@@ -48,18 +48,6 @@ public interface IVariableFactory {
     String CSTE_NAME = "cste -- ";
 
     /**
-     * Provide a minimum value for integer variable lower bound.
-     * Do not prevent from underflow, but may avoid it, somehow.
-     */
-    int MIN_INT_BOUND = Integer.MIN_VALUE / 100;
-
-    /**
-     * Provide a minimum value for integer variable lower bound.
-     * Do not prevent from overflow, but may avoid it, somehow.
-     */
-    int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
-
-    /**
      * Simple method to get a model object
      * Should not be called by the user
      * @return a model object

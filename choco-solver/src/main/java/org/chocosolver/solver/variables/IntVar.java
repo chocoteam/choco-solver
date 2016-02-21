@@ -50,6 +50,18 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 public interface IntVar extends Variable {
 
     /**
+     * Provide a minimum value for integer variable lower bound.
+     * Do not prevent from underflow, but may avoid it, somehow.
+     */
+    int MIN_INT_BOUND = Integer.MIN_VALUE / 100;
+
+    /**
+     * Provide a minimum value for integer variable lower bound.
+     * Do not prevent from overflow, but may avoid it, somehow.
+     */
+    int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
+
+    /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
      * <ul>
      * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
