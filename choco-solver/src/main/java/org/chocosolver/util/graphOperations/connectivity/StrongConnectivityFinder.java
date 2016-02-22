@@ -47,7 +47,6 @@ public class StrongConnectivityFinder implements Serializable {
 	private int nbSCC;
 
 	// util
-	ISet[] successors;
 	int[] stack, p, inf, nodeOfDfsNum, dfsNumOfNode;
 	Iterator<Integer>[] iterator;
 	BitSet inStack;
@@ -62,7 +61,6 @@ public class StrongConnectivityFinder implements Serializable {
 		nodeOfDfsNum = new int[n];
 		dfsNumOfNode = new int[n];
 		inStack = new BitSet(n);
-		successors = new ISet[n];
 		restriction = new BitSet(n);
 		sccFirstNode = new int[n];
 		nextNode = new int[n];
@@ -92,8 +90,7 @@ public class StrongConnectivityFinder implements Serializable {
 		findSingletons(restriction);
 		int first = restriction.nextSetBit(0);
 		while (first >= 0) {
-			findSCC(first, restriction,
-					stack, p, inf, nodeOfDfsNum, dfsNumOfNode, inStack);
+			findSCC(first, restriction, stack, p, inf, nodeOfDfsNum, dfsNumOfNode, inStack);
 			first = restriction.nextSetBit(first);
 		}
 	}
@@ -119,9 +116,6 @@ public class StrongConnectivityFinder implements Serializable {
 			return;
 		}
 		//initialization
-		for(int i=0;i<n;i++){
-			iterator[i] = successors[i].iterator();
-		}
 		int stackIdx = 0;
 		int k = 0;
 		int i = k;
@@ -130,7 +124,7 @@ public class StrongConnectivityFinder implements Serializable {
 		stack[stackIdx++] = i;
 		inStack.set(i);
 		p[k] = k;
-		successors[k] = graph.getSuccOf(start);
+		iterator[k] = graph.getSuccOf(start).iterator();
 		int j;
 		// algo
 		while (true) {
@@ -143,7 +137,7 @@ public class StrongConnectivityFinder implements Serializable {
 						dfsNumOfNode[j] = k;
 						p[k] = i;
 						i = k;
-						successors[i] = graph.getSuccOf(j);
+						iterator[i] = graph.getSuccOf(j).iterator();
 						stack[stackIdx++] = i;
 						inStack.set(i);
 						inf[i] = i;
