@@ -311,7 +311,7 @@ public class ParallelResolution {
      * Will be removed in version > 3.4.0
      */
     @Deprecated
-    public void addSolver(Solver s){
+    public void addSolver(Model s){
         addModel(s);
     }
 
@@ -320,8 +320,8 @@ public class ParallelResolution {
      * Will be removed in version > 3.4.0
      */
     @Deprecated
-    public Solver getSolver(int i){
-        return (Solver)getModel(i);
+    public Model getSolver(int i){
+        return getModel(i);
     }
 
     /**
@@ -329,7 +329,7 @@ public class ParallelResolution {
      * Will be removed in version > 3.4.0
      */
     @Deprecated
-    public void removeSolver(Solver s){
+    public void removeSolver(Model s){
         removeModel(s);
     }
 
