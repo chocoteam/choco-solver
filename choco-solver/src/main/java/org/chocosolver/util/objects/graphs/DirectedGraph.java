@@ -71,13 +71,13 @@ public class DirectedGraph implements IGraph {
         predecessors = new ISet[n];
         successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeSet(type, n);
-            successors[i] = SetFactory.makeSet(type, n);
+            predecessors[i] = SetFactory.makeSet(type, 0);
+            successors[i] = SetFactory.makeSet(type, 0);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeFullSet(n);
+            this.nodes = SetFactory.makeIntervalSet(0,n-1);
         } else {
-            this.nodes = SetFactory.makeBitSet(n);
+            this.nodes = SetFactory.makeBitSet(0);
         }
     }
 
@@ -97,13 +97,13 @@ public class DirectedGraph implements IGraph {
         predecessors = new ISet[n];
         successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeStoredSet(type, n, model);
-            successors[i] = SetFactory.makeStoredSet(type, n, model);
+            predecessors[i] = SetFactory.makeStoredSet(type, 0, model);
+            successors[i] = SetFactory.makeStoredSet(type, 0, model);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeFullSet(n);
+            this.nodes = SetFactory.makeIntervalSet(0,n-1);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, model);
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
         }
     }
 
@@ -115,9 +115,9 @@ public class DirectedGraph implements IGraph {
         StringBuilder sb = new StringBuilder();
         sb.append("nodes : \n").append(nodes).append("\n");
         sb.append("successors : \n");
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
+        for (int i : nodes) {
             sb.append(i).append(" -> {");
-            for (int j = successors[i].getFirstElement(); j >= 0; j = successors[i].getNextElement()) {
+            for (int j : successors[i]) {
                 sb.append(j).append(" ");
             }
             sb.append("}\n");
@@ -148,11 +148,11 @@ public class DirectedGraph implements IGraph {
     @Override
     public boolean removeNode(int x) {
         if (nodes.remove(x)) {
-            for (int j = successors[x].getFirstElement(); j >= 0; j = successors[x].getNextElement()) {
+            for (int j : successors[x]) {
                 predecessors[j].remove(x);
             }
             successors[x].clear();
-            for (int j = predecessors[x].getFirstElement(); j >= 0; j = predecessors[x].getNextElement()) {
+            for (int j : predecessors[x]) {
                 successors[j].remove(x);
             }
             predecessors[x].clear();

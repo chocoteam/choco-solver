@@ -87,10 +87,10 @@ public class PropFastGCC extends Propagator<IntVar> {
         this.mandatories = new ISet[n2];
         this.map = map;
         for (int idx = 0; idx < n2; idx++) {
-            mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, model);
-            possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, model);
+            mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+            possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
         }
-        this.valueToCompute = SetFactory.makeStoredSet(SetType.BITSET, n2, model);
+        this.valueToCompute = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
         this.boundVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
             if (!vars[i].hasEnumeratedDomain()) {
@@ -152,8 +152,8 @@ public class PropFastGCC extends Propagator<IntVar> {
                     }
                 }
             } else {//lazy update
-                for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
-                    for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
+                for (int i : valueToCompute) {
+                    for (int var : possibles[i]) {
                         if (!vars[var].contains(values[i])) {
                             possibles[i].remove(var);
                         } else if (vars[var].isInstantiated()) {
@@ -170,19 +170,19 @@ public class PropFastGCC extends Propagator<IntVar> {
 
     private boolean filter() throws ContradictionException {
         boolean again = false;
-        for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
+        for (int i : valueToCompute) {
             again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), this);
             again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), this);
             if (vars[n + i].isInstantiated()) {
                 if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
-                    for (int j = possibles[i].getFirstElement(); j >= 0; j = possibles[i].getNextElement()) {
+                    for (int j : possibles[i]) {
                         mandatories[i].add(j);
                         again |= vars[j].instantiateTo(values[i], this);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
                 } else if (mandatories[i].getSize() == vars[n + i].getUB()) {
-                    for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
+                    for (int var : possibles[i]) {
                         again |= vars[var].removeValue(values[i], this);
                     }
                     possibles[i].clear();

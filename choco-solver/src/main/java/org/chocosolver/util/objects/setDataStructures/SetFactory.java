@@ -40,14 +40,14 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.solver.Model;
+import org.chocosolver.util.objects.setDataStructures.array.Set_FixedArray;
+import org.chocosolver.util.objects.setDataStructures.bitset.Set_Std_BitSet;
+import org.chocosolver.util.objects.setDataStructures.interval.Set_Interval;
+import org.chocosolver.util.objects.setDataStructures.interval.Set_Std_Interval;
 import org.chocosolver.util.objects.setDataStructures.linkedlist.*;
-import org.chocosolver.util.objects.setDataStructures.matrix.Set_Array;
-import org.chocosolver.util.objects.setDataStructures.matrix.Set_BitSet;
-import org.chocosolver.util.objects.setDataStructures.matrix.Set_Std_Array;
-import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap_Array;
-import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap_Hash;
-import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap_Array;
-import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap_Hash;
+import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap;
 
 /**
  * Factory for creating sets
@@ -57,140 +57,130 @@ import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap_Hash;
  */
 public class SetFactory {
 
-    //***********************************************************************************
-    // FACTORY - STORED SET
-    //***********************************************************************************
+	//***********************************************************************************
+	// FACTORY - STORED SET
+	//***********************************************************************************
 
 	public static boolean HARD_CODED = true;
-	public static boolean RECYCLE = true;
 
-    /**
-     * Make a stored set of integers in the range [0,maximumSize-1]
-     * Such a set is restored after a backtrack
-     *
-     * @param type        of set data structure
-     * @param maximumSize of the set (maximum value -1)
-     * @param model	  model providing the backtracking environment
-     * @return a new set which can be restored during search, after some backtracks
-     */
-    public static ISet makeStoredSet(SetType type, int maximumSize, Model model) {
+	/**
+	 * Creates a stored set of integers greater or equal than <code>offSet</code>
+	 * Such a set is restored after a backtrack
+	 * @param type      of set data structure
+	 * @param offSet	smallest value allowed in the set (possibly < 0)
+	 * @param model		model providing the backtracking environment
+	 * @return a new set which can be restored upon backtrack
+	 */
+	public static ISet makeStoredSet(SetType type, int offSet, Model model) {
 		IEnvironment environment = model.getEnvironment();
-        if (HARD_CODED)
-            switch (type) {
-                case BIPARTITESET:
-                    return new Set_Std_Swap_Array(environment, maximumSize);
-                case SWAP_HASH:
-                    return new Set_Std_Swap_Hash(environment, maximumSize);
-                case LINKED_LIST:
-					if(RECYCLE)
-						return new Set_Std_LinkedList(environment);
-					else
-						return new Set_Std_LinkedList_NoRecycling(environment);
-                case DOUBLE_LINKED_LIST:
-                    return new Set_Std_2LinkedList(environment);
-                case BITSET:
-                    return new Set_Std_BitSet(environment, maximumSize);
-                case BOOL_ARRAY:
-                    return new Set_Std_Array(environment, maximumSize);
-            }
-        if (environment instanceof EnvironmentTrailing) {
-            return new Set_Trail((EnvironmentTrailing) environment, makeSet(type, maximumSize));
-        } else if (environment instanceof EnvironmentCopying) {
-            return new Set_Copy((EnvironmentCopying) environment, makeSet(type, maximumSize));
-        } else {
-            throw new UnsupportedOperationException("not implemented yet");
-        }
-    }
+		if (HARD_CODED)
+			switch (type) {
+				case BIPARTITESET:
+					return new Set_Std_Swap(environment, offSet);
+				case INTERVAL:
+					return new Set_Std_Interval(environment);
+				case BITSET:
+					return new Set_Std_BitSet(environment, offSet);
+			}
+		if (environment instanceof EnvironmentTrailing) {
+			return new Set_Trail((EnvironmentTrailing) environment, makeSet(type,offSet));
+		} else if (environment instanceof EnvironmentCopying) {
+			return new Set_Copy((EnvironmentCopying) environment, makeSet(type,offSet));
+		} else {
+			throw new UnsupportedOperationException("not implemented yet");
+		}
+	}
 
 
-    //***********************************************************************************
-    // FACTORY - SET
-    //***********************************************************************************
+	//***********************************************************************************
+	// FACTORY - SET
+	//***********************************************************************************
 
-    /**
-     * Make a set of integers in the range [0,maximumSize-1]
-     *
-     * @param type        of set data structure
-     * @param maximumSize of the set (maximum value -1)
-     * @return a new set
-     */
-    public static ISet makeSet(SetType type, int maximumSize) {
-        switch (type) {
-            case BIPARTITESET:
-                return makeSwap(maximumSize, false);
-            case SWAP_HASH:
-                return makeSwap(maximumSize, true);
-            case LINKED_LIST:
-                return makeLinkedList(false);
-            case DOUBLE_LINKED_LIST:
-                return makeLinkedList(true);
-            case BITSET:
-                return makeBitSet(maximumSize);
-            case BOOL_ARRAY:
-                return makeArray(maximumSize);
-        }
-        throw new UnsupportedOperationException("unknown SetType");
-    }
+	/**
+	 * Creates an empty set of integers greater or equal than <code>offSet</code>
+	 * @param type      	implementation type
+	 * @param offSet		smallest value allowed in the set (possibly < 0)
+	 * @return a new set
+	 */
+	public static ISet makeSet(SetType type, int offSet) {
+		switch (type) {
+			case BIPARTITESET:
+				return makeBipartiteSet(offSet);
+			case LINKED_LIST:
+				return makeLinkedList();
+			case INTERVAL:
+				return makeIntervalSet();
+			case BITSET:
+				return makeBitSet(offSet);
+		}
+		throw new UnsupportedOperationException("unknown SetType");
+	}
 
-    /**
-     * Creates a set based on a linked list
-     * appropriate when the set has only a few elements
-     *
-     * @param doubleLink enable double links
-     * @return a new set
-     */
-    public static ISet makeLinkedList(boolean doubleLink) {
-        if (doubleLink) {
-            return new Set_2LinkedList();
-        } else {
-            return new Set_LinkedList();
-        }
-    }
+	// --- Interval
 
-    /**
-     * Creates a stored set based on a BitSet
-     *
-     * @param n maximal size of the set
-     * @return a new set
-     */
-    public static ISet makeBitSet(int n) {
-        return new Set_BitSet(n);
-    }
+	/**
+	 * Creates a set of integers represented with an interval [lb, ub]
+	 * Does not support holes
+	 * Initially empty
+	 * @return a new interval
+	 */
+	public static ISet makeIntervalSet() {
+		return new Set_Interval();
+	}
 
-    /**
-     * Creates a set based on a boolean array
-     *
-     * @param n maximal size of the set
-     * @return a new set
-     */
-    public static ISet makeArray(int n) {
-        return new Set_Array(n);
-    }
+	/**
+	 * Creates a set of integers represented with an interval [lb, ub]
+	 * Does not support holes
+	 * @return a new interval
+	 */
+	public static ISet makeIntervalSet(int lb, int ub) {
+		return new Set_Interval(lb, ub);
+	}
 
-    /**
-     * Creates a set that will ALWAYS contain all values from 0 to n-1
-     *
-     * @param n size of the set
-     * @return a new set that must always be full
-     */
-    public static ISet makeFullSet(int n) {
-        return new Set_Full(n);
-    }
+	// --- List
 
-    /**
-     * Creates a set based on swaps
-     * Optimal complexity
-     *
-     * @param n    maximal size of the set
-     * @param hash lighter in memory by slower (false is recommended)
-     * @return a new set
-     */
-    public static ISet makeSwap(int n, boolean hash) {
-        if (hash) {
-            return new Set_Swap_Hash(n);
-        } else {
-            return new Set_Swap_Array(n);
-        }
-    }
+	/**
+	 * Creates a set based on a linked list
+	 * appropriate when the set has only a few elements
+	 * @return a new set
+	 */
+	public static ISet makeLinkedList() {
+		return new Set_LinkedList();
+	}
 
+	// --- Bit Set
+
+	/**
+	 * Creates a set of integers, based on an offseted BitSet,
+	 * Supports integers greater or equal than <code>offSet</code>
+	 * @param offSet	smallest value allowed in the set (possibly < 0)
+	 * @return a new set
+	 */
+	public static ISet makeBitSet(int offSet) {
+		return new Set_BitSet(offSet);
+	}
+
+	// --- Bipartite Set
+
+	/**
+	 * Creates a set of integers, based on an offseted bitpartite set,
+	 * Supports integers greater or equal than <code>offSet</code>
+	 * Optimal complexity
+	 * @param offSet	smallest value allowed in the set (possibly < 0)
+	 * @return a new bipartite set
+	 */
+	public static ISet makeBipartiteSet(int offSet) {
+		return new Set_Swap(offSet);
+	}
+
+	// --- Constant Set
+
+	/**
+	 * Creates a fixed set of integers, equal to <code>cst</code>
+	 * @param cst	set value
+	 * @return a fixed set
+	 */
+	public static ISet makeConstantSet(int[] cst) {
+		return new Set_FixedArray(cst);
+	}
 }

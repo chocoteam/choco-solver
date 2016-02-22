@@ -32,129 +32,70 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * A Set Variable is defined by a domain which is a set interval [kernel,envelope]
- * The kernel is the set of elements that must belong to every single solution.
- * The envelope is the set of elements that may belong to at least one solution.
+ * A Set Variable is defined by a domain which is a set interval [LB,UB], where:
+ * LB is the set of integers that must belong to every single solution.
+ * UB is the set of integers that may belong to at least one solution.
  * <p/>
  * One must notice that in this context, a VALUE of the variable is a set of integers.
  *
  * @author Charles Prud'homme, Jean-Guillaume Fages
- * @since 15 nov. 2012
+ * @since 15 nov. 2012 Major update 2016
  */
 public interface SetVar extends Variable {
 
 	/**
-	 * Constant used for enumerating elements in the envelope or the kernel of a SetVar.
-	 * This value indicates that the iteration is over:
+	 * Get SetVar Lower Bound : the set of integers that must belong to every solution (i.e. a subset of all solutions)
+	 * To iterate over this set, use the following loop:
 	 *
-	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
-	 *     // something
-	 * }</code>
+	 * ISet lbSet = getLB();
+	 * for(int i : lbSet){
+	 *  	...
+	 * }
+	 *
+	 * This object is read-only. Use variable methods <code>force</code> to update the domain
+	 *
+	 * @return the lower bound of this SetVar.
 	 */
-	int END = Integer.MIN_VALUE;
+	ISet getLB();
+
 
 	/**
-	 * Get the first element currently in the kernel domain of <code>this</code>.
-	 * Returns <code>END</code> if the set is empty.
-	 * Note that elements are not sorted.
-	 * To iterate over elements that are present in the kernel, do the following loop:
-	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
-	 *     // something
-	 * }</code>
+	 * Get SetVar Upper Bound : the set of integers that may belong to a solution (i.e. a superset of all solutions)
+	 * To iterate over this set, use the following loop:
 	 *
-	 * @return the first element in the kernel or <code>END</code> if it is empty.
-	 */
-	int getKernelFirst();
-
-	/**
-	 * Get the next element in the kernel domain of <code>this</code>.
-	 * Returns <code>END</code> once all elements have been visited.
-	 * To iterate over elements that are present in the kernel, do the following loop:
-	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
-	 *     // something
-	 * }</code>
+	 * ISet ubSet = getUB();
+	 * for(int i : ubSet){
+	 *  	...
+	 * }
 	 *
-	 * @return the next element in the kernel, if any, or <code>END</code> otherwise.
-	 */
-	int getKernelNext();
-
-	/**
-	 * Get the number of elements in the kernel domain of <code>this</code>.
+	 * This object is read-only. Use variable methods <code>remove</code> to update the domain
 	 *
-	 * @return the number of elements currently present in the kernel.
+	 * @return the lower bound of this SetVar.
 	 */
-	int getKernelSize();
-
-	/**
-	 * Test whether element is present or not in the kernel
-	 * @param element value to test
-	 * @return true iff element is present in the kernel
-	 */
-	boolean kernelContains(int element);
-
-	/**
-	 * Get the first element currently in the envelope domain of <code>this</code>.
-	 * Returns <code>END</code> if the set is empty.
-	 * Note that elements are not sorted.
-	 * To iterate over elements that are present in the envelope, do the following loop:
-	 * <code>for(int e=getEnvelopeFirst(); e!=SetVar.END; e=getEnvelopeNext()){
-	 *     // something
-	 * }</code>
-	 *
-	 *
-	 * @return the first element in the envelope or <code>END</code> if it is empty.
-	 */
-	int getEnvelopeFirst();
-
-	/**
-	 * Get the next element in the envelope domain of <code>this</code>.
-	 * Returns <code>END</code> once all elements have been visited.
-	 * To iterate over elements that are present in the envelope, do the following loop:
-	 * <code>for(int e=getEnvelopeFirst(); e!=SetVar.END; e=getEnvelopeNext()){
-	 *     // something
-	 * }</code>
-	 *
-	 *
-	 * @return the next element in the envelope, if any, or <code>END</code> otherwise.
-	 */
-	int getEnvelopeNext();
-
-	/**
-	 * Get the number of elements in the envelope domain of <code>this</code>.
-	 *
-	 * @return the number of elements currently present in the envelope.
-	 */
-	int getEnvelopeSize();
-
-	/**
-	 * Test whether element is present or not in the envelope
-	 * @param element value to test
-	 * @return true iff element is present in the envelope
-	 */
-	boolean envelopeContains(int element);
+	ISet getUB();
 
     /**
-     * Adds element to the kernel, i.e. enforces that the set variable
-     * will contain element in every solution
+     * Adds element to the lower bound, i.e. every solution must include <code>element</code>
      *
      * @param element value to add
      * @param cause cause of value addition
-     * @return true iff value was not already in the kernel
+     * @return true iff element has been added to the lower bound
      * @throws ContradictionException
      */
-    boolean addToKernel(int element, ICause cause) throws ContradictionException;
+    boolean force(int element, ICause cause) throws ContradictionException;
 
     /**
-     * Removes element from the envelop, i.e. the set variable cannot contain element anymore
+     * Removes element from the upper bound, i.e. the set variable cannot contain <code>element</code> anymore
      *
      * @param element value to remove
      * @param cause cause of value removal
-     * @return true iff value was present in the envelope
+     * @return true iff element has been removed from the upper bound
      * @throws ContradictionException
      */
-    boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException;
+    boolean remove(int element, ICause cause) throws ContradictionException;
 
     /**
      * Enforces the set variable to contain exactly the set of integers given in parameter
@@ -172,15 +113,6 @@ public interface SetVar extends Variable {
      * @return the current value (or kernel if not yet instantiated).
      */
     int[] getValue();
-
-	/**
-	 * @deprecated use {@link #getValue()} instead
-	 * will be removed after version 3.4.0
-	 */
-	@Deprecated
-	default int[] getValues(){
-		return getValue();
-	}
 
     /**
      * Allow propagator to monitor element removal/enforcing of this

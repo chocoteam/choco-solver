@@ -596,7 +596,7 @@ public interface IVariableFactory {
      * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default SetVar setVar(String name, int[] lb, int[] ub) {
-        return new SetVarImpl(name, ub, SetType.BITSET, lb, SetType.BITSET, _me());
+        return new SetVarImpl(name, lb, SetType.BIPARTITESET, ub, SetType.BIPARTITESET, _me());
     }
 
     /**
@@ -606,7 +606,7 @@ public interface IVariableFactory {
      * @return a constant SetVar of domain {<i>value</i>}
      */
     default SetVar setVar(String name, int[] value) {
-        return new FixedSetVarImpl(name, value, _me());
+        return new SetVarImpl(name, value, _me());
     }
 
     // ARRAY

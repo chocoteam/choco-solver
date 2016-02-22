@@ -88,7 +88,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
         SCCfinder = new StrongConnectivityFinder(support);
         mates = new ISet[n2];
         for (int i = 0; i < n2; i++) {
-            mates[i] = SetFactory.makeLinkedList(false);
+            mates[i] = SetFactory.makeLinkedList();
         }
         rd = new Random(0);
         mandSCC = new BitSet(n2);
@@ -180,7 +180,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 				mandSCC.set(x);
 			}
 			succs = support.getSuccOf(i);
-			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+			for (int j : succs) {
 				if (x != sccOf[j]) {
 					G_R.addArc(x, sccOf[j]);
 					mates[x].add((i + 1) * n2 + j);
@@ -213,15 +213,14 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		mates[cc].clear();
 		if(sink){
 			ISet ps = G_R.getPredOf(cc);
-			for(int p=ps.getFirstElement();p>=0;p=ps.getNextElement()){
+			for(int p:ps){
 				G_R.removeArc(p,cc);
 				if(G_R.getSuccOf(p).isEmpty()){
 					makeLoops(source,p, true);
 				}
 			}
 		}else{
-			ISet ss = G_R.getSuccOf(cc);
-			for(int s=ss.getFirstElement();s>=0;s=ss.getNextElement()){
+			for(int s:G_R.getSuccOf(cc)){
 				G_R.removeArc(cc,s);
 				if(G_R.getPredOf(s).isEmpty()){
 					makeLoops(source,s, false);
@@ -241,7 +240,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
                 }
                 if (to != -1 && sccOf[to] != x && mates[x].getSize() > 1) {
                     arc = (i + 1) * n2 + to;
-                    for (int a = mates[x].getFirstElement(); a >= 0; a = mates[x].getNextElement()) {
+                    for (int a : mates[x]) {
                         if (a != arc) {
                             int val = a % n2;
                             if (val == n) {
@@ -258,9 +257,9 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
     }
 
 	private void checkSCCLink() throws ContradictionException {
-		for (int sccFrom=G_R.getNodes().getFirstElement(); sccFrom>=0; sccFrom=G_R.getNodes().getNextElement()) {
+		for (int sccFrom:G_R.getNodes()) {
 			int door = -1;
-			for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
+			for (int i : mates[sccFrom]) {
 				if(door == -1){
 					door = i/n2-1;
 				}else if(door!=i/n2-1){

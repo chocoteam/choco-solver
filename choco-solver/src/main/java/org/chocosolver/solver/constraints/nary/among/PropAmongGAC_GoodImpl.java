@@ -86,7 +86,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
         this.setValues = new TIntHashSet(values);
         this.values = setValues.toArray();
         Arrays.sort(this.values);
-		poss = SetFactory.makeStoredSet(SetType.BIPARTITESET,nb_vars, model);
+		poss = SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
 		nbSure = environment.makeInt(0);
     }
 
@@ -166,7 +166,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
     }
 
     protected void backPropRemPoss() throws ContradictionException {
-        for (int i = poss.getFirstElement(); i >= 0; i = poss.getNextElement()) {
+        for (int i : poss) {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int value : values) {
@@ -199,7 +199,7 @@ public class PropAmongGAC_GoodImpl extends Propagator<IntVar> {
     }
 
     protected void backPropForcePoss() throws ContradictionException {
-        for (int i = poss.getFirstElement(); i >= 0; i = poss.getNextElement()) {
+        for (int i : poss) {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int val = v.getLB(); val <= v.getUB(); val = v.nextValue(val)) {

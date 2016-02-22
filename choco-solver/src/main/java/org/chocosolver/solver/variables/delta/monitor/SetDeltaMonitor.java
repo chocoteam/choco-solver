@@ -90,9 +90,9 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
     public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
         int x;
         if (evt == SetEventType.ADD_TO_KER) {
-            x = ISetDelta.KERNEL;
+            x = ISetDelta.LB;
         } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
-            x = ISetDelta.ENVELOP;
+            x = ISetDelta.UB;
         } else {
             throw new UnsupportedOperationException("The event in parameter should be ADD_TO_KER or REMOVE_FROM_ENVELOPE");
         }

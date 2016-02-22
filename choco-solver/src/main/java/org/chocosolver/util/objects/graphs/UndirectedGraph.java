@@ -70,12 +70,12 @@ public class UndirectedGraph implements IGraph {
         this.n = n;
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeStoredSet(type, n, model);
+            neighbors[i] = SetFactory.makeStoredSet(type, 0, model);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeFullSet(n);
+            this.nodes = SetFactory.makeIntervalSet(0,n-1);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, model);
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
         }
     }
 
@@ -93,12 +93,12 @@ public class UndirectedGraph implements IGraph {
         this.n = n;
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeSet(type, n);
+            neighbors[i] = SetFactory.makeSet(type, 0);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeFullSet(n);
+            this.nodes = SetFactory.makeIntervalSet(0,n-1);
         } else {
-            this.nodes = SetFactory.makeBitSet(n);
+            this.nodes = SetFactory.makeBitSet(0);
         }
     }
 
@@ -110,9 +110,9 @@ public class UndirectedGraph implements IGraph {
         StringBuilder sb = new StringBuilder();
         sb.append("nodes : \n").append(nodes).append("\n");
         sb.append("neighbors : \n");
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
+        for (int i : nodes) {
             sb.append(i).append(" -> {");
-            for (int j = neighbors[i].getFirstElement(); j >= 0; j = neighbors[i].getNextElement()) {
+            for (int j : neighbors[i]) {
                 sb.append(j).append(" ");
             }
             sb.append("}\n");
@@ -153,7 +153,7 @@ public class UndirectedGraph implements IGraph {
     public boolean removeNode(int x) {
         if (nodes.remove(x)) {
             ISet nei = getNeighOf(x);
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+            for (int j : nei) {
                 neighbors[j].remove(x);
             }
             neighbors[x].clear();

@@ -69,7 +69,7 @@ public class PropDiffN extends Propagator<IntVar> {
             throw new UnsupportedOperationException();
         }
         overlappingBoxes = new UndirectedGraph(model, n, SetType.LINKED_LIST, true);
-        boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, model);
+        boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, 0, model);
         super.linkVariables();
     }
 
@@ -91,8 +91,7 @@ public class PropDiffN extends Propagator<IntVar> {
 	@Override
 	public void propagate(int varIdx, int mask) throws ContradictionException {
 		int v = varIdx % n;
-		ISet s = overlappingBoxes.getNeighOf(v);
-		for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
+		for (int i : overlappingBoxes.getNeighOf(v)) {
 			if (!mayOverlap(v, i)) {
 				overlappingBoxes.removeEdge(v, i);
 			}
@@ -124,7 +123,7 @@ public class PropDiffN extends Propagator<IntVar> {
                 boxesToCompute.add(i);
             }
         }
-        for (int i = boxesToCompute.getFirstElement(); i >= 0; i = boxesToCompute.getNextElement()) {
+        for (int i : boxesToCompute) {
             filterFromBox(i);
         }
         boxesToCompute.clear();
@@ -141,14 +140,13 @@ public class PropDiffN extends Propagator<IntVar> {
     }
 
     protected void filterFromBox(int i) throws ContradictionException {
-        ISet s = overlappingBoxes.getNeighOf(i);
         // check energy
         int xm = vars[i].getLB();
         int xM = vars[i].getUB() + vars[i + 2 * n].getUB();
         int ym = vars[i + n].getLB();
         int yM = vars[i + n].getUB() + vars[i + 3 * n].getUB();
         int am = vars[i + 2 * n].getLB() * vars[i + 3 * n].getLB();
-        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+        for (int j : overlappingBoxes.getNeighOf(i)) {
             xm = Math.min(xm, vars[j].getLB());
             xM = Math.max(xM, vars[j].getUB() + vars[j + 2 * n].getUB());
             ym = Math.min(ym, vars[j + n].getLB());
@@ -161,7 +159,7 @@ public class PropDiffN extends Propagator<IntVar> {
         // mandatory part based filtering
         boolean horizontal = true;
         boolean vertical = false;
-        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+        for (int j : overlappingBoxes.getNeighOf(i)) {
             if (doOverlap(i, j, horizontal)) {
                 filter(i, j, vertical);
             }

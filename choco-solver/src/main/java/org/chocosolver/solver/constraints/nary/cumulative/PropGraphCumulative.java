@@ -84,8 +84,8 @@ public class PropGraphCumulative extends PropFullCumulative {
                                boolean fast, Cumulative.Filter... filters) {
         super(s, d, e, h, capa, true, fast, filters);
         this.g = new UndirectedGraph(n, SetType.BITSET, true);
-        this.tasks = SetFactory.makeSwap(n, false);
-        this.toCompute = SetFactory.makeSwap(n, false);
+        this.tasks = SetFactory.makeBipartiteSet(0);
+        this.toCompute = SetFactory.makeBipartiteSet(0);
     }
 
     //***********************************************************************************
@@ -103,13 +103,13 @@ public class PropGraphCumulative extends PropFullCumulative {
             sweepBasedGraphComputation();
         } else {
             int count = 0;
-            for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
+            for (int i : toCompute) {
                 count += g.getNeighOf(i).getSize();
             }
             if (count >= 2 * n) {
                 filter(allTasks);
             } else {
-                for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
+                for (int i : toCompute) {
                     filterAround(i);
                 }
             }
@@ -144,7 +144,7 @@ public class PropGraphCumulative extends PropFullCumulative {
         tasks.clear();
         tasks.add(taskIndex);
         ISet env = g.getNeighOf(taskIndex);
-        for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+        for (int i : env) {
             if (!disjoint(taskIndex, i)) {
                 tasks.add(i);
             }

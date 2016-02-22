@@ -79,8 +79,8 @@ public class PropCount_AC extends Propagator<IntVar> {
         super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality}), PropagatorPriority.LINEAR, true);
         this.value = restrictedValue;
         this.n = decvars.length;
-        this.possibles = SetFactory.makeStoredSet(SetType.BITSET, n, model);
-        this.mandatories = SetFactory.makeStoredSet(SetType.BITSET, n, model);
+        this.possibles = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+        this.mandatories = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
     }
 
     @Override
@@ -148,12 +148,12 @@ public class PropCount_AC extends Propagator<IntVar> {
         if (vars[n].isInstantiated()) {
             int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {
-                for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
+                for (int j : possibles) {
                     vars[j].instantiateTo(value, this);
                 }
                 setPassive();
             } else if (mandatories.getSize() == nb) {
-                for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
+                for (int j : possibles) {
                     if (vars[j].removeValue(value, this)) {
                         possibles.remove(j);
                     }

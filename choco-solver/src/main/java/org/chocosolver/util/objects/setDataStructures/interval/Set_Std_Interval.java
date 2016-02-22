@@ -27,130 +27,107 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.linkedlist;
+package org.chocosolver.util.objects.setDataStructures.interval;
 
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 /**
- * LinkedList of m elements
- * add : O(1)
- * testPresence: O(m)
- * remove: O(m)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages, chameau
- * Date: 9 fevr. 2011
+ * Interval set of the form [min, max]
+ * BEWARE: Cannot add/remove elements other than bounds
+ *
+ * @author Jean-Guillaume Fages
  */
-public class Set_LinkedList implements ISet {
+public class Set_Std_Interval implements ISet {
 
 	//***********************************************************************************
-	// ITERATOR
+	// VARIABLES
 	//***********************************************************************************
 
-	private IntCell first, last;
-	private int size;
-	private IntCell poolGC;
+	private IStateInt lb, ub;
 	private ISetIterator iter = newIterator();
+
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+
+	/**
+	 * Creates a set of integers encoded as an interval [min, max]
+	 * Initially empty
+	 * @param env backtracking environment
+	 */
+	public Set_Std_Interval(IEnvironment env) {
+		this(env,0,-1);
+	}
+
+	/**
+	 * Creates a set of integers encoded as an interval [min, max]
+	 * @param env backtracking environment
+	 * @param min lowest value in the set
+	 * @param max highest value in the set
+	 */
+	public Set_Std_Interval(IEnvironment env, int min, int max) {
+		this.lb = env.makeInt(min);
+		this.ub = env.makeInt(max);
+	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
 	@Override
-	public int getSize() {
-		return size;
-	}
-
-	@Override
-	public boolean contain(int element) {
-		for(int i:this){
-			if(i==element){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
 	public boolean add(int element) {
-		if(contain(element)){
-			return false;
+		int s = getSize();
+		if(lb.get()-1 == element){
+			lb.add(-1);
 		}
-		if (poolGC == null) {
-			first = new IntCell(element, first);
-		} else {
-			IntCell recycled = poolGC;
-			poolGC = poolGC.next;
-			recycled.init(element, first);
-			first = recycled;
+		if(ub.get()+1 == element){
+			ub.add(1);
 		}
-		if(last==null){
-			assert size==0;
-			last=first;
-		}
-		this.size++;
-		return true;
+		return s!=getSize();
 	}
 
 	@Override
 	public boolean remove(int element) {
-		if(first == null){
-			return false;
-		} else if(first.element == element){
-			iter.notifyRemoved(element);
-			first = first.next;
-			if(first==null)last=null;
-			size--;
-			return true;
-		}else {
-			IntCell current = first;
-			IntCell previous = null;
-			while (current != null) {
-				if (current.element == element) {
-					iter.notifyRemoved(element);
-					previous.next = current.next;
-					if(previous.next==null) last = previous;
-					current.next = poolGC;
-					poolGC = current;
-					size--;
-					return true;
-				}
-				previous = current;
-				current = current.next;
-			}
-			throw new UnsupportedOperationException();
+		int s = getSize();
+		if(lb.get() == element){
+			lb.add(1);
 		}
+		if(ub.get() == element){
+			ub.add(-1);
+		}
+		return s!=getSize();
+	}
+
+	@Override
+	public boolean contain(int element) {
+		return lb.get()<=element && element<=ub.get();
+	}
+
+	@Override
+	public int getSize() {
+		return ub.get()-lb.get()+1;
 	}
 
 	@Override
 	public void clear() {
-		if (first != null) {
-			last.next = poolGC;
-			poolGC = first;
-		}
-		first = null;
-		last = null;
-		size = 0;
-	}
-
-	@Override
-	public String toString() {
-		String st = "{";
-		for(int i:this){
-			st+=i+", ";
-		}
-		st+="}";
-		return st.replace(", }","}");
+		lb.set(0);
+		ub.set(-1);
 	}
 
 	@Override
 	public SetType getSetType(){
-		return SetType.LINKED_LIST;
+		return SetType.INTERVAL;
+	}
+
+	@Override
+	public String toString(){
+		return "["+lb.get()+","+ub.get()+"]";
 	}
 
 	//***********************************************************************************
@@ -166,46 +143,22 @@ public class Set_LinkedList implements ISet {
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			protected IntCell nextCell;
+			int value = lb.get();
 			@Override
 			public void reset() {
-				nextCell = first;
+				value = lb.get();
 			}
 			@Override
-			public void notifyRemoved(int item) {
-				if(nextCell != null && nextCell.element == item){
-					nextCell = nextCell.next;
-				}
-			}
+			public void notifyRemoved(int item) {}
 			@Override
 			public boolean hasNext() {
-				return nextCell != null;
+				return value <= ub.get();
 			}
 			@Override
 			public Integer next() {
-				int e = nextCell.element;
-				nextCell = nextCell.next;
-				return e;
+				value++;
+				return value-1;
 			}
 		};
-	}
-
-	//***********************************************************************************
-	// STRUCTURE
-	//***********************************************************************************
-
-	protected class IntCell implements Serializable {
-
-		int element;
-		IntCell next;
-
-		public IntCell(int element, IntCell next) {
-			init(element, next);
-		}
-
-		public void init(int element, IntCell next) {
-			this.element = element;
-			this.next = next;
-		}
 	}
 }

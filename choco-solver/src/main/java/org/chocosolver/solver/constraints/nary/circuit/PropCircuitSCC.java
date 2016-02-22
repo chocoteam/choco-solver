@@ -79,7 +79,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		SCCfinder = new StrongConnectivityFinder(support);
 		mates = new ISet[n2];
 		for(int i=0;i<n2;i++){
-			mates[i] = SetFactory.makeLinkedList(false);
+			mates[i] = SetFactory.makeLinkedList();
 		}
 		this.conf = conf;
 		if(conf==CircuitConf.RD){ 
@@ -183,7 +183,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		for (int i = 0; i < n; i++) {
 			x = sccOf[i];
 			succs = support.getSuccOf(i);
-			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+			for (int j :succs) {
 				if (x != sccOf[j]) {
 					G_R.addArc(x, sccOf[j]);
 					mates[x].add((i + 1) * n2 + j);
@@ -201,7 +201,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		}
 		int next = -1;
 		ISet succs = G_R.getSuccOf(node);
-		for (int x = succs.getFirstElement(); x >= 0; x = succs.getNextElement()) {
+		for(int x:succs){
 			if (G_R.getPredOf(x).getSize() == 1) {
 				if (next != -1) {
 					return 0;
@@ -213,7 +213,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		}
 		succs = mates[node];
 		int from, to;
-		for (int e = succs.getFirstElement(); e >= 0; e = succs.getNextElement()) {
+		for (int e:succs) {
 			to = e % n2;
 			if (sccOf[to] != next) {
 				from = e / n2 - 1;
@@ -238,7 +238,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 				}
 				if (to != -1 && sccOf[to] != x && mates[x].getSize() > 1) {
 					arc = (i + 1) * n2 + to;
-					for (int a = mates[x].getFirstElement(); a >= 0; a = mates[x].getNextElement()) {
+					for (int a:mates[x]) {
 						if (a != arc) {
 							int val = a%n2;
 							if(val==n){
@@ -257,7 +257,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	private void checkSCCLink(int sccFrom) throws ContradictionException {
 		int inDoor = -1;
 		int outDoor = -1;
-		for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
+		for (int i : mates[sccFrom]) {
 			if(inDoor==-1){
 				inDoor = i%n2;
 			}else if (inDoor!=i%n2){
@@ -276,10 +276,10 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			forceOutDoor(outDoor);
 			// If 1 in and 1 out and |scc| > 2 then forbid in->out
 			// Is only 1 in ?
-			int p = G_R.getPredOf(sccFrom).getFirstElement();
-			if (p != -1) {
+			if (G_R.getPredOf(sccFrom).iterator().hasNext()) {
 				int in = -1;
-				for (int i = mates[p].getFirstElement(); i >= 0; i = mates[p].getNextElement()) {
+				int p = G_R.getPredOf(sccFrom).iterator().next();
+				for (int i : mates[p]) {
 					if (in == -1) {
 						in = i % n2;
 					} else if (in != i % n2) {

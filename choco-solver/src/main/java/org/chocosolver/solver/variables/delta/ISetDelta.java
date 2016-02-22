@@ -37,14 +37,14 @@ import org.chocosolver.solver.ICause;
  */
 public interface ISetDelta extends IDelta {
 
-	int KERNEL = 0;
-	int ENVELOP = 1;
+	int LB = 0;
+	int UB = 1;
 
-	int getSize(int kerOrEnv);
+	int getSize(int lbOrUb);
 
-	void add(int element, int kerOrEnv, ICause cause);
+	void add(int element, int lbOrUb, ICause cause);
 
-	int get(int index, int kerOrEnv);
+	int get(int index, int lbOrUb);
 
-	ICause getCause(int index, int kerOrEnv);
+	ICause getCause(int index, int lbOrUb);
 }

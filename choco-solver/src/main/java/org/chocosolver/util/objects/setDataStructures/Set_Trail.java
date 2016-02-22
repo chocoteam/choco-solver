@@ -33,13 +33,19 @@ import org.chocosolver.memory.structure.Operation;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.util.PoolManager;
 
+import java.util.Iterator;
+
 /**
- * Backtrable set
+ * Generic backtrable set for trailing
  *
  * @author Jean-Guillaume Fages
  * @since Nov 2012
  */
 public class Set_Trail implements ISet {
+
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
     // trailing
     private final EnvironmentTrailing environment;
@@ -49,12 +55,30 @@ public class Set_Trail implements ISet {
     // set (decorator design pattern)
     private ISet set;
 
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
+
     public Set_Trail(EnvironmentTrailing environment, ISet set) {
         super();
         this.environment = environment;
         this.operationPoolGC = new PoolManager<>();
         this.set = set;
     }
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+    @Override
+    public ISetIterator newIterator() {
+        return set.newIterator();
+    }
+
+	@Override
+	public Iterator<Integer> iterator(){
+		return set.iterator();
+	}
 
     @Override
     public boolean add(int element) {
@@ -90,18 +114,13 @@ public class Set_Trail implements ISet {
     }
 
     @Override
-    public boolean isEmpty() {
-        return set.isEmpty();
-    }
-
-    @Override
     public int getSize() {
         return set.getSize();
     }
 
     @Override
     public void clear() {
-        for (int i = getFirstElement(); i >= 0; i = getNextElement()) {
+        for (int i :set) {
             ListOP op = operationPoolGC.getE();
             if (op == null) {
                 new ListOP(i, ADD);
@@ -113,18 +132,8 @@ public class Set_Trail implements ISet {
     }
 
     @Override
-    public int getFirstElement() {
-        return set.getFirstElement();
-    }
-
-    @Override
-    public int getNextElement() {
-        return set.getNextElement();
-    }
-
-    @Override
     public String toString() {
-        return "set stored by trailing " + set.toString();
+        return set.toString();
     }
 
     //***********************************************************************************
@@ -160,15 +169,5 @@ public class Set_Trail implements ISet {
 	@Override
 	public SetType getSetType(){
 		return set.getSetType();
-	}
-
-	@Override
-	public int[] toArray() {
-		return set.toArray();
-	}
-
-	@Override
-	public int getMaxSize() {
-		return set.getMaxSize();
 	}
 }

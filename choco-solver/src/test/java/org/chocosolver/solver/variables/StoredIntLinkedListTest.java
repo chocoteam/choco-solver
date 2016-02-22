@@ -30,7 +30,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
-import org.chocosolver.util.objects.setDataStructures.linkedlist.Set_Std_LinkedList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

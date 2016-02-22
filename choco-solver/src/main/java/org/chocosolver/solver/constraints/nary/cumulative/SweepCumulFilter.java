@@ -87,7 +87,7 @@ public class SweepCumulFilter extends CumulFilter {
 		for(int i=0;i<3*n;i++){
 			events[i] = new Event();
 		}
-		tasksToUSe = SetFactory.makeSwap(n, false);
+		tasksToUSe = SetFactory.makeBipartiteSet(0);
 		sort = new ArraySort<>(events.length,true,false);
 		eventComparator = (e1, e2) -> {
             if(e1.date == e2.date){
@@ -111,7 +111,7 @@ public class SweepCumulFilter extends CumulFilter {
 		do{
 			again = false;
 			int i = 0;
-			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement()) {
+			for(int t:tasksToUSe) {
 				slb[i]=s[t].getLB();
 				sub[i]=s[t].getUB();
 				elb[i]=e[t].getLB();
@@ -128,7 +128,7 @@ public class SweepCumulFilter extends CumulFilter {
 			pruneMin(s);
 			// symmetric approach for the end upper bounds
 			i = 0;
-			for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement()) {
+			for(int t:tasksToUSe) {
 				slb[i]=-e[t].getUB()+1;
 				sub[i]=-e[t].getLB()+1;
 				elb[i]=-s[t].getUB()+1;
@@ -145,7 +145,7 @@ public class SweepCumulFilter extends CumulFilter {
 
 	protected void removeNullDurations(IntVar[] d, ISet tasks){
 		tasksToUSe.clear();
-		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
+		for(int t:tasks) {
 			if(d[t].getLB()>0){
 				tasksToUSe.add(t);
 			}
@@ -154,13 +154,13 @@ public class SweepCumulFilter extends CumulFilter {
 
 	protected void pruneMin(IntVar[] s) throws ContradictionException {
 		int i = 0;
-		for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
+		for(int t:tasksToUSe)
 			s[t].updateLowerBound(slb[i++], aCause);
 	}
 
 	protected void pruneMax(IntVar[] e) throws ContradictionException {
 		int i = 0;
-		for(int t=tasksToUSe.getFirstElement();t>=0;t=tasksToUSe.getNextElement())
+		for(int t:tasksToUSe)
 			e[t].updateUpperBound(1- slb[i++], aCause);
 	}
 

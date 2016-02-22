@@ -27,43 +27,79 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.swapList;
+package org.chocosolver.util.objects.setDataStructures;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateInt;
+import java.util.Iterator;
 
 /**
- * Backtrable List of m elements based on Array int_swaping
- * BEWARE : CANNOT ADD AND REMOVE ELEMENTS DURING SEARCH
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
+ * Generic read-only view of a set
+ *
+ * @author Jean-Guillaume Fages
+ * @since 2016
  */
-public class Set_Std_Swap_Hash extends Set_Swap_Hash {
+public class Set_ReadOnly implements ISet {
 
-    protected IStateInt size;
-    protected IEnvironment env;
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    public Set_Std_Swap_Hash(IEnvironment e, int n) {
-        super(n);
-        env = e;
-        size = e.makeInt(0);
+    private ISet set;
+
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
+
+    public Set_ReadOnly(ISet set) {
+        super();
+        this.set = set;
+    }
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+    @Override
+    public ISetIterator newIterator() {
+        return set.newIterator();
+    }
+
+	@Override
+	public Iterator<Integer> iterator(){
+		return set.iterator();
+	}
+
+    @Override
+    public boolean add(int element) {
+        throw new UnsupportedOperationException("this set is read-only");
+    }
+
+    @Override
+    public boolean remove(int element) {
+        throw new UnsupportedOperationException("this set is read-only");
+    }
+
+    @Override
+    public boolean contain(int element) {
+        return set.contain(element);
     }
 
     @Override
     public int getSize() {
-        return size.get();
+        return set.getSize();
     }
 
-    protected void setSize(int s) {
-        size.set(s);
+    @Override
+    public void clear() {
+		throw new UnsupportedOperationException("this set is read-only");
     }
 
-    protected void addSize(int delta) {
-        size.add(delta);
+    @Override
+    public String toString() {
+        return set.toString();
     }
+
+	@Override
+	public SetType getSetType(){
+		return set.getSetType();
+	}
 }

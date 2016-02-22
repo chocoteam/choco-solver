@@ -78,7 +78,7 @@ public class PropKLoops extends Propagator<IntVar> {
 		this.n = succs.length;
 		this.offSet = offSet;
 		IEnvironment environment = model.getEnvironment();
-		this.possibleLoops = SetFactory.makeStoredSet(SetType.BIPARTITESET, n, model);
+		this.possibleLoops = SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
 		this.nbMinLoops = environment.makeInt();
 	}
 
@@ -108,7 +108,7 @@ public class PropKLoops extends Propagator<IntVar> {
         vars[n].updateBounds(nbMin, nbMax, this);
         if (vars[n].isInstantiated() && nbMin != nbMax) {
             if (vars[n].getValue() == nbMax) {
-                for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
+                for (int i : possibleLoops) {
                     vars[i].instantiateTo(i + offSet, this);
                     assert vars[i].isInstantiatedTo(i + offSet);
                     nbMinLoops.add(1);
@@ -116,7 +116,7 @@ public class PropKLoops extends Propagator<IntVar> {
                 possibleLoops.clear();
                 setPassive();
             } else if (vars[n].getValue() == nbMin) {
-                for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
+                for (int i : possibleLoops) {
                     if (vars[i].removeValue(i + offSet, this)) {
                         possibleLoops.remove(i);
                     }

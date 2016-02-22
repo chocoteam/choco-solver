@@ -67,7 +67,7 @@ public class R3 implements R {
         valToRem = new int[31];
         learntEqualities = new ISet[n];
         for (int i = 0; i < n; i++) {
-            learntEqualities[i] = SetFactory.makeStoredSet(SetType.BITSET, n, model);
+            learntEqualities[i] = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
         }
     }
 
@@ -79,7 +79,6 @@ public class R3 implements R {
         assert n == vars.length - 1;
         BitSet mis = heur.getMIS();
         if (mis.cardinality() == vars[n].getUB()) {
-            ISet nei;
             for (int i = mis.nextClearBit(0); i >= 0 && i < n; i = mis.nextClearBit(i + 1)) {
                 int mate = -1;
                 int last = 0;
@@ -91,8 +90,7 @@ public class R3 implements R {
                 for (int k = lb; k <= ub; k = vars[i].nextValue(k)) {
                     valToRem[last++] = k;
                 }
-                nei = graph.getNeighOf(i);
-                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                for (int j : graph.getNeighOf(i)) {
                     if (mis.get(j)) {
                         if (mate == -1) {
                             mate = j;
@@ -121,7 +119,7 @@ public class R3 implements R {
             }
         }
         for (int i = 0; i < n; i++) {
-            for (int j = learntEqualities[i].getFirstElement(); j >= 0; j = learntEqualities[i].getNextElement()) {
+            for (int j : learntEqualities[i]) {
                 enforceEq(i, j, vars, aCause);
             }
         }

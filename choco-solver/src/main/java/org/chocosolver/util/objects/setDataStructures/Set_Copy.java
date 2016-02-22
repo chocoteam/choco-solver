@@ -34,17 +34,26 @@ import org.chocosolver.memory.copy.RcObject;
 import org.chocosolver.memory.copy.RecomputableElement;
 import org.chocosolver.memory.copy.store.StoredObjectCopy;
 
+import java.util.Iterator;
+
 /**
- * Backtrable set
+ * Generic backtrable set for copy
  *
  * @author Jean-Guillaume Fages
  * @since Nov 2012
  */
 public class Set_Copy extends RcObject implements ISet {
 
-    private ISet set;// set to be maintained during search (decorator design pattern)
+	//***********************************************************************************
+	// VARIABLE
+	//***********************************************************************************
 
+    private ISet set;// set to be maintained during search (decorator design pattern)
     private StoredObjectCopy copies;
+
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
 
     public Set_Copy(EnvironmentCopying environment, ISet set) {
         super(environment, null);
@@ -53,13 +62,12 @@ public class Set_Copy extends RcObject implements ISet {
         copies.add(this);
     }
 
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
     public Object deepCopy() {
-        int[] vals = new int[set.getSize()];
-        int k = 0;
-        for (int i = set.getFirstElement(); i >= 0; i = set.getNextElement()) {
-            vals[k++] = i;
-        }
-        return vals;
+        return set.toArray();
     }
 
     public void _set(final Object y, final int wstamp) {
@@ -69,6 +77,16 @@ public class Set_Copy extends RcObject implements ISet {
             set.add(i);
         }
         timeStamp = wstamp;
+    }
+
+	@Override
+	public Iterator<Integer> iterator(){
+		return set.iterator();
+	}
+
+    @Override
+    public ISetIterator newIterator() {
+        return set.newIterator();
     }
 
     @Override
@@ -95,11 +113,6 @@ public class Set_Copy extends RcObject implements ISet {
     }
 
     @Override
-    public boolean isEmpty() {
-        return set.isEmpty();
-    }
-
-    @Override
     public int getSize() {
         return set.getSize();
     }
@@ -110,16 +123,6 @@ public class Set_Copy extends RcObject implements ISet {
             timeStamp = environment.getWorldIndex();
         }
         set.clear();
-    }
-
-    @Override
-    public int getFirstElement() {
-        return set.getFirstElement();
-    }
-
-    @Override
-    public int getNextElement() {
-        return set.getNextElement();
     }
 
     @Override
@@ -138,21 +141,11 @@ public class Set_Copy extends RcObject implements ISet {
 
     @Override
     public String toString() {
-        return "set stored by copy " + set.toString();
+        return set.toString();
     }
 
 	@Override
 	public SetType getSetType(){
 		return set.getSetType();
-	}
-
-	@Override
-	public int[] toArray(){
-		return set.toArray();
-	}
-
-	@Override
-	public int getMaxSize(){
-		return set.getMaxSize();
 	}
 }

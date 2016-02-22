@@ -30,98 +30,169 @@
 package org.chocosolver.util.objects.setDataStructures.swapList;
 
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+
+import java.util.Iterator;
 
 /**
- * List of m elements based on Array int_swaping
+ * Bipartite set of integers:
+ *
  * add : O(1)
- * testPresence: O(1)
+ * contain: O(1)
  * remove: O(1)
  * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
+ *
+ * @author : Jean-Guillaume Fages
  */
-public abstract class Set_Swap implements ISet {
+public class Set_Swap implements ISet {
 
-    protected int arrayLength, currentIdx, size;
-	protected final int sizeMax;
-    protected int[] array;
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    public Set_Swap(int n) {
-        size = 0;
-        sizeMax = n;
-        arrayLength = 16;
-        array = new int[arrayLength];
-    }
+	protected int size, mapOffset;
+	protected int[] values, map;
+	protected ISetIterator iter = newIterator();
 
-    @Override
-    public boolean isEmpty() {
-        return getSize() == 0;
-    }
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
 
-    @Override
-    public int getSize() {
-        return size;
-    }
+	/**
+	 * Creates an empty bipartite set having numbers greater or equal than <code>offSet</code> (possibly < 0)
+	 * @param offSet smallest allowed value in this set (possibly < 0)
+	 */
+	public Set_Swap(int offSet){
+		mapOffset = offSet;
+		size = 0;
+		values = new int[0];
+		map = new int[0];
+	}
 
-    protected void setSize(int s) {
-        size = s;
-    }
-
-    protected void addSize(int delta) {
-        size += delta;
-    }
-
-    @Override
-    public String toString() {
-        int size = getSize();
-        if (size == 0) {
-            return "empty";
-        }
-        String res = "";
-        for (int i = 0; i < size - 1; i++) {
-            res += array[i] + " -> ";
-        }
-        res += array[size - 1];
-        return res;
-    }
-
-    @Override
-    public void clear() {
-        setSize(0);
-    }
-
-    // --- Iterations
-    @Override
-    public int getFirstElement() {
-        if (getSize() == 0) {
-            return -1;
-        }
-        currentIdx = 0;
-        return array[currentIdx];
-    }
-
-    @Override
-    public int getNextElement() {
-        currentIdx++;
-        if (currentIdx >= getSize()) {
-            return -1;
-        }
-        return array[currentIdx];
-    }
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
 	@Override
-	public int[] toArray(){
-		int[] a = new int[getSize()];
-		int idx = 0;
-		for(int i=getFirstElement();i>=0;i=getNextElement()){
-			a[idx++] = i;
+	public boolean add(int element) {
+		if (contain(element)) {
+			return false;
 		}
-		return a;
+		int size = getSize();
+		if (size == values.length) {
+			int[] tmp = values;
+			int[] tmpMap = map;
+			int ns = Math.min(16, tmp.length + 1 + (tmp.length * 2) / 3);
+			values = new int[ns];
+			map = new int[ns];
+			System.arraycopy(tmp, 0, values, 0, tmp.length);
+			System.arraycopy(tmpMap, 0, map, 0, map.length);
+		}
+		values[size] = element;
+		map[element-mapOffset] = size;
+		addSize(1);
+		return true;
 	}
 
 	@Override
-	public int getMaxSize(){
-		return sizeMax;
+	public boolean remove(int element) {
+		if (!contain(element)) {
+			return false;
+		}
+		int size = getSize();
+		if (size > 1) {
+			int idx = map[element-mapOffset];
+			int replacer = values[size - 1];
+			map[replacer-mapOffset] = idx;
+			values[idx] = replacer;
+			map[element-mapOffset] = size - 1;
+			values[size - 1] = element;
+			iter.notifyRemoved(element);
+		}
+		addSize(-1);
+		return true;
+	}
+
+	@Override
+	public boolean contain(int element) {
+		if(element<mapOffset || element >= mapOffset+map.length){
+			return false;
+		}
+		if(map[element] < getSize()){
+			assert values[map[element]] == element;
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	@Override
+	public int getSize() {
+		return size;
+	}
+
+	protected void setSize(int s) {
+		size = s;
+	}
+
+	protected void addSize(int delta) {
+		size += delta;
+	}
+
+	@Override
+	public void clear() {
+		setSize(0);
+	}
+
+	@Override
+	public String toString() {
+		String st = "{";
+		for(int i:this){
+			st+=i+", ";
+		}
+		st+="}";
+		return st.replace(", }","}");
+	}
+
+	@Override
+	public SetType getSetType(){
+		return SetType.BIPARTITESET;
+	}
+
+	//***********************************************************************************
+	// ITERATOR
+	//***********************************************************************************
+
+	@Override
+	public Iterator<Integer> iterator(){
+		iter.reset();
+		return iter;
+	}
+
+	@Override
+	public ISetIterator newIterator(){
+		return new ISetIterator() {
+			int idx;
+			@Override
+			public void reset() {
+				idx = 0;
+			}
+			@Override
+			public void notifyRemoved(int item) {
+				if(item == values[idx-1]){
+					idx--;
+				}
+			}
+			@Override
+			public boolean hasNext() {
+				return idx < size;
+			}
+			@Override
+			public Integer next() {
+				idx ++;
+				return values[idx-1];
+			}
+		};
 	}
 }

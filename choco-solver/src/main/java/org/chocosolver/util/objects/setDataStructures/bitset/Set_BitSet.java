@@ -27,131 +27,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.linkedlist;
+package org.chocosolver.util.objects.setDataStructures.bitset;
 
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.io.Serializable;
+import java.util.BitSet;
 import java.util.Iterator;
 
 /**
- * LinkedList of m elements
- * add : O(1)
- * testPresence: O(m)
- * remove: O(m)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages, chameau
- * Date: 9 fevr. 2011
+ * BitSet implementation for a set of integers
+ * Supports negative numbers when using int... constructor
+ *
+ * @author Jean-Guillaume Fages, Xavier Lorca
  */
-public class Set_LinkedList implements ISet {
+public class Set_BitSet extends BitSet implements ISet {
 
 	//***********************************************************************************
-	// ITERATOR
+	// VARIABLES
 	//***********************************************************************************
 
-	private IntCell first, last;
-	private int size;
-	private IntCell poolGC;
+	private int card;
+	private int offset;  // allow using negative numbers
 	private ISetIterator iter = newIterator();
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-	@Override
-	public int getSize() {
-		return size;
-	}
-
-	@Override
-	public boolean contain(int element) {
-		for(int i:this){
-			if(i==element){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean add(int element) {
-		if(contain(element)){
-			return false;
-		}
-		if (poolGC == null) {
-			first = new IntCell(element, first);
-		} else {
-			IntCell recycled = poolGC;
-			poolGC = poolGC.next;
-			recycled.init(element, first);
-			first = recycled;
-		}
-		if(last==null){
-			assert size==0;
-			last=first;
-		}
-		this.size++;
-		return true;
-	}
-
-	@Override
-	public boolean remove(int element) {
-		if(first == null){
-			return false;
-		} else if(first.element == element){
-			iter.notifyRemoved(element);
-			first = first.next;
-			if(first==null)last=null;
-			size--;
-			return true;
-		}else {
-			IntCell current = first;
-			IntCell previous = null;
-			while (current != null) {
-				if (current.element == element) {
-					iter.notifyRemoved(element);
-					previous.next = current.next;
-					if(previous.next==null) last = previous;
-					current.next = poolGC;
-					poolGC = current;
-					size--;
-					return true;
-				}
-				previous = current;
-				current = current.next;
-			}
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	@Override
-	public void clear() {
-		if (first != null) {
-			last.next = poolGC;
-			poolGC = first;
-		}
-		first = null;
-		last = null;
-		size = 0;
-	}
-
-	@Override
-	public String toString() {
-		String st = "{";
-		for(int i:this){
-			st+=i+", ";
-		}
-		st+="}";
-		return st.replace(", }","}");
-	}
-
-	@Override
-	public SetType getSetType(){
-		return SetType.LINKED_LIST;
-	}
 
 	//***********************************************************************************
 	// ITERATOR
@@ -166,46 +65,94 @@ public class Set_LinkedList implements ISet {
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			protected IntCell nextCell;
+			int current = -1;
 			@Override
 			public void reset() {
-				nextCell = first;
+				current = -1;
 			}
 			@Override
-			public void notifyRemoved(int item) {
-				if(nextCell != null && nextCell.element == item){
-					nextCell = nextCell.next;
-				}
-			}
+			public void notifyRemoved(int item) {}
 			@Override
 			public boolean hasNext() {
-				return nextCell != null;
+				return nextSetBit(current+1) >= 0;
 			}
 			@Override
 			public Integer next() {
-				int e = nextCell.element;
-				nextCell = nextCell.next;
-				return e;
+				current = nextSetBit(current + 1);
+				return current+offset;
 			}
 		};
 	}
 
 	//***********************************************************************************
-	// STRUCTURE
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	protected class IntCell implements Serializable {
+	/**
+	 * Creates an empty bitset having numbers greater or equal than <code>offSet</code> (possibly < 0)
+	 *
+	 * @param offSet minimum value in the set
+	 */
+	public Set_BitSet(int offSet) {
+		super();
+		card = 0;
+		offset = offSet;
+	}
 
-		int element;
-		IntCell next;
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-		public IntCell(int element, IntCell next) {
-			init(element, next);
+	@Override
+	public boolean add(int element) {
+		assert element >= offset;
+		if (!get(element-offset)) {
+			card++;
+			set(element-offset, true);
+			return true;
 		}
+		return false;
+	}
 
-		public void init(int element, IntCell next) {
-			this.element = element;
-			this.next = next;
+	@Override
+	public boolean remove(int element) {
+		assert element >= offset;
+		boolean isIn = get(element-offset);
+		if (isIn) {
+			set(element-offset, false);
+			card--;
 		}
+		return isIn;
+	}
+
+	@Override
+	public boolean contain(int element) {
+		return get(element-offset);
+	}
+
+	@Override
+	public int getSize() {
+		return card;
+	}
+
+	@Override
+	public void clear() {
+		card = 0;
+		super.clear();
+	}
+
+	@Override
+	public SetType getSetType(){
+		return SetType.BITSET;
+	}
+
+	@Override
+	public String toString() {
+		String st = "{";
+		for(int i:this){
+			st+=i+", ";
+		}
+		st+="}";
+		return st.replace(", }","}");
 	}
 }

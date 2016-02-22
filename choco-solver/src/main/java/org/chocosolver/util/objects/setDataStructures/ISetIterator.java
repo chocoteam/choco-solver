@@ -27,43 +27,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.swapList;
+package org.chocosolver.util.objects.setDataStructures;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateInt;
+import java.util.Iterator;
 
 /**
- * Backtrable List of m elements based on Array int_swaping
- * BEWARE : CANNOT ADD AND REMOVE ELEMENTS DURING SEARCH
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
+ * @author Jean-Guillaume Fages
  */
-public class Set_Std_Swap_Array extends Set_Swap_Array {
+public interface ISetIterator extends Iterator<Integer> {
 
-    protected IStateInt size;
-    protected IEnvironment env;
+	void reset();
 
-    public Set_Std_Swap_Array(IEnvironment e, int n) {
-        super(n);
-        env = e;
-        size = e.makeInt(0);
-    }
-
-    @Override
-    public int getSize() {
-        return size.get();
-    }
-
-    protected void setSize(int s) {
-        size.set(s);
-    }
-
-    protected void addSize(int delta) {
-        size.add(delta);
-    }
+	void notifyRemoved(int item);
 }

@@ -27,39 +27,64 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.linkedlist;
+package org.chocosolver.util.objects.setDataStructures.array;
 
+import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
- * LinkedList of m elements
- * add : O(1)
- * testPresence: O(m)
- * remove: O(m)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages, chameau
- * Date: 9 fevr. 2011
+ * Fixed array of integers (cannot add nor remove items)
+ *
+ * @author : Jean-Guillaume Fages, jimmy
  */
-public class Set_LinkedList implements ISet {
+public class Set_FixedArray implements ISet {
 
 	//***********************************************************************************
-	// ITERATOR
+	// VARIABLES
 	//***********************************************************************************
 
-	private IntCell first, last;
-	private int size;
-	private IntCell poolGC;
-	private ISetIterator iter = newIterator();
+	protected final int size;
+	protected final int[] values;
+	protected ISetIterator iter = newIterator();
+
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
+
+	/**
+	 * Creates an empty array of integers
+	 */
+	public Set_FixedArray(int[] vls){
+		values = new TIntHashSet(vls).toArray();
+		Arrays.sort(values);
+		size = values.length;
+	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
+
+	@Override
+	public boolean add(int element) {
+		if(contain(element))return false;
+		throw new UnsupportedOperationException("Cannot add element to Set_FixedArray");
+	}
+
+	@Override
+	public boolean remove(int element) {
+		if(!contain(element))return false;
+		throw new UnsupportedOperationException("Cannot remove element from Set_FixedArray");
+	}
+
+	@Override
+	public boolean contain(int element) {
+		return Arrays.binarySearch(values,element) >= 0;
+	}
 
 	@Override
 	public int getSize() {
@@ -67,75 +92,10 @@ public class Set_LinkedList implements ISet {
 	}
 
 	@Override
-	public boolean contain(int element) {
-		for(int i:this){
-			if(i==element){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean add(int element) {
-		if(contain(element)){
-			return false;
-		}
-		if (poolGC == null) {
-			first = new IntCell(element, first);
-		} else {
-			IntCell recycled = poolGC;
-			poolGC = poolGC.next;
-			recycled.init(element, first);
-			first = recycled;
-		}
-		if(last==null){
-			assert size==0;
-			last=first;
-		}
-		this.size++;
-		return true;
-	}
-
-	@Override
-	public boolean remove(int element) {
-		if(first == null){
-			return false;
-		} else if(first.element == element){
-			iter.notifyRemoved(element);
-			first = first.next;
-			if(first==null)last=null;
-			size--;
-			return true;
-		}else {
-			IntCell current = first;
-			IntCell previous = null;
-			while (current != null) {
-				if (current.element == element) {
-					iter.notifyRemoved(element);
-					previous.next = current.next;
-					if(previous.next==null) last = previous;
-					current.next = poolGC;
-					poolGC = current;
-					size--;
-					return true;
-				}
-				previous = current;
-				current = current.next;
-			}
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	@Override
 	public void clear() {
-		if (first != null) {
-			last.next = poolGC;
-			poolGC = first;
+		if(size>0){
+			throw new UnsupportedOperationException("Cannot clear Set_FixedArray");
 		}
-		first = null;
-		last = null;
-		size = 0;
 	}
 
 	@Override
@@ -150,7 +110,7 @@ public class Set_LinkedList implements ISet {
 
 	@Override
 	public SetType getSetType(){
-		return SetType.LINKED_LIST;
+		return SetType.FIXED_ARRAY;
 	}
 
 	//***********************************************************************************
@@ -166,46 +126,26 @@ public class Set_LinkedList implements ISet {
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			protected IntCell nextCell;
+			int idx;
 			@Override
 			public void reset() {
-				nextCell = first;
+				idx = 0;
 			}
 			@Override
 			public void notifyRemoved(int item) {
-				if(nextCell != null && nextCell.element == item){
-					nextCell = nextCell.next;
+				if(item == values[idx-1]){
+					idx--;
 				}
 			}
 			@Override
 			public boolean hasNext() {
-				return nextCell != null;
+				return idx < size;
 			}
 			@Override
 			public Integer next() {
-				int e = nextCell.element;
-				nextCell = nextCell.next;
-				return e;
+				idx ++;
+				return values[idx-1];
 			}
 		};
-	}
-
-	//***********************************************************************************
-	// STRUCTURE
-	//***********************************************************************************
-
-	protected class IntCell implements Serializable {
-
-		int element;
-		IntCell next;
-
-		public IntCell(int element, IntCell next) {
-			init(element, next);
-		}
-
-		public void init(int element, IntCell next) {
-			this.element = element;
-			this.next = next;
-		}
 	}
 }

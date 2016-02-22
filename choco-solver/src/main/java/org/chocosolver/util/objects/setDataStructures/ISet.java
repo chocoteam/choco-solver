@@ -30,14 +30,33 @@
 package org.chocosolver.util.objects.setDataStructures;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 /**
- * Class representing a set of POSITIVE integers (typically graph nodes)
+ * Class representing a set of integers
  * Created by IntelliJ IDEA.
- * @since 9 feb. 2011
+ * @since 9 feb. 2011, update 2016
  * @author chameau, Jean-Guillaume Fages
  */
-public interface ISet extends Serializable {
+public interface ISet extends Serializable, Iterable<Integer>{
+
+	/**
+	 * Use the following loop to iterate over this set.
+	 * for(int i:this){
+	 *     //
+	 * }
+	 * @return the default iterator of this set
+	 */
+	Iterator<Integer> iterator();
+
+	/**
+	 * Use the following loop to iterate over this set.
+	 * for(int i:this){
+	 *     //
+	 * }
+	 * @return a new iterator for this set
+	 */
+	ISetIterator newIterator();
 
     /**
      * Add element to the set
@@ -67,7 +86,9 @@ public interface ISet extends Serializable {
     /**
      * @return true iff the set is empty
      */
-    boolean isEmpty();
+    default boolean isEmpty(){
+		return getSize()==0;
+	}
 
     /**
      * @return the number of elements in the set
@@ -79,28 +100,6 @@ public interface ISet extends Serializable {
      */
     void clear();
 
-    /**
-     * @return the first element of the set, -1 empty set
-     */
-    int getFirstElement();
-
-    /**
-     * enables to iterate over the set
-     * <p/>
-     * should be used as follow :
-     * <p/>
-     * for(int i=getFirstElement(); i>=0; i = getNextElement()){
-     * ...
-     * }
-     * <p/>
-     * The use of getFirstElement() is necessary to ensure a complete iteration
-     * <p/>
-     * WARNING cannot encapsulate two for loops (copy the set for that)
-     *
-     * @return the next element of the set
-     */
-    int getNextElement();
-
 	/**
 	 * @return the implementation type of this set
 	 */
@@ -110,11 +109,12 @@ public interface ISet extends Serializable {
 	 * Copies the set in an array if integers
 	 * @return an array containing every integer of the set
 	 */
-	int[] toArray();
-
-	/**
-	 * Gets the maximum size of the set, or -1 if it is unbounded.
-	 * @return the maximum size of the set, or -1 if it is unbounded
-	 */
-	int getMaxSize();
+	default int[] toArray(){
+		int[] a = new int[getSize()];
+		int idx = 0;
+		for(int i:this){
+			a[idx++] = i;
+		}
+		return a;
+	}
 }

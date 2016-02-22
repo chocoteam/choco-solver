@@ -27,38 +27,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.linkedlist;
+package org.chocosolver.util.objects.setDataStructures.interval;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+
+import java.util.Iterator;
 
 /**
- * Backtrable linked list of m elements with double link (predecessor and successor)
- * add : O(1)
- * testPresence: O(m)
- * remove: O(m)
- * Enable deletion of the current item in O(1) (except for the last one)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 17/11/2011
+ * Interval set of the form [min, max]
+ * BEWARE: Cannot add/remove elements other than bounds
+ *
+ * @author Jean-Guillaume Fages
  */
-public class Set_Std_2LinkedList extends Set_2LinkedList {
-
-	final IEnvironment environment;
-	public final static boolean ADD = true;
-	public final static boolean REMOVE = false;
-	ListOP[] operationPoolGC;
-	int poolCurrentSize;
+public class Set_Interval implements ISet {
 
 	//***********************************************************************************
-	// CONSTRUCTOR
+	// VARIABLES
 	//***********************************************************************************
 
-	public Set_Std_2LinkedList(IEnvironment environment) {
-		super();
-		this.environment = environment;
-		operationPoolGC = new ListOP[16];
+	private int lb, ub;
+	private ISetIterator iter = newIterator();
+
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+
+	/**
+	 * Creates a set of integers encoded as an interval [min, max]
+	 * Initially empty
+	 */
+	public Set_Interval() {
+		this(0,-1);
+	}
+
+	/**
+	 * Creates a set of integers encoded as an interval [min, max]
+	 * @param min lowest value in the set
+	 * @param max highest value in the set
+	 */
+	public Set_Interval(int min, int max) {
+		this.lb = min;
+		this.ub = max;
 	}
 
 	//***********************************************************************************
@@ -67,84 +78,83 @@ public class Set_Std_2LinkedList extends Set_2LinkedList {
 
 	@Override
 	public boolean add(int element) {
-		this._add(element);
-		if (poolCurrentSize<=0) {
-			new ListOP(element, REMOVE);
-		} else {
-			ListOP op = operationPoolGC[--poolCurrentSize];
-			op.set(element, REMOVE);
+		int s = getSize();
+		if(lb-1 == element){
+			lb--;
 		}
-		return true;
-	}
-
-	protected void _add(int element) {
-		super.add(element);
+		if(ub+1 == element){
+			ub++;
+		}
+		return s!=getSize();
 	}
 
 	@Override
 	public boolean remove(int element) {
-		boolean done = this._remove(element);
-		if (done) {
-			if (poolCurrentSize<=0) {
-				new ListOP(element, ADD);
-			} else {
-				ListOP op = operationPoolGC[--poolCurrentSize];
-				op.set(element, ADD);
-			}
+		int s = getSize();
+		if(lb == element){
+			lb++;
 		}
-		return done;
+		if(ub == element){
+			ub--;
+		}
+		return s!=getSize();
 	}
 
-	protected boolean _remove(int element) {
-		return super.remove(element);
+	@Override
+	public boolean contain(int element) {
+		return lb<=element && element<=ub;
+	}
+
+	@Override
+	public int getSize() {
+		return ub-lb+1;
 	}
 
 	@Override
 	public void clear() {
-		for (int i = getFirstElement(); i >= 0; i = getNextElement()) {
-			if (poolCurrentSize<=0) {
-				new ListOP(i, ADD);
-			} else {
-				ListOP op = operationPoolGC[--poolCurrentSize];
-				op.set(i, ADD);
-			}
-		}
-		super.clear();
+		lb = 0;
+		ub = -1;
+	}
+
+	@Override
+	public SetType getSetType(){
+		return SetType.INTERVAL;
+	}
+
+	@Override
+	public String toString(){
+		return "["+lb+","+ub+"]";
 	}
 
 	//***********************************************************************************
-	// TRAILING OPERATIONS
+	// ITERATOR
 	//***********************************************************************************
 
-	private class ListOP extends Operation {
-		int element;
-		boolean addOrRemove;
+	@Override
+	public Iterator<Integer> iterator(){
+		iter.reset();
+		return iter;
+	}
 
-		public ListOP(int i, boolean add) {
-			super();
-			set(i, add);
-		}
-
-		@Override
-		public void undo() {
-			if (addOrRemove) {
-				_add(element);
-			} else {
-				_remove(element);
+	@Override
+	public ISetIterator newIterator(){
+		return new ISetIterator() {
+			int value = lb;
+			@Override
+			public void reset() {
+				value = lb;
 			}
-			// ensures capacity
-			if(poolCurrentSize==operationPoolGC.length){
-				ListOP[] tmp = new ListOP[poolCurrentSize*4/3+10];
-				System.arraycopy(operationPoolGC,0,tmp,0,poolCurrentSize);
-				operationPoolGC = tmp;
+			@Override
+			public void notifyRemoved(int item) {}
+			@Override
+			public boolean hasNext() {
+				return value <= ub;
 			}
-			operationPoolGC[poolCurrentSize++] = this;
-		}
-
-		public void set(int i, boolean add) {
-			element = i;
-			addOrRemove = add;
-			environment.save(this);
-		}
+			@Override
+			public Integer next() {
+				value++;
+				return value-1;
+			}
+		};
 	}
 }
