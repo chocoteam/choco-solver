@@ -49,7 +49,7 @@ import java.util.Iterator;
 public class Set_LinkedList implements ISet {
 
 	//***********************************************************************************
-	// ITERATOR
+	// VARIABLE
 	//***********************************************************************************
 
 	private IntCell first, last;
