@@ -42,8 +42,8 @@ public class SetDomainMin implements SetValueSelector {
 
     @Override
     public int selectValue(SetVar s) {
-        for (int i = s.getEnvelopeFirst(); i != SetVar.END; i = s.getEnvelopeNext()) {
-            if (!s.kernelContains(i)) {
+        for (int i : s.getUB()) {
+            if (!s.getLB().contain(i)) {
                 return i;
             }
         }

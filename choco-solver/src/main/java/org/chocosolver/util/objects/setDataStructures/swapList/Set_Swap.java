@@ -51,9 +51,9 @@ public class Set_Swap implements ISet {
 	// VARIABLES
 	//***********************************************************************************
 
-	protected int size, mapOffset;
-	protected int[] values, map;
-	protected ISetIterator iter = newIterator();
+	private int size, mapOffset;
+	private int[] values, map;
+	private ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -66,8 +66,9 @@ public class Set_Swap implements ISet {
 	public Set_Swap(int offSet){
 		mapOffset = offSet;
 		size = 0;
-		values = new int[0];
-		map = new int[0];
+		values = new int[16];
+		map = new int[16];
+		for(int i=0;i<16;i++)map[i] = -1;
 	}
 
 	//***********************************************************************************
@@ -76,18 +77,30 @@ public class Set_Swap implements ISet {
 
 	@Override
 	public boolean add(int element) {
+		assert element>=mapOffset;
 		if (contain(element)) {
 			return false;
 		}
 		int size = getSize();
 		if (size == values.length) {
-			int[] tmp = values;
-			int[] tmpMap = map;
-			int ns = Math.min(16, tmp.length + 1 + (tmp.length * 2) / 3);
-			values = new int[ns];
-			map = new int[ns];
-			System.arraycopy(tmp, 0, values, 0, tmp.length);
-			System.arraycopy(tmpMap, 0, map, 0, map.length);
+			{
+				int[] tmp = values;
+				int ns = tmp.length + 1 + (tmp.length * 2) / 3;
+				values = new int[ns];
+				System.arraycopy(tmp, 0, values, 0, tmp.length);
+			}
+			{
+				int[] tmp = map;
+				int ns = Math.max(
+						element-mapOffset+1,
+						tmp.length + 1 + (tmp.length * 2) / 3
+				);
+				map = new int[ns];
+				System.arraycopy(tmp, 0, map, 0, tmp.length);
+				for(int i=tmp.length;i<ns;i++){
+					map[i] = -1;
+				}
+			}
 		}
 		values[size] = element;
 		map[element-mapOffset] = size;
@@ -119,8 +132,8 @@ public class Set_Swap implements ISet {
 		if(element<mapOffset || element >= mapOffset+map.length){
 			return false;
 		}
-		if(map[element] < getSize()){
-			assert values[map[element]] == element;
+		if(map[element-mapOffset] < getSize() && map[element-mapOffset]>=0){
+			assert values[map[element-mapOffset]] == element : values[map[element-mapOffset]] +"!="+ element;
 			return true;
 		}else{
 			return false;

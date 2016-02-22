@@ -596,7 +596,7 @@ public interface IVariableFactory {
      * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default SetVar setVar(String name, int[] lb, int[] ub) {
-        return new SetVarImpl(name, lb, SetType.BIPARTITESET, ub, SetType.BIPARTITESET, _me());
+        return new SetVarImpl(name, lb, SetType.BITSET, ub, SetType.BITSET, _me());
     }
 
     /**

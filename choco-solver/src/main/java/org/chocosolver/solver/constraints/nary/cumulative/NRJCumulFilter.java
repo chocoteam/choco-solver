@@ -77,7 +77,7 @@ public class NRJCumulFilter extends CumulFilter{
 	@Override
 	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		int idx = 0;
-		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+		for (int i : tasks) {
 			if(d[i].getLB()>0){
 				slb[i] = s[i].getLB();
 				dlb[i] = d[i].getLB();

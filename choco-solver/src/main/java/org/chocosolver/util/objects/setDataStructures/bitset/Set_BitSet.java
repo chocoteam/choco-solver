@@ -116,7 +116,7 @@ public class Set_BitSet extends BitSet implements ISet {
 
 	@Override
 	public boolean remove(int element) {
-		assert element >= offset;
+		if(!contain(element))return false;
 		boolean isIn = get(element-offset);
 		if (isIn) {
 			set(element-offset, false);
@@ -127,6 +127,7 @@ public class Set_BitSet extends BitSet implements ISet {
 
 	@Override
 	public boolean contain(int element) {
+		if(element<offset)return false;
 		return get(element-offset);
 	}
 

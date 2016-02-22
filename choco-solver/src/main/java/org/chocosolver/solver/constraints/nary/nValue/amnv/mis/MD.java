@@ -101,7 +101,7 @@ public class MD implements F{
 		inMIS.set(node);
 		out.set(node);
 		int sizeFifo=0;
-		for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+		for (int j : nei) {
 			if (!out.get(j)) {
 				out.set(j);
 				fifo[sizeFifo++] = j;
@@ -109,7 +109,7 @@ public class MD implements F{
 		}
 		for (int i=0; i<sizeFifo; i++) {
 			nei = graph.getNeighOf(fifo[i]);
-			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+			for (int j : nei) {
 				nbNeighbours[j]--;
 			}
 		}

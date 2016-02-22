@@ -183,12 +183,12 @@ public interface DecisionOperator<V extends Variable> extends Serializable {
 
         @Override
         public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.addToKernel(element, cause);
+            var.force(element, cause);
         }
 
         @Override
         public void unapply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.removeFromEnvelope(element, cause);
+            var.remove(element, cause);
         }
 
         @Override
@@ -198,7 +198,7 @@ public interface DecisionOperator<V extends Variable> extends Serializable {
 
         @Override
         public boolean isValid(SetVar var, int element) {
-            return var.envelopeContains(element) && !var.kernelContains(element);
+            return var.getUB().contain(element) && !var.getLB().contain(element);
         }
 
         @Override
@@ -211,12 +211,12 @@ public interface DecisionOperator<V extends Variable> extends Serializable {
 
         @Override
         public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.removeFromEnvelope(element, cause);
+            var.remove(element, cause);
         }
 
         @Override
         public void unapply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.addToKernel(element, cause);
+            var.force(element, cause);
         }
 
         @Override
@@ -226,7 +226,7 @@ public interface DecisionOperator<V extends Variable> extends Serializable {
 
         @Override
         public boolean isValid(SetVar var, int element) {
-			return var.envelopeContains(element) && !var.kernelContains(element);
+			return var.getUB().contain(element) && !var.getLB().contain(element);
         }
 
         @Override

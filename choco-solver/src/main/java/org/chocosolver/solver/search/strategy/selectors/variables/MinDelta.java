@@ -49,7 +49,7 @@ public class MinDelta implements VariableSelector<SetVar>,VariableEvaluator<SetV
         int delta = Integer.MAX_VALUE;
         for (int idx = 0; idx < variables.length; idx++) {
             SetVar variable = variables[idx];
-            int d = variable.getEnvelopeSize() - variable.getKernelSize();
+            int d = variable.getUB().getSize() - variable.getLB().getSize();
             if (d > 0 && d < delta) {
                 delta = d;
                 small_idx = idx;
@@ -60,6 +60,6 @@ public class MinDelta implements VariableSelector<SetVar>,VariableEvaluator<SetV
 
     @Override
     public double evaluate(SetVar variable) {
-        return variable.getEnvelopeSize() - variable.getKernelSize();
+        return variable.getUB().getSize() - variable.getLB().getSize();
     }
 }

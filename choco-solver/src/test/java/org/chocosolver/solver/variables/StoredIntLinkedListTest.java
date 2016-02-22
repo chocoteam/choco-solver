@@ -29,7 +29,12 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
+import org.chocosolver.solver.Model;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -43,8 +48,9 @@ public class StoredIntLinkedListTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        EnvironmentTrailing environment = new EnvironmentTrailing();
-        Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);
+        Model m = new Model();
+        IEnvironment environment = m.getEnvironment();
+        ISet llist = SetFactory.makeStoredSet(SetType.LINKED_LIST,0,m);
 
         Assert.assertFalse(llist.contain(1));
         Assert.assertFalse(llist.contain(2));
@@ -96,8 +102,9 @@ public class StoredIntLinkedListTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
-        EnvironmentTrailing environment = new EnvironmentTrailing();
-        Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);
+        Model m = new Model();
+        IEnvironment environment = m.getEnvironment();
+        ISet llist = SetFactory.makeStoredSet(SetType.LINKED_LIST,0,m);
 
         int n = 100;
 
@@ -129,8 +136,9 @@ public class StoredIntLinkedListTest {
 
     @Test(groups="10s", timeOut=60000)
     public void test3() {
-        EnvironmentTrailing environment = new EnvironmentTrailing();
-        Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);
+        Model m = new Model();
+        IEnvironment environment = m.getEnvironment();
+        ISet llist = SetFactory.makeStoredSet(SetType.LINKED_LIST,0,m);
 
         int n = 49999;
 
@@ -146,7 +154,5 @@ public class StoredIntLinkedListTest {
             environment.worldPop();
             Assert.assertFalse(llist.contain(i));
         }
-
     }
-
 }

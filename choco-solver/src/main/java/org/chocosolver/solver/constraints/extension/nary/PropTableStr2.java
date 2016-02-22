@@ -96,7 +96,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         boolean hasSupport = false;
-        for (int tuple = tuples.getFirstElement(); tuple >= 0 && !hasSupport; tuple = tuples.getNextElement()) {
+        for (int tuple : tuples) {
             if (is_tuple_supported(tuple)) {
                 hasSupport = true;
             }
@@ -157,7 +157,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
                 tmp.last_size.set(tmp.var.getDomainSize());
             }
         }
-        for (int tuple = tuples.getFirstElement(); tuple >= 0; tuple = tuples.getNextElement()) {
+        for (int tuple : tuples) {
             if (is_tuple_supported(tuple)) {
                 for (int var = 0; var < Ssup.size(); var++) {
                     str2_var v = Ssup.get(var);

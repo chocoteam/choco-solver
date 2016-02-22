@@ -43,7 +43,6 @@ import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
 import static org.chocosolver.solver.Model.writeInFile;
 import static org.chocosolver.solver.constraints.checker.fmk.Domain.*;
-import static org.chocosolver.solver.variables.SetVar.END;
 import static org.testng.Assert.fail;
 
 /**
@@ -206,7 +205,7 @@ public class Correctness {
         int[] _values = new int[d.length];
         int k = 0;
         for (int i : d) {
-            if (!variable.envelopeContains(i)) {
+            if (!variable.getUB().contain(i)) {
                 _values[k++] = i;
             }
         }
@@ -215,9 +214,9 @@ public class Correctness {
 
     ////////////////////////////////////////////////////////////////////////
     private static int[] getForcedElements(SetVar v, int[] d) {
-        int[] _values = new int[v.getKernelSize()];
+        int[] _values = new int[v.getLB().getSize()];
         int k = 0;
-        for (int j = v.getKernelFirst(); j != END; j = v.getKernelNext()) {
+        for (int j : v.getLB()) {
             boolean newEl = true;
             for (int i : d) {
                 if (i == j) {

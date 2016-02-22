@@ -63,7 +63,7 @@ public class TimeCumulFilter extends CumulFilter {
 	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		int min = Integer.MAX_VALUE / 2;
 		int max = Integer.MIN_VALUE / 2;
-		for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+		for (int i : tasks) {
 			if (s[i].getUB() < e[i].getLB()) {
 				min = Math.min(min, s[i].getUB());
 				max = Math.max(max, e[i].getLB());
@@ -80,7 +80,7 @@ public class TimeCumulFilter extends CumulFilter {
 			// fill mandatory parts and filter capacity
 			int elb,hlb;
 			int maxC=0;
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+			for (int i : tasks) {
 				elb = e[i].getLB();
 				hlb = h[i].getLB();
 				for (int t = s[i].getUB(); t < elb; t++) {
@@ -91,7 +91,7 @@ public class TimeCumulFilter extends CumulFilter {
 			capa.updateLowerBound(maxC, aCause);
 			// filter max height
 			int minH;
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+			for (int i : tasks) {
 				if(!h[i].isInstantiated()){
 					minH = h[i].getUB();
 					elb = e[i].getLB();
@@ -102,7 +102,7 @@ public class TimeCumulFilter extends CumulFilter {
 					h[i].updateUpperBound(minH,aCause);
 				}
 			}
-			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+			for (int i : tasks) {
 				if (d[i].getLB() > 0 && h[i].getLB() > 0) {
 					// filters
 					if (s[i].getLB() + d[i].getLB() > min) {

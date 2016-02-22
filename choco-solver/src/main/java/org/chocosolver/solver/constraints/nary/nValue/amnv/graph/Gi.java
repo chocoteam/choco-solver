@@ -87,7 +87,7 @@ public class Gi extends G {
 
     public void update(int i) {
         ISet nei = getNeighOf(i);
-        for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+        for (int j : nei) {
             if (!intersect(i, j)) {
                 removeEdge(i, j);
             }

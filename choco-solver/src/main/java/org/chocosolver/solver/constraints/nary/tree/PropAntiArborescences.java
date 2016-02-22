@@ -140,7 +140,7 @@ public class PropAntiArborescences extends Propagator<IntVar> {
         if (!isCompletelyInstantiated()) {
             return ESat.UNDEFINED;
         }
-        ISet tmp = SetFactory.makeBitSet();
+        ISet tmp = SetFactory.makeBitSet(0);
         for (int i = 0; i < n; i++) {
             if (circuit(tmp, i)) {
                 return ESat.FALSE;
@@ -153,14 +153,14 @@ public class PropAntiArborescences extends Propagator<IntVar> {
         tmp.clear();
         int x = i;
         tmp.add(x);
-        int y = vars[x].getValue();
+        int y = vars[x].getValue()-offSet;
         while (x != y) {
             x = y;
             if (tmp.contain(x)) {
                 return true;
             }
             tmp.add(x);
-            y = vars[x].getValue();
+            y = vars[x].getValue()-offSet;
         }
         return false;
     }

@@ -70,7 +70,7 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	@Override
 	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		int size = 0;
-		for(int t=tasks.getFirstElement();t>=0;t=tasks.getNextElement()) {
+		for(int t:tasks) {
 			if(d[t].getLB()>0){
 				map[size] = t;
 				sortedTasks[size] = size;

@@ -60,55 +60,7 @@ public class Partition extends AbstractProblem {
 	private boolean noEmptySet = true;
 
 	public static void main(String[] args) {
-//		new Partition().execute(args);
-
-		Iterable<Integer> mySet = new Iterable<Integer>() {
-			int[] values = new int[]{0,3,6,2,10};
-			Iterator<Integer> iter = new Iterator<Integer>() {
-				int idx = 0;
-				int length = values.length;
-				@Override
-				public boolean hasNext() {
-					return idx<length;
-				}
-
-				@Override
-				public Integer next() {
-					idx++;
-					return values[idx-1];
-				}
-
-				@Override
-				public void remove(){
-					values[idx-1] = values[length-1];
-					idx--;
-					length--;
-				}
-			};
-
-			@Override
-			public Iterator<Integer> iterator() {
-				iter.idx = 0;
-				return iter;
-			}
-		};
-		for(int i:mySet){
-			System.out.println(i);
-		}
-		System.out.println("%%%");
-		Iterator<Integer> it = mySet.iterator();
-		while(it.hasNext()){
-			int k = it.next();
-			if (k == 6){
-				System.out.println("remove "+k);
-				it.remove();
-			}
-		}
-		System.out.println("%%%");
-		for(int i:mySet){
-			System.out.println(i);
-		}
-		System.out.println("%%%");
+		new Partition().execute(args);
 	}
 
 

@@ -138,10 +138,8 @@ public class AlgoAllDiffAC {
         for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
             tryToMatch(i);
         }
-        int p;
         for (int i = 0; i < n; i++) {
-            p = digraph.getPredOf(i).getFirstElement();
-            matching[i] = p;
+            matching[i] = digraph.getPredOf(i).isEmpty()?-1:digraph.getPredOf(i).iterator().next();
         }
     }
 
@@ -165,12 +163,12 @@ public class AlgoAllDiffAC {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
-        int x, y;
+        int x;
         ISet succs;
         while (indexFirst != indexLast) {
             x = fifo[indexFirst++];
             succs = digraph.getSuccOf(x);
-            for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
+            for (int y : succs) {
                 if (!in.get(y)) {
                     father[y] = x;
                     fifo[indexLast++] = y;

@@ -109,7 +109,7 @@ public class Rk implements F {
             inMIS.set(idx);
             out.set(idx);
             ISet nei = graph.getNeighOf(idx);
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+            for (int j : nei) {
                 out.set(j);
             }
         }

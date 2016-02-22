@@ -34,6 +34,8 @@ import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.util.objects.graphs.IGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
+import java.util.Iterator;
+
 /**
  * Class containing algorithms to find all connected components and articulation points of graph by performing one dfs
  * it uses Tarjan algorithm in a non recursive way and can be performed in O(M+N) time c.f. Gondrand Minoux
@@ -52,6 +54,7 @@ public class ConnectivityFinder {
 	private int nbCC;
 	//bonus biconnection
 	private int[] numOfNode, nodeOfNum, inf;
+	private Iterator<Integer>[] iterators;
 
 	/**
 	 * Create an object that can compute Connected Components (CC) of a graph g
@@ -64,6 +67,7 @@ public class ConnectivityFinder {
 		n = g.getNbMaxNodes();
 		p = new int[n];
 		fifo = new int[n];
+		iterators = new Iterator[n];
 	}
 
 	/**
@@ -99,19 +103,17 @@ public class ConnectivityFinder {
 			node_CC = new int[n];
 		}
 		ISet act = graph.getNodes();
-		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
+		for (int i : act) {
 			p[i] = -1;
 		}
 		for(int i=0;i<CC_firstNode.length;i++){
 			CC_firstNode[i] = -1;
 		}
-		int first = act.getFirstElement();
 		int cc = 0;
-		while (first >= 0) {
-			findCC(first, cc);
-			cc++;
-			while (first >= 0 && p[first] != -1) {
-				first = act.getNextElement();
+		for(int i:act){
+			if(p[i]==-1){
+				findCC(i, cc);
+				cc++;
 			}
 		}
 		nbCC = cc;
@@ -125,8 +127,7 @@ public class ConnectivityFinder {
 		add(start,cc);
 		while(first<last){
 			int i = fifo[first++];
-			ISet s = graph.getSuccOrNeighOf(i);
-			for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+			for(int j:graph.getSuccOrNeighOf(i)){
 				if(p[j]==-1){
 					p[j] = i;
 					add(j,cc);
@@ -134,8 +135,7 @@ public class ConnectivityFinder {
 				}
 			}
 			if(graph.isDirected()){
-				s = graph.getPredOrNeighOf(i);
-				for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+				for(int j:graph.getPredOrNeighOf(i)){
 					if(p[j]==-1){
 						p[j] = i;
 						add(j,cc);
@@ -166,12 +166,13 @@ public class ConnectivityFinder {
 			inf = new int[n];
 		}
 		ISet act = graph.getNodes();
-		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
+		for (int i : act) {
 			inf[i] = Integer.MAX_VALUE;
 			p[i] = -1;
+			iterators[i] = graph.getSuccOrNeighOf(i).iterator();
 		}
 		//algo
-		int start = act.getFirstElement();
+		int start = act.iterator().next();
 		int i = start;
 		int k = 0;
 		numOfNode[start] = k;
@@ -179,25 +180,9 @@ public class ConnectivityFinder {
 		p[start] = start;
 		int j, q;
 		int nbRootChildren = 0;
-		boolean first = true;
 		while (true) {
-			if (first) {
-				j = graph.getSuccOrNeighOf(i).getFirstElement();
-				first = false;
-			} else {
-				j = graph.getSuccOrNeighOf(i).getNextElement();
-			}
-			if (j < 0) {
-				if (i == start) {
-					return k >= act.getSize() - 1;
-				}
-				q = inf[i];
-				i = p[i];
-				inf[i] = Math.min(q, inf[i]);
-				if (q >= numOfNode[i] && i != start) {
-					return false;
-				} // ARTICULATION POINT DETECTED
-			} else {
+			if (iterators[i].hasNext()) {
+				j = iterators[i].next();
 				if (p[j] == -1) {
 					p[j] = i;
 					if (i == start) {
@@ -207,7 +192,6 @@ public class ConnectivityFinder {
 						}
 					}
 					i = j;
-					first = true;
 					k++;
 					numOfNode[i] = k;
 					nodeOfNum[k] = i;
@@ -215,6 +199,16 @@ public class ConnectivityFinder {
 				} else if (p[i] != j) {
 					inf[i] = Math.min(inf[i], numOfNode[j]);
 				}
+			}else {
+				if (i == start) {
+					return k >= act.getSize() - 1;
+				}
+				q = inf[i];
+				i = p[i];
+				inf[i] = Math.min(q, inf[i]);
+				if (q >= numOfNode[i] && i != start) {
+					return false;
+				} // ARTICULATION POINT DETECTED
 			}
 		}
 	}
@@ -241,29 +235,33 @@ public class ConnectivityFinder {
 			H = new int[n];
 		}
 		ISet act = graph.getNodes();
-		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
+		for (int i : act) {
 			p[i] = -1;
+			iterators[i] = graph.getSuccOrNeighOf(i).iterator();
 		}
 		for(int i=0;i<CC_firstNode.length;i++){
 			CC_firstNode[i] = -1;
 		}
 		//algo
-		int start = act.getFirstElement();
+		int start = act.iterator().next();
 		int i = start;
 		int k = 0;
 		numOfNode[start] = k;
 		nodeOfNum[k] = start;
 		p[start] = start;
 		int j;
-		boolean first = true;
 		while (true) {
-			if (first) {
-				j = graph.getSuccOrNeighOf(i).getFirstElement();
-				first = false;
-			} else {
-				j = graph.getSuccOrNeighOf(i).getNextElement();
-			}
-			if (j < 0) {
+			if (iterators[i].hasNext()) {
+				j = iterators[i].next();
+				if (p[j] == -1) {
+					p[j] = i;
+					i = j;
+					add(i, 0);
+					k++;
+					numOfNode[i] = k;
+					nodeOfNum[k] = i;
+				}
+			}else {
 				if (i == start) {
 					if (k < act.getSize() - 1) {
 						return false;
@@ -272,16 +270,6 @@ public class ConnectivityFinder {
 					}
 				}
 				i = p[i];
-			} else {
-				if (p[j] == -1) {
-					p[j] = i;
-					i = j;
-					first = true;
-					add(i, 0);
-					k++;
-					numOfNode[i] = k;
-					nodeOfNum[k] = i;
-				}
 			}
 		}
 		// POST ORDER PASS FOR FINDING ISTHMUS
@@ -293,8 +281,7 @@ public class ConnectivityFinder {
 			ND[currentNode] = 1;
 			L[currentNode] = i;
 			H[currentNode] = i;
-			ISet nei = graph.getSuccOrNeighOf(currentNode);
-			for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
+			for (int s : graph.getSuccOrNeighOf(currentNode)) {
 				if (p[s] == currentNode) {
 					ND[currentNode] += ND[s];
 					L[currentNode] = Math.min(L[currentNode], L[s]);
