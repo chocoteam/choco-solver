@@ -109,7 +109,7 @@ public class PropElement extends Propagator<Variable> {
                 if (disjoint(set, array[i - offSet]) || disjoint(array[i - offSet], set)) {// array[i] != set
                     index.removeValue(i, this);
                 } else {
-                    if (array[i - offSet].getKernelSize() == 0) {
+                    if (array[i - offSet].getLB().getSize() == 0) {
                         noEmptyKer = false;
                     }
                 }
@@ -119,15 +119,15 @@ public class PropElement extends Propagator<Variable> {
             if (noEmptyKer) {// from ker
                 constructiveDisjunction.clear();
                 SetVar v = array[index.getLB() - offSet];
-                for (int j = v.getKernelFirst(); j != SetVar.END; j = v.getKernelNext()) {
-                    if (!set.kernelContains(j)) {
+                for (int j : v.getLB()) {
+                    if (!set.getLB().contain(j)) {
                         constructiveDisjunction.add(j);
                     }
                 }
                 for (int cd = constructiveDisjunction.size() - 1; cd >= 0; cd--) {
                     int j = constructiveDisjunction.get(cd);
                     for (int i = index.nextValue(index.getLB()); i <= ub; i = index.nextValue(i)) {
-                        if (!array[i - offSet].kernelContains(j)) {
+                        if (!array[i - offSet].getLB().contain(j)) {
                             constructiveDisjunction.remove(j);
                             break;
                         }
@@ -135,20 +135,20 @@ public class PropElement extends Propagator<Variable> {
                 }
                 for (int cd = constructiveDisjunction.size() - 1; cd >= 0; cd--) {
                     int j = constructiveDisjunction.get(cd);
-                    set.addToKernel(j, this);
+                    set.force(j, this);
                 }
             }
             if (!set.isInstantiated()) {// from env
-                for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
+                for (int j : set.getUB()) {
                     boolean valueExists = false;
                     for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
-                        if (array[i - offSet].envelopeContains(j)) {
+                        if (array[i - offSet].getUB().contain(j)) {
                             valueExists = true;
                             break;
                         }
                     }
                     if (!valueExists) {
-                        set.removeFromEnvelope(j, this);
+                        set.remove(j, this);
                     }
                 }
             }
@@ -156,19 +156,19 @@ public class PropElement extends Propagator<Variable> {
     }
 
     private void setEq(SetVar s1, SetVar s2) throws ContradictionException {
-        for (int j = s2.getKernelFirst(); j != SetVar.END; j = s2.getKernelNext()) {
-            s1.addToKernel(j, this);
+        for (int j : s2.getLB()) {
+            s1.force(j, this);
         }
-        for (int j = s1.getEnvelopeFirst(); j != SetVar.END; j = s1.getEnvelopeNext()) {
-            if (!s2.envelopeContains(j)) {
-                s1.removeFromEnvelope(j, this);
+        for (int j : s1.getUB()) {
+            if (!s2.getUB().contain(j)) {
+                s1.remove(j, this);
             }
         }
     }
 
     private boolean disjoint(SetVar s1, SetVar s2) {
-        for (int j = s2.getKernelFirst(); j != SetVar.END; j = s2.getKernelNext()) {
-            if (!s1.envelopeContains(j)) {
+        for (int j : s2.getLB()) {
+            if (!s1.getUB().contain(j)) {
                 return true;
             }
         }

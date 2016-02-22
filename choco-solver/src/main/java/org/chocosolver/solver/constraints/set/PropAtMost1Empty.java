@@ -85,25 +85,25 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
 
     @Override
     public void propagate(int v, int mask) throws ContradictionException {
-        if (vars[v].getEnvelopeSize() == 0) {
+        if (vars[v].getUB().getSize() == 0) {
             if (emptySetIndex.get() != -1) {
                 contradiction(vars[v], "");
             } else {
                 emptySetIndex.set(v);
                 for (int i = 0; i < vars.length; i++) {
-                    int s = vars[i].getEnvelopeSize();
-                    if (i != v && s != vars[i].getKernelSize()) {
+                    int s = vars[i].getUB().getSize();
+                    if (i != v && s != vars[i].getLB().getSize()) {
                         if (s == 0) {
                             contradiction(vars[i], "");
                         } else if (s == 1) {
-                            vars[i].addToKernel(vars[i].getEnvelopeFirst(), this);
+                            vars[i].force(vars[i].getUB().iterator().next(), this);
                         }
                     }
                 }
             }
         }
-        if (vars[v].getEnvelopeSize() == 1 && emptySetIndex.get() != -1) {
-            vars[v].addToKernel(vars[v].getEnvelopeFirst(), this);
+        if (vars[v].getUB().getSize() == 1 && emptySetIndex.get() != -1) {
+            vars[v].force(vars[v].getUB().iterator().next(), this);
         }
     }
 
@@ -112,7 +112,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
         boolean none = true;
         boolean allInstantiated = true;
         for (int i = 0; i < vars.length; i++) {
-            if (vars[i].getEnvelopeSize() == 0) {
+            if (vars[i].getUB().getSize() == 0) {
                 if (!none) {
                     return ESat.FALSE;
                 }

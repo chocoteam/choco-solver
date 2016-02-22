@@ -70,7 +70,7 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		for(int v=values.getEnvelopeFirst();v!=SetVar.END;v=values.getEnvelopeNext()){
+		for(int v:values.getUB()){
 			int support = -1;
 			for(int i=0;i<X.length;i++){
 				if(X[i].contains(v)){
@@ -83,17 +83,17 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 				}
 			}
 			if(support == -1){
-				values.removeFromEnvelope(v, this);
-			}else if(support!=-2 && values.kernelContains(v)){
+				values.remove(v, this);
+			}else if(support!=-2 && values.getLB().contain(v)){
 				X[support].instantiateTo(v, this);
 			}
 		}
 		for(int i=0;i<X.length;i++){
 			if(X[i].isInstantiated()){
-				values.addToKernel(X[i].getValue(), this);
+				values.force(X[i].getValue(), this);
 			}else {
 				for (int v = X[i].getLB(); v <= X[i].getUB(); v = X[i].nextValue(v)) {
-					if (!values.envelopeContains(v)) {
+					if (!values.getUB().contain(v)) {
 						X[i].removeValue(v, this);
 					}
 				}
@@ -103,7 +103,7 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 
 	@Override
 	public ESat isEntailed() {
-		for(int v=values.getKernelFirst();v!=SetVar.END;v=values.getKernelNext()){
+		for(int v:values.getLB()){
 			int support = -1;
 			for(int i=0;i<X.length;i++){
 				if(X[i].contains(v)){
@@ -120,7 +120,7 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 			}
 		}
 		for(IntVar x:X){
-			if(x.isInstantiated() && !values.envelopeContains(x.getValue())){
+			if(x.isInstantiated() && !values.getUB().contain(x.getValue())){
 				return ESat.FALSE;
 			}
 		}

@@ -77,8 +77,8 @@ public class PropSymmetric extends Propagator<SetVar> {
         for (int i = 0; i < n; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> vars[element - offSet].addToKernel(currentSet + offSet, this);
-        elementRemoved = element -> vars[element - offSet].removeFromEnvelope(currentSet + offSet, this);
+        elementForced = element -> vars[element - offSet].force(currentSet + offSet, this);
+        elementRemoved = element -> vars[element - offSet].remove(currentSet + offSet, this);
     }
 
     //***********************************************************************************
@@ -88,13 +88,13 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext()) {
-                if (j < offSet || j >= n + offSet || !vars[j - offSet].envelopeContains(i + offSet)) {
-                    vars[i].removeFromEnvelope(j, this);
+            for (int j : vars[i].getUB()) {
+                if (j < offSet || j >= n + offSet || !vars[j - offSet].getUB().contain(i + offSet)) {
+                    vars[i].remove(j, this);
                 }
             }
-            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
-                vars[j - offSet].addToKernel(i + offSet, this);
+            for (int j : vars[i].getLB()) {
+                vars[j - offSet].force(i + offSet, this);
             }
         }
         for (int i = 0; i < n; i++) {
@@ -114,8 +114,8 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
-                if (!vars[j - offSet].envelopeContains(i + offSet)) {
+            for (int j : vars[i].getLB()) {
+                if (!vars[j - offSet].getUB().contain(i + offSet)) {
                     return ESat.FALSE;
                 }
             }

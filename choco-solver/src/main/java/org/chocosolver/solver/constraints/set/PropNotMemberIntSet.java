@@ -73,7 +73,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (iv.isInstantiated()) {
-            sv.removeFromEnvelope(iv.getValue(), this);
+            sv.remove(iv.getValue(), this);
 			setPassive();
         }
     }
@@ -81,7 +81,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     @Override
     public void propagate(int vidx, int evtmask) throws ContradictionException {
         assert iv.isInstantiated();
-        sv.removeFromEnvelope(iv.getValue(), this);
+        sv.remove(iv.getValue(), this);
 		setPassive();
     }
 
@@ -89,8 +89,8 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     public ESat isEntailed() {
         if (iv.isInstantiated()) {
             int v = iv.getValue();
-            if (sv.envelopeContains(v)) {
-                if (sv.kernelContains(v)) {
+            if (sv.getUB().contain(v)) {
+                if (sv.getLB().contain(v)) {
                     return ESat.FALSE;
                 } else {
                     return ESat.UNDEFINED;
@@ -100,7 +100,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
             }
         } else {
             for (int v = iv.getLB(); v <= iv.getUB(); v = iv.nextValue(v)) {
-                if (!sv.kernelContains(v)) {
+                if (!sv.getLB().contain(v)) {
                     return ESat.UNDEFINED;
                 }
             }

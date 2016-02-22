@@ -85,16 +85,16 @@ public class PropAllDiff extends Propagator<SetVar> {
     @Override
     public void propagate(int idx, int mask) throws ContradictionException {
         if (vars[idx].isInstantiated()) {
-            int s = vars[idx].getEnvelopeSize();
+            int s = vars[idx].getUB().getSize();
             for (int i = 0; i < n; i++) {
                 if (i != idx) {
-                    int sei = vars[i].getEnvelopeSize();
-                    int ski = vars[i].getKernelSize();
+                    int sei = vars[i].getUB().getSize();
+                    int ski = vars[i].getLB().getSize();
                     if (ski >= s - 1 && sei <= s + 1) {
                         int nbSameInKer = 0;
                         int diff = -1;
-                        for (int j = vars[idx].getKernelFirst(); j != SetVar.END; j = vars[idx].getKernelNext())
-                            if (vars[i].kernelContains(j)) {
+                        for (int j : vars[idx].getLB())
+                            if (vars[i].getLB().contain(j)) {
                                 nbSameInKer++;
                             } else {
                                 diff = j;
@@ -103,12 +103,12 @@ public class PropAllDiff extends Propagator<SetVar> {
                             if (sei == s) { // check diff
                                 contradiction(vars[i], "");
                             } else if (sei == s + 1 && ski < sei) { // force other (if same elements in ker)
-                                for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext())
-                                    vars[i].addToKernel(j, this);
+                                for (int j: vars[i].getUB())
+                                    vars[i].force(j, this);
                             }
                         } else if (sei == s && nbSameInKer == s - 1) { // remove other (if same elements in ker)
-                            if (vars[i].envelopeContains(diff)) {
-                                vars[i].removeFromEnvelope(diff, this);
+                            if (vars[i].getUB().contain(diff)) {
+                                vars[i].remove(diff, this);
                             }
                         }
                     }
@@ -133,11 +133,11 @@ public class PropAllDiff extends Propagator<SetVar> {
     }
 
     private boolean same(int i, int i2) {
-        if (vars[i].getEnvelopeSize() < vars[i2].getKernelSize()) return false;
-        if (vars[i2].getEnvelopeSize() < vars[i].getKernelSize()) return false;
+        if (vars[i].getUB().getSize() < vars[i2].getLB().getSize()) return false;
+        if (vars[i2].getUB().getSize() < vars[i].getLB().getSize()) return false;
         if (vars[i].isInstantiated() && vars[i2].isInstantiated()) {
-            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
-                if (!vars[i2].envelopeContains(j)) {
+            for (int j : vars[i].getLB()) {
+                if (!vars[i2].getUB().contain(j)) {
                     return false;
                 }
             }

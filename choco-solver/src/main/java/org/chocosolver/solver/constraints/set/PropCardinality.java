@@ -88,21 +88,21 @@ public class PropCardinality extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int k = set.getKernelSize();
+        int k = set.getLB().getSize();
         card.updateLowerBound(k, this);
-        int e = set.getEnvelopeSize();
+        int e = set.getUB().getSize();
         card.updateUpperBound(e, this);
         if (card.isInstantiated()) {
             int c = card.getValue();
             if (c == k) {
-                for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
-                    if (!set.kernelContains(j)) {
-                        set.removeFromEnvelope(j, this);
+                for (int j : set.getUB()) {
+                    if (!set.getLB().contain(j)) {
+                        set.remove(j, this);
                     }
                 }
             } else if (c == e) {
-                for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
-                    set.addToKernel(j, this);
+                for (int j : set.getUB()) {
+                    set.force(j, this);
                 }
             }
         }
@@ -110,8 +110,8 @@ public class PropCardinality extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        int k = set.getKernelSize();
-        int e = set.getEnvelopeSize();
+        int k = set.getLB().getSize();
+        int e = set.getUB().getSize();
         if (k > card.getUB() || e < card.getLB()) {
             return ESat.FALSE;
         }

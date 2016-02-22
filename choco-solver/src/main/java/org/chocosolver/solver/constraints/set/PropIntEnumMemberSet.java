@@ -100,19 +100,19 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), this);
+            set.force(iv.getValue(), this);
             setPassive();
             return;
         }
         int ub = iv.getUB();
         for (int i = iv.getLB(); i <= ub; i = iv.nextValue(i)) {
-            if (!set.envelopeContains(i)) {
+            if (!set.getUB().contain(i)) {
                 iv.removeValue(i, this);
             }
         }
         // now iv \subseteq set
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), this);
+            set.force(iv.getValue(), this);
             setPassive();
         }
         sdm.unfreeze();
@@ -126,7 +126,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
             sdm.unfreeze();
         }
         if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), this);
+            set.force(iv.getValue(), this);
             setPassive();
         }
     }
@@ -134,10 +134,10 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         if (iv.isInstantiated()) {
-            if (!set.envelopeContains(iv.getValue())) {
+            if (!set.getUB().contain(iv.getValue())) {
                 return ESat.FALSE;
             } else {
-                if (set.kernelContains(iv.getValue())) {
+                if (set.getLB().contain(iv.getValue())) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;
@@ -148,7 +148,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
             int maxVal = iv.getUB();
             boolean all = true;
             for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
-                if (!set.kernelContains(i)) {
+                if (!set.getLB().contain(i)) {
                     all = false;
                     break;
                 }
@@ -157,7 +157,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
                 return ESat.TRUE;
             }
             for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
-                if (set.envelopeContains(i)) {
+                if (set.getUB().contain(i)) {
                     return ESat.UNDEFINED;
                 }
             }

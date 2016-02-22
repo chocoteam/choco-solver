@@ -98,7 +98,7 @@ public class PropIntChannel extends Propagator<Variable> {
         // procedures
         elementForced = element -> ints[element - offSet2].instantiateTo(idx, this);
         elementRemoved = element -> ints[element - offSet2].removeValue(idx, this);
-        valRem = element -> sets[element - offSet1].removeFromEnvelope(idx, this);
+        valRem = element -> sets[element - offSet1].remove(idx, this);
     }
 
     //***********************************************************************************
@@ -113,21 +113,21 @@ public class PropIntChannel extends Propagator<Variable> {
         for (int i = 0; i < nInts; i++) {
             int ub = ints[i].getUB();
             for (int j = ints[i].getLB(); j <= ub; j = ints[i].nextValue(j)) {
-                if (!sets[j - offSet1].envelopeContains(i + offSet2)) {
+                if (!sets[j - offSet1].getUB().contain(i + offSet2)) {
                     ints[i].removeValue(j, this);
                 }
             }
             if (ints[i].isInstantiated()) {
-                sets[ints[i].getValue() - offSet1].addToKernel(i + offSet2, this);
+                sets[ints[i].getValue() - offSet1].force(i + offSet2, this);
             }
         }
         for (int i = 0; i < nSets; i++) {
-            for (int j = sets[i].getEnvelopeFirst(); j != SetVar.END; j = sets[i].getEnvelopeNext()) {
+            for (int j : sets[i].getUB()) {
                 if (j < offSet2 || j > nInts - 1 + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
-                    sets[i].removeFromEnvelope(j, this);
+                    sets[i].remove(j, this);
                 }
             }
-            for (int j = sets[i].getKernelFirst(); j != SetVar.END; j = sets[i].getKernelNext()) {
+            for (int j : sets[i].getLB()) {
                 ints[j - offSet2].instantiateTo(i + offSet1, this);
             }
         }
@@ -151,7 +151,7 @@ public class PropIntChannel extends Propagator<Variable> {
         } else {
             idx -= nSets;
             if (ints[idx].isInstantiated()) {
-                sets[ints[idx].getValue() - offSet1].addToKernel(idx + offSet2, this);
+                sets[ints[idx].getValue() - offSet1].force(idx + offSet2, this);
             }
             idx += offSet2;
             idm[idxVarInProp - nSets].freeze();
@@ -165,13 +165,13 @@ public class PropIntChannel extends Propagator<Variable> {
         for (int i = 0; i < nInts; i++) {
             if (ints[i].isInstantiated()) {
                 int val = ints[i].getValue();
-                if (val < offSet1 || val >= nSets + offSet1 || !sets[val - offSet1].envelopeContains(i + offSet2)) {
+                if (val < offSet1 || val >= nSets + offSet1 || !sets[val - offSet1].getUB().contain(i + offSet2)) {
                     return ESat.FALSE;
                 }
             }
         }
         for (int i = 0; i < nSets; i++) {
-            for (int j = sets[i].getKernelFirst(); j != SetVar.END; j = sets[i].getKernelNext()) {
+            for (int j : sets[i].getLB()) {
                 if (j < offSet2 || j >= nInts + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     return ESat.FALSE;
                 }

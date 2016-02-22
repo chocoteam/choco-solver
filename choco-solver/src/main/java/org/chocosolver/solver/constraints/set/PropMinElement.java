@@ -113,29 +113,29 @@ public class PropMinElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
+        for (int j : set.getLB()) {
             min.updateUpperBound(get(j), this);
         }
         int minVal = Integer.MAX_VALUE;
         int lb = min.getLB();
-        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
+        for (int j : set.getUB()) {
             int k = get(j);
             if (k < lb) {
-                set.removeFromEnvelope(j, this);
+                set.remove(j, this);
             } else {
                 if (minVal > k) {
                     minVal = k;
                 }
             }
         }
-        if (notEmpty || set.getKernelSize() > 0) {
+        if (notEmpty || set.getLB().getSize() > 0) {
             min.updateLowerBound(minVal, this);
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if (set.getEnvelopeSize() == 0) {
+        if (set.getUB().getSize() == 0) {
             if (notEmpty) {
                 return ESat.FALSE;
             } else {
@@ -144,18 +144,18 @@ public class PropMinElement extends Propagator<Variable> {
         }
         int lb = min.getLB();
         int ub = min.getUB();
-        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
+        for (int j : set.getLB()) {
             if (get(j) < lb) {
                 return ESat.FALSE;
             }
         }
         int minVal = Integer.MAX_VALUE;
-        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
+        for (int j : set.getUB()) {
             if (minVal > get(j)) {
                 minVal = get(j);
             }
         }
-        if (minVal > ub && (notEmpty || set.getKernelSize() > 0)) {
+        if (minVal > ub && (notEmpty || set.getLB().getSize() > 0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {

@@ -45,8 +45,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
-
-import static org.chocosolver.solver.variables.SetVar.END;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * Propagator for Member constraint: iv is in set
@@ -61,7 +60,6 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
 
     private IntVar iv;
     private SetVar set;
-    private int watchLit1, watchLit2;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -75,12 +73,10 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
      * @param intVar an integer variable
      */
     public PropIntBoundedMemberSet(SetVar setVar, IntVar intVar) {
-        super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY, true);
+        super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY, false);
         assert !intVar.hasEnumeratedDomain();
         this.set = (SetVar) vars[0];
         this.iv = (IntVar) vars[1];
-        watchLit1 = iv.getLB();
-        watchLit2 = iv.nextValue(watchLit1);
     }
 
     //***********************************************************************************
@@ -98,105 +94,41 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), this);
-            setPassive();
-            return;
-        }
-        int maxVal = set.getEnvelopeFirst();
-        int minVal = maxVal;
-        for (int j = maxVal; j != END; j = set.getEnvelopeNext()) {
-            maxVal = j;
-        }
-        iv.updateBounds(minVal, maxVal, this);
-        minVal = iv.getLB();
-        maxVal = iv.getUB();
-        while (minVal <= maxVal && !set.envelopeContains(minVal)) {
-            iv.updateLowerBound(++minVal, this);
-        }
-        while (minVal <= maxVal && !set.envelopeContains(maxVal)) {
-            iv.updateUpperBound(--maxVal, this);
-        }
-        if (iv.isInstantiated()) {
-            set.addToKernel(iv.getValue(), this);
-            setPassive();
-            return;
-        }
-        // search for watch literals
-        int i = set.getEnvelopeFirst(), wl = 0, cnt = 0;
-        while (i != END && wl < 2) {
-            if (!iv.contains(i)) {
-                cnt++;
-            } else {
-                watchLit2 = watchLit1;
-                watchLit1 = i;
-                wl++;
-            }
-            i = set.getEnvelopeNext();
-        }
-        if (cnt == set.getEnvelopeSize()) {
-            this.contradiction(iv, "Inconsistent");
-        } else if (cnt == set.getEnvelopeSize() - 1) {
-            setWatchLiteral(watchLit1);
-        }
-    }
-
-    @Override
-    public void propagate(int i, int mask) throws ContradictionException {
-        if (i == 1) {
-            if (iv.isInstantiated()) {
-                set.addToKernel(iv.getValue(), this);
-                setPassive();
-            } else if (!iv.contains(watchLit1)) {
-                setWatchLiteral(watchLit2);
-            } else if (!iv.contains(watchLit2)) {
-                setWatchLiteral(watchLit1);
-            }
-        } else {
-            if (!set.envelopeContains(watchLit1)) {
-                setWatchLiteral(watchLit2);
-            } else if (!set.envelopeContains(watchLit2)) {
-                setWatchLiteral(watchLit1);
-            }
-        }
-    }
-
-    /**
-     * Search a watchLiteral. A watchLiteral (or wL) is pointing out one variable not yet instantiated.
-     * If every variables are instantiated, get out.
-     * Otherwise, set the new not yet instantiated wL.
-     *
-     * @param otherWL previous known wL
-     * @throws ContradictionException if a contradiction occurs
-     */
-    private void setWatchLiteral(int otherWL) throws ContradictionException {
-        int i = set.getEnvelopeFirst();
-        int cnt = 0;
-        while (i != SetVar.END) {
-            if (!iv.contains(i)) {
-                cnt++;
-            } else if (i != otherWL) {
-                watchLit1 = i;
-                watchLit2 = otherWL;
-                return;
-            }
-            i = set.getEnvelopeNext();
-        }
-        if (cnt == set.getEnvelopeSize()) {
-            this.contradiction(iv, "Inconsistent");
-        }
-        set.addToKernel(otherWL, this);
-        iv.instantiateTo(otherWL, this);
-        setPassive();
+		if (iv.isInstantiated()) {
+			set.force(iv.getValue(), this);
+			setPassive();
+			return;
+		}else {
+			ISet ub = set.getUB();
+			if (ub.getSize() == 0) {
+				fails();
+			} else {
+				if(ub.contain(iv.getLB()) && ub.contain(iv.getUB())){
+					return;
+				}
+				int max = ub.iterator().next();
+				int min = max;
+				for (int j : ub) {
+					max = Math.max(max, j);
+					min = Math.min(min, j);
+				}
+				iv.updateBounds(min, max, this);
+				if (iv.isInstantiated()) {
+					set.force(iv.getValue(), this);
+					setPassive();
+					return;
+				}
+			}
+		}
     }
 
     @Override
     public ESat isEntailed() {
         if (iv.isInstantiated()) {
-            if (!set.envelopeContains(iv.getValue())) {
+            if (!set.getUB().contain(iv.getValue())) {
                 return ESat.FALSE;
             } else {
-                if (set.kernelContains(iv.getValue())) {
+                if (set.getLB().contain(iv.getValue())) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;
@@ -207,7 +139,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
             int ub = iv.getUB();
             boolean all = true;
             for (int i = lb; i <= ub; i++) {
-                if (!set.kernelContains(i)) {
+                if (!set.getLB().contain(i)) {
                     all = false;
                     break;
                 }
@@ -216,7 +148,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
                 return ESat.TRUE;
             }
             for (int i = lb; i <= ub; i++) {
-                if (set.envelopeContains(i)) {
+                if (set.getUB().contain(i)) {
                     return ESat.UNDEFINED;
                 }
             }

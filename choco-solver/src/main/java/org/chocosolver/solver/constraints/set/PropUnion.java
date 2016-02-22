@@ -78,7 +78,7 @@ public class PropUnion extends Propagator<SetVar> {
         unionForced = element -> {
             int mate = -1;
             for (int i = 0; i < k && mate != -2; i++) {
-                if (vars[i].envelopeContains(element)) {
+                if (vars[i].getUB().contain(element)) {
                     if (mate == -1) {
                         mate = i;
                     } else {
@@ -89,20 +89,20 @@ public class PropUnion extends Propagator<SetVar> {
             if (mate == -1) {
                 contradiction(vars[k], "");
             } else if (mate != -2) {
-                vars[mate].addToKernel(element, this);
+                vars[mate].force(element, this);
             }
         };
         unionRemoved = element -> {
             for (int i = 0; i < k; i++) {
-                vars[i].removeFromEnvelope(element, this);
+                vars[i].remove(element, this);
             }
         };
-        setForced = element -> vars[k].addToKernel(element, this);
+        setForced = element -> vars[k].force(element, this);
         setRemoved = element -> {
-            if (vars[k].envelopeContains(element)) {
+            if (vars[k].getUB().contain(element)) {
                 int mate = -1;
                 for (int i = 0; i < k && mate != -2; i++) {
-                    if (vars[i].envelopeContains(element)) {
+                    if (vars[i].getUB().contain(element)) {
                         if (mate == -1) {
                             mate = i;
                         } else {
@@ -111,9 +111,9 @@ public class PropUnion extends Propagator<SetVar> {
                     }
                 }
                 if (mate == -1) {
-                    vars[k].removeFromEnvelope(element, this);
-                } else if (mate != -2 && vars[k].kernelContains(element)) {
-                    vars[mate].addToKernel(element, this);
+                    vars[k].remove(element, this);
+                } else if (mate != -2 && vars[k].getLB().contain(element)) {
+                    vars[mate].force(element, this);
                 }
             }
         };
@@ -128,17 +128,17 @@ public class PropUnion extends Propagator<SetVar> {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             SetVar union = vars[k];
             for (int i = 0; i < k; i++) {
-                for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext())
-                    union.addToKernel(j, this);
-                for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext())
-                    if (!union.envelopeContains(j))
-                        vars[i].removeFromEnvelope(j, this);
+                for (int j : vars[i].getLB())
+                    union.force(j, this);
+                for (int j : vars[i].getUB())
+                    if (!union.getUB().contain(j))
+                        vars[i].remove(j, this);
             }
-            for (int j = union.getEnvelopeFirst(); j != SetVar.END; j = union.getEnvelopeNext()) {
-                if (union.kernelContains(j)) {
+            for (int j : union.getUB()) {
+                if (union.getLB().contain(j)) {
                     int mate = -1;
                     for (int i = 0; i < k && mate != -2; i++) {
-                        if (vars[i].envelopeContains(j)) {
+                        if (vars[i].getUB().contain(j)) {
                             if (mate == -1) {
                                 mate = i;
                             } else {
@@ -149,17 +149,17 @@ public class PropUnion extends Propagator<SetVar> {
                     if (mate == -1) {
                         contradiction(vars[k], "");
                     } else if (mate != -2) {
-                        vars[mate].addToKernel(j, this);
+                        vars[mate].force(j, this);
                     }
                 } else {
                     int mate = -1;
                     for (int i = 0; i < k; i++) {
-                        if (vars[i].envelopeContains(j)) {
+                        if (vars[i].getUB().contain(j)) {
                             mate = i;
                             break;
                         }
                     }
-                    if (mate == -1) union.removeFromEnvelope(j, this);
+                    if (mate == -1) union.remove(j, this);
                 }
             }
             // ------------------
@@ -184,14 +184,14 @@ public class PropUnion extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < k; i++) {
-            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext())
-                if (!vars[k].envelopeContains(j))
+            for (int j : vars[i].getLB())
+                if (!vars[k].getUB().contain(j))
                     return ESat.FALSE;
         }
-        for (int j = vars[k].getKernelFirst(); j != SetVar.END; j = vars[k].getKernelNext()) {
+        for (int j : vars[k].getLB()) {
             int mate = -1;
             for (int i = 0; i < k; i++)
-                if (vars[i].envelopeContains(j)) {
+                if (vars[i].getUB().contain(j)) {
                     mate = i;
                     break;
                 }

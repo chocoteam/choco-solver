@@ -56,23 +56,23 @@ public class PropNotEmpty extends Propagator<SetVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int e = vars[0].getEnvelopeSize();
+		int e = vars[0].getUB().getSize();
 		if(e==0){
 			contradiction(vars[0],"");
 		}else if(e==1){
-			vars[0].addToKernel(vars[0].getEnvelopeFirst(), this);
+			vars[0].force(vars[0].getUB().iterator().next(), this);
 		}
-		if(vars[0].getKernelSize()>0){
+		if(vars[0].getLB().getSize()>0){
 			setPassive();
 		}
 	}
 
 	@Override
 	public ESat isEntailed() {
-		if(vars[0].getEnvelopeSize()==0){
+		if(vars[0].getUB().getSize()==0){
 			return ESat.FALSE;
 		}
-		if(vars[0].getKernelSize()>0){
+		if(vars[0].getLB().getSize()>0){
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;

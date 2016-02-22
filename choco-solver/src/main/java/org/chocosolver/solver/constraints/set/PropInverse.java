@@ -87,8 +87,8 @@ public class PropInverse extends Propagator<SetVar> {
         for (int i = 0; i < n + n2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> toFilter[element - offSet].addToKernel(idx, this);
-        elementRemoved = element -> toFilter[element - offSet].removeFromEnvelope(idx, this);
+        elementForced = element -> toFilter[element - offSet].force(idx, this);
+        elementRemoved = element -> toFilter[element - offSet].remove(idx, this);
     }
 
     //***********************************************************************************
@@ -98,23 +98,23 @@ public class PropInverse extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
-                if (j < offSet1 || j >= n2 + offSet1 || !invsets[j - offSet2].envelopeContains(i + offSet1)) {
-                    sets[i].removeFromEnvelope(j, this);
+            for (int j : sets[i].getUB()) {
+                if (j < offSet1 || j >= n2 + offSet1 || !invsets[j - offSet2].getUB().contain(i + offSet1)) {
+                    sets[i].remove(j, this);
                 }
             }
-            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
-                invsets[j - offSet2].addToKernel(i + offSet1, this);
+            for (int j:sets[i].getLB()) {
+                invsets[j - offSet2].force(i + offSet1, this);
             }
         }
         for (int i = 0; i < n2; i++) {
-            for (int j=invsets[i].getEnvelopeFirst(); j!=SetVar.END; j=invsets[i].getEnvelopeNext()) {
-                if (j < offSet2 || j >= n + offSet2 || !sets[j - offSet1].envelopeContains(i + offSet2)) {
-                    invsets[i].removeFromEnvelope(j, this);
+            for (int j:invsets[i].getUB()) {
+                if (j < offSet2 || j >= n + offSet2 || !sets[j - offSet1].getUB().contain(i + offSet2)) {
+                    invsets[i].remove(j, this);
                 }
             }
-            for (int j=invsets[i].getKernelFirst(); j!=SetVar.END; j=invsets[i].getKernelNext()) {
-                sets[j - offSet1].addToKernel(i + offSet2, this);
+            for (int j:invsets[i].getLB()) {
+                sets[j - offSet1].force(i + offSet2, this);
             }
         }
         for (int i = 0; i < n + n2; i++) {
@@ -144,15 +144,15 @@ public class PropInverse extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
-                if (!invsets[j - offSet2].envelopeContains(i + offSet1)) {
+            for (int j:sets[i].getLB()) {
+                if (!invsets[j - offSet2].getUB().contain(i + offSet1)) {
                     return ESat.FALSE;
                 }
             }
         }
         for (int i = 0; i < n2; i++) {
-            for (int j=invsets[i].getKernelFirst(); j!=SetVar.END; j=invsets[i].getKernelNext()) {
-                if (!sets[j - offSet1].envelopeContains(i + offSet2)) {
+            for (int j:invsets[i].getLB()) {
+                if (!sets[j - offSet1].getUB().contain(i + offSet2)) {
                     return ESat.FALSE;
                 }
             }

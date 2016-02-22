@@ -81,12 +81,12 @@ public class PropAllEqual extends Propagator<SetVar> {
         }
         elementForced = element -> {
             for (int i = 0; i < n; i++) {
-                vars[i].addToKernel(element, this);
+                vars[i].force(element, this);
             }
         };
         elementRemoved = element -> {
             for (int i = 0; i < n; i++) {
-                vars[i].removeFromEnvelope(element, this);
+                vars[i].remove(element, this);
             }
         };
     }
@@ -99,23 +99,23 @@ public class PropAllEqual extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
 			TIntArrayList toRemove = new TIntArrayList();
-			for (int j = vars[0].getEnvelopeFirst(); j != SetVar.END; j = vars[0].getEnvelopeNext()) {
+			for (int j : vars[0].getUB()) {
 				for (int i = 1; i < n; i++) {
-					if(!vars[i].envelopeContains(j)){
+					if(!vars[i].getUB().contain(j)){
 						toRemove.add(j);
 						break;
 					}
 				}
 			}
             for (int i = 0; i < n; i++) {
-				for (int j = vars[i].getEnvelopeFirst(); j != SetVar.END; j = vars[i].getEnvelopeNext()) {
-					if((i>0 && !vars[0].envelopeContains(j)) || toRemove.contains(j)){
-						vars[i].removeFromEnvelope(j, this);
+				for (int j : vars[i].getUB()) {
+					if((i>0 && !vars[0].getUB().contain(j)) || toRemove.contains(j)){
+						vars[i].remove(j, this);
 					}
 				}
-                for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
+                for (int j : vars[i].getLB()) {
                     for (int i2 = 0; i2 < n; i2++) {
-                        vars[i2].addToKernel(j, this);
+                        vars[i2].force(j, this);
                     }
                 }
             }
@@ -140,9 +140,9 @@ public class PropAllEqual extends Propagator<SetVar> {
             if (!vars[i].isInstantiated()) {
                 allInstantiated = false;
             }
-            for (int j = vars[i].getKernelFirst(); j != SetVar.END; j = vars[i].getKernelNext()) {
+            for (int j : vars[i].getLB()) {
                 for (int i2 = 0; i2 < n; i2++) {
-                    if (!vars[i2].envelopeContains(j)) {
+                    if (!vars[i2].getUB().contain(j)) {
                         return ESat.FALSE;
                     }
                 }

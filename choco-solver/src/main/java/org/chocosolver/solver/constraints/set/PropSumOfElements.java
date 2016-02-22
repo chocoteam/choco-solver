@@ -113,9 +113,9 @@ public class PropSumOfElements extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (weights != null) {
-            for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
+            for (int j : set.getUB()) {
                 if (j < offSet || j >= weights.length + offSet) {
-                    set.removeFromEnvelope(j, this);
+                    set.remove(j, this);
                 }
             }
         }
@@ -126,27 +126,27 @@ public class PropSumOfElements extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         int sK = 0;
         int sE = 0;
-        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
+        for (int j : set.getLB()) {
             sK += get(j);
         }
-        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
+        for (int j : set.getUB()) {
             sE += get(j);
         }
-        if (notEmpty || set.getKernelSize() > 0) {
+        if (notEmpty || set.getLB().getSize() > 0) {
             sum.updateBounds(sK, sE, this);
         }
         boolean again = false;
         // filter set
         int lb = sum.getLB();
         int ub = sum.getUB();
-        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
-            if (!set.kernelContains(j)) {
+        for (int j : set.getUB()) {
+            if (!set.getLB().contain(j)) {
                 if (sE - get(j) < lb) {
-                    if (set.addToKernel(j, this)) {
+                    if (set.force(j, this)) {
                         again = true;
                     }
                 } else if (sK + get(j) > ub) {
-                    if (set.removeFromEnvelope(j, this)) {
+                    if (set.remove(j, this)) {
                         again = true;
                     }
                 }
@@ -159,7 +159,7 @@ public class PropSumOfElements extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        if (set.getEnvelopeSize() == 0) {
+        if (set.getUB().getSize() == 0) {
             if (notEmpty) {
                 return ESat.FALSE;
             } else {
@@ -168,16 +168,16 @@ public class PropSumOfElements extends Propagator<Variable> {
         }
         int sK = 0;
         int sE = 0;
-        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
+        for (int j : set.getLB()) {
             sK += get(j);
         }
-        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
+        for (int j : set.getUB()) {
             sE += get(j);
         }
         // filter set
         int lb = sum.getLB();
         int ub = sum.getUB();
-        if ((lb > sE || ub < sK) && (notEmpty || set.getKernelSize() > 0)) {
+        if ((lb > sE || ub < sK) && (notEmpty || set.getLB().getSize() > 0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {

@@ -71,14 +71,14 @@ public class PropIntersection extends Propagator<SetVar> {
         // PROCEDURES
         intersectionForced = element -> {
             for (int i = 0; i < k; i++) {
-                vars[i].addToKernel(element, this);
+                vars[i].force(element, this);
             }
         };
         intersectionRemoved = element -> {
             int mate = -1;
             for (int i = 0; i < k; i++)
-                if (vars[i].envelopeContains(element)) {
-                    if (!vars[i].kernelContains(element)) {
+                if (vars[i].getUB().contain(element)) {
+                    if (!vars[i].getLB().contain(element)) {
                         if (mate == -1) {
                             mate = i;
                         } else {
@@ -93,25 +93,25 @@ public class PropIntersection extends Propagator<SetVar> {
             if (mate == -1) {
                 contradiction(vars[k], "");
             } else if (mate != -2) {
-                vars[mate].removeFromEnvelope(element, this);
+                vars[mate].remove(element, this);
             }
         };
         setForced = element -> {
             boolean allKer = true;
             for (int i = 0; i < k; i++) {
-                if (!vars[i].envelopeContains(element)) {
-                    vars[k].removeFromEnvelope(element, this);
+                if (!vars[i].getUB().contain(element)) {
+                    vars[k].remove(element, this);
                     allKer = false;
                     break;
-                } else if (!vars[i].kernelContains(element)) {
+                } else if (!vars[i].getLB().contain(element)) {
                     allKer = false;
                 }
             }
             if (allKer) {
-                vars[k].addToKernel(element, this);
+                vars[k].force(element, this);
             }
         };
-        setRemoved = element -> vars[k].removeFromEnvelope(element, this);
+        setRemoved = element -> vars[k].remove(element, this);
     }
 
     //***********************************************************************************
@@ -122,27 +122,27 @@ public class PropIntersection extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         SetVar intersection = vars[k];
         if (PropagatorEventType.isFullPropagation(evtmask)) {
-            for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
+            for (int j : vars[0].getLB()) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
-                    if (!vars[i].kernelContains(j)) {
+                    if (!vars[i].getLB().contain(j)) {
                         all = false;
                         break;
                     }
                 }
                 if (all) {
-                    intersection.addToKernel(j, this);
+                    intersection.force(j, this);
                 }
             }
-            for (int j = intersection.getEnvelopeFirst(); j != SetVar.END; j = intersection.getEnvelopeNext()) {
-                if (intersection.kernelContains(j)) {
+            for (int j : intersection.getUB()) {
+                if (intersection.getLB().contain(j)) {
                     for (int i = 0; i < k; i++) {
-                        vars[i].addToKernel(j, this);
+                        vars[i].force(j, this);
                     }
                 } else {
                     for (int i = 0; i < k; i++)
-                        if (!vars[i].envelopeContains(j)) {
-                            intersection.removeFromEnvelope(j, this);
+                        if (!vars[i].getUB().contain(j)) {
+                            intersection.remove(j, this);
                             break;
                         }
                 }
@@ -168,15 +168,15 @@ public class PropIntersection extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        for (int j = vars[k].getKernelFirst(); j != SetVar.END; j = vars[k].getKernelNext())
+        for (int j : vars[k].getLB())
             for (int i = 0; i < k; i++)
-                if (!vars[i].envelopeContains(j))
+                if (!vars[i].getUB().contain(j))
                     return ESat.FALSE;
-        for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
-            if (!vars[k].envelopeContains(j)) {
+        for (int j : vars[0].getLB()) {
+            if (!vars[k].getUB().contain(j)) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
-                    if (!vars[i].kernelContains(j)) {
+                    if (!vars[i].getLB().contain(j)) {
                         all = false;
                         break;
                     }

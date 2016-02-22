@@ -101,20 +101,20 @@ public class PropBoolChannel extends Propagator<Variable> {
         for (int i = 0; i < n; i++) {
             if (bools[i].isInstantiated()) {
                 if (bools[i].getValue() == 0) {
-                    set.removeFromEnvelope(i + offSet, this);
+                    set.remove(i + offSet, this);
                 } else {
-                    set.addToKernel(i + offSet, this);
+                    set.force(i + offSet, this);
                 }
-            } else if (!set.envelopeContains(i + offSet)) {
+            } else if (!set.getUB().contain(i + offSet)) {
                 bools[i].setToFalse(this);
             }
         }
-        for (int j = set.getEnvelopeFirst(); j != SetVar.END; j = set.getEnvelopeNext()) {
+        for (int j : set.getUB()) {
             if (j < offSet || j >= n + offSet) {
-                set.removeFromEnvelope(j, this);
+                set.remove(j, this);
             }
         }
-        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
+        for (int j : set.getLB()) {
             bools[j - offSet].setToTrue(this);
         }
         sdm.unfreeze();
@@ -124,9 +124,9 @@ public class PropBoolChannel extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         if (i < n) {
             if (bools[i].getValue() == 0) {
-                set.removeFromEnvelope(i + offSet, this);
+                set.remove(i + offSet, this);
             } else {
-                set.addToKernel(i + offSet, this);
+                set.force(i + offSet, this);
             }
         } else {
             sdm.freeze();
@@ -138,7 +138,7 @@ public class PropBoolChannel extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        for (int j = set.getKernelFirst(); j != SetVar.END; j = set.getKernelNext()) {
+        for (int j : set.getLB()) {
             int i = j - offSet;
             if (i < 0 || i >= bools.length || bools[i].isInstantiatedTo(0)) {
                 return ESat.FALSE;
@@ -146,7 +146,7 @@ public class PropBoolChannel extends Propagator<Variable> {
         }
         for (int i = 0; i < n; i++) {
             if (bools[i].isInstantiatedTo(1)) {
-                if (!set.envelopeContains(i + offSet)) {
+                if (!set.getUB().contain(i + offSet)) {
                     return ESat.FALSE;
                 }
             }

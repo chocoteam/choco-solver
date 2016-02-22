@@ -76,8 +76,8 @@ public class PropSubsetEq extends Propagator<SetVar> {
         for (int i = 0; i < 2; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        elementForced = element -> vars[1].addToKernel(element, this);
-        elementRemoved = element -> vars[0].removeFromEnvelope(element, this);
+        elementForced = element -> vars[1].force(element, this);
+        elementRemoved = element -> vars[0].remove(element, this);
     }
 
     //***********************************************************************************
@@ -94,12 +94,12 @@ public class PropSubsetEq extends Propagator<SetVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
-            vars[1].addToKernel(j, this);
+        for (int j : vars[0].getLB()) {
+            vars[1].force(j, this);
         }
-        for (int j = vars[0].getEnvelopeFirst(); j != SetVar.END; j = vars[0].getEnvelopeNext()) {
-            if (!vars[1].envelopeContains(j))
-                vars[0].removeFromEnvelope(j, this);
+        for (int j : vars[0].getUB()) {
+            if (!vars[1].getUB().contain(j))
+                vars[0].remove(j, this);
         }
         sdm[0].unfreeze();
         sdm[1].unfreeze();
@@ -117,13 +117,13 @@ public class PropSubsetEq extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        for (int j = vars[0].getKernelFirst(); j != SetVar.END; j = vars[0].getKernelNext()) {
-            if (!vars[1].envelopeContains(j)) {
+        for (int j : vars[0].getLB()) {
+            if (!vars[1].getUB().contain(j)) {
                 return ESat.FALSE;
             }
         }
-        for (int j = vars[0].getEnvelopeFirst(); j != SetVar.END; j = vars[0].getEnvelopeNext()) {
-            if (!vars[1].kernelContains(j)) {
+        for (int j : vars[0].getUB()) {
+            if (!vars[1].getLB().contain(j)) {
                 return ESat.UNDEFINED;
             }
         }
