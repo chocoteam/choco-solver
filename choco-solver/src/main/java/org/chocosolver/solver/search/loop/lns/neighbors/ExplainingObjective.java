@@ -34,7 +34,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -126,7 +126,7 @@ public class ExplainingObjective extends ExplainingCut{
 
     @Override
     public void init() {
-        Resolver r = mModel.getResolver();
+        Solver r = mModel.getSolver();
         om = r.getObjectiveManager();
         objective = om.getObjective();
         LB = objective.getLB();

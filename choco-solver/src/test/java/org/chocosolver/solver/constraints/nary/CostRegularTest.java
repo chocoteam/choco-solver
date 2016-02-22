@@ -84,10 +84,10 @@ public class CostRegularTest {
             costs[i][1][1] = 1;
         }
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9280);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9280);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -125,10 +125,10 @@ public class CostRegularTest {
         auto.addCounter(c);
 
         model.costRegular(vars, cost, auto).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9280);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9280);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -174,10 +174,10 @@ public class CostRegularTest {
         }
 
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 229376);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 229376);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -226,10 +226,10 @@ public class CostRegularTest {
         CostAutomaton cauto = new CostAutomaton(auto, c);
 
         model.costRegular(vars, cost, cauto).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 229376);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 229376);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -266,10 +266,10 @@ public class CostRegularTest {
         }
 
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 67584);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 67584);
 //        assertEquals(124927,s.getNodeCount());
 
     }
@@ -309,10 +309,10 @@ public class CostRegularTest {
         auto.addCounter(new CounterState(costs, 10, 10));
 
         model.costRegular(vars, cost, auto).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 67584);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 67584);
 
 //        assertEquals(124927, s.getNodeCount());
     }
@@ -348,10 +348,10 @@ public class CostRegularTest {
         }
 
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 149456);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 149456);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -388,10 +388,10 @@ public class CostRegularTest {
         auto.addCounter(new CounterState(costs, 4, 6));
 
         model.costRegular(vars, cost, auto).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 149456);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 149456);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -418,9 +418,9 @@ public class CostRegularTest {
         IntVar cost = model.intVar("z", n / 2, n / 2 + 1, true);
 
         model.costRegular(vars, cost, makeSingleResource(auto, c2, cost.getLB(), cost.getUB())).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 64008);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 64008);
     }
 }

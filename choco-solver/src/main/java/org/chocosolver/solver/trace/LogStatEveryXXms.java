@@ -68,8 +68,8 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
                     sleep(duration);
                     //noinspection InfiniteLoopStatement
                     do {
-                        model.getResolver().getMeasures().updateTime();
-                        Chatterbox.out.println(String.format(">> %s", model.getResolver().getMeasures().toOneShortLineString()));
+                        model.getSolver().getMeasures().updateTime();
+                        Chatterbox.out.println(String.format(">> %s", model.getSolver().getMeasures().toOneShortLineString()));
                         sleep(duration);
                     } while (alive);
                 } catch (InterruptedException ignored) {

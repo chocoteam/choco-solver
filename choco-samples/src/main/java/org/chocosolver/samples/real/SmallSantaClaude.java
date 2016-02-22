@@ -92,12 +92,12 @@ public class SmallSantaClaude {
         model.realIbexGenericConstraint("({0}+{1}+{2})/3={3};(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}", allRV).post();
 
         // set search strategy (ABS)
-        model.getResolver().set(minDomLBSearch(kid_gift));
+        model.getSolver().set(minDomLBSearch(kid_gift));
         // displays resolution statistics
         showStatistics(model);
         showSolutions(model);
         // print each solution
-        model.getResolver().plugMonitor((IMonitorSolution) () -> {
+        model.getSolver().plugMonitor((IMonitorSolution) () -> {
             out.println("*******************");
             for (int i = 0; i < n_kids; i++) {
                 out.println(format("Kids #%d has received the gift #%d at a cost of %d euros",

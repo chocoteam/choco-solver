@@ -330,7 +330,7 @@ public class StableMarriage extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(minDomLBSearch(append(husband, wife)));
+        model.getSolver().set(minDomLBSearch(append(husband, wife)));
     }
 
     @Override
@@ -341,7 +341,7 @@ public class StableMarriage extends AbstractProblem {
     @Override
     public void prettyOut() {
 
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             int num_sols = 0;
             do {
 

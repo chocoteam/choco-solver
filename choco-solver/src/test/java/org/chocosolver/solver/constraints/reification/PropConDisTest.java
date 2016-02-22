@@ -33,11 +33,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
-import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
@@ -48,7 +45,6 @@ import static org.chocosolver.solver.constraints.SatFactory.addConstructiveDisju
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.intVarSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -69,12 +65,12 @@ public class PropConDisTest {
         BoolVar b1 = s.arithm(a, "=", 9).reify();
         BoolVar b2 = s.arithm(a, "=", 10).reify();
         addConstructiveDisjunction(b1, b2);
-        s.getResolver().propagate();
+        s.getSolver().propagate();
         assertEquals(a.getDomainSize(), 2);
         assertEquals(a.getLB(), 9);
         assertEquals(a.getUB(), 10);
         while (s.solve()) ;
-        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -86,7 +82,7 @@ public class PropConDisTest {
         Constraint c2 = s.arithm(Y, "-", X, "<=", -9);
 
         addConstructiveDisjunction(c1.reify(), c2.reify());
-        s.getResolver().propagate();
+        s.getSolver().propagate();
         assertEquals(X.getDomainSize(), 4);
         assertEquals(Y.getDomainSize(), 4);
         assertTrue(X.contains(0));
@@ -98,7 +94,7 @@ public class PropConDisTest {
         assertTrue(Y.contains(9));
         assertTrue(Y.contains(10));
         while (s.solve()) ;
-        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 6);
+        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 6);
     }
 
 
@@ -109,14 +105,14 @@ public class PropConDisTest {
             out.printf("Size: %d\n", n);
             Model or = modelPb(n, n, rnd, false, true);
             Model cd = modelPb(n, n, rnd, true, true);
-            or.getResolver().set(inputOrderLBSearch((IntVar[]) or.getHook("decvars")));
-            cd.getResolver().set(inputOrderLBSearch((IntVar[]) cd.getHook("decvars")));
+            or.getSolver().set(inputOrderLBSearch((IntVar[]) or.getHook("decvars")));
+            cd.getSolver().set(inputOrderLBSearch((IntVar[]) cd.getHook("decvars")));
             while(or.solve());
             while(cd.solve());
             assertEquals(cd.getSolutionRecorder().getLastSolution().getIntVal((IntVar) cd.getObjectives()[0]),
                     or.getSolutionRecorder().getLastSolution().getIntVal((IntVar) or.getObjectives()[0]));
-            assertEquals(cd.getResolver().getMeasures().getSolutionCount(), or.getResolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
-            assertTrue(or.getResolver().getMeasures().getNodeCount() >= cd.getResolver().getMeasures().getNodeCount(), "wrong nb of nodes");
+            assertEquals(cd.getSolver().getMeasures().getSolutionCount(), or.getSolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
+            assertTrue(or.getSolver().getMeasures().getNodeCount() >= cd.getSolver().getMeasures().getNodeCount(), "wrong nb of nodes");
         }
     }
 
@@ -128,13 +124,13 @@ public class PropConDisTest {
             for (int seed = 0; seed < 5; seed += 1) {
                 out.printf("Size: %d (%d)\n", n, seed);
                 Model or = modelPb(n, seed, rnd, false, false);
-                or.getResolver().set(randomSearch((IntVar[]) or.getHook("decvars"), 0));
+                or.getSolver().set(randomSearch((IntVar[]) or.getHook("decvars"), 0));
                 while (or.solve()) ;
                 Model cd = modelPb(n, seed, rnd, true, false);
-                cd.getResolver().set(randomSearch((IntVar[]) cd.getHook("decvars"), 0));
+                cd.getSolver().set(randomSearch((IntVar[]) cd.getHook("decvars"), 0));
                 while (cd.solve()) ;
-                assertEquals(cd.getResolver().getMeasures().getSolutionCount(), or.getResolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
-                assertTrue(or.getResolver().getMeasures().getNodeCount() >= cd.getResolver().getMeasures().getNodeCount(), "wrong nb of nodes");
+                assertEquals(cd.getSolver().getMeasures().getSolutionCount(), or.getSolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
+                assertTrue(or.getSolver().getMeasures().getNodeCount() >= cd.getSolver().getMeasures().getNodeCount(), "wrong nb of nodes");
             }
         }
     }

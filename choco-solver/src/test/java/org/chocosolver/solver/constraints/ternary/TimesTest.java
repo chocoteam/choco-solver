@@ -73,7 +73,7 @@ public class TimesTest extends AbstractTernaryTest {
 		Constraint c = s.times(a, b, z);
 		c.post();
 		try {
-			s.getResolver().propagate();
+			s.getSolver().propagate();
 			assertFalse(a.contains(0));
 			for (Propagator p : c.getPropagators()) {
 				p.propagate(FULL_PROPAGATION.getMask());
@@ -93,7 +93,7 @@ public class TimesTest extends AbstractTernaryTest {
 			IntVar i2 = s.intVar("i2", 0, 465 * i, false);
 			s.times(i1, 465 * i, i2).post();
 			while (s.solve()) ;
-			assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
+			assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
 		}
 	}
 
@@ -106,7 +106,7 @@ public class TimesTest extends AbstractTernaryTest {
 			IntVar i2 = s.intVar("i2", 0, 465 * i, true);
 			s.times(i1, 465 * i, i2).post();
 			while (s.solve()) ;
-			assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2);
+			assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
 		}
 	}
 
@@ -117,7 +117,7 @@ public class TimesTest extends AbstractTernaryTest {
 		IntVar i2 = s.intVar("i2", 0, 465 * 10000, false);
 		s.times(i1, 10000, i2).post();
 		while (s.solve()) ;
-		assertEquals(s.getResolver().getMeasures().getSolutionCount(), 466);
+		assertEquals(s.getSolver().getMeasures().getSolutionCount(), 466);
 	}
 	@Test(groups="1s", timeOut=60000)
 	public void testJL5() {
@@ -126,7 +126,7 @@ public class TimesTest extends AbstractTernaryTest {
 		IntVar i2 = s.intVar("i2", MIN_VALUE / 10, MAX_VALUE / 10, true);
 		s.times(i1, 10000, i2).post();
 		while (s.solve()) ;
-		assertEquals(s.getResolver().getMeasures().getSolutionCount(), MAX_VALUE / 100000 * 2 + 1);
+		assertEquals(s.getSolver().getMeasures().getSolutionCount(), MAX_VALUE / 100000 * 2 + 1);
 	}
 
 	@Test(groups="1s", timeOut=60000)

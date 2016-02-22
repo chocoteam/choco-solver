@@ -108,7 +108,7 @@ public class IntLinCombTest {
         s.scalar(vars, coeffs, "=", sum).post();
         s.arithm(sum, operatorToString(operator), constant).post();
 
-        s.getResolver().set(inputOrderLBSearch(vars));
+        s.getSolver().set(inputOrderLBSearch(vars));
 
         while (s.solve()) ;
     }
@@ -151,7 +151,7 @@ public class IntLinCombTest {
         IntVar sum = model.intVar("scal", -99999999, 99999999, true);
         model.scalar(bins, coeffs, "=", sum).post();
         model.arithm(sum, opname, b).post();
-        model.getResolver().set(inputOrderLBSearch(bins));
+        model.getSolver().set(inputOrderLBSearch(bins));
         return model;
     }
 
@@ -172,7 +172,7 @@ public class IntLinCombTest {
         IntVar sum = model.intVar("scal", -99999999, 99999999, true);
         model.scalar(bins, coeffs, "=", sum).post();
         model.arithm(sum, opname, b).post();
-        model.getResolver().set(inputOrderLBSearch(bins));
+        model.getSolver().set(inputOrderLBSearch(bins));
         return model;
     }
 
@@ -197,8 +197,8 @@ public class IntLinCombTest {
 
             while (sum.solve()) ;
             while (intlincomb.solve()) ;
-            assertEquals(sum.getResolver().getMeasures().getSolutionCount(), intlincomb.getResolver().getMeasures().getSolutionCount());
-            assertEquals(sum.getResolver().getMeasures().getNodeCount(), intlincomb.getResolver().getMeasures().getNodeCount());
+            assertEquals(sum.getSolver().getMeasures().getSolutionCount(), intlincomb.getSolver().getMeasures().getSolutionCount());
+            assertEquals(sum.getSolver().getMeasures().getNodeCount(), intlincomb.getSolver().getMeasures().getNodeCount());
         }
     }
 
@@ -220,10 +220,10 @@ public class IntLinCombTest {
         Variable[] vars = sum.getVars();
         ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
         ((IntVar) vars[1]).instantiateTo(-1, Cause.Null);
-        sum.getResolver().propagate();
+        sum.getSolver().propagate();
 //        sum.getResolver().timeStamp++;
         ((IntVar) vars[2]).removeValue(-2, Cause.Null);
-        sum.getResolver().propagate();
+        sum.getSolver().propagate();
         Assert.assertTrue(vars[2].isInstantiated());
     }
 
@@ -488,8 +488,8 @@ public class IntLinCombTest {
         }
         while (s1.solve()) ;
         while (s2.solve()) ;
-        assertEquals(s2.getResolver().getMeasures().getSolutionCount(), s1.getResolver().getMeasures().getSolutionCount());
-        assertEquals(s2.getResolver().getMeasures().getNodeCount(), s1.getResolver().getMeasures().getNodeCount());
+        assertEquals(s2.getSolver().getMeasures().getSolutionCount(), s1.getSolver().getMeasures().getSolutionCount());
+        assertEquals(s2.getSolver().getMeasures().getNodeCount(), s1.getSolver().getMeasures().getNodeCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -518,8 +518,8 @@ public class IntLinCombTest {
         }
         while (s1.solve()) ;
         while (s2.solve()) ;
-        assertEquals(s2.getResolver().getMeasures().getSolutionCount(), s1.getResolver().getMeasures().getSolutionCount());
-        assertEquals(s2.getResolver().getMeasures().getNodeCount(), s1.getResolver().getMeasures().getNodeCount());
+        assertEquals(s2.getSolver().getMeasures().getSolutionCount(), s1.getSolver().getMeasures().getSolutionCount());
+        assertEquals(s2.getSolver().getMeasures().getNodeCount(), s1.getSolver().getMeasures().getNodeCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -552,8 +552,8 @@ public class IntLinCombTest {
         showDecisions(s2);
         while (s1.solve()) ;
         while (s2.solve()) ;
-        assertEquals(s2.getResolver().getMeasures().getSolutionCount(), s1.getResolver().getMeasures().getSolutionCount());
-        assertEquals(s2.getResolver().getMeasures().getNodeCount(), s1.getResolver().getMeasures().getNodeCount());
+        assertEquals(s2.getSolver().getMeasures().getSolutionCount(), s1.getSolver().getMeasures().getSolutionCount());
+        assertEquals(s2.getSolver().getMeasures().getNodeCount(), s1.getSolver().getMeasures().getNodeCount());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -573,7 +573,7 @@ public class IntLinCombTest {
         fill(cs, k, n, -1);
         IntVar sum = model.intVar("S", -n / 2, n / 2, true);
         model.scalar(bs, cs, "=", sum).post();
-        model.getResolver().set(inputOrderLBSearch(bs));
+        model.getSolver().set(inputOrderLBSearch(bs));
 //        Chatterbox.showDecisions(solver);
         while (model.solve()) ;
     }
@@ -587,10 +587,10 @@ public class IntLinCombTest {
         int[] cs = new int[n];
         fill(cs, 0, n, -1);
         model.scalar(bs, cs, "<=", -2).post();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         bs[2].setToFalse(Null);
         bs[0].setToTrue(Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertTrue(bs[1].isInstantiatedTo(1));
     }
 
@@ -600,7 +600,7 @@ public class IntLinCombTest {
         Model model = new Model();
         model.scalar(new IntVar[]{model.intVar(1), model.intVar(3)}, new int[]{1, -1}, "!=", 0).post();
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
         } catch (ContradictionException e) {
             fail();
         }
@@ -612,7 +612,7 @@ public class IntLinCombTest {
         IntVar[] X = model.intVarArray("X", 1, 1, 3, false);
         model.scalar(X, new int[]{-1}, "<=", 2).post();
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3);
 
     }
 
@@ -624,9 +624,9 @@ public class IntLinCombTest {
         X[1] = model.intVar("X2", 6, 56, false);
         X[2] = model.intVar("X3", -1140, 1140, true);
         model.scalar(X, new int[]{1, -1, -1}, "=", 0).post();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         X[1].updateUpperBound(46, Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertEquals(X[2].getLB(), -40);
         assertEquals(X[2].getUB(), 40);
 
@@ -640,7 +640,7 @@ public class IntLinCombTest {
         X[0] = model.intVar("X1", 1, 3, false);
         X[1] = model.intVar("X2", 2, 5, false);
         model.scalar(X, new int[]{2, 3}, "<=", 10).post();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertEquals(X[0].getLB(), 1);
         assertEquals(X[0].getUB(), 2);
         assertEquals(X[1].getLB(), 2);
@@ -654,7 +654,7 @@ public class IntLinCombTest {
         X[0] = model.intVar("X1", 1, 3, false);
         X[1] = model.intVar("X2", 2, 5, false);
         model.scalar(X, new int[]{-2, -3}, ">=", -10).post();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertEquals(X[0].getLB(), 1);
         assertEquals(X[0].getUB(), 2);
         assertEquals(X[1].getLB(), 2);
@@ -668,7 +668,7 @@ public class IntLinCombTest {
         X[0] = model.intVar("X1", 0, 3, false);
         X[1] = model.intVar("X2", 1, 5, false);
         model.scalar(X, new int[]{2, 3}, ">=", 10).post();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertEquals(X[0].getLB(), 0);
         assertEquals(X[0].getUB(), 3);
         assertEquals(X[1].getLB(), 2);
@@ -682,7 +682,7 @@ public class IntLinCombTest {
         X[0] = model.intVar("X1", 0, 3, false);
         X[1] = model.intVar("X2", 1, 5, false);
         model.scalar(X, new int[]{-2, -3}, ">=", -10).post();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertEquals(X[0].getLB(), 0);
         assertEquals(X[0].getUB(), 3);
         assertEquals(X[1].getLB(), 1);
@@ -722,7 +722,7 @@ public class IntLinCombTest {
         Model model = new Model("TestChoco 3.3.2 Briot");
         IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
         model.sum(new IntVar[]{var[0], var[1], var[2]}, ">=", 60).post();
-        model.getResolver().set(inputOrderLBSearch(var));
+        model.getSolver().set(inputOrderLBSearch(var));
         showStatistics(model);
         showSolutions(model);
         model.solve();
@@ -733,7 +733,7 @@ public class IntLinCombTest {
         Model model = new Model("TestChoco 3.3.2 Briot");
         IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
         model.sum(new IntVar[]{var[0], var[1], var[2]}, "<=", 120).post();
-        model.getResolver().set(inputOrderLBSearch(var));
+        model.getSolver().set(inputOrderLBSearch(var));
         showStatistics(model);
         showSolutions(model);
         model.solve();

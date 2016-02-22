@@ -257,7 +257,7 @@ public class IteratorTest {
         IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -279,7 +279,7 @@ public class IteratorTest {
         IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -301,7 +301,7 @@ public class IteratorTest {
         IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -325,7 +325,7 @@ public class IteratorTest {
         IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -349,7 +349,7 @@ public class IteratorTest {
         IntVar var = model.intScaleView(model.intVar("b", 1, 4, true), 2);
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -367,7 +367,7 @@ public class IteratorTest {
             try {
                 // currently, the propagation is not sufficient (bound)
                 // could be fixed with an extension filtering
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -391,7 +391,7 @@ public class IteratorTest {
             try {
                 // currently, the propagation is not sufficient (bound)
                 // could be fixed with an extension filtering
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -421,7 +421,7 @@ public class IteratorTest {
             try {
                 // currently, the propagation is not sufficient (bound)
                 // could be fixed with an extension filtering
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -449,7 +449,7 @@ public class IteratorTest {
         IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -471,7 +471,7 @@ public class IteratorTest {
         IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -493,7 +493,7 @@ public class IteratorTest {
         IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -517,7 +517,7 @@ public class IteratorTest {
         IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
-                model.getResolver().propagate();
+                model.getSolver().propagate();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new UnsupportedOperationException();
@@ -540,7 +540,7 @@ public class IteratorTest {
         Model model = new Model();
         IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -559,7 +559,7 @@ public class IteratorTest {
         Model model = new Model();
         IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -578,7 +578,7 @@ public class IteratorTest {
         Model model = new Model();
         IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -599,7 +599,7 @@ public class IteratorTest {
         Model model = new Model();
         IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }

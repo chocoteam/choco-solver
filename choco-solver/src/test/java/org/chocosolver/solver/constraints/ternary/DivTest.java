@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
@@ -74,7 +74,7 @@ public class DivTest extends AbstractTernaryTest {
             IntVar b = s.intVar("b", new int[]{-1, 1, 3, 4});
             IntVar c = s.intVar("c", new int[]{-3, 1, 4});
             s.div(a, b, c).post();
-            Resolver r = s.getResolver();
+            Solver r = s.getSolver();
             r.set(randomSearch(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);
             r.plugMonitor((IMonitorSolution) () -> {

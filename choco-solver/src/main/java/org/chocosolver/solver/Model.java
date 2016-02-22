@@ -111,7 +111,7 @@ public class Model implements Serializable, IModel {
     private final IEnvironment environment;
 
     /** Resolver of the model, controls propagation and search */
-    private final Resolver resolver;
+    private final Solver solver;
 
     /** Array of variable to optimize, possibly empty. */
     private Variable[] objectives;
@@ -180,8 +180,8 @@ public class Model implements Serializable, IModel {
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objectives = new Variable[0];
         this.hooks = new HashMap<>();
-        this.resolver = new Resolver(this);
-        getResolver().set(new LastSolutionRecorder(new Solution(), this));
+        this.solver = new Solver(this);
+        getSolver().set(new LastSolutionRecorder(new Solution(), this));
     }
 
     /**
@@ -298,8 +298,8 @@ public class Model implements Serializable, IModel {
      * Returns the unique and internal propagation and search object to solve this model.
      * @return the unique and internal <code>Resolver</code> object.
      */
-    public Resolver getResolver() {
-        return resolver;
+    public Solver getSolver() {
+        return solver;
     }
 
     /**
@@ -528,20 +528,20 @@ public class Model implements Serializable, IModel {
             this.policy = policy;
             if (objectives.length == 1) {
                 if ((objectives[0].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
-                    getResolver().set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
+                    getSolver().set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
                 } else {
-                    getResolver().set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
+                    getSolver().set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
                 }
             }else{
                 // BEWARE the usual optimization manager is only defined for mono-objective optimization
                 // so we use a satisfaction manager by default (which does nothing)
                 // with a pareto solution recorder that dynamically adds constraints to skip dominated solutions
-                getResolver().set(ObjectiveManager.SAT());
+                getSolver().set(ObjectiveManager.SAT());
                 IntVar[] _objectives = new IntVar[objectives.length];
                 for (int i = 0; i < objectives.length; i++) {
                     _objectives[i] = (IntVar) objectives[i];
                 }
-                getResolver().set(new ParetoSolutionsRecorder(policy, _objectives));
+                getSolver().set(new ParetoSolutionsRecorder(policy, _objectives));
             }
         }
     }
@@ -552,7 +552,7 @@ public class Model implements Serializable, IModel {
     public void clearObjectives() {
         this.objectives = new Variable[0];
         this.policy = ResolutionPolicy.SATISFACTION;
-        getResolver().set(ObjectiveManager.SAT());
+        getSolver().set(ObjectiveManager.SAT());
     }
 
     /**
@@ -674,7 +674,7 @@ public class Model implements Serializable, IModel {
     private void _post(boolean permanent, Constraint... cs) {
         boolean dynAdd = false;
         // check if the resolution already started -> if true, dynamic addition
-        IPropagationEngine engine = getResolver().getEngine();
+        IPropagationEngine engine = getSolver().getEngine();
         if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
             dynAdd = true;
         }
@@ -713,7 +713,7 @@ public class Model implements Serializable, IModel {
     public void postTemp(Constraint... cs) throws ContradictionException {
         for(Constraint c:cs) {
             _post(false, c);
-            if (getResolver().getEngine() == NoPropagationEngine.SINGLETON || !getResolver().getEngine().isInitialized()) {
+            if (getSolver().getEngine() == NoPropagationEngine.SINGLETON || !getSolver().getEngine().isInitialized()) {
                 throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                         "A call to Model.post(Constraint) is more appropriate.");
             }
@@ -721,7 +721,7 @@ public class Model implements Serializable, IModel {
                 if (settings.debugPropagation()) {
                     IPropagationEngine.Trace.printFirstPropagation(propagator, settings.outputWithANSIColors());
                 }
-                PropagationTrigger.execute(propagator, getResolver().getEngine());
+                PropagationTrigger.execute(propagator, getSolver().getEngine());
             }
         }
     }
@@ -737,7 +737,7 @@ public class Model implements Serializable, IModel {
         while (idx < cIdx && cstrs[idx] != c) {
             idx++;
         }
-        IPropagationEngine engine = getResolver().getEngine();
+        IPropagationEngine engine = getSolver().getEngine();
         // 2. remove it from the network
         while (idx < cIdx) {
             Constraint cm = cstrs[--cIdx];
@@ -773,7 +773,7 @@ public class Model implements Serializable, IModel {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("\n Model[%s]\n", name));
         st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
-        st.append(String.format("Feasability: %s\n", getResolver().isFeasible()));
+        st.append(String.format("Feasability: %s\n", getSolver().isFeasible()));
         st.append("== variables ==\n");
         for (int v = 0; v < vIdx; v++) {
             st.append(vars[v].toString()).append('\n');
@@ -868,17 +868,17 @@ public class Model implements Serializable, IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Solves the model by executing {@link Resolver#solve()}.
+     * Solves the model by executing {@link Solver#solve()}.
      *
      * Default configuration:
      * - SATISFACTION : Computes a feasible solution. Use while(solve()) to enumerate all solutions.
      * - OPTIMISATION : If an objective has been defined, searches an optimal solution
      * (and prove optimality by closing the search space). Then restores the best solution found after solving.
      * @return if at least one new solution has been found.
-     * @see {@link Resolver#solve()}
+     * @see {@link Solver#solve()}
      */
     public boolean solve(){
-        return getResolver().solve();
+        return getSolver().solve();
     }
 
 
@@ -901,246 +901,246 @@ public class Model implements Serializable, IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @deprecated use {@link Resolver#getSolutionRecorder()} instead
+     * @deprecated use {@link Solver#getSolutionRecorder()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public ISolutionRecorder getSolutionRecorder() {
-        return getResolver().getSolutionRecorder();
+        return getSolver().getSolutionRecorder();
     }
 
     /**
-     * @deprecated use {@link Resolver#set(ISolutionRecorder)} instead
+     * @deprecated use {@link Solver#set(ISolutionRecorder)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void set(ISolutionRecorder sr) {
-        getResolver().set(sr);
+        getSolver().set(sr);
     }
 
     /**
-     * @deprecated use {@link Resolver#getSolutionRecorder().restoreLastSolution()} instead
+     * @deprecated use {@link Solver#getSolutionRecorder().restoreLastSolution()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void restoreLastSolution() throws ContradictionException {
-        getResolver().getSolutionRecorder().restoreLastSolution();
+        getSolver().getSolutionRecorder().restoreLastSolution();
     }
 
     /**
-     * @deprecated use {@link Resolver#getSolutionRecorder().restoreSolution(Solution)} instead
+     * @deprecated use {@link Solver#getSolutionRecorder().restoreSolution(Solution)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void restoreSolution(Solution solution) throws ContradictionException {
-        getResolver().getSolutionRecorder().restoreSolution(solution);
+        getSolver().getSolutionRecorder().restoreSolution(solution);
     }
 
     /**
-     * @deprecated use {@link Resolver#isFeasible()} instead
+     * @deprecated use {@link Solver#isFeasible()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public ESat isFeasible() {
-        return getResolver().isFeasible();
+        return getSolver().isFeasible();
     }
 
     /**
-     * @deprecated use {@link Resolver#getExplainer()} instead
+     * @deprecated use {@link Solver#getExplainer()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public ExplanationEngine getExplainer() {
-        return getResolver().getExplainer();
+        return getSolver().getExplainer();
     }
 
     /**
-     * @deprecated use {@link Resolver#set(ExplanationEngine)} instead
+     * @deprecated use {@link Solver#set(ExplanationEngine)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void set(ExplanationEngine explainer) {
-        getResolver().set(explainer);
+        getSolver().set(explainer);
     }
 
     /**
-     * @deprecated use {@link Resolver#plugMonitor(ISearchMonitor)} instead
+     * @deprecated use {@link Solver#plugMonitor(ISearchMonitor)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void plugMonitor(ISearchMonitor sm) {
-        getResolver().plugMonitor(sm);
+        getSolver().plugMonitor(sm);
     }
 
     /**
-     * @deprecated use {@link Resolver#unplugMonitor(ISearchMonitor)} instead
+     * @deprecated use {@link Solver#unplugMonitor(ISearchMonitor)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void unplugMonitor(ISearchMonitor sm){
-        getResolver().unplugMonitor(sm);
+        getSolver().unplugMonitor(sm);
     }
 
     /**
-     * @deprecated use {@link Resolver#unplugAllSearchMonitors()} instead
+     * @deprecated use {@link Solver#unplugAllSearchMonitors()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void unplugAllMonitors(){
-        getResolver().unplugAllSearchMonitors();
+        getSolver().unplugAllSearchMonitors();
     }
 
     /**
-     * @deprecated use {@link Resolver#plugMonitor(ISearchMonitor)} instead
+     * @deprecated use {@link Solver#plugMonitor(ISearchMonitor)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void plugMonitor(FilteringMonitor filteringMonitor) {
-        getResolver().plugMonitor(filteringMonitor);
+        getSolver().plugMonitor(filteringMonitor);
     }
 
     /**
-     * @deprecated use {@link Resolver#getEventObserver()} instead
+     * @deprecated use {@link Solver#getEventObserver()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public FilteringMonitor getEventObserver() {
-        return getResolver().getEventObserver();
+        return getSolver().getEventObserver();
     }
 
     /**
-     * @deprecated use {@link Resolver#addStopCriterion(Criterion...)} instead
+     * @deprecated use {@link Solver#addStopCriterion(Criterion...)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void addStopCriterion(Criterion criterion){
-        getResolver().addStopCriterion(criterion);
+        getSolver().addStopCriterion(criterion);
     }
 
     /**
-     * @deprecated use {@link Resolver#removeStopCriterion(Criterion...)} instead
+     * @deprecated use {@link Solver#removeStopCriterion(Criterion...)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void removeStopCriterion(Criterion criterion){
-        getResolver().removeStopCriterion(criterion);
+        getSolver().removeStopCriterion(criterion);
     }
 
     /**
-     * @deprecated use {@link Resolver#removeAllStopCriteria()} instead
+     * @deprecated use {@link Solver#removeAllStopCriteria()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void removeAllStopCriteria(){
-        getResolver().removeAllStopCriteria();
+        getSolver().removeAllStopCriteria();
     }
 
     /**
-     * @deprecated use {@link Resolver#getMeasures()} instead
+     * @deprecated use {@link Solver#getMeasures()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public IMeasures getMeasures() {
-        return getResolver().getMeasures();
+        return getSolver().getMeasures();
     }
 
     /**
-     * @deprecated use {@link Resolver#isSatisfied()} instead
+     * @deprecated use {@link Solver#isSatisfied()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public ESat isSatisfied() {
-        return getResolver().isSatisfied();
+        return getSolver().isSatisfied();
     }
 
     /**
-     * @deprecated use {@link Resolver#getEngine()} instead
+     * @deprecated use {@link Solver#getEngine()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public IPropagationEngine getEngine() {
-        return getResolver().getEngine();
+        return getSolver().getEngine();
     }
 
     /**
-     * @deprecated use {@link Resolver#set(IPropagationEngine)} instead
+     * @deprecated use {@link Solver#set(IPropagationEngine)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void set(IPropagationEngine propagationEngine) {
-        getResolver().set(propagationEngine);
+        getSolver().set(propagationEngine);
     }
 
     /**
-     * @deprecated use {@link Resolver#propagate()} instead
+     * @deprecated use {@link Solver#propagate()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void propagate() throws ContradictionException {
-        getResolver().propagate();
+        getSolver().propagate();
     }
 
     /**
-     * @deprecated use {@link Resolver#isStopCriterionMet()} instead
+     * @deprecated use {@link Solver#isStopCriterionMet()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public boolean hasReachedLimit() {
-        return getResolver().isStopCriterionMet();
+        return getSolver().isStopCriterionMet();
     }
 
     /**
-     * @deprecated use {@link Resolver#getObjectiveManager()} instead
+     * @deprecated use {@link Solver#getObjectiveManager()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public ObjectiveManager getObjectiveManager() {
-        return getResolver().getObjectiveManager();
+        return getSolver().getObjectiveManager();
     }
 
     /**
-     * @deprecated use {@link Resolver#getStrategy()} instead
+     * @deprecated use {@link Solver#getStrategy()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public AbstractStrategy getStrategy() {
-        return getResolver().getStrategy();
+        return getSolver().getStrategy();
     }
 
     /**
-     * @deprecated use {@link Resolver#set(AbstractStrategy[])} instead
+     * @deprecated use {@link Solver#set(AbstractStrategy[])} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void set(AbstractStrategy... strategies) {
-        getResolver().set(strategies);
+        getSolver().set(strategies);
     }
 
     /**
-     * @deprecated use {@link Resolver#set(ObjectiveManager)} instead
+     * @deprecated use {@link Solver#set(ObjectiveManager)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void set(ObjectiveManager om) {
-        getResolver().set(om);
+        getSolver().set(om);
     }
 
     /**
-     * @deprecated use {@link Resolver#makeCompleteStrategy(boolean)} instead
+     * @deprecated use {@link Solver#makeCompleteStrategy(boolean)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void makeCompleteSearch(boolean isComplete) {
-        getResolver().makeCompleteStrategy(isComplete);
+        getSolver().makeCompleteStrategy(isComplete);
     }
 
     /**
-     * @deprecated use {@link #getResolver()} instead
+     * @deprecated use {@link #getSolver()} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
-    public Resolver getSearchLoop() {
-        return getResolver();
+    public Solver getSearchLoop() {
+        return getSolver();
     }
 
     /**
@@ -1197,14 +1197,14 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link Resolver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
+     * Use {@link Solver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
         setObjectives(policy,getObjectives());
-        getResolver().setRestoreBestSolution(restoreLastSolution);
+        getSolver().setRestoreBestSolution(restoreLastSolution);
         while(solve());
     }
 
@@ -1230,14 +1230,14 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link Resolver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
+     * Use {@link Solver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
         setObjectives(policy,objective);
-        getResolver().setRestoreBestSolution(restoreLastSolution);
+        getSolver().setRestoreBestSolution(restoreLastSolution);
         while(solve());
     }
 
@@ -1245,14 +1245,14 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link Resolver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
+     * Use {@link Solver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
         setObjectives(policy,objective);
         setPrecision(precision);
-        getResolver().setRestoreBestSolution(restoreLastSolution);
+        getSolver().setRestoreBestSolution(restoreLastSolution);
         while(solve());
     }
 
@@ -1270,14 +1270,14 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link Resolver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
+     * Use {@link Solver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
         setObjectives(policy,objectives);
-        getResolver().setRestoreBestSolution(restoreLastSolution);
+        getSolver().setRestoreBestSolution(restoreLastSolution);
         while(solve());
     }
 
@@ -1303,7 +1303,7 @@ public class Model implements Serializable, IModel {
      */
     @Deprecated
     public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
-        getResolver().set(new ObjectiveManager<IntVar, Integer>(objective, MAXIMIZE, false));
+        getSolver().set(new ObjectiveManager<IntVar, Integer>(objective, MAXIMIZE, false));
         while (solve());
     }
 
@@ -1311,7 +1311,7 @@ public class Model implements Serializable, IModel {
      * @deprecated Will be removed in version > 3.4.0
      */
     @Deprecated
-    public void set(Resolver resolver) {
+    public void set(Solver solver) {
         throw new UnsupportedOperationException();
     }
 }

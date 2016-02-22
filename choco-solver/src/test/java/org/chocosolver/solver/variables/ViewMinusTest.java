@@ -61,7 +61,7 @@ public class ViewMinusTest {
 
         try {
 			if(!model.getSettings().enableViews())
-				model.getResolver().propagate();
+				model.getSolver().propagate();
             Assert.assertFalse(Y.isInstantiated());
             Assert.assertEquals(Y.getLB(), -10);
             Assert.assertEquals(Y.getUB(), -1);
@@ -75,25 +75,25 @@ public class ViewMinusTest {
 
             Y.updateLowerBound(-9, Cause.Null);
 			if(!model.getSettings().enableViews())
-				model.getResolver().propagate();
+				model.getSolver().propagate();
             Assert.assertEquals(Y.getLB(), -9);
             Assert.assertEquals(X.getUB(), 9);
 
             Y.updateUpperBound(-2, Cause.Null);
 			if(!model.getSettings().enableViews())
-				model.getResolver().propagate();
+				model.getSolver().propagate();
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 
             Y.removeValue(-4, Cause.Null);
 			if(!model.getSettings().enableViews())
-				model.getResolver().propagate();
+				model.getSolver().propagate();
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 
             Y.removeInterval(-8, -6, Cause.Null);
 			if(!model.getSettings().enableViews())
-				model.getResolver().propagate();
+				model.getSolver().propagate();
             Assert.assertFalse(Y.contains(-8));
             Assert.assertFalse(Y.contains(-7));
             Assert.assertFalse(Y.contains(-6));
@@ -106,7 +106,7 @@ public class ViewMinusTest {
 
             Y.instantiateTo(-5, Cause.Null);
 			if(!model.getSettings().enableViews())
-				model.getResolver().propagate();
+				model.getSolver().propagate();
             Assert.assertTrue(X.isInstantiated());
             Assert.assertTrue(Y.isInstantiated());
             Assert.assertEquals(X.getValue(), 5);
@@ -128,7 +128,7 @@ public class ViewMinusTest {
                 xs[0] = ref.intVar("x", 1, 15, true);
                 xs[1] = ref.intVar("y", -15, -1, true);
                 ref.sum(xs, "=", 0).post();
-                ref.getResolver().set(randomSearch(xs, seed));
+                ref.getSolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -136,11 +136,11 @@ public class ViewMinusTest {
                 xs[0] = model.intVar("x", 1, 15, true);
                 xs[1] = model.intMinusView(xs[0]);
                 model.sum(xs, "=", 0).post();
-                model.getResolver().set(randomSearch(xs, seed));
+                model.getSolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount());
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
 
         }
     }
@@ -156,7 +156,7 @@ public class ViewMinusTest {
                 xs[0] = ref.intVar("x", 1, 15, false);
                 xs[1] = ref.intVar("y", -15, -1, false);
                 ref.sum(xs, "=", 0).post();
-                ref.getResolver().set(randomSearch(xs, seed));
+                ref.getSolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -164,11 +164,11 @@ public class ViewMinusTest {
                 xs[0] = model.intVar("x", 1, 15, false);
                 xs[1] = model.intMinusView(xs[0]);
                 model.sum(xs, "=", 0).post();
-                model.getResolver().set(randomSearch(xs, seed));
+                model.getSolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount());
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
 
         }
     }
@@ -218,7 +218,7 @@ public class ViewMinusTest {
             IntVar v = model.intMinusView(o);
 			if(!model.getSettings().enableViews()){
 				try {
-					model.getResolver().propagate();
+					model.getSolver().propagate();
 				}catch (Exception e){
 					e.printStackTrace();
 					throw new UnsupportedOperationException();

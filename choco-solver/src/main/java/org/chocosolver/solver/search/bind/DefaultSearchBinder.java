@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.bind;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
@@ -63,13 +63,13 @@ public class DefaultSearchBinder implements ISearchBinder {
             Chatterbox.err.printf("No search strategies defined.\nSet to default ones.");
         }
 
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(getDefault(model));
         r.set(lastConflict(r.getStrategy()));
     }
 
     public AbstractStrategy[] getDefault(Model model) {
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         AbstractStrategy[] strats = new AbstractStrategy[4];
         int nb = 0;
 

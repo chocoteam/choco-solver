@@ -130,7 +130,7 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.getResolver().limitNode(200000);
+        model.getSolver().limitNode(200000);
         model.setObjectives(MINIMIZE, objective);
         while(model.solve());
     }
@@ -146,7 +146,7 @@ public class OpenStacks extends AbstractProblem {
             st.append("(").append(norders[i]).append(")\n\t");
         }
         st.append("\n\t");
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             for (int j = 0; j < np; j++) {
                 st.append(scheds[j].getValue()).append(" ");
             }

@@ -32,7 +32,7 @@ package org.chocosolver.solver.search.loop.learn;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
 import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -89,7 +89,7 @@ public class LearnCBJ extends LearnExplained {
      * @param nworld index of the world to backtrack to
      */
     void identifyRefutedDecision(int nworld) {
-        Decision dec = mModel.getResolver().getLastDecision(); // the current decision to undo
+        Decision dec = mModel.getSolver().getLastDecision(); // the current decision to undo
         while (dec != ROOT && nworld > 1) {
             mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
             dec = dec.getPrevious();
@@ -105,14 +105,14 @@ public class LearnCBJ extends LearnExplained {
     }
 
     @Override
-    public void onFailure(Resolver resolver) {
-       super.onFailure(resolver);
+    public void onFailure(Solver solver) {
+       super.onFailure(solver);
         if (this.nogoodFromConflict) {
             postNogood();
         }
         int upto = compute(mModel.getEnvironment().getWorldIndex());
         assert upto > 0;
-        resolver.setJumpTo(upto);
+        solver.setJumpTo(upto);
         identifyRefutedDecision(upto);
     }
 
@@ -124,7 +124,7 @@ public class LearnCBJ extends LearnExplained {
     private void postNogood() {
         if (lastExplanation.isComplete()) {
             Model mModel = ngstore.getModel();
-            Decision<IntVar> decision = mModel.getResolver().getLastDecision();
+            Decision<IntVar> decision = mModel.getSolver().getLastDecision();
             ps.clear();
             while (decision != RootDecision.ROOT) {
                 if (lastExplanation.getDecisions().get(decision.getWorldIndex())) {
@@ -151,7 +151,7 @@ public class LearnCBJ extends LearnExplained {
     }
 
     @Override
-    public void forget(Resolver resolver) {
+    public void forget(Solver solver) {
         mExplainer.getRuleStore();
     }
 }

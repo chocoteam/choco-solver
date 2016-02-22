@@ -156,9 +156,9 @@ public class NurseScheduling {
 
         Model model = new Model();
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
-        model.getResolver().limitTime(180000);
+        model.getSolver().limitTime(180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
-        model.getResolver().set(strategy.getGoal(model, vars));
+        model.getSolver().set(strategy.getGoal(model, vars));
         if (Boolean.TRUE == model.solve()) {
             m.printSolution(model);
             NSChecker checker = new NSChecker(data);
@@ -166,8 +166,8 @@ public class NurseScheduling {
                 System.out.println("Solution checked.");
         }
         String content =
-                model.getResolver().getMeasures().getTimeCount() + " ms,\t " + model.getResolver().getMeasures().getNodeCount() + " nodes,\t "
-                        + model.getResolver().getMeasures().getBackTrackCount() + " bks,\t "
+                model.getSolver().getMeasures().getTimeCount() + " ms,\t " + model.getSolver().getMeasures().getNodeCount() + " nodes,\t "
+                        + model.getSolver().getMeasures().getBackTrackCount() + " bks,\t "
                         + strategy.name() + "\t " + patternOptions.name() + "\t "
                         + m.getDescription() + "\n";
         System.out.println(content);
@@ -184,7 +184,7 @@ public class NurseScheduling {
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
 
-        model.getResolver().set(strategy.getGoal(model, vars));
+        model.getSolver().set(strategy.getGoal(model, vars));
 
         System.out.printf("%s\n", model.toString());
         if (Boolean.TRUE == model.solve()) {
@@ -199,9 +199,9 @@ public class NurseScheduling {
         System.out.println(strategy.name() + "\t " + patternOptions.name() + "\t " + basisOptions.name());
         Model model = new Model();
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, model);
-        model.getResolver().limitTime(180000);
+        model.getSolver().limitTime(180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
-        model.getResolver().set(strategy.getGoal(model, vars));
+        model.getSolver().set(strategy.getGoal(model, vars));
         String solved = "0";
         if (Boolean.TRUE == model.solve()) {
             m.printSolution(model);
@@ -211,15 +211,15 @@ public class NurseScheduling {
             solved = "1";
         }
         String content =
-                solved + ",\t" + model.getResolver().getMeasures().getTimeCount() + " ms,\t "
-                        + model.getResolver().getMeasures().getNodeCount() + " nodes,\t "
-                        + model.getResolver().getMeasures().getBackTrackCount() + " bks,\t "
+                solved + ",\t" + model.getSolver().getMeasures().getTimeCount() + " ms,\t "
+                        + model.getSolver().getMeasures().getNodeCount() + " nodes,\t "
+                        + model.getSolver().getMeasures().getBackTrackCount() + " bks,\t "
                         + strategy.name() + "\t " + patternOptions.name() + "\t " + basisOptions.name() + "\t "
                         + m.getDescription() + "\n";
         String contentCSV =
-                solved + "," + model.getResolver().getMeasures().getTimeCount() + ","
-                        + model.getResolver().getMeasures().getNodeCount() + ","
-                        + model.getResolver().getMeasures().getBackTrackCount() + ","
+                solved + "," + model.getSolver().getMeasures().getTimeCount() + ","
+                        + model.getSolver().getMeasures().getNodeCount() + ","
+                        + model.getSolver().getMeasures().getBackTrackCount() + ","
                         + strategy.name() + "," + patternOptions.name() + "," + basisOptions.name() + ","
                         + m.getDescription() + "\n";
         System.out.println(content);

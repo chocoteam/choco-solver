@@ -501,7 +501,7 @@ public class IntStrategyFactory {
      */
     @Deprecated
     public static AbstractStrategy lastConflict(Model Model) {
-        return lastConflict(Model, Model.getResolver().getStrategy());
+        return lastConflict(Model, Model.getSolver().getStrategy());
     }
 
     /**

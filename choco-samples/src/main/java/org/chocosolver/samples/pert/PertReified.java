@@ -30,7 +30,7 @@
 package org.chocosolver.samples.pert;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -86,7 +86,7 @@ public class PertReified extends Pert {
 
     @Override
     public void configureSearch() {
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(
                 inputOrderLBSearch(bvars),
                 inputOrderLBSearch(vars)

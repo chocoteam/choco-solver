@@ -58,7 +58,7 @@ public class FailPerPropagator implements IMonitorContradiction {
     public FailPerPropagator(Constraint[] constraints, Model model) {
         p2w = new IntMap(10, 0);
         init(constraints);
-        model.getResolver().plugMonitor(this);
+        model.getSolver().plugMonitor(this);
     }
 
     private void init(Constraint[] constraints) {

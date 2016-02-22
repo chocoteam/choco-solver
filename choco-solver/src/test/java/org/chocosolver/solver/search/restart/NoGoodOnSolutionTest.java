@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.restart;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -76,8 +76,8 @@ public class NoGoodOnSolutionTest {
         }
         s.sum(costOf, "=", z).post();
         s.circuit(vars).post();
-        s.getResolver().set(randomSearch(vars, 0));
-        s.getResolver().limitSolution(MAX_NB_SOLS);
+        s.getSolver().set(randomSearch(vars, 0));
+        s.getSolver().limitSolution(MAX_NB_SOLS);
         return s;
     }
 
@@ -86,36 +86,36 @@ public class NoGoodOnSolutionTest {
         // no restarts (ok)
         Model s = makeProblem();
         while (s.solve()) ;
-        out.println(s.getResolver().getMeasures());
-        assertTrue(s.getResolver().getMeasures().getSolutionCount() == NB_SOLS);
+        out.println(s.getSolver().getMeasures());
+        assertTrue(s.getSolver().getMeasures().getSolutionCount() == NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testRoS() {
         // restarts on solutions (infinite loop)
         Model s = makeProblem();
-        s.getResolver().setRestartOnSolutions();
+        s.getSolver().setRestartOnSolutions();
         while (s.solve()) ;
-        out.println(s.getResolver().getMeasures());
-        assertTrue(s.getResolver().getMeasures().getSolutionCount() == MAX_NB_SOLS);
+        out.println(s.getSolver().getMeasures());
+        assertTrue(s.getSolver().getMeasures().getSolutionCount() == MAX_NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testRoSNG() {
         // restarts on solutions with no goods on solutions (ok)
         Model s = makeProblem();
-        s.getResolver().setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
-        s.getResolver().setRestartOnSolutions();
+        s.getSolver().setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
+        s.getSolver().setRestartOnSolutions();
         while (s.solve()) ;
-        out.println(s.getResolver().getMeasures());
-        assertTrue(s.getResolver().getMeasures().getSolutionCount() == NB_SOLS);
+        out.println(s.getSolver().getMeasures());
+        assertTrue(s.getSolver().getMeasures().getSolutionCount() == NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testA() {
         // restarts on solutions and on fails (at activity presolve only) (loop infinitely)
         Model s = makeProblem();
-        Resolver r = s.getResolver();
+        Solver r = s.getSolver();
         r.set(activityBasedSearch(s.retrieveIntVars(true)));
         while (s.solve()) ;
         out.println(r.getMeasures());
@@ -126,7 +126,7 @@ public class NoGoodOnSolutionTest {
     public void testANG() {
         // restarts on solutions and on fails with restarts on solutions (ok)
         Model s = makeProblem();
-        Resolver r = s.getResolver();
+        Solver r = s.getSolver();
         r.setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
         r.set(activityBasedSearch(s.retrieveIntVars(true)));
         showSolutions(s);
@@ -150,13 +150,13 @@ public class NoGoodOnSolutionTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        model.getResolver().setNoGoodRecordingFromSolutions(model.retrieveIntVars(true));
-        model.getResolver().set(randomSearch(vars, 0));
+        model.getSolver().setNoGoodRecordingFromSolutions(model.retrieveIntVars(true));
+        model.getSolver().set(randomSearch(vars, 0));
 
-        model.getResolver().setRestartOnSolutions();
+        model.getSolver().setRestartOnSolutions();
         while (model.solve()) ;
-        out.println(model.getResolver().getMeasures());
-        assertTrue(model.getResolver().getMeasures().getSolutionCount() == 92);
+        out.println(model.getSolver().getMeasures());
+        assertTrue(model.getSolver().getMeasures().getSolutionCount() == 92);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -174,13 +174,13 @@ public class NoGoodOnSolutionTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        model.getResolver().setNoGoodRecordingFromSolutions(model.retrieveIntVars(false));
-        model.getResolver().setNoGoodRecordingFromRestarts();
-        model.getResolver().set(randomSearch(vars, 0));
-        model.getResolver().setRestartOnSolutions();
+        model.getSolver().setNoGoodRecordingFromSolutions(model.retrieveIntVars(false));
+        model.getSolver().setNoGoodRecordingFromRestarts();
+        model.getSolver().set(randomSearch(vars, 0));
+        model.getSolver().setRestartOnSolutions();
         while (model.solve()) ;
-        out.println(model.getResolver().getMeasures());
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 92);
+        out.println(model.getSolver().getMeasures());
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -198,12 +198,12 @@ public class NoGoodOnSolutionTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        model.getResolver().setNoGoodRecordingFromSolutions(vars[0]);
+        model.getSolver().setNoGoodRecordingFromSolutions(vars[0]);
         showSolutions(model);
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
         while (model.solve()) ;
-        out.println(model.getResolver().getMeasures());
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 8);
+        out.println(model.getSolver().getMeasures());
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -221,12 +221,12 @@ public class NoGoodOnSolutionTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        model.getResolver().setNoGoodRecordingFromSolutions(vars[0], vars[1]);
+        model.getSolver().setNoGoodRecordingFromSolutions(vars[0], vars[1]);
         showSolutions(model);
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 //        Chatterbox.showDecisions(solver);
         while (model.solve()) ;
-        out.println(model.getResolver().getMeasures());
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 36);
+        out.println(model.getSolver().getMeasures());
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 36);
     }
 }

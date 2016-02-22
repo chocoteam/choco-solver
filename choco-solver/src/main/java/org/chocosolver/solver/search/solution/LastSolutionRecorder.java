@@ -50,7 +50,7 @@ public class LastSolutionRecorder implements ISolutionRecorder {
 	public LastSolutionRecorder(final Solution solution,  final Model model){
 		this.model = model;
 		this.solution = solution;
-		model.getResolver().plugMonitor((IMonitorSolution) () -> solution.record(model));
+		model.getSolver().plugMonitor((IMonitorSolution) () -> solution.record(model));
 	}
 
 	@Override

@@ -60,7 +60,7 @@ public class ViewSumXYTest {
         model.sum(new IntVar[]{X, Y}, "=", Z).post();
 
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertFalse(Z.isInstantiated());
             assertEquals(Z.getLB(), 4);
             assertEquals(Z.getUB(), 18);
@@ -73,24 +73,24 @@ public class ViewSumXYTest {
             assertEquals(Z.previousValue(4), MIN_VALUE);
 
             Z.updateLowerBound(12, Null);
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertEquals(X.getLB(), 4);
             assertEquals(X.getUB(), 10);
             assertEquals(Y.getLB(), 3);
             assertEquals(Y.getUB(), 8);
 
             Y.updateUpperBound(-2, Null);
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertEquals(Y.getUB(), -2);
             assertEquals(X.getLB(), 2);
 
             Y.removeValue(-4, Null);
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertFalse(Y.contains(-4));
             assertFalse(X.contains(4));
 
             Y.removeInterval(-8, -6, Null);
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertFalse(Y.contains(-8));
             assertFalse(Y.contains(-7));
             assertFalse(Y.contains(-6));
@@ -102,7 +102,7 @@ public class ViewSumXYTest {
             assertEquals(Y.getDomainSize(), 4);
 
             Y.instantiateTo(-5, Null);
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertTrue(X.isInstantiated());
             assertTrue(Y.isInstantiated());
             assertEquals(X.getValue(), 5);
@@ -124,7 +124,7 @@ public class ViewSumXYTest {
                 xs[1] = ref.intVar("y", 1, 5, true);
                 xs[2] = ref.intVar("z", 2, 10, true);
                 ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
-                ref.getResolver().set(randomSearch(xs, seed));
+                ref.getSolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -134,11 +134,11 @@ public class ViewSumXYTest {
                 IntVar Z = model.intVar("Z", 0, 200, false);
                 model.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getResolver().set(randomSearch(xs, seed));
+                model.getSolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount(), "seed:" + seed);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }
@@ -155,7 +155,7 @@ public class ViewSumXYTest {
                 xs[1] = ref.intVar("y", 1, 5, false);
                 xs[2] = ref.intVar("z", 2, 10, false);
                 ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
-                ref.getResolver().set(randomSearch(xs, seed));
+                ref.getSolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -165,11 +165,11 @@ public class ViewSumXYTest {
                 IntVar Z = model.intVar("Z", 0, 200, false);
                 model.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getResolver().set(randomSearch(xs, seed));
+                model.getSolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount(), "seed:" + seed);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }

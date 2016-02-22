@@ -123,7 +123,7 @@ public abstract class AbstractProblem {
     }
 
     protected void overrideExplanation() {
-        if (model.getResolver().getExplainer() == null) {
+        if (model.getSolver().getExplainer() == null) {
             expeng.plugin(model, ng, false);
         }
     }
@@ -150,7 +150,7 @@ public abstract class AbstractProblem {
                 public void run() {
                     if (userInterruption()) {
                         if (level.getLevel() > SILENT.getLevel()) {
-                            System.out.println(model.getResolver().getMeasures().toString());
+                            System.out.println(model.getSolver().getMeasures().toString());
                         }
                     }
 

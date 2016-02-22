@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop.lns;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
@@ -73,21 +73,21 @@ public class LNSFactory {
     }
 
     /**
-     * @deprecated use {@link Resolver#setLNS(INeighbor, ICounter)}
+     * @deprecated use {@link Solver#setLNS(INeighbor, ICounter)}
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void rlns(Model model, IntVar[] vars, int level, long seed, ACounter frcounter) {
-        model.getResolver().setLNS(new RandomNeighborhood(vars, level, seed), frcounter);
+        model.getSolver().setLNS(new RandomNeighborhood(vars, level, seed), frcounter);
     }
 
     /**
-     * @deprecated use {@link Resolver#setLNS(INeighbor, ICounter)}
+     * @deprecated use {@link Solver#setLNS(INeighbor, ICounter)}
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void pglns(Model model, IntVar[] vars, int fgmtSize, int listSize, int level, long seed, ACounter frcounter) {
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.setLNS(
                 new SequenceNeighborhood(
                         pg(model, vars, fgmtSize, listSize, seed),
@@ -98,7 +98,7 @@ public class LNSFactory {
     }
 
     /**
-     * @deprecated use {@link Resolver#setLNS(INeighbor, ICounter)}
+     * @deprecated use {@link Solver#setLNS(INeighbor, ICounter)}
      * and {@link INeighborFactory#explanationBased(IntVar...)} instead
      * Will be removed after version 3.4.0
      */
@@ -110,6 +110,6 @@ public class LNSFactory {
         INeighbor neighbor3 = new RandomNeighborhood(vars, level, seed);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
-        model.getResolver().setLNS(neighbor, frcounter);
+        model.getSolver().setLNS(neighbor, frcounter);
     }
 }

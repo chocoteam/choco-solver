@@ -102,10 +102,10 @@ public class ExplainingCut implements INeighbor {
     @Override
     public void recordSolution() {
         if (mExplanationEngine == null) {
-            if (mModel.getResolver().getExplainer() == null) {
-                mModel.getResolver().set(new ExplanationEngine(mModel, false, false));
+            if (mModel.getSolver().getExplainer() == null) {
+                mModel.getSolver().set(new ExplanationEngine(mModel, false, false));
             }
-            this.mExplanationEngine = mModel.getResolver().getExplainer();
+            this.mExplanationEngine = mModel.getSolver().getExplainer();
         }
         clonePath();
         forceCft = true;
@@ -121,7 +121,7 @@ public class ExplainingCut implements INeighbor {
         decision.free();
         // then fix variables
         _fixVar();
-        assert mModel.getResolver().getLastDecision() == RootDecision.ROOT;
+        assert mModel.getSolver().getLastDecision() == RootDecision.ROOT;
         // add unrelated
         notFrozen.or(unrelated);
         for (int id = notFrozen.nextSetBit(0); id >= 0; id = notFrozen.nextSetBit(id + 1)) {
@@ -179,7 +179,7 @@ public class ExplainingCut implements INeighbor {
      */
     void clonePath() {
         path.free();
-        Decision dec = mModel.getResolver().getLastDecision();
+        Decision dec = mModel.getSolver().getLastDecision();
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
             dec = dec.getPrevious();
@@ -225,10 +225,10 @@ public class ExplainingCut implements INeighbor {
         int i = 0;
         try {
 
-            Decision previous = mModel.getResolver().getLastDecision();
+            Decision previous = mModel.getSolver().getLastDecision();
             assert previous == RootDecision.ROOT;
             // 2. apply the decisions
-            mExplanationEngine.getSolver().getResolver().getObjectiveManager().postDynamicCut();
+            mExplanationEngine.getSolver().getSolver().getObjectiveManager().postDynamicCut();
             for (i = path.size() - 1; i >= 0; i--) {
                 if ((d = decisionPool.getE()) == null) {
                     d = new IntDecision(decisionPool);
@@ -237,7 +237,7 @@ public class ExplainingCut implements INeighbor {
                 d.setPrevious(previous);
                 d.buildNext();
                 d.apply();
-                mModel.getResolver().propagate();
+                mModel.getSolver().propagate();
                 previous = d;
             }
             //mModel.propagate();
@@ -250,7 +250,7 @@ public class ExplainingCut implements INeighbor {
                 if (explanation.getDecisions().isEmpty()) {
                     isTerminated = true;
                     mModel.getEnvironment().worldPop();
-                    mModel.getResolver().getEngine().flush();
+                    mModel.getSolver().getEngine().flush();
                     return;
                 }
 
@@ -270,7 +270,7 @@ public class ExplainingCut implements INeighbor {
             }
         }
         mModel.getEnvironment().worldPop();
-        mModel.getResolver().getEngine().flush();
+        mModel.getSolver().getEngine().flush();
 
         nbFixedVariables = related.cardinality() - 1;
         nbCall = 0;

@@ -33,7 +33,7 @@ import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.samples.integer.AllIntervalSeries;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.testng.annotations.Test;
@@ -94,7 +94,7 @@ public class AllTest {
         });
         prob.buildModel();
         prob.configureSearch();
-        Resolver r = prob.model.getResolver();
+        Solver r = prob.model.getSolver();
         switch (explanation){
             case "NONE" : r.setNoLearning();break;
             case "CBJ" : r.setCBJLearning(false,false);break;
@@ -102,7 +102,7 @@ public class AllTest {
         }
         while (prob.model.solve()) ;
 
-        assertEquals(nbSol, prob.getModel().getResolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
+        assertEquals(nbSol, prob.getModel().getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
     }
 
     @Override

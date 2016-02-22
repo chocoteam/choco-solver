@@ -63,7 +63,7 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(minDomLBSearch(vars));
+        model.getSolver().set(minDomLBSearch(vars));
     }
 
     public static void main(String[] args) {

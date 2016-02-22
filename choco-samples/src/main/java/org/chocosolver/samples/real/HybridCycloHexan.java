@@ -83,8 +83,8 @@ public class HybridCycloHexan extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		model.getResolver().set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
-		model.getResolver().limitTime(10000);
+		model.getSolver().set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
+		model.getSolver().limitTime(10000);
 	}
 
 	@Override

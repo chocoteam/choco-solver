@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.move;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -76,24 +76,24 @@ public class MoveRestart implements Move {
     }
 
     @Override
-    public boolean extend(Resolver resolver) {
+    public boolean extend(Solver solver) {
         boolean extend;
         if (!criterion.isMet(limit)) {
-            extend =  move.extend(resolver);
+            extend =  move.extend(solver);
         }else{
-            restart(resolver);
+            restart(solver);
             extend = true;
         }
         return extend;
     }
 
     @Override
-    public boolean repair(Resolver resolver) {
+    public boolean repair(Solver solver) {
         boolean repair;
         if (!criterion.isMet(limit)) {
-            repair =  move.repair(resolver);
+            repair =  move.repair(solver);
         }else{
-            restart(resolver);
+            restart(solver);
             repair = true;
         }
         return repair;
@@ -114,7 +114,7 @@ public class MoveRestart implements Move {
         move.setStrategy(aStrategy);
     }
 
-    protected void restart(Resolver resolver) {
+    protected void restart(Solver solver) {
         // update parameters for restarts
         restartFromStrategyCount++;
         if (restartFromStrategyCount >= restartLimit) {
@@ -123,7 +123,7 @@ public class MoveRestart implements Move {
             limit += restartStrategy.getNextCutoff(restartFromStrategyCount);
         }
         // then do the restart
-        resolver.restart();
+        solver.restart();
     }
 
     @Override

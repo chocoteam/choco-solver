@@ -170,9 +170,9 @@ public class ParallelResolution {
     public boolean solve() {
         if(!isPrepared){ prepare(); }
         long nsol = 0;
-        for (Model s : models) { nsol -= s.getResolver().getMeasures().getSolutionCount(); }
+        for (Model s : models) { nsol -= s.getSolver().getMeasures().getSolutionCount(); }
         models.parallelStream().forEach(Model::solve);
-        for (Model s : models) { nsol += s.getResolver().getMeasures().getSolutionCount(); }
+        for (Model s : models) { nsol += s.getSolver().getMeasures().getSolutionCount(); }
         return nsol > 0;
     }
 
@@ -192,21 +192,21 @@ public class ParallelResolution {
      * @return the first model which finds a solution (or the best one) or <tt>null</tt> if no such model exists.
      */
     public Model getBestModel(){
-        ResolutionPolicy policy = models.get(0).getResolver().getObjectiveManager().getPolicy();
+        ResolutionPolicy policy = models.get(0).getSolver().getObjectiveManager().getPolicy();
         check(policy);
         if (policy == ResolutionPolicy.SATISFACTION) {
             for (Model s : models) {
-                if (s.getResolver().getMeasures().getSolutionCount() > 0) {
+                if (s.getSolver().getMeasures().getSolutionCount() > 0) {
                     return s;
                 }
             }
             return null;
         }else{
-            boolean min = models.get(0).getResolver().getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
+            boolean min = models.get(0).getSolver().getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
             Model best = null;
             int cost = 0;
             for (Model s : models) {
-                if (s.getResolver().getMeasures().getSolutionCount() > 0) {
+                if (s.getSolver().getMeasures().getSolutionCount() > 0) {
                     int solVal = s.getSolutionRecorder().getLastSolution().getIntVal((IntVar)s.getObjectives()[0]);
                     if (best == null
                             || (cost > solVal && min)
@@ -235,8 +235,8 @@ public class ParallelResolution {
         isPrepared = true;
         ResolutionPolicy policy = models.get(0).getResolutionPolicy();
         check(policy);
-        models.stream().forEach(s -> s.getResolver().addStopCriterion(()->finishers.get()>0));
-        models.stream().forEach(s -> s.getResolver().plugMonitor(new IMonitorClose() {
+        models.stream().forEach(s -> s.getSolver().addStopCriterion(()->finishers.get()>0));
+        models.stream().forEach(s -> s.getSolver().plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
                 int count = finishers.addAndGet(1);
@@ -247,17 +247,17 @@ public class ParallelResolution {
         }));
         if(policy != ResolutionPolicy.SATISFACTION){
             // share the best known bound
-            models.stream().forEach(s -> s.getResolver().plugMonitor(
+            models.stream().forEach(s -> s.getSolver().plugMonitor(
                     (IMonitorSolution) () -> {
-                        synchronized (s.getResolver().getObjectiveManager()) {
-                            switch (s.getResolver().getObjectiveManager().getPolicy()) {
+                        synchronized (s.getSolver().getObjectiveManager()) {
+                            switch (s.getSolver().getObjectiveManager().getPolicy()) {
                                 case MAXIMIZE:
-                                    Number lb = s.getResolver().getObjectiveManager().getBestSolutionValue();
-                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestLB(lb));
+                                    Number lb = s.getSolver().getObjectiveManager().getBestSolutionValue();
+                                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(lb));
                                     break;
                                 case MINIMIZE:
-                                    int ub = s.getResolver().getObjectiveManager().getBestSolutionValue().intValue();
-                                    models.forEach(s1 -> s1.getResolver().getObjectiveManager().updateBestUB(ub));
+                                    int ub = s.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
+                                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(ub));
                                     break;
                                 case SATISFACTION:
                                     break;

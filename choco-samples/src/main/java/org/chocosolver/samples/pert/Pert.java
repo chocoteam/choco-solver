@@ -105,7 +105,7 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];

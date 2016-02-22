@@ -78,7 +78,7 @@ public class NQueenTest {
     }
 
     private void assertIt(Model s) {
-        Assert.assertEquals(s.getResolver().getMeasures().getSolutionCount(), NB_QUEENS_SOLUTION[size], "nb sol incorrect");
+        Assert.assertEquals(s.getSolver().getMeasures().getSolutionCount(), NB_QUEENS_SOLUTION[size], "nb sol incorrect");
     }
 
     protected Model modeler(AbstractNQueen nq, int size) {
@@ -140,14 +140,14 @@ public class NQueenTest {
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
             while (sol.solve()) ;
-            long nbsol = sol.getResolver().getMeasures().getSolutionCount();
-            long node = sol.getResolver().getMeasures().getNodeCount();
+            long nbsol = sol.getSolver().getMeasures().getSolutionCount();
+            long node = sol.getSolver().getMeasures().getNodeCount();
             for (int t = 0; t < values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 values()[t].make(sol);
                 while (sol.solve()) ;
-                assertEquals(sol.getResolver().getMeasures().getSolutionCount(), nbsol);
-                assertEquals(sol.getResolver().getMeasures().getNodeCount(), node);
+                assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
+                assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
             }
         }
     }
@@ -158,15 +158,15 @@ public class NQueenTest {
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
             while (sol.solve()) ;
-            long nbsol = sol.getResolver().getMeasures().getSolutionCount();
-            long node = sol.getResolver().getMeasures().getNodeCount();
+            long nbsol = sol.getSolver().getMeasures().getSolutionCount();
+            long node = sol.getSolver().getMeasures().getNodeCount();
             for (int t = 0; t < values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 // default group
                 values()[t].make(sol);
                 while (sol.solve()) ;
-                assertEquals(sol.getResolver().getMeasures().getSolutionCount(), nbsol);
-                assertEquals(sol.getResolver().getMeasures().getNodeCount(), node);
+                assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
+                assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
             }
 
         }
@@ -177,7 +177,7 @@ public class NQueenTest {
     public void testBug1() throws ContradictionException {
 //        "a corriger!!!, ca doit etre du a prop cond des propagators";
         Model model = modeler(new NQueenBinaryGlobal(), 16);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
 		int offset = 2;
         Variable[] vars = model.getVars();
         ((IntVar) vars[offset]).instantiateTo(1, Cause.Null);
@@ -187,11 +187,11 @@ public class NQueenTest {
         ((IntVar) vars[4+offset]).instantiateTo(12, Cause.Null);
         ((IntVar) vars[5+offset]).instantiateTo(16, Cause.Null);
         ((IntVar) vars[6+offset]).instantiateTo(4, Cause.Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
 //        System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7+offset]).instantiateTo(7, Cause.Null);
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             Assert.fail();
         } catch (ContradictionException ex) {
 //            System.out.printf("%s\n", ex.getMessage());

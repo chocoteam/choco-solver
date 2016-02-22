@@ -30,7 +30,7 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
@@ -87,7 +87,7 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {
-                expl.getResolver().propagate();
+                expl.getSolver().propagate();
                 Assert.fail();
             } catch (ContradictionException e) {
                 r = ee.explain(e);
@@ -119,7 +119,7 @@ public class ExplanationEngineTest {
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation r = null;
             try {
-                expl.getResolver().propagate();
+                expl.getSolver().propagate();
                 Assert.fail();
             } catch (ContradictionException e) {
                 r = ee.explain(e);
@@ -145,7 +145,7 @@ public class ExplanationEngineTest {
             Model expl = new Model();
             model3(expl, n);
 
-            Resolver r = expl.getResolver();
+            Solver r = expl.getSolver();
             IntStrategy is = inputOrderLBSearch(expl.retrieveIntVars(false));
             ExplanationEngine ee = new ExplanationEngine(expl, true, true);
             Explanation ex = null;
@@ -181,7 +181,7 @@ public class ExplanationEngineTest {
 
         ExplanationEngine ee = new ExplanationEngine(model, true, true);
         Explanation ex = null;
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         IntStrategy is = inputOrderLBSearch(vs);
         try {
             r.propagate();
@@ -205,10 +205,10 @@ public class ExplanationEngineTest {
             IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
             model.arithm(vars[n - 2], "=", vars[n - 1]).post();
             model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-            model.getResolver().set(inputOrderLBSearch(vars));
+            model.getSolver().set(inputOrderLBSearch(vars));
 
-            Resolver r = model.getResolver();
-            model.getResolver().setCBJLearning(false, false);
+            Solver r = model.getSolver();
+            model.getSolver().setCBJLearning(false, false);
             assertFalse(model.solve());
 
             assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
@@ -224,7 +224,7 @@ public class ExplanationEngineTest {
             model.arithm(vars[n - 2], "=", vars[n - 1]).post();
             model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
 
-            Resolver r = model.getResolver();
+            Solver r = model.getSolver();
             r.set(inputOrderLBSearch(vars));
 
             r.setCBJLearning(false, false);
@@ -244,11 +244,11 @@ public class ExplanationEngineTest {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
 
-            model.getResolver().setCBJLearning(false, false);
+            model.getSolver().setCBJLearning(false, false);
             assertFalse(model.solve());
 
-            assertEquals(model.getResolver().getMeasures().getNodeCount(), 0);
-            assertEquals(model.getResolver().getMeasures().getFailCount(), 1);
+            assertEquals(model.getSolver().getMeasures().getNodeCount(), 0);
+            assertEquals(model.getSolver().getMeasures().getFailCount(), 1);
         }
     }
 
@@ -260,13 +260,13 @@ public class ExplanationEngineTest {
             for (int i = 0; i < n - 1; i++) {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
-            model.getResolver().set(inputOrderLBSearch(vars));
+            model.getSolver().set(inputOrderLBSearch(vars));
 
-            model.getResolver().setCBJLearning(false, false);
+            model.getSolver().setCBJLearning(false, false);
             assertFalse(model.solve());
 
-            assertEquals(model.getResolver().getMeasures().getNodeCount(), 0);
-            assertEquals(model.getResolver().getMeasures().getFailCount(), 1);
+            assertEquals(model.getSolver().getMeasures().getNodeCount(), 0);
+            assertEquals(model.getSolver().getMeasures().getFailCount(), 1);
         }
     }
 
@@ -284,9 +284,9 @@ public class ExplanationEngineTest {
 
             model.sum(copyOfRange(p, 0, 8), "=", 5).post();
             model.arithm(p[9], "+", p[8], ">", 4).post();
-            model.getResolver().set(randomSearch(p, seed));
+            model.getSolver().set(randomSearch(p, seed));
 
-            model.getResolver().setCBJLearning(false, false);
+            model.getSolver().setCBJLearning(false, false);
 
             showShortStatistics(model);
             assertFalse(model.solve());
@@ -306,7 +306,7 @@ public class ExplanationEngineTest {
         model.sum(copyOfRange(p, 0, 8), "=", 5).post();
         model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
 
         r.setCBJLearning(false, false);
@@ -331,7 +331,7 @@ public class ExplanationEngineTest {
         model.sum(copyOfRange(p, 0, 8), "=", 5).post();
         model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
 
         r.setCBJLearning(false, false);
@@ -350,22 +350,22 @@ public class ExplanationEngineTest {
                 break;
             case 1: {
                 System.out.printf("cbj    :");
-                model.getResolver().setCBJLearning(false, false);
+                model.getSolver().setCBJLearning(false, false);
             }
             break;
             case 2: {
                 System.out.printf("cbj+ng :");
-                model.getResolver().setCBJLearning(true, false);
+                model.getSolver().setCBJLearning(true, false);
             }
             break;
             case 3: {
                 System.out.printf("dbt    :");
-                model.getResolver().setDBTLearning(false, false);
+                model.getSolver().setDBTLearning(false, false);
             }
             break;
             case 4: {
                 System.out.printf("dbt+ng :");
-                model.getResolver().setDBTLearning(true, false);
+                model.getSolver().setDBTLearning(true, false);
             }
             break;
         }
@@ -385,7 +385,7 @@ public class ExplanationEngineTest {
             model.allDifferent(col, "FC").post();
             model.allDifferent(row, "FC").post();
         }
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 //        solver.set(ISF.custom(
 //                ISF.lexico_var_selector(),
 //                ISF.min_value_selector(),
@@ -395,8 +395,8 @@ public class ExplanationEngineTest {
 
         configure(model, a);
         showShortStatistics(model);
-        model.getResolver().limitTime("5m");
-        assertTrue(model.solve() || model.getResolver().isStopCriterionMet());
+        model.getSolver().limitTime("5m");
+        assertTrue(model.solve() || model.getSolver().isStopCriterionMet());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -431,11 +431,11 @@ public class ExplanationEngineTest {
         // symmetry-breaking
         model.arithm(vars[0], "<", vars[n - 1]).post();
 
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
         configure(model, a);
         showShortStatistics(model);
-        model.getResolver().limitTime("5m");
+        model.getSolver().limitTime("5m");
         assertTrue(model.solve());
     }
 
@@ -478,14 +478,14 @@ public class ExplanationEngineTest {
             model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
 
-        model.getResolver().set(inputOrderLBSearch(ticks));
+        model.getSolver().set(inputOrderLBSearch(ticks));
 
         configure(model, a);
         showShortStatistics(model);
-        model.getResolver().limitTime("5m");
+        model.getSolver().limitTime("5m");
         model.setObjectives(MINIMIZE, ticks[m - 1]);
         while(model.solve());
-        assertTrue(model.getResolver().getMeasures().getSolutionCount() > 0);
+        assertTrue(model.getSolver().getMeasures().getSolutionCount() > 0);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -507,12 +507,12 @@ public class ExplanationEngineTest {
             }
         }
         model.allDifferent(position, "FC").post();
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(minDomUBSearch(position));
 
         configure(model, a);
         showShortStatistics(model);
-        model.getResolver().limitTime("5m");
+        model.getSolver().limitTime("5m");
         assertTrue(model.solve());
     }
 
@@ -569,12 +569,12 @@ public class ExplanationEngineTest {
         model.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(), midIntVal(true), vars));
 
         configure(model, a);
         showShortStatistics(model);
-        model.getResolver().limitTime("5m");
+        model.getSolver().limitTime("5m");
         assertTrue(model.solve() || r.isStopCriterionMet());
     }
 
@@ -649,12 +649,12 @@ public class ExplanationEngineTest {
         model.allDifferent(xy, "FC").post();
 
 
-        model.getResolver().set(minDomLBSearch(Ovars));
+        model.getSolver().set(minDomLBSearch(Ovars));
 
         configure(model, a);
         showShortStatistics(model);
-        model.getResolver().limitTime("5m");
-        assertTrue(model.solve() || model.getResolver().isStopCriterionMet());
+        model.getSolver().limitTime("5m");
+        assertTrue(model.solve() || model.getSolver().isStopCriterionMet());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -677,7 +677,7 @@ public class ExplanationEngineTest {
         SatFactory.addBoolNot(bs[0], bs[n - 1]);
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         Explanation ex = null;
         try {
             r.propagate();
@@ -704,7 +704,7 @@ public class ExplanationEngineTest {
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         try {
             r.propagate();
             IntStrategy is = inputOrderLBSearch(bs);
@@ -732,7 +732,7 @@ public class ExplanationEngineTest {
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         try {
             r.propagate();
             IntStrategy is = inputOrderLBSearch(bs);
@@ -760,7 +760,7 @@ public class ExplanationEngineTest {
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         try {
             r.propagate();
             IntStrategy is = inputOrderUBSearch(bs);
@@ -785,10 +785,10 @@ public class ExplanationEngineTest {
         Model s1 = test(n, m, 1);
         Model s2 = test(n, m, 2);
         Model s3 = test(n, m, 3);
-        Assert.assertEquals(s1.getResolver().getMeasures().getSolutionCount(), s2.getResolver().getMeasures().getSolutionCount());
-        Assert.assertEquals(s1.getResolver().getMeasures().getSolutionCount(), s3.getResolver().getMeasures().getSolutionCount());
-        Assert.assertTrue(s1.getResolver().getMeasures().getNodeCount() >= s2.getResolver().getMeasures().getNodeCount());
-        Assert.assertTrue(s2.getResolver().getMeasures().getNodeCount() >= s3.getResolver().getMeasures().getNodeCount());
+        Assert.assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s2.getSolver().getMeasures().getSolutionCount());
+        Assert.assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s3.getSolver().getMeasures().getSolutionCount());
+        Assert.assertTrue(s1.getSolver().getMeasures().getNodeCount() >= s2.getSolver().getMeasures().getNodeCount());
+        Assert.assertTrue(s2.getSolver().getMeasures().getNodeCount() >= s3.getSolver().getMeasures().getNodeCount());
     }
 
     private Model test(int n, int m, int expMode) {
@@ -799,9 +799,9 @@ public class ExplanationEngineTest {
         s.arithm(x[n - 2], "=", x[n - 1]).post();
         // explanations
         if (expMode == 2) {
-            s.getResolver().setCBJLearning(false, true);
+            s.getSolver().setCBJLearning(false, true);
         } else if (expMode == 3) {
-            s.getResolver().setDBTLearning(false, true);
+            s.getSolver().setDBTLearning(false, true);
         }
         // logging and solution
         showStatistics(s);
@@ -838,8 +838,8 @@ public class ExplanationEngineTest {
         Constraint xE1 = s.arithm(x, "=", one);
         xE1.post();
 
-        s.getResolver().setCBJLearning(false, true);
-        LearnCBJ cbj = (LearnCBJ) s.getResolver().getLearn();
+        s.getSolver().setCBJLearning(false, true);
+        LearnCBJ cbj = (LearnCBJ) s.getSolver().getLearn();
         showDecisions(s);
         assertFalse(s.solve());
         // If the problem has no solution, the end-user explanation can be retrieved
@@ -857,7 +857,7 @@ public class ExplanationEngineTest {
         for (int i = 0; i < n; i++) {
             model.arithm(X[i], ">", i).reifyWith(B[i]);
         }
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.setCBJLearning(false, false);
         r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         showDecisions(model);
@@ -879,7 +879,7 @@ public class ExplanationEngineTest {
         ExplanationEngine ee = new ExplanationEngine(model, false, false);
 
         model.getEnvironment().worldPush();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertEquals(x.getLB(), 1);
         assertEquals(y.getUB(), 2);
         assertEquals(z.getUB(), 0);
@@ -888,7 +888,7 @@ public class ExplanationEngineTest {
         IntDecision d1 = strategy.makeIntDecision(x, int_split, 2);
         d1.buildNext();
         d1.apply();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertEquals(z.getUB(), -1);
         model.getEnvironment().worldPush();
         IntDecision d2 = strategy.makeIntDecision(x, int_split, 1);
@@ -896,7 +896,7 @@ public class ExplanationEngineTest {
         d2.apply();
         ContradictionException c = null;
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             fail();
         } catch (ContradictionException ce) {
             c = ce;
@@ -913,7 +913,7 @@ public class ExplanationEngineTest {
 
         model.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2).post();
 
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         out.printf("%s\n", model);
     }
 

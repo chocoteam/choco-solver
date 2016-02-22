@@ -66,7 +66,7 @@ public class MinTest extends AbstractTernaryTest {
         X[3] = model.intVar(-3);
 
         model.min(min, X).post();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertEquals(X[2].getUB(), -5);
     }
 }

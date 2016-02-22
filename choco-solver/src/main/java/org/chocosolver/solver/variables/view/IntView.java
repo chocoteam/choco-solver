@@ -138,7 +138,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
-        model.getResolver().getEngine().fails(cause, this, message);
+        model.getSolver().getEngine().fails(cause, this, message);
     }
 
 

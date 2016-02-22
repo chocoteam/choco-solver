@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 
 /**
@@ -66,31 +66,31 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
     }
 
     @Override
-    public boolean repair(Resolver resolver) {
-        resolver.getMeasures().incBackTrackCount();
-        resolver.getMeasures().incDepth();
-        resolver.getModel().getEnvironment().worldPop();
-        boolean repaired = rewind(resolver);
+    public boolean repair(Solver solver) {
+        solver.getMeasures().incBackTrackCount();
+        solver.getMeasures().incDepth();
+        solver.getModel().getEnvironment().worldPop();
+        boolean repaired = rewind(solver);
         // increase the discrepancy max, if allowed, when the root node is reached
-        if (resolver.getLastDecision() == topDecision && dis.get() < DIS) {
+        if (solver.getLastDecision() == topDecision && dis.get() < DIS) {
             dis.add(1);
-            resolver.restart();
+            solver.restart();
             repaired = true;
         }
         return repaired;
     }
 
     @Override
-    protected boolean rewind(Resolver resolver) {
+    protected boolean rewind(Solver solver) {
         boolean repaired = false;
-        while (!repaired && resolver.getLastDecision() != topDecision) {
-            resolver.setJumpTo(resolver.getJumpTo()-1);
-            if (dis.get() > 0 && resolver.getJumpTo() <= 0 && resolver.getLastDecision().hasNext()) {
-                resolver.getModel().getEnvironment().worldPush();
+        while (!repaired && solver.getLastDecision() != topDecision) {
+            solver.setJumpTo(solver.getJumpTo()-1);
+            if (dis.get() > 0 && solver.getJumpTo() <= 0 && solver.getLastDecision().hasNext()) {
+                solver.getModel().getEnvironment().worldPush();
                 repaired = true;
                 dis.add(-1);
             } else {
-                prevDecision(resolver);
+                prevDecision(solver);
             }
         }
         return repaired;

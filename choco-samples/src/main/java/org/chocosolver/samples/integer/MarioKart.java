@@ -31,8 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -147,7 +146,7 @@ public class MarioKart extends AbstractProblem {
 	@Override
 	public void configureSearch() {
 		/* Listeners */
-		Resolver r = model.getResolver();
+		Solver r = model.getSolver();
 		/* Heuristic choices */
 		r.set(lastConflict(inputOrderLBSearch(next)));
 	}

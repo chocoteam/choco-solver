@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 
 /**
  * Interface to define how to learn during the solving process (e.g. CBJ, DBT...)
@@ -37,7 +37,7 @@ import org.chocosolver.solver.Resolver;
  */
 public interface ILearnFactory {
 
-    Resolver _me();
+    Solver _me();
 
 	/**
      * @return an object learning nothing during search (default configuration)

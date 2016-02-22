@@ -29,12 +29,6 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.loop.lns.INeighborFactory;
-import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
-import org.chocosolver.solver.search.loop.move.Move;
-import org.chocosolver.solver.search.loop.move.MoveLNS;
 import org.chocosolver.util.tools.TimeUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -55,9 +49,9 @@ public class LimitsTest {
     public void testTime() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long tl = 500;
-        s.getResolver().limitTime(tl);
+        s.getSolver().limitTime(tl);
         while (s.solve()) ;
-        int tc = (int) (s.getResolver().getMeasures().getTimeCount() * 1000);
+        int tc = (int) (s.getSolver().getMeasures().getTimeCount() * 1000);
         assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
 
@@ -65,9 +59,9 @@ public class LimitsTest {
     public void testNode() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long nl = 50;
-        s.getResolver().limitNode(nl);
+        s.getSolver().limitNode(nl);
         while (s.solve()) ;
-        long nc = s.getResolver().getMeasures().getNodeCount();
+        long nc = s.getSolver().getMeasures().getNodeCount();
         assertEquals(nc, nl);
     }
 
@@ -75,10 +69,10 @@ public class LimitsTest {
     public void testBacktrack() {
         for(long bl=10;bl<200;bl+=7) {
             Model s = makeNQueenWithBinaryConstraints(12);
-            s.getResolver().limitBacktrack(bl);
+            s.getSolver().limitBacktrack(bl);
             while (s.solve()) ;
-            long bc = s.getResolver().getMeasures().getBackTrackCount();
-            assertTrue(bc <= bl + s.getResolver().getMeasures().getNodeCount());
+            long bc = s.getSolver().getMeasures().getBackTrackCount();
+            assertTrue(bc <= bl + s.getSolver().getMeasures().getNodeCount());
         }
     }
 
@@ -86,9 +80,9 @@ public class LimitsTest {
     public void testFail() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long fl = 50;
-        s.getResolver().limitFail(fl);
+        s.getSolver().limitFail(fl);
         while (s.solve()) ;
-        long fc = s.getResolver().getMeasures().getFailCount();
+        long fc = s.getSolver().getMeasures().getFailCount();
         assertEquals(fc, fl);
     }
 
@@ -96,9 +90,9 @@ public class LimitsTest {
     public void testSolution() {
         Model s = makeNQueenWithBinaryConstraints(12);
         long sl = 50;
-        s.getResolver().limitSolution(sl);
+        s.getSolver().limitSolution(sl);
         while (s.solve()) ;
-        long sc = s.getResolver().getMeasures().getSolutionCount();
+        long sc = s.getSolver().getMeasures().getSolutionCount();
         assertEquals(sc, sl);
     }
 

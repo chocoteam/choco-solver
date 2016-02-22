@@ -92,7 +92,7 @@ public class ParetoTest {
         s.knapsack(occurrences, totalWeight, totalProfit_1, weights, profits_1).post();
         s.knapsack(occurrences, totalWeight, totalProfit_2, weights, profits_2).post();
         // --- Monitor
-        s.getResolver().plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
+        s.getSolver().plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
         // --- solve
         s.setObjectives(ResolutionPolicy.MAXIMIZE,totalProfit_1, totalProfit_2);
         while(s.solve());

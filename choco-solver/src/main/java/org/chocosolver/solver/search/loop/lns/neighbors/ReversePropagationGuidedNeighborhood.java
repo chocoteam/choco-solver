@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -61,7 +60,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
 
                 mModel.getEnvironment().worldPush();
                 vars[id].instantiateTo(bestSolution[id], Cause.Null);
-                mModel.getResolver().propagate();
+                mModel.getSolver().propagate();
                 fragment.clear(id);
 
                 for (int i = 0; i < n; i++) {
@@ -102,7 +101,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                 impose(i);
             }
         }
-        mModel.getResolver().propagate();
+        mModel.getSolver().propagate();
 
         logSum = 0;
         for (int i = 0; i < n; i++) {

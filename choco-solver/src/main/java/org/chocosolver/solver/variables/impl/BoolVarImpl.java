@@ -184,7 +184,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 hasChanged = instantiateTo(1, cause);
             } else {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+                    model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
                 }
                 this.contradiction(cause, MSG_UNKNOWN);
 
@@ -218,7 +218,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
+                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, MSG_INST);
             }
@@ -233,13 +233,13 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 }
                 mValue = value;
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().instantiateTo(this, value, cause, 0, 1);
+                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.notifyPropagators(e, cause);
                 return true;
             } else {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().instantiateTo(this, value, cause, 0, 1);
+                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, 0, 1);
                 }
                 this.contradiction(cause, MSG_UNKNOWN);
                 return false;
@@ -298,7 +298,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         boolean hasChanged = false;
         if (lb > 1 || ub < 0) {
             if (_plugexpl) {
-                model.getResolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
             }
             this.contradiction(cause, MSG_UNKNOWN);
         } else {
@@ -484,7 +484,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
-        model.getResolver().getEngine().fails(cause, this, message);
+        model.getSolver().getEngine().fails(cause, this, message);
     }
 
     @Override

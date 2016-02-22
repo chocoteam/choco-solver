@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -139,7 +139,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     @Override
     public boolean init() {
         boolean init = super.init();
-        ObjectiveManager<IntVar, Integer> om = mModel.getResolver().getObjectiveManager();
+        ObjectiveManager<IntVar, Integer> om = mModel.getSolver().getObjectiveManager();
         this.objectiveManager = om;
         if (objectiveManager.getPolicy() == ResolutionPolicy.SATISFACTION) {
             throw new UnsupportedOperationException("HBFS is not adapted to satisfaction problems.");
@@ -149,30 +149,30 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     }
 
     @Override
-    public boolean extend(Resolver resolver) {
+    public boolean extend(Solver solver) {
         boolean extend;
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < copen.length) {
-            Decision tmp = resolver.getLastDecision();
-            resolver.setLastDecision(copen[current++]);
-            assert resolver.getLastDecision() != null;
-            resolver.getLastDecision().setPrevious(tmp);
-            resolver.getModel().getEnvironment().worldPush();
+            Decision tmp = solver.getLastDecision();
+            solver.setLastDecision(copen[current++]);
+            assert solver.getLastDecision() != null;
+            solver.getLastDecision().setPrevious(tmp);
+            solver.getModel().getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
-            extend = super.extend(resolver);
+            extend = super.extend(solver);
         }
         return extend;
     }
 
     @Override
-    public boolean repair(Resolver resolver) {
+    public boolean repair(Solver solver) {
         boolean repair;
         if (!dfslimit.isMet(limit)) {
             current = copen.length;
-            repair = super.repair(resolver);
+            repair = super.repair(solver);
         } else {
-            extractOpenRightBranches(resolver);
+            extractOpenRightBranches(solver);
             repair = true;
         }
         return repair;
@@ -181,10 +181,10 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * This methods extracts and stores all open right branches for future exploration
      */
-    protected void extractOpenRightBranches(Resolver resolver) {
+    protected void extractOpenRightBranches(Solver solver) {
         // update parameters for restarts
         if (nodesRecompute > 0) {
-            double ratio = nodesRecompute * 1.d / resolver.getMeasures().getNodeCount();
+            double ratio = nodesRecompute * 1.d / solver.getMeasures().getNodeCount();
             if (ratio > b && Z <= N) {
                 Z *= 2;
             } else if (ratio < a && Z >= 2) {
@@ -193,9 +193,9 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
         }
         limit += Z;
         // then start the extraction of open right branches
-        int i = compareSubpath(resolver);
+        int i = compareSubpath(solver);
         if(i < _unkopen.size()) {
-            extractOB(resolver, i);
+            extractOB(solver, i);
         }
         // finally, get the best ORB to keep up the search
         Open next = opens.poll();
@@ -207,25 +207,25 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             // the decision in 0 is the last taken, then the array us reversed
             ArrayUtils.reverse(copen);
             current = 0;
-            nodesRecompute = resolver.getMeasures().getNodeCount() + copen.length;
+            nodesRecompute = solver.getMeasures().getNodeCount() + copen.length;
         } else{
             // to be sure not to use the previous path
             current = copen.length;
         }
         // then do the restart
-        resolver.restart();
+        solver.restart();
     }
 
     /**
      * Copy the current decision path in _unkopen, for comparison with copen.
      * Then, it compares each decision, from the top to the bottom, to find the first difference.
      * This is required to avoid adding the same decision sub-path more than once
-     * @param resolver the search loop
+     * @param solver the search loop
      * @return the index of the decision, in _unkopen, that stops the loop
      */
-    private int compareSubpath(Resolver resolver) {
+    private int compareSubpath(Solver solver) {
         _unkopen.clear();
-        Decision decision = resolver.getLastDecision();
+        Decision decision = solver.getLastDecision();
         while (decision != topDecision) {
             _unkopen.add(decision);
             decision = decision.getPrevious();
@@ -242,14 +242,14 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
 
     /**
      * Extract the open right branches from the current path until it reaches the i^th decision of _unkopen
-     * @param resolver the search loop
+     * @param solver the search loop
      * @param i the index of the decision, in _unkopen, that stops the loop
      */
-    private void extractOB(Resolver resolver, int i) {
+    private void extractOB(Solver solver, int i) {
         Decision stopAt = _unkopen.get(i).getPrevious();
         // then, goes up in the search tree, and detect open nodes
-        resolver.getModel().getEnvironment().worldPop();
-        Decision decision = resolver.getLastDecision();
+        solver.getModel().getEnvironment().worldPop();
+        Decision decision = solver.getLastDecision();
         int bound;
         while (decision != stopAt) {
             bound = isMinimization ?
@@ -258,10 +258,10 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             if (decision.hasNext() && isValid(bound)) {
                 opens.add(new Open(decision, bound, isMinimization));
             }
-            resolver.setLastDecision(resolver.getLastDecision().getPrevious());
+            solver.setLastDecision(solver.getLastDecision().getPrevious());
             decision.free();
-            decision = resolver.getLastDecision();
-            resolver.getModel().getEnvironment().worldPop();
+            decision = solver.getLastDecision();
+            solver.getModel().getEnvironment().worldPop();
         }
     }
 

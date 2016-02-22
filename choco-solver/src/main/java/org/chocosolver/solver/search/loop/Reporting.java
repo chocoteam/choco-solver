@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
@@ -50,8 +50,8 @@ public enum Reporting {
     ;
 
     public static String onDecisions(Model model) {
-        Resolver resolver = model.getResolver();
-        Decision last = resolver.getLastDecision();
+        Solver solver = model.getSolver();
+        Decision last = solver.getLastDecision();
         Deque<Decision> stack = new ArrayDeque<>();
         while (last != null) {
             stack.push(last);
@@ -61,7 +61,7 @@ public enum Reporting {
         while (!stack.isEmpty()) {
             sb.append(stack.removeFirst().toString()).append(" & ");
         }
-        sb.append("\n").append(model.getResolver().getObjectiveManager().toString());
+        sb.append("\n").append(model.getSolver().getObjectiveManager().toString());
         return sb.toString();
     }
 
@@ -98,7 +98,7 @@ public enum Reporting {
         sb.append(onUnsatisfiedConstraints(model)).append("\n");
         sb.append(StringUtils.pad("", 50, "=")).append("\n");
         sb.append(onDecisions(model)).append("\n");
-        sb.append(model.getResolver().getMeasures().toOneShortLineString());
+        sb.append(model.getSolver().getMeasures().toOneShortLineString());
         sb.append(StringUtils.pad("", 50, "#")).append("\n");
         return sb.toString();
     }

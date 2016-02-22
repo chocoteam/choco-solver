@@ -29,11 +29,11 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.move.IMoveFactory;
 
 /**
- * @deprecated use {@link Resolver}, which extends {@link IMoveFactory}, instead
+ * @deprecated use {@link Solver}, which extends {@link IMoveFactory}, instead
  * Will be removed after version 3.4.0
  */
 @Deprecated

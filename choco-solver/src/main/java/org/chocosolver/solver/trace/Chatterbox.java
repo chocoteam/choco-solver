@@ -133,7 +133,7 @@ public class Chatterbox {
     public static void printStatistics(Model model) {
         printVersion(model);
         printFeatures(model);
-        out.println(model.getResolver().getMeasures().toString());
+        out.println(model.getSolver().getMeasures().toString());
     }
 
     /**
@@ -149,7 +149,7 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void printShortStatistics(Model model) {
-        out.println(model.getResolver().getMeasures().toOneLineString());
+        out.println(model.getSolver().getMeasures().toOneLineString());
     }
 
     /**
@@ -167,7 +167,7 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void printCSVStatistics(Model model) {
-        out.println(model.getResolver().getMeasures().toCSV());
+        out.println(model.getSolver().getMeasures().toCSV());
     }
 
 
@@ -180,7 +180,7 @@ public class Chatterbox {
      * @param message the message to print per solution
      */
     public static void printSolutions(Model model, IMessage message) {
-        ISolutionRecorder solrec = model.getResolver().getSolutionRecorder();
+        ISolutionRecorder solrec = model.getSolver().getSolutionRecorder();
         for (Solution sol : solrec.getSolutions()) {
             solrec.restoreSolution(sol);
             out.println(message.print());
@@ -208,7 +208,7 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void showStatistics(final Model model) {
-        model.getResolver().plugMonitor(new IMonitorInitialize() {
+        model.getSolver().plugMonitor(new IMonitorInitialize() {
 
             @Override
             public void beforeInitialize() {
@@ -216,10 +216,10 @@ public class Chatterbox {
                 printFeatures(model);
             }
         });
-        model.getResolver().plugMonitor(new IMonitorClose() {
+        model.getSolver().plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
-                out.println(model.getResolver().getMeasures().toString());
+                out.println(model.getSolver().getMeasures().toString());
             }
         });
     }
@@ -232,10 +232,10 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void showShortStatistics(final Model model) {
-        model.getResolver().plugMonitor(new IMonitorClose() {
+        model.getSolver().plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                out.println(model.getResolver().getMeasures().toOneShortLineString());
+                out.println(model.getSolver().getMeasures().toOneShortLineString());
             }
         });
     }
@@ -249,7 +249,7 @@ public class Chatterbox {
      * @param message the message to print.
      */
     public static void showSolutions(Model model, final IMessage message) {
-        model.getResolver().plugMonitor((IMonitorSolution) () -> out.println(message.print()));
+        model.getSolver().plugMonitor((IMonitorSolution) () -> out.println(message.print()));
     }
 
     /**
@@ -273,10 +273,10 @@ public class Chatterbox {
      * @param message the message to print.
      */
     public static void showDecisions(final Model model, final IMessage message) {
-        model.getResolver().plugMonitor(new IMonitorDownBranch() {
+        model.getSolver().plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownBranch(boolean left) {
-                Decision d = model.getResolver().getLastDecision();
+                Decision d = model.getSolver().getLastDecision();
                 out.printf("%s[%d/%d] %s%s ", pad("", model.getEnvironment().getWorldIndex(), "."),
                         d.getArity() - d.triesLeft() +1, d.getArity(),
                         model.getSettings().outputWithANSIColors()?ANSI_BLUE:"",
@@ -305,7 +305,7 @@ public class Chatterbox {
      * @param model the solver to evaluate
      */
     public static void showContradiction(Model model) {
-        model.getResolver().plugMonitor((IMonitorContradiction) cex -> out.println(String.format("\t/!\\ %s", cex.toString())));
+        model.getSolver().plugMonitor((IMonitorContradiction) cex -> out.println(String.format("\t/!\\ %s", cex.toString())));
     }
 
     /**
@@ -316,7 +316,7 @@ public class Chatterbox {
      */
     public static void showStatisticsDuringResolution(Model model, long f) {
         if (f > 0) {
-            model.getResolver().plugMonitor(new LogStatEveryXXms(model, f));
+            model.getSolver().plugMonitor(new LogStatEveryXXms(model, f));
         }
     }
 
@@ -338,9 +338,9 @@ public class Chatterbox {
         public String print() {
             return String.format("%s- Solution #%s found. %s \n\t%s.%s",
                     model.getSettings().outputWithANSIColors()?ANSI_GREEN:"",
-                    model.getResolver().getMeasures().getSolutionCount(),
-                    model.getResolver().getMeasures().toOneShortLineString(),
-                    print(model.getResolver().getStrategy().getVariables()),
+                    model.getSolver().getMeasures().getSolutionCount(),
+                    model.getSolver().getMeasures().toOneShortLineString(),
+                    print(model.getSolver().getStrategy().getVariables()),
                     model.getSettings().outputWithANSIColors()?ANSI_RESET:""
             );
         }
@@ -369,7 +369,7 @@ public class Chatterbox {
         @Override
         public String print() {
             int limit = 120;
-            Variable[] vars = model.getResolver().getStrategy().getVariables();
+            Variable[] vars = model.getSolver().getStrategy().getVariables();
             StringBuilder s = new StringBuilder(32);
             for (int i = 0; i < vars.length && s.length() < limit; i++) {
                 s.append(vars[i]).append(' ');

@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -55,7 +55,7 @@ class RecursiveSearchLoop {
         // some preprocess for the first call
         int c = 0;
         try {
-            model.getResolver().getEngine().propagate();
+            model.getSolver().getEngine().propagate();
         } catch (ContradictionException e) {
             return c;
         }
@@ -68,7 +68,7 @@ class RecursiveSearchLoop {
                 dec.apply();
                 c += dfs(model, strategy);
             } catch (ContradictionException cex) {
-                model.getResolver().getEngine().flush();
+                model.getSolver().getEngine().flush();
             }
             model.getEnvironment().worldPop();
             model.getEnvironment().worldPush();
@@ -77,7 +77,7 @@ class RecursiveSearchLoop {
                 dec.apply();
                 c += dfs(model, strategy);
             } catch (ContradictionException cex) {
-                model.getResolver().getEngine().flush();
+                model.getSolver().getEngine().flush();
             }
             model.getEnvironment().worldPop();
         } else {
@@ -91,7 +91,7 @@ class RecursiveSearchLoop {
     public static int lds(Model model, AbstractStrategy strategy, int dis) {
         int c = 0;
         try {
-            model.getResolver().getEngine().propagate();
+            model.getSolver().getEngine().propagate();
         } catch (ContradictionException e) {
             return c;
         }
@@ -104,7 +104,7 @@ class RecursiveSearchLoop {
                 dec.apply();
                 c += lds(model, strategy, dis);
             } catch (ContradictionException cex) {
-                model.getResolver().getEngine().flush();
+                model.getSolver().getEngine().flush();
             }
             model.getEnvironment().worldPop();
             if (dis > 0) {
@@ -114,7 +114,7 @@ class RecursiveSearchLoop {
                     dec.apply();
                     c += lds(model, strategy, dis - 1);
                 } catch (ContradictionException cex) {
-                    model.getResolver().getEngine().flush();
+                    model.getSolver().getEngine().flush();
                 }
                 model.getEnvironment().worldPop();
             }
@@ -129,7 +129,7 @@ class RecursiveSearchLoop {
     public static int dds(Model model, AbstractStrategy strategy, int dis, int dep) {
         int c = 0;
         try {
-            model.getResolver().getEngine().propagate();
+            model.getSolver().getEngine().propagate();
         } catch (ContradictionException e) {
             return c;
         }
@@ -143,7 +143,7 @@ class RecursiveSearchLoop {
                     dec.apply();
                     c += ilds(model, strategy, dis, dep - 1);
                 } catch (ContradictionException cex) {
-                    model.getResolver().getEngine().flush();
+                    model.getSolver().getEngine().flush();
                 }
                 model.getEnvironment().worldPop();
             } else {
@@ -156,7 +156,7 @@ class RecursiveSearchLoop {
                     dec.apply();
                     c += ilds(model, strategy, dis - 1, dep);
                 } catch (ContradictionException cex) {
-                    model.getResolver().getEngine().flush();
+                    model.getSolver().getEngine().flush();
                 }
                 model.getEnvironment().worldPop();
             }
@@ -172,7 +172,7 @@ class RecursiveSearchLoop {
     public static int ilds(Model model, AbstractStrategy strategy, int dis, int dep) {
         int c = 0;
         try {
-            model.getResolver().getEngine().propagate();
+            model.getSolver().getEngine().propagate();
         } catch (ContradictionException e) {
             return c;
         }
@@ -186,7 +186,7 @@ class RecursiveSearchLoop {
                     dec.apply();
                     c += ilds(model, strategy, dis, dep - 1);
                 } catch (ContradictionException cex) {
-                    model.getResolver().getEngine().flush();
+                    model.getSolver().getEngine().flush();
                 }
                 model.getEnvironment().worldPop();
             } else {
@@ -199,7 +199,7 @@ class RecursiveSearchLoop {
                     dec.apply();
                     c += ilds(model, strategy, dis - 1, dep);
                 } catch (ContradictionException cex) {
-                    model.getResolver().getEngine().flush();
+                    model.getSolver().getEngine().flush();
                 }
                 model.getEnvironment().worldPop();
             }
@@ -215,7 +215,7 @@ class RecursiveSearchLoop {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 3, 0, 2, false);
 //        model.post(solver.allDifferent(X));
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(new SevenQueuesPropagatorEngine(model));
         r.getEngine().initialize();
 //        System.out.printf("%d solutions\n", setDFS(solver, ISF.lexico_LB(X)));

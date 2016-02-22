@@ -176,7 +176,7 @@ public class PropConDis extends Propagator<BoolVar> {
                     for (int i = 0; i < disjunctions.size(); i++) {
                         BoolVar[] boolVars = disjunctions.get(i);
                         // change the propagation engine
-                        model.getResolver().set(internalEngine);
+                        model.getSolver().set(internalEngine);
                         toZero.clear();
                         toUnion.clear();
                         for (int b = 0; b < boolVars.length; b++) {
@@ -196,7 +196,7 @@ public class PropConDis extends Propagator<BoolVar> {
                             }
                         }
                         // restore the propagation before applying the deductions
-                        model.getResolver().set(masterEngine);
+                        model.getSolver().set(masterEngine);
                         change |= applyDeductions(boolVars);
                     }
                 }
@@ -303,12 +303,12 @@ public class PropConDis extends Propagator<BoolVar> {
         allvars = Arrays.copyOf(allvars, k);
         cardinalities = new int[k];
         // get a copy of the current propagation engine
-        masterEngine = model.getResolver().getEngine();
+        masterEngine = model.getSolver().getEngine();
         // create internalEngine
         internalEngine = new SevenQueuesPropagatorEngine(model);
         internalEngine.initialize();
 
-        model.getResolver().set(internalEngine);
+        model.getSolver().set(internalEngine);
         boolean ok = true;
         try {
             internalEngine.propagate();
@@ -316,7 +316,7 @@ public class PropConDis extends Propagator<BoolVar> {
             internalEngine.flush();
             ok = false;
         }
-        model.getResolver().set(masterEngine);
+        model.getSolver().set(masterEngine);
         return ok;
     }
 

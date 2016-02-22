@@ -95,12 +95,12 @@ public class LearnDBT extends LearnCBJ {
     @Override
     void identifyRefutedDecision(int nworld) {
         dbTstrategy.clear();
-        if (nworld == 1 || mModel.getResolver().getEngine().getContradictionException().c == mModel.getResolver().getObjectiveManager()) {
+        if (nworld == 1 || mModel.getSolver().getEngine().getContradictionException().c == mModel.getSolver().getObjectiveManager()) {
             super.identifyRefutedDecision(nworld);
             return;
         }
         // preliminary : compute where to jump back
-        Decision dup, dec = mModel.getResolver().getLastDecision(); // the current decision to undo
+        Decision dup, dec = mModel.getSolver().getLastDecision(); // the current decision to undo
         int myworld = nworld;
         while (dec != RootDecision.ROOT && myworld > 1) {
             dec = dec.getPrevious();
@@ -109,7 +109,7 @@ public class LearnDBT extends LearnCBJ {
         Decision jmpBck = dec;
 
         // now we can explicitly enforce the jump
-        dec = mModel.getResolver().getLastDecision(); // the current decision to undo
+        dec = mModel.getSolver().getLastDecision(); // the current decision to undo
         int decIdx = lastExplanation.getEvtstrIdx(); // index of the decision to refute in the event store
         while (dec != RootDecision.ROOT && nworld > 1) {
 
@@ -192,7 +192,7 @@ public class LearnDBT extends LearnCBJ {
             this.decision_path = new ArrayDeque<>();
             this.mModel = model;
             this.mExplainer = mExplainer;
-            model.getResolver().plugMonitor(this);
+            model.getSolver().plugMonitor(this);
         }
 
         protected void clear() {
@@ -210,9 +210,9 @@ public class LearnDBT extends LearnCBJ {
 
         @Override
         public void afterInitialize() {
-            this.mainStrategy = mModel.getResolver().getStrategy();
+            this.mainStrategy = mModel.getSolver().getStrategy();
             // put this strategy before any other ones.
-            mModel.getResolver().set(this);
+            mModel.getSolver().set(this);
         }
 
         @Override

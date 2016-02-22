@@ -31,7 +31,7 @@ package org.chocosolver.solver.search;
 
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.objective.ObjectiveManager;
@@ -95,40 +95,40 @@ public class ObjectiveTest {
     @SuppressWarnings("UnusedParameters")
     private void one(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            model.getResolver().reset();
+            model.getSolver().reset();
             model.solve();
-            Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
-            Assert.assertEquals(model.getResolver().getMeasures().getNodeCount(), 2);
+            Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
+            Assert.assertEquals(model.getSolver().getMeasures().getNodeCount(), 2);
         }
     }
 
     @SuppressWarnings("UnusedParameters")
     private void all(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            model.getResolver().reset();
+            model.getSolver().reset();
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 11);
-            assertEquals(model.getResolver().getMeasures().getNodeCount(), 21);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 11);
+            assertEquals(model.getSolver().getMeasures().getNodeCount(), 21);
         }
     }
 
     private void min(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            model.getResolver().reset();
+            model.getSolver().reset();
             model.setObjectives(MINIMIZE, iv);
             while(model.solve());
-            assertEquals(model.getResolver().getMeasures().getBestSolutionValue(), 0);
-            assertEquals(model.getResolver().getMeasures().getNodeCount(), 2);
+            assertEquals(model.getSolver().getMeasures().getBestSolutionValue(), 0);
+            assertEquals(model.getSolver().getMeasures().getNodeCount(), 2);
         }
     }
 
     private void max(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
-            model.getResolver().reset();
+            model.getSolver().reset();
             model.setObjectives(MAXIMIZE, iv);
             while(model.solve());
-            assertEquals(model.getResolver().getMeasures().getBestSolutionValue(), 10);
-            assertEquals(model.getResolver().getMeasures().getNodeCount(), 21);
+            assertEquals(model.getSolver().getMeasures().getBestSolutionValue(), 10);
+            assertEquals(model.getSolver().getMeasures().getNodeCount(), 21);
         }
     }
 
@@ -140,13 +140,13 @@ public class ObjectiveTest {
 
         model.setObjectives(MINIMIZE, iv);
         while(model.solve());
-        assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
 
-        model.getResolver().reset();
+        model.getSolver().reset();
 
         model.setObjectives(MINIMIZE, iv);
         while(model.solve());
-        assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -161,7 +161,7 @@ public class ObjectiveTest {
                         new Constraint[]{model.TRUE()}) {
                     @Override
                     public ESat checkCondition() {
-                        int nbNode = (int) this.model.getResolver().getMeasures().getNodeCount();
+                        int nbNode = (int) this.model.getSolver().getMeasures().getNodeCount();
                         switch (nbNode) {
                             case 0:
                             case 1:
@@ -177,12 +177,12 @@ public class ObjectiveTest {
         model.solve();
         assertEquals(iv.getValue(), 2);
 
-        model.getResolver().reset();
-        model.getResolver().plugMonitor((IMonitorSolution) () -> model.arithm(iv, ">=", 6).post());
+        model.getSolver().reset();
+        model.getSolver().plugMonitor((IMonitorSolution) () -> model.arithm(iv, ">=", 6).post());
         model.solve();
         assertEquals(iv.getValue(), 2);
 
-        model.getResolver().reset();
+        model.getSolver().reset();
         model.solve();
         assertEquals(iv.getValue(), 6);
     }
@@ -196,7 +196,7 @@ public class ObjectiveTest {
         model.setObjectives(MINIMIZE, v);
         while(model.solve());
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
-        model.getResolver().reset();
+        model.getSolver().reset();
 
         model.setObjectives(MINIMIZE, v);
         while(model.solve());
@@ -209,7 +209,7 @@ public class ObjectiveTest {
         BoolVar b1 = model.boolVar("b1");
         BoolVar b2 = model.boolVar("b2");
         model.arithm(b1, "<=", b2).post();
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
 //        SMF.log(solver, true, true);
         r.set(new ObjectiveManager<IntVar, Integer>(b1, MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
@@ -237,11 +237,11 @@ public class ObjectiveTest {
 	public void testJL2() {
 		Model model = new Model();
         IntVar a = model.intVar("a", -2, 2, false);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
 		r.set(new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),minDomLBSearch(a));
 		r.setNoGoodRecordingFromSolutions(a);
         r.set(new ObjectiveManager<IntVar, Integer>(a, MAXIMIZE, false));
         while (model.solve());
-		Assert.assertEquals(model.getResolver().isStopCriterionMet(),false);
+		Assert.assertEquals(model.getSolver().isStopCriterionMet(),false);
 	}
 }

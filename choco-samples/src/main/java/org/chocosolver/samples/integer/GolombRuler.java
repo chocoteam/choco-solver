@@ -93,7 +93,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(ticks));
+        model.getSolver().set(inputOrderLBSearch(ticks));
     }
 
     @Override

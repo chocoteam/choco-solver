@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.move;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
@@ -60,14 +60,14 @@ public interface Move extends Serializable {
      *
      * @return <code>true</code> if an extension can be done, <code>false</code> when no more extension is possible.
      */
-    boolean extend(Resolver resolver);
+    boolean extend(Solver solver);
 
     /**
      * Performs a move when the CSP associated to the current node of the search space is proven to be not consistent.
      *
      * @return <code>true</code> if a reparation can be done, <code>false</code> when no more reparation is possible.
      */
-    boolean repair(Resolver resolver);
+    boolean repair(Solver solver);
 
     /**
      * Returns the search strategy in use.
@@ -103,7 +103,7 @@ public interface Move extends Serializable {
      * When only one "terminal" move is declared, the top decision is ROOT.
      * When dealing with a sequence of Move, the top decision is the last one of the previous move.
      * In consequence, when backtracking, the right move can be applied or stopped when needed.
-     * This has to be declared on the first call to {@link #extend(Resolver)} and is checked on {@link #repair(Resolver)}.
+     * This has to be declared on the first call to {@link #extend(Solver)} and is checked on {@link #repair(Solver)}.
      */
     void setTopDecision(Decision topDecision);
 }

@@ -76,7 +76,7 @@ public class MaxViewTest {
                 xs[2] = ref.intVar("z", domains[2][0], domains[2][1], true);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.getResolver().set(randomSearch(xs, seed));
+                ref.getSolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -86,12 +86,12 @@ public class MaxViewTest {
                 xs[2] = model.intVar("z", domains[1][0], domains[2][1], true);
                 max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getResolver().set(randomSearch(xs, seed));
+                model.getSolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
-            assertTrue(model.getResolver().getMeasures().getNodeCount() <= ref.getResolver().getMeasures().getNodeCount(), "NODES (" + seed + ")");
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            assertTrue(model.getSolver().getMeasures().getNodeCount() <= ref.getSolver().getMeasures().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 
@@ -109,7 +109,7 @@ public class MaxViewTest {
                 xs[2] = ref.intVar("z", domains[2]);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.getResolver().set(randomSearch(xs, seed));
+                ref.getSolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -119,11 +119,11 @@ public class MaxViewTest {
                 xs[2] = model.intVar("z", domains[2]);
                 max(model, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getResolver().set(randomSearch(xs, seed));
+                model.getSolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
             // BEWARE: MAX does not ensure AC, unlike reformulation; so nb of nodes can be different...
 //            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getResolver().getMeasures().getNodeCount(), "NODES (" + seed + "): "
 //                    + solver.getMeasures().getNodeCount() + " vs. " + ref.getResolver().getMeasures().getNodeCount());

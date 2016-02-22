@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 
 import java.io.Serializable;
 
@@ -47,11 +47,11 @@ public interface Learn extends Serializable{
     /**
      * Validate and record a new piece of knowledge, that is, the current position is a dead-end.
      */
-    void record(Resolver resolver);
+    void record(Solver solver);
 
     /**
      * Forget some pieces of knowledge.
      */
-    void forget(Resolver resolver);
+    void forget(Solver solver);
 
 }

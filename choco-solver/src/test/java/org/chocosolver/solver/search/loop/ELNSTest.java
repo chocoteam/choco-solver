@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
 import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingObjective;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
@@ -60,9 +60,9 @@ public class ELNSTest {
         model.arithm(vars[0], "+", vars[1], "<", 2).post();
         model.arithm(vars[4], "+", vars[5], ">", 3).post();
 
-        model.getResolver().setCBJLearning(false, false);
+        model.getSolver().setCBJLearning(false, false);
 
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.setLNS(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),

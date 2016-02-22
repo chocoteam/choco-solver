@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -62,7 +62,7 @@ public class LearnExplained implements Learn {
     final boolean saveCauses;
 
     /**
-     * Maintains the number of solutions found, required for {@link #record(Resolver)}.
+     * Maintains the number of solutions found, required for {@link #record(Solver)}.
      */
     private long nbsol = 0;
 
@@ -80,25 +80,25 @@ public class LearnExplained implements Learn {
      */
     public LearnExplained(Model mModel, boolean partialExplanationsOn, boolean recordCauses) {
         this.mModel = mModel;
-        if (mModel.getResolver().getExplainer() == null) {
-            mModel.getResolver().set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));
+        if (mModel.getSolver().getExplainer() == null) {
+            mModel.getSolver().set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));
         }
-        this.mExplainer = mModel.getResolver().getExplainer();
+        this.mExplainer = mModel.getSolver().getExplainer();
         this.saveCauses = recordCauses;
     }
 
     @Override
-    public void record(Resolver resolver) {
-        if (nbsol == resolver.getMeasures().getSolutionCount()) {
-            onFailure(resolver);
+    public void record(Solver solver) {
+        if (nbsol == solver.getMeasures().getSolutionCount()) {
+            onFailure(solver);
         } else {
             nbsol++;
-            onSolution(resolver);
+            onSolution(solver);
         }
     }
 
     @Override
-    public void forget(Resolver resolver) {
+    public void forget(Solver solver) {
         // nothing by default but forget some learnt nogoods should be done here
     }
 
@@ -106,9 +106,9 @@ public class LearnExplained implements Learn {
      * Actions to do when a solution is found.
      * By default, it records the basic explanation related to the refutation of the last decision.
      */
-    public void onSolution(Resolver resolver){
+    public void onSolution(Solver solver){
         // we need to prepare a "false" backtrack on this decision
-        Decision dec = mModel.getResolver().getLastDecision();
+        Decision dec = mModel.getSolver().getLastDecision();
         while ((dec != ROOT) && (!dec.hasNext())) {
             dec = dec.getPrevious();
         }
@@ -124,14 +124,14 @@ public class LearnExplained implements Learn {
             }
             mExplainer.storeDecisionExplanation(dec, explanation);
         }
-        resolver.setJumpTo(1);
+        solver.setJumpTo(1);
     }
 
     /**
      * Actions to do when a failure is met.
      */
-    public void onFailure(Resolver resolver){
-        ContradictionException cex = mModel.getResolver().getEngine().getContradictionException();
+    public void onFailure(Solver solver){
+        ContradictionException cex = mModel.getSolver().getEngine().getContradictionException();
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
         lastExplanation = mExplainer.explain(cex);
     }

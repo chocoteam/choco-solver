@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.LubyRestartStrategy;
@@ -43,7 +43,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @deprecated use {@link Resolver}, which extends {@link ISearchMonitorFactory}, instead
+ * @deprecated use {@link Solver}, which extends {@link ISearchMonitorFactory}, instead
  * Will be removed after version 3.4.0
  */
 @Deprecated
@@ -60,61 +60,61 @@ public class SearchMonitorFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @deprecated use {@link Resolver#setLubyRestart(int, int, ICounter, int)} instead
+     * @deprecated use {@link Solver#setLubyRestart(int, int, ICounter, int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void luby(Model model, int scaleFactor, int geometricalFactor, ICounter restartStrategyLimit, int restartLimit) {
-        model.getResolver().setRestarts(restartStrategyLimit, new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
+        model.getSolver().setRestarts(restartStrategyLimit, new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**
-     * @deprecated use {@link Resolver#setGeometricalRestart(int, double, ICounter, int)} instead
+     * @deprecated use {@link Solver#setGeometricalRestart(int, double, ICounter, int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void geometrical(Model model, int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        model.getResolver().setRestarts(restartStrategyLimit, new GeometricalRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
+        model.getSolver().setRestarts(restartStrategyLimit, new GeometricalRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**
-     * @deprecated use {@link Resolver#limitNode(long)} instead
+     * @deprecated use {@link Solver#limitNode(long)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void limitNode(Model model, long limit) {
         NodeCounter counter = new NodeCounter(model, limit);
-        model.getResolver().addStopCriterion(counter);
+        model.getSolver().addStopCriterion(counter);
     }
 
     /**
-     * @deprecated use {@link Resolver#limitSolution(long)} instead
+     * @deprecated use {@link Solver#limitSolution(long)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void limitSolution(Model model, long limit) {
         SolutionCounter counter = new SolutionCounter(model, limit);
-        model.getResolver().addStopCriterion(counter);
+        model.getSolver().addStopCriterion(counter);
     }
 
     /**
-     * @deprecated use {@link Resolver#limitTime(long)} instead
+     * @deprecated use {@link Solver#limitTime(long)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void limitTime(Model model, long limit) {
         TimeCounter counter = new TimeCounter(model, limit * MILLISECONDS_IN_NANOSECONDS);
-        model.getResolver().addStopCriterion(counter);
+        model.getSolver().addStopCriterion(counter);
     }
 
     /**
-     * @deprecated use {@link Resolver#limitTime(String)} instead
+     * @deprecated use {@link Solver#limitTime(String)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void limitTime(Model model, String duration) {
-        model.getResolver().limitTime(convertInMilliseconds(duration));
+        model.getSolver().limitTime(convertInMilliseconds(duration));
     }
 
     /**
@@ -214,59 +214,59 @@ public class SearchMonitorFactory {
     }
 
     /**
-     * @deprecated use {@link Resolver#limitFail(long)} instead
+     * @deprecated use {@link Solver#limitFail(long)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void limitFail(Model model, long limit) {
         FailCounter counter = new FailCounter(model, limit);
-        model.getResolver().addStopCriterion(counter);
+        model.getSolver().addStopCriterion(counter);
     }
 
     /**
-     * @deprecated use {@link Resolver#limitBacktrack(long)} instead
+     * @deprecated use {@link Solver#limitBacktrack(long)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void limitBacktrack(Model model, long limit) {
         BacktrackCounter counter = new BacktrackCounter(model, limit);
-        model.getResolver().addStopCriterion(counter);
+        model.getSolver().addStopCriterion(counter);
     }
 
     /**
-     * @deprecated use {@link Resolver#limitSearch(Criterion)} instead
+     * @deprecated use {@link Solver#limitSearch(Criterion)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void limitSearch(Model model, Criterion aStopCriterion) {
-        model.getResolver().addStopCriterion(aStopCriterion);
+        model.getSolver().addStopCriterion(aStopCriterion);
     }
 
     /**
-     * @deprecated use {@link Resolver#setNoGoodRecordingFromSolutions(IntVar...)} instead
+     * @deprecated use {@link Solver#setNoGoodRecordingFromSolutions(IntVar...)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void nogoodRecordingOnSolution(IntVar[] vars) {
-        vars[0].getModel().getResolver().plugMonitor(new NogoodFromSolutions(vars));
+        vars[0].getModel().getSolver().plugMonitor(new NogoodFromSolutions(vars));
     }
 
     /**
-     * @deprecated use {@link Resolver#setNoGoodRecordingFromRestarts()} instead
+     * @deprecated use {@link Solver#setNoGoodRecordingFromRestarts()} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void nogoodRecordingFromRestarts(final Model model) {
-        model.getResolver().plugMonitor(new NogoodFromRestarts(model));
+        model.getSolver().plugMonitor(new NogoodFromRestarts(model));
     }
 
     /**
-     * @deprecated use {@link Resolver#connectocpprofiler()} instead
+     * @deprecated use {@link Solver#connectocpprofiler()} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void connectocpprofiler(Model aModel){
-        aModel.getResolver().plugMonitor(new CPProfiler(aModel));
+        aModel.getSolver().plugMonitor(new CPProfiler(aModel));
     }
 
 }

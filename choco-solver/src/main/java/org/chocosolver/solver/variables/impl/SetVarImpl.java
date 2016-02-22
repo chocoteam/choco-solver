@@ -256,6 +256,6 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
-        model.getResolver().getEngine().fails(cause, this, message);
+        model.getSolver().getEngine().fails(cause, this, message);
     }
 }

@@ -32,7 +32,7 @@ package org.chocosolver.samples.integer;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
@@ -86,7 +86,7 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
 		r.limitTime(limit);
 		r.set(intVarSearch(
 				minDomIntVar(),

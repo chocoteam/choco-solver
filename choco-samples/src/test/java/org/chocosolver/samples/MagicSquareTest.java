@@ -64,17 +64,17 @@ public class MagicSquareTest {
         Model sol;
         int j = 3;
         sol = modeler(j);
-        sol.getResolver().set(new ImpactBased((IntVar[]) sol.getResolver().getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
+        sol.getSolver().set(new ImpactBased((IntVar[]) sol.getSolver().getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
         while (sol.solve()) ;
-        long nbsol = sol.getResolver().getMeasures().getSolutionCount();
-        long node = sol.getResolver().getMeasures().getNodeCount();
+        long nbsol = sol.getSolver().getMeasures().getSolutionCount();
+        long node = sol.getSolver().getMeasures().getNodeCount();
         for (int t = 0; t < values().length; t++) {
             sol = modeler(j);
-            sol.getResolver().set(new ImpactBased((IntVar[]) sol.getResolver().getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
+            sol.getSolver().set(new ImpactBased((IntVar[]) sol.getSolver().getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
             values()[t].make(sol);
             while (sol.solve()) ;
-            assertEquals(sol.getResolver().getMeasures().getSolutionCount(), nbsol);
-            assertEquals(sol.getResolver().getMeasures().getNodeCount(), node);
+            assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
+            assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
         }
     }
 
@@ -84,14 +84,14 @@ public class MagicSquareTest {
         for (int j = 3; j < 5; j++) {
             sol = modeler(j);
             while (sol.solve()) ;
-            long nbsol = sol.getResolver().getMeasures().getSolutionCount();
-            long node = sol.getResolver().getMeasures().getNodeCount();
+            long nbsol = sol.getSolver().getMeasures().getSolutionCount();
+            long node = sol.getSolver().getMeasures().getNodeCount();
             for (int t = 0; t < values().length; t++) {
                 sol = modeler(j);
                 values()[t].make(sol);
                 while (sol.solve()) ;
-                assertEquals(sol.getResolver().getMeasures().getSolutionCount(), nbsol);
-                assertEquals(sol.getResolver().getMeasures().getNodeCount(), node);
+                assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
+                assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
             }
         }
     }
@@ -105,7 +105,7 @@ public class MagicSquareTest {
         //== >square0,2  ==  12 (0)
         Model model = modeler(4);
         Variable[] vars = model.getVars();
-        model.getResolver().propagate();
+        model.getSolver().propagate();
 		int offset = 0;
         ((IntVar) vars[offset]).instantiateTo(3, Cause.Null);
         ((IntVar) vars[15+offset]).instantiateTo(4, Cause.Null);
@@ -114,10 +114,10 @@ public class MagicSquareTest {
         ((IntVar) vars[9+offset]).removeInterval(1, 2, Cause.Null);
         ((IntVar) vars[13+offset]).removeInterval(1, 2, Cause.Null);
         ((IntVar) vars[1+offset]).instantiateTo(6, Cause.Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         ((IntVar) vars[2+offset]).instantiateTo(12, Cause.Null);
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             Assert.fail("should fail");
         } catch (ContradictionException ignored) {}
     }
@@ -130,22 +130,22 @@ public class MagicSquareTest {
         // square3,0={14,15} square3,1={1,4,5,6,7,8...,8} square3,2={4,5,6,7,8,9...,10} square3,3={8,9,10,11,12,14...,15}
         //[R]!square3,0  ==  14 (1)
         Model model = modeler(4);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
 		int offset = 0;
         Variable[] vars = model.getVars();
         ((IntVar) vars[offset]).instantiateTo(2, Cause.Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         ((IntVar) vars[3+offset]).instantiateTo(3, Cause.Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         ((IntVar) vars[1+offset]).instantiateTo(13, Cause.Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
 
         ((IntVar) vars[6+offset]).removeValue(1, Cause.Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         ((IntVar) vars[14+offset]).removeValue(1, Cause.Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         ((IntVar) vars[12+offset]).removeInterval(9, 14, Cause.Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         Assert.assertTrue(((IntVar) vars[13+offset]).isInstantiatedTo(1));
     }
 }

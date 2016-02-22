@@ -60,7 +60,7 @@ public class BoolNotViewTest {
                 xs[0] = ref.boolVar("x");
                 xs[1] = ref.boolVar("y");
                 ref.sum(xs, "=", 1).post();
-                ref.getResolver().set(randomSearch(xs, seed));
+                ref.getSolver().set(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -68,11 +68,11 @@ public class BoolNotViewTest {
                 xs[0] = model.boolVar("x");
                 xs[1] = model.boolNotView(xs[0]);
                 model.sum(xs, "=", 1).post();
-                model.getResolver().set(randomSearch(xs, seed));
+                model.getSolver().set(randomSearch(xs, seed));
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount());
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
 
         }
     }

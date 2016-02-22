@@ -82,7 +82,7 @@ public class Grocery extends AbstractProblem {
         // choco branching
         showStatistics(model);
         showSolutions(model);
-        model.getResolver().set(inputOrderUBSearch(itemCost));
+        model.getSolver().set(inputOrderUBSearch(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));
     }

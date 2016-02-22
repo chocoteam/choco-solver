@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -266,7 +266,7 @@ public class KeysortingTest {
 
         model.keySort(X, null, Y, 1).post();
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertEquals(X[0][1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -289,7 +289,7 @@ public class KeysortingTest {
 
         model.keySort(X, null, Y, 1).post();
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertEquals(X[0][1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -312,7 +312,7 @@ public class KeysortingTest {
 
         model.keySort(X, null, Y, 1).post();
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertEquals(X[0][0].getValue(), 7);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -345,7 +345,7 @@ public class KeysortingTest {
 
 
         model.keySort(X, null, Y, 2).post();
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(flatten(X)), inputOrderLBSearch(flatten(Y)));
         showSolutions(model);
         while (model.solve()) ;
@@ -371,7 +371,7 @@ public class KeysortingTest {
 
 
         model.keySort(X, null, Y, 1).post();
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(flatten(X)), inputOrderLBSearch(flatten(Y)));
         showSolutions(model);
         while (model.solve()) ;

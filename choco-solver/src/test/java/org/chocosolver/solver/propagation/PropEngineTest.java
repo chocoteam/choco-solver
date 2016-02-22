@@ -79,11 +79,11 @@ public class PropEngineTest {
         Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
         model.post(CSTR, CSTR);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3);
-        model.getResolver().reset();
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3);
+        model.getSolver().reset();
         model.unpost(CSTR);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
     }
 
     // test clone in propagators
@@ -100,9 +100,9 @@ public class PropEngineTest {
         model.allDifferent(vars).post();
         sort(vars, (o1, o2) -> o2.getId() - o1.getId());
 
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         vars[0].instantiateTo(0, Null);
-        model.getResolver().propagate();
+        model.getSolver().propagate();
         assertFalse(vars[0].isInstantiatedTo(0));
     }
 
@@ -116,37 +116,37 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         Model model = makeNQueenWithBinaryConstraints(8);
-        model.getResolver().set(new SevenQueuesPropagatorEngine(model));
+        model.getSolver().set(new SevenQueuesPropagatorEngine(model));
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 92);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
         Model model = makeNQueenWithBinaryConstraints(8);
-        model.getResolver().set(new TwoBucketPropagationEngine(model));
+        model.getSolver().set(new TwoBucketPropagationEngine(model));
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 92);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 92);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void test5(){
         Model model = ProblemMaker.makeGolombRuler(10);
-        model.getResolver().set(new SevenQueuesPropagatorEngine(model));
-        model.getResolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
+        model.getSolver().set(new SevenQueuesPropagatorEngine(model));
+        model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
         while(model.solve());
-        Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
+        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void test6(){
         Model model = ProblemMaker.makeGolombRuler(10);
-        model.getResolver().set(new TwoBucketPropagationEngine(model));
-        model.getResolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
+        model.getSolver().set(new TwoBucketPropagationEngine(model));
+        model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
         while(model.solve());
-        Assert.assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(model.getResolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
+        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
     }
     
     @Test(groups="1s", timeOut=60000)
@@ -182,9 +182,9 @@ public class PropEngineTest {
                     return TRUE;
                 }
             }).post();
-            model.getResolver().set(randomSearch(X, 0));
+            model.getSolver().set(randomSearch(X, 0));
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
         }
     }
 }

@@ -62,7 +62,7 @@ public class CycleLtTest {
             s.arithm(vars[i], "<", vars[i + 1]).post();
         }
         s.arithm(vars[n - 1], "<", vars[0]).post();
-        s.getResolver().set(inputOrderLBSearch(vars));
+        s.getSolver().set(inputOrderLBSearch(vars));
         return s;
     }
 
@@ -96,8 +96,8 @@ public class CycleLtTest {
                 rand.set(nset);
                 values()[j].make(rand);
                 while (rand.solve()) ;
-                st.append(pad(format("%d ", rand.getResolver().getMeasures().getNodeCount()), -7, " "));
-                st.append(pad(format("%d ", rand.getResolver().getMeasures().getBackTrackCount()), -7, " "));
+                st.append(pad(format("%d ", rand.getSolver().getMeasures().getNodeCount()), -7, " "));
+                st.append(pad(format("%d ", rand.getSolver().getMeasures().getBackTrackCount()), -7, " "));
                 st.setLength(0);
             }
             st.append(StringUtils.pad(String.format("MOYENNE : %fms ", mean(prepare(times))), -15, " "));

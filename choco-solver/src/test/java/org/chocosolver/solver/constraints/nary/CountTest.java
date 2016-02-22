@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.BoolVar;
@@ -80,14 +80,14 @@ public class CountTest {
     public void testMS4() {
         Model model = modelit(4);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMS8() {
         Model model = modelit(8);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 1);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -116,13 +116,13 @@ public class CountTest {
             IntVar[] allvars = append(vars, new IntVar[]{occ});
             model.count(value, vars, occ).post();
 
-            Resolver r = model.getResolver();
+            Solver r = model.getSolver();
             r.set(randomSearch(allvars,i));
 
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -168,7 +168,7 @@ public class CountTest {
 //                SearchMonitorFactory.log(solver, true, true);
 //            }
 
-            Resolver r = model.getResolver();
+            Solver r = model.getSolver();
             r.set(randomSearch(vars, seed));
             while (model.solve()) ;
             if (nbsol == -1) {
@@ -195,7 +195,7 @@ public class CountTest {
         IntVar[] vars = model.intVarArray("e", vs.length + 1, 0, ub, false);
 
         Tuples tuples = new Tuples(true);
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
         model.solve();
         do {
             int[] tuple = new int[vars.length];

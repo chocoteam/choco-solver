@@ -31,7 +31,7 @@ package org.chocosolver.samples.real;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.RealVar;
 
@@ -79,13 +79,13 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(realVarSearch(vars));
     }
 
     @Override
     public void solve() {
-        model.getResolver().plugMonitor((IMonitorSolution) () -> {
+        model.getSolver().plugMonitor((IMonitorSolution) () -> {
             StringBuilder st = new StringBuilder();
             st.append("\t");
             for (int i = 0; i < vars.length; i++) {

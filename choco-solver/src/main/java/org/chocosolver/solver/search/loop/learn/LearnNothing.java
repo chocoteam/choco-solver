@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 
 /**
  * Created by cprudhom on 02/09/15.
@@ -37,12 +37,12 @@ import org.chocosolver.solver.Resolver;
  */
 public class LearnNothing implements Learn {
     @Override
-    public void record(Resolver resolver) {
+    public void record(Solver solver) {
 
     }
 
     @Override
-    public void forget(Resolver resolver) {
+    public void forget(Solver solver) {
 
     }
 }

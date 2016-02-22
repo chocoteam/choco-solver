@@ -51,7 +51,7 @@ public class CircuitTest {
         IntVar[] x = model.intVarArray("x", 10, 0, 20, true);
         model.circuit(x).post();
         model.solve();
-        assertEquals(1, model.getResolver().getMeasures().getSolutionCount());
+        assertEquals(1, model.getSolver().getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -60,7 +60,7 @@ public class CircuitTest {
         IntVar[] x = model.intVarArray("x", 10, 0, 10, false);
         model.circuit(x).post();
         model.solve();
-        assertEquals(1, model.getResolver().getMeasures().getSolutionCount());
+        assertEquals(1, model.getSolver().getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -71,7 +71,7 @@ public class CircuitTest {
         IntVar[] vars = append(x, y);
         model.circuit(vars).post();
         model.solve();
-        assertEquals(0, model.getResolver().getMeasures().getSolutionCount());
+        assertEquals(0, model.getSolver().getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -81,7 +81,7 @@ public class CircuitTest {
             IntVar[] x = model.intVarArray("x", n, 0, n - 1, true);
             model.circuit(x).post();
             while (model.solve()) ;
-            assertEquals(factorial(n - 1), model.getResolver().getMeasures().getSolutionCount());
+            assertEquals(factorial(n - 1), model.getSolver().getMeasures().getSolutionCount());
         }
     }
 

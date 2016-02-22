@@ -90,7 +90,7 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderUBSearch(itemCost));
+        model.getSolver().set(inputOrderUBSearch(itemCost));
     }
 
     @Override

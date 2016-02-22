@@ -33,7 +33,7 @@ import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.search.loop.learn.LearnExplained;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -119,33 +119,33 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
     }
 
     @Override
-    public boolean extend(Resolver resolver) {
+    public boolean extend(Solver solver) {
         boolean extend;
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < neighbor.length) {
-            Decision tmp = resolver.getLastDecision();
-            resolver.setLastDecision(neighbor[current++]);
-            assert resolver.getLastDecision() != null;
-            resolver.getLastDecision().setWorldIndex(resolver.getModel().getEnvironment().getWorldIndex());
-            resolver.getLastDecision().setPrevious(tmp);
-            resolver.getModel().getEnvironment().worldPush();
+            Decision tmp = solver.getLastDecision();
+            solver.setLastDecision(neighbor[current++]);
+            assert solver.getLastDecision() != null;
+            solver.getLastDecision().setWorldIndex(solver.getModel().getEnvironment().getWorldIndex());
+            solver.getLastDecision().setPrevious(tmp);
+            solver.getModel().getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
             // TODO: incomplete, have to deal with gamma when extending
-            extend = move.extend(resolver);
+            extend = move.extend(solver);
         }
         return extend;
     }
 
     @Override
-    public boolean repair(Resolver resolver) {
+    public boolean repair(Solver solver) {
         boolean repair;
         if (current < neighbor.length) {
-            resolver.restart();
+            solver.restart();
             // check stop conditionsn for instance, when no compatible decision path can be computed
             repair = !stop;
         } else {
-            repair = move.repair(resolver);
+            repair = move.repair(solver);
         }
         return repair;
     }
@@ -154,14 +154,14 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
      * {@inheritDoc} main reason we implement this Learn.
      */
     @Override
-    public void onFailure(Resolver resolver) {
-        super.onFailure(resolver);
-        neighbor(resolver);
+    public void onFailure(Solver solver) {
+        super.onFailure(solver);
+        neighbor(solver);
     }
 
-    private void neighbor(Resolver resolver) {
+    private void neighbor(Solver solver) {
         Explanation expl = getLastExplanation();
-        IntMetaDecision k = extractConlict(resolver, expl);
+        IntMetaDecision k = extractConlict(solver, expl);
         // add k to the list of conflicts
         gamma.add(k);
         // remove the oldest element in gamma if the tabu size is met
@@ -276,9 +276,9 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
         return _w2.get(k.getDop(i));
     }
 
-    private IntMetaDecision extractConlict(Resolver resolver, Explanation lastExplanation) {
-        int offset = resolver.getSearchWorldIndex();
-        int wi = resolver.getModel().getEnvironment().getWorldIndex() - 1;
+    private IntMetaDecision extractConlict(Solver solver, Explanation lastExplanation) {
+        int offset = solver.getSearchWorldIndex();
+        int wi = solver.getModel().getEnvironment().getWorldIndex() - 1;
         int k = wi - offset;
         int size = lastExplanation.getDecisions().cardinality();
         double w = 1d / size;
@@ -290,7 +290,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
 
         // start iteration over decisions
         IntMetaDecision md = new IntMetaDecision();
-        Decision decision = resolver.getLastDecision();
+        Decision decision = solver.getLastDecision();
         IntDecision id;
         if (DEBUG) System.out.printf("Conflict: ");
         while (decision != RootDecision.ROOT) { // all decisions needs to be explored

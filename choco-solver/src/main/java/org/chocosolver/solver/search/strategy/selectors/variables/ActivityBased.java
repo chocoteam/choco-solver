@@ -34,7 +34,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
@@ -177,15 +177,15 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
-        model.getResolver().setRestartOnSolutions();
+        model.getSolver().setRestartOnSolutions();
         if (restartAfterEachFail) {
-            rfMove = new MoveRestart(model.getResolver().getMove(),
+            rfMove = new MoveRestart(model.getSolver().getMove(),
                     new MonotonicRestartStrategy(1),
-                    new FailCounter(model.getResolver().getModel(), 1),
+                    new FailCounter(model.getSolver().getModel(), 1),
                     MAX_VALUE);
-            model.getResolver().set(rfMove);
+            model.getSolver().set(rfMove);
         }
-        model.getResolver().plugMonitor(this);
+        model.getSolver().plugMonitor(this);
         decisionPool = new PoolManager<>();
 //        init(vars);
     }
@@ -382,7 +382,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
                 if(restartAfterEachFail){
-                    Resolver sl = model.getResolver();
+                    Solver sl = model.getSolver();
                     Move m = sl.getMove();
                     if(m == rfMove){
                         sl.set(rfMove.getChildMoves().get(0));

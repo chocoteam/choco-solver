@@ -103,7 +103,7 @@ public class MagicSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
     }
 
     @Override

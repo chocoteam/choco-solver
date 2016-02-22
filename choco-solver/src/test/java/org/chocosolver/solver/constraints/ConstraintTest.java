@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -56,7 +56,7 @@ public class ConstraintTest {
         SetVar s2 = model.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         model.or(model.allEqual(new SetVar[]{s1, s2}), model.setBoolsChanneling(bs, s1, 0)).post();
         while (model.solve()) ;
-        assertEquals(2040, model.getResolver().getMeasures().getSolutionCount());
+        assertEquals(2040, model.getSolver().getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -68,7 +68,7 @@ public class ConstraintTest {
         model.arithm(ivs[0], ">=", ivs[2]).post(); // INST + UB or INST + LB
         model.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
 
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(randomSearch(ivs, 0));
         while (model.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 48);

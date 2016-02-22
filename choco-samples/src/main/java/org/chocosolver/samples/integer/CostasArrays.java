@@ -81,8 +81,8 @@ public class CostasArrays extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		model.getResolver().limitTime("20s");
-		model.getResolver().set(inputOrderLBSearch(vectors));
+		model.getSolver().limitTime("20s");
+		model.getSolver().set(inputOrderLBSearch(vectors));
 	}
 
     @Override

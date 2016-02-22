@@ -66,30 +66,30 @@ public class RestartTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
         return model;
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testGeometricalRestart1() {
         Model model = buildQ(4);
-        model.getResolver().setGeometricalRestart(2, 1.1, new NodeCounter(model, 2), 2);
+        model.getSolver().setGeometricalRestart(2, 1.1, new NodeCounter(model, 2), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
-        assertEquals(model.getResolver().getMeasures().getRestartCount(), 2);
-        assertEquals(model.getResolver().getMeasures().getNodeCount(), 12);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getMeasures().getRestartCount(), 2);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 12);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testLubyRestart1() {
         Model model = buildQ(4);
-        model.getResolver().setLubyRestart(2, 2, new NodeCounter(model, 2), 2);
+        model.getSolver().setLubyRestart(2, 2, new NodeCounter(model, 2), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
-        assertEquals(model.getResolver().getMeasures().getRestartCount(), 2);
-        assertEquals(model.getResolver().getMeasures().getNodeCount(), 11);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getMeasures().getRestartCount(), 2);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 11);
     }
 
 
@@ -135,9 +135,9 @@ public class RestartTest {
             for (int i = 0; i < n; i++) {
                 model.arithm(Y[i], "=", X[i], "+", n).post();
             }
-            model.getResolver().setRestartOnSolutions();
-            model.getResolver().set(inputOrderLBSearch(X));
-            model.getResolver().limitSolution(100);
+            model.getSolver().setRestartOnSolutions();
+            model.getSolver().set(inputOrderLBSearch(X));
+            model.getSolver().limitSolution(100);
             while (model.solve()) ;
             //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());
         }
@@ -146,10 +146,10 @@ public class RestartTest {
     @Test(groups="1s", timeOut=60000)
     public void testGeometricalRestart2() {
         Model model = buildQ(8);
-        model.getResolver().setGeometricalRestart(10, 1.2, new FailCounter(model, 10), 2);
+        model.getSolver().setGeometricalRestart(10, 1.2, new FailCounter(model, 10), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
-        assertEquals(model.getResolver().getMeasures().getRestartCount(), 2);
+        assertEquals(model.getSolver().getMeasures().getRestartCount(), 2);
     }
 }

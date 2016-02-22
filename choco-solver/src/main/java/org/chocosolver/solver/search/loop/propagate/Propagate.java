@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.propagate;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 
 import java.io.Serializable;
@@ -50,5 +50,5 @@ public interface Propagate extends Serializable{
      *
      * @throws ContradictionException if a dead-end is encountered
      */
-    void execute(Resolver resolver) throws ContradictionException;
+    void execute(Solver solver) throws ContradictionException;
 }

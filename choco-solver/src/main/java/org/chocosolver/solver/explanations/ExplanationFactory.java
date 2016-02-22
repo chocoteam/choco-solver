@@ -30,10 +30,10 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 
 /**
- * @deprecated : use {@link Resolver}
+ * @deprecated : use {@link Solver}
  * which implements {@link org.chocosolver.solver.search.loop.learn.ILearnFactory} instead
  *
  * This class will be removed in versions > 3.4.0
@@ -42,7 +42,7 @@ import org.chocosolver.solver.Resolver;
 public enum ExplanationFactory {
 
     /**
-     * @deprecated : use {@link Resolver#setNoLearning()} instead
+     * @deprecated : use {@link Solver#setNoLearning()} instead
      * This class will be removed in versions > 3.4.0
      */
     @Deprecated
@@ -53,29 +53,29 @@ public enum ExplanationFactory {
         }
     },
     /**
-     * @deprecated : use {@link Resolver#setCBJLearning(boolean, boolean)} instead
+     * @deprecated : use {@link Solver#setCBJLearning(boolean, boolean)} instead
      * This class will be removed in versions > 3.4.0
      */
     @Deprecated
     CBJ {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
-            model.getResolver().setCBJLearning(nogoodsOn, userFeedbackOn);
+            model.getSolver().setCBJLearning(nogoodsOn, userFeedbackOn);
         }
     },
     /**
-     * @deprecated : use {@link Resolver#setDBTLearning(boolean, boolean)} instead
+     * @deprecated : use {@link Solver#setDBTLearning(boolean, boolean)} instead
      * This class will be removed in versions > 3.4.0
      */
     @Deprecated
     DBT {
         @Override
         public void plugin(Model model, boolean nogoodsOn, boolean userFeedbackOn) {
-            model.getResolver().setDBTLearning(nogoodsOn, userFeedbackOn);
+            model.getSolver().setDBTLearning(nogoodsOn, userFeedbackOn);
         }
     };
     /**
-     * @deprecated : use {@link Resolver} instead
+     * @deprecated : use {@link Solver} instead
      * This class will be removed in versions > 3.4.0
      */
     @Deprecated

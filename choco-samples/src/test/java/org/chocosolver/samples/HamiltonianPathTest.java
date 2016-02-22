@@ -102,16 +102,16 @@ public class HamiltonianPathTest {
 		model.path(succ, model.intVar(offset), model.intVar(n - 1 + offset), offset).post();
 		// configure solver
 		if (rd) {
-			model.getResolver().set(randomSearch(succ, seed));
+			model.getSolver().set(randomSearch(succ, seed));
 		} else {
-			model.getResolver().set(new ConstructorIntHeur(succ, offset));
+			model.getSolver().set(new ConstructorIntHeur(succ, offset));
 		}
-		model.getResolver().limitTime(TIME_LIMIT);
+		model.getSolver().limitTime(TIME_LIMIT);
 		model.solve();
-		IMeasures mes = model.getResolver().getMeasures();
+		IMeasures mes = model.getSolver().getMeasures();
 		// the problem has at least one solution
-		assertTrue(mes.getSolutionCount() == 1 || model.getResolver().isStopCriterionMet(),
-				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + model.getResolver().isStopCriterionMet());
+		assertTrue(mes.getSolutionCount() == 1 || model.getSolver().isStopCriterionMet(),
+				"sol count:" + mes.getSolutionCount() + ", has reached limit: " + model.getSolver().isStopCriterionMet());
 	}
 
 	private static boolean[][] transformMatrix(boolean[][] m) {

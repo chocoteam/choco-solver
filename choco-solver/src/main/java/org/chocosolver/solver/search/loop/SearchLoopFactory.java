@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.move.IMoveFactory;
@@ -41,7 +41,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.criteria.LongCriterion;
 
 /**
- * @deprecated use {@link Resolver}, which extends {@link IMoveFactory}, instead
+ * @deprecated use {@link Solver}, which extends {@link IMoveFactory}, instead
  * Will be removed after version 3.4.0
  */
 @Deprecated
@@ -50,56 +50,56 @@ public class SearchLoopFactory {
     SearchLoopFactory() {}
 
     /**
-     * @deprecated use {@link Resolver#setDFS()} instead
+     * @deprecated use {@link Solver#setDFS()} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void dfs(Model aModel, AbstractStrategy<V> aSearchStrategy) {
-        Resolver r = aModel.getResolver();
+        Solver r = aModel.getSolver();
         r.setDFS();
         r.set(aSearchStrategy);
     }
 
     /**
-     * @deprecated use {@link Resolver#setLDS(int)} instead
+     * @deprecated use {@link Solver#setLDS(int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void lds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
-        Resolver r = aModel.getResolver();
+        Solver r = aModel.getSolver();
         r.set(aSearchStrategy);
         r.setLDS(discrepancy);
     }
 
     /**
-     * @deprecated use {@link Resolver#setDDS(int)} instead
+     * @deprecated use {@link Solver#setDDS(int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void dds(Model aModel, AbstractStrategy<V> aSearchStrategy, int discrepancy) {
-        Resolver r = aModel.getResolver();
+        Solver r = aModel.getSolver();
         r.set(aSearchStrategy);
         r.setDDS(discrepancy);
     }
 
     /**
-     * @deprecated use {@link Resolver#setHBFS(double, double, long)} instead
+     * @deprecated use {@link Solver#setHBFS(double, double, long)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void hbfs(Model aModel, AbstractStrategy<V> aSearchStrategy, double a, double b, long N) {
-        Resolver r = aModel.getResolver();
+        Solver r = aModel.getSolver();
         r.set(aSearchStrategy);
         r.setHBFS(a, b, N);
     }
 
     /**
-     * @deprecated use {@link Resolver#set(Move...)} instead
+     * @deprecated use {@link Solver#set(Move...)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static <V extends Variable> void seq(Model aModel, Move... moves) {
-        aModel.getResolver().set(moves);
+        aModel.getSolver().set(moves);
     }
 
     //****************************************************************************************************************//
@@ -107,42 +107,42 @@ public class SearchLoopFactory {
     //****************************************************************************************************************//
 
     /**
-     * @deprecated use {@link Resolver#setRestarts(LongCriterion, IRestartStrategy, int)} instead
+     * @deprecated use {@link Solver#setRestarts(LongCriterion, IRestartStrategy, int)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void restart(Model aModel, LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
-        Resolver r = aModel.getResolver();
+        Solver r = aModel.getSolver();
         r.setRestarts(restartCriterion, restartStrategy, restartsLimit);
     }
 
     /**
-     * @deprecated use {@link Resolver#setRestartOnSolutions()} instead
+     * @deprecated use {@link Solver#setRestartOnSolutions()} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void restartOnSolutions(Model aModel) {
-        Resolver r = aModel.getResolver();
+        Solver r = aModel.getSolver();
         r.setRestartOnSolutions();
     }
 
     /**
-     * @deprecated use {@link Resolver#setLNS(INeighbor, ICounter)} instead
+     * @deprecated use {@link Solver#setLNS(INeighbor, ICounter)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void lns(Model aModel, INeighbor neighbor, ICounter restartCounter) {
-        aModel.getResolver().setLNS(neighbor,restartCounter);
+        aModel.getSolver().setLNS(neighbor,restartCounter);
     }
 
 
     /**
-     * @deprecated use {@link Resolver#setLNS(INeighbor)} instead
+     * @deprecated use {@link Solver#setLNS(INeighbor)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void lns(Model aModel, INeighbor neighbor) {
-        Resolver r = aModel.getResolver();
+        Solver r = aModel.getSolver();
         r.setLNS(neighbor);
     }
 
@@ -163,20 +163,20 @@ public class SearchLoopFactory {
     //****************************************************************************************************************//
 
     /**
-     * @deprecated use {@link Resolver#setCBJLearning(boolean, boolean)} instead
+     * @deprecated use {@link Solver#setCBJLearning(boolean, boolean)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void learnCBJ(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        aModel.getResolver().setCBJLearning(nogoodsOn,userFeedbackOn);
+        aModel.getSolver().setCBJLearning(nogoodsOn,userFeedbackOn);
     }
 
     /**
-     * @deprecated use {@link Resolver#setDBTLearning(boolean, boolean)} instead
+     * @deprecated use {@link Solver#setDBTLearning(boolean, boolean)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
     public static void learnDBT(Model aModel, boolean nogoodsOn, boolean userFeedbackOn) {
-        aModel.getResolver().setDBTLearning(nogoodsOn,userFeedbackOn);
+        aModel.getSolver().setDBTLearning(nogoodsOn,userFeedbackOn);
     }
 }

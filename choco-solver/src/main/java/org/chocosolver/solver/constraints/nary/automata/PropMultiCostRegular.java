@@ -737,8 +737,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     protected void checkWorld() throws ContradictionException {
         int currentworld = model.getEnvironment().getWorldIndex();
-        long currentbt = model.getResolver().getMeasures().getBackTrackCount();
-        long currentrestart = model.getResolver().getMeasures().getRestartCount();
+        long currentbt = model.getSolver().getMeasures().getBackTrackCount();
+        long currentrestart = model.getSolver().getMeasures().getRestartCount();
         //System.err.println("TIME STAMP : "+currentbt+"   BT COUNT : "+solver.getBackTrackCount());
         // assert (currentbt == model.getBackTrackCount());
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
@@ -857,8 +857,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     public final boolean needPropagation() {
         int currentworld = model.getEnvironment().getWorldIndex();
-        long currentbt = model.getResolver().getMeasures().getBackTrackCount();
-        long currentrestart = model.getResolver().getMeasures().getRestartCount();
+        long currentbt = model.getSolver().getMeasures().getBackTrackCount();
+        long currentrestart = model.getSolver().getMeasures().getRestartCount();
 
         return (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts);
 

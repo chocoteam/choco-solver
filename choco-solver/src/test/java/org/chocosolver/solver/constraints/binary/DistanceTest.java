@@ -31,7 +31,7 @@ package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -67,7 +67,7 @@ public class DistanceTest {
                 model.arithm(Z, "=", 5).post();
 
 
-                Resolver r = model.getResolver();
+                Solver r = model.getSolver();
                 r.set(randomSearch(new IntVar[]{X, Y}, i));
                 while (model.solve()) ;
                 nbSol = r.getMeasures().getSolutionCount();
@@ -78,7 +78,7 @@ public class DistanceTest {
                 IntVar X = model.intVar("X", 1, 10, false);
                 IntVar Y = model.intVar("Y", 1, 10, false);
                 model.distance(X, Y, "=", 5).post();
-                Resolver r = model.getResolver();
+                Solver r = model.getSolver();
                 r.set(randomSearch(new IntVar[]{X, Y}, i));
                 while (model.solve()) ;
                 assertEquals(r.getMeasures().getSolutionCount(), nbSol);
@@ -110,8 +110,8 @@ public class DistanceTest {
             }
 
             try {
-                s1.getResolver().propagate();
-                s2.getResolver().propagate();
+                s1.getSolver().propagate();
+                s2.getSolver().propagate();
                 Assert.assertEquals(vs1[0].getDomainSize(), vs2[0].getDomainSize());
                 Assert.assertEquals(vs1[1].getDomainSize(), vs2[1].getDomainSize());
 
@@ -124,7 +124,7 @@ public class DistanceTest {
                     vs1[0].removeValue(val, Cause.Null);
                     vs2[0].removeValue(val, Cause.Null);
 
-                    s1.getResolver().propagate();
+                    s1.getSolver().propagate();
                     p2.propagate(0);
 
                     Assert.assertEquals(vs1[0].getDomainSize(), vs2[0].getDomainSize());
@@ -147,7 +147,7 @@ public class DistanceTest {
         IntVar Y = model.intVar("Y", -5, 5, true);
         IntVar Z = model.intVar("Z", 0, 10, true);
         model.distance(X, Y, "=", Z).post();
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(new IntVar[]{Z, X, Y, Z}));
         while (model.solve()) ;
     }

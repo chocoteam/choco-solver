@@ -99,7 +99,7 @@ public class Langford extends AbstractProblem {
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder(String.format("Langford's number (%s,%s)\n", k, n));
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             int[] values = new int[k * n];
             for (int i = 0; i < k; i++) {
                 for (int j = 0; j < n; j++) {

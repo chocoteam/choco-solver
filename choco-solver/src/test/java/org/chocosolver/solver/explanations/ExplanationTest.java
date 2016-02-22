@@ -62,17 +62,17 @@ public class ExplanationTest {
                     IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
                     model.arithm(vars[n - 2], "=", vars[n - 1]).post();
                     model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-                    model.getResolver().set(inputOrderLBSearch(vars));
+                    model.getSolver().set(inputOrderLBSearch(vars));
                     switch (e){
-                        case 1:model.getResolver().setNoLearning();break;
-                        case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
-                        case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                        case 1:model.getSolver().setNoLearning();break;
+                        case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
+                        case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                     }
                     assertFalse(model.solve());
-                    out.printf("\t%s", model.getResolver().getMeasures().toOneShortLineString());
+                    out.printf("\t%s", model.getSolver().getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
                     if (e > 0) {
-                        assertEquals(model.getResolver().getMeasures().getNodeCount(), (n - 2) * 2);
+                        assertEquals(model.getSolver().getMeasures().getNodeCount(), (n - 2) * 2);
                     }
                 }
             }
@@ -86,10 +86,10 @@ public class ExplanationTest {
         IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
         model.arithm(vars[n - 2], "=", vars[n - 1]).post();
         model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
 
-        model.getResolver().setCBJLearning(false, true);
-        LearnCBJ cbj = (LearnCBJ) model.getResolver().getLearn();
+        model.getSolver().setCBJLearning(false, true);
+        LearnCBJ cbj = (LearnCBJ) model.getSolver().getLearn();
         assertFalse(model.solve());
         Explanation exp = cbj.getLastExplanation();
         assertEquals(2, exp.nbCauses());
@@ -104,11 +104,11 @@ public class ExplanationTest {
                         final Model model = new Model();
                         IntVar[] pigeons = model.intVarArray("p", n, 0, n - 2, false);
                         model.allDifferent(pigeons, "NEQS").post();
-                        model.getResolver().set(randomSearch(pigeons, seed));
+                        model.getSolver().set(randomSearch(pigeons, seed));
                         switch (e){
-                            case 1:model.getResolver().setNoLearning();break;
-                            case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
-                            case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                            case 1:model.getSolver().setNoLearning();break;
+                            case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
+                            case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                         }
                         assertFalse(model.solve());
                         printShortStatistics(model);
@@ -162,12 +162,12 @@ public class ExplanationTest {
                         model.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
                         model.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
                         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
-                        model.getResolver().set(randomSearch(vars, seed));
+                        model.getSolver().set(randomSearch(vars, seed));
 
                         switch (e){
-                            case 1:model.getResolver().setNoLearning();break;
-                            case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
-                            case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                            case 1:model.getSolver().setNoLearning();break;
+                            case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
+                            case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                         }
 //                    SMF.shortlog(solver);
                         assertEquals(n > 2, model.solve());
@@ -191,11 +191,11 @@ public class ExplanationTest {
 
                     model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                     model.arithm(p[9], "+", p[8], ">", 4).post();
-                    model.getResolver().set(randomSearch(p, seed));
+                    model.getSolver().set(randomSearch(p, seed));
                     switch (e){
-                        case 1:model.getResolver().setNoLearning();break;
-                        case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
-                        case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                        case 1:model.getSolver().setNoLearning();break;
+                        case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
+                        case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                     }
                     showShortStatistics(model);
                     assertFalse(model.solve());
@@ -218,11 +218,11 @@ public class ExplanationTest {
                 model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
-                model.getResolver().set(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
+                model.getSolver().set(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
                 switch (e){
-                    case 1:model.getResolver().setNoLearning();break;
-                    case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
-                    case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                    case 1:model.getSolver().setNoLearning();break;
+                    case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
+                    case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                 }
                 showStatistics(model);
                 showSolutions(model);
@@ -246,11 +246,11 @@ public class ExplanationTest {
                 model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
-                model.getResolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
+                model.getSolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
                 switch (e){
-                    case 1:model.getResolver().setNoLearning();break;
-                    case 2:model.getResolver().setCBJLearning(ng == 1, false);break;
-                    case 3:model.getResolver().setDBTLearning(ng == 1, false);break;
+                    case 1:model.getSolver().setNoLearning();break;
+                    case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
+                    case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                 }
                 showStatistics(model);
                 showSolutions(model);
@@ -277,8 +277,8 @@ public class ExplanationTest {
             bs[1] = model.arithm(p[3], "!=", p[4]).reify();
             model.arithm(bs[0], "=", bs[1]).post();
 
-            model.getResolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
-            model.getResolver().setDBTLearning(ng == 1, false);
+            model.getSolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
+            model.getSolver().setDBTLearning(ng == 1, false);
             showStatistics(model);
             showSolutions(model);
             showDecisions(model);

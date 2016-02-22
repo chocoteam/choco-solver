@@ -87,7 +87,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(flatten(M)));
+        model.getSolver().set(inputOrderLBSearch(flatten(M)));
     }
 
     @Override
@@ -99,7 +99,7 @@ public class SchurLemma extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("Schur's lemma (%d,%d)", n, k));
         StringBuilder st = new StringBuilder();
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < k; i++) {
                 st.append("\tBox #").append(i + 1).append(": ");
                 for (int j = 0; j < n; j++) {

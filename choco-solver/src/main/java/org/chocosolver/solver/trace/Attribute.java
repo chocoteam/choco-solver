@@ -189,7 +189,7 @@ public enum Attribute {
     NMDV {
         @Override
         public double evaluate(Model model) {
-            AbstractStrategy strat = model.getResolver().getStrategy();
+            AbstractStrategy strat = model.getSolver().getStrategy();
             if (strat != null) {
                 return strat.getVariables().length * 1.0 / model.getVars().length;
             } else return 1.0;
@@ -234,8 +234,8 @@ public enum Attribute {
         Chatterbox.out.printf("- Model[%s] features:\n", model.getName());
         Chatterbox.out.printf("\tVariables : %d\n", model.getNbVars());
         Chatterbox.out.printf("\tConstraints : %d\n", model.getNbCstrs());
-        Chatterbox.out.printf("\tDefault search strategy : %s\n", model.getResolver().isDefaultSearchUsed()?"yes":"no");
-        Chatterbox.out.printf("\tCompleted search strategy : %s\n", model.getResolver().isSearchCompleted()?"yes":"no");
+        Chatterbox.out.printf("\tDefault search strategy : %s\n", model.getSolver().isDefaultSearchUsed()?"yes":"no");
+        Chatterbox.out.printf("\tCompleted search strategy : %s\n", model.getSolver().isSearchCompleted()?"yes":"no");
     }
 
 }

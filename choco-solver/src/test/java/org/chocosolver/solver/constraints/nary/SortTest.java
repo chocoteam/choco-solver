@@ -102,7 +102,7 @@ public class SortTest {
 
         model.sort(X, Y).post();
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertEquals(X[1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -125,7 +125,7 @@ public class SortTest {
 
         model.sort(X, Y).post();
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertEquals(X[1].getValue(), 0);
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -148,7 +148,7 @@ public class SortTest {
 
         model.sort(X, Y).post();
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             assertEquals(X[0].getValue(), 7);
         } catch (ContradictionException e) {
             e.printStackTrace();

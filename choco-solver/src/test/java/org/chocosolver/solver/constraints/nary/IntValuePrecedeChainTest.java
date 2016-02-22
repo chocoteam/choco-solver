@@ -65,17 +65,17 @@ public class IntValuePrecedeChainTest {
                 Model model = new Model();
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 model.intValuePrecedeChain(vars, 1, 2).post();
-                model.getResolver().set(randomSearch(vars, 0));
+                model.getSolver().set(randomSearch(vars, 0));
                 while (model.solve()) ;
-                s1 = model.getResolver().getMeasures().getSolutionCount();
+                s1 = model.getSolver().getMeasures().getSolutionCount();
             }
             {
                 Model model = new Model();
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 int_value_precede_chain_dec(vars, 1, 2);
-                model.getResolver().set(randomSearch(vars, 0));
+                model.getSolver().set(randomSearch(vars, 0));
                 while (model.solve()) ;
-                s2 = model.getResolver().getMeasures().getSolutionCount();
+                s2 = model.getSolver().getMeasures().getSolutionCount();
             }
             Assert.assertEquals(s1, s2);
 

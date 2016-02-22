@@ -66,7 +66,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.chocosolver.solver.Resolver.Action.*;
+import static org.chocosolver.solver.Solver.Action.*;
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.search.loop.Reporting.fullReport;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
@@ -96,7 +96,7 @@ import static org.chocosolver.util.ESat.*;
  * Project: choco.
  * @author Charles Prud'homme
  */
-public final class Resolver implements Serializable, ISolver {
+public final class Solver implements Serializable, ISolver {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////    PRIVATE FIELDS     //////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ public final class Resolver implements Serializable, ISolver {
      *
      * @param aModel the target model
      */
-    public Resolver(Model aModel) {
+    public Solver(Model aModel) {
         mModel = aModel;
         eoList = new FilteringMonitorList();
         engine = NoPropagationEngine.SINGLETON;
@@ -216,7 +216,7 @@ public final class Resolver implements Serializable, ISolver {
      * - OPTIMISATION : If an objective has been defined, searches an optimal solution
      * (and prove optimality by closing the search space). Then restores the best solution found after solving.
      * @return if at least one new solution has been found.
-     * @see {@link Resolver}
+     * @see {@link Solver}
      */
     public boolean solve(){
         // prepare
@@ -399,7 +399,7 @@ public final class Resolver implements Serializable, ISolver {
             AbstractStrategy<Variable> declared = M.getStrategy();
             DefaultSearchBinder dbinder = new DefaultSearchBinder();
             AbstractStrategy[] complete = dbinder.getDefault(mModel);
-            mModel.getResolver().set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
+            mModel.getSolver().set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
         }
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
             mModel.getEnvironment().worldPop();
@@ -469,7 +469,7 @@ public final class Resolver implements Serializable, ISolver {
         searchMonitors.beforeRestart();
         restoreRootNode();
         mModel.getEnvironment().worldPush();
-        mModel.getResolver().getMeasures().incRestartCount();
+        mModel.getSolver().getMeasures().incRestartCount();
         try {
             objectivemanager.postDynamicCut();
             P.execute(this);
@@ -922,7 +922,7 @@ public final class Resolver implements Serializable, ISolver {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public Resolver _me() {
+    public Solver _me() {
         return this;
     }
 
@@ -946,11 +946,11 @@ public final class Resolver implements Serializable, ISolver {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @deprecated use {@link Resolver#set(Propagate), Resolver#set(Learn), Resolver#set(Move)} instead
+     * @deprecated use {@link Solver#set(Propagate), Resolver#set(Learn), Resolver#set(Move)} instead
      * Will be removed after version 3.4.0
      */
     @Deprecated
-    public Resolver(Model aModel, Propagate p, Learn l, Move m) {
+    public Solver(Model aModel, Propagate p, Learn l, Move m) {
         this(aModel);
         set(p);
         set(l);

@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -153,9 +153,9 @@ public class CumulativeTest {
 			model.arithm(e[i], "<=", last).post();
 		}
 		model.cumulative(t, h, capa, graph).post();
-		Resolver r = model.getResolver();
+		Solver r = model.getSolver();
 		r.set(lastConflict(randomSearch(model.retrieveIntVars(false), seed)));
-		model.getResolver().limitTime(5000);
+		model.getSolver().limitTime(5000);
 		switch (mode) {
 			case 0:
 				model.solve();

@@ -90,7 +90,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
         assert k > 0 : "parameter K of last conflict must be strictly positive!";
         this.model = model;
         this.mainStrategy = mainStrategy;
-        model.getResolver().plugMonitor(this);
+        model.getSolver().plugMonitor(this);
         conflictingVariables = new Variable[k];
         nbCV = 0;
         active = false;
@@ -127,8 +127,8 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        if(!model.getResolver().getLastDecision().isMeta()) {
-            Variable curDecVar = (Variable) model.getResolver().getLastDecision().getDecisionVariables();
+        if(!model.getSolver().getLastDecision().isMeta()) {
+            Variable curDecVar = (Variable) model.getSolver().getLastDecision().getDecisionVariables();
             if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
             if (inScope(curDecVar)) {
                 if (nbCV < conflictingVariables.length) {

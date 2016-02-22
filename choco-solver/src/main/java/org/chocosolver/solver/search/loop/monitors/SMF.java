@@ -29,10 +29,10 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 
 /**
- * @deprecated use {@link Resolver}, which extends {@link ISearchMonitorFactory}, instead
+ * @deprecated use {@link Solver}, which extends {@link ISearchMonitorFactory}, instead
  * Will be removed after version 3.4.0
  */
 @Deprecated

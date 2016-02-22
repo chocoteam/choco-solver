@@ -121,7 +121,7 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(cars));
+        model.getSolver().set(inputOrderLBSearch(cars));
     }
 
     @Override

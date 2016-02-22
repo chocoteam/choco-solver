@@ -63,10 +63,10 @@ public class SimpleExplanationTest {
         s.arithm(vars[1], "<", vars[2]).post();
         s.arithm(vars[0], "!=", vars[1]).post();
         // configure Solver
-        s.getResolver().set(inputOrderLBSearch(vars));
+        s.getSolver().set(inputOrderLBSearch(vars));
         // solve
         s.solve();
-        long sol = s.getResolver().getMeasures().getSolutionCount();
+        long sol = s.getSolver().getMeasures().getSolutionCount();
         assertEquals(sol, 1, "nb sol incorrect");
     }
 

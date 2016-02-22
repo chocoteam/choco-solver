@@ -95,11 +95,11 @@ public class AmongTest {
             int value = 1;
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.getResolver().set(randomSearch(allvars,i));
+            model.getSolver().set(randomSearch(allvars,i));
             model.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -112,12 +112,12 @@ public class AmongTest {
             int[] values = {1, 2, 0};
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.getResolver().set(randomSearch(allvars,i));
+            model.getSolver().set(randomSearch(allvars,i));
             model.among(occ, vars, values).post();
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
         }
     }
 
@@ -129,11 +129,11 @@ public class AmongTest {
         IntVar occ = model.intVar("oc", 0, 4, true);
         model.among(occ, vars, values).post();
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
 
             vars[0].removeValue(1, Null);
             vars[0].removeValue(2, Null);
-            model.getResolver().propagate();
+            model.getSolver().propagate();
         } catch (ContradictionException e) {
             fail();
         }
@@ -177,12 +177,12 @@ public class AmongTest {
             }
             model.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]).post();
 
-            model.getResolver().set(randomSearch(vars,seed));
+            model.getSolver().set(randomSearch(vars,seed));
             while (model.solve()) ;
             if (nbsol == -1) {
-                nbsol = model.getResolver().getMeasures().getSolutionCount();
+                nbsol = model.getSolver().getMeasures().getSolutionCount();
             } else {
-                assertEquals(model.getResolver().getMeasures().getSolutionCount(), nbsol);
+                assertEquals(model.getSolver().getMeasures().getSolutionCount(), nbsol);
             }
 
         }
@@ -231,12 +231,12 @@ public class AmongTest {
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
 
-            model.getResolver().set(randomSearch(vars,seed));
+            model.getSolver().set(randomSearch(vars,seed));
             while (model.solve()) ;
             if (nbsol == -1) {
-                nbsol = model.getResolver().getMeasures().getSolutionCount();
+                nbsol = model.getSolver().getMeasures().getSolutionCount();
             } else {
-                assertEquals(model.getResolver().getMeasures().getSolutionCount(), nbsol);
+                assertEquals(model.getSolver().getMeasures().getSolutionCount(), nbsol);
             }
 
         }

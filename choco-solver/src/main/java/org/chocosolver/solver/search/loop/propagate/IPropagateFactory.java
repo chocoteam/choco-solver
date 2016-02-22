@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.propagate;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 
 /**
  * Interface to define how to handle constraint propagation
@@ -37,7 +37,7 @@ import org.chocosolver.solver.Resolver;
  */
 public interface IPropagateFactory {
 
-	Resolver _me();
+	Solver _me();
 
 	/**
      * Creates a basic Propagate object to handle constraint propagation

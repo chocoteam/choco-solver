@@ -110,7 +110,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         random = new Random(seed);
         decisionPool = new PoolManager<>();
         this.nodeImpact = nodeImpact;
-        if (!initOnly) model.getResolver().plugMonitor(this);
+        if (!initOnly) model.getSolver().plugMonitor(this);
     }
 
     public ImpactBased(IntVar[] vars, boolean initOnly){
@@ -348,21 +348,21 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         double after;
         try {
             v.instantiateTo(a, this);
-            model.getResolver().getEngine().propagate();
+            model.getSolver().getEngine().propagate();
             after = searchSpaceSize();
             return 1.0d - (after / before);
         } catch (ContradictionException e) {
-            model.getResolver().getEngine().flush();
+            model.getSolver().getEngine().flush();
             model.getEnvironment().worldPop();
             model.getEnvironment().worldPush();
             // if the value leads to fail, then the value can be removed from the domain
             try {
                 v.removeValue(a, this);
-                model.getResolver().getEngine().propagate();
+                model.getSolver().getEngine().propagate();
             } catch (ContradictionException ex) {
                 learnsAndFails = true;
                 lAfVar = v;
-                model.getResolver().getEngine().flush();
+                model.getSolver().getEngine().flush();
             }
             return 1.0d;
         }finally {
@@ -403,7 +403,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     protected void reevaluateImpact() {
-        if (nodeImpact > 0 && model.getResolver().getMeasures().getNodeCount() % nodeImpact == 0) {
+        if (nodeImpact > 0 && model.getSolver().getMeasures().getNodeCount() % nodeImpact == 0) {
             double before = searchSpaceSize.get();
             learnsAndFails = false;
             for (int i = 0; i < vars.length; i++) {

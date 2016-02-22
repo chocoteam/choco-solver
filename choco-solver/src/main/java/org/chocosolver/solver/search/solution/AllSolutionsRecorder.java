@@ -48,7 +48,7 @@ public class AllSolutionsRecorder implements ISolutionRecorder {
 	public AllSolutionsRecorder(final Model model){
 		this.model = model;
 		this.solutions = new LinkedList<>();
-		model.getResolver().plugMonitor(createRecMonitor());
+		model.getSolver().plugMonitor(createRecMonitor());
 	}
 
 	protected IMonitorSolution createRecMonitor() {

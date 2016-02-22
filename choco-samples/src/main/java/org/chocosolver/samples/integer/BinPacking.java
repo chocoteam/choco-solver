@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.objective.ObjectiveManager;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.AllSolutionsRecorder;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -90,7 +89,7 @@ public class BinPacking extends AbstractProblem{
 		switch (mode) {
 			case 0:// to check
 				model.arithm(minLoad, "=", 17).post();
-				model.getResolver().set(new AllSolutionsRecorder(model));
+				model.getSolver().set(new AllSolutionsRecorder(model));
 				while(model.solve()){
 					nbOpt ++;
 				}
@@ -98,7 +97,7 @@ public class BinPacking extends AbstractProblem{
 				break;
 			case 1:// one step approach (could be slow)
 				// non-strict optimization
-				model.getResolver().set(new ObjectiveManager<IntVar, Integer>(minLoad, MAXIMIZE, false));
+				model.getSolver().set(new ObjectiveManager<IntVar, Integer>(minLoad, MAXIMIZE, false));
 				while (model.solve());
 				break;
 			case 2:// two step approach (find and prove optimum, then enumerate)
@@ -109,7 +108,7 @@ public class BinPacking extends AbstractProblem{
 					opt = minLoad.getValue();
 				}
 				if (opt != -1) {
-					model.getResolver().reset();
+					model.getSolver().reset();
 					model.arithm(minLoad, "=", opt).post();
 					model.clearObjectives();
 					while(model.solve()){
@@ -125,7 +124,7 @@ public class BinPacking extends AbstractProblem{
 
 	@Override
 	public void prettyOut() {
-		System.out.println("There are "+ model.getResolver().getSolutionRecorder().getSolutions().size()+" optimal solutions");
+		System.out.println("There are "+ model.getSolver().getSolutionRecorder().getSolutions().size()+" optimal solutions");
 	}
 
 	//***********************************************************************************

@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 
@@ -58,20 +58,20 @@ public class MoveBinaryDDS extends MoveBinaryLDS {
     }
 
     @Override
-    public boolean extend(Resolver resolver) {
+    public boolean extend(Solver solver) {
         boolean extended = false;
-        Decision tmp = resolver.getLastDecision();
-        resolver.setLastDecision(strategy.getDecision());
-        if (resolver.getLastDecision() != null) { // null means there is no more decision
-            resolver.getLastDecision().setPrevious(tmp);
-            resolver.getModel().getEnvironment().worldPush();
+        Decision tmp = solver.getLastDecision();
+        solver.setLastDecision(strategy.getDecision());
+        if (solver.getLastDecision() != null) { // null means there is no more decision
+            solver.getLastDecision().setPrevious(tmp);
+            solver.getModel().getEnvironment().worldPush();
             if (dis.get() == 1) {
-                resolver.getLastDecision().buildNext();
+                solver.getLastDecision().buildNext();
             }
             dis.add(-1);
             extended = true;
         } else {
-            resolver.setLastDecision(tmp);
+            solver.setLastDecision(tmp);
         }
         return extended;
     }

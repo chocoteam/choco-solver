@@ -70,7 +70,7 @@ public class EqualXYCExplTest {
         ref.set(nset);
         sol.set(nset);
 
-        sol.getResolver().setCBJLearning(false, false);
+        sol.getSolver().setCBJLearning(false, false);
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
@@ -83,10 +83,10 @@ public class EqualXYCExplTest {
             indicess[i] = sol.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = flatten(toArray(varsr, indicesr));
-        ref.getResolver().set(inputOrderLBSearch(allvarsr));
+        ref.getSolver().set(inputOrderLBSearch(allvarsr));
 
         IntVar[] allvarss = flatten(toArray(varss, indicess));
-        sol.getResolver().set(inputOrderLBSearch(allvarss));
+        sol.getSolver().set(inputOrderLBSearch(allvarss));
 
 
         for (int i = 0; i < varsr.length - 1; i++) {
@@ -100,8 +100,8 @@ public class EqualXYCExplTest {
         while (sol.solve()) ;
 
 
-        assertEquals(sol.getResolver().getMeasures().getSolutionCount(), ref.getResolver().getMeasures().getSolutionCount());
-        assertTrue(sol.getResolver().getMeasures().getBackTrackCount() <= ref.getResolver().getMeasures().getBackTrackCount());
+        assertEquals(sol.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
+        assertTrue(sol.getSolver().getMeasures().getBackTrackCount() <= ref.getSolver().getMeasures().getBackTrackCount());
     }
 
     @Test(groups="1s", timeOut=60000)

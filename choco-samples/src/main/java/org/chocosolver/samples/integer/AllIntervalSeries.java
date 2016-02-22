@@ -92,7 +92,7 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(minDomLBSearch(vars));
+        model.getSolver().set(minDomLBSearch(vars));
     }
 
     @Override

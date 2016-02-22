@@ -64,8 +64,8 @@ public class SetCstrsTest {
 		while (v1[0].getModel().solve()) ;
 		while (v2[0].getModel().solve()) ;
 		assertEquals(
-				v1[0].getModel().getResolver().getMeasures().getSolutionCount(),
-				v2[0].getModel().getResolver().getMeasures().getSolutionCount()
+				v1[0].getModel().getSolver().getMeasures().getSolutionCount(),
+				v2[0].getModel().getSolver().getMeasures().getSolutionCount()
 		);
 	}
 
@@ -102,7 +102,7 @@ public class SetCstrsTest {
 		showStatistics(s);
 		showSolutions(s);
 		try {
-			s.getResolver().propagate();
+			s.getSolver().propagate();
 		} catch (ContradictionException e) {
 			e.printStackTrace();
 		}

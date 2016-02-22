@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -82,37 +82,37 @@ public class MoveSeq implements Move {
     }
 
     @Override
-    public boolean extend(Resolver resolver) {
+    public boolean extend(Solver solver) {
         boolean extend = false;
         int i = index.get();
         // if the current Move is able to extend the decision path
         if (i < moves.size()) {
-            extend = moves.get(i).extend(resolver);
+            extend = moves.get(i).extend(solver);
         }
         //otherwise, try the remaining ones.
         while (i < moves.size() - 1 && !extend) {
             // first, store the world index in which the first decision of this move is taken.
             i++;
-            Decision tmp = resolver.getLastDecision();
-            resolver.setLastDecision(tds[i - 1]);
-            resolver.getLastDecision().setPrevious(tmp);
-            resolver.getModel().getEnvironment().worldPush();
+            Decision tmp = solver.getLastDecision();
+            solver.setLastDecision(tds[i - 1]);
+            solver.getLastDecision().setPrevious(tmp);
+            solver.getModel().getEnvironment().worldPush();
             moves.get(i).setTopDecision(tds[i - 1]);
-            extend = moves.get(i).extend(resolver);
+            extend = moves.get(i).extend(solver);
         }
         index.set(i);
         return extend;
     }
 
     @Override
-    public boolean repair(Resolver resolver) {
+    public boolean repair(Solver solver) {
         boolean repair = false;
         int i = index.get() + 1;
         while (i > 0 && !repair) {
-            repair = moves.get(--i).repair(resolver);
+            repair = moves.get(--i).repair(solver);
             if (i > 0) {
-                Decision tmp = resolver.getLastDecision();
-                resolver.setLastDecision(resolver.getLastDecision().getPrevious());
+                Decision tmp = solver.getLastDecision();
+                solver.setLastDecision(solver.getLastDecision().getPrevious());
                 tmp.free();
             }
         }

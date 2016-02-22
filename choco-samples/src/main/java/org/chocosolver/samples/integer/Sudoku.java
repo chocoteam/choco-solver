@@ -96,7 +96,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(minDomLBSearch(append(rows)));
+        model.getSolver().set(minDomLBSearch(append(rows)));
 
     }
 

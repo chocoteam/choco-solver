@@ -252,8 +252,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         for (int v = tmp.length; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
         }
-        if (model.getResolver().getEngine() != NoPropagationEngine.SINGLETON && model.getResolver().getEngine().isInitialized()) {
-            model.getResolver().getEngine().updateInvolvedVariables(this);
+        if (model.getSolver().getEngine() != NoPropagationEngine.SINGLETON && model.getSolver().getEngine().isInitialized()) {
+            model.getSolver().getEngine().updateInvolvedVariables(this);
         }
     }
 
@@ -367,7 +367,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws ContradictionException if the propagation encounters inconsistency.
      */
     public final void forcePropagate(PropagatorEventType evt) throws ContradictionException {
-        model.getResolver().getEngine().delayedPropagation(this, evt);
+        model.getSolver().getEngine().delayedPropagation(this, evt);
     }
 
     /**
@@ -407,7 +407,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             state = PASSIVE;
             model.getEnvironment().save(operations[ACTIVE]);
             //TODO: update var mask back
-            model.getResolver().getEngine().desactivatePropagator(this);
+            model.getSolver().getEngine().desactivatePropagator(this);
         }
     }
 
@@ -465,7 +465,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails() throws ContradictionException {
-        model.getResolver().getEngine().fails(this, null, null);
+        model.getSolver().getEngine().fails(this, null, null);
     }
 
     /**
@@ -476,7 +476,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void contradiction(Variable variable, String message) throws ContradictionException {
-        model.getResolver().getEngine().fails(this, variable, message);
+        model.getSolver().getEngine().fails(this, variable, message);
     }
 
     @Override

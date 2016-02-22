@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.propagate;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 
@@ -40,11 +40,11 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 public class PropagateBasic implements Propagate {
 
     @Override
-    public void execute(Resolver resolver) throws ContradictionException {
-        Decision cd = resolver.getLastDecision();
+    public void execute(Solver solver) throws ContradictionException {
+        Decision cd = solver.getLastDecision();
         cd.buildNext();
-        resolver.getObjectiveManager().apply(cd);
-        resolver.getObjectiveManager().postDynamicCut();
-        resolver.getEngine().propagate();
+        solver.getObjectiveManager().apply(cd);
+        solver.getObjectiveManager().postDynamicCut();
+        solver.getEngine().propagate();
     }
 }

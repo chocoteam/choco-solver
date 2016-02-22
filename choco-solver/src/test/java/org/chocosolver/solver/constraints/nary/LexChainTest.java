@@ -103,7 +103,7 @@ public class LexChainTest {
         }
 
         SatFactory.addClauses(LogOp.and(trees), model);
-        model.getResolver().set(randomSearch(ArrayUtils.flatten(X), seed));
+        model.getSolver().set(randomSearch(ArrayUtils.flatten(X), seed));
         return model;
     }
 
@@ -116,7 +116,7 @@ public class LexChainTest {
                     model.intVarArray("X_" + i, m, 0, k, false);
         }
         model.lexChainLess(X).post();
-        model.getResolver().set(randomSearch(flatten(X),seed));
+        model.getSolver().set(randomSearch(flatten(X),seed));
         return model;
     }
 
@@ -135,7 +135,7 @@ public class LexChainTest {
             while (refor.solve()) ;
             while (lex.solve()) ;
 
-            assertEquals(refor.getResolver().getMeasures().getSolutionCount(), lex.getResolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
+            assertEquals(refor.getSolver().getMeasures().getSolutionCount(), lex.getSolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
         }
     }
 
@@ -154,7 +154,7 @@ public class LexChainTest {
             while (refor.solve()) ;
             while (lex.solve()) ;
 
-            assertEquals(refor.getResolver().getMeasures().getSolutionCount(), lex.getResolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
+            assertEquals(refor.getSolver().getMeasures().getSolutionCount(), lex.getSolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
         }
     }
 
@@ -165,7 +165,7 @@ public class LexChainTest {
         Model lex = lex(n, m, k, seed, true);
         while (refor.solve()) ;
         while (lex.solve()) ;
-        assertEquals(refor.getResolver().getMeasures().getSolutionCount(), lex.getResolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
+        assertEquals(refor.getSolver().getMeasures().getSolutionCount(), lex.getSolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -180,14 +180,14 @@ public class LexChainTest {
 
 
         try {
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             X[0][0].updateLowerBound(1, Null);
             X[0][1].updateLowerBound(1, Null);
             X[1][0].updateLowerBound(1, Null);
             X[2][1].updateLowerBound(1, Null);
-            model.getResolver().propagate();
+            model.getSolver().propagate();
             X[2][1].instantiateTo(1, Null);
-            model.getResolver().propagate();
+            model.getSolver().propagate();
         } catch (ContradictionException e) {
             fail();
         }

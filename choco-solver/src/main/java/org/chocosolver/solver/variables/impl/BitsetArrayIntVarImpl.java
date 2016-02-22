@@ -170,7 +170,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (index > -1 && this.INDICES.get(index)) {
             if (SIZE.get() == 1) {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().removeValue(this, value, cause);
+                    model.getSolver().getEventObserver().removeValue(this, value, cause);
                 }
                 //            monitors.forEachRemVal(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, MSG_REMOVE);
@@ -194,7 +194,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
             this.notifyPropagators(e, cause);
             if (_plugexpl) {
-                model.getResolver().getEventObserver().removeValue(this, value, cause);
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
             }
             return true;
         } else {
@@ -244,7 +244,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             if (index > -1 && this.INDICES.get(index)) {
                 if (count == 1) {
                     if (_plugexpl) {
-                        model.getResolver().getEventObserver().removeValue(this, value, cause);
+                        model.getSolver().getEventObserver().removeValue(this, value, cause);
                     }
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -255,7 +255,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                     delta.add(value, cause);
                 }
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().removeValue(this, value, cause);
+                    model.getSolver().getEventObserver().removeValue(this, value, cause);
                 }
             }
             value = values.nextValue(value);
@@ -302,7 +302,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             if (!values.contains(value)) {
                 if (count == 1) {
                     if (_plugexpl) {
-                        model.getResolver().getEventObserver().removeValue(this, value, cause);
+                        model.getSolver().getEventObserver().removeValue(this, value, cause);
                     }
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -313,7 +313,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                     delta.add(value, cause);
                 }
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().removeValue(this, value, cause);
+                    model.getSolver().getEventObserver().removeValue(this, value, cause);
                 }
             }
         }
@@ -358,7 +358,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                     delta.add(value, cause);
                 }
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().removeValue(this, value, cause);
+                    model.getSolver().getEventObserver().removeValue(this, value, cause);
                 }
             }
             if (anyChange) {
@@ -393,7 +393,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             int cvalue = this.getValue();
             if (value != cvalue) {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
+                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
                 }
                 this.contradiction(cause, MSG_INST);
             }
@@ -425,13 +425,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                     this.contradiction(cause, MSG_EMPTY);
                 }
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().instantiateTo(this, value, cause, oldLB, oldUB);
+                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, oldLB, oldUB);
                 }
                 this.notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
             } else {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
                 }
                 this.contradiction(cause, MSG_UNKNOWN);
                 return false;
@@ -466,7 +466,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             int oub = VALUES[ub];
             if (oub < value) {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().updateLowerBound(this, oub + 1, old, cause);
+                    model.getSolver().getEventObserver().updateLowerBound(this, oub + 1, old, cause);
                 }
                 this.contradiction(cause, MSG_LOW);
             } else {
@@ -488,7 +488,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().updateLowerBound(this, value, old, cause);
+                    model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
                 }
                 return true;
             }
@@ -523,7 +523,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             int olb = VALUES[lb];
             if (olb > value) {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().updateUpperBound(this, olb - 1, old, cause);
+                    model.getSolver().getEventObserver().updateUpperBound(this, olb - 1, old, cause);
                 }
                 this.contradiction(cause, MSG_UPP);
             } else {
@@ -545,7 +545,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 }
                 this.notifyPropagators(e, cause);
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().updateUpperBound(this, value, old, cause);
+                    model.getSolver().getEventObserver().updateUpperBound(this, value, old, cause);
                 }
                 return true;
             }
@@ -566,7 +566,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             int index, b;
             if (oub < aLB) {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
+                    model.getSolver().getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
                 }
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < aLB) {
@@ -586,7 +586,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
             if (olb > aUB) {
                 if (_plugexpl) {
-                    model.getResolver().getEventObserver().updateUpperBound(this, olb - 1, olb, cause);
+                    model.getSolver().getEventObserver().updateUpperBound(this, olb - 1, olb, cause);
                 }
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > aUB) {
@@ -610,8 +610,8 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
             this.notifyPropagators(e, cause);
             if (_plugexpl) {
-                if (olb < aLB) model.getResolver().getEventObserver().updateLowerBound(this, aLB, olb, cause);
-                if (oub > aUB) model.getResolver().getEventObserver().updateUpperBound(this, aUB, oub, cause);
+                if (olb < aLB) model.getSolver().getEventObserver().updateLowerBound(this, aLB, olb, cause);
+                if (oub > aUB) model.getSolver().getEventObserver().updateUpperBound(this, aUB, oub, cause);
             }
             update = true;
         }
@@ -850,7 +850,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     public void contradiction(ICause cause, String message) throws ContradictionException {
         assert cause != null;
 //        records.forEachRemVal(onContradiction.set(this, event, cause));
-        model.getResolver().getEngine().fails(cause, this, message);
+        model.getSolver().getEngine().fails(cause, this, message);
     }
 
     @Override

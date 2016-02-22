@@ -102,7 +102,7 @@ public class Solution implements Serializable, ICause {
      */
     public void record(Model model) {
         if (empty) {
-            Variable[] _dvars = model.getResolver().getStrategy().getVariables();
+            Variable[] _dvars = model.getSolver().getStrategy().getVariables();
             for (int i = 0; i < _dvars.length; i++) {
                 dvars.add(_dvars[i].getId());
             }

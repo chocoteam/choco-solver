@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
@@ -50,12 +50,12 @@ import static org.testng.Assert.assertEquals;
  * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
-public class ResolverTest {
+public class SolverTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1DFS() {
         Model model = makeNQueenWithOneAlldifferent(8);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(model.retrieveIntVars(true)));
         r.setDFS();
         showSolutions(model);
@@ -67,7 +67,7 @@ public class ResolverTest {
     @Test(groups="1s", timeOut=60000)
     public void test1LDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLDS(4);
         model.solve();
@@ -78,7 +78,7 @@ public class ResolverTest {
     @Test(groups="1s", timeOut=60000)
     public void test1DDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(model.retrieveIntVars(true)));
         r.setDDS(4);
         model.solve();
@@ -89,102 +89,102 @@ public class ResolverTest {
     @Test(groups="10s", timeOut=60000)
     public void test1HBFS() {
         Model model = makeGolombRuler(8);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setHBFS(.05, .1, 32);
         while(model.solve());
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 7);
-        assertEquals(model.getResolver().getMeasures().getNodeCount(), 7522);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 7);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 7522);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DFS() {
         Model model = makeNQueenWithOneAlldifferent(8);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(true)));
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 92);
-        assertEquals(model.getResolver().getMeasures().getNodeCount(), 480);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 92);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 480);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2LDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLDS(4);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 7);
-        assertEquals(model.getResolver().getMeasures().getNodeCount(), 205);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 7);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 205);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setDDS(5);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 2);
-        assertEquals(model.getResolver().getMeasures().getNodeCount(), 130);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 130);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2DDS2() {
         Model model = new Model();
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         IntVar[] bs = model.boolVarArray("b", 4);
         r.set(inputOrderLBSearch(bs));
         r.setDDS(3);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         Model model = makeGolombRuler(6);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         while(model.solve());
         printShortStatistics(model);
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 3);
-        assertEquals(model.getResolver().getMeasures().getNodeCount(), 16);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 16);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test4() {
         Model model = makeNQueenWithOneAlldifferent(8);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
-        model.getResolver().setRestarts(limit -> model.getResolver().getMeasures().getNodeCount() >= limit, new LubyRestartStrategy(2, 2), 2);
+        model.getSolver().setRestarts(limit -> model.getSolver().getMeasures().getNodeCount() >= limit, new LubyRestartStrategy(2, 2), 2);
         while (model.solve()) ;
         printShortStatistics(model);
-        assertEquals(model.getResolver().getMeasures().getRestartCount(), 2);
+        assertEquals(model.getSolver().getMeasures().getRestartCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test5() {
         Model model = makeGolombRuler(5);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.limitSearch(() -> r.getMeasures().getNodeCount() >= 1000);
         while(model.solve());
         printShortStatistics(model);
-        assertEquals(model.getResolver().getMeasures().getRestartCount(), 314);
+        assertEquals(model.getSolver().getMeasures().getRestartCount(), 314);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test6() {
         Model model = makeGolombRuler(6);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
-        model.getResolver().setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
+        model.getSolver().setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
         while(model.solve());
         printShortStatistics(model);
@@ -197,13 +197,13 @@ public class ResolverTest {
         Model model = new Model();
         int n = 3;
         BoolVar[] B = model.boolVarArray("b", n - 1);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderUBSearch(B));
         r.setLDS(1);
         showSolutions(model);
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 4);
 
     }
 
@@ -216,14 +216,14 @@ public class ResolverTest {
         for (int i = 0; i < n - 1; i++) {
             model.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         r.setLDS(1);
         showSolutions(model);
 //        Chatterbox.showDecisions(solver);
         r.limitSolution(10);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -236,7 +236,7 @@ public class ResolverTest {
             model.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
 
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(new MoveBinaryLDS(inputOrderUBSearch(B), 1,model.getEnvironment()),
                 new MoveBinaryDFS(greedySearch(inputOrderLBSearch(X)))
         );

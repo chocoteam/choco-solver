@@ -61,7 +61,7 @@ public class Pareto {
 
 		while(model.solve());
 
-		List<Solution> paretoFront = model.getResolver().getSolutionRecorder().getSolutions();
+		List<Solution> paretoFront = model.getSolver().getSolutionRecorder().getSolutions();
 		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
 		for(Solution s:paretoFront){
 			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));

@@ -148,7 +148,7 @@ public class RuleStore {
     public void init(Explanation expl) {
         this.cRules = expl.getRules();
         preemptedStop = false;
-        swi = mModel.getResolver().getSearchWorldIndex();
+        swi = mModel.getSolver().getSearchWorldIndex();
     }
 
     /**

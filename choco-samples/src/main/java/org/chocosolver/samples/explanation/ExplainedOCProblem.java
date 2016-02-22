@@ -61,13 +61,13 @@ public class ExplainedOCProblem extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(vars));
+        model.getSolver().set(inputOrderLBSearch(vars));
     }
 
 
     @Override
     public void solve() {
-        model.getResolver().setCBJLearning(false, false);
+        model.getSolver().setCBJLearning(false, false);
         while (model.solve()){
             prettyOut();
         }

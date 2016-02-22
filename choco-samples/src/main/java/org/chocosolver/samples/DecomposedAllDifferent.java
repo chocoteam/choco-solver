@@ -114,7 +114,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(X));
+        model.getSolver().set(inputOrderLBSearch(X));
         /*IPropagationEngine engine = model.getResolver().getEngine();;
         engine.addGroup(
                 Group.buildGroup(

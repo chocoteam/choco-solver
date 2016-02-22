@@ -82,7 +82,7 @@ public class PertTest {
         precedence(garden, 1, objective).post();
         precedence(painting, 2, objective).post();
 
-        model.getResolver().set(minDomLBSearch(new IntVar[]{masonry, carpentry, plumbing, ceiling,
+        model.getSolver().set(minDomLBSearch(new IntVar[]{masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden, objective}));
         return model;
 
@@ -108,15 +108,15 @@ public class PertTest {
         values()[0].make(sol);
         sol.setObjectives(MINIMIZE, objective);
         while(sol.solve());
-        long nbsol = sol.getResolver().getMeasures().getSolutionCount();
-        long node = sol.getResolver().getMeasures().getNodeCount();
+        long nbsol = sol.getSolver().getMeasures().getSolutionCount();
+        long node = sol.getSolver().getMeasures().getNodeCount();
         for (int t = 1; t < values().length; t++) {
             sol = modeler();
             values()[t].make(sol);
             sol.setObjectives(MINIMIZE, objective);
             while(sol.solve());
-            assertEquals(sol.getResolver().getMeasures().getSolutionCount(), nbsol);
-            assertEquals(sol.getResolver().getMeasures().getNodeCount(), node);
+            assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
+            assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
         }
     }
 }

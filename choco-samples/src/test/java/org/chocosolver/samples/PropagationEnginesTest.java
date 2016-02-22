@@ -92,19 +92,19 @@ public class PropagationEnginesTest {
                     Model model = problem.getModel();
                     problem.buildModel();
                     problem.configureSearch();
-                    model.getResolver().set(pe.make(model));
+                    model.getSolver().set(pe.make(model));
                     //SMF.toCSV(solver, problem.getClass().getCanonicalName() + ";" + pe.name(), "/Users/kyzrsoze/Sandbox/pren/pe.csv");
                     problem.solve();
                     switch (pe) {
                         case PROPAGATORDRIVEN_7QD:
-                            stats[0][0] = problem.model.getResolver().getMeasures().getSolutionCount();
-                            stats[0][1] = problem.model.getResolver().getMeasures().getNodeCount();
-                            stats[0][2] = problem.model.getResolver().getMeasures().getFailCount();
+                            stats[0][0] = problem.model.getSolver().getMeasures().getSolutionCount();
+                            stats[0][1] = problem.model.getSolver().getMeasures().getNodeCount();
+                            stats[0][2] = problem.model.getSolver().getMeasures().getFailCount();
                             break;
                         case TWOBUCKETPROPAGATIONENGINE:
-                            stats[1][0] = problem.model.getResolver().getMeasures().getSolutionCount();
-                            stats[1][1] = problem.model.getResolver().getMeasures().getNodeCount();
-                            stats[1][2] = problem.model.getResolver().getMeasures().getFailCount();
+                            stats[1][0] = problem.model.getSolver().getMeasures().getSolutionCount();
+                            stats[1][1] = problem.model.getSolver().getMeasures().getNodeCount();
+                            stats[1][2] = problem.model.getSolver().getMeasures().getFailCount();
                             break;
                     }
                 }

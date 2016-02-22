@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.BoolVar;
@@ -61,7 +61,7 @@ public class ElementTest {
 
         IntVar[] allvars = toArray(index, var);
 
-        Resolver r = s.getResolver();
+        Solver r = s.getSolver();
         r.set(randomSearch(allvars, currentTimeMillis()));
         while (s.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), nbSol, "nb sol");
@@ -119,7 +119,7 @@ public class ElementTest {
                 return true;
             }
         });
-        s.getResolver().setCBJLearning(false, false);
+        s.getSolver().setCBJLearning(false, false);
 
         Random r = new Random(125);
         int[] values = new int[10];
@@ -141,7 +141,7 @@ public class ElementTest {
         }
 
         while (s.solve()) ;
-        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 58, "nb sol");
+        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 58, "nb sol");
     }
 
     public void nasty(int seed, int nbvars, int nbsols) {
@@ -162,7 +162,7 @@ public class ElementTest {
             indicesr[i] = ref.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = flatten(toArray(varsr, indicesr));
-        ref.getResolver().set(randomSearch(allvarsr, seed));
+        ref.getSolver().set(randomSearch(allvarsr, seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
             ref.element(varsr[i], values, indicesr[i], 0).post();
@@ -171,7 +171,7 @@ public class ElementTest {
 
         while (ref.solve()) ;
 
-        assertEquals(ref.getResolver().getMeasures().getSolutionCount(), nbsols);
+        assertEquals(ref.getSolver().getMeasures().getSolutionCount(), nbsols);
     }
 
 
@@ -188,9 +188,9 @@ public class ElementTest {
             IntVar I = model.intVar("I", 0, 5, false);
             IntVar R = model.intVar("R", 0, 10, false);
             model.element(R, new int[]{0, 2, 4, 6, 7}, I).post();
-            model.getResolver().set(randomSearch(new IntVar[]{I, R}, i));
+            model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 5);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 5);
         }
     }
 
@@ -201,9 +201,9 @@ public class ElementTest {
             IntVar I = model.intVar("I", 0, 5, false);
             IntVar R = model.intVar("R", 0, 10, false);
             model.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
-            model.getResolver().set(randomSearch(new IntVar[]{I, R}, i));
+            model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 5);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 5);
         }
     }
 
@@ -214,9 +214,9 @@ public class ElementTest {
             IntVar I = model.intVar("I", 0, 13, false);
             IntVar R = model.intVar("R", 0, 21, false);
             model.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I).post();
-            model.getResolver().set(randomSearch(new IntVar[]{I, R}, i));
+            model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 14);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 14);
         }
     }
 
@@ -227,9 +227,9 @@ public class ElementTest {
             IntVar I = model.intVar("I", 0, 3, true);
             IntVar R = model.intVar("R", -1, 0, false);
             model.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1).post();
-            model.getResolver().set(randomSearch(new IntVar[]{I, R}, i));
+            model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
-            assertEquals(model.getResolver().getMeasures().getSolutionCount(), 4);
+            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 4);
         }
     }
     @Test
@@ -241,7 +241,7 @@ public class ElementTest {
         s.or(el.reify()).post();
         // s.post(el);// works instead of previous post
         while (s.solve()) ;
-        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 1L);
+        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 1L);
     }
 
 
@@ -257,7 +257,7 @@ public class ElementTest {
         Constraint affect = s.arithm(val, "=", 2);
         s.or(b, affect.reify()).post();
         while (s.solve()) ;
-        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 2L);
+        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2L);
     }
 
 }

@@ -51,8 +51,8 @@ public class ExplanationExamples {
         BoolVar[] bvars = model.boolVarArray("B", 4);
         model.arithm(bvars[2], "=", bvars[3]).post();
         model.arithm(bvars[2], "!=", bvars[3]).post();
-        model.getResolver().set(inputOrderLBSearch(bvars));
-        model.getResolver().setCBJLearning(false, false);
+        model.getSolver().set(inputOrderLBSearch(bvars));
+        model.getSolver().setCBJLearning(false, false);
         showStatistics(model);
         while (model.solve()) ;
     }
@@ -66,8 +66,8 @@ public class ExplanationExamples {
                 model.arithm(pigeon[i], "!=", pigeon[j]).post();
             }
         }
-        model.getResolver().set(inputOrderLBSearch(pigeon));
-        model.getResolver().setCBJLearning(false, false);
+        model.getSolver().set(inputOrderLBSearch(pigeon));
+        model.getSolver().setCBJLearning(false, false);
         showStatistics(model);
         while (model.solve()) ;
     }

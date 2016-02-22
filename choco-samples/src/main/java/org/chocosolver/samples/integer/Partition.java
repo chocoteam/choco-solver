@@ -133,7 +133,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(minDomLBSearch(Ovars));
+        model.getSolver().set(minDomLBSearch(Ovars));
     }
 
     @Override
@@ -144,7 +144,7 @@ public class Partition extends AbstractProblem {
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder();
-        if (ESat.TRUE == model.getResolver().isFeasible()) {
+        if (ESat.TRUE == model.getSolver().isFeasible()) {
             int sum1 = 0, sum2 = 0;
             int i = 0;
             st.append(vars[i].getValue());

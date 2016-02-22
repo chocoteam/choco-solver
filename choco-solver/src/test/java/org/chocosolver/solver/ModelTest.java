@@ -83,7 +83,7 @@ public class ModelTest {
         s.scalar(objects, volumes, "=", s.intVar("capa", capacites[0], capacites[1], true)).post();
         s.scalar(objects, energies, "=", power).post();
         s.setObjectives(MAXIMIZE, power);
-        s.getResolver().set(inputOrderLBSearch(objects));
+        s.getSolver().set(inputOrderLBSearch(objects));
         showShortStatistics(s);
         return s;
     }
@@ -239,7 +239,7 @@ public class ModelTest {
         BoolVar b = model.boolVar("b");
         model.arithm(b, "=", 2).post();
         while (model.solve()) ;
-        assertEquals(model.getResolver().isFeasible(), FALSE);
+        assertEquals(model.getSolver().isFeasible(), FALSE);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -262,7 +262,7 @@ public class ModelTest {
         }
         pares.solve();
         Chatterbox.printSolutions(pares.getBestModel());
-        Assert.assertEquals(pares.getBestModel().getResolver().getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(pares.getBestModel().getSolver().getMeasures().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -277,7 +277,7 @@ public class ModelTest {
             while(pares.solve());
             Assert.assertTrue(pares.getBestModel()!=null);
             Chatterbox.printSolutions(pares.getBestModel());
-            Assert.assertEquals(pares.getBestModel().getResolver().getObjectiveManager().getBestSolutionValue(), 51);
+            Assert.assertEquals(pares.getBestModel().getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
@@ -287,7 +287,7 @@ public class ModelTest {
             Model s = knapsack(true);
             while(s.solve());
             Chatterbox.printSolutions(s);
-            Assert.assertEquals(s.getResolver().getObjectiveManager().getBestSolutionValue(), 51);
+            Assert.assertEquals(s.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
@@ -301,7 +301,7 @@ public class ModelTest {
             }
             while(pares.solve());
             Chatterbox.printSolutions(pares.getBestModel());
-            Assert.assertEquals(pares.getBestModel().getResolver().getObjectiveManager().getBestSolutionValue(), 51);
+            Assert.assertEquals(pares.getBestModel().getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
@@ -311,14 +311,14 @@ public class ModelTest {
         IntVar i = s.intVar("i", -5, 5, false);
         s.setObjectives(MAXIMIZE, i);
         s.solve();
-        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 1);
-        assertEquals(s.getResolver().getSolutionRecorder().getLastSolution().getIntVal(i).intValue(), 5);
+        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 1);
+        assertEquals(s.getSolver().getSolutionRecorder().getLastSolution().getIntVal(i).intValue(), 5);
 
-        s.getResolver().getEngine().flush();
-        s.getResolver().reset();
+        s.getSolver().getEngine().flush();
+        s.getSolver().reset();
 
         while (s.solve()) ;
-        assertEquals(s.getResolver().getMeasures().getSolutionCount(), 11);
+        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 11);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -329,20 +329,20 @@ public class ModelTest {
         final int[] d = {0};
         IMonitorSolution sm1 = () -> c[0]++;
         IMonitorSolution sm2 = () -> d[0]++;
-        model.getResolver().plugMonitor(sm1);
-        model.getResolver().plugMonitor(sm2);
+        model.getSolver().plugMonitor(sm1);
+        model.getSolver().plugMonitor(sm2);
         while (model.solve()) ;
         assertEquals(2, c[0]);
         assertEquals(2, d[0]);
         // unplug
-        model.getResolver().unplugMonitor(sm1);
-        model.getResolver().reset();
+        model.getSolver().unplugMonitor(sm1);
+        model.getSolver().reset();
         while (model.solve()) ;
         assertEquals(2, c[0]);
         assertEquals(4, d[0]);
         // plug
-        model.getResolver().unplugAllSearchMonitors();
-        model.getResolver().reset();
+        model.getSolver().unplugAllSearchMonitors();
+        model.getSolver().reset();
         while (model.solve()) ;
         assertEquals(2, c[0]);
         assertEquals(4, d[0]);
@@ -352,22 +352,22 @@ public class ModelTest {
     public void testCriteria() {
         Model model = new Model();
         IntVar v = model.boolVar("b");
-        Criterion c1 = () -> model.getResolver().getMeasures().getNodeCount() == 1;
-        Criterion c2 = () -> model.getResolver().getMeasures().getSolutionCount() == 1;
-        model.getResolver().addStopCriterion(c1);
-        model.getResolver().addStopCriterion(c2);
+        Criterion c1 = () -> model.getSolver().getMeasures().getNodeCount() == 1;
+        Criterion c2 = () -> model.getSolver().getMeasures().getSolutionCount() == 1;
+        model.getSolver().addStopCriterion(c1);
+        model.getSolver().addStopCriterion(c2);
         while (model.solve()) ;
-        assertEquals(0, model.getResolver().getMeasures().getSolutionCount());
+        assertEquals(0, model.getSolver().getMeasures().getSolutionCount());
         // unplug
-        model.getResolver().removeStopCriterion(c1);
-        model.getResolver().reset();
+        model.getSolver().removeStopCriterion(c1);
+        model.getSolver().reset();
         while (model.solve()) ;
-        assertEquals(1, model.getResolver().getMeasures().getSolutionCount());
+        assertEquals(1, model.getSolver().getMeasures().getSolutionCount());
         // plug
-        model.getResolver().removeAllStopCriteria();
-        model.getResolver().reset();
+        model.getSolver().removeAllStopCriteria();
+        model.getSolver().reset();
         while (model.solve()) ;
-        assertEquals(2, model.getResolver().getMeasures().getSolutionCount());
+        assertEquals(2, model.getSolver().getMeasures().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -377,10 +377,10 @@ public class ModelTest {
         IntVar[] w = model.boolVarArray("w", 2);
         model.arithm(v[0], "!=", v[1]).post();
         model.arithm(w[0], "!=", w[1]).post();
-        model.getResolver().set(inputOrderLBSearch(v));
-        model.getResolver().makeCompleteStrategy(true);
+        model.getSolver().set(inputOrderLBSearch(v));
+        model.getSolver().makeCompleteStrategy(true);
         model.solve();
-        assertEquals(model.getResolver().isSatisfied(), TRUE);
+        assertEquals(model.getSolver().isSatisfied(), TRUE);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -403,7 +403,7 @@ public class ModelTest {
         model.arithm(v[0], "!=", v[1]).post();
         model.setObjectives(MAXIMIZE, v[0]);
         model.solve();
-        model.getResolver().getSolutionRecorder().restoreLastSolution();
+        model.getSolver().getSolutionRecorder().restoreLastSolution();
         assertTrue(v[0].isInstantiated());
         assertTrue(v[0].isInstantiatedTo(1));
     }

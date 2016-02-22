@@ -31,7 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -106,7 +106,7 @@ public class SMPTSP extends AbstractProblem {
 	@Override
 	public void configureSearch() {
 		// bottom-up optimisation, then classical branching
-		Resolver r = model.getResolver();
+		Solver r = model.getSolver();
 		r.set(inputOrderLBSearch(nbValues), minDomLBSearch(assignment));
 		// displays the root lower bound
 		r.plugMonitor(new IMonitorInitialize() {
@@ -131,7 +131,7 @@ public class SMPTSP extends AbstractProblem {
 	@Override
 	public void prettyOut() {
 		int nb = 1;
-		for(Solution s: model.getResolver().getSolutionRecorder().getSolutions()){
+		for(Solution s: model.getSolver().getSolutionRecorder().getSolutions()){
 			System.out.println("Optimal solution : "+nb);
 			for(int i=0;i<5;i++){
 				System.out.println(assignment[i].getName()+" = "+s.getIntVal(assignment[i]));

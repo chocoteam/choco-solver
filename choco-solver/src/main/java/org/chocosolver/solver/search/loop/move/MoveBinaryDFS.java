@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.move;
 
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
@@ -62,26 +62,26 @@ public class MoveBinaryDFS implements Move {
     }
 
     @Override
-    public boolean extend(Resolver resolver) {
+    public boolean extend(Solver solver) {
         boolean extended = false;
-        Decision tmp = resolver.getLastDecision();
-        resolver.setLastDecision(strategy.getDecision());
-        if (resolver.getLastDecision() != null) { // null means there is no more decision
-            resolver.getLastDecision().setPrevious(tmp);
-            resolver.getModel().getEnvironment().worldPush();
+        Decision tmp = solver.getLastDecision();
+        solver.setLastDecision(strategy.getDecision());
+        if (solver.getLastDecision() != null) { // null means there is no more decision
+            solver.getLastDecision().setPrevious(tmp);
+            solver.getModel().getEnvironment().worldPush();
             extended = true;
         } else {
-            resolver.setLastDecision(tmp);
+            solver.setLastDecision(tmp);
         }
         return extended;
     }
 
     @Override
-    public boolean repair(Resolver resolver) {
-        resolver.getMeasures().incBackTrackCount();
-        resolver.getMeasures().incDepth();
-        resolver.getModel().getEnvironment().worldPop();
-        return rewind(resolver);
+    public boolean repair(Solver solver) {
+        solver.getMeasures().incBackTrackCount();
+        solver.getMeasures().incDepth();
+        solver.getModel().getEnvironment().worldPop();
+        return rewind(solver);
     }
 
     @Override
@@ -99,30 +99,30 @@ public class MoveBinaryDFS implements Move {
         this.strategy = aStrategy;
     }
 
-    protected boolean rewind(Resolver resolver) {
+    protected boolean rewind(Solver solver) {
         boolean repaired = false;
-        while (!repaired && resolver.getLastDecision() != topDecision) {
-            resolver.setJumpTo(resolver.getJumpTo()-1);
-            if (resolver.getJumpTo() <= 0 && resolver.getLastDecision().hasNext()) {
-                resolver.getModel().getEnvironment().worldPush();
+        while (!repaired && solver.getLastDecision() != topDecision) {
+            solver.setJumpTo(solver.getJumpTo()-1);
+            if (solver.getJumpTo() <= 0 && solver.getLastDecision().hasNext()) {
+                solver.getModel().getEnvironment().worldPush();
                 repaired = true;
             } else {
-                prevDecision(resolver);
+                prevDecision(solver);
             }
         }
         return repaired;
     }
 
-    protected void prevDecision(Resolver resolver) {
-        Decision tmp = resolver.getLastDecision();
-        resolver.setLastDecision(resolver.getLastDecision().getPrevious());
+    protected void prevDecision(Solver solver) {
+        Decision tmp = solver.getLastDecision();
+        solver.setLastDecision(solver.getLastDecision().getPrevious());
         tmp.free();
         // goes up in the search tree and makes sure search monitors are correctly informed
-        resolver.getSearchMonitors().afterUpBranch();
-        resolver.getMeasures().incBackTrackCount();
-        resolver.getMeasures().decDepth();
-        resolver.getModel().getEnvironment().worldPop();
-        resolver.getSearchMonitors().beforeUpBranch();
+        solver.getSearchMonitors().afterUpBranch();
+        solver.getMeasures().incBackTrackCount();
+        solver.getMeasures().decDepth();
+        solver.getModel().getEnvironment().worldPop();
+        solver.getSearchMonitors().beforeUpBranch();
     }
 
     @Override

@@ -71,7 +71,7 @@ public class NQueenBinary extends AbstractNQueen {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(minDomLBSearch(vars));
+        model.getSolver().set(minDomLBSearch(vars));
 //        SearchMonitorFactory.log(solver, true, false);
     }
 

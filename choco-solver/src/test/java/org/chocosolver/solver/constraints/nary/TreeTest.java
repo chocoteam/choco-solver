@@ -52,8 +52,8 @@ public class TreeTest {
 		Model s2 = model(false);
 		while (s1.solve()) ;
 		while (s2.solve()) ;
-		assertEquals(s1.getResolver().getMeasures().getSolutionCount(), s2.getResolver().getMeasures().getSolutionCount());
-		assertEquals(s1.getResolver().getMeasures().getNodeCount(), s2.getResolver().getMeasures().getNodeCount());
+		assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s2.getSolver().getMeasures().getSolutionCount());
+		assertEquals(s1.getSolver().getMeasures().getNodeCount(), s2.getSolver().getMeasures().getNodeCount());
 	}
 
 	private Model model(boolean defaultCstr) {
@@ -68,7 +68,7 @@ public class TreeTest {
 					new PropKLoops(VS, 0, NT)
 			).post();
 		}
-		model.getResolver().set(randomSearch(VS, 0));
+		model.getSolver().set(randomSearch(VS, 0));
 		showShortStatistics(model);
 		return model;
 	}

@@ -161,13 +161,13 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(domOverWDegSearch(vars));
-        model.getResolver().setLubyRestart(2, 2, new FailCounter(model, 2), 25000);
+        model.getSolver().set(domOverWDegSearch(vars));
+        model.getSolver().setLubyRestart(2, 2, new FailCounter(model, 2), 25000);
     }
 
     @Override
     public void solve() {
-        model.getResolver().limitNode(10000);
+        model.getSolver().limitNode(10000);
         if (opt) {
             model.setObjectives(MAXIMIZE, nb0);
         }
@@ -180,7 +180,7 @@ public class RLFAP extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("RLFAP %s", dir));
         StringBuilder st = new StringBuilder();
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             st.append("\t");
             for (int i = 0; i < vars.length; i++) {
                 st.append(vars[i].getValue()).append(" ");

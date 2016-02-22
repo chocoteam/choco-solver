@@ -127,7 +127,7 @@ public class CorrectnessChecker {
         Model ref = modeler.model(nbVar, domains, map, parameters);
         ref.getEnvironment().worldPush();
         try {
-            ref.getResolver().propagate();
+            ref.getSolver().propagate();
         } catch (ContradictionException e) {
 //            System.out.println("Pas de solution pour ce probleme => rien a tester !");
             return null;

@@ -50,25 +50,25 @@ public class NogoodTest {
     public void test1() {
         final Model model = new Model();
         IntVar[] vars = model.intVarArray("vars", 3, 0, 2, false);
-        model.getResolver().setNoGoodRecordingFromRestarts();
-        model.getResolver().set(randomSearch(vars, 29091981L));
-        model.getResolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3);
+        model.getSolver().setNoGoodRecordingFromRestarts();
+        model.getSolver().set(randomSearch(vars, 29091981L));
+        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 27);
-        assertEquals(model.getResolver().getMeasures().getBackTrackCount(), 51);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 27);
+        assertEquals(model.getSolver().getMeasures().getBackTrackCount(), 51);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void test2() {
         final Model model = new Model();
         IntVar[] vars = model.intVarArray("vars", 3, 0, 3, false);
-        model.getResolver().setNoGoodRecordingFromRestarts();
-        model.getResolver().set(randomSearch(vars, 29091981L));
-        model.getResolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 1000);
-        model.getResolver().limitTime(2000);
+        model.getSolver().setNoGoodRecordingFromRestarts();
+        model.getSolver().set(randomSearch(vars, 29091981L));
+        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 1000);
+        model.getSolver().limitTime(2000);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 64);
-        assertEquals(model.getResolver().getMeasures().getBackTrackCount(), 121);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 64);
+        assertEquals(model.getSolver().getMeasures().getBackTrackCount(), 121);
     }
 
 }

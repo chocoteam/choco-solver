@@ -80,7 +80,7 @@ public class MagicSequence extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(x));
+        model.getSolver().set(inputOrderLBSearch(x));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class MagicSequence extends AbstractProblem {
     @Override
     public void prettyOut() {
 
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             int num_solutions = 0;
             do {
 

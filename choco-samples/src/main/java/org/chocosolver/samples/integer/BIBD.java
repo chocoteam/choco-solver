@@ -131,7 +131,7 @@ public class BIBD extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getResolver().set(inputOrderLBSearch(flatten(vars)));
+        model.getSolver().set(inputOrderLBSearch(flatten(vars)));
     }
 
     @Override
@@ -143,7 +143,7 @@ public class BIBD extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("BIBD(%d,%d,%d,%d,%d)", v, b, r, k, l));
         StringBuilder st = new StringBuilder();
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < v; i++) {
                 st.append("\t");
                 for (int j = 0; j < b; j++) {

@@ -158,7 +158,7 @@ public class SocialGolfer extends AbstractProblem {
     @Override
     public void configureSearch() {
         BoolVar[] vars = flatten(P);
-        model.getResolver().set(inputOrderUBSearch(vars));
+        model.getSolver().set(inputOrderUBSearch(vars));
     }
 
     @Override
@@ -170,7 +170,7 @@ public class SocialGolfer extends AbstractProblem {
     public void prettyOut() {
         System.out.println(String.format("Social golfer(%d,%d,%d)", g, s, w));
         StringBuilder st = new StringBuilder();
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             int p = g * s;
             for (int i = 0; i < w; i++) {
                 st.append("\tWeek ").append(i + 1).append("\n");

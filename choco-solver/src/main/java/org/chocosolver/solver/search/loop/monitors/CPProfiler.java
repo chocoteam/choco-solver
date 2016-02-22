@@ -101,7 +101,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     public void afterInitialize() {
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
-                mModel.getResolver().getMeasures().getRestartCount());
+                mModel.getSolver().getMeasures().getRestartCount());
         connector.connect(6565); // 6565 is the port used by cpprofiler by default
         connector.restart(0); // starting a new tree (also used in case of a restart)
         alt_stack.push(-1); // -1 is alt for the root node
@@ -112,7 +112,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     @Override
     public void beforeDownBranch(boolean left) {
         if (left) {
-            Decision dec = mModel.getResolver().getLastDecision();
+            Decision dec = mModel.getSolver().getLastDecision();
             String pdec = pretty(dec.getPrevious());
             int ari = dec.getArity();
             send(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, Connector.NodeStatus.BRANCH, pdec, "");
@@ -140,13 +140,13 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
 
     @Override
     public void onSolution() {
-        String dec = pretty(mModel.getResolver().getLastDecision());
+        String dec = pretty(mModel.getSolver().getLastDecision());
         send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.SOLVED, dec, solutionMessage.print());
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        String dec = pretty(mModel.getResolver().getLastDecision());
+        String dec = pretty(mModel.getSolver().getLastDecision());
         send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.FAILED, dec, cex.toString());
     }
 
@@ -154,7 +154,7 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     public void afterRestart() {
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
-                mModel.getResolver().getMeasures().getRestartCount());
+                mModel.getSolver().getMeasures().getRestartCount());
         connector.restart(++rid);
         pid_stack.clear();
         alt_stack.clear();

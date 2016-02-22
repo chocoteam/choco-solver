@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.checker.fmk;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -185,7 +185,7 @@ public interface SetTestModel {
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             s.sum(bools, "=", vars[n - 1]).post();
-            s.getResolver().set(inputOrderLBSearch(vars));
+            s.getSolver().set(inputOrderLBSearch(vars));
             return s;
         }
     };
@@ -206,7 +206,7 @@ public interface SetTestModel {
 //                System.out.printf("");
             }
             s.arithm(vars[0], "=", vars[1]).post();
-            s.getResolver().set(inputOrderLBSearch(vars));
+            s.getSolver().set(inputOrderLBSearch(vars));
             return s;
         }
     };
@@ -227,7 +227,7 @@ public interface SetTestModel {
             }
             IntVar[] allvars = append(X, Y);
             s.inverseChanneling(X, Y, 0, 0).post();
-            s.getResolver().set(inputOrderLBSearch(allvars));
+            s.getSolver().set(inputOrderLBSearch(allvars));
             return s;
         }
     };
@@ -247,7 +247,7 @@ public interface SetTestModel {
                     decvars[i] = vars[i];
                 }
             }
-            Resolver r = s.getResolver();
+            Solver r = s.getSolver();
             s.nValues(decvars, vars[n - 1]).post();
             r.set(inputOrderLBSearch(vars));
             return s;

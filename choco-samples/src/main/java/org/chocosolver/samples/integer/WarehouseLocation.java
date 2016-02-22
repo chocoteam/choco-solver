@@ -31,7 +31,7 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -126,7 +126,7 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(inputOrderLBSearch(suppliers), inputOrderLBSearch(costPerStore));
     }
 
@@ -140,7 +140,7 @@ public class WarehouseLocation extends AbstractProblem {
     public void prettyOut() {
         System.out.println("Warehouse location problem");
         StringBuilder st = new StringBuilder();
-        if (model.getResolver().isFeasible() == ESat.TRUE) {
+        if (model.getSolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < nWH; i++) {
                 if (open[i].getValue() > 0) {
                     st.append(String.format("\tw#%d:\n\t", i));

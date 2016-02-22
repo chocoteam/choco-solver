@@ -106,7 +106,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         this.coefLB = coefs[0];
         this.coefUB = coefs[1];
         this.optPolicy = policy;
-        model.getResolver().setRestartOnSolutions();
+        model.getSolver().setRestartOnSolutions();
         if (coefLB < 0 || coefUB < 0 || coefLB + coefUB == 0) {
             throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
         }
@@ -152,13 +152,13 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     //***********************************************************************************
 
     public boolean init() {
-        decOperator = getOperator(optPolicy, model.getResolver().getObjectiveManager().getPolicy());
+        decOperator = getOperator(optPolicy, model.getSolver().getObjectiveManager().getPolicy());
         return true;
     }
     @Override
     public Decision getDecision() {
-        if (model.getResolver().getMeasures().getSolutionCount() == 0
-                || (nbSols == model.getResolver().getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
+        if (model.getSolver().getMeasures().getSolutionCount() == 0
+                || (nbSols == model.getSolver().getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
             return null;
         }
         if (obj.isInstantiated()) {
@@ -169,7 +169,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
             globalLB = obj.getLB();
             globalUB = obj.getUB();
         }
-        nbSols = model.getResolver().getMeasures().getSolutionCount();
+        nbSols = model.getSolver().getMeasures().getSolutionCount();
         globalLB = Math.max(globalLB, obj.getLB());//check
         globalUB = Math.min(globalUB, obj.getUB());//check
 //        ObjectiveManager man = model.getResolver().getObjectiveManager();

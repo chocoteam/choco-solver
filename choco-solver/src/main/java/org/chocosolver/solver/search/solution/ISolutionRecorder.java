@@ -79,13 +79,13 @@ public interface ISolutionRecorder extends Serializable{
 	default void restoreSolution(Solution solution){
 		if(solution!=null){
 			try{
-				getModel().getResolver().restoreRootNode();
+				getModel().getSolver().restoreRootNode();
 				getModel().getEnvironment().worldPush();
 				solution.restore(getModel());
 			}catch (ContradictionException e){
 				throw new UnsupportedOperationException("restoring the solution ended in a failure");
 			}
-			getModel().getResolver().getEngine().flush();
+			getModel().getSolver().getEngine().flush();
 		}
 	}
 

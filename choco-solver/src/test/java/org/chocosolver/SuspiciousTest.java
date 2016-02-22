@@ -30,7 +30,7 @@
 package org.chocosolver;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
@@ -56,9 +56,9 @@ public class SuspiciousTest {
     @Test(groups="1s", timeOut=60000)
     public void testBacktrack() {
         Model s = makeNQueenWithBinaryConstraints(12);
-        s.getResolver().limitBacktrack(50);
+        s.getSolver().limitBacktrack(50);
         while (s.solve()) ;
-        long bc = s.getResolver().getMeasures().getBackTrackCount();
+        long bc = s.getSolver().getMeasures().getBackTrackCount();
         assertEquals(bc, 52);
     }
 
@@ -67,35 +67,35 @@ public class SuspiciousTest {
         Model model = makeNQueenWithBinaryConstraints(12);
         NodeCounter nodeCounter = new NodeCounter(model, 100);
         INeighbor rnd = INeighborFactory.random(model.retrieveIntVars(true));
-        Move currentMove = model.getResolver().getMove();
-        model.getResolver().set(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
+        Move currentMove = model.getSolver().getMove();
+        model.getSolver().set(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
-            public boolean extend(Resolver resolver) {
+            public boolean extend(Solver solver) {
                 if (nodeCounter.isMet()) {
-                    super.extend(resolver);
+                    super.extend(solver);
                 }
-                return currentMove.extend(resolver);
+                return currentMove.extend(solver);
             }
 
             @Override
-            public boolean repair(Resolver resolver) {
+            public boolean repair(Solver solver) {
                 if (nodeCounter.isMet()) {
-                    super.repair(resolver);
+                    super.repair(solver);
                 } else if (this.solutions > 0
                         // the second condition is only here for intiale calls, when solutions is not already up to date
-                        || resolver.getMeasures().getSolutionCount() > 0) {
+                        || solver.getMeasures().getSolutionCount() > 0) {
                     // the detection of a new solution can only be met here
-                    if (solutions < resolver.getMeasures().getSolutionCount()) {
-                        assert solutions == resolver.getMeasures().getSolutionCount() - 1;
+                    if (solutions < solver.getMeasures().getSolutionCount()) {
+                        assert solutions == solver.getMeasures().getSolutionCount() - 1;
                         solutions++;
                         neighbor.recordSolution();
                     }
                 }
-                return currentMove.repair(resolver);
+                return currentMove.repair(solver);
             }
         });
         while (model.solve()) ;
-        long sc = model.getResolver().getMeasures().getSolutionCount();
+        long sc = model.getSolver().getMeasures().getSolutionCount();
         assertEquals(sc, 11);
     }
 }

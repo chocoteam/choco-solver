@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -38,7 +38,6 @@ import org.testng.annotations.Test;
 import static java.lang.Math.ceil;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
 import static org.chocosolver.solver.trace.Chatterbox.printSolutions;
 
@@ -68,7 +67,7 @@ public class LNSTest {
         model.scalar(objects, energies, "=", power).post();
         model.knapsack(objects, scalar, power, volumes, energies).post();
 
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(lastConflict(domOverWDegSearch(objects)));
 //        SearchMonitorFactory.log(solver, true, false);
         switch (lns) {

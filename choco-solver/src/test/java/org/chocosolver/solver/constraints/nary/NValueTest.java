@@ -55,7 +55,7 @@ public class NValueTest {
         showStatistics(model);
         showSolutions(model);
         final BitSet values = new BitSet(3);
-        model.getResolver().plugMonitor((IMonitorSolution) () -> {
+        model.getSolver().plugMonitor((IMonitorSolution) () -> {
             values.clear();
             for (IntVar v : XS) {
                 if (!v.isInstantiated()) {
@@ -82,7 +82,7 @@ public class NValueTest {
         showStatistics(model);
         showSolutions(model);
         final BitSet values = new BitSet(3);
-        model.getResolver().plugMonitor((IMonitorSolution) () -> {
+        model.getSolver().plugMonitor((IMonitorSolution) () -> {
             values.clear();
             for (IntVar v : XS) {
                 if (!v.isInstantiated()) {

@@ -31,7 +31,7 @@ package org.chocosolver.solver.search;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -75,7 +75,7 @@ public class StrategyTest {
         for (int i = 0; i < n; i++) {
             variables[i] = s.intVar("V" + i, i, n + i, false);
         }
-        Resolver r = s.getResolver();
+        Solver r = s.getSolver();
         r.set(inputOrderLBSearch(variables));
 
         env.worldPush();
@@ -118,7 +118,7 @@ public class StrategyTest {
         int n = 100;
 
         Model s = new Model();
-        Resolver r = s.getResolver();
+        Solver r = s.getSolver();
         IEnvironment env = s.getEnvironment();
 
         AbstractStrategy[] asgs = new AbstractStrategy[n];
@@ -176,7 +176,7 @@ public class StrategyTest {
         VariableSelector varsel = new InputOrder<>();
         IntValueSelector valsel = new IntDomainMin();
         DecisionOperator assgnt = DecisionOperator.int_eq;
-        model.getResolver().set(new Once(v, varsel, valsel, assgnt));
+        model.getSolver().set(new Once(v, varsel, valsel, assgnt));
         model.solve();
         Assert.assertTrue(x.getValue() == 1);
     }
@@ -189,7 +189,7 @@ public class StrategyTest {
         model.allDifferent(x).post();
         model.member(x[0], y).post();
         model.solve();
-        AbstractStrategy strat = model.getResolver().getStrategy();
+        AbstractStrategy strat = model.getSolver().getStrategy();
         assertTrue(strat instanceof LastConflict);
     }
 
@@ -368,22 +368,22 @@ public class StrategyTest {
     public void testFH3321() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(), midIntVal(true), DecisionOperator.int_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testFH3322() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(), midIntVal(false), DecisionOperator.int_reverse_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
     }
 
 
@@ -391,21 +391,21 @@ public class StrategyTest {
     public void testFH33232() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(), midIntVal(true), DecisionOperator.int_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testFH3324() {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
-        Resolver r = model.getResolver();
+        Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(), midIntVal(false), DecisionOperator.int_reverse_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getResolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
     }
 }

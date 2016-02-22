@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Resolver;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
@@ -53,19 +53,19 @@ public class ImpactTest {
 		Model s2 = costasArray(7, true);
 
 		while (s1.solve()) ;
-		out.println(s1.getResolver().getMeasures().getSolutionCount());
+		out.println(s1.getSolver().getMeasures().getSolutionCount());
 
 		while (s2.solve()) ;
 
-		out.println(s2.getResolver().getMeasures().getSolutionCount());
-		assertEquals(s1.getResolver().getMeasures().getSolutionCount(), s2.getResolver().getMeasures().getSolutionCount());
+		out.println(s2.getSolver().getMeasures().getSolutionCount());
+		assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s2.getSolver().getMeasures().getSolutionCount());
 	}
 
 	private Model costasArray(int n, boolean impact){
 		Model model = ProblemMaker.makeCostasArrays(n);
 		IntVar[] vectors = (IntVar[]) model.getHook("vectors");
 
-		Resolver r = model.getResolver();
+		Solver r = model.getSolver();
 		r.limitTime(20000);
 		if(impact){
 			r.set(new ImpactBased(vectors,2,3,10,0,true));
