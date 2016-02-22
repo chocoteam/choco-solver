@@ -124,14 +124,14 @@ Set variables
 =============
 
 A set variable, ``SetVar``, represents a set of integers, i.e. its value is a set of integers.
-Its domain is defined by a set interval ``[S_K,S_E]`` where:
+Its domain is defined by a set interval ``[LB,UB]`` where:
 
-- the kernel, ``S_K``, is an ``ISet`` object which contains integers that figure in every solution.
-- the envelope, ``S_E``, is an ``ISet`` object which contains integers that potentially figure in at least one solution,
+- the lower bound, ``LB``, is an ``ISet`` object which contains integers that figure in every solution.
+- the upper bound, ``UB``, is an ``ISet`` object which contains integers that potentially figure in at least one solution,
 
-Initial values for both ``S_K`` and ``S_E`` should be such that ``S_K`` is a subset of ``S_E``.
-Then, decisions and filtering algorithms will remove integers from ``S_E`` and add some others to ``S_K``.
-A set variable is instantiated if and only if ``S_E = S_K``.
+Initial values for both ``LB`` and ``UB`` should be such that ``LB`` is a subset of ``UB``.
+Then, decisions and filtering algorithms will remove integers from ``UB`` and add some others to ``LB``.
+A set variable is instantiated if and only if ``LB = UB``.
 
 A set variable can be created as follows: ::
 
