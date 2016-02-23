@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.chocosolver.solver.Solver.Action.*;
+import static org.chocosolver.solver.Solver.Action.initialize;
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.search.loop.Reporting.fullReport;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
@@ -96,6 +97,30 @@ import static org.chocosolver.util.ESat.*;
  * @author Charles Prud'homme
  */
 public final class Solver implements Serializable, ISolver {
+
+    /** Define the possible actions of SearchLoop */
+    protected enum Action {
+        /**
+         * Initialization step
+         */
+        initialize,
+        /**
+         * propagation step
+         */
+        propagate,
+        /**
+         * extension step
+         */
+        extend,
+        /**
+         * validation step
+         */
+        validate,
+        /**
+         * reparation step
+         */
+        repair
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////    PRIVATE FIELDS     //////////////////////////////////////////////////////
@@ -172,6 +197,9 @@ public final class Solver implements Serializable, ISolver {
     /** Counter that indicates how many world should be rolled back when backtracking */
     private int jumpTo;
 
+    /** Set to <tt>true</tt> to stop the search loop **/
+    private boolean stop;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,54 +252,27 @@ public final class Solver implements Serializable, ISolver {
             initialize();
             searchMonitors.afterInitialize();
         }
-        long nbsol = getMeasures().getSolutionCount();
         // solve
-        searchLoop();
+        boolean newSolutionFound = searchLoop();
         // close
         searchMonitors.beforeClose();
-        mMeasures.updateTime();
-        kill = false;
-        ESat sat = FALSE;
-        if (mMeasures.getSolutionCount() > 0) {
-            sat = TRUE;
-            if (objectivemanager.isOptimization()) {
-                mMeasures.setObjectiveOptimal(!isStopCriterionMet());
-            }
-        } else if (isStopCriterionMet()) {
-            mMeasures.setObjectiveOptimal(false);
-            sat = UNDEFINED;
-        }
-        feasible = sat;
+        closeSearch();
         searchMonitors.afterClose();
-        // to return
-        boolean newSolutionFound = (getMeasures().getSolutionCount() - nbsol) > 0;
         // restoration
         return newSolutionFound;
     }
 
-    /** Define the possible actions of SearchLoop */
-    protected enum Action {
-        initialize, // initialization step
-        propagate,  // propagation step
-        extend,     // extension step
-        validate,   // validation step
-        repair,     //reparation step
-    }
-
-    private boolean stop;
-
     /**
      * Executes the search loop
+     * @return <tt>true</tt> if ends on a solution, <tt>false</tt> otherwise
      */
-    private void searchLoop() {
+    private boolean searchLoop() {
+        boolean solution = false;
         kill = true;
         boolean left = true;
-        do {
+        while(!stop){
             if (isStopCriterionMet()) {
                 stop = true;
-            }
-            if(stop){
-                return;
             }
             switch (action) {
                 case initialize: throw new UnsupportedOperationException("should not initialize during search loop");
@@ -324,10 +325,11 @@ public final class Solver implements Serializable, ISolver {
                     searchMonitors.onSolution();
                     jumpTo = 1;
                     action = repair;
-                    stop = true;
+                    stop = solution = true;
                     break;
             }
-        } while (true);
+        }
+        return solution;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -400,6 +402,26 @@ public final class Solver implements Serializable, ISolver {
             if (c instanceof ICounter) {
                 ((ICounter) c).init();
             }
+        }
+    }
+
+    /**
+     * Close the search:
+     * - set satisfaction
+     * - update statistics
+     */
+    private void closeSearch() {
+        mMeasures.updateTime();
+        kill = false;
+        feasible = FALSE;
+        if (mMeasures.getSolutionCount() > 0) {
+            feasible = TRUE;
+            if (objectivemanager.isOptimization()) {
+                mMeasures.setObjectiveOptimal(!isStopCriterionMet());
+            }
+        } else if (isStopCriterionMet()) {
+            mMeasures.setObjectiveOptimal(false);
+            feasible = UNDEFINED;
         }
     }
 

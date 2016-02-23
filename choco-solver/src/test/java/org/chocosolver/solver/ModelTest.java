@@ -46,9 +46,9 @@ import org.testng.annotations.Test;
 import java.text.MessageFormat;
 
 import static org.chocosolver.memory.Environments.COPY;
+import static org.chocosolver.memory.Environments.TRAIL;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
 import static org.chocosolver.solver.variables.IntVar.MIN_INT_BOUND;
 import static org.chocosolver.util.ESat.FALSE;
@@ -69,12 +69,20 @@ public class ModelTest {
     final static int[] nbOmax = {4, 6, 17};
     final static int n = 3;
 
+    /** For autonumbering anonymous models. */
+    private static int modelInitNumber;
+
+    /** @return next model's number, for anonymous models. */
+    private static synchronized int nextModelNum() {
+        return modelInitNumber++;
+    }
+
     public static Model knapsack(boolean copy) {
         Model model;
         if (copy) {
-            model = new Model(COPY.make(), "test");
+            model = new Model(COPY.make(), "ModelC-"+nextModelNum());
         } else {
-            model = new Model();
+            model = new Model(TRAIL.make(), "ModelT-"+nextModelNum());
         }
         IntVar power = model.intVar("v_" + n, 0, 9999, true);
         IntVar[] objects = new IntVar[n];
@@ -86,7 +94,6 @@ public class ModelTest {
         model.setObjectives(MAXIMIZE, power);
         model.addHook("obj", power);
         model.getSolver().set(inputOrderLBSearch(objects));
-        showShortStatistics(model);
         return model;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,12 +308,15 @@ public class ModelTest {
         for (int iter = 0; iter < 50; iter++) {
             ParallelResolution pares = new ParallelResolution();
             for (int i = 0; i < 10; i++) {
-                pares.addModel(knapsack(true));
+                pares.addModel(knapsack(false));
                 pares.addModel(knapsack(false));
             }
-            while(pares.solve());
-            Chatterbox.printStatistics(pares.getBestModel());
-            Assert.assertEquals(pares.getBestModel().getSolver().getObjectiveManager().getBestSolutionValue(), 51);
+            Model finder = null;
+            while(pares.solve()){
+                finder = pares.getBestModel();
+            }
+            Chatterbox.printShortStatistics(finder);
+            Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);
         }
     }
 

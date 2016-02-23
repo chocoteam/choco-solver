@@ -30,7 +30,6 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.Variable;
 
@@ -114,8 +113,11 @@ public class ParallelResolution {
     /** Stores whether or not prepare() method has been called */
     private boolean isPrepared = false;
 
-    /** Integer which stores the number of ending models. Needed for synchronization purpose. */
-    private final AtomicInteger finishers = new AtomicInteger(0);
+    /** Point to (one of) the solver(s) which found a solution */
+    private AtomicInteger finisher = new AtomicInteger(0);
+
+    /** Point to (one of) the solver(s) which found a solution */
+    private Model finder;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
@@ -167,12 +169,16 @@ public class ParallelResolution {
      * @throws SolverException if no model or only model has been added.
      */
     public boolean solve() {
-        if(!isPrepared){ prepare(); }
-        long nsol = 0;
-        for (Model s : models) { nsol -= s.getSolver().getMeasures().getSolutionCount(); }
-        models.parallelStream().forEach(Model::solve);
-        for (Model s : models) { nsol += s.getSolver().getMeasures().getSolutionCount(); }
-        return nsol > 0;
+        if (!isPrepared) {
+            prepare();
+        }
+        finder = null;
+        models.parallelStream().forEach(m -> {
+            if (m.solve() && finisher.get() == 1) {
+                finder = m;
+            }
+        });
+        return finder != null;
     }
 
     /**
@@ -191,32 +197,7 @@ public class ParallelResolution {
      * @return the first model which finds a solution (or the best one) or <tt>null</tt> if no such model exists.
      */
     public Model getBestModel(){
-        ResolutionPolicy policy = models.get(0).getSolver().getObjectiveManager().getPolicy();
-        check(policy);
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            for (Model s : models) {
-                if (s.getSolver().getMeasures().getSolutionCount() > 0) {
-                    return s;
-                }
-            }
-            return null;
-        }else{
-            boolean min = models.get(0).getSolver().getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
-            Model best = null;
-            int cost = 0;
-            for (Model m : models) {
-                if (m.getSolver().getMeasures().getSolutionCount() > 0) {
-                    int solVal = (Integer)m.getSolver().getObjectiveManager().getBestSolutionValue();
-                    if (best == null
-                            || (cost > solVal && min)
-                            || (cost < solVal && !min)) {
-                        best = m;
-                        cost = solVal;
-                    }
-                }
-            }
-            return best;
-        }
+        return finder;
     }
 
     /**
@@ -234,16 +215,7 @@ public class ParallelResolution {
         isPrepared = true;
         ResolutionPolicy policy = models.get(0).getResolutionPolicy();
         check(policy);
-        models.stream().forEach(s -> s.getSolver().addStopCriterion(()->finishers.get()>0));
-        models.stream().forEach(s -> s.getSolver().plugMonitor(new IMonitorClose() {
-            @Override
-            public void afterClose() {
-                int count = finishers.addAndGet(1);
-                if(count == models.size()){
-                    finishers.set(0); //reset the counter to 0
-                }
-            }
-        }));
+        models.stream().forEach(s -> s.getSolver().addStopCriterion(()->finder!=null));
         if(policy != ResolutionPolicy.SATISFACTION){
             // share the best known bound
             models.stream().forEach(s -> s.getSolver().plugMonitor(
