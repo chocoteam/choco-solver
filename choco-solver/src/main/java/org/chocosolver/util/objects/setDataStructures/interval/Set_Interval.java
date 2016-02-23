@@ -145,8 +145,6 @@ public class Set_Interval implements ISet {
 				value = lb;
 			}
 			@Override
-			public void notifyRemoved(int item) {}
-			@Override
 			public boolean hasNext() {
 				return value <= ub;
 			}

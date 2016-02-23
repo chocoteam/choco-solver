@@ -147,8 +147,6 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 				current = -1;
 			}
 			@Override
-			public void notifyRemoved(int item) {}
-			@Override
 			public boolean hasNext() {
 				return nextSetBit(current+1) >= 0;
 			}

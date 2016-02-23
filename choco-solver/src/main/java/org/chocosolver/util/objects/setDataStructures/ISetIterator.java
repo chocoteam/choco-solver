@@ -32,11 +32,26 @@ package org.chocosolver.util.objects.setDataStructures;
 import java.util.Iterator;
 
 /**
+ * Object to iterate over an ISet values using
+ * <code>
+ *     for(int value:set){
+ *         ...
+ *     }
+ * </code>
+ *
  * @author Jean-Guillaume Fages
  */
 public interface ISetIterator extends Iterator<Integer> {
 
+	/**
+	 * Reset iteration (to avoid creating a new ISetIterator for every iteration)
+	 */
 	void reset();
 
-	void notifyRemoved(int item);
+	/**
+	 * Inform the iterator that value <code>item</code> has been removed
+	 * (may require to update iterator structure)
+	 * @param item removed value
+	 */
+	default void notifyRemoved(int item){}
 }

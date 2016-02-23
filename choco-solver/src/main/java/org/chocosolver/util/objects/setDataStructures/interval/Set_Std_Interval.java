@@ -149,8 +149,6 @@ public class Set_Std_Interval implements ISet {
 				value = lb.get();
 			}
 			@Override
-			public void notifyRemoved(int item) {}
-			@Override
 			public boolean hasNext() {
 				return value <= ub.get();
 			}

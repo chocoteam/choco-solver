@@ -71,8 +71,6 @@ public class Set_BitSet extends BitSet implements ISet {
 				current = -1;
 			}
 			@Override
-			public void notifyRemoved(int item) {}
-			@Override
 			public boolean hasNext() {
 				return nextSetBit(current+1) >= 0;
 			}
