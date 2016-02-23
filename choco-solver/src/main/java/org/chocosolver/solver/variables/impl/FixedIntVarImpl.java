@@ -42,7 +42,10 @@ import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.tools.StringUtils;
+
+import java.util.Iterator;
 
 /**
  * A IntVar with one domain value.
@@ -75,6 +78,11 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
      * Reusable iterator over ranges.
      */
     private DisposableRangeIterator _riterator;
+
+    /**
+     * Value iterator allowing for(int i:this) loops
+     */
+    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
      * Creates a variable whom domain is natively reduced to the singleton {<code>constante</code>}.
@@ -416,5 +424,11 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
             _riterator.topDownInit();
         }
         return _riterator;
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        _javaIterator.reset();
+        return _javaIterator;
     }
 }

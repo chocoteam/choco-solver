@@ -43,11 +43,10 @@ import org.chocosolver.solver.variables.delta.monitor.IntervalDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
-import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
-import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.iterators.DisposableValueBoundIterator;
-import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.tools.StringUtils;
+
+import java.util.Iterator;
 
 /**
  * <br/>
@@ -91,6 +90,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * To iterate over ranges
      */
     private DisposableRangeIterator _riterator;
+
+    /**
+     * Value iterator allowing for(int i:this) loops
+     */
+    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
      * Create a bounded domain IntVar : [min,max]
@@ -631,5 +635,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             _riterator.topDownInit();
         }
         return _riterator;
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        _javaIterator.reset();
+        return _javaIterator;
     }
 }

@@ -39,10 +39,9 @@ import org.chocosolver.solver.variables.delta.IntDelta;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
-import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
-import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.iterators.DisposableValueBoundIterator;
-import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.*;
+
+import java.util.Iterator;
 
 /**
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
@@ -65,6 +64,11 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     protected DisposableValueIterator _viterator;
 
     protected DisposableRangeIterator _riterator;
+
+    /**
+     * Value iterator allowing for(int i:this) loops
+     */
+    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     public IntView(String name, IntVar var) {
         super(name, var.getModel());
@@ -168,4 +172,9 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         return _riterator;
     }
 
+    @Override
+    public Iterator<Integer> iterator() {
+        _javaIterator.reset();
+        return _javaIterator;
+    }
 }

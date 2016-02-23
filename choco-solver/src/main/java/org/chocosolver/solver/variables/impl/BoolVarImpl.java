@@ -43,10 +43,9 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
-import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.iterators.DisposableValueBoundIterator;
-import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.*;
+
+import java.util.Iterator;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
@@ -91,6 +90,10 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * To iterate over ranges
      */
     private DisposableRangeIterator _riterator;
+    /**
+     * Value iterator allowing for(int i:this) loops
+     */
+    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
     /**
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
      * on value removal
@@ -524,6 +527,12 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             _riterator.topDownInit();
         }
         return _riterator;
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        _javaIterator.reset();
+        return _javaIterator;
     }
 
     @Override

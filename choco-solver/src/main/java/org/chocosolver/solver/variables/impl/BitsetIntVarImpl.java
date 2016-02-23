@@ -46,9 +46,11 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.tools.StringUtils;
 
 import java.util.BitSet;
+import java.util.Iterator;
 
 /**
  * <br/>
@@ -103,6 +105,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * To iterate over ranges
      */
     private DisposableRangeIterator _riterator;
+
+    /**
+     * Value iterator allowing for(int i:this) loops
+     */
+    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
      * Create an enumerated IntVar based on a bitset
@@ -934,5 +941,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             _riterator.topDownInit();
         }
         return _riterator;
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        _javaIterator.reset();
+        return _javaIterator;
     }
 }

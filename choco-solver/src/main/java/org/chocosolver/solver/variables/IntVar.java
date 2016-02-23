@@ -47,7 +47,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends Variable {
+public interface IntVar extends Variable, Iterable<Integer>{
 
     /**
      * Provide a minimum value for integer variable lower bound.
