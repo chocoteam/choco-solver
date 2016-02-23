@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -75,6 +76,8 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 */
 	public SetVarImpl(String name, int[] ker, SetType kerType, int[] env, SetType envType, Model model) {
 		super(name, model);
+		ker = new TIntHashSet(ker).toArray();
+		env = new TIntHashSet(env).toArray();
 		int offSet = env.length>0?env[0]:0;
 		for(int i:env){
 			offSet = Math.min(offSet,i);
@@ -84,15 +87,9 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 		lbReadOnly = new Set_ReadOnly(lb);
 		ubReadOnly = new Set_ReadOnly(ub);
 		for(int i:env){
-			if(ub.contain(i)){
-				throw new UnsupportedOperationException("Invalid SetVar domain definition : "+i+" is twice in the UB.");
-			}
 			ub.add(i);
 		}
 		for(int i:ker){
-			if(lb.contain(i)){
-				throw new UnsupportedOperationException("Invalid SetVar domain definition : "+i+" is twice in the LB.");
-			}
 			lb.add(i);
 			if(!ub.contain(i)){
 				throw new UnsupportedOperationException("Invalid SetVar domain definition : "
@@ -110,16 +107,10 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	 */
 	public SetVarImpl(String name, int[] value, Model model) {
 		super(name, model);
-		lb = SetFactory.makeConstantSet(value);
+		lb = SetFactory.makeConstantSet(new TIntHashSet(value).toArray());
 		ub = lb;
 		lbReadOnly = new Set_ReadOnly(lb);
 		ubReadOnly = new Set_ReadOnly(ub);
-		for(int i:value){
-			if(lb.contain(i)){
-				throw new UnsupportedOperationException("Invalid fixed SetVar domain definition : "+i+" is added twice.");
-			}
-			lb.add(i);
-		}
 	}
 
 	//***********************************************************************************
