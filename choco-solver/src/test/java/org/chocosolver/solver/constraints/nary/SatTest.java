@@ -32,6 +32,7 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -215,8 +216,11 @@ public class SatTest {
         model.getSolver().set(inputOrderLBSearch(var));
 
         model.setObjectives(MAXIMIZE, var);
-        while(model.solve());
-        assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal(var).intValue(), 2);
+        Solution solution = new Solution();
+        while(model.solve()){
+            solution.record(model);
+        }
+        assertEquals(solution.getIntVal(var).intValue(), 2);
 
     }
 }

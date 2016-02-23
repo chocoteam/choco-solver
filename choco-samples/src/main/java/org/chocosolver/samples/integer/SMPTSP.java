@@ -38,6 +38,9 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
@@ -64,6 +67,7 @@ public class SMPTSP extends AbstractProblem {
 	// model
 	private IntVar nbValues;
 	private IntVar[] assignment;
+	List<Solution> solutions = new ArrayList<>();
 
 	// ***********************************************************************************
 	// METHODS
@@ -125,13 +129,17 @@ public class SMPTSP extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		while (model.solve());
+		while (model.solve()){
+            Solution sol = new Solution();
+            sol.record(model);
+            solutions.add(sol);
+        }
 	}
 
 	@Override
 	public void prettyOut() {
 		int nb = 1;
-		for(Solution s: model.getSolver().getSolutionRecorder().getSolutions()){
+		for(Solution s: solutions){
 			System.out.println("Optimal solution : "+nb);
 			for(int i=0;i<5;i++){
 				System.out.println(assignment[i].getName()+" = "+s.getIntVal(assignment[i]));

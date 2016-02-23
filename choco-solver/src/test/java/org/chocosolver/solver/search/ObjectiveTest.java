@@ -139,14 +139,20 @@ public class ObjectiveTest {
         model.arithm(iv, ">=", 2).post();
 
         model.setObjectives(MINIMIZE, iv);
-        while(model.solve());
-        assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        int value = 11;
+        while(model.solve()){
+            value = iv.getValue();
+        }
+        assertEquals(value, 2);
 
         model.getSolver().reset();
 
+        value = 11;
         model.setObjectives(MINIMIZE, iv);
-        while(model.solve());
-        assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal(iv).intValue(), 2);
+        while(model.solve()){
+            value = iv.getValue();
+        }
+        assertEquals(value, 2);
     }
 
     @Test(groups="1s", timeOut=60000)

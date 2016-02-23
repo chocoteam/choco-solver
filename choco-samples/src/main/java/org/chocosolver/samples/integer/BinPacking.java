@@ -32,8 +32,11 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.objective.ObjectiveManager;
-import org.chocosolver.solver.search.solution.AllSolutionsRecorder;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 
@@ -57,6 +60,7 @@ public class BinPacking extends AbstractProblem{
 	int nbBins;
 	IntVar[] loads;
 	IntVar minLoad;
+    List<Solution> solutions = new ArrayList<>();
 
 	//***********************************************************************************
 	// METHODS
@@ -89,8 +93,10 @@ public class BinPacking extends AbstractProblem{
 		switch (mode) {
 			case 0:// to check
 				model.arithm(minLoad, "=", 17).post();
-				model.getSolver().set(new AllSolutionsRecorder(model));
 				while(model.solve()){
+					Solution sol = new Solution();
+                    sol.record(model);
+                    solutions.add(sol);
 					nbOpt ++;
 				}
 				System.out.println("There are "+nbOpt+" optima");
@@ -124,7 +130,7 @@ public class BinPacking extends AbstractProblem{
 
 	@Override
 	public void prettyOut() {
-		System.out.println("There are "+ model.getSolver().getSolutionRecorder().getSolutions().size()+" optimal solutions");
+		System.out.println("There are "+ solutions.size()+" optimal solutions");
 	}
 
 	//***********************************************************************************

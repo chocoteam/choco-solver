@@ -33,6 +33,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -43,7 +44,6 @@ import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
 import static org.chocosolver.solver.constraints.SatFactory.addConstructiveDisjunction;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.intVarSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
@@ -107,10 +107,16 @@ public class PropConDisTest {
             Model cd = modelPb(n, n, rnd, true, true);
             or.getSolver().set(inputOrderLBSearch((IntVar[]) or.getHook("decvars")));
             cd.getSolver().set(inputOrderLBSearch((IntVar[]) cd.getHook("decvars")));
-            while(or.solve());
-            while(cd.solve());
-            assertEquals(cd.getSolutionRecorder().getLastSolution().getIntVal((IntVar) cd.getObjectives()[0]),
-                    or.getSolutionRecorder().getLastSolution().getIntVal((IntVar) or.getObjectives()[0]));
+            Solution sor = new Solution();
+            Solution scd = new Solution();
+            while(or.solve()){
+                sor.record(or);
+            }
+            while(cd.solve()){
+                scd.record(cd);
+            }
+            assertEquals(scd.getIntVal((IntVar) cd.getObjectives()[0]),
+                    sor.getIntVal((IntVar) or.getObjectives()[0]));
             assertEquals(cd.getSolver().getMeasures().getSolutionCount(), or.getSolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
             assertTrue(or.getSolver().getMeasures().getNodeCount() >= cd.getSolver().getMeasures().getNodeCount(), "wrong nb of nodes");
         }

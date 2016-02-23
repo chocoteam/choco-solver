@@ -32,7 +32,6 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.LinkedList;
@@ -205,13 +204,13 @@ public class ParallelResolution {
             boolean min = models.get(0).getSolver().getObjectiveManager().getPolicy() == ResolutionPolicy.MINIMIZE;
             Model best = null;
             int cost = 0;
-            for (Model s : models) {
-                if (s.getSolver().getMeasures().getSolutionCount() > 0) {
-                    int solVal = s.getSolutionRecorder().getLastSolution().getIntVal((IntVar)s.getObjectives()[0]);
+            for (Model m : models) {
+                if (m.getSolver().getMeasures().getSolutionCount() > 0) {
+                    int solVal = (Integer)m.getSolver().getObjectiveManager().getBestSolutionValue();
                     if (best == null
                             || (cost > solVal && min)
                             || (cost < solVal && !min)) {
-                        best = s;
+                        best = m;
                         cost = solVal;
                     }
                 }

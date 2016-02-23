@@ -31,8 +31,6 @@ package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.*;
-import org.chocosolver.solver.search.solution.ISolutionRecorder;
-import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 
@@ -168,35 +166,6 @@ public class Chatterbox {
      */
     public static void printCSVStatistics(Model model) {
         out.println(model.getSolver().getMeasures().toCSV());
-    }
-
-
-    /**
-     * Prints a posteriori the solutions found (beware, a solution recorder must have been defined).
-     * <p>
-     * Recommended usage: to be called after the resolution step.
-     *
-     * @param model  the solver to print solutions from
-     * @param message the message to print per solution
-     */
-    public static void printSolutions(Model model, IMessage message) {
-        ISolutionRecorder solrec = model.getSolver().getSolutionRecorder();
-        for (Solution sol : solrec.getSolutions()) {
-            solrec.restoreSolution(sol);
-            out.println(message.print());
-        }
-    }
-
-    /**
-     * Print a posteriori the solutions found (beware, a solution recorder must has been defined).
-     * <p>
-     * Recommended usage: to be called after the resolution step.
-     *
-     * @param model the solver to print solutions from
-     * @see Chatterbox.DefaultSolutionMessage
-     */
-    public static void printSolutions(Model model) {
-        printSolutions(model, new DefaultSolutionMessage(model));
     }
 
     /**

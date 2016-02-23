@@ -32,6 +32,7 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -69,23 +70,24 @@ public class ModelTest {
     final static int n = 3;
 
     public static Model knapsack(boolean copy) {
-        Model s;
+        Model model;
         if (copy) {
-            s = new Model(COPY.make(), "test");
+            model = new Model(COPY.make(), "test");
         } else {
-            s = new Model();
+            model = new Model();
         }
-        IntVar power = s.intVar("v_" + n, 0, 9999, true);
+        IntVar power = model.intVar("v_" + n, 0, 9999, true);
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            objects[i] = s.intVar("v_" + i, 0, nbOmax[i], false);
+            objects[i] = model.intVar("v_" + i, 0, nbOmax[i], false);
         }
-        s.scalar(objects, volumes, "=", s.intVar("capa", capacites[0], capacites[1], true)).post();
-        s.scalar(objects, energies, "=", power).post();
-        s.setObjectives(MAXIMIZE, power);
-        s.getSolver().set(inputOrderLBSearch(objects));
-        showShortStatistics(s);
-        return s;
+        model.scalar(objects, volumes, "=", model.intVar("capa", capacites[0], capacites[1], true)).post();
+        model.scalar(objects, energies, "=", power).post();
+        model.setObjectives(MAXIMIZE, power);
+        model.addHook("obj", power);
+        model.getSolver().set(inputOrderLBSearch(objects));
+        showShortStatistics(model);
+        return model;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,7 +263,7 @@ public class ModelTest {
             m.clearObjectives();
         }
         pares.solve();
-        Chatterbox.printSolutions(pares.getBestModel());
+        Chatterbox.printStatistics(pares.getBestModel());
         Assert.assertEquals(pares.getBestModel().getSolver().getMeasures().getSolutionCount(), 1);
     }
 
@@ -274,9 +276,12 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
-            while(pares.solve());
+            Solution sol = new Solution();
+            while(pares.solve()){
+                sol.record(pares.getBestModel());
+            }
             Assert.assertTrue(pares.getBestModel()!=null);
-            Chatterbox.printSolutions(pares.getBestModel());
+            Chatterbox.printStatistics(pares.getBestModel());
             Assert.assertEquals(pares.getBestModel().getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
@@ -284,10 +289,10 @@ public class ModelTest {
     @Test(groups="1s", timeOut=60000)
     public void testParBug2() {
         for (int iter = 0; iter < 50; iter++) {
-            Model s = knapsack(true);
-            while(s.solve());
-            Chatterbox.printSolutions(s);
-            Assert.assertEquals(s.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
+            Model model = knapsack(true);
+            while(model.solve());
+            Chatterbox.printStatistics(model);
+            Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
@@ -300,7 +305,7 @@ public class ModelTest {
                 pares.addModel(knapsack(false));
             }
             while(pares.solve());
-            Chatterbox.printSolutions(pares.getBestModel());
+            Chatterbox.printStatistics(pares.getBestModel());
             Assert.assertEquals(pares.getBestModel().getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
@@ -312,7 +317,7 @@ public class ModelTest {
         s.setObjectives(MAXIMIZE, i);
         s.solve();
         assertEquals(s.getSolver().getMeasures().getSolutionCount(), 1);
-        assertEquals(s.getSolver().getSolutionRecorder().getLastSolution().getIntVal(i).intValue(), 5);
+        assertEquals(i.getValue(), 5);
 
         s.getSolver().getEngine().flush();
         s.getSolver().reset();
@@ -403,7 +408,6 @@ public class ModelTest {
         model.arithm(v[0], "!=", v[1]).post();
         model.setObjectives(MAXIMIZE, v[0]);
         model.solve();
-        model.getSolver().getSolutionRecorder().restoreLastSolution();
         assertTrue(v[0].isInstantiated());
         assertTrue(v[0].isInstantiatedTo(1));
     }

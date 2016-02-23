@@ -43,6 +43,7 @@ import org.chocosolver.solver.constraints.extension.nary.LargeRelation;
 import org.chocosolver.solver.constraints.extension.nary.TuplesLargeTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.Assert;
@@ -197,18 +198,21 @@ public class TableTest {
         }
         model.sum(reified, "=", sum).post();
         model.setObjectives(MINIMIZE, sum);
-        while(model.solve());
+        Solution sol = new Solution();
+        while(model.solve()){
+            sol.record(model);
+        }
         if (model.getSolver().getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
-                out.print(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal(vars[i]) + "\t");
+                out.print(sol.getIntVal(vars[i]) + "\t");
             }
             out.println("");
             for (int i = 0; i < reified.length; i++) {
                 out.print(reified[i].getValue() + "\t");
             }
-            out.println("\n" + "obj = " + model.getSolver().getSolutionRecorder().getLastSolution().getIntVal(sum) + ", backtracks = " + model.getSolver().getMeasures().getBackTrackCount());
+            out.println("\n" + "obj = " + sol.getIntVal(sum) + ", backtracks = " + model.getSolver().getMeasures().getBackTrackCount());
         }
-        assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal(sum).intValue(), 5);
+        assertEquals(sol.getIntVal(sum).intValue(), 5);
     }
 
     @Test(groups="1s", timeOut=60000)

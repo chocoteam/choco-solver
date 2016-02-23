@@ -228,9 +228,12 @@ public class RegularTest {
         IntVar[] CS = model.intVarArray("CS", 4, -10, 10, false);
         model.regular(CS, new FiniteAutomaton("<-9>1*")).post();
         showSolutions(model);
-        while (model.solve()) ;
-
-        final List<Solution> solutions = model.getSolver().getSolutionRecorder().getSolutions();
+        List<Solution> solutions = new ArrayList<>();
+        while (model.solve()){
+            Solution s = new Solution();
+            s.record(model);
+            solutions.add(s);
+        }
 
         out.println(solutions);
 

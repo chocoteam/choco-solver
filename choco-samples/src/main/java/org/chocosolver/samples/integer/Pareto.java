@@ -39,6 +39,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,11 +60,15 @@ public class Pareto {
 		// the problem is to maximize a and b
 		model.setObjectives(ResolutionPolicy.MAXIMIZE,a,b);
 
-		while(model.solve());
+		List<Solution> solutions = new ArrayList<>();
+		while(model.solve()){
+			Solution sol = new Solution();
+			sol.record(model);
+			solutions.add(sol);
+		}
 
-		List<Solution> paretoFront = model.getSolver().getSolutionRecorder().getSolutions();
-		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
-		for(Solution s:paretoFront){
+		System.out.println("The pareto front has "+solutions.size()+" solutions : ");
+		for(Solution s:solutions){
 			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
 		}
 	}

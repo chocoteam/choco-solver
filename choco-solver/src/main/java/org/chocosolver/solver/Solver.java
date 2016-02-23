@@ -49,7 +49,6 @@ import org.chocosolver.solver.search.loop.move.MoveSeq;
 import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
-import org.chocosolver.solver.search.solution.ISolutionRecorder;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
@@ -162,9 +161,6 @@ public final class Solver implements Serializable, ISolver {
     /** The propagation engine to use */
     private IPropagationEngine engine;
 
-    /** A solution recorder */
-    private ISolutionRecorder solutionRecorder;
-
     /**
      * Problem feasbility:
      * - UNDEFINED if unknown,
@@ -175,9 +171,6 @@ public final class Solver implements Serializable, ISolver {
 
     /** Counter that indicates how many world should be rolled back when backtracking */
     private int jumpTo;
-
-    /** specifies whether or not to restore the best solution for optimisation problems (true by default)*/
-    private boolean restoreBestSolution = true;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
@@ -253,15 +246,6 @@ public final class Solver implements Serializable, ISolver {
         // to return
         boolean newSolutionFound = (getMeasures().getSolutionCount() - nbsol) > 0;
         // restoration
-        if(restoreBestSolution && (!newSolutionFound) && !satPb){
-            try {
-                getSolutionRecorder().restoreLastSolution();
-            } catch (ContradictionException e) {
-                throw new UnsupportedOperationException("restoring the last solution ended in a failure");
-            } finally {
-                getEngine().flush();
-            }
-        }
         return newSolutionFound;
     }
 
@@ -632,14 +616,6 @@ public final class Solver implements Serializable, ISolver {
     }
 
     /**
-     * Return the solution recorder
-     * @return this model's solution recorder
-     */
-    public ISolutionRecorder getSolutionRecorder() {
-        return solutionRecorder;
-    }
-
-    /**
      * Returns information on the feasibility of the current problem defined by the solver.
      * <p>
      * Possible back values are:
@@ -782,15 +758,6 @@ public final class Solver implements Serializable, ISolver {
     }
 
     /**
-     * Overrides the solution recorder.
-     * Beware : multiple recorders which restore a solution might create a conflict.
-     * @param sr the solution recorder to use
-     */
-    public void set(ISolutionRecorder sr) {
-        this.solutionRecorder = sr;
-    }
-
-    /**
      * Completes (or not) the declared search strategy with one over all variables
      * @param isComplete set to true to complete the current search strategy
      */
@@ -906,15 +873,6 @@ public final class Solver implements Serializable, ISolver {
      */
     public void setJumpTo(int jto) {
         this.jumpTo = jto;
-    }
-
-    /**
-     * Specifies whether or not to restore the best solution found after an optimisation
-     * Already set to true by default
-     * @param restoreBestSolution whether or not to restore the best solution found after an optimisation
-     */
-    public void setRestoreBestSolution(boolean restoreBestSolution) {
-        this.restoreBestSolution = restoreBestSolution;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -134,9 +134,12 @@ public class PropEngineTest {
         Model model = ProblemMaker.makeGolombRuler(10);
         model.getSolver().set(new SevenQueuesPropagatorEngine(model));
         model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
-        while(model.solve());
+        int obj = Integer.MAX_VALUE;
+        while(model.solve()){
+            obj = ((IntVar)(model.getObjectives()[0])).getValue();
+        }
         Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
+        Assert.assertEquals(obj, 55);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -144,9 +147,12 @@ public class PropEngineTest {
         Model model = ProblemMaker.makeGolombRuler(10);
         model.getSolver().set(new TwoBucketPropagationEngine(model));
         model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
-        while(model.solve());
+        int obj = Integer.MAX_VALUE;
+        while(model.solve()){
+            obj = ((IntVar)(model.getObjectives()[0])).getValue();
+        }
         Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
-        Assert.assertEquals(model.getSolver().getSolutionRecorder().getLastSolution().getIntVal((IntVar) model.getObjectives()[0]).intValue(), 55);
+        Assert.assertEquals(obj, 55);
     }
     
     @Test(groups="1s", timeOut=60000)

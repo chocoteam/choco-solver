@@ -30,6 +30,8 @@
 package org.chocosolver.util.iterators;
 
 import org.chocosolver.solver.variables.IntVar;
+
+import java.io.Serializable;
 import java.util.Iterator;
 
 /**
@@ -49,10 +51,20 @@ import java.util.Iterator;
  *
  * @author Jean-Guillaume Fages
  */
-public class IntVarValueIterator implements Iterator<Integer> {
+public class IntVarValueIterator implements Iterator<Integer>, Serializable {
 
+	/**
+	 * Variable to iterate on
+	 */
 	IntVar var;
-	int value, ub;
+    /**
+     * current returned value
+     */
+	int value;
+    /**
+     * upper bound of {@link #var}
+     */
+    int ub;
 
 	/**
 	 * Creates an object to iterate over an IntVar values using

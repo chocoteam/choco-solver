@@ -49,10 +49,6 @@ import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.search.solution.ISolutionRecorder;
-import org.chocosolver.solver.search.solution.LastSolutionRecorder;
-import org.chocosolver.solver.search.solution.ParetoSolutionsRecorder;
-import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
@@ -181,7 +177,6 @@ public class Model implements Serializable, IModel {
         this.objectives = new Variable[0];
         this.hooks = new HashMap<>();
         this.solver = new Solver(this);
-        getSolver().set(new LastSolutionRecorder(new Solution(), this));
     }
 
     /**
@@ -541,7 +536,8 @@ public class Model implements Serializable, IModel {
                 for (int i = 0; i < objectives.length; i++) {
                     _objectives[i] = (IntVar) objectives[i];
                 }
-                getSolver().set(new ParetoSolutionsRecorder(policy, _objectives));
+//                getSolver().set(new ParetoSolutionsRecorder(policy, _objectives));
+                throw new UnsupportedOperationException("Pareto is not natively supported anymore");
             }
         }
     }
@@ -901,42 +897,6 @@ public class Model implements Serializable, IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @deprecated use {@link Solver#getSolutionRecorder()} instead
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public ISolutionRecorder getSolutionRecorder() {
-        return getSolver().getSolutionRecorder();
-    }
-
-    /**
-     * @deprecated use {@link Solver#set(ISolutionRecorder)} instead
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public void set(ISolutionRecorder sr) {
-        getSolver().set(sr);
-    }
-
-    /**
-     * @deprecated use {@link Solver#getSolutionRecorder().restoreLastSolution()} instead
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public void restoreLastSolution() throws ContradictionException {
-        getSolver().getSolutionRecorder().restoreLastSolution();
-    }
-
-    /**
-     * @deprecated use {@link Solver#getSolutionRecorder().restoreSolution(Solution)} instead
-     * Will be removed in version > 3.4.0
-     */
-    @Deprecated
-    public void restoreSolution(Solution solution) throws ContradictionException {
-        getSolver().getSolutionRecorder().restoreSolution(solution);
-    }
-
-    /**
      * @deprecated use {@link Solver#isFeasible()} instead
      * Will be removed in version > 3.4.0
      */
@@ -1197,14 +1157,12 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link Solver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
         setObjectives(policy,getObjectives());
-        getSolver().setRestoreBestSolution(restoreLastSolution);
         while(solve());
     }
 
@@ -1230,14 +1188,12 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link Solver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
         setObjectives(policy,objective);
-        getSolver().setRestoreBestSolution(restoreLastSolution);
         while(solve());
     }
 
@@ -1245,14 +1201,12 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link Solver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
         setObjectives(policy,objective);
         setPrecision(precision);
-        getSolver().setRestoreBestSolution(restoreLastSolution);
         while(solve());
     }
 
@@ -1270,14 +1224,12 @@ public class Model implements Serializable, IModel {
 
     /**
      * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
-     * Use {@link Solver#setRestoreBestSolution(boolean)} to prevent the solver from restoring last solution
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
         setObjectives(policy,objectives);
-        getSolver().setRestoreBestSolution(restoreLastSolution);
         while(solve());
     }
 
