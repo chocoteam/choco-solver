@@ -33,8 +33,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.loop.lns.INeighborFactory;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
 import org.testng.annotations.Test;
@@ -66,13 +66,13 @@ public class SuspiciousTest {
     public void testGregy4() {
         Model model = makeNQueenWithBinaryConstraints(12);
         NodeCounter nodeCounter = new NodeCounter(model, 100);
-        INeighbor rnd = INeighborFactory.random(model.retrieveIntVars(true));
+        INeighbor rnd = new RandomNeighborhood(model.retrieveIntVars(true), 30, 0);
         Move currentMove = model.getSolver().getMove();
         model.getSolver().set(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
             public boolean extend(Solver solver) {
                 if (nodeCounter.isMet()) {
-                    super.extend(solver);
+                    return super.extend(solver);
                 }
                 return currentMove.extend(solver);
             }
@@ -80,7 +80,7 @@ public class SuspiciousTest {
             @Override
             public boolean repair(Solver solver) {
                 if (nodeCounter.isMet()) {
-                    super.repair(solver);
+                    return super.repair(solver);
                 } else if (this.solutions > 0
                         // the second condition is only here for intiale calls, when solutions is not already up to date
                         || solver.getMeasures().getSolutionCount() > 0) {
@@ -94,8 +94,9 @@ public class SuspiciousTest {
                 return currentMove.repair(solver);
             }
         });
+        model.getSolver().limitNode(200);
         while (model.solve()) ;
         long sc = model.getSolver().getMeasures().getSolutionCount();
-        assertEquals(sc, 11);
+        assertEquals(sc, 54);
     }
 }
