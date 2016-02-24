@@ -102,7 +102,7 @@ public class Set_LinkedList implements ISet {
 		if(first == null){
 			return false;
 		} else if(first.element == element){
-			iter.notifyRemoved(element);
+			iter.notifyRemoving(element);
 			first = first.next;
 			if(first==null)last=null;
 			size--;
@@ -112,7 +112,7 @@ public class Set_LinkedList implements ISet {
 			IntCell previous = null;
 			while (current != null) {
 				if (current.element == element) {
-					iter.notifyRemoved(element);
+					iter.notifyRemoving(element);
 					previous.next = current.next;
 					if(previous.next==null) last = previous;
 					current.next = poolGC;
@@ -172,7 +172,7 @@ public class Set_LinkedList implements ISet {
 				nextCell = first;
 			}
 			@Override
-			public void notifyRemoved(int item) {
+			public void notifyRemoving(int item) {
 				if(nextCell != null && nextCell.element == item){
 					nextCell = nextCell.next;
 				}

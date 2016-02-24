@@ -53,5 +53,5 @@ public interface ISetIterator extends Iterator<Integer> {
 	 * (may require to update iterator structure)
 	 * @param item removed value
 	 */
-	default void notifyRemoved(int item){}
+	default void notifyRemoving(int item){}
 }

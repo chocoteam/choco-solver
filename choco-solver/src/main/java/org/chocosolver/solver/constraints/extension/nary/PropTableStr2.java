@@ -38,6 +38,9 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
 
 import java.util.ArrayList;
@@ -59,7 +62,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
 
     int[][] table;
     str2_var str2vars[];
-    Set_Std_Swap tuples;
+    ISet tuples;
     ArrayList<str2_var> Ssup;
     ArrayList<str2_var> Sval;
     boolean firstProp = true;
@@ -74,7 +77,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
         for (int i = 0; i < table[0].length; i++) {
             str2vars[i] = new str2_var(model.getEnvironment(), vars_[i], i, table);
         }
-        tuples = new Set_Std_Swap(model.getEnvironment(), 0);
+        tuples = SetFactory.makeStoredSet(SetType.BIPARTITESET,0,model);
         Ssup = new ArrayList<>();
         Sval = new ArrayList<>();
         this.table = table;

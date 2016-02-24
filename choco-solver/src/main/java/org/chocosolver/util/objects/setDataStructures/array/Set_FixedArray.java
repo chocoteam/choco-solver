@@ -132,12 +132,6 @@ public class Set_FixedArray implements ISet {
 				idx = 0;
 			}
 			@Override
-			public void notifyRemoved(int item) {
-				if(idx>0 && item == values[idx-1]){
-					idx--;
-				}
-			}
-			@Override
 			public boolean hasNext() {
 				return idx < size;
 			}

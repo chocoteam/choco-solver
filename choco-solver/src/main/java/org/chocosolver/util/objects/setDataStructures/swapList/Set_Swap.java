@@ -111,6 +111,7 @@ public class Set_Swap implements ISet {
 		if (!contain(element)) {
 			return false;
 		}
+		iter.notifyRemoving(element);
 		int size = getSize();
 		if (size > 1) {
 			int idx = map[element-mapOffset];
@@ -119,7 +120,6 @@ public class Set_Swap implements ISet {
 			values[idx] = replacer;
 			map[element-mapOffset] = size - 1;
 			values[size - 1] = element;
-			iter.notifyRemoved(element);
 		}
 		addSize(-1);
 		return true;
@@ -185,7 +185,7 @@ public class Set_Swap implements ISet {
 				idx = 0;
 			}
 			@Override
-			public void notifyRemoved(int item) {
+			public void notifyRemoving(int item) {
 				if(idx>0 && item == values[idx-1]){
 					idx--;
 				}
