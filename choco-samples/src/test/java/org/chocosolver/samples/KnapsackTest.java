@@ -143,11 +143,8 @@ public class KnapsackTest {
         Model s = ks.modelIt("k20", 15);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getSolver().getMeasures().getBestSolutionValue().intValue(), 2657, "obj val");
-
-        // This test was true when the default search strategy did not use Last Conflict
-        // TODO update test
-        Assert.assertEquals(s.getSolver().getMeasures().getSolutionCount(), 29, "nb sol");
-//        Assert.assertEquals(s.getResolver().getMeasures().getNodeCount(), 1153919, "nb nod");
+        Assert.assertEquals(s.getSolver().getMeasures().getSolutionCount(), 27, "nb sol");
+        Assert.assertEquals(s.getSolver().getMeasures().getNodeCount(), 303, "nb nod");
     }
 
 }
