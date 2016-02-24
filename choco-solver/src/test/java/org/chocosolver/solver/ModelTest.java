@@ -283,13 +283,15 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
+            Model finder = null;
             Solution sol = new Solution();
             while(pares.solve()){
-                sol.record(pares.getBestModel());
+                finder = pares.getBestModel();
+                sol.record(finder);
             }
-            Assert.assertTrue(pares.getBestModel()!=null);
-            Chatterbox.printStatistics(pares.getBestModel());
-            Assert.assertEquals(pares.getBestModel().getSolver().getObjectiveManager().getBestSolutionValue(), 51);
+            Assert.assertNotNull(finder);
+            Chatterbox.printStatistics(finder);
+            Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
@@ -307,13 +309,14 @@ public class ModelTest {
     public void testP2() {
         for (int iter = 0; iter < 50; iter++) {
             ParallelResolution pares = new ParallelResolution();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 20; i++) {
                 pares.addModel(knapsack(false));
-                pares.addModel(knapsack(false));
+                pares.addModel(knapsack(true));
             }
             Model finder = null;
             while(pares.solve()){
                 finder = pares.getBestModel();
+                Chatterbox.printShortStatistics(finder);
             }
             Chatterbox.printShortStatistics(finder);
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);

@@ -63,10 +63,10 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.chocosolver.solver.Solver.Action.*;
-import static org.chocosolver.solver.Solver.Action.initialize;
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.search.loop.Reporting.fullReport;
 import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
@@ -200,6 +200,9 @@ public final class Solver implements Serializable, ISolver {
     /** Set to <tt>true</tt> to stop the search loop **/
     private boolean stop;
 
+    /** Set to <tt>true</tt> when no more reparation can be achinved, ie entire search tree explored. */
+    private boolean canBeRepaired = true;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,7 +249,7 @@ public final class Solver implements Serializable, ISolver {
             throw new SolverException("No objective variable has been defined whereas policy implies optimization");
         }
         kill = true;
-        stop = false;
+        stop = !canBeRepaired;
         if(action == initialize){
             searchMonitors.beforeInitialize();
             initialize();
@@ -309,9 +312,9 @@ public final class Solver implements Serializable, ISolver {
                     // this is done before the reparation,
                     // since restart is a move which can stop the search if the cut fails
                     action = propagate;
-                    boolean repaired = M.repair(this);
+                    canBeRepaired = M.repair(this);
                     searchMonitors.afterUpBranch();
-                    if (!repaired) {
+                    if (!canBeRepaired) {
                         stop = true;
                     } else {
                         L.forget(this);
@@ -447,6 +450,7 @@ public final class Solver implements Serializable, ISolver {
             action = initialize;
             mMeasures.reset();
             objectivemanager = SAT();
+            canBeRepaired = true; // resetting force to reconsider possible reparation
             set(NoPropagationEngine.SINGLETON); // necessary
         }
     }
@@ -820,9 +824,7 @@ public final class Solver implements Serializable, ISolver {
      * @see #removeAllStopCriteria()
      */
     public void addStopCriterion(Criterion... criterion){
-        for(Criterion c:criterion) {
-            criteria.add(c);
-        }
+        Collections.addAll(criteria, criterion);
     }
 
     /**

@@ -174,7 +174,7 @@ public class ParallelResolution {
         }
         finder = null;
         models.parallelStream().forEach(m -> {
-            if (m.solve() && finisher.get() == 1) {
+            if (m.solve() && finisher.get() == 0) {
                 finder = m;
             }
         });
@@ -211,6 +211,7 @@ public class ParallelResolution {
     ///////////////////////////////////////   INTERNAL METHODS    //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @SuppressWarnings("unchecked")
     private void prepare(){
         isPrepared = true;
         ResolutionPolicy policy = models.get(0).getResolutionPolicy();
