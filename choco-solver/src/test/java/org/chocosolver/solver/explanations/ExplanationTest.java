@@ -53,9 +53,9 @@ import static org.testng.Assert.assertFalse;
  */
 public class ExplanationTest {
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=60000)
     public void testNosol0() {
-        for (int n = 500; n < 4501; n += 500) {
+        for (int n = 5; n < 9; n ++) {
             for (int e = 1; e < 4; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Model model = new Model();
@@ -69,11 +69,34 @@ public class ExplanationTest {
                         case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                     }
                     assertFalse(model.solve());
-                    out.printf("\t%s", model.getSolver().getMeasures().toOneShortLineString());
+                    System.out.println(model.getSolver().getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
-                    if (e > 0) {
+                    if (e > 1) {
                         assertEquals(model.getSolver().getMeasures().getNodeCount(), (n - 2) * 2);
                     }
+                }
+            }
+        }
+    }
+
+    @Test(groups="5m", timeOut=300000)
+    public void testNosolBut0() {
+        for (int n = 500; n < 4501; n += 500) {
+            for (int e = 2; e < 4; e++) {
+                for (int ng = 0; ng < 2; ng++) {
+                    final Model model = new Model();
+                    IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
+                    model.arithm(vars[n - 2], "=", vars[n - 1]).post();
+                    model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
+                    model.getSolver().set(inputOrderLBSearch(vars));
+                    switch (e){
+                        case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
+                        case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
+                    }
+                    assertFalse(model.solve());
+                    System.out.println(model.getSolver().getMeasures().toOneShortLineString());
+                    // get the last contradiction, which is
+                    assertEquals(model.getSolver().getMeasures().getNodeCount(), (n - 2) * 2);
                 }
             }
         }
