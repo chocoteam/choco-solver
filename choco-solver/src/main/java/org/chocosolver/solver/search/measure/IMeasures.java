@@ -91,8 +91,14 @@ public interface IMeasures extends Serializable, Cloneable {
      */
     long getElapsedTimeInNanoseconds();
 
+    /**
+     * Start the stopwatch, to compute resolution time
+     */
     void startStopwatch();
 
+    /**
+     * Update resolution time
+     */
     void updateTime();
 
     /**
@@ -102,6 +108,7 @@ public interface IMeasures extends Serializable, Cloneable {
 
     /**
      * set the reading time count
+     * @param time time needed to read the model
      */
     void setReadingTimeCount(long time);
 
@@ -177,8 +184,9 @@ public interface IMeasures extends Serializable, Cloneable {
 
     /**
      * indicates an objective variable
+     * @param ho set to <tt>true<tt/> to indicate that an objective is declared
      */
-    void declareObjective();
+    void declareObjective(boolean ho);
 
     /**
      * @return true iff the problem has an objective variable (i.e. optimization problem)
@@ -187,6 +195,7 @@ public interface IMeasures extends Serializable, Cloneable {
 
     /**
      * indicates whether or not the optimum has been found and proved
+     * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
      */
     void setObjectiveOptimal(boolean objectiveOptimal);
 

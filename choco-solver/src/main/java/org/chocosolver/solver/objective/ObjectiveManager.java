@@ -39,11 +39,18 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 
+import java.util.function.Function;
+
 /**
  * Class to monitor the objective function and avoid exploring "worse" solutions
  *
- * @author Jean-Guillaume Fages
+ * @author Jean-Guillaume Fages, Charles Prud'homme
  * @since Oct. 2012
+ * @
+ * @param <V> type of objective variable
+ * @param <N> related to the type of objective variable:
+ *           if {@link #objective} is an {@link IntVar}, then this is an {@link Integer},
+ *           if {@link #objective} is a {@link RealVar}, then this is a {@link Double},
  */
 public class ObjectiveManager<V extends Variable, N extends Number> implements ICause {
 
@@ -51,64 +58,84 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     // VARIABLES
     //***********************************************************************************
 
-    final protected ResolutionPolicy policy;
-    final protected boolean strict;
+    /** Define how should the objective be optimize */
+    protected ResolutionPolicy policy;
+    /** The variable to optimize **/
     final protected V objective;
-
+    /** set to <tt>true<tt/> if {@link #objective} is an integer variable, to <tt>false<tt/> if it is a real variable **/
     final private boolean intOrReal;
+    /** if {@link #objective} is a real variable, define the precision to consider it as instantiated **/
     final private double precision;
+    /** Define how the cut should be update when posting the cut **/
+    private Function<N, N> mCutComputer;
+    /** best lower bound found so far **/
+    protected N bestProvedLB;
+    /** best upper bound found so far **/
+    protected N bestProvedUB; // best bounds found so far
 
-    protected N bestProvedLB, bestProvedUB; // best bounds found so far
-
-    // creates an objective manager for satisfaction problems
+    /**
+     * Create an objective manager for satisfaction problem, ie when no objective is defined
+     * @return a no-objective manager (singleton)
+     */
     public static ObjectiveManager SAT() {
-        return new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, false);
+        return new ObjectiveManager<>(null, ResolutionPolicy.SATISFACTION, null);
     }
 
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
 
-    private ObjectiveManager(V objective, ResolutionPolicy policy, double precision, boolean strict, boolean intOrReal) {
+    /**
+     * Create an objective manager
+     * @param objective variable to optimize
+     * @param policy resolution policy
+     * @param precision if {@link #objective} is a real variable, define the precision to consider it as instantiated
+     * @param intOrReal set to <tt>true<tt/> if {@link #objective} is an integer variable,
+     *                  to <tt>false<tt/> if it is a real variable
+     */
+    @SuppressWarnings("unchecked")
+    private ObjectiveManager(V objective, ResolutionPolicy policy, double precision, boolean intOrReal,
+                             Function<N,N> cutComputer) {
         this.policy = policy;
-        this.strict = strict;
         this.objective = objective;
         this.precision = precision;
         this.intOrReal = intOrReal;
+        this.mCutComputer = cutComputer;
         if (isOptimization()) {
-            this.bestProvedLB = getObjLB();
-            this.bestProvedUB = getObjUB();
+            if(intOrReal){
+                this.bestProvedLB = (N)(Integer)(getObjLB().intValue() - 1);
+                this.bestProvedUB = (N)(Integer)(getObjUB().intValue() + 1);
+            }else{
+                this.bestProvedLB = (N)(Double)(getObjLB().doubleValue() - precision);
+                this.bestProvedUB = (N)(Double)(getObjUB().doubleValue() + precision);
+            }
         }
     }
 
     /**
      * Creates an optimization manager for an integer objective function (represented by an IntVar)
      * Enables to cut "worse" solutions
-     *
-     * @param objective variable (represent the value of a solution)
+     *  @param objective variable (represent the value of a solution)
      * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
-     * @param strict    Forces to compute strictly better solutions.
-     *                  Enables to enumerate better or equal solutions when set to false.
+     * @param cutComputer define how the cut should be updated dynamically
      */
     @SuppressWarnings("unchecked")
-    public ObjectiveManager(IntVar objective, ResolutionPolicy policy, boolean strict) {
-        this((V) objective, policy, 0, strict, true);
+    public ObjectiveManager(IntVar objective, ResolutionPolicy policy, Function<Integer,Integer> cutComputer) {
+        this((V) objective, policy, 0, true, (Function<N, N>) cutComputer);
     }
 
     /**
      * Creates an optimization manager for a continuous objective function (represented by a RealVar)
      * Enables to cut "worse" solutions
-     *
-     * @param objective variable (represent the value of a solution)
+     *  @param objective variable (represent the value of a solution)
      * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
      * @param precision precision parameter defining the minimum objective improvement between two solutions
      *                  (avoids wasting time enumerating a huge set of equivalent solutions)
-     * @param strict    Forces to compute strictly better solutions.
-     *                  Enables to enumerate better or equal solutions when set to false.
+     * @param cutComputer define how the cut should be updated dynamically
      */
     @SuppressWarnings("unchecked")
-    public ObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision, boolean strict) {
-        this((V) objective, policy, precision, strict, false);
+    public ObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision, Function<N,N> cutComputer) {
+        this((V) objective, policy, precision, false, cutComputer);
     }
 
     //***********************************************************************************
@@ -159,7 +186,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
         }
     }
 
-    protected int getNbDecimals() {
+    private int getNbDecimals() {
         int dec = 0;
         double p = precision;
         while ((int) p <= 0 && dec <= 12) {
@@ -191,31 +218,23 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     /**
      * Prevent the model from computing worse quality solutions
      *
-     * @throws org.chocosolver.solver.exception.ContradictionException
+     * @throws org.chocosolver.solver.exception.ContradictionException if posting this cut fails
      */
     public void postDynamicCut() throws ContradictionException {
         if (isOptimization()) {
             if (intOrReal) {
-                int offset = 0;
-                if (objective.getModel().getSolver().getMeasures().getSolutionCount() > 0 && strict) {
-                    offset = 1;
-                }
                 IntVar io = (IntVar) objective;
                 if (policy == ResolutionPolicy.MINIMIZE) {
-                    io.updateBounds(bestProvedLB.intValue(), bestProvedUB.intValue() - offset, this);
+                    io.updateBounds(bestProvedLB.intValue(), mCutComputer.apply(bestProvedUB).intValue(), this);
                 } else {
-                    io.updateBounds(bestProvedLB.intValue() + offset, bestProvedUB.intValue(), this);
+                    io.updateBounds(mCutComputer.apply(bestProvedLB).intValue(), bestProvedUB.intValue(), this);
                 }
             } else {
-                double offset = 0;
-                if (objective.getModel().getSolver().getMeasures().getSolutionCount() > 0 && strict) {
-                    offset = precision;
-                }
                 RealVar io = (RealVar) objective;
                 if (policy == ResolutionPolicy.MINIMIZE) {
-                    io.updateBounds(bestProvedLB.doubleValue(), bestProvedUB.doubleValue() - offset, this);
+                    io.updateBounds(bestProvedLB.doubleValue(), mCutComputer.apply(bestProvedUB).doubleValue(), this);
                 } else {
-                    io.updateBounds(bestProvedLB.doubleValue() + offset, bestProvedUB.doubleValue(), this);
+                    io.updateBounds(mCutComputer.apply(bestProvedLB).doubleValue(), bestProvedUB.doubleValue(), this);
                 }
             }
         }
@@ -300,6 +319,54 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
             }
             return (N) ub;
         }
+    }
+
+    /**
+     * Change the way cuts are managed.
+     *
+     * @param aCutComputer a cut computer
+     */
+    public void setCutComputer(Function<N,N> aCutComputer){
+        this.mCutComputer = aCutComputer;
+    }
+
+    /**
+     * Define a strict cut computer where in the next solution to find should be strictly greater than (resp. less)
+     * the best solution found so far when maximizing (resp. minimizing) a problem.
+     * @param policy resolution policy used
+     * @return the new cut to consider
+     */
+    public static Function<Integer,Integer> strictIntVarCutComputer(ResolutionPolicy policy){
+        return n -> policy == ResolutionPolicy.MAXIMIZE ? (Integer) (n + 1) : (Integer) (n - 1);
+    }
+
+    /**
+     * Define a <i>walking</i> cut computer where in the next solution to find should be greater than (resp. less than)
+     * or equal to the best solution found so far when maximizing (resp. minimizing) a problem.
+     * @return the new cut to consider
+     */
+    public static Function<Integer,Integer> walkingIntVarCutComputer(){
+        return n -> n;
+    }
+
+    /**
+     * Define a strict cut computer where in the next solution to find should be strictly greater (resp. lesser) than
+     * the best solution found so far when maximizing (resp. minimizing) a problem.
+     * @param policy resolution policy used
+     * @param precision precision to consider a RealVar as instantiated
+     * @return the new cut to consider
+     */
+    public static Function<Double,Double> strictRealVarCutComputer(ResolutionPolicy policy, double precision){
+        return n -> policy == ResolutionPolicy.MAXIMIZE ? (Double) (n + precision) : (Double) (n - precision);
+    }
+
+    /**
+     * Define a <i>walking</i> cut computer where in the next solution to find should be greater than (resp. less than)
+     * or equal to the best solution found so far when maximizing (resp. minimizing) a problem.
+     * @return the new cut to consider
+     */
+    public static Function<Double,Double> walkingRealVarCutComputer(){
+        return n -> n;
     }
 
     //***********************************************************************************

@@ -76,9 +76,17 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
      */
     IntIterableRangeSet r3;
 
-    public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z) {
+    /**
+     * Create propagator for ternary sum: X + Y =Z
+     * @param X an integer variable
+     * @param Y an integer variable
+     * @param Z an integer variable
+     * @param enableAC set to <tt>true</tt> to enable AC filter algorithm
+     */
+    public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z, boolean enableAC) {
         super(new IntVar[]{X,Y,Z}, PropagatorPriority.TERNARY, false);
-        allbounded = !X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain();
+        allbounded = !enableAC
+                || (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
         r1 = new IntIterableRangeSet();
         r2 = new IntIterableRangeSet();
         r3 = new IntIterableRangeSet();

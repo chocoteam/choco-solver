@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2015, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -39,9 +39,11 @@ import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -64,7 +66,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class ObjectiveTest {
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1() {
         Model model = new Model();
 
@@ -116,7 +118,7 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
             model.setObjective(MINIMIZE, iv);
-            while(model.solve());
+            while (model.solve()) ;
             assertEquals(model.getSolver().getMeasures().getBestSolutionValue(), 0);
             assertEquals(model.getSolver().getMeasures().getNodeCount(), 2);
         }
@@ -126,13 +128,13 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
             model.setObjective(MAXIMIZE, iv);
-            while(model.solve());
+            while (model.solve()) ;
             assertEquals(model.getSolver().getMeasures().getBestSolutionValue(), 10);
             assertEquals(model.getSolver().getMeasures().getNodeCount(), 21);
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2() {
         Model model = new Model();
         IntVar iv = model.intVar("iv", 0, 10, false);
@@ -140,7 +142,7 @@ public class ObjectiveTest {
 
         model.setObjective(MINIMIZE, iv);
         int value = 11;
-        while(model.solve()){
+        while (model.solve()) {
             value = iv.getValue();
         }
         assertEquals(value, 2);
@@ -149,13 +151,13 @@ public class ObjectiveTest {
 
         value = 11;
         model.setObjective(MINIMIZE, iv);
-        while(model.solve()){
+        while (model.solve()) {
             value = iv.getValue();
         }
         assertEquals(value, 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test3() {
         final Model model = new Model();
         final IntVar iv = model.intVar("iv", 0, 10, false);
@@ -193,40 +195,41 @@ public class ObjectiveTest {
         assertEquals(iv.getValue(), 6);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test4() {
         Model model = new Model();
         IntVar iv = model.intVar("iv", 0, 10, false);
         BoolVar v = model.arithm(iv, "<=", 2).reify();
 
         model.setObjective(MINIMIZE, v);
-        while(model.solve());
+        while (model.solve()) ;
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
         model.getSolver().reset();
 
         model.setObjective(MINIMIZE, v);
-        while(model.solve());
+        while (model.solve()) ;
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL1() {
         Model model = new Model();
         BoolVar b1 = model.boolVar("b1");
         BoolVar b2 = model.boolVar("b2");
         model.arithm(b1, "<=", b2).post();
+        model.setObjective(MINIMIZE, b1);
         Solver r = model.getSolver();
 //        SMF.log(solver, true, true);
-        r.set(new ObjectiveManager<IntVar, Integer>(b1, MINIMIZE, true));
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
         if (r.getEngine() == SINGLETON) {
             r.set(new SevenQueuesPropagatorEngine(model));
         }
         r.getMeasures().setReadingTimeCount(nanoTime());
-        while(model.solve());
+        while (model.solve()) ;
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         r.reset();
+        r.set(ObjectiveManager.SAT());
         model.arithm(b1, "=", bestvalue).post();
         r.set(inputOrderLBSearch(new BoolVar[]{b1, b2}));
         int count = 0;
@@ -239,15 +242,78 @@ public class ObjectiveTest {
         assertEquals(count, 2);
     }
 
-	@Test(groups="1s", timeOut=60000)
-	public void testJL2() {
-		Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJL2() {
+        Model model = new Model();
         IntVar a = model.intVar("a", -2, 2, false);
         Solver r = model.getSolver();
-		r.set(new ObjectiveStrategy(a,OptimizationPolicy.TOP_DOWN),minDomLBSearch(a));
-		r.setNoGoodRecordingFromSolutions(a);
-        r.set(new ObjectiveManager<IntVar, Integer>(a, MAXIMIZE, false));
-        while (model.solve());
-		Assert.assertEquals(model.getSolver().isStopCriterionMet(),false);
-	}
+        model.setObjective(MAXIMIZE, a);
+        r.set(new ObjectiveStrategy(a, OptimizationPolicy.TOP_DOWN), minDomLBSearch(a));
+        r.setNoGoodRecordingFromSolutions(a);
+        while (model.solve()) ;
+        Assert.assertEquals(model.getSolver().isStopCriterionMet(), false);
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testAdaptiveCut1() {
+        Model model = ProblemMaker.makeGolombRuler(8);
+        IntVar objective = (IntVar) model.getHook("objective");
+        final int[] ends = {5, 2, 1};
+        model.setObjective(MINIMIZE, objective);
+        ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
+        oman.setCutComputer(n -> n - 10);
+        Chatterbox.showSolutions(model);
+        int best = objective.getUB();
+        for (int i = 0; i < 4; i++) {
+            while (model.solve()) {
+                best = objective.getValue();
+            }
+            model.getSolver().reset();
+            final int finalI = i;
+            oman.setCutComputer(n -> n - ends[finalI]);
+            oman.updateBestUB(best);
+        }
+        Assert.assertEquals(best, 34);
+        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 0); // the last resolution fails at finding solutions
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testAdaptiveCut2() {
+        Model model = ProblemMaker.makeGolombRuler(8);
+        IntVar objective = (IntVar) model.getHook("objective");
+        final int[] ends = {10};
+        model.setObjective(MINIMIZE, objective);
+        ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
+        oman.setCutComputer(n -> n - ends[0]);
+        Chatterbox.showSolutions(model);
+        int best = objective.getUB();
+        for (int i = 0; i < 4; i++) {
+            while (model.solve()) {
+                best = objective.getValue();
+            }
+            model.getSolver().reset();
+            ends[0] = Math.floorDiv(ends[0], 2);
+            oman.updateBestUB(best);
+        }
+        Assert.assertEquals(best, 34);
+        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 0); // the last resolution fails at finding solutions
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testAdaptiveCut3() {
+        Model model = ProblemMaker.makeGolombRuler(8);
+        IntVar objective = (IntVar) model.getHook("objective");
+        model.setObjective(MINIMIZE, objective);
+        ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
+        oman.setCutComputer(ObjectiveManager.walkingIntVarCutComputer());
+        Chatterbox.showSolutions(model);
+        int best = objective.getUB();
+        for (int i = 0; i < 4; i++) {
+            while (model.solve()) {
+                best = objective.getValue();
+            }
+        }
+        Assert.assertEquals(best, 34);
+        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 18);
+    }
 }

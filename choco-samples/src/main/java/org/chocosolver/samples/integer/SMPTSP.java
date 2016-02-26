@@ -32,7 +32,6 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.solution.Solution;
@@ -124,7 +123,7 @@ public class SMPTSP extends AbstractProblem {
 			System.out.println("Solution found! Objective = "+bestObj);
 		});
 		// searches for all optimal solutions (non-strict optimization)
-		r.set(new ObjectiveManager<IntVar, Integer>(nbValues, MAXIMIZE, false));
+		model.setObjective(MAXIMIZE, nbValues);
 	}
 
 	@Override

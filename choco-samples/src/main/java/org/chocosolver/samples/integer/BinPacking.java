@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -103,7 +102,7 @@ public class BinPacking extends AbstractProblem{
 				break;
 			case 1:// one step approach (could be slow)
 				// non-strict optimization
-				model.getSolver().set(new ObjectiveManager<IntVar, Integer>(minLoad, MAXIMIZE, false));
+				model.setObjective(MAXIMIZE, minLoad);
 				while (model.solve());
 				break;
 			case 2:// two step approach (find and prove optimum, then enumerate)

@@ -145,8 +145,8 @@ public final class MeasuresRecorder implements IMeasures {
     }
 
     @Override
-    public void declareObjective() {
-        hasObjective = true;
+    public void declareObjective(boolean ho) {
+        hasObjective = ho;
     }
 
     @Override
@@ -162,7 +162,6 @@ public final class MeasuresRecorder implements IMeasures {
         restartCount = 0;
         failCount = 0;
         solutionCount = 0;
-        hasObjective = false;
         depth = 0;
         maxDepth = 0;
     }

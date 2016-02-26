@@ -58,8 +58,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import java.util.function.Function;
 
 /**
  * The <code>Model</code> is the header component of Constraint Programming.
@@ -508,10 +507,19 @@ public class Model implements Serializable, IModel {
 
     /**
      * Defines the variable to optimize according to <i>policy</i>.
+     * By default, each solution forces either :
+     * <ul>
+     * <li> for {@link ResolutionPolicy#MAXIMIZE}: to increase by one for {@link IntVar} (or {@link #precision} for {@link RealVar}) the objective lower bound, or</li>
+     * <li> for {@link ResolutionPolicy#MINIMIZE}:  to decrease by one {@link IntVar} (or {@link #precision} for {@link RealVar}) the objective upper bound.</li>
+     * </ul>
+     * @see ObjectiveManager#strictIntVarCutComputer(ResolutionPolicy)
+     * @see ObjectiveManager#strictRealVarCutComputer(ResolutionPolicy, double)
+     * @see ObjectiveManager#setCutComputer(Function)
      * @param policy optimisation policy (minimisation or maximisation)
      * @param objective variable to optimize
      */
-    public void setObjective(ResolutionPolicy policy, Variable objective) {
+    @SuppressWarnings("unchecked")
+    public <V extends Variable, N extends Number> void setObjective(ResolutionPolicy policy, V objective) {
         if(objective == null){
             assert policy == ResolutionPolicy.SATISFACTION;
             clearObjective();
@@ -520,9 +528,11 @@ public class Model implements Serializable, IModel {
             this.objective = objective;
             this.policy = policy;
             if ((objective.getTypeAndKind() & Variable.KIND) == Variable.REAL) {
-                getSolver().set(new ObjectiveManager<RealVar, Double>((RealVar) objective, policy, 0.00d, true));
+                getSolver().set(new ObjectiveManager<RealVar, Double>((RealVar) objective, policy, 0.00d,
+                        ObjectiveManager.strictRealVarCutComputer(policy, precision)));
             } else {
-                getSolver().set(new ObjectiveManager<IntVar, Integer>((IntVar) objective, policy, true));
+                getSolver().set(new ObjectiveManager<IntVar, Integer>((IntVar) objective, policy,
+                        ObjectiveManager.strictIntVarCutComputer(policy)));
             }
         }
     }
@@ -1239,8 +1249,7 @@ public class Model implements Serializable, IModel {
      */
     @Deprecated
     public void findAllOptimalSolutions(ResolutionPolicy policy, IntVar objective, boolean twoSteps) {
-        getSolver().set(new ObjectiveManager<IntVar, Integer>(objective, MAXIMIZE, false));
-        while (solve());
+        throw new UnsupportedOperationException("Two-step resolution not supported anymore");
     }
 
     /**

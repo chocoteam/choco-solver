@@ -55,6 +55,8 @@ import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.FilteringMonitor;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.observers.FilteringMonitorList;
 import org.chocosolver.util.ESat;
@@ -447,9 +449,9 @@ public final class Solver implements Serializable, ISolver {
                 decision = tmp.getPrevious();
                 tmp.free();
             }
+            feasible = ESat.UNDEFINED;
             action = initialize;
             mMeasures.reset();
-            objectivemanager = SAT();
             canBeRepaired = true; // resetting force to reconsider possible reparation
             set(NoPropagationEngine.SINGLETON); // necessary
         }
@@ -556,9 +558,13 @@ public final class Solver implements Serializable, ISolver {
     }
 
     /**
+     * @param <V> type of the objective variable
+     * @param <N> if {@link #objectivemanager} deals with {@link IntVar}, set to {@link Integer},
+     *           if {@link #objectivemanager} deals with {@link RealVar}, set to {@link Double},
      * @return the currently used objective manager
      */
-    public ObjectiveManager getObjectiveManager() {
+    @SuppressWarnings("unchecked")
+    public <V extends Variable, N extends Number> ObjectiveManager<V,N> getObjectiveManager() {
         return objectivemanager;
     }
 
@@ -737,9 +743,7 @@ public final class Solver implements Serializable, ISolver {
      */
     public void set(ObjectiveManager om) {
         this.objectivemanager = om;
-        if (objectivemanager.isOptimization()) {
-            mMeasures.declareObjective();
-        }
+        mMeasures.declareObjective(objectivemanager.isOptimization());
     }
 
     /**

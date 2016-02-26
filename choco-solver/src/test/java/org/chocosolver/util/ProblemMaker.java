@@ -165,6 +165,7 @@ public class ProblemMaker {
         if (m > 2) {
             model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
+        model.addHook("objective", ticks[m - 1]);
         model.setObjective(ResolutionPolicy.MINIMIZE,ticks[m - 1]);
         return model;
     }

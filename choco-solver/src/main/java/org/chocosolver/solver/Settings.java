@@ -31,8 +31,10 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.Except_0;
 import org.chocosolver.memory.ICondition;
+import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.io.Serializable;
 
@@ -85,7 +87,7 @@ public interface Settings extends Serializable {
     }
 
     /**
-     * Set to 'true' to allow the creation of views in the {@link org.chocosolver.solver.variables.VariableFactory}.
+     * Set to 'true' to allow the creation of views in the {@link org.chocosolver.solver.Model}.
      * Creates new variables with channeling constraints otherwise.
      * @return <tt>true</tt> if views are enabled.
      */
@@ -95,7 +97,7 @@ public interface Settings extends Serializable {
 
     /**
      * Define the maximum domain size threshold to force integer variable to be enumerated
-     * instead of bounded while calling {@link org.chocosolver.solver.variables.VariableFactory#integer(String, int, int, Model)}.
+     * instead of bounded while calling {@link org.chocosolver.solver.Model#intVar(String, int, int)}.
      * @return maximum domain size threshold to force integer variable to be enumerated
      */
     default int getMaxDomSizeForEnumerated() {
@@ -128,8 +130,8 @@ public interface Settings extends Serializable {
     }
 
     /**
-     * Defines the smallest used double for {@link org.chocosolver.solver.constraints.ICF#multicost_regular(org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton)} algorithm
-     * @return the smallest used double for {@link org.chocosolver.solver.constraints.ICF#multicost_regular(org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.variables.IntVar[], org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton)} algorithm
+     * Defines the smallest used double for {@link org.chocosolver.solver.Model#multiCostRegular(IntVar[], IntVar[], ICostAutomaton)} algorithm
+     * @return the smallest used double for {@link org.chocosolver.solver.Model#multiCostRegular(IntVar[], IntVar[], ICostAutomaton)} algorithm
      */
     default double getMCRDecimalPrecision() {
         return 0.0001d;
@@ -230,4 +232,16 @@ public interface Settings extends Serializable {
     default boolean cloneVariableArrayInPropagator(){
         return true;
     }
+
+
+    /**
+     * If this is set to <tt>true<tt/> then AC algorithm is used to filter ternary sum,
+     * otherwise, BC is used.
+     * Note AC brings more filtering when there are holes in variable domains but this comes at a cost.
+     * @return <tt>true<tt/> if AC is enabled to filter ternary sums.
+     */
+    default boolean enableACOnTernarySum(){
+        return false;
+    }
+
 }
