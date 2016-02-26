@@ -107,7 +107,7 @@ public class BinPacking extends AbstractProblem{
 				while (model.solve());
 				break;
 			case 2:// two step approach (find and prove optimum, then enumerate)
-				model.setObjectives(MAXIMIZE, minLoad);
+				model.setObjective(MAXIMIZE, minLoad);
 				int opt = -1;
 				while(model.solve()){
 					System.out.println("better solution found : "+minLoad);
@@ -116,7 +116,7 @@ public class BinPacking extends AbstractProblem{
 				if (opt != -1) {
 					model.getSolver().reset();
 					model.arithm(minLoad, "=", opt).post();
-					model.clearObjectives();
+					model.clearObjective();
 					while(model.solve()){
 						nbOpt ++;
 					}

@@ -35,12 +35,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Multi-objective optimization illustration to compute pareto solutions
@@ -58,7 +53,7 @@ public class Pareto {
 		model.arithm(a, "+", b, "<", 3).post();
 
 		// the problem is to maximize a and b
-		model.setObjectives(ResolutionPolicy.MAXIMIZE,a,b);
+		/*model.setObjective(ResolutionPolicy.MAXIMIZE,a,b);
 
 		List<Solution> solutions = new ArrayList<>();
 		while(model.solve()){
@@ -70,6 +65,7 @@ public class Pareto {
 		System.out.println("The pareto front has "+solutions.size()+" solutions : ");
 		for(Solution s:solutions){
 			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
-		}
+		}*/
+		throw new UnsupportedOperationException("Pareto not supported anymore");
 	}
 }

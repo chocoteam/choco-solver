@@ -153,7 +153,7 @@ public class MarioKart extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		model.setObjectives(MAXIMIZE, goldFound);
+		model.setObjective(MAXIMIZE, goldFound);
 		while(model.solve()){
 			prettyOut();
 		}

@@ -136,7 +136,7 @@ public class PropEngineTest {
         model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
         int obj = Integer.MAX_VALUE;
         while(model.solve()){
-            obj = ((IntVar)(model.getObjectives()[0])).getValue();
+            obj = ((IntVar)(model.getObjective())).getValue();
         }
         Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(obj, 55);
@@ -149,7 +149,7 @@ public class PropEngineTest {
         model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
         int obj = Integer.MAX_VALUE;
         while(model.solve()){
-            obj = ((IntVar)(model.getObjectives()[0])).getValue();
+            obj = ((IntVar)(model.getObjective())).getValue();
         }
         Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
         Assert.assertEquals(obj, 55);

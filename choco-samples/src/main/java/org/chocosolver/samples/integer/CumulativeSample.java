@@ -93,7 +93,7 @@ public class CumulativeSample extends AbstractProblem{
 
 	@Override
 	public void solve() {
-		model.setObjectives(MINIMIZE, makespan);
+		model.setObjective(MINIMIZE, makespan);
 		while(model.solve()){
 			System.out.println("New solution found : "+makespan);
 		}

@@ -115,7 +115,7 @@ public class ObjectiveTest {
     private void min(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
-            model.setObjectives(MINIMIZE, iv);
+            model.setObjective(MINIMIZE, iv);
             while(model.solve());
             assertEquals(model.getSolver().getMeasures().getBestSolutionValue(), 0);
             assertEquals(model.getSolver().getMeasures().getNodeCount(), 2);
@@ -125,7 +125,7 @@ public class ObjectiveTest {
     private void max(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
-            model.setObjectives(MAXIMIZE, iv);
+            model.setObjective(MAXIMIZE, iv);
             while(model.solve());
             assertEquals(model.getSolver().getMeasures().getBestSolutionValue(), 10);
             assertEquals(model.getSolver().getMeasures().getNodeCount(), 21);
@@ -138,7 +138,7 @@ public class ObjectiveTest {
         IntVar iv = model.intVar("iv", 0, 10, false);
         model.arithm(iv, ">=", 2).post();
 
-        model.setObjectives(MINIMIZE, iv);
+        model.setObjective(MINIMIZE, iv);
         int value = 11;
         while(model.solve()){
             value = iv.getValue();
@@ -148,7 +148,7 @@ public class ObjectiveTest {
         model.getSolver().reset();
 
         value = 11;
-        model.setObjectives(MINIMIZE, iv);
+        model.setObjective(MINIMIZE, iv);
         while(model.solve()){
             value = iv.getValue();
         }
@@ -199,12 +199,12 @@ public class ObjectiveTest {
         IntVar iv = model.intVar("iv", 0, 10, false);
         BoolVar v = model.arithm(iv, "<=", 2).reify();
 
-        model.setObjectives(MINIMIZE, v);
+        model.setObjective(MINIMIZE, v);
         while(model.solve());
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
         model.getSolver().reset();
 
-        model.setObjectives(MINIMIZE, v);
+        model.setObjective(MINIMIZE, v);
         while(model.solve());
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }

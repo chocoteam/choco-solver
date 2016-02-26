@@ -168,7 +168,7 @@ public class AirPlaneLanding extends AbstractProblem {
         model.sum(new IntVar[]{obj_e, obj_t}, "=", objective).post();
 
         model.allDifferent(planes, "BC").post();
-        model.setObjectives(MINIMIZE, objective);
+        model.setObjective(MINIMIZE, objective);
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {

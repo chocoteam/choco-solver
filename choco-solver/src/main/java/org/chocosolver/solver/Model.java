@@ -109,8 +109,8 @@ public class Model implements Serializable, IModel {
     /** Resolver of the model, controls propagation and search */
     private final Solver solver;
 
-    /** Array of variable to optimize, possibly empty. */
-    private Variable[] objectives;
+    /** Variable to optimize, possibly null. */
+    private Variable objective;
 
     /** Precision to consider when optimizing a RealVariable */
     private double precision = 0.0001D;
@@ -174,7 +174,7 @@ public class Model implements Serializable, IModel {
         this.environment = environment;
         this.creationTime = System.currentTimeMillis();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
-        this.objectives = new Variable[0];
+        this.objective = null;
         this.hooks = new HashMap<>();
         this.solver = new Solver(this);
     }
@@ -422,12 +422,11 @@ public class Model implements Serializable, IModel {
     }
 
     /**
-     * Return the (possibly empty) array of objective variables
-     * @return an array of variables (empty for satisfaction problems)
+     * Return the (possibly null) objective variable
+     * @return a variable (null for satisfaction problems)
      */
-    public Variable[] getObjectives() {
-        assert objectives!=null;
-        return objectives;
+    public Variable getObjective() {
+        return objective;
     }
 
     /**
@@ -508,36 +507,22 @@ public class Model implements Serializable, IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Defines the variable(s) to optimize according to <i>policy</i>.
-     * In case of multiple variables, all should be optimised in the same direction.
+     * Defines the variable to optimize according to <i>policy</i>.
      * @param policy optimisation policy (minimisation or maximisation)
-     * @param objectives one or more variables
+     * @param objective variable to optimize
      */
-    public void setObjectives(ResolutionPolicy policy, Variable... objectives) {
-        if(objectives == null || objectives.length==0){
+    public void setObjective(ResolutionPolicy policy, Variable objective) {
+        if(objective == null){
             assert policy == ResolutionPolicy.SATISFACTION;
-            clearObjectives();
+            clearObjective();
         }else {
             assert policy != ResolutionPolicy.SATISFACTION;
-            this.objectives = objectives;
+            this.objective = objective;
             this.policy = policy;
-            if (objectives.length == 1) {
-                if ((objectives[0].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
-                    getSolver().set(new ObjectiveManager<RealVar, Double>((RealVar) objectives[0], policy, 0.00d, true));
-                } else {
-                    getSolver().set(new ObjectiveManager<IntVar, Integer>((IntVar) objectives[0], policy, true));
-                }
-            }else{
-                // BEWARE the usual optimization manager is only defined for mono-objective optimization
-                // so we use a satisfaction manager by default (which does nothing)
-                // with a pareto solution recorder that dynamically adds constraints to skip dominated solutions
-                getSolver().set(ObjectiveManager.SAT());
-                IntVar[] _objectives = new IntVar[objectives.length];
-                for (int i = 0; i < objectives.length; i++) {
-                    _objectives[i] = (IntVar) objectives[i];
-                }
-//                getSolver().set(new ParetoSolutionsRecorder(policy, _objectives));
-                throw new UnsupportedOperationException("Pareto is not natively supported anymore");
+            if ((objective.getTypeAndKind() & Variable.KIND) == Variable.REAL) {
+                getSolver().set(new ObjectiveManager<RealVar, Double>((RealVar) objective, policy, 0.00d, true));
+            } else {
+                getSolver().set(new ObjectiveManager<IntVar, Integer>((IntVar) objective, policy, true));
             }
         }
     }
@@ -545,8 +530,8 @@ public class Model implements Serializable, IModel {
     /**
      * Removes any objective and set problem to a satisfaction problem
      */
-    public void clearObjectives() {
-        this.objectives = new Variable[0];
+    public void clearObjective() {
+        this.objective = null;
         this.policy = ResolutionPolicy.SATISFACTION;
         getSolver().set(ObjectiveManager.SAT());
     }
@@ -1104,14 +1089,14 @@ public class Model implements Serializable, IModel {
     }
 
     /**
-     * @deprecated use {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #setObjective(ResolutionPolicy, Variable)} instead
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void setObjectives(Variable... objectives) {
         if(objectives == null){
-            clearObjectives();
+            clearObjective();
         }else {
             throw new UnsupportedOperationException("please specify a resolution policy");
         }
@@ -1124,7 +1109,7 @@ public class Model implements Serializable, IModel {
      */
     @Deprecated
     public long findAllSolutions() {
-        clearObjectives();
+        clearObjective();
         long nbSols = 0;
         while (solve()){
             nbSols++;
@@ -1139,7 +1124,7 @@ public class Model implements Serializable, IModel {
      */
     @Deprecated
     public boolean findSolution() {
-        clearObjectives();
+        clearObjective();
         return solve();
     }
 
@@ -1156,18 +1141,18 @@ public class Model implements Serializable, IModel {
     // INTS
 
     /**
-     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjective(ResolutionPolicy, Variable)} instead
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution) {
-        setObjectives(policy,getObjectives());
+        setObjective(policy, getObjective());
         while(solve());
     }
 
     /**
-     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjective(ResolutionPolicy, Variable)} instead
      *
      * Will be removed in version > 3.4.0
      */
@@ -1177,7 +1162,7 @@ public class Model implements Serializable, IModel {
     }
 
     /**
-     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjective(ResolutionPolicy, Variable)} instead
      *
      * Will be removed in version > 3.4.0
      */
@@ -1187,31 +1172,31 @@ public class Model implements Serializable, IModel {
     }
 
     /**
-     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjective(ResolutionPolicy, Variable)} instead
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, IntVar objective) {
-        setObjectives(policy,objective);
+        setObjective(policy,objective);
         while(solve());
     }
 
     // REALS
 
     /**
-     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjective(ResolutionPolicy, Variable)} instead
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findOptimalSolution(ResolutionPolicy policy, boolean restoreLastSolution, RealVar objective, double precision) {
-        setObjectives(policy,objective);
+        setObjective(policy,objective);
         setPrecision(precision);
         while(solve());
     }
 
     /**
-     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjective(ResolutionPolicy, Variable)} instead
      *
      * Will be removed in version > 3.4.0
      */
@@ -1223,24 +1208,23 @@ public class Model implements Serializable, IModel {
     // PARETO
 
     /**
-     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjective(ResolutionPolicy, Variable)} instead
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findParetoFront(ResolutionPolicy policy, boolean restoreLastSolution, IntVar... objectives) {
-        setObjectives(policy,objectives);
-        while(solve());
+        throw new UnsupportedOperationException("Pareto not supported anymore");
     }
 
     /**
-     * @deprecated use {@link #solve()} and {@link #setObjectives(ResolutionPolicy, Variable...)} instead
+     * @deprecated use {@link #solve()} and {@link #setObjective(ResolutionPolicy, Variable)} instead
      *
      * Will be removed in version > 3.4.0
      */
     @Deprecated
     public void findParetoFront(ResolutionPolicy policy, IntVar... objectives) {
-        findParetoFront(policy, true, objectives);
+        throw new UnsupportedOperationException("Pareto not supported anymore");
     }
 
     /**

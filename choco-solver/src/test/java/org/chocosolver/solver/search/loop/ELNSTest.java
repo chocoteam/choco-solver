@@ -71,7 +71,7 @@ public class ELNSTest {
         r.set(randomSearch(vars, seed));
 
         showSolutions(model);
-        model.setObjectives(MINIMIZE, obj);
+        model.setObjective(MINIMIZE, obj);
         while(model.solve());
     }
 

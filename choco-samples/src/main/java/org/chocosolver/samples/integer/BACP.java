@@ -31,7 +31,6 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -116,7 +115,7 @@ public class BACP extends AbstractProblem {
             model.arithm(load[i], "<=", objective).post();
         }
 
-        model.setObjectives(MINIMIZE, objective);
+        model.setObjective(MINIMIZE, objective);
 
         prerequisite(3, 1);
         prerequisite(4, 1);

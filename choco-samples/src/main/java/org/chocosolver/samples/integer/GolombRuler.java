@@ -98,7 +98,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.setObjectives(MINIMIZE, (IntVar) model.getVars()[m - 1]);
+        model.setObjective(MINIMIZE, (IntVar) model.getVars()[m - 1]);
         while(model.solve()){
             System.out.println("New solution found : "+model.getVars()[m - 1]);
         }

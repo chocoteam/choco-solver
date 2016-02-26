@@ -68,7 +68,7 @@ public class BottleneckTest {
 
 
             model.getSolver().set(minDomLBSearch(allvars));
-            model.setObjectives(MAXIMIZE, sum);
+            model.setObjective(MAXIMIZE, sum);
             while(model.solve());
         }
     }

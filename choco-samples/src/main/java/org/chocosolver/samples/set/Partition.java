@@ -41,9 +41,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 
 /**
@@ -111,7 +108,7 @@ public class Partition extends AbstractProblem {
 	@Override
 	public void solve() {
 		// find the optimum
-		model.setObjectives(MINIMIZE, sum);
+		model.setObjective(MINIMIZE, sum);
 		while(model.solve());
 	}
 

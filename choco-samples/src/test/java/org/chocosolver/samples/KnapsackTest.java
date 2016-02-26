@@ -78,7 +78,7 @@ public class KnapsackTest {
                 throw new UnsupportedOperationException("The solver has no power variable");
             }
             // end of trick
-            s.setObjectives(MAXIMIZE, power);
+            s.setObjective(MAXIMIZE, power);
         }
         while(s.solve());
         times.add(s.getSolver().getMeasures().getTimeCount());

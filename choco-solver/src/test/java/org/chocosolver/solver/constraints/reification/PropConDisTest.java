@@ -115,8 +115,8 @@ public class PropConDisTest {
             while(cd.solve()){
                 scd.record(cd);
             }
-            assertEquals(scd.getIntVal((IntVar) cd.getObjectives()[0]),
-                    sor.getIntVal((IntVar) or.getObjectives()[0]));
+            assertEquals(scd.getIntVal((IntVar) cd.getObjective()),
+                    sor.getIntVal((IntVar) or.getObjective()));
             assertEquals(cd.getSolver().getMeasures().getSolutionCount(), or.getSolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
             assertTrue(or.getSolver().getMeasures().getNodeCount() >= cd.getSolver().getMeasures().getNodeCount(), "wrong nb of nodes");
         }
@@ -174,7 +174,7 @@ public class PropConDisTest {
         IntVar horizon = model.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);
         model.sum(new IntVar[]{OS[size - 1], LS[size - 1]}, "=", horizon).post();
         if (optimize) {
-            model.setObjectives(ResolutionPolicy.MINIMIZE, horizon);
+            model.setObjective(ResolutionPolicy.MINIMIZE, horizon);
         }
         model.addHook("decvars", append(OS, LS));
 //        showShortStatistics(model);

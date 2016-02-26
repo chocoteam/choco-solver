@@ -197,7 +197,7 @@ public class TableTest {
             c.post();
         }
         model.sum(reified, "=", sum).post();
-        model.setObjectives(MINIMIZE, sum);
+        model.setObjective(MINIMIZE, sum);
         Solution sol = new Solution();
         while(model.solve()){
             sol.record(model);

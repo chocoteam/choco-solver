@@ -483,7 +483,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         showShortStatistics(model);
         model.getSolver().limitTime("5m");
-        model.setObjectives(MINIMIZE, ticks[m - 1]);
+        model.setObjective(MINIMIZE, ticks[m - 1]);
         while(model.solve());
         assertTrue(model.getSolver().getMeasures().getSolutionCount() > 0);
     }

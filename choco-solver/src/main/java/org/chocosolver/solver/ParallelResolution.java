@@ -63,7 +63,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     the other ones are eagerly stopped.
  *     Moreover, when dealing with an optimization problem, cut on the objective variable's value is propagated
  *     to all models on solution.
- *     It is essential to eagerly declare the objective variable(s) with {@link Model#setObjectives(ResolutionPolicy, Variable...)}.
+ *     It is essential to eagerly declare the objective variable(s) with {@link Model#setObjective(ResolutionPolicy, Variable)}.
  *
  * </p>
  * <p>
@@ -148,7 +148,7 @@ public class ParallelResolution {
      *  </li>
      *  <li>
      *      when dealing with optimization problems, the objective variables <b>HAVE</b> to be declared eagerly with
-     *      {@link Model#setObjectives(ResolutionPolicy, Variable...)}.
+     *      {@link Model#setObjective(ResolutionPolicy, Variable)}.
      *  </li>
      *  </ul>
      *
@@ -245,12 +245,12 @@ public class ParallelResolution {
             throw new SolverException("Try to run " + models.size() + " model in parallel (should be >1).");
         }
         if(policy != ResolutionPolicy.SATISFACTION) {
-            Variable[] os = models.get(0).getObjectives();
-            if (os == null) {
+            Variable objective = models.get(0).getObjective();
+            if (objective == null) {
                 throw new UnsupportedOperationException("No objective has been defined");
             }
-            if (!(os.length == 1 && (os[0].getTypeAndKind() & Variable.INT) != 0)) {
-                throw new UnsupportedOperationException("ParallelResolution cannot deal with multi-objective or " +
+            if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
+                throw new UnsupportedOperationException("ParallelResolution cannot deal with " +
                         "real variable objective optimization problems");
             }
         }

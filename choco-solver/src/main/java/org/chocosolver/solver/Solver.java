@@ -245,7 +245,7 @@ public final class Solver implements Serializable, ISolver {
     public boolean solve(){
         // prepare
         boolean satPb = getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION;
-        if((getModel().getObjectives() == null || getModel().getObjectives().length == 0) && !satPb) {
+        if(getModel().getObjective() == null && !satPb) {
             throw new SolverException("No objective variable has been defined whereas policy implies optimization");
         }
         kill = true;

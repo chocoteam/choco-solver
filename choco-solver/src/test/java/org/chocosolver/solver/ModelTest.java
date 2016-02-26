@@ -91,7 +91,7 @@ public class ModelTest {
         }
         model.scalar(objects, volumes, "=", model.intVar("capa", capacites[0], capacites[1], true)).post();
         model.scalar(objects, energies, "=", power).post();
-        model.setObjectives(MAXIMIZE, power);
+        model.setObjective(MAXIMIZE, power);
         model.addHook("obj", power);
         model.getSolver().set(inputOrderLBSearch(objects));
         return model;
@@ -114,7 +114,7 @@ public class ModelTest {
                     while (s.solve()) ;
                     break;
                 case OPT:
-                    s.setObjectives(MAXIMIZE, (IntVar) s.getVar(0));
+                    s.setObjective(MAXIMIZE, (IntVar) s.getVar(0));
                     s.solve();
                     break;
                 default:
@@ -267,7 +267,7 @@ public class ModelTest {
             pares.addModel(knapsack(false));
         }
         for(Model m:pares.getModels()){
-            m.clearObjectives();
+            m.clearObjective();
         }
         pares.solve();
         Chatterbox.printStatistics(pares.getBestModel());
@@ -327,7 +327,7 @@ public class ModelTest {
     public void testJL300() {
         Model s = new Model();
         IntVar i = s.intVar("i", -5, 5, false);
-        s.setObjectives(MAXIMIZE, i);
+        s.setObjective(MAXIMIZE, i);
         s.solve();
         assertEquals(s.getSolver().getMeasures().getSolutionCount(), 1);
         assertEquals(i.getValue(), 5);
@@ -419,7 +419,7 @@ public class ModelTest {
         Model model = new Model();
         IntVar[] v = model.boolVarArray("v", 2);
         model.arithm(v[0], "!=", v[1]).post();
-        model.setObjectives(MAXIMIZE, v[0]);
+        model.setObjective(MAXIMIZE, v[0]);
         model.solve();
         assertTrue(v[0].isInstantiated());
         assertTrue(v[0].isInstantiatedTo(1));
