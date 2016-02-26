@@ -355,9 +355,7 @@ public final class Solver implements Serializable, ISolver {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(mModel));
         }
-        if (!engine.isInitialized()) {
-            engine.initialize();
-        }
+        engine.initialize();
         getMeasures().setReadingTimeCount(System.currentTimeMillis() - mModel.getCreationTime());
         // end note
 
@@ -453,7 +451,6 @@ public final class Solver implements Serializable, ISolver {
             action = initialize;
             mMeasures.reset();
             canBeRepaired = true; // resetting force to reconsider possible reparation
-            set(NoPropagationEngine.SINGLETON); // necessary
         }
     }
 

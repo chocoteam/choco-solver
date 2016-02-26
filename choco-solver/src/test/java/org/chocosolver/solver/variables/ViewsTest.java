@@ -31,6 +31,7 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
@@ -79,6 +80,12 @@ public class ViewsTest {
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
             Model model = new Model();
+            model.set(new Settings() {
+                @Override
+                public boolean enableACOnTernarySum() {
+                    return true;
+                }
+            });
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -302,6 +309,12 @@ public class ViewsTest {
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
             Model model = new Model();
+            model.set(new Settings() {
+                @Override
+                public boolean enableACOnTernarySum() {
+                    return true;
+                }
+            });
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -330,6 +343,12 @@ public class ViewsTest {
         // Z = |X - Y|
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
+            ref.set(new Settings() {
+                @Override
+                public boolean enableACOnTernarySum() {
+                    return true;
+                }
+            });
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);

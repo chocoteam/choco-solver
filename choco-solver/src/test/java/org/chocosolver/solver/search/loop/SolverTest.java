@@ -94,7 +94,7 @@ public class SolverTest {
         r.setHBFS(.05, .1, 32);
         while(model.solve());
         assertEquals(model.getSolver().getMeasures().getSolutionCount(), 7);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 7522);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 8676);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -150,7 +150,7 @@ public class SolverTest {
         while(model.solve());
         printShortStatistics(model);
         assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 16);
+        assertEquals(model.getSolver().getMeasures().getNodeCount(), 18);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -188,7 +188,7 @@ public class SolverTest {
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
         while(model.solve());
         printShortStatistics(model);
-        assertEquals(r.getMeasures().getRestartCount(), 972);
+        assertEquals(r.getMeasures().getRestartCount(), 971);
     }
 
 

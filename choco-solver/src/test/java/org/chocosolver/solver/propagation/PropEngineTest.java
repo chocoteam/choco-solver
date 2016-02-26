@@ -34,6 +34,7 @@ import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
@@ -72,15 +73,39 @@ public class PropEngineTest {
         model.solve();
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test2() {
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void test2a() {
         Model model = new Model();
         IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
         Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
         model.post(CSTR, CSTR);
         while (model.solve()) ;
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test2b() {
+        Model model = new Model();
+        IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
+        Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
+        model.post(CSTR);
+        while (model.solve()) ;
         assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3);
         model.getSolver().reset();
+        model.unpost(CSTR);
+        while (model.solve()) ;
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test2c() {
+        Model model = new Model();
+        IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
+        Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
+        model.post(CSTR);
+        while (model.solve()) ;
+        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3);
+        model.getSolver().reset();
+        model.getSolver().set(NoPropagationEngine.SINGLETON);
         model.unpost(CSTR);
         while (model.solve()) ;
         assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);

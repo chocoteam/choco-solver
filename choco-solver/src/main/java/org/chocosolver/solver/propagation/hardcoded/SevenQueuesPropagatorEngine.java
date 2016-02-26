@@ -36,6 +36,7 @@ import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
 import org.chocosolver.solver.variables.Variable;
@@ -182,10 +183,14 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                 }
             }
             propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-            trigger.addAll(propagators);
 
             p2i = new IntMap(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
+                if(p2i.containsKey(propagators[j].getId())){
+                    throw new SolverException("A propagator of "+propagators[j].getConstraint()+" is added more than once" +
+                            " into the propagation engine." +
+                            "\nThis may lead to incoherent behavior.");
+                }
                 p2i.put(propagators[j].getId(), j);
             }
             for (int i = 0; i < 8; i++) {
@@ -206,6 +211,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             notEmpty = 0;
             init = true;
         }
+        trigger.addAll(propagators);
     }
 
     @Override
@@ -403,6 +409,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         System.arraycopy(_propagators, 0, propagators, 0, osize);
         System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
+            if(p2i.containsKey(propagators[j].getId())){
+                throw new SolverException("A propagator of "+propagators[j].getConstraint()+" is added more than once" +
+                        " into the propagation engine." +
+                        "\nThis may lead to incoherent behavior.");
+            }
             p2i.put(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
         }

@@ -334,7 +334,7 @@ public class ModelTest {
 
         s.getSolver().getEngine().flush();
         s.getSolver().reset();
-
+        s.clearObjective();
         while (s.solve()) ;
         assertEquals(s.getSolver().getMeasures().getSolutionCount(), 11);
     }
