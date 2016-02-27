@@ -44,20 +44,17 @@ public abstract class IStateDoubleVector implements Serializable {
     /**
      * Contains the elements of the vector.
      */
-
     protected double[] elementData;
 
     /**
      * A backtrackable search with the size of the vector.
      */
-
     protected IStateInt size;
 
 
     /**
      * The current environment.
      */
-
     protected final IEnvironment environment;
 
 
@@ -90,7 +87,6 @@ public abstract class IStateDoubleVector implements Serializable {
     /**
      * Returns the current size of the stored search vector.
      */
-
     public final int size() {
         return size.get();
     }
@@ -99,9 +95,8 @@ public abstract class IStateDoubleVector implements Serializable {
     /**
      * Checks if the vector is empty.
      */
-
     public final boolean isEmpty() {
-        return (size.get() == 0);
+        return size.get() == 0;
     }
 
     /**
@@ -109,7 +104,6 @@ public abstract class IStateDoubleVector implements Serializable {
      *
      * @param i The search to add.
      */
-
     public abstract void add(double i);
 
 
@@ -118,7 +112,6 @@ public abstract class IStateDoubleVector implements Serializable {
      *
      * @param i The search to remove.
      */
-
     public abstract void remove(int i);
 
 
@@ -126,14 +119,12 @@ public abstract class IStateDoubleVector implements Serializable {
      * removes the search at the end of the vector.
      * does nothing when called on an empty vector
      */
-
     public abstract void removeLast();
 
 
     /**
      * Returns the <code>index</code>th element of the vector.
      */
-
     public final double get(int index) {
         if (rangeCheck(index)) {
             return elementData[index];
@@ -148,7 +139,7 @@ public abstract class IStateDoubleVector implements Serializable {
      * @return the element
      */
     public final double quickGet(int index) {
-        assert (rangeCheck(index));
+        assert rangeCheck(index);
         return elementData[index];
     }
 
@@ -160,7 +151,6 @@ public abstract class IStateDoubleVector implements Serializable {
      * Assigns a new value <code>val</code> to the element <code>index</code> and returns
      * the old value
      */
-
     public abstract double set(int index, double val);
 
     /**

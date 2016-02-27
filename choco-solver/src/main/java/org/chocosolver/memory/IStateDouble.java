@@ -63,7 +63,6 @@ public abstract class IStateDouble implements Serializable {
      * Modifies the value and stores if needed the former value on the
      * trailing stack.
      */
-
     public abstract void set(double y);
 
     /**
@@ -84,7 +83,6 @@ public abstract class IStateDouble implements Serializable {
      * @param y      the new value
      * @param wstamp the stamp of the world in which the update is performed
      */
-
     public void _set(final double y, final int wstamp) {
         currentValue = y;
         timeStamp = wstamp;

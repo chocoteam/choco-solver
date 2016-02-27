@@ -56,7 +56,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
     /**
      * Shared BitSet
      */
-    public BasicIndexedBipartiteSet booleanSet;
+    private BasicIndexedBipartiteSet booleanSet;
 
     protected AbstractEnvironment(Type type) {
         this.type = type;

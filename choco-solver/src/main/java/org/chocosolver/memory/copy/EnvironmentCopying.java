@@ -102,7 +102,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
     @Override
     public void worldCommit() {
         //TODO
-        throw (new UnsupportedOperationException());
+        throw new UnsupportedOperationException();
     }
 
     /**
