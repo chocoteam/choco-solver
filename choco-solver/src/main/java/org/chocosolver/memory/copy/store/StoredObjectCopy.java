@@ -62,6 +62,7 @@ public class StoredObjectCopy implements IStorage {
         objects[position++] = rc;
     }
 
+    @Override
     public void worldPush(int worldIndex) {
         if (lastSavedWorldIndex >= worldIndex) lastSavedWorldIndex = 0;
 
@@ -82,6 +83,7 @@ public class StoredObjectCopy implements IStorage {
         values[worldIndex] = tmpobj;
     }
 
+    @Override
     public void worldPop(int worldIndex) {
         Object[] tmpobj = values[worldIndex];
         for (int i = tmpobj.length; --i >= 0; )

@@ -48,7 +48,7 @@ public class StoredBoolCopy implements IStoredBoolCopy {
         values = new boolean[64][];
     }
 
-
+    @Override
     public void add(RcBool rc) {
         if (position == objects.length) {
             int newSize = objects.length * 3 / 2 + 1;
@@ -59,6 +59,7 @@ public class StoredBoolCopy implements IStoredBoolCopy {
         objects[position++] = rc;
     }
 
+    @Override
     public void worldPush(int worldIndex) {
         if (values.length <= worldIndex) {
             boolean[][] tmp = values;
@@ -72,6 +73,7 @@ public class StoredBoolCopy implements IStoredBoolCopy {
         values[worldIndex] = tmpboolean;
     }
 
+    @Override
     public void worldPop(int worldIndex) {
         boolean[] tmpboolean = values[worldIndex];
         for (int i = tmpboolean.length; --i >= 0; )

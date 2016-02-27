@@ -62,6 +62,7 @@ public class StoredIntVectorCopy implements IStorage {
         objects[position++] = rc;
     }
 
+    @Override
     public void worldPush(int worldIndex) {
         if (lastSavedWorldIndex >= worldIndex) lastSavedWorldIndex = 0;
 
@@ -81,6 +82,7 @@ public class StoredIntVectorCopy implements IStorage {
         values[worldIndex] = tmpint;
     }
 
+    @Override
     public void worldPop(int worldIndex) {
         int[][] tmpobj = values[worldIndex];
         for (int i = tmpobj.length; --i >= 0; )

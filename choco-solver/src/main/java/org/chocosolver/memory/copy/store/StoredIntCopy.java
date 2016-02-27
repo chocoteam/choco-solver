@@ -48,7 +48,7 @@ public class StoredIntCopy implements IStoredIntCopy {
         values = new int[64][];
     }
 
-
+    @Override
     public void add(RcInt rc) {
         if (position == objects.length) {
             int newSize = objects.length * 3 / 2 + 1;
@@ -59,6 +59,7 @@ public class StoredIntCopy implements IStoredIntCopy {
         objects[position++] = rc;
     }
 
+    @Override
     public void worldPush(int worldIndex) {
         if (values.length <= worldIndex) {
             int[][] tmp = values;
@@ -72,6 +73,7 @@ public class StoredIntCopy implements IStoredIntCopy {
         values[worldIndex] = tmpint;
     }
 
+    @Override
     public void worldPop(int worldIndex) {
         int[] tmpint = values[worldIndex];
         for (int i = tmpint.length; --i >= 0; )

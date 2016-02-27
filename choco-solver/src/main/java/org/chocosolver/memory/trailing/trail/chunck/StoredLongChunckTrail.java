@@ -109,7 +109,7 @@ public class StoredLongChunckTrail implements IStoredLongTrail {
      *
      * @param worldIndex current world index
      */
-
+    @Override
     public void worldPush(int worldIndex) {
         chunks[worldIndex] = curChunk;
         tops[worldIndex] = nextTop;
@@ -121,7 +121,7 @@ public class StoredLongChunckTrail implements IStoredLongTrail {
      *
      * @param worldIndex current world index
      */
-
+    @Override
     public void worldPop(int worldIndex) {
         final int c = chunks[worldIndex];
         final int t = tops[worldIndex];
@@ -155,7 +155,7 @@ public class StoredLongChunckTrail implements IStoredLongTrail {
     /**
      * Comits a world: merging it with the previous one.
      */
-
+    @Override
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
     }
@@ -164,6 +164,7 @@ public class StoredLongChunckTrail implements IStoredLongTrail {
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
+    @Override
     public void savePreviousState(StoredLong v, long oldValue, int oldStamp) {
         valueStack[curChunk][nextTop] = oldValue;
         variableStack[curChunk][nextTop] = v;
@@ -249,6 +250,7 @@ public class StoredLongChunckTrail implements IStoredLongTrail {
         stampStack = staBigger;
     }
 
+    @Override
     public void resizeWorldCapacity(int newWorldCapacity) {
         int[] tmp = new int[newWorldCapacity];
         System.arraycopy(chunks, 0, tmp, 0, chunks.length);

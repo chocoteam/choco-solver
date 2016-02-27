@@ -48,7 +48,7 @@ public class StoredDoubleCopy implements IStoredDoubleCopy {
         values = new double[64][];
     }
 
-
+    @Override
     public void add(RcDouble rc) {
         if (position == objects.length) {
             int newSize = objects.length * 3 / 2 + 1;
@@ -59,6 +59,7 @@ public class StoredDoubleCopy implements IStoredDoubleCopy {
         objects[position++] = rc;
     }
 
+    @Override
     public void worldPush(int worldIndex) {
         if (values.length <= worldIndex) {
             double[][] tmp = values;
@@ -72,6 +73,7 @@ public class StoredDoubleCopy implements IStoredDoubleCopy {
         values[worldIndex] = tmpdouble;
     }
 
+    @Override
     public void worldPop(int worldIndex) {
         double[] tmpdouble = values[worldIndex];
         for (int i = tmpdouble.length; --i >= 0; )

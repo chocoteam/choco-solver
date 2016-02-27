@@ -63,6 +63,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
         this.timestamp = 0;
     }
 
+    @Override
     public final int getWorldIndex() {
         return currentWorld;
     }

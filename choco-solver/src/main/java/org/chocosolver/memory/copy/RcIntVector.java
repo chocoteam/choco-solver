@@ -38,7 +38,7 @@ import org.chocosolver.memory.IStateIntVector;
  * Since : Choco 2.0.0
  *
  */
-public final class RcIntVector extends IStateIntVector {
+public final class RcIntVector extends IStateIntVector implements RecomputableElement{
 
     private int timeStamp;
 
@@ -70,7 +70,6 @@ public final class RcIntVector extends IStateIntVector {
      *
      * @param minCapacity the necessary capacity.
      */
-
     public void ensureCapacity(int minCapacity) {
         int oldCapacity = elementData.length;
         if (minCapacity > oldCapacity) {
@@ -89,7 +88,7 @@ public final class RcIntVector extends IStateIntVector {
      *
      * @param i The search to add.
      */
-
+    @Override
     public void add(int i) {
         timeStamp = environment.getWorldIndex();
         int newsize = size.get() + 1;
@@ -102,7 +101,7 @@ public final class RcIntVector extends IStateIntVector {
      * removes the search at the end of the vector.
      * does nothing when called on an empty vector
      */
-
+    @Override
     public void removeLast() {
         timeStamp = environment.getWorldIndex();
         int newsize = size.get() - 1;
@@ -113,7 +112,7 @@ public final class RcIntVector extends IStateIntVector {
     /**
      * Assigns a new value <code>val</code> to the element <code>index</code>.
      */
-
+    @Override
     public int set(int index, int val) {
         if (index < size.get() && index >= 0) {
             //<hca> je vire cet assert en cas de postCut il n est pas vrai ok ?
@@ -138,6 +137,7 @@ public final class RcIntVector extends IStateIntVector {
         return oldValue;
     }
 
+    @Override
     public void remove(int i) {
 
     }
@@ -152,7 +152,7 @@ public final class RcIntVector extends IStateIntVector {
         System.arraycopy(vals, 0, elementData, 0, vals.length);
     }
 
-
+    @Override
     public int getTimeStamp() {
         return timeStamp;
     }

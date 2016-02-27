@@ -45,7 +45,6 @@ public class RcObject implements IStateObject, RecomputableElement {
     protected int timeStamp;
     private Object currentObject;
 
-
     public RcObject(EnvironmentCopying env, Object obj) {
         environment = env;
         currentObject = obj;
@@ -86,6 +85,7 @@ public class RcObject implements IStateObject, RecomputableElement {
         return OBJECT;
     }
 
+    @Override
     public int getTimeStamp() {
         return timeStamp;
     }
