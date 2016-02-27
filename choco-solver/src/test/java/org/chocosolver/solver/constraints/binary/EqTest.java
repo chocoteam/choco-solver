@@ -52,7 +52,7 @@ public class EqTest {
         IntVar two2 = s.intVar(2);
         s.arithm(two1, "=", two2).post();
         assertTrue(s.solve());
-        assertEquals(TRUE, s.isSatisfied());
+        assertEquals(TRUE, s.getSolver().isSatisfied());
     }
 
 
@@ -63,7 +63,7 @@ public class EqTest {
         IntVar two = s.intVar(2);
         s.arithm(three, "-", two, "=", 1).post();
         assertTrue(s.solve());
-        assertEquals(TRUE, s.isSatisfied());
+        assertEquals(TRUE, s.getSolver().isSatisfied());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -73,6 +73,6 @@ public class EqTest {
         IntVar two = s.intVar(2);
         s.arithm(three, "=", two, "+", 1).post();
         assertTrue(s.solve());
-        assertEquals(TRUE, s.isSatisfied());
+        assertEquals(TRUE, s.getSolver().isSatisfied());
     }
 }

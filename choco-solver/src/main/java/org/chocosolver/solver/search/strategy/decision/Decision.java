@@ -116,15 +116,6 @@ public abstract class Decision<E> implements ICause {
         max_branching = isRefutable ? 2 : 1;
     }
 
-    /**
-     * @deprecated use {@link #setRefutable} instead
-     * Will be removed after version 3.4.0
-     */
-    @Deprecated
-    public final void once(boolean once) {
-        setRefutable(!once);
-    }
-
     public final int getArity(){
         return max_branching;
     }

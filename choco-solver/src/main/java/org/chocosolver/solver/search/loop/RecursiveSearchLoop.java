@@ -81,7 +81,7 @@ class RecursiveSearchLoop {
             }
             model.getEnvironment().worldPop();
         } else {
-            assert model.isSatisfied() == ESat.TRUE;
+            assert model.getSolver().isSatisfied() == ESat.TRUE;
             c++;
             System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
@@ -119,7 +119,7 @@ class RecursiveSearchLoop {
                 model.getEnvironment().worldPop();
             }
         } else {
-            assert model.isSatisfied() == ESat.TRUE;
+            assert model.getSolver().isSatisfied() == ESat.TRUE;
             c++;
             System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
@@ -161,7 +161,7 @@ class RecursiveSearchLoop {
                 model.getEnvironment().worldPop();
             }
         } else if (dis == 0) {
-            assert model.isSatisfied() == ESat.TRUE;
+            assert model.getSolver().isSatisfied() == ESat.TRUE;
             c++;
             System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
@@ -204,7 +204,7 @@ class RecursiveSearchLoop {
                 model.getEnvironment().worldPop();
             }
         } else if (dis == 0) {
-            assert model.isSatisfied() == ESat.TRUE;
+            assert model.getSolver().isSatisfied() == ESat.TRUE;
             c++;
             System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }

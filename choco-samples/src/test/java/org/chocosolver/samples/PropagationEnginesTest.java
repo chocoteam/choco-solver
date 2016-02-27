@@ -88,7 +88,6 @@ public class PropagationEnginesTest {
             for (int i = 0; i < 1; i++) {
                 for (PropagationEngineFactory pe : engines) {
 //                    System.out.printf(".");
-                    problem.createSolver();
                     Model model = problem.getModel();
                     problem.buildModel();
                     problem.configureSearch();

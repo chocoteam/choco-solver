@@ -201,16 +201,6 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
     int link(Propagator propagator, int idxInProp);
 
     /**
-     * Analysis propagator event reaction on this, and adapt this
-     *
-     * @param mask event mask
-     * @deprecated not used anymore in the code. No substitute. To be removed in version > 3.3.2
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    void recordMask(int mask);
-
-    /**
      * Remove a propagator from the list of propagator of <code>this</code>.
      * SHOULD BE CONTAINED IN THIS.
      *

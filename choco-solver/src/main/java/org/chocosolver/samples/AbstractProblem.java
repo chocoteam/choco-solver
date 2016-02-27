@@ -30,7 +30,6 @@
 package org.chocosolver.samples;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -69,10 +68,6 @@ public abstract class AbstractProblem {
     @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
 
-    @Option(name = "-ee", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
-    @Deprecated
-    ExplanationFactory expeng = ExplanationFactory.NONE;
-
     @Option(name = "-ng", aliases = "--nogoods", usage = "Extract nogoods from explanations (required \"-ee\").", required = false)
     protected boolean ng = false;
 
@@ -83,22 +78,6 @@ public abstract class AbstractProblem {
     public Model getModel() {
         return model;
     }
-
-    /**
-     * @deprecated : create Model in {@link AbstractProblem#getModel()} instead
-     * This will be removed in versions > 3.4.0
-     */
-    @Deprecated
-    public Model getSolver() {
-        return getModel();
-    }
-
-    /**
-     * @deprecated : create Model in {@link AbstractProblem#buildModel()} instead
-     * This will be removed in versions > 3.4.0
-     */
-    @Deprecated
-    public void createSolver(){}
 
     public abstract void buildModel();
 
@@ -122,23 +101,14 @@ public abstract class AbstractProblem {
         return true;
     }
 
-    protected void overrideExplanation() {
-        if (model.getSolver().getExplainer() == null) {
-            expeng.plugin(model, ng, false);
-        }
-    }
-
     private boolean userInterruption() {
         return userInterruption;
     }
 
     public final void execute(String... args) {
         if (this.readArgs(args)) {
-            this.createSolver();
             this.buildModel();
             this.configureSearch();
-
-            overrideExplanation();
 
             if (level.getLevel() > SILENT.getLevel()) {
                 Chatterbox.showStatistics(model);

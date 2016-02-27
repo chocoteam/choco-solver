@@ -155,16 +155,6 @@ public class Constraint implements Serializable {
         }
     }
 
-
-    /**
-     * @deprecated use {@link #reify()}
-     * This method will be removed in versions > 3.4.0
-     */
-    @Deprecated
-    public final BoolVar reif() {
-        return reify();
-    }
-
     /**
      * Get/make the boolean variable indicating whether the constraint is satisfied or not
      * This should not be posted.

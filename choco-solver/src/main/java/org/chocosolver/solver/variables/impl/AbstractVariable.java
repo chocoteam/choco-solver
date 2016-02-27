@@ -237,13 +237,6 @@ public abstract class AbstractVariable implements Variable {
         pindices[dindices[i]] = ip;
     }
 
-
-    @Deprecated
-    @Override
-    public void recordMask(int mask) {
-        // to be removed in version > 3.3.2
-    }
-
     @Override
     public void unlink(Propagator propagator) {
         int i = 0;
