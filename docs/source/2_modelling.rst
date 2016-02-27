@@ -454,11 +454,11 @@ The method ``why(...)`` explains the filtering, to allow learning.
 Here is an example of how to implement a propagator for ``X >= Y``: ::
 
     // Propagator to apply X >= Y
-    public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
+    public final class MyIncrementalPropagator extends Propagator<IntVar> {
 
         IntVar x, y;
 
-        public PropGreaterOrEqualX_Y(IntVar x, IntVar y) {
+        public MyIncrementalPropagator(IntVar x, IntVar y) {
             super(new IntVar[]{x,y}, PropagatorPriority.BINARY, true);
             this.x = x;
             this.y = y;
