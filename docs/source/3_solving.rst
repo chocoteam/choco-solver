@@ -1,8 +1,8 @@
 ###################
-Tuning the Resolver
+Tuning the Solver
 ###################
 
-Each ``Model`` is associated with a ``Resolver`` that is in charge of alternating constraint-propagation with search, and possibly learning,
+Each ``Model`` is associated with a ``Solver`` that is in charge of alternating constraint-propagation with search, and possibly learning,
 to compute solutions. This object may be configured in various ways.
 
 *****************
@@ -44,17 +44,17 @@ Specifying a search strategy
 You may specify a search strategy to the resolver by using ``resolver.set(...)`` method as follows: ::
 
         // to use the default SetVar search on mySetVars
-        Resolver r = model.getResolver();
-        r.set(setVarSearch(mySetVars));
+        Solver s = model.getSolver();
+        s.set(setVarSearch(mySetVars));
 
         // to use activity based search on myIntVars
-        Resolver r = model.getResolver();
-        r.set(activityBasedSearch(myIntVars));
+        Solver s = model.getSolver();
+        s.set(activityBasedSearch(myIntVars));
 
         // to use activity based search on myIntVars
         // then the default SetValSelectorFactoryVar search on mySetVars
-        Resolver r = model.getResolver();
-        r.set(activityBasedSearch(myIntVars), setVarSearch(mySetVars));
+        Solver s = model.getSolver();
+        s.set(activityBasedSearch(myIntVars), setVarSearch(mySetVars));
 
 .. note::
 
@@ -75,8 +75,8 @@ There are several ways to achieve this: ::
     import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
 
 
-        Resolver r = model.getResolver();
-        r.set(SearchStrategyFactory.intVarSearch(
+        Solver s = model.getSolver();
+        s.set(SearchStrategyFactory.intVarSearch(
                         // selects the variable of smallest domain
                         VarSelectorFactory.minDomIntVar(),
                         // selects the smallest domain value (lower bound)
@@ -95,8 +95,8 @@ There are several ways to achieve this: ::
     import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.*;
 
 
-        Resolver r = model.getResolver();
-        r.set(intVarSearch(
+        Solver s = model.getSolver();
+        s.set(intVarSearch(
                 minDomIntVar(),
                 minIntVal(),
                 int_eq, // not required field (used by default)
@@ -108,8 +108,8 @@ There are several ways to achieve this: ::
 
     import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
-        Resolver r = model.getResolver();
-        r.set(minDomLBSearch(x, y));
+        Solver s = model.getSolver();
+        s.set(minDomLBSearch(x, y));
 
 .. important:: Black-box search strategies
 
@@ -148,8 +148,8 @@ your own variable and value selectors: ::
 For instance, to select the first non instantiated variable and assign it to its lower bound: ::
 
 
-        Resolver r = model.getResolver();
-        r.set(intVarSearch(
+        Solver s = model.getSolver();
+        s.set(intVarSearch(
                 // variable selector
                 (VariableSelector<IntVar>) variables -> {
                     for(IntVar v:variables){
@@ -174,7 +174,7 @@ From scratch
 
 You can design your own strategy by creating ``Decision`` objects directly as follows: ::
 
-        r.set(new AbstractStrategy<IntVar>(x,y) {
+        s.set(new AbstractStrategy<IntVar>(x,y) {
             // enables to recycle decision objects (good practice)
             PoolManager<IntDecision> pool = new PoolManager();
             @Override
@@ -210,8 +210,8 @@ You can make a decision non-refutable by using ``decision.setRefutable(false)``
 
 To make an entire search strategy greedy, use: ::
 
-        Resolver r = model.getResolver();
-        r.set(greedySearch(inputOrderLBSearch(x,y,z)));
+        Solver s = model.getSolver();
+        s.set(greedySearch(inputOrderLBSearch(x,y,z)));
 
 Restarts
 ========
@@ -225,10 +225,10 @@ Unless the number of allowed restarts is limited, a tree search with restarts is
 Some adaptive search strategies resolutions are improved by sometimes restarting the search exploration from the root node.
 Thus, the statistics computed on the bottom of the tree search can be applied on the top of it.
 
-Several restart strategies are available in ``Resolver``: ::
+Several restart strategies are available in ``Solver``: ::
 
     // Restarts after after each new solution.
-    resolver.setRestartOnSolutions()
+    solver.setRestartOnSolutions()
 
 Geometrical restarts perform a search with restarts controlled by the resolution event [#f1]_ ``counter`` which counts events occurring during the search.
 Parameter ``base`` indicates the maximal number of events allowed in the first search tree.
@@ -236,7 +236,7 @@ Once this limit is reached, a restart occurs and the search continues until ``ba
 After each restart, the limit number of events is increased by the geometric factor ``grow``.
 ``limit`` states the maximum number of restarts. ::
 
-    resolver.setGeometricalRestart(int base, double grow, ICounter counter, int limit)
+    solver.setGeometricalRestart(int base, double grow, ICounter counter, int limit)
 
 The `Luby <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.47.5558>`_ ’s restart policy is an alternative to the geometric restart policy.
 It performs a search with restarts controlled by the number of resolution events [#f1]_ counted by ``counter``.
@@ -248,11 +248,11 @@ immediately followed by coefficient ``grow``:math:`^k`.
 - the first coefficients for ``grow`` =2: [1,1,2,1,1,2,4,1,1,2,1,1,2,4,8,1,...]
 - the first coefficients for ``grow`` =3 : [1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 9,...] ::
 
-    resolver.setLubyRestart(int base, int grow, ICounter counter, int limit)
+    solver.setLubyRestart(int base, int grow, ICounter counter, int limit)
 
 You can design your own restart strategies using: ::
 
-    resolver.setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit)
+    solver.setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit)
 
 ***************
 Search monitors
@@ -295,8 +295,8 @@ Most of them gives the opportunity to do something before and after a step. The 
 
 Simple example to print every solution: ::
 
-        Resolver r = model.getResolver();
-        r.plugMonitor(new IMonitorSolution() {
+        Solver s = model.getSolver();
+        s.plugMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
                 System.out.println("x = "+x.getValue());
@@ -305,8 +305,8 @@ Simple example to print every solution: ::
 
 In Java 8 style: ::
 
-        Resolver r = model.getResolver();
-        r.plugMonitor((IMonitorSolution) () -> {System.out.println("x = "+x.getValue());});
+        Solver s = model.getSolver();
+        s.plugMonitor((IMonitorSolution) () -> {System.out.println("x = "+x.getValue());});
 
 *************
 Search limits
@@ -315,7 +315,7 @@ Search limits
 Built-in search limits
 ----------------------
 
-Search can be limited in various ways using the ``Resolver`` (from ``model.getResolver()``).
+Search can be limited in various ways using the ``Solver`` (from ``model.getSolver()``).
 
 - ``limitTime`` stops the search when the given time limit has been reached. This is the most common limit, as many applications have a limited available runtime.
 
@@ -329,8 +329,8 @@ Search can be limited in various ways using the ``Resolver`` (from ``model.getRe
 
 For instance, to interrupt search after 10 seconds: ::
 
-    Resolver r = model.getResolver();
-    r.limitTime("10s");
+    Solver s = model.getSolver();
+    s.limitTime("10s");
     model.solve();
 
 Custom search limits
@@ -338,8 +338,8 @@ Custom search limits
 
 You can design you own search limit by implementing a ``Criterion`` and using ``resolver.limitSearch(Criterion c)``: ::
 
-        Resolver r = model.getResolver();
-        r.limitSearch(new Criterion() {
+        Solver s = model.getSolver();
+        s.limitSearch(new Criterion() {
             @Override
             public boolean isMet() {
                 // todo return true if you want to stop search
@@ -348,8 +348,8 @@ You can design you own search limit by implementing a ``Criterion`` and using ``
 
 In Java 8, this can be shortened using lambda expressions: ::
 
-        Resolver r = model.getResolver();
-        r.limitSearch(() -> { /*todo return true if you want to stop search*/ });
+        Solver s = model.getSolver();
+        s.limitSearch(() -> { /*todo return true if you want to stop search*/ });
 
 
 ***************************
@@ -408,10 +408,10 @@ Curly braces *{value}* indicate search statistics:
 0. number of solutions found
 1. objective value in maximization
 2. objective value in minimization
-3. building time in second (from ``new Solver()`` to ``findSolution()`` or equivalent)
+3. building time in second (from ``new Model()`` to ``solve()`` or equivalent)
 4. initialisation time in second (before initial propagation)
 5. initial propagation time in second
-6. resolution time in second (from ``new Solver()`` till now)
+6. resolution time in second (from ``new Model()`` till now)
 7. number of decision created, that is, nodes in the binary tree search
 8. number of backtracks achieved
 9. number of failures that occurred
@@ -649,7 +649,7 @@ Consider the following example:
    :linenos:
 
 The problem has no solution since the two constraints cannot be satisfied together.
-A naive strategy such as ``ISF.lexico_LB(bvars)`` (which selects the variables in lexicographical order) will detect lately and many times the failure.
+A naive strategy such as ``inputOrderLB(bvars)`` (which selects the variables in lexicographical order) will detect lately and many times the failure.
 By plugging-in an explanation engine, on each failure, the reasons of the conflict will be explained.
 
 .. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/ExplanationExamples.java

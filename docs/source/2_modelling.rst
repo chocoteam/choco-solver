@@ -599,7 +599,7 @@ A call to ``model.solve()`` launches a resolution which stops on the first solut
 
     if(model.solve()){
         // do something, e.g. print out variable values
-    }else if(model.getResolver().hasReachedLimit()){
+    }else if(model.getSolver().hasReachedLimit()){
         System.out.println("The could not find a solution
                             nor prove that none exists in the given limits");
     }else {
@@ -609,7 +609,7 @@ A call to ``model.solve()`` launches a resolution which stops on the first solut
 If ``model.solve()`` returns ``true``, then a solution has been found and each variable is instantiated to a value.
 Otherwise, two cases must be considered:
 
-- A limit has been declared and reached (``model.getResolver().hasReachedLimit()`` returns true).
+- A limit has been declared and reached (``model.getSolver().hasReachedLimit()`` returns true).
   There may be a solution, but the solver has not been able to find it in the given limit
   or there is no solution but the solver has not been able to prove it (i.e., to close to search tree) in the given limit.
   The resolution process stops in no particular place in the search tree.
