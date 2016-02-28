@@ -45,7 +45,6 @@
 
     <modules>
         <module>choco-solver</module>
-        <module>choco-samples</module>
     </modules>
 
     <properties>

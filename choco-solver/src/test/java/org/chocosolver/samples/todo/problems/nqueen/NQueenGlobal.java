@@ -27,14 +27,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.problems.nqueen;
+
 
 import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import org.chocosolver.solver.variables.IntVar;
 
-import static java.lang.Runtime.getRuntime;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 
 /**
  * <br/>
@@ -42,62 +41,32 @@ import static java.lang.Runtime.getRuntime;
  * @author Charles Prud'homme
  * @since 31/03/11
  */
-public abstract class AbstractProblem {
+public class NQueenGlobal extends AbstractNQueen {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
+    @Override
+    public void buildModel() {
+        model = new Model("NQueen");
+        vars = new IntVar[n];
+        IntVar[] diag1 = new IntVar[n];
+        IntVar[] diag2 = new IntVar[n];
 
-    protected Model model;
-
-    private boolean userInterruption = true;
-
-    public Model getModel() {
-        return model;
-    }
-
-    public abstract void buildModel();
-
-    public void configureSearch(){}
-
-    public abstract void solve();
-
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
+        for (int i = 0; i < n; i++) {
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
+            diag1[i] = model.intOffsetView(vars[i], i);
+            diag2[i] = model.intOffsetView(vars[i], -i);
         }
-        return true;
+
+        model.allDifferent(vars, "BC").post();
+        model.allDifferent(diag1, "BC").post();
+        model.allDifferent(diag2, "BC").post();
     }
 
-    private boolean userInterruption() {
-        return userInterruption;
+    @Override
+    public void configureSearch() {
+        model.getSolver().set(minDomLBSearch(vars));
     }
 
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
-                    }
-                }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
-        }
+    public static void main(String[] args) {
+        new NQueenGlobal().execute(args);
     }
-
 }

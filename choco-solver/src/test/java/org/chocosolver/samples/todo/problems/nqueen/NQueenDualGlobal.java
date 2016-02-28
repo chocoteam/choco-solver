@@ -27,14 +27,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.problems.nqueen;
+
 
 import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-
-import static java.lang.Runtime.getRuntime;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * <br/>
@@ -42,62 +39,46 @@ import static java.lang.Runtime.getRuntime;
  * @author Charles Prud'homme
  * @since 31/03/11
  */
-public abstract class AbstractProblem {
+public class NQueenDualGlobal extends AbstractNQueen {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
+    @Override
+    public void buildModel() {
+        model = new Model("NQueen");
+        vars = new IntVar[n];
+        IntVar[] diag1 = new IntVar[n];
+        IntVar[] diag2 = new IntVar[n];
 
-    protected Model model;
+        IntVar[] dualvars = new IntVar[n];
+        IntVar[] dualdiag1 = new IntVar[n];
+        IntVar[] dualdiag2 = new IntVar[n];
 
-    private boolean userInterruption = true;
+        for (int i = 0; i < n; i++) {
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
+            diag1[i] = model.intVar("D1_" + i, 1, 2 * n, false);
+            diag2[i] = model.intVar("D2_" + i, -n, n, false);
 
-    public Model getModel() {
-        return model;
-    }
-
-    public abstract void buildModel();
-
-    public void configureSearch(){}
-
-    public abstract void solve();
-
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
+            dualvars[i] = model.intVar("DQ_" + i, 1, n, false);
+            dualdiag1[i] = model.intVar("DD1_" + i, 1, 2 * n, false);
+            dualdiag2[i] = model.intVar("DD2_" + i, -n, n, false);
         }
-        return true;
-    }
 
-    private boolean userInterruption() {
-        return userInterruption;
-    }
+        for (int i = 0; i < n; i++) {
+            model.arithm(diag1[i], "=", vars[i], "+", i).post();
+            model.arithm(diag2[i], "=", vars[i], "-", i).post();
 
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
-                    }
-                }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
+            model.arithm(dualdiag1[i], "=", dualvars[i], "+", i).post();
+            model.arithm(dualdiag2[i], "=", dualvars[i], "-", i).post();
         }
+        model.allDifferent(diag1, "BC").post();
+        model.allDifferent(diag2, "BC").post();
+        model.allDifferent(dualdiag1, "BC").post();
+        model.allDifferent(dualdiag2, "BC").post();
+
+        model.inverseChanneling(vars, dualvars, 1, 1).post();
     }
 
+
+    public static void main(String[] args) {
+        new NQueenDualGlobal().execute(args);
+    }
 }

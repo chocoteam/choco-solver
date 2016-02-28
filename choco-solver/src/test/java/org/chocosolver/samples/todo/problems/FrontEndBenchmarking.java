@@ -27,77 +27,44 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.problems;
 
-import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
+import org.chocosolver.samples.AbstractProblem;
 import org.kohsuke.args4j.Option;
-
-import static java.lang.Runtime.getRuntime;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 29/08/11
  */
-public abstract class AbstractProblem {
+public class FrontEndBenchmarking extends AbstractBenchmarking {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
+    @Option(name = "-args", usage = "Command arguments", required = false)
+    String parameters = "samples.integer.Alpha";
 
-    protected Model model;
-
-    private boolean userInterruption = true;
-
-    public Model getModel() {
-        return model;
-    }
-
-    public abstract void buildModel();
-
-    public void configureSearch(){}
-
-    public abstract void solve();
-
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
+    @Override
+    protected void run() {
+        String[] cmd = parameters.split(" ");
+        String[] args = new String[cmd.length - 1];
+        System.arraycopy(cmd, 1, args, 0, args.length);
         try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
-        }
-        return true;
-    }
-
-    private boolean userInterruption() {
-        return userInterruption;
-    }
-
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
-                    }
-                }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
+            Class exec = Class.forName(cmd[0]);
+            Object inst = exec.newInstance();
+            if (inst instanceof AbstractProblem) {
+                AbstractProblem pb = (AbstractProblem) inst;
+                run(pb, args);
+            } else {
+                throw new ClassCastException(cmd[0] + " does not extend AbstractProblem");
+            }
+        } catch (ClassNotFoundException e) {
+            System.out.printf("unknown class %s\n", cmd[0]);
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
+    public static void main(String[] args) {
+        new FrontEndBenchmarking().execute(args);
+    }
 }

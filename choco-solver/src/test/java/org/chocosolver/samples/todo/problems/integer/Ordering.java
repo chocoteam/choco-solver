@@ -27,77 +27,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.problems.integer;
 
+import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
+import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
-import static java.lang.Runtime.getRuntime;
-
 /**
+ * Simple example which orders a set of integer variables
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 28/03/12
  */
-public abstract class AbstractProblem {
+public class Ordering extends AbstractProblem {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
+    @Option(name = "-n", aliases = "--number", usage = "number of variables.", required = false)
+    int n = 1000;
 
-    protected Model model;
+    IntVar[] vars;
 
-    private boolean userInterruption = true;
 
-    public Model getModel() {
-        return model;
-    }
-
-    public abstract void buildModel();
-
-    public void configureSearch(){}
-
-    public abstract void solve();
-
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
-        }
-        return true;
-    }
-
-    private boolean userInterruption() {
-        return userInterruption;
-    }
-
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
-                    }
-                }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
+    @Override
+    public void buildModel() {
+        model = new Model();
+        vars = model.intVarArray("v", n, 1, n, true);
+        for (int i = 0; i < n - 1; i++) {
+            model.arithm(vars[i], "<", vars[i + 1]).post();
         }
     }
 
+    @Override
+    public void configureSearch() {
+    }
+
+    @Override
+    public void solve() {
+        model.solve();
+    }
+
+    public static void main(String[] args) {
+        new Ordering().execute(args);
+    }
 }

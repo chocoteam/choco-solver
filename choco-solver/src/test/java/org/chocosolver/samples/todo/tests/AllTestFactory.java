@@ -27,77 +27,66 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.tests;
 
-import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import org.chocosolver.memory.Environments;
+import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.samples.todo.problems.integer.AllIntervalSeries;
+import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.testng.annotations.Test;
 
-import static java.lang.Runtime.getRuntime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 15/11/11
  */
-public abstract class AbstractProblem {
+public class AllTestFactory {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
+    @Test
+    public void testDifferentConfigurations() {
 
-    protected Model model;
+        AbstractProblem[] problems = new AbstractProblem[]{
+                new AllIntervalSeries()
+        };
 
-    private boolean userInterruption = true;
+        String[][] arguments = new String[][]{
+                {"-seed", "1234"},
+                {"-seed", "1236"},
+        };
 
-    public Model getModel() {
-        return model;
-    }
+        long[] nbSol = new long[]{
+                6, 18
+        };
 
-    public abstract void buildModel();
+        Environments[] envFact = new Environments[]{
+                Environments.TRAIL,
+                Environments.COPY
+        };
 
-    public void configureSearch(){}
+        List<Object> lresult = new ArrayList<>(12);
 
-    public abstract void solve();
+        PropagationEngineFactory[] pol = PropagationEngineFactory.values();
 
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
-        }
-        return true;
-    }
-
-    private boolean userInterruption() {
-        return userInterruption;
-    }
-
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
+        for (int p = 0; p < problems.length; p++) {
+            System.out.println(problems[p].getClass().getSimpleName());
+            for (String exp : new String[]{"NONE", "CBJ", "DBT"}) {
+                System.out.println("\t"+exp);
+                for (Environments e : envFact) {
+                    System.out.println("\t\t"+e);
+                    for (PropagationEngineFactory st : pol) {
+                        System.out.println("\t\t\t"+pol);
+                        lresult.add(new AllTest(problems[p], arguments[p], e.make(), st, exp, nbSol[p]));
+                        System.out.println("\t\t\tDONE");
                     }
+                    System.out.println("\t\tDONE");
                 }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
+                System.out.println("\tDONE");
+            }
+            System.out.println("DONE");
         }
     }
-
 }

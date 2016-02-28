@@ -27,76 +27,59 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.tests;
 
+import org.chocosolver.samples.todo.problems.integer.GolombRuler;
 import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import org.chocosolver.solver.variables.IntVar;
+import org.testng.annotations.Test;
 
-import static java.lang.Runtime.getRuntime;
+import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
+import static org.testng.Assert.assertEquals;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 15/03/11
  */
-public abstract class AbstractProblem {
+public class GolombRulerTest {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
+    public final static int[][] OPTIMAL_RULER = {
+            {5, 11}, {6, 17}, {7, 25}, {8, 34}, {9, 44}, {10, 55}//, {11, 72}
+    };
 
-    protected Model model;
-
-    private boolean userInterruption = true;
-
-    public Model getModel() {
-        return model;
+    protected Model modeler(int m) {
+        GolombRuler pb = new GolombRuler();
+        pb.readArgs("-m", Integer.toString(m));
+        pb.buildModel();
+        pb.configureSearch();
+        return pb.getModel();
     }
 
-    public abstract void buildModel();
+    @Test(groups="10s", timeOut=60000)
+    public void testAll() {
+        Model sol;
+        for (int j = 0; j < OPTIMAL_RULER.length; j++) {
+            sol = modeler(OPTIMAL_RULER[j][0]);
+            sol.setObjective(MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
+            int nb=0;
+            while(sol.solve()){
+                nb++;
+            }
+            long sols = sol.getSolver().getMeasures().getSolutionCount();
+            assertEquals(nb, sols);
+            long nodes = sol.getSolver().getMeasures().getNodeCount();
+            for (int k = 1; k < values().length; k++) {
+                sol = modeler(OPTIMAL_RULER[j][0]);
+                values()[k].make(sol);
+                sol.setObjective(MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
+                while(sol.solve());
+                assertEquals(sol.getSolver().getMeasures().getSolutionCount(), sols);
+                assertEquals(sol.getSolver().getMeasures().getNodeCount(), nodes);
 
-    public void configureSearch(){}
-
-    public abstract void solve();
-
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
-        }
-        return true;
-    }
-
-    private boolean userInterruption() {
-        return userInterruption;
-    }
-
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
-                    }
-                }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
+            }
         }
     }
 

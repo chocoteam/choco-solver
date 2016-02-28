@@ -27,77 +27,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.tests;
 
-import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import org.testng.annotations.Factory;
 
-import static java.lang.Runtime.getRuntime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 30 sept. 2010
  */
-public abstract class AbstractProblem {
+public class NQueenTestFactory {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
+    int[] propagation = {
+            0, 1
+    };
 
-    protected Model model;
+    private int[] size = {4, 8, 12};//,5,6,7,8,9,10,11,12};
+    private int[] searchloop = {0, 1};   // simple binary, advanced binary
+    private int[] pilot = {0, 1};       // basic, schulte-like
 
-    private boolean userInterruption = true;
+    @Factory
+    public Object[] createInstances() {
+        List<Object> lresult = new ArrayList<>(12);
 
-    public Model getModel() {
-        return model;
-    }
-
-    public abstract void buildModel();
-
-    public void configureSearch(){}
-
-    public abstract void solve();
-
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
-        }
-        return true;
-    }
-
-    private boolean userInterruption() {
-        return userInterruption;
-    }
-
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
+        for (int s = 0; s < size.length; s++) {
+            int _size = size[s];
+            for (int sl = 0; sl < searchloop.length; sl++) {
+                int _searchloop = searchloop[sl];
+                for (int p = 0; p < pilot.length; p++) {
+                    int _pilot = pilot[p];
+                    for (int pe = 0; pe < propagation.length; pe++) {
+                        int _propagation = propagation[pe];
+                        lresult.add(new NQueenTest(_propagation, _pilot, _searchloop, _size));
                     }
                 }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
+            }
         }
+        return lresult.toArray();
     }
+
 
 }

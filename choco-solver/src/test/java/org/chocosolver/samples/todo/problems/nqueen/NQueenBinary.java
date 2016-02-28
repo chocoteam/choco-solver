@@ -27,14 +27,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.problems.nqueen;
 
 import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.variables.IntVar;
 
-import static java.lang.Runtime.getRuntime;
+import java.util.HashSet;
+
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 
 /**
  * <br/>
@@ -42,62 +43,39 @@ import static java.lang.Runtime.getRuntime;
  * @author Charles Prud'homme
  * @since 31/03/11
  */
-public abstract class AbstractProblem {
+public class NQueenBinary extends AbstractNQueen {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
+    HashSet<Constraint> set;
 
-    protected Model model;
-
-    private boolean userInterruption = true;
-
-    public Model getModel() {
-        return model;
-    }
-
-    public abstract void buildModel();
-
-    public void configureSearch(){}
-
-    public abstract void solve();
-
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
+    @Override
+    public void buildModel() {
+        model = new Model("NQueen");
+        set = new HashSet<>();
+        vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
         }
-        return true;
-    }
 
-    private boolean userInterruption() {
-        return userInterruption;
-    }
 
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
-                    }
-                }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = model.arithm(vars[i], "!=", vars[j]);
+                neq.post();
+                set.add(neq);
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
+            }
         }
     }
 
+    @Override
+    public void configureSearch() {
+        model.getSolver().set(minDomLBSearch(vars));
+//        SearchMonitorFactory.log(solver, true, false);
+    }
+
+    public static void main(String[] args) {
+        new NQueenBinary().execute(args);
+    }
 }

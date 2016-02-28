@@ -27,76 +27,57 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.samples;
+package org.chocosolver.samples.todo.tests;
 
+import org.chocosolver.samples.todo.problems.integer.Partition;
 import org.chocosolver.solver.Model;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
-import static java.lang.Runtime.getRuntime;
+import static org.testng.Assert.assertEquals;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 16/03/11
  */
-public abstract class AbstractProblem {
+public class PartitionTest {
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    protected long seed = 29091981;
-
-    protected Model model;
-
-    private boolean userInterruption = true;
-
-    public Model getModel() {
-        return model;
+    protected Model modeler(int size) {
+        Partition pb;
+        pb = new Partition();
+        pb.readArgs("-n", Integer.toString(size));
+        pb.buildModel();
+        pb.configureSearch();
+        return pb.getModel();
     }
 
-    public abstract void buildModel();
+    @Test(groups="5m", timeOut=300000)
+    public void test4to14() {
+        int[] size = {8, 12, 16, 20, 24, 28};
+        int[] sols = {1, 1, 7, 24, 296, 1443};
+//        int[] nodes = {3, 22, 189, 1739, 17889, 189944};
 
-    public void configureSearch(){}
-
-    public abstract void solve();
-
-    public final boolean readArgs(String... args) {
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            return false;
+        for (int i = 0; i < size.length; i++) {
+            Model sol = modeler(size[i]);
+            while (sol.solve()) ;
+            assertEquals(sol.getSolver().getMeasures().getSolutionCount(), sols[i]);
+//            Assert.assertEquals(sol.getResolver().getMeasures().getNodeCount(), nodes[i]);
         }
-        return true;
     }
 
-    private boolean userInterruption() {
-        return userInterruption;
-    }
+    @Test(groups="5m", timeOut=300000)
+    public void test16to32() {
+        int[] size = {32, 36, 40, 44, 48, 52, 56, 60, 64};
+        int[] sols = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+//        int[] nodes = {633, 760, 2250, 6331, 19832, 19592, 60477, 139296, 180302};
 
-    public final void execute(String... args) {
-        if (this.readArgs(args)) {
-            this.buildModel();
-            this.configureSearch();
-
-            Thread statOnKill = new Thread() {
-                public void run() {
-                    if (userInterruption()) {
-                        System.out.println(model.getSolver().getMeasures().toString());
-                    }
-                }
-            };
-
-            getRuntime().addShutdownHook(statOnKill);
-
-            this.solve();
-            userInterruption = false;
-            getRuntime().removeShutdownHook(statOnKill);
+        for (int i = 0; i < size.length; i++) {
+            Model sol = modeler(size[i]);
+            sol.solve();
+            Assert.assertEquals(sol.getSolver().getMeasures().getSolutionCount(), sols[i]);
+//            Assert.assertEquals(sol.getResolver().getMeasures().getNodeCount(), nodes[i]);
         }
     }
 
