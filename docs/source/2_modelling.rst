@@ -677,18 +677,35 @@ You can use custom cuts (TODO)
         // Compute optimum
         model.solve();
 
-Multi-objective Pareto optimization
------------------------------------
+Multi-objective optimization
+----------------------------
 
-Solving multi-objective optimization problems with Choco |version|, is done by adding constraints while solving.
+If you have multiple objective to optimize, you have several options. First, you may aggregate them in a function so that you end up with only one objective variable. Second, you can solve the problem multiple times, each one optimizing one variable and possibly fixing some bounds on the other. Third, you can enumerate solutions (without defining any objective) and add constraints on the fly to prevent search from finding dominated solutions. This is done by the `ParetoOptimizer` object which does the following:
 Anytime a solution is found, a constraint is posted which states that at least one of the objective variables must be strictly better:
-Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n)` where :math:`X_i` is the ith objective variable and :math:`b_i`
+Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n)` where :math:`X_i` is the ith objective variable and :math:`b_i` its value.
 
-TODO example: ::
+Here is a simple example on how to use the `ParetoOptimizer` to optimize two variables (a and b): ::
 
-   // to maximize X and Y
-   model.setObjectives(ResolutionPolicy.MINIMIZE, X, Y);
-   model.solve();
+		// simple model
+		Model model = new Model();
+		IntVar a = model.intVar("a", 0, 2, false);
+		IntVar b = model.intVar("b", 0, 2, false);
+		IntVar c = model.intVar("c", 0, 2, false);
+		model.arithm(a, "+", b, "=", c).post();
+
+		// create an object that will store the best solutions and remove dominated ones
+		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b});
+		model.getSolver().plugMonitor(po);
+
+		// optimization
+		while(model.solve());
+
+		// retrieve the pareto front
+		List<Solution> paretoFront = po.getParetoFront();
+		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
+		for(Solution s:paretoFront){
+			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
+		}
 
 
 .. note::

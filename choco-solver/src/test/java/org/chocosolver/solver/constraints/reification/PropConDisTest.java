@@ -33,7 +33,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -107,13 +107,13 @@ public class PropConDisTest {
             Model cd = modelPb(n, n, rnd, true, true);
             or.getSolver().set(inputOrderLBSearch((IntVar[]) or.getHook("decvars")));
             cd.getSolver().set(inputOrderLBSearch((IntVar[]) cd.getHook("decvars")));
-            Solution sor = new Solution();
-            Solution scd = new Solution();
+            Solution sor = new Solution(or);
+            Solution scd = new Solution(cd);
             while(or.solve()){
-                sor.record(or);
+                sor.record();
             }
             while(cd.solve()){
-                scd.record(cd);
+                scd.record();
             }
             assertEquals(scd.getIntVal((IntVar) cd.getObjective()),
                     sor.getIntVal((IntVar) or.getObjective()));

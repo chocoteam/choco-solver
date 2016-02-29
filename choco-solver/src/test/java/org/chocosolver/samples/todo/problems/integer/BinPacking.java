@@ -31,7 +31,7 @@ package org.chocosolver.samples.todo.problems.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -89,12 +89,13 @@ public class BinPacking extends AbstractProblem{
 			case 0:// to check
 				model.arithm(minLoad, "=", 17).post();
 				while(model.solve()){
-					Solution sol = new Solution();
-                    sol.record(model);
-                    solutions.add(sol);
+                    solutions.add(new Solution(true,model));
 					nbOpt ++;
 				}
 				System.out.println("There are "+nbOpt+" optima");
+				for(Solution s:solutions){
+					System.out.println(s);
+				}
 				break;
 			case 1:// one step approach (could be slow)
 				// non-strict optimization

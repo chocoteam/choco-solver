@@ -43,7 +43,7 @@ import org.chocosolver.solver.constraints.extension.nary.LargeRelation;
 import org.chocosolver.solver.constraints.extension.nary.TuplesLargeTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
-import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.Assert;
@@ -198,9 +198,9 @@ public class TableTest {
         }
         model.sum(reified, "=", sum).post();
         model.setObjective(MINIMIZE, sum);
-        Solution sol = new Solution();
+        Solution sol = new Solution(model);
         while(model.solve()){
-            sol.record(model);
+            sol.record();
         }
         if (model.getSolver().getMeasures().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {

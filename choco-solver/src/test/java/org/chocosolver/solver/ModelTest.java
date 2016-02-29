@@ -32,7 +32,6 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -284,10 +283,10 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             Model finder = null;
-            Solution sol = new Solution();
+            Solution sol;
             while(pares.solve()){
                 finder = pares.getBestModel();
-                sol.record(finder);
+                sol = new Solution(true,finder);
             }
             Assert.assertNotNull(finder);
             Chatterbox.printStatistics(finder);

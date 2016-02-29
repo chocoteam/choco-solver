@@ -72,9 +72,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     is propagated among all models, so different objectives may lead to wrong results.
  * </p>
  * <p>
- *     Since there is no condition on the similarity of the models, this API does not rely on
- *     shared {@link org.chocosolver.solver.search.solution.ISolutionRecorder}.
- *     So then, once the resolution ends, the model which finds the (best) solution is internally stored.
+ *     Since there is no condition on the similarity of the models,
+ *     once the resolution ends, the model which finds the (best) solution is internally stored.
  * </p>
  * <p>
  *     Example of use.

@@ -36,8 +36,8 @@ package org.chocosolver.samples;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.search.solution.ParetoSolutionsRecorder;
-import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.objective.ParetoOptimizer;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -60,15 +60,15 @@ public class ParetoFront {
 		IntVar c = model.intVar("c", 0, 2, false);
 		model.arithm(a, "+", b, "=", c).post();
 
-		// create an object that will store the best solutions and dynamically add constraints to remove dominated ones
-		ParetoSolutionsRecorder paretoRecorder = new ParetoSolutionsRecorder(ResolutionPolicy.MAXIMIZE,a,b);
-		model.getSolver().plugMonitor(paretoRecorder);
+		// create an object that will store the best solutions and remove dominated ones
+		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b});
+		model.getSolver().plugMonitor(po);
 
 		// optimization
 		while(model.solve());
 
 		// retrieve the pareto front
-		List<Solution> paretoFront = paretoRecorder.getSolutions();
+		List<Solution> paretoFront = po.getParetoFront();
 		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
 		Assert.assertEquals(3, paretoFront.size());
 		for(Solution s:paretoFront){

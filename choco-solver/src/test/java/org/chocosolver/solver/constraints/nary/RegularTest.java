@@ -32,7 +32,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
@@ -230,9 +230,7 @@ public class RegularTest {
         showSolutions(model);
         List<Solution> solutions = new ArrayList<>();
         while (model.solve()){
-            Solution s = new Solution();
-            s.record(model);
-            solutions.add(s);
+            solutions.add(new Solution(true,model));
         }
 
         out.println(solutions);

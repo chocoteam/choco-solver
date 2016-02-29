@@ -34,7 +34,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.solution.Solution;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -129,9 +129,7 @@ public class SMPTSP extends AbstractProblem {
 	@Override
 	public void solve() {
 		while (model.solve()){
-            Solution sol = new Solution();
-            sol.record(model);
-            solutions.add(sol);
+            solutions.add(new Solution(model));
         }
 
 		int nb = 1;

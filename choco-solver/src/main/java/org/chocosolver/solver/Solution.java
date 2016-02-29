@@ -27,16 +27,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.solution;
+package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -56,166 +50,128 @@ import java.util.Arrays;
  */
 public class Solution implements Serializable, ICause {
 
-    /**
-     * No entry value for maps
-     */
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
+    /** No entry value for maps */
     private static final int NO_ENTRY = Integer.MAX_VALUE;
 
-    /**
-     * Maps of value for integer variable (id - value)
-     */
-    TIntIntHashMap intmap;
-    /**
-     * Maps of value for real variable (id - value)
-     */
-    TIntObjectHashMap<double[]> realmap;
-    /**
-     * Maps of value for set variable (id - values)
-     */
-    TIntObjectHashMap<int[]> setmap;
-    /**
-     * Set of decisions variables (key: id)
-     */
-    TIntHashSet dvars;
-    /**
-     * Set to <tt>true</tt> when this object is empty
-     */
+    // SOLUTION
+    /** Set to <tt>true</tt> when this object is empty */
     boolean empty;
+    /** Maps of value for integer variable (id - value) */
+    TIntIntHashMap intmap;
+    /** Maps of value for real variable (id - value) */
+    TIntObjectHashMap<double[]> realmap;
+    /** Maps of value for set variable (id - values) */
+    TIntObjectHashMap<int[]> setmap;
+
+    // INPUT
+    /** Model to store */
+    Model model;
+	/** Variables to store; */
+    private Variable[] varsToStore;
+
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
+
+	/**
+     * Create an empty solution object that will be able to store decision variables (variables in the scope of the search strategy)
+     * @param model the model to store
+     */
+    public Solution(Model model){
+        this(false,model);
+    }
 
     /**
-     * A solutio - complete instantiation
+     * Create a solution object and stores the current solution if <code>recordNow</code>
+     * (value of each variable in <code>varsToStore</code>)
+     *
+     * @param recordNow indicates whether to record the current solution or simply create an empty solution object
+     * @param varsToStore variables to store in this object
      */
-    @SuppressWarnings("unchecked")
-    public Solution() {
-        intmap = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
-        realmap = new TIntObjectHashMap(16, 05f, NO_ENTRY);
-        setmap = new TIntObjectHashMap(16, 05f, NO_ENTRY);
-        dvars = new TIntHashSet(16, .5f, -1);
+    public Solution(boolean recordNow, Model model, Variable... varsToStore) {
+        this.varsToStore = varsToStore;
         empty = true;
+        this.model = model;
+        assert varsToStore != null;
+        if (recordNow) {
+            record();
+        }
     }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     /**
      * Records the current solution of the solver
      * clears all previous recordings
-     *
-     * @param model a solver
      */
-    public void record(Model model) {
-        if (empty) {
-            Variable[] _dvars = model.getSolver().getStrategy().getVariables();
-            for (int i = 0; i < _dvars.length; i++) {
-                dvars.add(_dvars[i].getId());
-            }
-            empty = false;
-        }
+    public void record() {
+        empty = false;
         boolean warn = false;
-        intmap.clear();
-        realmap.clear();
-        setmap.clear();
-        // solver.getVars() is not called anymore, to reduce memory footprint
-        // indeed, it makes a copy of the array.
-        for (int i = 0; i < model.getNbVars(); i++) {
-            Variable var = model.getVar(i);
+        if(varsToStore.length == 0) {
+            varsToStore = model.getSolver().getStrategy().getVariables();
+        }
+        assert varsToStore.length>0;
+        if(intmap != null) intmap.clear();
+        if(realmap != null)realmap.clear();
+        if(setmap != null) setmap.clear();
+        for (Variable var:varsToStore) {
             if ((var.getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
                 int kind = var.getTypeAndKind() & Variable.KIND;
-                if (!var.isInstantiated()) {
-                    if (dvars.contains(var.getId())) {
-                        throw new SolverException(var + " is not instantiated when recording a solution.");
-                    } else {
-                        warn = true;
-                    }
-                } else {
+                if (var.isInstantiated()) {
                     switch (kind) {
                         case Variable.INT:
                         case Variable.BOOL:
+                            if(intmap == null) intmap = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
                             IntVar v = (IntVar) var;
                             intmap.put(v.getId(), v.getValue());
                             break;
                         case Variable.REAL:
+                            if(realmap == null) realmap = new TIntObjectHashMap<>(16, 05f, NO_ENTRY);
                             RealVar r = (RealVar) var;
                             realmap.put(r.getId(), new double[]{r.getLB(), r.getUB()});
                             break;
                         case Variable.SET:
+                            if(setmap == null) setmap = new TIntObjectHashMap<>(16, 05f, NO_ENTRY);
                             SetVar s = (SetVar) var;
                             setmap.put(s.getId(), s.getValue());
                             break;
                     }
+                }else{
+                    warn = true;
                 }
             }
         }
-        if (warn && model.getSettings().warnUser()) {
+        if (warn && varsToStore[0].getModel().getSettings().warnUser()) {
             Chatterbox.err.printf("Some non decision variables are not instantiated in the current solution.");
         }
     }
 
-    /**
-     * Set all variables to their respective value in the solution
-     * Throws an exception is this empties a domain (i.e. this domain does not contain
-     * the solution value)
-     * <p>
-     * BEWARE: A restart might be required so that domains contain the solution values
-     * @param model solver to restore solution in
-     * @throws ContradictionException if solution is not correct with current domain states
-     */
-    public void restore(Model model) throws ContradictionException {
-        if (empty) {
-            throw new UnsupportedOperationException("Empty solution. No solution found");
-        }
-        Variable[] vars = model.getVars();
-        for (int i = 0; i < vars.length; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
-                int kind = vars[i].getTypeAndKind() & Variable.KIND;
-                switch (kind) {
-                    case Variable.INT:
-                    case Variable.BOOL:
-                        IntVar v = (IntVar) vars[i];
-                        int value = intmap.get(v.getId());
-                        if(value != NO_ENTRY){
-                            v.instantiateTo(value, this);
-                        } // otherwise, this is not a decision variable
-                        break;
-                    case Variable.REAL:
-                        RealVar r = (RealVar) vars[i];
-                        double[] bounds = realmap.get(r.getId());
-                        if(bounds != null){
-                            r.updateBounds(bounds[0], bounds[1], this);
-                        }  // otherwise, this is not a decision variable
-                        break;
-                    case Variable.SET:
-                        SetVar s = (SetVar) vars[i];
-                        int[]values = setmap.get(s.getId());
-                        if(values != null){
-                            s.instantiateTo(values, Cause.Null);
-                        } // otherwise, this is not a decision variable
-                        break;
-                }
-            }
-        }
-    }
-
-    /**
-     * @param model a solver
-     * @return a string which represent this solution input in the <i>solver</i>
-     */
-    public String toString(Model model) {
-        Variable[] vars = model.getVars();
+    @Override
+    public String toString() {
+        if(empty)return "Empty solution. No solution recorded yet";
         StringBuilder st = new StringBuilder("Solution: ");
-        for (int i = 0; i < vars.length; i++) {
-            if ((vars[i].getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
-                int kind = vars[i].getTypeAndKind() & Variable.KIND;
+        for (Variable var:varsToStore) {
+            if ((var.getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = var.getTypeAndKind() & Variable.KIND;
                 switch (kind) {
                     case Variable.INT:
                     case Variable.BOOL:
-                        IntVar v = (IntVar) vars[i];
+                        IntVar v = (IntVar) var;
                         st.append(v.getName()).append("=").append(intmap.get(v.getId())).append(", ");
                         break;
                     case Variable.REAL:
-                        RealVar r = (RealVar) vars[i];
+                        RealVar r = (RealVar) var;
                         double[] bounds = realmap.get(r.getId());
                         st.append(r.getName()).append("=[").append(bounds[0]).append(",").append(bounds[1]).append("], ");
                         break;
                     case Variable.SET:
-                        SetVar s = (SetVar) vars[i];
+                        SetVar s = (SetVar) var;
                         st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s.getId()))).append(", ");
                         break;
                 }
@@ -232,7 +188,7 @@ public class Solution implements Serializable, ICause {
      */
     public Integer getIntVal(IntVar v) {
         if (empty) {
-            throw new UnsupportedOperationException("Empty solution. No solution found");
+            throw new UnsupportedOperationException("Empty solution. No solution recorded yet");
         }
         if (intmap.containsKey(v.getId())) {
             return intmap.get(v.getId());
@@ -251,10 +207,9 @@ public class Solution implements Serializable, ICause {
      * @param s SetVar
      * @return the value of variable s in this solution, or null if the variable is not instantiated in the solution
      */
-    @SuppressWarnings("unused")
     public int[] getSetVal(SetVar s) {
         if (empty) {
-            throw new UnsupportedOperationException("Empty solution. No solution found");
+            throw new UnsupportedOperationException("Empty solution. No solution recorded yet");
         }
         if (setmap.containsKey(s.getId())) {
             return setmap.get(s.getId());
@@ -271,10 +226,9 @@ public class Solution implements Serializable, ICause {
      * @param r RealVar
      * @return the bounds of r in this solution, or null if the variable is not instantiated in the solution
      */
-    @SuppressWarnings("unused")
     public double[] getRealBounds(RealVar r) {
         if (empty) {
-            throw new UnsupportedOperationException("Empty solution. No solution found");
+            throw new UnsupportedOperationException("Empty solution. No solution recorded yet");
         }
         if (realmap.containsKey(r.getId())) {
             return realmap.get(r.getId());
@@ -285,13 +239,5 @@ public class Solution implements Serializable, ICause {
                 return null;
             }
         }
-    }
-
-    /**
-     * @return true iff this is a valid solution
-     */
-
-    public boolean hasBeenFound() {
-        return !empty;
     }
 }
