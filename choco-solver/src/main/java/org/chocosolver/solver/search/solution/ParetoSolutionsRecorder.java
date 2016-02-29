@@ -32,7 +32,6 @@ package org.chocosolver.solver.search.solution;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.nary.cnf.PropSat;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -51,7 +50,7 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
     PropSat psat;
     BoolVar[] bvars;
 
-    public ParetoSolutionsRecorder(final ResolutionPolicy policy, final IntVar[] objectives) {
+    public ParetoSolutionsRecorder(final ResolutionPolicy policy, final IntVar... objectives) {
         super(objectives[0].getModel());
         this.objectives = objectives;
         this.n = objectives.length;
@@ -63,33 +62,31 @@ public class ParetoSolutionsRecorder extends AllSolutionsRecorder {
     }
 
     @Override
-    protected IMonitorSolution createRecMonitor() {
-        return () -> {
-            for (int i = 0; i < n; i++) {
-                vals[i] = objectives[i].getValue();
+    public void onSolution() {
+        for (int i = 0; i < n; i++) {
+            vals[i] = objectives[i].getValue();
+        }
+        // update solution set
+        for (int i = solutions.size() - 1; i >= 0; i--) {
+            if (dominatedSolution(solutions.get(i), vals)) {
+                solutions.remove(i);
             }
-            // update solution set
-            for (int i = solutions.size() - 1; i >= 0; i--) {
-                if (dominatedSolution(solutions.get(i), vals)) {
-                    solutions.remove(i);
-                }
-            }
-            // store current solution
-            Solution solution = new Solution();
-            solution.record(model);
-            solutions.add(solution);
-            // aim at better solutions
-            Operator symbol = Operator.GT;
-            if (policy == ResolutionPolicy.MINIMIZE) {
-                symbol = Operator.LT;
-            }
-            for (int i = 0; i < n; i++) {
-                bvars[i] = model.boolVar("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")");
-                model.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
-                lits[i] = psat.Literal(bvars[i]);
-            }
-            psat.addLearnt(lits);
-        };
+        }
+        // store current solution
+        Solution solution = new Solution();
+        solution.record(model);
+        solutions.add(solution);
+        // aim at better solutions
+        Operator symbol = Operator.GT;
+        if (policy == ResolutionPolicy.MINIMIZE) {
+            symbol = Operator.LT;
+        }
+        for (int i = 0; i < n; i++) {
+            bvars[i] = model.boolVar("(" + objectives[i].getName() + symbol.toString() + "" + vals[i] + ")");
+            model.arithm(objectives[i], symbol.toString(), vals[i]).reifyWith(bvars[i]);
+            lits[i] = psat.Literal(bvars[i]);
+        }
+        psat.addLearnt(lits);
     }
 
     private boolean dominatedSolution(Solution solution, int[] vals) {

@@ -40,7 +40,7 @@ import java.util.List;
  *
  * @author Jean-Guillaume Fages
  */
-public class AllSolutionsRecorder implements ISolutionRecorder {
+public class AllSolutionsRecorder implements ISolutionRecorder, IMonitorSolution {
 
 	LinkedList<Solution> solutions;
 	Model model;
@@ -48,15 +48,13 @@ public class AllSolutionsRecorder implements ISolutionRecorder {
 	public AllSolutionsRecorder(final Model model){
 		this.model = model;
 		this.solutions = new LinkedList<>();
-		model.getSolver().plugMonitor(createRecMonitor());
 	}
 
-	protected IMonitorSolution createRecMonitor() {
-		return () -> {
-            Solution solution = new Solution();
-            solution.record(model);
-            solutions.addLast(solution);
-        };
+	@Override
+	public void onSolution() {
+		Solution solution = new Solution();
+		solution.record(model);
+		solutions.addLast(solution);
 	}
 
 	@Override

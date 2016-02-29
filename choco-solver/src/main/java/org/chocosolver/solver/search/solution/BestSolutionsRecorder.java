@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.search.solution;
 
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -50,15 +49,13 @@ public class BestSolutionsRecorder extends AllSolutionsRecorder {
 	}
 
 	@Override
-	protected IMonitorSolution createRecMonitor() {
-		return () -> {
-            if(objective.getValue()!=lastValue){
-                lastValue = objective.getValue();
-                solutions.clear();
-            }
-            Solution solution = new Solution();
-            solution.record(model);
-            solutions.add(solution);
-        };
+	public void onSolution() {
+		if(objective.getValue()!=lastValue){
+			lastValue = objective.getValue();
+			solutions.clear();
+		}
+		Solution solution = new Solution();
+		solution.record(model);
+		solutions.add(solution);
 	}
 }

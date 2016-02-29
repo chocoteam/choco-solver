@@ -639,26 +639,29 @@ After the enumeration, the solver closes the search tree and variables are no lo
 Optimization
 ============
 
+In Constraint-Programming, optimization is done by computing improving solutions, until reaching an optimum.
+Therefore, it can be seen as solving multiple times the model while adding constraints on the fly to prevent the solver from computing dominated solutions.
+
 Mono-objective optimization
 ---------------------------
 
-In Constraint-Programming, the optimization process is the following: anytime a solution is found, the value of the objective variable is stored and a *cut* is posted.
-The cut is an additional constraint which states that the next solution must be strictly better than the current one.
+The optimization process is the following: anytime a solution is found, the value of the objective variable is stored and a *cut* is posted.
+The cut is an additional constraint which states that the next solution must be (stricly) better than the current one.
 To solve an optimization problem, you must specify which variable to optimize and in which direction: ::
 
    // to maximize X
    model.setObjectives(ResolutionPolicy.MAXIMIZE, X);
-   model.solve();
+   while(model.solve()){
+       // an improving solution has been found
+   }
+   // the last solution found was optimal (if search completed)
 
    // to minimize X
    model.setObjectives(ResolutionPolicy.MINIMIZE, X);
    model.solve();
 
-The method returns true if at least one solution (not necessarily optimal) has been found.
-The best solution found so far is automatically restored at the end of ``model.solve()``,
-so that you can access variable values.
 
-
+You can use custom cuts (TODO)
 
 
 .. tip::
@@ -674,21 +677,19 @@ so that you can access variable values.
         // Compute optimum
         model.solve();
 
-Multi-objective optimization
-----------------------------
+Multi-objective Pareto optimization
+-----------------------------------
 
-It is possible to solve multi-objective optimization problems with Choco |version|.
-You must then specify a set of incomparable objective variable you want to optimize: ::
+Solving multi-objective optimization problems with Choco |version|, is done by adding constraints while solving.
+Anytime a solution is found, a constraint is posted which states that at least one of the objective variables must be strictly better:
+Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n)` where :math:`X_i` is the ith objective variable and :math:`b_i`
+
+TODO example: ::
 
    // to maximize X and Y
    model.setObjectives(ResolutionPolicy.MINIMIZE, X, Y);
    model.solve();
 
-This method will compute the Pareto front of the problem.
-The underlying approach is currently a bit naive, but it simplifies the process:
-Anytime a solution is found, a cut is posted which states that at least one of the objective variables must be strictly better:
-Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n)` where :math:`X_i` is the ith objective variable and :math:`b_i`
-its best known value.
 
 .. note::
 

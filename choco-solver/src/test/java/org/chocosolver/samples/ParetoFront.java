@@ -32,40 +32,48 @@
  * @since 21/03/14
  * Created by IntelliJ IDEA.
  */
-package org.chocosolver.samples.todo.problems.integer;
+package org.chocosolver.samples;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.search.solution.ParetoSolutionsRecorder;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.List;
 
 /**
- * Multi-objective optimization illustration to compute pareto solutions
+ * Trivial multi-objective optimization computing pareto solutions
  *
  * @author Jimmy Liang, Jean-Guillaume Fages
  */
-public class Pareto {
+public class ParetoFront {
 
-	public static void main(String[] args){
+	@Test(groups = "1s", timeOut = 60000)
+	public void testPareto(){
+		// simple model
 		Model model = new Model();
 		IntVar a = model.intVar("a", 0, 2, false);
 		IntVar b = model.intVar("b", 0, 2, false);
 		IntVar c = model.intVar("c", 0, 2, false);
+		model.arithm(a, "+", b, "=", c).post();
 
-		model.arithm(a, "+", b, "<", 3).post();
+		// create an object that will store the best solutions and dynamically add constraints to remove dominated ones
+		ParetoSolutionsRecorder paretoRecorder = new ParetoSolutionsRecorder(ResolutionPolicy.MAXIMIZE,a,b);
+		model.getSolver().plugMonitor(paretoRecorder);
 
-		// the problem is to maximize a and b
-		/*model.setObjective(ResolutionPolicy.MAXIMIZE,a,b);
+		// optimization
+		while(model.solve());
 
-		List<Solution> solutions = new ArrayList<>();
-		while(model.solve()){
-			Solution sol = new Solution();
-			sol.record(model);
-			solutions.add(sol);
-		}
-
-		System.out.println("The pareto front has "+solutions.size()+" solutions : ");
-		for(Solution s:solutions){
+		// retrieve the pareto front
+		List<Solution> paretoFront = paretoRecorder.getSolutions();
+		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
+		Assert.assertEquals(3, paretoFront.size());
+		for(Solution s:paretoFront){
 			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
-		}*/
-		throw new UnsupportedOperationException("Pareto not supported anymore");
+			Assert.assertEquals(2,(int)s.getIntVal(c));
+		}
 	}
 }
