@@ -107,6 +107,7 @@ public class TSP_Utils {
                 } else if (format.contains("UPPER_DIAG_ROW")) {
                     upperDiagMatrix(dist, buf);
                 } else {
+                    buf.close();
                     return null;
                 }
             } else if (type.contains("CEIL_2D") || type.contains("EUC_2D") || type.contains("ATT") || type.contains("GEO")) {
@@ -115,9 +116,10 @@ public class TSP_Utils {
                 }
                 coordinates(dist, buf, type);
             } else {
+                buf.close();
                 throw new UnsupportedOperationException();
             }
-
+            buf.close();
             return dist;
         } catch (Exception e) {
             e.printStackTrace();
@@ -133,6 +135,7 @@ public class TSP_Utils {
             while (!line.contains(s)) {
                 line = buf.readLine();
             }
+            buf.close();
             return Integer.parseInt(line.split(";")[1]);
         } catch (Exception e) {
             e.printStackTrace();

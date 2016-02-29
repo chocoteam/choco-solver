@@ -194,6 +194,7 @@ public class HCP_Utils {
                 matrix[j][i] = true;
                 line = buf.readLine();
             }
+			buf.close();
             return matrix;
         } catch (Exception e) {
             e.printStackTrace();
