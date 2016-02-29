@@ -91,11 +91,8 @@ public class PropKnapsack extends Propagator<IntVar> {
                 }
             }
             in.set(item);
-            if (item == -1) {
-                throw new UnsupportedOperationException();
-            } else {
-                order[index++] = item;
-            }
+            assert item!=-1;
+            order[index++] = item;
         }
     }
 
@@ -124,9 +121,7 @@ public class PropKnapsack extends Propagator<IntVar> {
         } else {
             int idx;
             for (int i = 0; i < n; i++) {
-                if (camax < 0) {
-                    throw new UnsupportedOperationException(camax + " < 0");
-                }
+                assert camax >= 0;
                 idx = order[i];
                 int delta = weigth[idx] * (vars[idx].getUB() - vars[idx].getLB());
                 if (delta > 0) {
