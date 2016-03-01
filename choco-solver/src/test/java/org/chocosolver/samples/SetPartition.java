@@ -113,7 +113,7 @@ public class SetPartition extends AbstractProblem {
 		SetPartition sp = new SetPartition();
 		sp.buildModel();
 		sp.solve();
-		Assert.assertEquals(2,sp.getModel().getSolver().getMeasures().getSolutionCount());
+		Assert.assertEquals(2,sp.getModel().getSolver().getSolutionCount());
 		Assert.assertEquals(13,sp.getModel().getSolver().getObjectiveManager().getBestSolutionValue().intValue());
 	}
 }

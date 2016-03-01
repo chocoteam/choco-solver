@@ -87,7 +87,7 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9280);
+        assertEquals(model.getSolver().getSolutionCount(), 9280);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -128,7 +128,7 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9280);
+        assertEquals(model.getSolver().getSolutionCount(), 9280);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -177,7 +177,7 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 229376);
+        assertEquals(model.getSolver().getSolutionCount(), 229376);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -229,7 +229,7 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 229376);
+        assertEquals(model.getSolver().getSolutionCount(), 229376);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -269,7 +269,7 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 67584);
+        assertEquals(model.getSolver().getSolutionCount(), 67584);
 //        assertEquals(124927,s.getNodeCount());
 
     }
@@ -312,7 +312,7 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 67584);
+        assertEquals(model.getSolver().getSolutionCount(), 67584);
 
 //        assertEquals(124927, s.getNodeCount());
     }
@@ -351,7 +351,7 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 149456);
+        assertEquals(model.getSolver().getSolutionCount(), 149456);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -391,7 +391,7 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 149456);
+        assertEquals(model.getSolver().getSolutionCount(), 149456);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -421,6 +421,6 @@ public class CostRegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 64008);
+        assertEquals(model.getSolver().getSolutionCount(), 64008);
     }
 }

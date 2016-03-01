@@ -140,7 +140,7 @@ public class ViewMinusTest {
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
+            assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
 
         }
     }
@@ -168,7 +168,7 @@ public class ViewMinusTest {
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
+            assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
 
         }
     }

@@ -103,7 +103,7 @@ public class TableTest {
             while (model.solve()) {
                 nbs++;
             }
-            long nbn = model.getSolver().getMeasures().getNodeCount();
+            long nbn = model.getSolver().getNodeCount();
 //            System.out.printf("%s\n", solver.getMeasures().toOneLineString());
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 10; s++) {
@@ -117,7 +117,7 @@ public class TableTest {
                         nbSolutions++;
                     }
                     assertEquals(nbSolutions, nbs);
-                    if (a > 1) assertEquals(tsolver.getSolver().getMeasures().getNodeCount(), nbn);
+                    if (a > 1) assertEquals(tsolver.getSolver().getNodeCount(), nbn);
 //                    System.out.printf("%s\n", tsolver.getResolver().getMeasures().toOneLineString());
                 }
             }
@@ -144,7 +144,7 @@ public class TableTest {
             while (model.solve()) {
                 nbs++;
             }
-            long nbn = model.getSolver().getMeasures().getNodeCount();
+            long nbn = model.getSolver().getNodeCount();
 //            System.out.printf("%s\n===\n", solver.getMeasures().toOneLineString());
             for (int a = 0; a < ALGOS.length; a++) {
                 for (int s = 0; s < 1; s++) {
@@ -202,7 +202,7 @@ public class TableTest {
         while(model.solve()){
             sol.record();
         }
-        if (model.getSolver().getMeasures().getSolutionCount() > 0) {
+        if (model.getSolver().getSolutionCount() > 0) {
             for (int i = 0; i < vars.length; i++) {
                 out.print(sol.getIntVal(vars[i]) + "\t");
             }
@@ -210,7 +210,7 @@ public class TableTest {
             for (int i = 0; i < reified.length; i++) {
                 out.print(reified[i].getValue() + "\t");
             }
-            out.println("\n" + "obj = " + sol.getIntVal(sum) + ", backtracks = " + model.getSolver().getMeasures().getBackTrackCount());
+            out.println("\n" + "obj = " + sol.getIntVal(sum) + ", backtracks = " + model.getSolver().getBackTrackCount());
         }
         assertEquals(sol.getIntVal(sum).intValue(), 5);
     }
@@ -245,7 +245,7 @@ public class TableTest {
         tuples.add(1, 1, 1);
         model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -257,7 +257,7 @@ public class TableTest {
         tuples.add(2, 1, 0);
         model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
 
@@ -277,7 +277,7 @@ public class TableTest {
                 while (model.solve()) {
                     nbs++;
                 }
-                long nbn = model.getSolver().getMeasures().getNodeCount();
+                long nbn = model.getSolver().getNodeCount();
                 for (int a = 0; a < ALGOS.length; a++) {
                     for (int s = 0; s < 1; s++) {
                         Model tsolver = new Model(ALGOS[a]);
@@ -289,7 +289,7 @@ public class TableTest {
                             nbSolutions++;
                         }
                         assertEquals(nbSolutions, nbs);
-                        if (a > 1) assertEquals(tsolver.getSolver().getMeasures().getNodeCount(), nbn);
+                        if (a > 1) assertEquals(tsolver.getSolver().getNodeCount(), nbn);
                     }
                 }
             }
@@ -442,7 +442,7 @@ public class TableTest {
             Tuples ts = scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
             model.table(new IntVar[]{x, z, z, y}, ts, a).post();
             while (model.solve()) ;
-            assertEquals(1, model.getSolver().getMeasures().getSolutionCount());
+            assertEquals(1, model.getSolver().getSolutionCount());
         }
     }
 }

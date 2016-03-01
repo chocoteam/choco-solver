@@ -62,7 +62,7 @@ public class OffsetViewTest {
 
         s.getSolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getSolver().getSolutionCount(), 2);
     }
 
 
@@ -79,7 +79,7 @@ public class OffsetViewTest {
 
         s.getSolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(s.getSolver().getSolutionCount(), 4);
     }
 
     private Model bijective(int low, int upp, int coeff) {
@@ -126,8 +126,8 @@ public class OffsetViewTest {
             Model sc = contraint(low, upp, coeff);
             while (sb.solve()) ;
             while (sc.solve()) ;
-            assertEquals(sc.getSolver().getMeasures().getSolutionCount(), sb.getSolver().getMeasures().getSolutionCount());
-            assertEquals(sc.getSolver().getMeasures().getNodeCount(), sb.getSolver().getMeasures().getNodeCount());
+            assertEquals(sc.getSolver().getSolutionCount(), sb.getSolver().getSolutionCount());
+            assertEquals(sc.getSolver().getNodeCount(), sb.getSolver().getNodeCount());
 
         }
     }
@@ -138,8 +138,8 @@ public class OffsetViewTest {
         Model sc = contraint(1, 1999, 3);
         while (sb.solve()) ;
         while (sc.solve()) ;
-        assertEquals(sc.getSolver().getMeasures().getSolutionCount(), sb.getSolver().getMeasures().getSolutionCount());
-        assertEquals(sc.getSolver().getMeasures().getNodeCount(), sb.getSolver().getMeasures().getNodeCount());
+        assertEquals(sc.getSolver().getSolutionCount(), sb.getSolver().getSolutionCount());
+        assertEquals(sc.getSolver().getNodeCount(), sb.getSolver().getNodeCount());
 
     }
 
@@ -151,8 +151,8 @@ public class OffsetViewTest {
             Model sc = contraint(1, N, 3);
             while (sb.solve()) ;
             while (sc.solve()) ;
-            assertEquals(sc.getSolver().getMeasures().getSolutionCount(), sb.getSolver().getMeasures().getSolutionCount());
-            assertEquals(sc.getSolver().getMeasures().getNodeCount(), sb.getSolver().getMeasures().getNodeCount());
+            assertEquals(sc.getSolver().getSolutionCount(), sb.getSolver().getSolutionCount());
+            assertEquals(sc.getSolver().getNodeCount(), sb.getSolver().getNodeCount());
         }
 
     }

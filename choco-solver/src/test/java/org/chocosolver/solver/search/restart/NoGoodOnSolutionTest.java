@@ -87,7 +87,7 @@ public class NoGoodOnSolutionTest {
         Model s = makeProblem();
         while (s.solve()) ;
         out.println(s.getSolver().getMeasures());
-        assertTrue(s.getSolver().getMeasures().getSolutionCount() == NB_SOLS);
+        assertTrue(s.getSolver().getSolutionCount() == NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -97,7 +97,7 @@ public class NoGoodOnSolutionTest {
         s.getSolver().setRestartOnSolutions();
         while (s.solve()) ;
         out.println(s.getSolver().getMeasures());
-        assertTrue(s.getSolver().getMeasures().getSolutionCount() == MAX_NB_SOLS);
+        assertTrue(s.getSolver().getSolutionCount() == MAX_NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -108,7 +108,7 @@ public class NoGoodOnSolutionTest {
         s.getSolver().setRestartOnSolutions();
         while (s.solve()) ;
         out.println(s.getSolver().getMeasures());
-        assertTrue(s.getSolver().getMeasures().getSolutionCount() == NB_SOLS);
+        assertTrue(s.getSolver().getSolutionCount() == NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -156,7 +156,7 @@ public class NoGoodOnSolutionTest {
         model.getSolver().setRestartOnSolutions();
         while (model.solve()) ;
         out.println(model.getSolver().getMeasures());
-        assertTrue(model.getSolver().getMeasures().getSolutionCount() == 92);
+        assertTrue(model.getSolver().getSolutionCount() == 92);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -180,7 +180,7 @@ public class NoGoodOnSolutionTest {
         model.getSolver().setRestartOnSolutions();
         while (model.solve()) ;
         out.println(model.getSolver().getMeasures());
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 92);
+        assertEquals(model.getSolver().getSolutionCount(), 92);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -203,7 +203,7 @@ public class NoGoodOnSolutionTest {
         model.getSolver().set(inputOrderLBSearch(vars));
         while (model.solve()) ;
         out.println(model.getSolver().getMeasures());
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -227,6 +227,6 @@ public class NoGoodOnSolutionTest {
 //        Chatterbox.showDecisions(solver);
         while (model.solve()) ;
         out.println(model.getSolver().getMeasures());
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 36);
+        assertEquals(model.getSolver().getSolutionCount(), 36);
     }
 }

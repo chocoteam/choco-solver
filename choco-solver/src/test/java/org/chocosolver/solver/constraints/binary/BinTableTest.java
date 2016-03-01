@@ -89,7 +89,7 @@ public class BinTableTest {
             s.table(v1, v2, feasible, a).post();
 
             while (s.solve()) ;
-            assertEquals(5, s.getSolver().getMeasures().getSolutionCount());
+            assertEquals(5, s.getSolver().getSolutionCount());
         }
         tearDown();
     }
@@ -105,7 +105,7 @@ public class BinTableTest {
             s.table(v1, v2, infeasible, a).post();
 
             while (s.solve()) ;
-            assertEquals((16 - 5), s.getSolver().getMeasures().getSolutionCount());
+            assertEquals((16 - 5), s.getSolver().getSolutionCount());
         }
         tearDown();
     }
@@ -129,7 +129,7 @@ public class BinTableTest {
         while (model.solve()) {
             nbs++;
         }
-        long nbn = model.getSolver().getMeasures().getNodeCount();
+        long nbn = model.getSolver().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
                 Model tsolver = new Model();
@@ -142,7 +142,7 @@ public class BinTableTest {
                     nbSolutions++;
                 }
                 assertEquals(nbSolutions, nbs);
-                if (a > 1) assertEquals(tsolver.getSolver().getMeasures().getNodeCount(), nbn);
+                if (a > 1) assertEquals(tsolver.getSolver().getNodeCount(), nbn);
             }
         }
     }
@@ -165,7 +165,7 @@ public class BinTableTest {
         while (model.solve()) {
             nbs++;
         }
-        long nbn = model.getSolver().getMeasures().getNodeCount();
+        long nbn = model.getSolver().getNodeCount();
         for (int s = 0; s < 20; s++) {
             for (int a = 0; a < ALGOS.length; a++) {
                 Model tsolver = new Model();
@@ -178,7 +178,7 @@ public class BinTableTest {
                     nbSolutions++;
                 }
                 assertEquals(nbSolutions, nbs);
-                if (a > 1) assertEquals(tsolver.getSolver().getMeasures().getNodeCount(), nbn);
+                if (a > 1) assertEquals(tsolver.getSolver().getNodeCount(), nbn);
             }
         }
     }
@@ -201,7 +201,7 @@ public class BinTableTest {
         while (model.solve()) {
             nbs++;
         }
-        long nbn = model.getSolver().getMeasures().getNodeCount();
+        long nbn = model.getSolver().getNodeCount();
         for (int a = 0; a < ALGOS.length; a++) {
             for (int s = 0; s < 20; s++) {
                 Model tsolver = new Model();
@@ -214,7 +214,7 @@ public class BinTableTest {
                     nbSolutions++;
                 }
                 assertEquals(nbSolutions, nbs);
-                if (a > 1) assertEquals(tsolver.getSolver().getMeasures().getNodeCount(), nbn);
+                if (a > 1) assertEquals(tsolver.getSolver().getNodeCount(), nbn);
             }
         }
     }

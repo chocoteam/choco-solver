@@ -817,7 +817,7 @@ public final class Solver implements Serializable, ISolver, IMeasures {
      * </pre>
      * With lambda, stop when 10 nodes are visited:
      * <pre>
-     *     () -> solver.getMeasures().getNodeCount() >= 10
+     *     () -> solver.getNodeCount() >= 10
      * </pre>
      *
      * @param criterion one or many stop criterion to add.

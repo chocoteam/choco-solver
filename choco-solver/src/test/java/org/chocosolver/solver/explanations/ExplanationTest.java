@@ -72,7 +72,7 @@ public class ExplanationTest {
                     System.out.println(model.getSolver().getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
                     if (e > 1) {
-                        assertEquals(model.getSolver().getMeasures().getNodeCount(), (n - 2) * 2);
+                        assertEquals(model.getSolver().getNodeCount(), (n - 2) * 2);
                     }
                 }
             }
@@ -96,7 +96,7 @@ public class ExplanationTest {
                     assertFalse(model.solve());
                     System.out.println(model.getSolver().getMeasures().toOneShortLineString());
                     // get the last contradiction, which is
-                    assertEquals(model.getSolver().getMeasures().getNodeCount(), (n - 2) * 2);
+                    assertEquals(model.getSolver().getNodeCount(), (n - 2) * 2);
                 }
             }
         }

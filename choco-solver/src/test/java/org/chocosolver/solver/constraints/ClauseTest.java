@@ -83,7 +83,7 @@ public class ClauseTest {
                 s.getSolver().set(inputOrderLBSearch(bs));
 
                 while (s.solve()) ;
-                long sol = s.getSolver().getMeasures().getSolutionCount();
+                long sol = s.getSolver().getSolutionCount();
                 assertEquals(sol, nSol);
             }
             nSol = nSol * 2 + 1;
@@ -102,7 +102,7 @@ public class ClauseTest {
         addClauses(and, s);
         s.getSolver().set(inputOrderLBSearch(bs));
         while (s.solve()) ;
-        long sol = s.getSolver().getMeasures().getSolutionCount();
+        long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 0);
     }
 
@@ -120,7 +120,7 @@ public class ClauseTest {
         s.getSolver().set(inputOrderLBSearch(bs));
 //        SMF.log(s, true, true);
         while (s.solve()) ;
-        long sol = s.getSolver().getMeasures().getSolutionCount();
+        long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 2);
     }
 
@@ -225,7 +225,7 @@ public class ClauseTest {
 
                 model.getSolver().set(randomSearch(bvars, seed));
                 while (model.solve()) ;
-                n1 = model.getSolver().getMeasures().getSolutionCount();
+                n1 = model.getSolver().getSolutionCount();
             }
             {
                 Model model = new Model();
@@ -234,7 +234,7 @@ public class ClauseTest {
 
                 model.getSolver().set(randomSearch(bvars, seed));
                 while (model.solve()) ;
-                n2 = model.getSolver().getMeasures().getSolutionCount();
+                n2 = model.getSolver().getSolutionCount();
             }
             Assert.assertEquals(n2, n1, String.format("seed: %d", seed));
         }

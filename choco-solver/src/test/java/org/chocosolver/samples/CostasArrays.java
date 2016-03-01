@@ -103,8 +103,8 @@ public class CostasArrays extends AbstractProblem {
 	public void test(){
 		CostasArrays ca = new CostasArrays();
 		ca.execute();
-		Assert.assertEquals(1,ca.getModel().getSolver().getMeasures().getSolutionCount());
-		Assert.assertEquals(3914, ca.getModel().getSolver().getMeasures().getNodeCount());
+		Assert.assertEquals(1,ca.getModel().getSolver().getSolutionCount());
+		Assert.assertEquals(3914, ca.getModel().getSolver().getNodeCount());
 	}
 
 	@Test(groups = "10s", timeOut = 60000)
@@ -112,7 +112,7 @@ public class CostasArrays extends AbstractProblem {
 		for(int i=5;i<14;i++) {
 			CostasArrays ca = new CostasArrays();
 			ca.execute("-o", i + "");
-			Assert.assertEquals(1,ca.getModel().getSolver().getMeasures().getSolutionCount());
+			Assert.assertEquals(1,ca.getModel().getSolver().getSolutionCount());
 		}
 	}
 
@@ -125,7 +125,7 @@ public class CostasArrays extends AbstractProblem {
 			ca.readArgs("-o", size[i] + "");
 			ca.buildModel();
 			while (ca.getModel().solve()) ;
-			Assert.assertEquals(nbSols[i], ca.getModel().getSolver().getMeasures().getSolutionCount());
+			Assert.assertEquals(nbSols[i], ca.getModel().getSolver().getSolutionCount());
 		}
 	}
 }

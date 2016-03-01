@@ -75,7 +75,7 @@ public class SetIntUnion {
         showSolutions(s);
         s.getSolver().set(inputOrderLBSearch(x));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 0);
+        assertEquals(s.getSolver().getSolutionCount(), 0);
     }
 
 	@Test(groups="1s", timeOut=60000)
@@ -95,6 +95,6 @@ public class SetIntUnion {
         s.getSolver().set(inputOrderLBSearch(x));
         while (s.solve()) ;
         out.println(values);
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 1);
+        assertEquals(s.getSolver().getSolutionCount(), 1);
     }
 }

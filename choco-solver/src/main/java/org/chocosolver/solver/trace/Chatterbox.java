@@ -307,7 +307,7 @@ public class Chatterbox {
         public String print() {
             return String.format("%s- Solution #%s found. %s \n\t%s.%s",
                     model.getSettings().outputWithANSIColors()?ANSI_GREEN:"",
-                    model.getSolver().getMeasures().getSolutionCount(),
+                    model.getSolver().getSolutionCount(),
                     model.getSolver().getMeasures().toOneShortLineString(),
                     print(model.getSolver().getStrategy().getVariables()),
                     model.getSettings().outputWithANSIColors()?ANSI_RESET:""

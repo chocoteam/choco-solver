@@ -93,8 +93,8 @@ public class MemberTest {
                 s.getSolver().set(inputOrderLBSearch(vars));
 
                 while (s.solve()) ;
-                long sol = s.getSolver().getMeasures().getSolutionCount();
-                long nod = s.getSolver().getMeasures().getNodeCount();
+                long sol = s.getSolver().getSolutionCount();
+                long nod = s.getSolver().getNodeCount();
                 assertEquals(sol, unionSize(values[0], values[1]), "nb sol incorrect");
                 assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb sol incorrect");
             }
@@ -120,8 +120,8 @@ public class MemberTest {
                 s.getSolver().set(inputOrderLBSearch(vars));
 
                 while (s.solve()) ;
-                long sol = s.getSolver().getMeasures().getSolutionCount();
-                long nod = s.getSolver().getMeasures().getNodeCount();
+                long sol = s.getSolver().getSolutionCount();
+                long nod = s.getSolver().getNodeCount();
                 assertEquals(sol, unionSize(lb, ub, values[1]), "nb sol incorrect");
                 assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb nod incorrect");
             }

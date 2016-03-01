@@ -270,7 +270,7 @@ public class ModelTest {
         }
         pares.solve();
         Chatterbox.printStatistics(pares.getBestModel());
-        Assert.assertEquals(pares.getBestModel().getSolver().getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(pares.getBestModel().getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -328,14 +328,14 @@ public class ModelTest {
         IntVar i = s.intVar("i", -5, 5, false);
         s.setObjective(MAXIMIZE, i);
         s.solve();
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 1);
+        assertEquals(s.getSolver().getSolutionCount(), 1);
         assertEquals(i.getValue(), 5);
 
         s.getSolver().getEngine().flush();
         s.getSolver().reset();
         s.clearObjective();
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 11);
+        assertEquals(s.getSolver().getSolutionCount(), 11);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -369,22 +369,22 @@ public class ModelTest {
     public void testCriteria() {
         Model model = new Model();
         IntVar v = model.boolVar("b");
-        Criterion c1 = () -> model.getSolver().getMeasures().getNodeCount() == 1;
-        Criterion c2 = () -> model.getSolver().getMeasures().getSolutionCount() == 1;
+        Criterion c1 = () -> model.getSolver().getNodeCount() == 1;
+        Criterion c2 = () -> model.getSolver().getSolutionCount() == 1;
         model.getSolver().addStopCriterion(c1);
         model.getSolver().addStopCriterion(c2);
         while (model.solve()) ;
-        assertEquals(0, model.getSolver().getMeasures().getSolutionCount());
+        assertEquals(0, model.getSolver().getSolutionCount());
         // unplug
         model.getSolver().removeStopCriterion(c1);
         model.getSolver().reset();
         while (model.solve()) ;
-        assertEquals(1, model.getSolver().getMeasures().getSolutionCount());
+        assertEquals(1, model.getSolver().getSolutionCount());
         // plug
         model.getSolver().removeAllStopCriteria();
         model.getSolver().reset();
         while (model.solve()) ;
-        assertEquals(2, model.getSolver().getMeasures().getSolutionCount());
+        assertEquals(2, model.getSolver().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)

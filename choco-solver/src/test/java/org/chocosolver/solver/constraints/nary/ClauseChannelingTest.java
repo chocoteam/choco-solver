@@ -117,9 +117,9 @@ public class ClauseChannelingTest {
                     r.set(randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                     while (sc.solve()) ;
                 }
-                Assert.assertEquals(sr.getSolver().getMeasures().getSolutionCount(), i);
-                Assert.assertEquals(sc.getSolver().getMeasures().getSolutionCount(), i);
-                Assert.assertEquals(sc.getSolver().getMeasures().getNodeCount(), sr.getSolver().getMeasures().getNodeCount());
+                Assert.assertEquals(sr.getSolver().getSolutionCount(), i);
+                Assert.assertEquals(sc.getSolver().getSolutionCount(), i);
+                Assert.assertEquals(sc.getSolver().getNodeCount(), sr.getSolver().getNodeCount());
 
             }
         }
@@ -158,9 +158,9 @@ public class ClauseChannelingTest {
                     r.set(randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
                     while (sc.solve()) ;
                 }
-                Assert.assertEquals(sr.getSolver().getMeasures().getSolutionCount(), i);
-                Assert.assertEquals(sc.getSolver().getMeasures().getSolutionCount(), i);
-                Assert.assertEquals(sc.getSolver().getMeasures().getNodeCount(), sr.getSolver().getMeasures().getNodeCount());
+                Assert.assertEquals(sr.getSolver().getSolutionCount(), i);
+                Assert.assertEquals(sc.getSolver().getSolutionCount(), i);
+                Assert.assertEquals(sc.getSolver().getNodeCount(), sr.getSolver().getNodeCount());
 
             }
         }

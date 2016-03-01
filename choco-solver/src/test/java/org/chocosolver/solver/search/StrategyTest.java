@@ -372,7 +372,7 @@ public class StrategyTest {
         r.set(intVarSearch(minDomIntVar(), midIntVal(true), DecisionOperator.int_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -383,7 +383,7 @@ public class StrategyTest {
         r.set(intVarSearch(minDomIntVar(), midIntVal(false), DecisionOperator.int_reverse_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 
 
@@ -395,7 +395,7 @@ public class StrategyTest {
         r.set(intVarSearch(minDomIntVar(), midIntVal(true), DecisionOperator.int_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -406,6 +406,6 @@ public class StrategyTest {
         r.set(intVarSearch(minDomIntVar(), midIntVal(false), DecisionOperator.int_reverse_split, X));
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
+        assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 }

@@ -135,7 +135,7 @@ public class LexChainTest {
             while (refor.solve()) ;
             while (lex.solve()) ;
 
-            assertEquals(refor.getSolver().getMeasures().getSolutionCount(), lex.getSolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
+            assertEquals(refor.getSolver().getSolutionCount(), lex.getSolver().getSolutionCount(), format("seed:%d", seed));
         }
     }
 
@@ -154,7 +154,7 @@ public class LexChainTest {
             while (refor.solve()) ;
             while (lex.solve()) ;
 
-            assertEquals(refor.getSolver().getMeasures().getSolutionCount(), lex.getSolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
+            assertEquals(refor.getSolver().getSolutionCount(), lex.getSolver().getSolutionCount(), format("seed:%d", seed));
         }
     }
 
@@ -165,7 +165,7 @@ public class LexChainTest {
         Model lex = lex(n, m, k, seed, true);
         while (refor.solve()) ;
         while (lex.solve()) ;
-        assertEquals(refor.getSolver().getMeasures().getSolutionCount(), lex.getSolver().getMeasures().getSolutionCount(), format("seed:%d", seed));
+        assertEquals(refor.getSolver().getSolutionCount(), lex.getSolver().getSolutionCount(), format("seed:%d", seed));
     }
 
     @Test(groups="1s", timeOut=60000)

@@ -247,8 +247,8 @@ public class ExplanationEngineTest {
             model.getSolver().setCBJLearning(false, false);
             assertFalse(model.solve());
 
-            assertEquals(model.getSolver().getMeasures().getNodeCount(), 0);
-            assertEquals(model.getSolver().getMeasures().getFailCount(), 1);
+            assertEquals(model.getSolver().getNodeCount(), 0);
+            assertEquals(model.getSolver().getFailCount(), 1);
         }
     }
 
@@ -265,8 +265,8 @@ public class ExplanationEngineTest {
             model.getSolver().setCBJLearning(false, false);
             assertFalse(model.solve());
 
-            assertEquals(model.getSolver().getMeasures().getNodeCount(), 0);
-            assertEquals(model.getSolver().getMeasures().getFailCount(), 1);
+            assertEquals(model.getSolver().getNodeCount(), 0);
+            assertEquals(model.getSolver().getFailCount(), 1);
         }
     }
 
@@ -485,7 +485,7 @@ public class ExplanationEngineTest {
         model.getSolver().limitTime("5m");
         model.setObjective(MINIMIZE, ticks[m - 1]);
         while(model.solve());
-        assertTrue(model.getSolver().getMeasures().getSolutionCount() > 0);
+        assertTrue(model.getSolver().getSolutionCount() > 0);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -785,10 +785,10 @@ public class ExplanationEngineTest {
         Model s1 = test(n, m, 1);
         Model s2 = test(n, m, 2);
         Model s3 = test(n, m, 3);
-        Assert.assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s2.getSolver().getMeasures().getSolutionCount());
-        Assert.assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s3.getSolver().getMeasures().getSolutionCount());
-        Assert.assertTrue(s1.getSolver().getMeasures().getNodeCount() >= s2.getSolver().getMeasures().getNodeCount());
-        Assert.assertTrue(s2.getSolver().getMeasures().getNodeCount() >= s3.getSolver().getMeasures().getNodeCount());
+        Assert.assertEquals(s1.getSolver().getSolutionCount(), s2.getSolver().getSolutionCount());
+        Assert.assertEquals(s1.getSolver().getSolutionCount(), s3.getSolver().getSolutionCount());
+        Assert.assertTrue(s1.getSolver().getNodeCount() >= s2.getSolver().getNodeCount());
+        Assert.assertTrue(s2.getSolver().getNodeCount() >= s3.getSolver().getNodeCount());
     }
 
     private Model test(int n, int m, int expMode) {

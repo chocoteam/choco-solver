@@ -166,8 +166,8 @@ public class NurseScheduling {
                 System.out.println("Solution checked.");
         }
         String content =
-                model.getSolver().getMeasures().getTimeCount() + " ms,\t " + model.getSolver().getMeasures().getNodeCount() + " nodes,\t "
-                        + model.getSolver().getMeasures().getBackTrackCount() + " bks,\t "
+                model.getSolver().getTimeCount() + " ms,\t " + model.getSolver().getNodeCount() + " nodes,\t "
+                        + model.getSolver().getBackTrackCount() + " bks,\t "
                         + strategy.name() + "\t " + patternOptions.name() + "\t "
                         + m.getDescription() + "\n";
         System.out.println(content);
@@ -211,15 +211,15 @@ public class NurseScheduling {
             solved = "1";
         }
         String content =
-                solved + ",\t" + model.getSolver().getMeasures().getTimeCount() + " ms,\t "
-                        + model.getSolver().getMeasures().getNodeCount() + " nodes,\t "
-                        + model.getSolver().getMeasures().getBackTrackCount() + " bks,\t "
+                solved + ",\t" + model.getSolver().getTimeCount() + " ms,\t "
+                        + model.getSolver().getNodeCount() + " nodes,\t "
+                        + model.getSolver().getBackTrackCount() + " bks,\t "
                         + strategy.name() + "\t " + patternOptions.name() + "\t " + basisOptions.name() + "\t "
                         + m.getDescription() + "\n";
         String contentCSV =
-                solved + "," + model.getSolver().getMeasures().getTimeCount() + ","
-                        + model.getSolver().getMeasures().getNodeCount() + ","
-                        + model.getSolver().getMeasures().getBackTrackCount() + ","
+                solved + "," + model.getSolver().getTimeCount() + ","
+                        + model.getSolver().getNodeCount() + ","
+                        + model.getSolver().getBackTrackCount() + ","
                         + strategy.name() + "," + patternOptions.name() + "," + basisOptions.name() + ","
                         + m.getDescription() + "\n";
         System.out.println(content);

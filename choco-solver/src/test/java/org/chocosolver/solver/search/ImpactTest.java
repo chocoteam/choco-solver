@@ -53,12 +53,12 @@ public class ImpactTest {
 		Model s2 = costasArray(7, true);
 
 		while (s1.solve()) ;
-		out.println(s1.getSolver().getMeasures().getSolutionCount());
+		out.println(s1.getSolver().getSolutionCount());
 
 		while (s2.solve()) ;
 
-		out.println(s2.getSolver().getMeasures().getSolutionCount());
-		assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s2.getSolver().getMeasures().getSolutionCount());
+		out.println(s2.getSolver().getSolutionCount());
+		assertEquals(s1.getSolver().getSolutionCount(), s2.getSolver().getSolutionCount());
 	}
 
 	private Model costasArray(int n, boolean impact){

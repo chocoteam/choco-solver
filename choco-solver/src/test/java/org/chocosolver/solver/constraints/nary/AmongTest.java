@@ -99,7 +99,7 @@ public class AmongTest {
             model.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getSolver().getSolutionCount(), 9);
         }
     }
 
@@ -117,7 +117,7 @@ public class AmongTest {
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getSolver().getSolutionCount(), 9);
         }
     }
 
@@ -180,9 +180,9 @@ public class AmongTest {
             model.getSolver().set(randomSearch(vars,seed));
             while (model.solve()) ;
             if (nbsol == -1) {
-                nbsol = model.getSolver().getMeasures().getSolutionCount();
+                nbsol = model.getSolver().getSolutionCount();
             } else {
-                assertEquals(model.getSolver().getMeasures().getSolutionCount(), nbsol);
+                assertEquals(model.getSolver().getSolutionCount(), nbsol);
             }
 
         }
@@ -234,9 +234,9 @@ public class AmongTest {
             model.getSolver().set(randomSearch(vars,seed));
             while (model.solve()) ;
             if (nbsol == -1) {
-                nbsol = model.getSolver().getMeasures().getSolutionCount();
+                nbsol = model.getSolver().getSolutionCount();
             } else {
-                assertEquals(model.getSolver().getMeasures().getSolutionCount(), nbsol);
+                assertEquals(model.getSolver().getSolutionCount(), nbsol);
             }
 
         }

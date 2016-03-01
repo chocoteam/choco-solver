@@ -58,7 +58,7 @@ public class ScaleViewTest {
         s.arithm(Y, "!=", 4).post();
         s.getSolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getSolver().getSolutionCount(), 2);
     }
 
 
@@ -74,7 +74,7 @@ public class ScaleViewTest {
 
         s.getSolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(s.getSolver().getSolutionCount(), 4);
     }
 
     private Model bijective(int low, int upp, int coeff) {
@@ -122,7 +122,7 @@ public class ScaleViewTest {
             Model sc = contraint(low, upp, coeff);
             while (sb.solve()) ;
             while (sc.solve()) ;
-            assertEquals(sc.getSolver().getMeasures().getSolutionCount(), sb.getSolver().getMeasures().getSolutionCount());
+            assertEquals(sc.getSolver().getSolutionCount(), sb.getSolver().getSolutionCount());
             //Assert.assertEquals(sc.getResolver().getMeasures().getNodeCount(), sb.getResolver().getMeasures().getNodeCount());
         }
     }
@@ -133,7 +133,7 @@ public class ScaleViewTest {
         Model sc = contraint(1, 9999, 3);
         while (sb.solve()) ;
         while (sc.solve()) ;
-        assertEquals(sc.getSolver().getMeasures().getSolutionCount(), sb.getSolver().getMeasures().getSolutionCount());
+        assertEquals(sc.getSolver().getSolutionCount(), sb.getSolver().getSolutionCount());
         //Assert.assertEquals(sc.getResolver().getMeasures().getNodeCount(), sb.getResolver().getMeasures().getNodeCount());
     }
 

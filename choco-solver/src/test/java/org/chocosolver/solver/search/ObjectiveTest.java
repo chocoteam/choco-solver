@@ -99,8 +99,8 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
             model.solve();
-            Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
-            Assert.assertEquals(model.getSolver().getMeasures().getNodeCount(), 2);
+            Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
+            Assert.assertEquals(model.getSolver().getNodeCount(), 2);
         }
     }
 
@@ -109,8 +109,8 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 11);
-            assertEquals(model.getSolver().getMeasures().getNodeCount(), 21);
+            assertEquals(model.getSolver().getSolutionCount(), 11);
+            assertEquals(model.getSolver().getNodeCount(), 21);
         }
     }
 
@@ -119,8 +119,8 @@ public class ObjectiveTest {
             model.getSolver().reset();
             model.setObjective(MINIMIZE, iv);
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getBestSolutionValue(), 0);
-            assertEquals(model.getSolver().getMeasures().getNodeCount(), 2);
+            assertEquals(model.getSolver().getBestSolutionValue(), 0);
+            assertEquals(model.getSolver().getNodeCount(), 2);
         }
     }
 
@@ -129,8 +129,8 @@ public class ObjectiveTest {
             model.getSolver().reset();
             model.setObjective(MAXIMIZE, iv);
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getBestSolutionValue(), 10);
-            assertEquals(model.getSolver().getMeasures().getNodeCount(), 21);
+            assertEquals(model.getSolver().getBestSolutionValue(), 10);
+            assertEquals(model.getSolver().getNodeCount(), 21);
         }
     }
 
@@ -169,7 +169,7 @@ public class ObjectiveTest {
                         new Constraint[]{model.TRUE()}) {
                     @Override
                     public ESat checkCondition() {
-                        int nbNode = (int) this.model.getSolver().getMeasures().getNodeCount();
+                        int nbNode = (int) this.model.getSolver().getNodeCount();
                         switch (nbNode) {
                             case 0:
                             case 1:
@@ -274,7 +274,7 @@ public class ObjectiveTest {
             oman.updateBestUB(best);
         }
         Assert.assertEquals(best, 34);
-        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 0); // the last resolution fails at finding solutions
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
     }
 
     @Test(groups = "10s", timeOut = 60000)
@@ -296,7 +296,7 @@ public class ObjectiveTest {
             oman.updateBestUB(best);
         }
         Assert.assertEquals(best, 34);
-        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 0); // the last resolution fails at finding solutions
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
     }
 
     @Test(groups = "10s", timeOut = 60000)
@@ -314,6 +314,6 @@ public class ObjectiveTest {
             }
         }
         Assert.assertEquals(best, 34);
-        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(), 18);
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 18);
     }
 }

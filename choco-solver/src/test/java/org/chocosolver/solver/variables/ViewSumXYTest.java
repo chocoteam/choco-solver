@@ -138,7 +138,7 @@ public class ViewSumXYTest {
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount(), "seed:" + seed);
+            assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount(), "seed:" + seed);
 
         }
     }
@@ -169,7 +169,7 @@ public class ViewSumXYTest {
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount(), "seed:" + seed);
+            assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount(), "seed:" + seed);
 
         }
     }

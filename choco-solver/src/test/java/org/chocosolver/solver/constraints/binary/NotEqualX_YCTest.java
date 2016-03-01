@@ -60,7 +60,7 @@ public class NotEqualX_YCTest {
 
         s.getSolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
-        long sol = s.getSolver().getMeasures().getSolutionCount();
+        long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 6, "nb sol incorrect");
 
     }
@@ -79,7 +79,7 @@ public class NotEqualX_YCTest {
         s.getSolver().set(inputOrderLBSearch(vars));
 //        ChocoLogging.toSolution();
         while (s.solve()) ;
-        long sol = s.getSolver().getMeasures().getSolutionCount();
+        long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 6, "nb sol incorrect");
     }
 

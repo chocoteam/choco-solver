@@ -65,15 +65,15 @@ public class MagicSquareTest {
         sol = modeler(j);
         sol.getSolver().set(new ImpactBased((IntVar[]) sol.getSolver().getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
         while (sol.solve()) ;
-        long nbsol = sol.getSolver().getMeasures().getSolutionCount();
-        long node = sol.getSolver().getMeasures().getNodeCount();
+        long nbsol = sol.getSolver().getSolutionCount();
+        long node = sol.getSolver().getNodeCount();
         for (int t = 0; t < values().length; t++) {
             sol = modeler(j);
             sol.getSolver().set(new ImpactBased((IntVar[]) sol.getSolver().getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
             values()[t].make(sol);
             while (sol.solve()) ;
-            assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
-            assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
+            assertEquals(sol.getSolver().getSolutionCount(), nbsol);
+            assertEquals(sol.getSolver().getNodeCount(), node);
         }
     }
 
@@ -83,14 +83,14 @@ public class MagicSquareTest {
         for (int j = 3; j < 5; j++) {
             sol = modeler(j);
             while (sol.solve()) ;
-            long nbsol = sol.getSolver().getMeasures().getSolutionCount();
-            long node = sol.getSolver().getMeasures().getNodeCount();
+            long nbsol = sol.getSolver().getSolutionCount();
+            long node = sol.getSolver().getNodeCount();
             for (int t = 0; t < values().length; t++) {
                 sol = modeler(j);
                 values()[t].make(sol);
                 while (sol.solve()) ;
-                assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
-                assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
+                assertEquals(sol.getSolver().getSolutionCount(), nbsol);
+                assertEquals(sol.getSolver().getNodeCount(), node);
             }
         }
     }

@@ -101,7 +101,7 @@ public class AllTest {
 //        }
 //        while (prob.getModel().solve()) ;
 //
-//        assertEquals(nbSol, prob.getModel().getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
+//        assertEquals(nbSol, prob.getModel().getSolver().getSolutionCount(), "incorrect nb solutions");
     }
 
     @Override

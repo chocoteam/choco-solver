@@ -56,7 +56,7 @@ public class ConstraintTest {
         SetVar s2 = model.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         model.or(model.allEqual(new SetVar[]{s1, s2}), model.setBoolsChanneling(bs, s1, 0)).post();
         while (model.solve()) ;
-        assertEquals(2040, model.getSolver().getMeasures().getSolutionCount());
+        assertEquals(2040, model.getSolver().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)

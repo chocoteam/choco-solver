@@ -67,7 +67,7 @@ public class IntValuePrecedeChainTest {
                 model.intValuePrecedeChain(vars, 1, 2).post();
                 model.getSolver().set(randomSearch(vars, 0));
                 while (model.solve()) ;
-                s1 = model.getSolver().getMeasures().getSolutionCount();
+                s1 = model.getSolver().getSolutionCount();
             }
             {
                 Model model = new Model();
@@ -75,7 +75,7 @@ public class IntValuePrecedeChainTest {
                 int_value_precede_chain_dec(vars, 1, 2);
                 model.getSolver().set(randomSearch(vars, 0));
                 while (model.solve()) ;
-                s2 = model.getSolver().getMeasures().getSolutionCount();
+                s2 = model.getSolver().getSolutionCount();
             }
             Assert.assertEquals(s1, s2);
 

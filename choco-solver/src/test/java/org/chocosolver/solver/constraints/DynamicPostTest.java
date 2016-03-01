@@ -79,7 +79,7 @@ public class DynamicPostTest {
         final IntVar Z = model.intVar("Z", 1, 2, false);
         model.getSolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
 
@@ -96,7 +96,7 @@ public class DynamicPostTest {
                         new Constraint[]{}) {
                     @Override
                     public ESat checkCondition() {
-                        int nbNode = (int) this.model.getSolver().getMeasures().getNodeCount();
+                        int nbNode = (int) this.model.getSolver().getNodeCount();
                         switch (nbNode) {
                             case 0:
                             case 1:
@@ -111,7 +111,7 @@ public class DynamicPostTest {
                 }).post();
         model.getSolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 7);
+        assertEquals(model.getSolver().getSolutionCount(), 7);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -127,7 +127,7 @@ public class DynamicPostTest {
 
             @Override
             public void afterOpenNode() {
-                if (model.getSolver().getMeasures().getNodeCount() == 1) {
+                if (model.getSolver().getNodeCount() == 1) {
                     model.arithm(X, "=", Y).post();
                     model.arithm(Y, "=", Z).post();
                 }
@@ -137,7 +137,7 @@ public class DynamicPostTest {
         showSolutions(model);
         model.getSolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -154,7 +154,7 @@ public class DynamicPostTest {
         model.unpost(c1);
         model.getSolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getSolver().getSolutionCount(), 8);
         assertEquals(model.getNbCstrs(), 0);
     }
 
@@ -174,7 +174,7 @@ public class DynamicPostTest {
         });
         model.getSolver().set(engine.make(model));
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 5);
+        assertEquals(model.getSolver().getSolutionCount(), 5);
         assertEquals(model.getNbCstrs(), 0);
     }
 
@@ -278,12 +278,12 @@ public class DynamicPostTest {
         Model s2 = costasArray(7, true);
 
         while (s1.solve()) ;
-        out.println(s1.getSolver().getMeasures().getSolutionCount());
+        out.println(s1.getSolver().getSolutionCount());
 
         while (s2.solve()) ;
 
-        out.println(s2.getSolver().getMeasures().getSolutionCount());
-        assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s2.getSolver().getMeasures().getSolutionCount());
+        out.println(s2.getSolver().getSolutionCount());
+        assertEquals(s1.getSolver().getSolutionCount(), s2.getSolver().getSolutionCount());
     }
 
     private Model costasArray(int n, boolean dynamic) {

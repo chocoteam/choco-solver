@@ -70,7 +70,7 @@ public class PropConDisTest {
         assertEquals(a.getLB(), 9);
         assertEquals(a.getUB(), 10);
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -94,7 +94,7 @@ public class PropConDisTest {
         assertTrue(Y.contains(9));
         assertTrue(Y.contains(10));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 6);
+        assertEquals(s.getSolver().getSolutionCount(), 6);
     }
 
 
@@ -117,8 +117,8 @@ public class PropConDisTest {
             }
             assertEquals(scd.getIntVal((IntVar) cd.getObjective()),
                     sor.getIntVal((IntVar) or.getObjective()));
-            assertEquals(cd.getSolver().getMeasures().getSolutionCount(), or.getSolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
-            assertTrue(or.getSolver().getMeasures().getNodeCount() >= cd.getSolver().getMeasures().getNodeCount(), "wrong nb of nodes");
+            assertEquals(cd.getSolver().getSolutionCount(), or.getSolver().getSolutionCount(), "wrong nb of solutions");
+            assertTrue(or.getSolver().getNodeCount() >= cd.getSolver().getNodeCount(), "wrong nb of nodes");
         }
     }
 
@@ -135,8 +135,8 @@ public class PropConDisTest {
                 Model cd = modelPb(n, seed, rnd, true, false);
                 cd.getSolver().set(randomSearch((IntVar[]) cd.getHook("decvars"), 0));
                 while (cd.solve()) ;
-                assertEquals(cd.getSolver().getMeasures().getSolutionCount(), or.getSolver().getMeasures().getSolutionCount(), "wrong nb of solutions");
-                assertTrue(or.getSolver().getMeasures().getNodeCount() >= cd.getSolver().getMeasures().getNodeCount(), "wrong nb of nodes");
+                assertEquals(cd.getSolver().getSolutionCount(), or.getSolver().getSolutionCount(), "wrong nb of solutions");
+                assertTrue(or.getSolver().getNodeCount() >= cd.getSolver().getNodeCount(), "wrong nb of nodes");
             }
         }
     }

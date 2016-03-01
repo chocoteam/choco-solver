@@ -120,7 +120,7 @@ public abstract class AbstractTernaryTest {
                 System.err.printf("seed: %d\n", seed);
                 throw ae;
             }
-            long cp = s.getSolver().getMeasures().getSolutionCount();
+            long cp = s.getSolver().getSolutionCount();
             Assert.assertEquals(cp, base, "found: " + cp + " solutions, while " + base + " are expected (" + seed + ")");
         }
     }

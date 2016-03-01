@@ -62,13 +62,13 @@ public class ViewsTest {
             ref.solve();
             model.solve();
         }
-        Assert.assertEquals(model.getSolver().getMeasures().getSolutionCount(),
-                ref.getSolver().getMeasures().getSolutionCount(), "solutions (" + seed + ")");
+        Assert.assertEquals(model.getSolver().getSolutionCount(),
+                ref.getSolver().getSolutionCount(), "solutions (" + seed + ")");
         if (strict) {
-            Assert.assertEquals(model.getSolver().getMeasures().getNodeCount(), ref.getSolver().getMeasures().getNodeCount(), "nodes (" + seed + ")");
+            Assert.assertEquals(model.getSolver().getNodeCount(), ref.getSolver().getNodeCount(), "nodes (" + seed + ")");
         } else {
-            Assert.assertTrue(ref.getSolver().getMeasures().getNodeCount() >=
-                    model.getSolver().getMeasures().getNodeCount(), seed + "");
+            Assert.assertTrue(ref.getSolver().getNodeCount() >=
+                    model.getSolver().getNodeCount(), seed + "");
         }
     }
 
@@ -487,7 +487,7 @@ public class ViewsTest {
         SetVar v2 = model.setVar("v2", new int[]{}, new int[]{0, 1, 2, 3});
         model.subsetEq(new SetVar[]{v1, v2}).post();
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -498,7 +498,7 @@ public class ViewsTest {
                 "=",
                 model.intMinusView(model.boolVar("bool"))).post();
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -512,7 +512,7 @@ public class ViewsTest {
         Solver r = s.getSolver();
         r.set(minDomUBSearch(bool));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 1);
+        assertEquals(s.getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)

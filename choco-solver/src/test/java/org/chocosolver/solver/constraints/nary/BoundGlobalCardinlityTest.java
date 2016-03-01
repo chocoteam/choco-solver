@@ -73,7 +73,7 @@ public class BoundGlobalCardinlityTest {
 
         model.getSolver().set(inputOrderLBSearch(append(vars, card)));
         while (model.solve()) ;
-        assertTrue(model.getSolver().getMeasures().getSolutionCount() > 0);
+        assertTrue(model.getSolver().getSolutionCount() > 0);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -109,7 +109,7 @@ public class BoundGlobalCardinlityTest {
 //            SearchMonitorFactory.log(solver, false, true);
             while (model.solve()) ;
             while (ref.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
+            assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
 
         }
     }
@@ -146,7 +146,7 @@ public class BoundGlobalCardinlityTest {
 //            SearchMonitorFactory.log(solver, false, true);
             while (model.solve()) ;
             while (ref.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
+            assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
 
         }
     }

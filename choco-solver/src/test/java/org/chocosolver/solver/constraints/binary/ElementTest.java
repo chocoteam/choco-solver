@@ -141,7 +141,7 @@ public class ElementTest {
         }
 
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 58, "nb sol");
+        assertEquals(s.getSolver().getSolutionCount(), 58, "nb sol");
     }
 
     public void nasty(int seed, int nbvars, int nbsols) {
@@ -171,7 +171,7 @@ public class ElementTest {
 
         while (ref.solve()) ;
 
-        assertEquals(ref.getSolver().getMeasures().getSolutionCount(), nbsols);
+        assertEquals(ref.getSolver().getSolutionCount(), nbsols);
     }
 
 
@@ -190,7 +190,7 @@ public class ElementTest {
             model.element(R, new int[]{0, 2, 4, 6, 7}, I).post();
             model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 5);
+            assertEquals(model.getSolver().getSolutionCount(), 5);
         }
     }
 
@@ -203,7 +203,7 @@ public class ElementTest {
             model.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
             model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 5);
+            assertEquals(model.getSolver().getSolutionCount(), 5);
         }
     }
 
@@ -216,7 +216,7 @@ public class ElementTest {
             model.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I).post();
             model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 14);
+            assertEquals(model.getSolver().getSolutionCount(), 14);
         }
     }
 
@@ -229,7 +229,7 @@ public class ElementTest {
             model.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1).post();
             model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 4);
+            assertEquals(model.getSolver().getSolutionCount(), 4);
         }
     }
     @Test
@@ -241,7 +241,7 @@ public class ElementTest {
         s.or(el.reify()).post();
         // s.post(el);// works instead of previous post
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 1L);
+        assertEquals(s.getSolver().getSolutionCount(), 1L);
     }
 
 
@@ -257,7 +257,7 @@ public class ElementTest {
         Constraint affect = s.arithm(val, "=", 2);
         s.or(b, affect.reify()).post();
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2L);
+        assertEquals(s.getSolver().getSolutionCount(), 2L);
     }
 
 }

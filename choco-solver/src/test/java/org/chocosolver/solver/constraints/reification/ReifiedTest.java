@@ -76,7 +76,7 @@ public class ReifiedTest {
             s.ifThenElse(b, cons, oppCons);
             s.getSolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
-            long sol = s.getSolver().getMeasures().getSolutionCount();
+            long sol = s.getSolver().getSolutionCount();
             assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
     }
@@ -100,7 +100,7 @@ public class ReifiedTest {
 
         s.getSolver().set(inputOrderLBSearch(new IntVar[]{x, y, z}));
         while (s.solve()) ;
-        long sol = s.getSolver().getMeasures().getSolutionCount();
+        long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
     }
 
@@ -124,7 +124,7 @@ public class ReifiedTest {
 
             s.getSolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
-            long sol = s.getSolver().getMeasures().getSolutionCount();
+            long sol = s.getSolver().getSolutionCount();
             assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
     }
@@ -244,8 +244,8 @@ public class ReifiedTest {
 
 
                 ////////////////////////
-                long sol1 = s1.getSolver().getMeasures().getSolutionCount();
-                long sol2 = s2.getSolver().getMeasures().getSolutionCount();
+                long sol1 = s1.getSolver().getSolutionCount();
+                long sol2 = s2.getSolver().getSolutionCount();
                 assertEquals(sol2, sol1, "nb sol incorrect");
             }
         }
@@ -267,8 +267,8 @@ public class ReifiedTest {
 
 
         ////////////////////////
-        long sol1 = s1.getSolver().getMeasures().getSolutionCount();
-        long sol2 = s2.getSolver().getMeasures().getSolutionCount();
+        long sol1 = s1.getSolver().getSolutionCount();
+        long sol2 = s2.getSolver().getSolutionCount();
         assertEquals(sol2, sol1, "nb sol incorrect");
 
     }
@@ -338,7 +338,7 @@ public class ReifiedTest {
 
         while (s.solve()) ;
 
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getSolver().getSolutionCount(), 2);
 
     }
 
@@ -374,7 +374,7 @@ public class ReifiedTest {
 
         while (s.solve()) ;
 
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getSolver().getSolutionCount(), 2);
 
     }
 
@@ -411,7 +411,7 @@ public class ReifiedTest {
 //        SearchMonitorFactory.log(s, true, false);
         while (s.solve()) ;
 
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(s.getSolver().getSolutionCount(), 2);
 
     }
 
@@ -448,7 +448,7 @@ public class ReifiedTest {
 //        SearchMonitorFactory.log(s, true, false);
         while (s.solve()) ;
 
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 5);
+        assertEquals(s.getSolver().getSolutionCount(), 5);
 
     }
 }

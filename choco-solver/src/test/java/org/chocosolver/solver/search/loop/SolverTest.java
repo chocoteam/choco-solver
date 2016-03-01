@@ -93,8 +93,8 @@ public class SolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setHBFS(.05, .1, 32);
         while(model.solve());
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 7);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 8676);
+        assertEquals(model.getSolver().getSolutionCount(), 7);
+        assertEquals(model.getSolver().getNodeCount(), 8676);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -104,8 +104,8 @@ public class SolverTest {
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(true)));
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 92);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 480);
+        assertEquals(model.getSolver().getSolutionCount(), 92);
+        assertEquals(model.getSolver().getNodeCount(), 480);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -115,8 +115,8 @@ public class SolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLDS(4);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 7);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 205);
+        assertEquals(model.getSolver().getSolutionCount(), 7);
+        assertEquals(model.getSolver().getNodeCount(), 205);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -126,8 +126,8 @@ public class SolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setDDS(5);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 130);
+        assertEquals(model.getSolver().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getNodeCount(), 130);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -138,7 +138,7 @@ public class SolverTest {
         r.set(inputOrderLBSearch(bs));
         r.setDDS(3);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -149,8 +149,8 @@ public class SolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         while(model.solve());
         printShortStatistics(model);
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 18);
+        assertEquals(model.getSolver().getSolutionCount(), 3);
+        assertEquals(model.getSolver().getNodeCount(), 18);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -159,10 +159,10 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
-        model.getSolver().setRestarts(limit -> model.getSolver().getMeasures().getNodeCount() >= limit, new LubyRestartStrategy(2, 2), 2);
+        model.getSolver().setRestarts(limit -> model.getSolver().getNodeCount() >= limit, new LubyRestartStrategy(2, 2), 2);
         while (model.solve()) ;
         printShortStatistics(model);
-        assertEquals(model.getSolver().getMeasures().getRestartCount(), 2);
+        assertEquals(model.getSolver().getRestartCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -175,7 +175,7 @@ public class SolverTest {
         r.limitSearch(() -> r.getMeasures().getNodeCount() >= 1000);
         while(model.solve());
         printShortStatistics(model);
-        assertEquals(model.getSolver().getMeasures().getRestartCount(), 314);
+        assertEquals(model.getSolver().getRestartCount(), 314);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -203,7 +203,7 @@ public class SolverTest {
         showSolutions(model);
         showDecisions(model);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getSolver().getSolutionCount(), 4);
 
     }
 
@@ -223,7 +223,7 @@ public class SolverTest {
 //        Chatterbox.showDecisions(solver);
         r.limitSolution(10);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)

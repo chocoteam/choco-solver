@@ -92,8 +92,8 @@ public class NotMemberTest {
                 s.getSolver().set(inputOrderLBSearch(vars));
 
                 while (s.solve()) ;
-                long sol = s.getSolver().getMeasures().getSolutionCount();
-                long nod = s.getSolver().getMeasures().getNodeCount();
+                long sol = s.getSolver().getSolutionCount();
+                long nod = s.getSolver().getNodeCount();
                 assertEquals(sol, intersectionSize(values[0], values[1]), "nb sol incorrect");
                 assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb sol incorrect");
             }
@@ -118,8 +118,8 @@ public class NotMemberTest {
                 s.getSolver().set(inputOrderLBSearch(vars));
 
                 while (s.solve()) ;
-                long sol = s.getSolver().getMeasures().getSolutionCount();
-                long nod = s.getSolver().getMeasures().getNodeCount();
+                long sol = s.getSolver().getSolutionCount();
+                long nod = s.getSolver().getNodeCount();
                 assertEquals(sol, unionSize(lb, ub, values[1]), "nb sol incorrect");
                 assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb nod incorrect");
             }
@@ -136,7 +136,7 @@ public class NotMemberTest {
         s.getSolver().set(inputOrderLBSearch(vars));
 
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(s.getSolver().getSolutionCount(), 4);
 
     }
 

@@ -98,14 +98,14 @@ public class PropagationEnginesTest {
                     problem.solve();
                     switch (pe) {
                         case PROPAGATORDRIVEN_7QD:
-                            stats[0][0] = problem.getModel().getSolver().getMeasures().getSolutionCount();
-                            stats[0][1] = problem.getModel().getSolver().getMeasures().getNodeCount();
-                            stats[0][2] = problem.getModel().getSolver().getMeasures().getFailCount();
+                            stats[0][0] = problem.getModel().getSolver().getSolutionCount();
+                            stats[0][1] = problem.getModel().getSolver().getNodeCount();
+                            stats[0][2] = problem.getModel().getSolver().getFailCount();
                             break;
                         case TWOBUCKETPROPAGATIONENGINE:
-                            stats[1][0] = problem.getModel().getSolver().getMeasures().getSolutionCount();
-                            stats[1][1] = problem.getModel().getSolver().getMeasures().getNodeCount();
-                            stats[1][2] = problem.getModel().getSolver().getMeasures().getFailCount();
+                            stats[1][0] = problem.getModel().getSolver().getSolutionCount();
+                            stats[1][1] = problem.getModel().getSolver().getNodeCount();
+                            stats[1][2] = problem.getModel().getSolver().getFailCount();
                             break;
                     }
                 }

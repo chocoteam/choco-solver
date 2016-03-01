@@ -64,7 +64,7 @@ public class TestSolveur {
 
             s.getSolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
-            assertEquals(s.getSolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
+            assertEquals(s.getSolver().getSolutionCount(), nbSol, "nb sol");
         }
     }
 
@@ -85,7 +85,7 @@ public class TestSolveur {
             }
             s.getSolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
-            assertEquals(s.getSolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
+            assertEquals(s.getSolver().getSolutionCount(), nbSol, "nb sol");
         }
     }
 
@@ -106,8 +106,8 @@ public class TestSolveur {
         s.arithm(vars[k - 1], "!=", vars[0]).post();
         s.getSolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
-        assertEquals(s.getSolver().getMeasures().getNodeCount(), nbNod, "nb nod");
+        assertEquals(s.getSolver().getSolutionCount(), nbSol, "nb sol");
+        assertEquals(s.getSolver().getNodeCount(), nbNod, "nb nod");
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -144,8 +144,8 @@ public class TestSolveur {
 
             s.getSolver().set(inputOrderLBSearch(vars));
             while (s.solve()) ;
-            assertEquals(s.getSolver().getMeasures().getSolutionCount(), 0, "nb sol");
-            assertEquals(s.getSolver().getMeasures().getNodeCount(), 0, "nb nod");
+            assertEquals(s.getSolver().getSolutionCount(), 0, "nb sol");
+            assertEquals(s.getSolver().getNodeCount(), 0, "nb nod");
         }
     }
 
@@ -174,8 +174,8 @@ public class TestSolveur {
 
         s.getSolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
-        assertEquals(s.getSolver().getMeasures().getNodeCount(), nbNod, "nb nod");
+        assertEquals(s.getSolver().getSolutionCount(), nbSol, "nb sol");
+        assertEquals(s.getSolver().getNodeCount(), nbNod, "nb nod");
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -206,9 +206,9 @@ public class TestSolveur {
 
         s.getSolver().set(inputOrderLBSearch(vars));
         while (s.solve()) ;
-        s.getSolver().getMeasures().getSolutionCount();
-        assertEquals(s.getSolver().getMeasures().getSolutionCount(), nbSol, "nb sol");
-        assertEquals(s.getSolver().getMeasures().getNodeCount(), nbNod, "nb nod");
+        s.getSolver().getSolutionCount();
+        assertEquals(s.getSolver().getSolutionCount(), nbSol, "nb sol");
+        assertEquals(s.getSolver().getNodeCount(), nbNod, "nb nod");
     }
 
 
@@ -235,8 +235,8 @@ public class TestSolveur {
         model.getSolver().set(inputOrderLBSearch(vars));
         TWOBUCKETPROPAGATIONENGINE.make(model);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 0, "nb sol");
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 0, "nb nod");
+        assertEquals(model.getSolver().getSolutionCount(), 0, "nb sol");
+        assertEquals(model.getSolver().getNodeCount(), 0, "nb nod");
     }
 
 

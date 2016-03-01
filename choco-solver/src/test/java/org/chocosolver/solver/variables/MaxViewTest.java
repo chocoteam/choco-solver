@@ -90,8 +90,8 @@ public class MaxViewTest {
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
-            assertTrue(model.getSolver().getMeasures().getNodeCount() <= ref.getSolver().getMeasures().getNodeCount(), "NODES (" + seed + ")");
+            assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            assertTrue(model.getSolver().getNodeCount() <= ref.getSolver().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 
@@ -123,10 +123,10 @@ public class MaxViewTest {
             }
             while (ref.solve()) ;
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount(), "SOLUTIONS (" + seed + ")");
             // BEWARE: MAX does not ensure AC, unlike reformulation; so nb of nodes can be different...
-//            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getResolver().getMeasures().getNodeCount(), "NODES (" + seed + "): "
-//                    + solver.getMeasures().getNodeCount() + " vs. " + ref.getResolver().getMeasures().getNodeCount());
+//            Assert.assertTrue(solver.getNodeCount() <= ref.getResolver().getMeasures().getNodeCount(), "NODES (" + seed + "): "
+//                    + solver.getNodeCount() + " vs. " + ref.getResolver().getMeasures().getNodeCount());
         }
     }
 }

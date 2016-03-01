@@ -403,7 +403,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     protected void reevaluateImpact() {
-        if (nodeImpact > 0 && model.getSolver().getMeasures().getNodeCount() % nodeImpact == 0) {
+        if (nodeImpact > 0 && model.getSolver().getNodeCount() % nodeImpact == 0) {
             double before = searchSpaceSize.get();
             learnsAndFails = false;
             for (int i = 0; i < vars.length; i++) {

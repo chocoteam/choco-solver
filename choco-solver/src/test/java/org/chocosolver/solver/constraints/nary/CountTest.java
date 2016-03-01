@@ -80,14 +80,14 @@ public class CountTest {
     public void testMS4() {
         Model model = modelit(4);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMS8() {
         Model model = modelit(8);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 1);
+        assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -122,7 +122,7 @@ public class CountTest {
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 9);
+            assertEquals(model.getSolver().getSolutionCount(), 9);
         }
     }
 

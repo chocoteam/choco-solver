@@ -54,8 +54,8 @@ public class NogoodTest {
         model.getSolver().set(randomSearch(vars, 29091981L));
         model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 27);
-        assertEquals(model.getSolver().getMeasures().getBackTrackCount(), 51);
+        assertEquals(model.getSolver().getSolutionCount(), 27);
+        assertEquals(model.getSolver().getBackTrackCount(), 51);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -67,8 +67,8 @@ public class NogoodTest {
         model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 1000);
         model.getSolver().limitTime(2000);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 64);
-        assertEquals(model.getSolver().getMeasures().getBackTrackCount(), 121);
+        assertEquals(model.getSolver().getSolutionCount(), 64);
+        assertEquals(model.getSolver().getBackTrackCount(), 121);
     }
 
 }

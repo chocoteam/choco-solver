@@ -76,9 +76,9 @@ public class RestartTest {
         model.getSolver().setGeometricalRestart(2, 1.1, new NodeCounter(model, 2), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
-        assertEquals(model.getSolver().getMeasures().getRestartCount(), 2);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 12);
+        assertEquals(model.getSolver().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getRestartCount(), 2);
+        assertEquals(model.getSolver().getNodeCount(), 12);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -87,9 +87,9 @@ public class RestartTest {
         model.getSolver().setLubyRestart(2, 2, new NodeCounter(model, 2), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 2);
-        assertEquals(model.getSolver().getMeasures().getRestartCount(), 2);
-        assertEquals(model.getSolver().getMeasures().getNodeCount(), 11);
+        assertEquals(model.getSolver().getSolutionCount(), 2);
+        assertEquals(model.getSolver().getRestartCount(), 2);
+        assertEquals(model.getSolver().getNodeCount(), 11);
     }
 
 
@@ -139,7 +139,7 @@ public class RestartTest {
             model.getSolver().set(inputOrderLBSearch(X));
             model.getSolver().limitSolution(100);
             while (model.solve()) ;
-            //System.out.printf("%d - %.3fms \n", n, solver.getMeasures().getTimeCount());
+            //System.out.printf("%d - %.3fms \n", n, solver.getTimeCount());
         }
     }
 
@@ -149,7 +149,7 @@ public class RestartTest {
         model.getSolver().setGeometricalRestart(10, 1.2, new FailCounter(model, 10), 2);
         while (model.solve()) ;
         // not 2, because of restart, that found twice the same solution
-//        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 92);
-        assertEquals(model.getSolver().getMeasures().getRestartCount(), 2);
+//        Assert.assertEquals(solver.getSolutionCount(), 92);
+        assertEquals(model.getSolver().getRestartCount(), 2);
     }
 }

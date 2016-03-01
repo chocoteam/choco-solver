@@ -70,7 +70,7 @@ public class LexTest {
             model.getSolver().set(randomSearch(append(vs1, vs2), seed));
             while (model.solve()) ;
             int kpn = (int) pow(k + 1, n1 / 2);
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
+            assertEquals(model.getSolver().getSolutionCount(), (kpn * (kpn + 1) / 2));
         }
     }
 
@@ -90,7 +90,7 @@ public class LexTest {
             model.getSolver().set(randomSearch(append(vs1, vs2), seed));
 
             while (model.solve()) ;
-            assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3240);
+            assertEquals(model.getSolver().getSolutionCount(), 3240);
         }
     }
 
@@ -138,7 +138,7 @@ public class LexTest {
         }
 //        SearchMonitorFactory.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(6, model.getSolver().getMeasures().getSolutionCount());
+        assertEquals(6, model.getSolver().getSolutionCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -162,7 +162,7 @@ public class LexTest {
         assertEquals(5, a[0].getUB());
 //        SearchMonitorFactory.log(solver, true, true);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 4);
+        assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -186,7 +186,7 @@ public class LexTest {
         }
         assertEquals(-2, a[0].getUB());
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 8);
+        assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -208,7 +208,7 @@ public class LexTest {
             fail();
         } catch (ContradictionException ignored) {
         }
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 0);
+        assertEquals(model.getSolver().getSolutionCount(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -236,7 +236,7 @@ public class LexTest {
         } catch (ContradictionException ignored) {
         }
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 216);
+        assertEquals(model.getSolver().getSolutionCount(), 216);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -263,6 +263,6 @@ public class LexTest {
         assertEquals(-1, b[0].getLB());
 //        SearchMonitorFactory.log(solver, true, false);
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 30);
+        assertEquals(model.getSolver().getSolutionCount(), 30);
     }
 }

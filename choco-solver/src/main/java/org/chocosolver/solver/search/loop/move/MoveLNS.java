@@ -171,10 +171,10 @@ public class MoveLNS implements Move {
         boolean repair;
         if(solutions > 0
                 // the second condition is only here for intiale calls, when solutions is not already up to date
-                || solver.getMeasures().getSolutionCount() > 0) {
+                || solver.getSolutionCount() > 0) {
             // the detection of a new solution can only be met here
-            if (solutions < solver.getMeasures().getSolutionCount()) {
-                assert solutions == solver.getMeasures().getSolutionCount() - 1;
+            if (solutions < solver.getSolutionCount()) {
+                assert solutions == solver.getSolutionCount() - 1;
                 solutions++;
                 neighbor.recordSolution();
                 doRestart(solver);

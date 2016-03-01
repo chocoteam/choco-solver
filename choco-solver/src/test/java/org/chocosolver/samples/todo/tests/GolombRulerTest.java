@@ -68,16 +68,16 @@ public class GolombRulerTest {
             while(sol.solve()){
                 nb++;
             }
-            long sols = sol.getSolver().getMeasures().getSolutionCount();
+            long sols = sol.getSolver().getSolutionCount();
             assertEquals(nb, sols);
-            long nodes = sol.getSolver().getMeasures().getNodeCount();
+            long nodes = sol.getSolver().getNodeCount();
             for (int k = 1; k < values().length; k++) {
                 sol = modeler(OPTIMAL_RULER[j][0]);
                 values()[k].make(sol);
                 sol.setObjective(MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
                 while(sol.solve());
-                assertEquals(sol.getSolver().getMeasures().getSolutionCount(), sols);
-                assertEquals(sol.getSolver().getMeasures().getNodeCount(), nodes);
+                assertEquals(sol.getSolver().getSolutionCount(), sols);
+                assertEquals(sol.getSolver().getNodeCount(), nodes);
 
             }
         }

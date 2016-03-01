@@ -62,7 +62,7 @@ public class PartitionTest {
         for (int i = 0; i < size.length; i++) {
             Model sol = modeler(size[i]);
             while (sol.solve()) ;
-            assertEquals(sol.getSolver().getMeasures().getSolutionCount(), sols[i]);
+            assertEquals(sol.getSolver().getSolutionCount(), sols[i]);
 //            Assert.assertEquals(sol.getResolver().getMeasures().getNodeCount(), nodes[i]);
         }
     }
@@ -76,7 +76,7 @@ public class PartitionTest {
         for (int i = 0; i < size.length; i++) {
             Model sol = modeler(size[i]);
             sol.solve();
-            Assert.assertEquals(sol.getSolver().getMeasures().getSolutionCount(), sols[i]);
+            Assert.assertEquals(sol.getSolver().getSolutionCount(), sols[i]);
 //            Assert.assertEquals(sol.getResolver().getMeasures().getNodeCount(), nodes[i]);
         }
     }

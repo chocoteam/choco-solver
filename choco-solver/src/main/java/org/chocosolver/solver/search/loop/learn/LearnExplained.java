@@ -89,7 +89,7 @@ public class LearnExplained implements Learn {
 
     @Override
     public void record(Solver solver) {
-        if (nbsol == solver.getMeasures().getSolutionCount()) {
+        if (nbsol == solver.getSolutionCount()) {
             onFailure(solver);
         } else {
             nbsol++;

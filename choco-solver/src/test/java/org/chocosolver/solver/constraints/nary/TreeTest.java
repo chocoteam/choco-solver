@@ -52,8 +52,8 @@ public class TreeTest {
 		Model s2 = model(false);
 		while (s1.solve()) ;
 		while (s2.solve()) ;
-		assertEquals(s1.getSolver().getMeasures().getSolutionCount(), s2.getSolver().getMeasures().getSolutionCount());
-		assertEquals(s1.getSolver().getMeasures().getNodeCount(), s2.getSolver().getMeasures().getNodeCount());
+		assertEquals(s1.getSolver().getSolutionCount(), s2.getSolver().getSolutionCount());
+		assertEquals(s1.getSolver().getNodeCount(), s2.getSolver().getNodeCount());
 	}
 
 	private Model model(boolean defaultCstr) {

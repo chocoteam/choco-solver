@@ -58,7 +58,7 @@ public class SuspiciousTest {
         Model s = makeNQueenWithBinaryConstraints(12);
         s.getSolver().limitBacktrack(50);
         while (s.solve()) ;
-        long bc = s.getSolver().getMeasures().getBackTrackCount();
+        long bc = s.getSolver().getBackTrackCount();
         assertEquals(bc, 52);
     }
 
@@ -83,10 +83,10 @@ public class SuspiciousTest {
                     return super.repair(solver);
                 } else if (this.solutions > 0
                         // the second condition is only here for intiale calls, when solutions is not already up to date
-                        || solver.getMeasures().getSolutionCount() > 0) {
+                        || solver.getSolutionCount() > 0) {
                     // the detection of a new solution can only be met here
-                    if (solutions < solver.getMeasures().getSolutionCount()) {
-                        assert solutions == solver.getMeasures().getSolutionCount() - 1;
+                    if (solutions < solver.getSolutionCount()) {
+                        assert solutions == solver.getSolutionCount() - 1;
                         solutions++;
                         neighbor.recordSolution();
                     }
@@ -96,7 +96,7 @@ public class SuspiciousTest {
         });
         model.getSolver().limitNode(200);
         while (model.solve()) ;
-        long sc = model.getSolver().getMeasures().getSolutionCount();
+        long sc = model.getSolver().getSolutionCount();
         assertEquals(sc, 54);
     }
 }

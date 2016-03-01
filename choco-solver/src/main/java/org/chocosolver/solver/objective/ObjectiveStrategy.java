@@ -157,8 +157,8 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     }
     @Override
     public Decision getDecision() {
-        if (model.getSolver().getMeasures().getSolutionCount() == 0
-                || (nbSols == model.getSolver().getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
+        if (model.getSolver().getSolutionCount() == 0
+                || (nbSols == model.getSolver().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
             return null;
         }
         if (obj.isInstantiated()) {
@@ -169,7 +169,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
             globalLB = obj.getLB();
             globalUB = obj.getUB();
         }
-        nbSols = model.getSolver().getMeasures().getSolutionCount();
+        nbSols = model.getSolver().getSolutionCount();
         globalLB = Math.max(globalLB, obj.getLB());//check
         globalUB = Math.min(globalUB, obj.getUB());//check
 //        ObjectiveManager man = model.getResolver().getObjectiveManager();

@@ -100,8 +100,8 @@ public class EqualXYCExplTest {
         while (sol.solve()) ;
 
 
-        assertEquals(sol.getSolver().getMeasures().getSolutionCount(), ref.getSolver().getMeasures().getSolutionCount());
-        assertTrue(sol.getSolver().getMeasures().getBackTrackCount() <= ref.getSolver().getMeasures().getBackTrackCount());
+        assertEquals(sol.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
+        assertTrue(sol.getSolver().getBackTrackCount() <= ref.getSolver().getBackTrackCount());
     }
 
     @Test(groups="1s", timeOut=60000)

@@ -79,7 +79,7 @@ public class NQueenTest {
     }
 
     private void assertIt(Model s) {
-        Assert.assertEquals(s.getSolver().getMeasures().getSolutionCount(), NB_QUEENS_SOLUTION[size], "nb sol incorrect");
+        Assert.assertEquals(s.getSolver().getSolutionCount(), NB_QUEENS_SOLUTION[size], "nb sol incorrect");
     }
 
     protected Model modeler(AbstractNQueen nq, int size) {
@@ -140,14 +140,14 @@ public class NQueenTest {
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
             while (sol.solve()) ;
-            long nbsol = sol.getSolver().getMeasures().getSolutionCount();
-            long node = sol.getSolver().getMeasures().getNodeCount();
+            long nbsol = sol.getSolver().getSolutionCount();
+            long node = sol.getSolver().getNodeCount();
             for (int t = 0; t < values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 values()[t].make(sol);
                 while (sol.solve()) ;
-                assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
-                assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
+                assertEquals(sol.getSolver().getSolutionCount(), nbsol);
+                assertEquals(sol.getSolver().getNodeCount(), node);
             }
         }
     }
@@ -158,15 +158,15 @@ public class NQueenTest {
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
             while (sol.solve()) ;
-            long nbsol = sol.getSolver().getMeasures().getSolutionCount();
-            long node = sol.getSolver().getMeasures().getNodeCount();
+            long nbsol = sol.getSolver().getSolutionCount();
+            long node = sol.getSolver().getNodeCount();
             for (int t = 0; t < values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 // default group
                 values()[t].make(sol);
                 while (sol.solve()) ;
-                assertEquals(sol.getSolver().getMeasures().getSolutionCount(), nbsol);
-                assertEquals(sol.getSolver().getMeasures().getNodeCount(), node);
+                assertEquals(sol.getSolver().getSolutionCount(), nbsol);
+                assertEquals(sol.getSolver().getNodeCount(), node);
             }
 
         }

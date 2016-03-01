@@ -197,8 +197,8 @@ public class IntLinCombTest {
 
             while (sum.solve()) ;
             while (intlincomb.solve()) ;
-            assertEquals(sum.getSolver().getMeasures().getSolutionCount(), intlincomb.getSolver().getMeasures().getSolutionCount());
-            assertEquals(sum.getSolver().getMeasures().getNodeCount(), intlincomb.getSolver().getMeasures().getNodeCount());
+            assertEquals(sum.getSolver().getSolutionCount(), intlincomb.getSolver().getSolutionCount());
+            assertEquals(sum.getSolver().getNodeCount(), intlincomb.getSolver().getNodeCount());
         }
     }
 
@@ -488,8 +488,8 @@ public class IntLinCombTest {
         }
         while (s1.solve()) ;
         while (s2.solve()) ;
-        assertEquals(s2.getSolver().getMeasures().getSolutionCount(), s1.getSolver().getMeasures().getSolutionCount());
-        assertEquals(s2.getSolver().getMeasures().getNodeCount(), s1.getSolver().getMeasures().getNodeCount());
+        assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
+        assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -518,8 +518,8 @@ public class IntLinCombTest {
         }
         while (s1.solve()) ;
         while (s2.solve()) ;
-        assertEquals(s2.getSolver().getMeasures().getSolutionCount(), s1.getSolver().getMeasures().getSolutionCount());
-        assertEquals(s2.getSolver().getMeasures().getNodeCount(), s1.getSolver().getMeasures().getNodeCount());
+        assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
+        assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -552,8 +552,8 @@ public class IntLinCombTest {
         showDecisions(s2);
         while (s1.solve()) ;
         while (s2.solve()) ;
-        assertEquals(s2.getSolver().getMeasures().getSolutionCount(), s1.getSolver().getMeasures().getSolutionCount());
-        assertEquals(s2.getSolver().getMeasures().getNodeCount(), s1.getSolver().getMeasures().getNodeCount());
+        assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
+        assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
 
     @Test(groups="5m", timeOut=300000)
@@ -612,7 +612,7 @@ public class IntLinCombTest {
         IntVar[] X = model.intVarArray("X", 1, 1, 3, false);
         model.scalar(X, new int[]{-1}, "<=", 2).post();
         while (model.solve()) ;
-        assertEquals(model.getSolver().getMeasures().getSolutionCount(), 3);
+        assertEquals(model.getSolver().getSolutionCount(), 3);
 
     }
 

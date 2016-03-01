@@ -184,7 +184,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     protected void extractOpenRightBranches(Solver solver) {
         // update parameters for restarts
         if (nodesRecompute > 0) {
-            double ratio = nodesRecompute * 1.d / solver.getMeasures().getNodeCount();
+            double ratio = nodesRecompute * 1.d / solver.getNodeCount();
             if (ratio > b && Z <= N) {
                 Z *= 2;
             } else if (ratio < a && Z >= 2) {
@@ -207,7 +207,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             // the decision in 0 is the last taken, then the array us reversed
             ArrayUtils.reverse(copen);
             current = 0;
-            nodesRecompute = solver.getMeasures().getNodeCount() + copen.length;
+            nodesRecompute = solver.getNodeCount() + copen.length;
         } else{
             // to be sure not to use the previous path
             current = copen.length;
