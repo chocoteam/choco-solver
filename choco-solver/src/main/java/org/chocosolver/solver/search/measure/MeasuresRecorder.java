@@ -36,7 +36,7 @@ import org.chocosolver.solver.Model;
  *
  * @author Charles Prud'Homme
  */
-public final class MeasuresRecorder implements IMeasures {
+public final class MeasuresRecorder implements IMeasures, Cloneable {
 
     /**
      * To transform time from nanoseconds to seconds
@@ -117,7 +117,12 @@ public final class MeasuresRecorder implements IMeasures {
         this.model = model;
     }
 
-    @Override
+
+    /**
+     * Clones the IMeasure object (copy every measure)
+     *
+     * @return a new instance of IMeasure
+     */
     public MeasuresRecorder duplicate() {
         MeasuresRecorder mr = new MeasuresRecorder(model);
         mr.hasObjective = hasObjective;
@@ -144,17 +149,25 @@ public final class MeasuresRecorder implements IMeasures {
         return solutionCount;
     }
 
-    @Override
+    /**
+     * indicates an objective variable
+     * @param ho set to <tt>true<tt/> to indicate that an objective is declared
+     */
     public void declareObjective(boolean ho) {
         hasObjective = ho;
     }
 
-    @Override
+    /**
+     * indicates whether or not the optimum has been found and proved
+     * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
+     */
     public void setObjectiveOptimal(boolean objectiveOptimal) {
         this.objectiveOptimal = objectiveOptimal;
     }
 
-    @Override
+    /**
+     * Reset every measure to its default value (mostly 0)
+     */
     public final void reset() {
         timeCount = 0;
         nodeCount = 0;
@@ -190,7 +203,10 @@ public final class MeasuresRecorder implements IMeasures {
         return timeCount / IN_SEC;
     }
 
-    @Override
+    /**
+     * Returns the elapsed time in nanoseconds
+     * @return the elapsed time in nanoseconds
+     */
     public long getElapsedTimeInNanoseconds() {
         return timeCount;
     }
@@ -200,7 +216,10 @@ public final class MeasuresRecorder implements IMeasures {
         return readingTimeCount / IN_SEC;
     }
 
-    @Override
+    /**
+     * set the reading time count
+     * @param time time needed to read the model
+     */
     public void setReadingTimeCount(long time) {
         this.readingTimeCount = time;
     }
@@ -236,7 +255,7 @@ public final class MeasuresRecorder implements IMeasures {
     }
 
     @Override
-    public long timestamp() {
+    public long getTimestamp() {
         return nodeCount + backtrackCount;
     }
 
@@ -244,8 +263,9 @@ public final class MeasuresRecorder implements IMeasures {
     //**************************************** INCREMENTERS **********************************************************//
     //****************************************************************************************************************//
 
-
-    @Override
+    /**
+     * increment node counter
+     */
     public void incNodeCount() {
         nodeCount++;
         if (depth > maxDepth) {
@@ -253,41 +273,59 @@ public final class MeasuresRecorder implements IMeasures {
         }
     }
 
-    @Override
+    /**
+     * increment backtrack counter
+     */
     public void incBackTrackCount() {
         backtrackCount++;
     }
 
-    @Override
+    /**
+     * increment fail counter
+     */
     public void incFailCount() {
         failCount++;
     }
 
-    @Override
+    /**
+     * increment restart counter
+     */
     public void incRestartCount() {
         restartCount++;
     }
 
-    @Override
+    /**
+     * increment solution counter
+     */
     public void incSolutionCount() {
         solutionCount++;
         updateTime();
     }
 
+    /**
+     * Increments current depth
+     */
     public void incDepth(){
         depth++;
     }
 
+    /**
+     * Decrements current depth
+     */
     public void decDepth(){
         depth--;
     }
 
-    @Override
+    /**
+     * Start the stopwatch, to compute resolution time
+     */
     public void startStopwatch() {
         startingTime = System.nanoTime();
     }
 
-    @Override
+    /**
+     * Update resolution time
+     */
     public void updateTime() {
         timeCount = System.nanoTime() - startingTime;
     }
@@ -296,7 +334,9 @@ public final class MeasuresRecorder implements IMeasures {
     //**************************************** PRINTERS **************************************************************//
     //****************************************************************************************************************//
 
-    @Override
+    /**
+     * @return statistic values only
+     */
     public Number[] toArray() {
         return new Number[]{
                 getSolutionCount(),
@@ -310,7 +350,9 @@ public final class MeasuresRecorder implements IMeasures {
         };
     }
 
-    @Override
+    /**
+     * @return a summary of recorded statistics
+     */
     public String toOneLineString() {
         updateTime();
         StringBuilder st = new StringBuilder(256);
@@ -335,7 +377,9 @@ public final class MeasuresRecorder implements IMeasures {
         return st.toString();
     }
 
-    @Override
+    /**
+     * @return a short summary of recorded statistics
+     */
     public String toOneShortLineString() {
         updateTime();
         StringBuilder st = new StringBuilder(256);
@@ -352,6 +396,23 @@ public final class MeasuresRecorder implements IMeasures {
                 getFailCount(),
                 getRestartCount()));
         return st.toString();
+    }
+
+    /**
+     * @return statistics in a CSV format
+     */
+    public String toCSV() {
+        updateTime();
+        // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
+        return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
+                getSolutionCount(),
+                getReadingTimeCount(),
+                getTimeCount(),
+                hasObjective() ? getBestSolutionValue().doubleValue() : 0,
+                getNodeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount());
     }
 
     @Override
@@ -393,20 +454,5 @@ public final class MeasuresRecorder implements IMeasures {
                 model.getNbCstrs()
         ));
         return st.toString();
-    }
-
-    @Override
-    public String toCSV() {
-        updateTime();
-        // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
-        return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
-                getSolutionCount(),
-                getReadingTimeCount(),
-                getTimeCount(),
-                hasObjective() ? getBestSolutionValue().doubleValue() : 0,
-                getNodeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount());
     }
 }

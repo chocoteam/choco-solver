@@ -36,49 +36,12 @@ import java.io.Serializable;
  *
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public interface IMeasures extends Serializable, Cloneable {
-
-    /**
-     * Clones the IMeasure object (copy every measure)
-     *
-     * @return a new instance of IMeasure
-     */
-    IMeasures duplicate();
-
-    /**
-     * Reset every measure to its default value (mostly 0)
-     */
-    void reset();
-
-    /**
-     * @return a summary of recorded statistics
-     */
-    String toOneLineString();
-
-    /**
-     * @return a short summary of recorded statistics
-     */
-    String toOneShortLineString();
-
-    /**
-     * @return statistics
-     */
-    String toString();
-
-    /**
-     * @return statistics in a CSV format
-     */
-    String toCSV();
-
-    /**
-     * @return statistic values only
-     */
-    Number[] toArray();
+public interface IMeasures extends Serializable {
 
     /**
      * @return the current world unique id
      */
-    long timestamp();
+    long getTimestamp();
 
     /**
      * @return the time count (in sec), including initial propagation time count
@@ -86,31 +49,9 @@ public interface IMeasures extends Serializable, Cloneable {
     float getTimeCount();
 
     /**
-     * Returns the elapsed time in nanoseconds
-     * @return the elapsed time in nanoseconds
-     */
-    long getElapsedTimeInNanoseconds();
-
-    /**
-     * Start the stopwatch, to compute resolution time
-     */
-    void startStopwatch();
-
-    /**
-     * Update resolution time
-     */
-    void updateTime();
-
-    /**
      * @return the reading time count (in sec)
      */
     float getReadingTimeCount();
-
-    /**
-     * set the reading time count
-     * @param time time needed to read the model
-     */
-    void setReadingTimeCount(long time);
 
     /**
      * @return the node count
@@ -118,19 +59,9 @@ public interface IMeasures extends Serializable, Cloneable {
     long getNodeCount();
 
     /**
-     * increment node counter
-     */
-    void incNodeCount();
-
-    /**
      * @return the backtrack count
      */
     long getBackTrackCount();
-
-    /**
-     * increment backtrack counter
-     */
-    void incBackTrackCount();
 
     /**
      * @return the fail count
@@ -138,39 +69,14 @@ public interface IMeasures extends Serializable, Cloneable {
     long getFailCount();
 
     /**
-     * increment fail counter
-     */
-    void incFailCount();
-
-    /**
-     * Increments current depth
-     */
-    void incDepth();
-
-    /**
-     * Decrements current depth
-     */
-    void decDepth();
-
-    /**
      * @return the restart count
      */
     long getRestartCount();
 
     /**
-     * increment restart counter
-     */
-    void incRestartCount();
-
-    /**
      * @return the solution count of the measure
      */
     long getSolutionCount();
-
-    /**
-     * increment solution counter
-     */
-    void incSolutionCount();
 
     /**
      * @return the maximum depth of the search tree
@@ -183,21 +89,9 @@ public interface IMeasures extends Serializable, Cloneable {
     long getCurrentDepth();
 
     /**
-     * indicates an objective variable
-     * @param ho set to <tt>true<tt/> to indicate that an objective is declared
-     */
-    void declareObjective(boolean ho);
-
-    /**
      * @return true iff the problem has an objective variable (i.e. optimization problem)
      */
     boolean hasObjective();
-
-    /**
-     * indicates whether or not the optimum has been found and proved
-     * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
-     */
-    void setObjectiveOptimal(boolean objectiveOptimal);
 
     /**
      * @return true iff the optimum has been found and proved

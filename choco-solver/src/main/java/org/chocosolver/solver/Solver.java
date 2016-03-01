@@ -98,7 +98,7 @@ import static org.chocosolver.util.ESat.*;
  * Project: choco.
  * @author Charles Prud'homme
  */
-public final class Solver implements Serializable, ISolver {
+public final class Solver implements Serializable, ISolver, IMeasures {
 
     /** Define the possible actions of SearchLoop */
     protected enum Action {
@@ -147,7 +147,7 @@ public final class Solver implements Serializable, ISolver {
     private Action action;
 
     /** The measure recorder to keep up to date */
-    private IMeasures mMeasures;
+    private MeasuresRecorder mMeasures;
 
     /** The current decision */
     private Decision decision;
@@ -618,7 +618,7 @@ public final class Solver implements Serializable, ISolver {
      * This enables to get, for instance, the number of solutions found, time count, etc.
      * @return this model's measure recorder
      */
-    public IMeasures getMeasures() {
+    public MeasuresRecorder getMeasures() {
         return mMeasures;
     }
 
@@ -909,4 +909,72 @@ public final class Solver implements Serializable, ISolver {
         return this;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////       MEASURES        //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public long getTimestamp() {
+        return getMeasures().getTimestamp();
+    }
+
+    @Override
+    public float getTimeCount() {
+        return getMeasures().getTimeCount();
+    }
+
+    @Override
+    public float getReadingTimeCount() {
+        return getMeasures().getReadingTimeCount();
+    }
+
+    @Override
+    public long getNodeCount() {
+        return getMeasures().getNodeCount();
+    }
+
+    @Override
+    public long getBackTrackCount() {
+        return getMeasures().getBackTrackCount();
+    }
+
+    @Override
+    public long getFailCount() {
+        return getMeasures().getFailCount();
+    }
+
+    @Override
+    public long getRestartCount() {
+        return getMeasures().getRestartCount();
+    }
+
+    @Override
+    public long getSolutionCount() {
+        return getMeasures().getSolutionCount();
+    }
+
+    @Override
+    public long getMaxDepth() {
+        return getMeasures().getMaxDepth();
+    }
+
+    @Override
+    public long getCurrentDepth() {
+        return getMeasures().getCurrentDepth();
+    }
+
+    @Override
+    public boolean hasObjective() {
+        return getMeasures().hasObjective();
+    }
+
+    @Override
+    public boolean isObjectiveOptimal() {
+        return getMeasures().isObjectiveOptimal();
+    }
+
+    @Override
+    public Number getBestSolutionValue() {
+        return getMeasures().getBestSolutionValue();
+    }
 }

@@ -31,6 +31,7 @@ package org.chocosolver.solver.search.limits;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.measure.MeasuresRecorder;
 
 /**
  * Overrides all but one services for ICounter and provides easy to implement counter based on {@link IMeasures}.
@@ -41,7 +42,7 @@ import org.chocosolver.solver.search.measure.IMeasures;
  */
 public abstract class ACounter implements ICounter {
 
-    protected IMeasures measures;
+    protected MeasuresRecorder measures;
     protected long max;
 
     public ACounter(Model model, long limit) {
