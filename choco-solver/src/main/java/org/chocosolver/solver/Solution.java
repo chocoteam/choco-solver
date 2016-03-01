@@ -139,7 +139,7 @@ public class Solution implements Serializable, ICause {
                         case Variable.SET:
                             if(setmap == null) setmap = new TIntObjectHashMap<>(16, 05f, NO_ENTRY);
                             SetVar s = (SetVar) var;
-                            setmap.put(s.getId(), s.getValue());
+                            setmap.put(s.getId(), s.getValue().toArray());
                             break;
                     }
                 }else{
@@ -214,7 +214,7 @@ public class Solution implements Serializable, ICause {
         if (setmap.containsKey(s.getId())) {
             return setmap.get(s.getId());
         } else if ((s.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
-            return s.getValue();
+            return s.getValue().toArray();
         } else {
             return null;
         }

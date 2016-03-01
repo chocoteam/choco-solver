@@ -112,7 +112,10 @@ public interface SetVar extends Variable {
      *
      * @return the current value (or kernel if not yet instantiated).
      */
-    int[] getValue();
+    default ISet getValue(){
+		assert isInstantiated() : getName() + " not instantiated";
+		return getLB();
+	}
 
     /**
      * Allow propagator to monitor element removal/enforcing of this

@@ -188,11 +188,6 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     }
 
     @Override
-    public int[] getValue() {
-        return getLB().toArray();
-    }
-
-    @Override
     public SetDelta getDelta() {
         return delta;
     }
