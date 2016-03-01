@@ -96,7 +96,7 @@ public class SearchStrategyFactory {
      * @return a strategy to instantiate sets
      */
     public static SetStrategy setVarSearch(SetVar... sets) {
-        return setVarSearch(minDomVar(), minSetVal(), true, sets);
+        return setVarSearch(minDomVar(), firstSetVal(), true, sets);
     }
 
     // ************************************************************************************

@@ -137,7 +137,11 @@ public class ValSelectorFactory {
     // SETVAR SELECTORS
     // ************************************************************************************
 
-    public static SetValueSelector minSetVal(){
+	/**
+     * @return a value selector for SetVar to select the first int in UB\LB
+     * (not necessarily the smallest one as set domains are not sorted)
+     */
+    public static SetValueSelector firstSetVal(){
         return new SetDomainMin();
     }
 }
