@@ -41,7 +41,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
-import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithOneAlldifferent;
 import static org.testng.Assert.assertEquals;
@@ -58,7 +57,7 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.set(inputOrderLBSearch(model.retrieveIntVars(true)));
         r.setDFS();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         model.solve();
         assertEquals(r.getMeasures().getSolutionCount(), 1);
         assertEquals(r.getMeasures().getNodeCount(), 24);
@@ -147,8 +146,8 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setDFS();
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
-        while(model.solve());
-        printShortStatistics(model);
+        while (model.solve()) ;
+        model.getSolver().printShortStatistics();
         assertEquals(model.getSolver().getSolutionCount(), 3);
         assertEquals(model.getSolver().getNodeCount(), 18);
     }
@@ -161,7 +160,7 @@ public class SolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         model.getSolver().setRestarts(limit -> model.getSolver().getNodeCount() >= limit, new LubyRestartStrategy(2, 2), 2);
         while (model.solve()) ;
-        printShortStatistics(model);
+        model.getSolver().printShortStatistics();
         assertEquals(model.getSolver().getRestartCount(), 2);
     }
 
@@ -173,8 +172,8 @@ public class SolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.limitSearch(() -> r.getMeasures().getNodeCount() >= 1000);
-        while(model.solve());
-        printShortStatistics(model);
+        while (model.solve()) ;
+        model.getSolver().printShortStatistics();
         assertEquals(model.getSolver().getRestartCount(), 314);
     }
 
@@ -186,8 +185,8 @@ public class SolverTest {
         r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
         model.getSolver().setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
-        while(model.solve());
-        printShortStatistics(model);
+        while (model.solve()) ;
+        model.getSolver().printShortStatistics();
         assertEquals(r.getMeasures().getRestartCount(), 971);
     }
 
@@ -200,8 +199,8 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.set(inputOrderUBSearch(B));
         r.setLDS(1);
-        showSolutions(model);
-        showDecisions(model);
+        model.getSolver().showSolutions();
+        model.getSolver().showDecisions();
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
 
@@ -219,8 +218,8 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         r.setLDS(1);
-        showSolutions(model);
-//        Chatterbox.showDecisions(solver);
+        model.getSolver().showSolutions();
+//        IOutputFactory.showDecisions(solver);
         r.limitSolution(10);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
@@ -237,11 +236,11 @@ public class SolverTest {
         }
 
         Solver r = model.getSolver();
-        r.set(new MoveBinaryLDS(inputOrderUBSearch(B), 1,model.getEnvironment()),
+        r.set(new MoveBinaryLDS(inputOrderUBSearch(B), 1, model.getEnvironment()),
                 new MoveBinaryDFS(greedySearch(inputOrderLBSearch(X)))
         );
-        showSolutions(model);
-        showDecisions(model);
+        model.getSolver().showSolutions();
+        model.getSolver().showDecisions();
         r.limitSolution(10);
         while (model.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 4);

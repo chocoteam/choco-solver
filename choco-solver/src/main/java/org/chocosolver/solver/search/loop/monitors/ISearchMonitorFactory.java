@@ -29,15 +29,18 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.IMyself;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.TimeUtils;
 
-public interface ISearchMonitorFactory {
-
-    Solver _me();
+/**
+ * Interface to define some search monitors to be used
+ * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
+ */
+public interface ISearchMonitorFactory extends IMyself {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

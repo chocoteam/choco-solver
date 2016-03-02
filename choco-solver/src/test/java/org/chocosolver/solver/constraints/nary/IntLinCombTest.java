@@ -54,7 +54,6 @@ import static java.util.Arrays.fill;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.testng.Assert.*;
 
 /**
@@ -232,7 +231,7 @@ public class IntLinCombTest {
         Model model = new Model();
         BoolVar[] bs = model.boolVarArray("b", 3);
         model.scalar(bs, new int[]{1, 2, 3}, "=", 2).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -548,8 +547,8 @@ public class IntLinCombTest {
             BoolVar r = s2.boolVar("r");
             s2.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
         }
-        showDecisions(s1);
-        showDecisions(s2);
+        s1.getSolver().showDecisions();
+        s2.getSolver().showDecisions();
         while (s1.solve()) ;
         while (s2.solve()) ;
         assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
@@ -574,7 +573,7 @@ public class IntLinCombTest {
         IntVar sum = model.intVar("S", -n / 2, n / 2, true);
         model.scalar(bs, cs, "=", sum).post();
         model.getSolver().set(inputOrderLBSearch(bs));
-//        Chatterbox.showDecisions(solver);
+//        IOutputFactory.showDecisions(solver);
         while (model.solve()) ;
     }
 
@@ -723,8 +722,8 @@ public class IntLinCombTest {
         IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
         model.sum(new IntVar[]{var[0], var[1], var[2]}, ">=", 60).post();
         model.getSolver().set(inputOrderLBSearch(var));
-        showStatistics(model);
-        showSolutions(model);
+        model.getSolver().showStatistics();
+        model.getSolver().showSolutions();
         model.solve();
     }
 
@@ -734,8 +733,8 @@ public class IntLinCombTest {
         IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
         model.sum(new IntVar[]{var[0], var[1], var[2]}, "<=", 120).post();
         model.getSolver().set(inputOrderLBSearch(var));
-        showStatistics(model);
-        showSolutions(model);
+        model.getSolver().showStatistics();
+        model.getSolver().showSolutions();
         model.solve();
     }
 }

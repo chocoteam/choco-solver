@@ -90,7 +90,7 @@ public class MemberSetTest {
                     SetVar s = model.setVar("s", new int[]{}, doms[0]);
                     IntVar i = model.intVar("i", doms[1]);
                     model.member(i, s).post();
-                    //Chatterbox.showSolutions(solver);
+                    //IOutputFactory.showSolutions(solver);
                     long nbSolutions = 0;
                     while (model.solve()) {
                         nbSolutions++;
@@ -122,7 +122,7 @@ public class MemberSetTest {
                     SetVar s = model.setVar("s", new int[]{}, doms[0]);
                     IntVar i = model.intVar("i", doms[1][0], doms[1][doms[1].length - 1], true);
                     model.member(i, s).post();
-                    //Chatterbox.showSolutions(solver);
+                    //IOutputFactory.showSolutions(solver);
                     long nbSolutions = 0;
                     while (model.solve()) {
                         nbSolutions++;

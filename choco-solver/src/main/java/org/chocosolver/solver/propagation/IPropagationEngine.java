@@ -32,7 +32,7 @@ package org.chocosolver.solver.propagation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -51,57 +51,57 @@ public interface IPropagationEngine extends Serializable {
     enum Trace {;
 
         public static void printFirstPropagation(Propagator p, boolean COLOR) {
-            Chatterbox.out.printf("[A] %s%s%s\n",
-                    COLOR?Chatterbox.ANSI_PURPLE:"",
+            p.getModel().getSolver().getOut().printf("[A] %s%s%s\n",
+                    COLOR? IOutputFactory.ANSI_PURPLE:"",
                     p,
-                    COLOR?Chatterbox.ANSI_RESET:""
+                    COLOR? IOutputFactory.ANSI_RESET:""
             );
         }
 
         public static void printPropagation(Variable v, Propagator p, boolean COLOR) {
             if (v == null) {
-                Chatterbox.out.printf("[P] %s%s%s\n",
-                        COLOR?Chatterbox.ANSI_PURPLE:"",
+                p.getModel().getSolver().getOut().printf("[P] %s%s%s\n",
+                        COLOR? IOutputFactory.ANSI_PURPLE:"",
                         p,
-                        COLOR?Chatterbox.ANSI_RESET:""
+                        COLOR? IOutputFactory.ANSI_RESET:""
                 );
             } else {
-                Chatterbox.out.printf("[P] %s%s%s on %s%s%s\n",
-                        COLOR?Chatterbox.ANSI_BLUE:"",
+                p.getModel().getSolver().getOut().printf("[P] %s%s%s on %s%s%s\n",
+                        COLOR? IOutputFactory.ANSI_BLUE:"",
                         v,
-                        COLOR?Chatterbox.ANSI_RESET:"",
-                        COLOR?Chatterbox.ANSI_PURPLE:"",
+                        COLOR? IOutputFactory.ANSI_RESET:"",
+                        COLOR? IOutputFactory.ANSI_PURPLE:"",
                         p,
-                        COLOR?Chatterbox.ANSI_RESET:""
+                        COLOR? IOutputFactory.ANSI_RESET:""
                 );
             }
         }
 
         public static void printModification(Variable v, IEventType e, ICause c, boolean COLOR) {
-            Chatterbox.out.printf("\t[M] %s%s%s %s b/c %s%s%s\n",
-                    COLOR?Chatterbox.ANSI_BLUE:"",
+            v.getModel().getSolver().getOut().printf("\t[M] %s%s%s %s b/c %s%s%s\n",
+                    COLOR? IOutputFactory.ANSI_BLUE:"",
                     v,
-                    COLOR?Chatterbox.ANSI_RESET:"",
+                    COLOR? IOutputFactory.ANSI_RESET:"",
                     e,
-                    COLOR?Chatterbox.ANSI_PURPLE:"",
+                    COLOR? IOutputFactory.ANSI_PURPLE:"",
                     c,
-                    COLOR?Chatterbox.ANSI_RESET:""
+                    COLOR? IOutputFactory.ANSI_RESET:""
             );
         }
 
 
         public static void printFineSchedule(Propagator p, boolean COLOR) {
-            Chatterbox.out.printf("\t\t[FS] %s%s%s\n",
-                    COLOR?Chatterbox.ANSI_PURPLE:"",
+            p.getModel().getSolver().getOut().printf("\t\t[FS] %s%s%s\n",
+                    COLOR? IOutputFactory.ANSI_PURPLE:"",
                     p,
-                    COLOR?Chatterbox.ANSI_RESET:"");
+                    COLOR? IOutputFactory.ANSI_RESET:"");
         }
 
         public static void printCoarseSchedule(Propagator p, boolean COLOR) {
-            Chatterbox.out.printf("\t\t[CS] %s%s%s\n",
-                    COLOR?Chatterbox.ANSI_PURPLE:"",
+            p.getModel().getSolver().getOut().printf("\t\t[CS] %s%s%s\n",
+                    COLOR? IOutputFactory.ANSI_PURPLE:"",
                     p,
-                    COLOR?Chatterbox.ANSI_RESET:"");
+                    COLOR? IOutputFactory.ANSI_RESET:"");
         }
     }
 
@@ -136,13 +136,26 @@ public interface IPropagationEngine extends Serializable {
     default void flush() {
     }
 
+    /**
+     * Throw a contradiction exception
+     * @param cause origin of the failure
+     * @param variable can be null
+     * @param message can be null
+     * @throws ContradictionException failure forced
+     */
     default void fails(ICause cause, Variable variable, String message) throws ContradictionException {
     }
 
+    /**
+     * @return the (unique) contradiction attached to this propagation engine
+     */
     default ContradictionException getContradictionException() {
         throw new UnsupportedOperationException("no propagation engine has been defined");
     }
 
+    /**
+     * Clear internal structures
+     */
     default void clear() {
     }
 
@@ -155,13 +168,24 @@ public interface IPropagationEngine extends Serializable {
      *
      * @param variable modified variable
      * @param type     type of modification event
+     * @param cause origin of the modification
      */
     default void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
     }
 
+    /**
+     * Exeucte a delayed propagator
+     * @param propagator propagator to execute
+     * @param type type of event to execute
+     * @throws ContradictionException if a failure is encountered
+     */
     default void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
     }
 
+    /**
+     * Action to do when a propagator is executed
+     * @param propagator propagator to execute
+     */
     default void onPropagatorExecution(Propagator propagator) {
     }
 

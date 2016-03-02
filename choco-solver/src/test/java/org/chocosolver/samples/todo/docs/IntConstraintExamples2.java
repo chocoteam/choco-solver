@@ -36,8 +36,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
-
 /**
  * BEWARE: 5_elements.rst SHOULD BE UPDATED ANYTIME THIS CLASS IS CHANGED
  *
@@ -56,7 +54,7 @@ public class IntConstraintExamples2 {
         tuples.add(1, -1);
         tuples.add(0, 1);
         model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -67,7 +65,7 @@ public class IntConstraintExamples2 {
         BoolVar[] eqs = model.boolVarArray("eq", 3);
         BoolVar[] lqs = model.boolVarArray("lq", 3);
         model.clausesIntChanneling(iv, eqs, lqs).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -76,7 +74,7 @@ public class IntConstraintExamples2 {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 3, 1, 3, false);
         model.intValuePrecedeChain(X, 1, 2).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -85,7 +83,7 @@ public class IntConstraintExamples2 {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 3, 1, 3, false);
         model.intValuePrecedeChain(X, new int[]{2, 3, 1}).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 }

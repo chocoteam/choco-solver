@@ -53,7 +53,6 @@ import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
 import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.midIntVal;
 import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.minDomIntVar;
-import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 import static org.testng.Assert.*;
 
@@ -288,7 +287,7 @@ public class ExplanationEngineTest {
 
             model.getSolver().setCBJLearning(false, false);
 
-            showShortStatistics(model);
+            model.getSolver().showShortStatistics();
             assertFalse(model.solve());
         }
     }
@@ -311,9 +310,9 @@ public class ExplanationEngineTest {
 
         r.setCBJLearning(false, false);
 
-        showStatistics(model);
-        showSolutions(model);
-        showDecisions(model);
+        model.getSolver().showStatistics();
+        model.getSolver().showSolutions();
+        model.getSolver().showDecisions();
         assertFalse(model.solve());
 
     }
@@ -336,9 +335,9 @@ public class ExplanationEngineTest {
 
         r.setCBJLearning(false, false);
 
-        showStatistics(model);
-        showSolutions(model);
-        showDecisions(model);
+        model.getSolver().showStatistics();
+        model.getSolver().showSolutions();
+        model.getSolver().showDecisions();
         assertFalse(model.solve());
     }
 
@@ -394,7 +393,7 @@ public class ExplanationEngineTest {
 
 
         configure(model, a);
-        showShortStatistics(model);
+        model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
         assertTrue(model.solve() || model.getSolver().isStopCriterionMet());
     }
@@ -434,7 +433,7 @@ public class ExplanationEngineTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         configure(model, a);
-        showShortStatistics(model);
+        model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
         assertTrue(model.solve());
     }
@@ -481,10 +480,10 @@ public class ExplanationEngineTest {
         model.getSolver().set(inputOrderLBSearch(ticks));
 
         configure(model, a);
-        showShortStatistics(model);
+        model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
         model.setObjective(MINIMIZE, ticks[m - 1]);
-        while(model.solve());
+        while (model.solve()) ;
         assertTrue(model.getSolver().getSolutionCount() > 0);
     }
 
@@ -511,7 +510,7 @@ public class ExplanationEngineTest {
         r.set(minDomUBSearch(position));
 
         configure(model, a);
-        showShortStatistics(model);
+        model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
         assertTrue(model.solve());
     }
@@ -573,7 +572,7 @@ public class ExplanationEngineTest {
         r.set(intVarSearch(minDomIntVar(), midIntVal(true), vars));
 
         configure(model, a);
-        showShortStatistics(model);
+        model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
         assertTrue(model.solve() || r.isStopCriterionMet());
     }
@@ -652,7 +651,7 @@ public class ExplanationEngineTest {
         model.getSolver().set(minDomLBSearch(Ovars));
 
         configure(model, a);
-        showShortStatistics(model);
+        model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
         assertTrue(model.solve() || model.getSolver().isStopCriterionMet());
     }
@@ -804,8 +803,8 @@ public class ExplanationEngineTest {
             s.getSolver().setDBTLearning(false, true);
         }
         // logging and solution
-        showStatistics(s);
-        showSolutions(s);
+        s.getSolver().showStatistics();
+        s.getSolver().showSolutions();
         while (s.solve()) ;
         return s;
     }
@@ -840,7 +839,7 @@ public class ExplanationEngineTest {
 
         s.getSolver().setCBJLearning(false, true);
         LearnCBJ cbj = (LearnCBJ) s.getSolver().getLearn();
-        showDecisions(s);
+        s.getSolver().showDecisions();
         assertFalse(s.solve());
         // If the problem has no solution, the end-user explanation can be retrieved
         out.println(cbj.getLastExplanation());
@@ -860,8 +859,8 @@ public class ExplanationEngineTest {
         Solver r = model.getSolver();
         r.setCBJLearning(false, false);
         r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
-        showDecisions(model);
-        showSolutions(model);
+        model.getSolver().showDecisions();
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 

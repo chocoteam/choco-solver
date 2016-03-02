@@ -39,7 +39,6 @@ package org.chocosolver.samples.todo.problems.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
@@ -97,7 +96,7 @@ public class CumulativeSample extends AbstractProblem{
 		while(model.solve()){
 			System.out.println("New solution found : "+makespan);
 		}
-		Chatterbox.printStatistics(model);
+		model.getSolver().printStatistics();
 	}
 
 	public static void main(String[] args){

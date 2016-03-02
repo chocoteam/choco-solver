@@ -31,7 +31,6 @@ package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -90,6 +89,7 @@ public class Solution implements Serializable, ICause {
      * (value of each variable in <code>varsToStore</code>)
      *
      * @param recordNow indicates whether to record the current solution or simply create an empty solution object
+     * @param model model of the solution
      * @param varsToStore variables to store in this object
      */
     public Solution(boolean recordNow, Model model, Variable... varsToStore) {
@@ -148,7 +148,7 @@ public class Solution implements Serializable, ICause {
             }
         }
         if (warn && varsToStore[0].getModel().getSettings().warnUser()) {
-            Chatterbox.err.printf("Some non decision variables are not instantiated in the current solution.");
+            model.getSolver().getOut().printf("Some non decision variables are not instantiated in the current solution.");
         }
     }
 

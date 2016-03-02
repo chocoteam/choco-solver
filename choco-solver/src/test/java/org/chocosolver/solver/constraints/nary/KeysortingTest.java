@@ -36,7 +36,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.testng.Assert.assertEquals;
 
@@ -347,7 +346,7 @@ public class KeysortingTest {
         model.keySort(X, null, Y, 2).post();
         Solver r = model.getSolver();
         r.set(inputOrderLBSearch(flatten(X)), inputOrderLBSearch(flatten(Y)));
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 16);
     }
@@ -373,7 +372,7 @@ public class KeysortingTest {
         model.keySort(X, null, Y, 1).post();
         Solver r = model.getSolver();
         r.set(inputOrderLBSearch(flatten(X)), inputOrderLBSearch(flatten(Y)));
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 16);
     }

@@ -35,12 +35,10 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
-import static org.chocosolver.solver.trace.Chatterbox.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
@@ -69,7 +67,7 @@ public class ExplanationTest {
                         case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                     }
                     assertFalse(model.solve());
-                    System.out.println(model.getSolver().getMeasures().toOneShortLineString());
+                    System.out.println(model.getSolver().getMeasures().toOneLineString());
                     // get the last contradiction, which is
                     if (e > 1) {
                         assertEquals(model.getSolver().getNodeCount(), (n - 2) * 2);
@@ -94,7 +92,7 @@ public class ExplanationTest {
                         case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                     }
                     assertFalse(model.solve());
-                    System.out.println(model.getSolver().getMeasures().toOneShortLineString());
+                    System.out.println(model.getSolver().getMeasures().toOneLineString());
                     // get the last contradiction, which is
                     assertEquals(model.getSolver().getNodeCount(), (n - 2) * 2);
                 }
@@ -134,7 +132,7 @@ public class ExplanationTest {
                             case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                         }
                         assertFalse(model.solve());
-                        printShortStatistics(model);
+                        model.getSolver().printShortStatistics();
                     }
                 }
             }
@@ -215,12 +213,18 @@ public class ExplanationTest {
                     model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                     model.arithm(p[9], "+", p[8], ">", 4).post();
                     model.getSolver().set(randomSearch(p, seed));
-                    switch (e){
-                        case 1:model.getSolver().setNoLearning();break;
-                        case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
-                        case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
+                    switch (e) {
+                        case 1:
+                            model.getSolver().setNoLearning();
+                            break;
+                        case 2:
+                            model.getSolver().setCBJLearning(ng == 1, false);
+                            break;
+                        case 3:
+                            model.getSolver().setDBTLearning(ng == 1, false);
+                            break;
                     }
-                    showShortStatistics(model);
+                    model.getSolver().showShortStatistics();
                     assertFalse(model.solve());
                 }
             }
@@ -242,14 +246,20 @@ public class ExplanationTest {
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
                 model.getSolver().set(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
-                switch (e){
-                    case 1:model.getSolver().setNoLearning();break;
-                    case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
-                    case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
+                switch (e) {
+                    case 1:
+                        model.getSolver().setNoLearning();
+                        break;
+                    case 2:
+                        model.getSolver().setCBJLearning(ng == 1, false);
+                        break;
+                    case 3:
+                        model.getSolver().setDBTLearning(ng == 1, false);
+                        break;
                 }
-                showStatistics(model);
-                showSolutions(model);
-                showDecisions(model);
+                model.getSolver().showStatistics();
+                model.getSolver().showSolutions();
+                model.getSolver().showDecisions();
                 assertFalse(model.solve());
             }
         }
@@ -270,14 +280,20 @@ public class ExplanationTest {
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
                 model.getSolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
-                switch (e){
-                    case 1:model.getSolver().setNoLearning();break;
-                    case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
-                    case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
+                switch (e) {
+                    case 1:
+                        model.getSolver().setNoLearning();
+                        break;
+                    case 2:
+                        model.getSolver().setCBJLearning(ng == 1, false);
+                        break;
+                    case 3:
+                        model.getSolver().setDBTLearning(ng == 1, false);
+                        break;
                 }
-                showStatistics(model);
-                showSolutions(model);
-                showDecisions(model);
+                model.getSolver().showStatistics();
+                model.getSolver().showSolutions();
+                model.getSolver().showDecisions();
                 assertFalse(model.solve());
             }
         }
@@ -302,9 +318,9 @@ public class ExplanationTest {
 
             model.getSolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
             model.getSolver().setDBTLearning(ng == 1, false);
-            showStatistics(model);
-            showSolutions(model);
-            showDecisions(model);
+            model.getSolver().showStatistics();
+            model.getSolver().showSolutions();
+            model.getSolver().showDecisions();
             assertFalse(model.solve());
         }
     }

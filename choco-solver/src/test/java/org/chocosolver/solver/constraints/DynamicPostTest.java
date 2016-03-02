@@ -47,8 +47,6 @@ import java.util.List;
 import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showDecisions;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.chocosolver.util.ESat.*;
 import static org.testng.Assert.assertEquals;
 
@@ -133,8 +131,8 @@ public class DynamicPostTest {
                 }
             }
         });
-        showDecisions(model);
-        showSolutions(model);
+        model.getSolver().showDecisions();
+        model.getSolver().showSolutions();
         model.getSolver().set(engine.make(model));
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);

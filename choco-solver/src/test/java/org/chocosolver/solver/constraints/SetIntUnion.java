@@ -41,8 +41,6 @@ import org.testng.annotations.Test;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
-import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 import static org.testng.Assert.assertEquals;
 
 public class SetIntUnion {
@@ -53,8 +51,8 @@ public class SetIntUnion {
         IntVar[] x = s.intVarArray("ints", 4, 0, 5, false);
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.union(x, values).post();
-        showStatistics(s);
-        showSolutions(s);
+        s.getSolver().showStatistics();
+        s.getSolver().showSolutions();
         s.getSolver().set(inputOrderLBSearch(x));
         while (s.solve()) ;
     }
@@ -71,8 +69,8 @@ public class SetIntUnion {
         };
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.union(x, values).post();
-        showStatistics(s);
-        showSolutions(s);
+        s.getSolver().showStatistics();
+        s.getSolver().showSolutions();
         s.getSolver().set(inputOrderLBSearch(x));
         while (s.solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 0);
@@ -90,8 +88,8 @@ public class SetIntUnion {
         };
         SetVar values = s.setVar("values", new int[]{}, new int[]{-1, 0, 1, 2, 3, 4, 5, 6});
         s.union(x, values).post();
-        showStatistics(s);
-        showSolutions(s);
+        s.getSolver().showStatistics();
+        s.getSolver().showSolutions();
         s.getSolver().set(inputOrderLBSearch(x));
         while (s.solve()) ;
         out.println(values);

@@ -41,7 +41,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showShortStatistics;
 import static org.testng.Assert.assertEquals;
 
 public class TreeTest {
@@ -69,7 +68,7 @@ public class TreeTest {
 			).post();
 		}
 		model.getSolver().set(randomSearch(VS, 0));
-		showShortStatistics(model);
+		model.getSolver().showShortStatistics();
 		return model;
 	}
 }

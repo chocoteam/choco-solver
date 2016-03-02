@@ -361,33 +361,6 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         if (hasObjective()) {
             st.append(model.getSolver().getObjectiveManager()).append(", ");
         }
-        st.append(String.format("Building time : %,.3fs, " +
-                        "Resolution time %,.3fs, " +
-                        "%d Nodes (%,.1f n/s), " +
-                        "%,d Backtracks, " +
-                        "%,d Fails, " +
-                        "%,d Restarts",
-                getReadingTimeCount(),
-                getTimeCount(),
-                getNodeCount(),
-                getNodeCount() / getTimeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount()));
-        return st.toString();
-    }
-
-    /**
-     * @return a short summary of recorded statistics
-     */
-    public String toOneShortLineString() {
-        updateTime();
-        StringBuilder st = new StringBuilder(256);
-        st.append("Model[").append(model.getName()).append("], ");
-        st.append(String.format("%d Solutions, ", solutionCount));
-        if (hasObjective()) {
-            st.append(model.getSolver().getObjectiveManager()).append(", ");
-        }
         st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
                 getTimeCount(),
                 getNodeCount(),

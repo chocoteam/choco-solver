@@ -39,7 +39,6 @@ import java.util.Random;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -129,7 +128,7 @@ public class NoGoodOnSolutionTest {
         Solver r = s.getSolver();
         r.setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
         r.set(activityBasedSearch(s.retrieveIntVars(true)));
-        showSolutions(s);
+        s.getSolver().showSolutions();
         while (s.solve()) ;
         out.println(r.getMeasures());
         assertEquals(r.getMeasures().getSolutionCount(), NB_SOLS);
@@ -199,7 +198,7 @@ public class NoGoodOnSolutionTest {
             }
         }
         model.getSolver().setNoGoodRecordingFromSolutions(vars[0]);
-        showSolutions(model);
+        model.getSolver().showSolutions();
         model.getSolver().set(inputOrderLBSearch(vars));
         while (model.solve()) ;
         out.println(model.getSolver().getMeasures());
@@ -222,9 +221,9 @@ public class NoGoodOnSolutionTest {
             }
         }
         model.getSolver().setNoGoodRecordingFromSolutions(vars[0], vars[1]);
-        showSolutions(model);
+        model.getSolver().showSolutions();
         model.getSolver().set(inputOrderLBSearch(vars));
-//        Chatterbox.showDecisions(solver);
+//        IOutputFactory.showDecisions(solver);
         while (model.solve()) ;
         out.println(model.getSolver().getMeasures());
         assertEquals(model.getSolver().getSolutionCount(), 36);

@@ -29,18 +29,16 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.IMyself;
 
 /**
  * Interface to define how to learn during the solving process (e.g. CBJ, DBT...)
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public interface ILearnFactory {
-
-    Solver _me();
+public interface ILearnFactory extends IMyself{
 
 	/**
-     * @return an object learning nothing during search (default configuration)
+     * Indicate that no learning should be achieved during search (default configuration)
      */
     default void setNoLearning(){
         _me().set(new LearnNothing());

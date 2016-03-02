@@ -39,8 +39,6 @@ import org.testng.annotations.Test;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
-import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -99,8 +97,8 @@ public class SetCstrsTest {
 		BoolVar b2 = s.notEmpty(Yright).reify();
 		// ---
 		addBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
-		showStatistics(s);
-		showSolutions(s);
+		s.getSolver().showStatistics();
+		s.getSolver().showSolutions();
 		try {
 			s.getSolver().propagate();
 		} catch (ContradictionException e) {

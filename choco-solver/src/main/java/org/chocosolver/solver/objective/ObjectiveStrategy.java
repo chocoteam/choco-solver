@@ -44,7 +44,6 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
 
@@ -180,7 +179,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         if(model.getSettings().warnUser()){
-            Chatterbox.err.printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
+            model.getSolver().getErr().printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
@@ -188,7 +187,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (dec == null) dec = new IntDecision(pool);
         dec.set(obj, target, decOperator);
         if(model.getSettings().warnUser()){
-            Chatterbox.err.printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
+            model.getSolver().getErr().printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
         }
         return dec;
     }

@@ -39,23 +39,24 @@ import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Random;
 
+import static java.lang.Math.floorDiv;
 import static java.lang.System.nanoTime;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
+import static org.chocosolver.solver.objective.ObjectiveManager.walkingIntVarCutComputer;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.chocosolver.util.ESat.*;
+import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -256,13 +257,13 @@ public class ObjectiveTest {
 
     @Test(groups = "10s", timeOut = 60000)
     public void testAdaptiveCut1() {
-        Model model = ProblemMaker.makeGolombRuler(8);
+        Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
         final int[] ends = {5, 2, 1};
         model.setObjective(MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
         oman.setCutComputer(n -> n - 10);
-        Chatterbox.showSolutions(model);
+        model.getSolver().showSolutions();
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.solve()) {
@@ -273,47 +274,47 @@ public class ObjectiveTest {
             oman.setCutComputer(n -> n - ends[finalI]);
             oman.updateBestUB(best);
         }
-        Assert.assertEquals(best, 34);
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
+        assertEquals(best, 34);
+        assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
     }
 
     @Test(groups = "10s", timeOut = 60000)
     public void testAdaptiveCut2() {
-        Model model = ProblemMaker.makeGolombRuler(8);
+        Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
         final int[] ends = {10};
         model.setObjective(MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
         oman.setCutComputer(n -> n - ends[0]);
-        Chatterbox.showSolutions(model);
+        model.getSolver().showSolutions();
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.solve()) {
                 best = objective.getValue();
             }
             model.getSolver().reset();
-            ends[0] = Math.floorDiv(ends[0], 2);
+            ends[0] = floorDiv(ends[0], 2);
             oman.updateBestUB(best);
         }
-        Assert.assertEquals(best, 34);
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
+        assertEquals(best, 34);
+        assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
     }
 
     @Test(groups = "10s", timeOut = 60000)
     public void testAdaptiveCut3() {
-        Model model = ProblemMaker.makeGolombRuler(8);
+        Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
         model.setObjective(MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
-        oman.setCutComputer(ObjectiveManager.walkingIntVarCutComputer());
-        Chatterbox.showSolutions(model);
+        oman.setCutComputer(walkingIntVarCutComputer());
+        model.getSolver().showSolutions();
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.solve()) {
                 best = objective.getValue();
             }
         }
-        Assert.assertEquals(best, 34);
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 18);
+        assertEquals(best, 34);
+        assertEquals(model.getSolver().getSolutionCount(), 18);
     }
 }

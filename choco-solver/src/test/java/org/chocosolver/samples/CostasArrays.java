@@ -30,7 +30,6 @@
 package org.chocosolver.samples;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 import org.testng.Assert;
@@ -83,7 +82,7 @@ public class CostasArrays extends AbstractProblem {
     @Override
     public void solve() {
         model.solve();
-		Chatterbox.printStatistics(model);
+		model.getSolver().printStatistics();
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < n; i++) {
             s.append("|");

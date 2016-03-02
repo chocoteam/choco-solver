@@ -113,7 +113,7 @@ public class LNSTest {
                 r.limitTime(10000);
                 break;
         }
-//        Chatterbox.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());
+//        IOutputFactory.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());
         model.setObjective(MAXIMIZE, power);
         while(model.solve()){
             System.out.printf("objects : ");

@@ -41,7 +41,6 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.search.limits.ICounter.Impl.None;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 
 /**
  * <br/>
@@ -70,7 +69,7 @@ public class ELNSTest {
                 ), None);
         r.set(randomSearch(vars, seed));
 
-        showSolutions(model);
+        r.showSolutions();
         model.setObjective(MINIMIZE, obj);
         while(model.solve());
     }

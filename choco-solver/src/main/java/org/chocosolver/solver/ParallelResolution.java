@@ -85,7 +85,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *      pares.addModel(modeller());
  * }
  * pares.solve();
- * Chatterbox.printSolutions(pares.getBestModel());
+ * IOutputFactory.printSolutions(pares.getBestModel());
  * </code>
  * </pre>
  *

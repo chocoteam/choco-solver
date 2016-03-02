@@ -32,7 +32,6 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -269,7 +268,7 @@ public class ModelTest {
             m.clearObjective();
         }
         pares.solve();
-        Chatterbox.printStatistics(pares.getBestModel());
+        pares.getBestModel().getSolver().printStatistics();
         Assert.assertEquals(pares.getBestModel().getSolver().getSolutionCount(), 1);
     }
 
@@ -289,7 +288,7 @@ public class ModelTest {
                 sol = new Solution(true,finder);
             }
             Assert.assertNotNull(finder);
-            Chatterbox.printStatistics(finder);
+            finder.getSolver().printStatistics();
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
@@ -299,7 +298,7 @@ public class ModelTest {
         for (int iter = 0; iter < 50; iter++) {
             Model model = knapsack(true);
             while(model.solve());
-            Chatterbox.printStatistics(model);
+            model.getSolver().printStatistics();
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
@@ -315,9 +314,9 @@ public class ModelTest {
             Model finder = null;
             while(pares.solve()){
                 finder = pares.getBestModel();
-                Chatterbox.printShortStatistics(finder);
+                finder.getSolver().printStatistics();
             }
-            Chatterbox.printShortStatistics(finder);
+            finder.getSolver().printStatistics();
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);
         }
     }

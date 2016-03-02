@@ -35,8 +35,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderUBSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
-import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -80,8 +78,8 @@ public class Grocery extends AbstractProblem {
     @Override
     public void configureSearch() {
         // choco branching
-        showStatistics(model);
-        showSolutions(model);
+        model.getSolver().showStatistics();
+        model.getSolver().showSolutions();
         model.getSolver().set(inputOrderUBSearch(itemCost));
         // ibex branching
         //		solver.set(new AssignmentInterval(realitemCost, new Cyclic(realitemCost), new RealDomainMiddle()));

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.trace;
 
-import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -48,14 +48,14 @@ public enum Attribute {
      */
     NMCPV {
         @Override
-        public double evaluate(Model model) {
+        public double evaluate(Solver solver) {
             double m = 0.0;
             int n = 0;
-            for (Variable var : model.getVars()) {
+            for (Variable var : solver.getModel().getVars()) {
                 m += (var.getNbProps() - m) / (++n);
             }
             int p = 0;
-            for (Constraint c : model.getCstrs()) {
+            for (Constraint c : solver.getModel().getCstrs()) {
                 p += c.getPropagators().length;
             }
             return m / p;
@@ -71,10 +71,10 @@ public enum Attribute {
      */
     NMUCAA {
         @Override
-        public double evaluate(Model model) {
+        public double evaluate(Solver solver) {
             double u = 0.0, a = 0.0;
 
-            for (Constraint c : model.getCstrs()) {
+            for (Constraint c : solver.getModel().getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     a++;
                     if (p.getNbVars() == 1) {
@@ -95,10 +95,10 @@ public enum Attribute {
      */
     NMBCAA {
         @Override
-        public double evaluate(Model model) {
+        public double evaluate(Solver solver) {
             double u = 0.0, a = 0.0;
 
-            for (Constraint c : model.getCstrs()) {
+            for (Constraint c : solver.getModel().getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     a++;
                     if (p.getNbVars() == 2) {
@@ -119,10 +119,10 @@ public enum Attribute {
      */
     NMTCAA {
         @Override
-        public double evaluate(Model model) {
+        public double evaluate(Solver solver) {
             double u = 0.0, a = 0.0;
 
-            for (Constraint c : model.getCstrs()) {
+            for (Constraint c : solver.getModel().getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     a++;
                     if (p.getNbVars() == 3) {
@@ -143,10 +143,10 @@ public enum Attribute {
      */
     NMNCAA {
         @Override
-        public double evaluate(Model model) {
+        public double evaluate(Solver solver) {
             double u = 0.0, a = 0.0;
 
-            for (Constraint c : model.getCstrs()) {
+            for (Constraint c : solver.getModel().getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     a++;
                     if (p.getNbVars() > 3) {
@@ -167,15 +167,15 @@ public enum Attribute {
      */
     NMVPC {
         @Override
-        public double evaluate(Model model) {
+        public double evaluate(Solver solver) {
             double m = 0.0;
             int n = 0;
-            for (Constraint c : model.getCstrs()) {
+            for (Constraint c : solver.getModel().getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     m += (p.getNbVars() - m) / (++n);
                 }
             }
-            return m / model.getNbVars();
+            return m / solver.getModel().getNbVars();
         }
 
         @Override
@@ -188,10 +188,10 @@ public enum Attribute {
      */
     NMDV {
         @Override
-        public double evaluate(Model model) {
-            AbstractStrategy strat = model.getSolver().getStrategy();
+        public double evaluate(Solver solver) {
+            AbstractStrategy strat = solver.getStrategy();
             if (strat != null) {
-                return strat.getVariables().length * 1.0 / model.getVars().length;
+                return strat.getVariables().length * 1.0 / solver.getModel().getVars().length;
             } else return 1.0;
 
         }
@@ -205,10 +205,10 @@ public enum Attribute {
 
     /**
      * Method to evaluate a specific attribute over a model
-     * @param model to evaluate
+     * @param solver to evaluate
      * @return the value of the attribute
      */
-    public abstract double evaluate(Model model);
+    public abstract double evaluate(Solver solver);
 
     /**
      * @return a short description of the attribute
@@ -217,25 +217,25 @@ public enum Attribute {
 
     /**
      * Print all declared attributes and their values
-     * @param model model to evaluate
+     * @param solver solver to evaluate
      */
-    public static void printAll(Model model) {
-        printSuccint(model);
+    public static void printAll(Solver solver) {
+        printSuccint(solver);
         for (Attribute a : Attribute.values()) {
-            Chatterbox.out.printf("\t%s : %.3f\n", a.description(), a.evaluate(model));
+            solver.getOut().printf("\t%s : %.3f\n", a.description(), a.evaluate(solver));
         }
     }
 
     /**
      * Print basic features of a model
-     * @param model to evaluate
+     * @param solver to evaluate
      */
-    public static void printSuccint(Model model) {
-        Chatterbox.out.printf("- Model[%s] features:\n", model.getName());
-        Chatterbox.out.printf("\tVariables : %d\n", model.getNbVars());
-        Chatterbox.out.printf("\tConstraints : %d\n", model.getNbCstrs());
-        Chatterbox.out.printf("\tDefault search strategy : %s\n", model.getSolver().isDefaultSearchUsed()?"yes":"no");
-        Chatterbox.out.printf("\tCompleted search strategy : %s\n", model.getSolver().isSearchCompleted()?"yes":"no");
+    public static void printSuccint(Solver solver) {
+        solver.getOut().printf("- Model[%s] features:\n", solver.getModel().getName());
+        solver.getOut().printf("\tVariables : %d\n", solver.getModel().getNbVars());
+        solver.getOut().printf("\tConstraints : %d\n", solver.getModel().getNbCstrs());
+        solver.getOut().printf("\tDefault search strategy : %s\n", solver.getModel().getSolver().isDefaultSearchUsed()?"yes":"no");
+        solver.getOut().printf("\tCompleted search strategy : %s\n", solver.isSearchCompleted()?"yes":"no");
     }
 
 }

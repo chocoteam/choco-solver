@@ -35,7 +35,6 @@ import org.chocosolver.solver.variables.RealVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.constraints.real.Ibex.HC4;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 
 /**
  * @author Charles Prud'homme
@@ -56,7 +55,7 @@ public class RealConstraintExamples {
                 HC4,
                 x, y);
         rc.post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         model.solve();
     }
 }

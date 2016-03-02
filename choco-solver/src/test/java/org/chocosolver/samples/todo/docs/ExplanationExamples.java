@@ -35,7 +35,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
 
 /**
  *
@@ -53,7 +52,7 @@ public class ExplanationExamples {
         model.arithm(bvars[2], "!=", bvars[3]).post();
         model.getSolver().set(inputOrderLBSearch(bvars));
         model.getSolver().setCBJLearning(false, false);
-        showStatistics(model);
+        model.getSolver().showStatistics();
         while (model.solve()) ;
     }
 
@@ -68,7 +67,7 @@ public class ExplanationExamples {
         }
         model.getSolver().set(inputOrderLBSearch(pigeon));
         model.getSolver().setCBJLearning(false, false);
-        showStatistics(model);
+        model.getSolver().showStatistics();
         while (model.solve()) ;
     }
 }

@@ -42,7 +42,6 @@ import org.testng.annotations.Test;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.real.Ibex.HC4;
-import static org.chocosolver.solver.trace.Chatterbox.printStatistics;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -219,7 +218,7 @@ public class RealTest {
             e.printStackTrace();
         }
         out.printf("%s\n", model.toString());
-        printStatistics(model);
+        model.getSolver().printStatistics();
         model.getIbex().release();
     }
 
@@ -238,7 +237,7 @@ public class RealTest {
             e.printStackTrace();
         }
         out.printf("%s\n", model.toString());
-        printStatistics(model);
+        model.getSolver().printStatistics();
         model.getIbex().release();
     }
 }

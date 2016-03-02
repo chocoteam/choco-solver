@@ -41,9 +41,6 @@ import org.testng.annotations.Test;
 
 import java.util.BitSet;
 
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
-import static org.chocosolver.solver.trace.Chatterbox.showStatistics;
-
 public class NValueTest {
 
 	@Test(groups="1s", timeOut=60000)
@@ -52,8 +49,8 @@ public class NValueTest {
         final IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         final IntVar N = model.intVar("N", 2, 3, false);
         model.atLeastNValues(XS, N, false).post();
-        showStatistics(model);
-        showSolutions(model);
+        model.getSolver().showStatistics();
+        model.getSolver().showSolutions();
         final BitSet values = new BitSet(3);
         model.getSolver().plugMonitor((IMonitorSolution) () -> {
             values.clear();
@@ -79,8 +76,8 @@ public class NValueTest {
         final IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         final IntVar N = model.intVar("N", 2, 3, false);
         model.atMostNVvalues(XS, N, false).post();
-        showStatistics(model);
-        showSolutions(model);
+        model.getSolver().showStatistics();
+        model.getSolver().showSolutions();
         final BitSet values = new BitSet(3);
         model.getSolver().plugMonitor((IMonitorSolution) () -> {
             values.clear();

@@ -29,18 +29,17 @@
  */
 package org.chocosolver.solver.trace;
 
-import org.chocosolver.solver.Model;
+import org.chocosolver.solver.IMyself;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.StringUtils;
 
 import java.io.PrintStream;
 
-import static org.chocosolver.util.tools.StringUtils.pad;
-
 /**
- * This is not a logging framework (Choco relies on SLF4J)
- * but aims at simplifying resolution trace output by providing
+ * This aims at simplifying resolution trace output by providing
  * a unique entry point for most (not to say all) resolution message.
  * <br/>
  *
@@ -48,106 +47,95 @@ import static org.chocosolver.util.tools.StringUtils.pad;
  * @version choco
  * @since 12/11/14
  */
-public class Chatterbox {
+public interface IOutputFactory extends IMyself {
 
     // http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_GRAY = "\u001B[37m";
-
-    private Chatterbox() {
-    }
-
     /**
-     * The standard output stream (default: System.out)
+     * ANSI code for white
      */
-    public static PrintStream out = System.out;
-
+    String ANSI_RESET = "\u001B[0m";
     /**
-     * The standard error stream (default: System.err)
+     * ANSI code for blue
      */
-    public static PrintStream err = System.err;
+    String ANSI_BLUE = "\u001B[34m";
+    /**
+     * ANSI code for purple
+     */
+    String ANSI_PURPLE = "\u001B[35m";
+    /**
+     * ANSI code for green
+     */
+    String ANSI_GREEN = "\u001B[32m";
+    /**
+     * ANSI code for gray
+     */
+    String ANSI_GRAY = "\u001B[37m";
 
     /**
      * Set the current output stream (default is System.out)
      *
      * @param printStream a print stream
      */
-    public static void setOut(PrintStream printStream) {
-        out = printStream;
-    }
+    void setOut(PrintStream printStream);
+
+
+    /**
+     * @return the current output stream (default is System.out)
+     */
+    PrintStream getOut();
 
     /**
      * Set the current error stream (default is System.err)
      *
      * @param printStream a print stream
      */
-    public static void setErr(PrintStream printStream) {
-        err = printStream;
-    }
-
+    void setErr(PrintStream printStream);
 
     /**
-     * Print the version message.
-     *
-     * @param model the solver
+     * @return the current error stream (default is System.err)
      */
-    public static void printVersion(Model model) {
-        out.println(model.getSettings().getWelcomeMessage());
+    PrintStream getErr();
+
+    
+    /**
+     * Print the version message.
+     */
+    default void printVersion() {
+        getOut().println(_me().getModel().getSettings().getWelcomeMessage());
     }
 
     /**
      * Print (succint) features of the solver given in argument
-     *
-     * @param model a solver
      */
-    public static void printFeatures(Model model) {
-        Attribute.printSuccint(model);
+    default void printFeatures() {
+        Attribute.printSuccint(_me());
     }
 
     /**
      * Print all features of the solver given in argument
-     *
-     * @param model a solver
      */
-    public static void printAllFeatures(Model model) {
-        Attribute.printAll(model);
+    default void printAllFeatures() {
+        Attribute.printAll(_me());
     }
 
     /**
      * Print the resolution statistics.
      * <p>
      * Recommended usage: to be called after the resolution step.
-     * <p>
-     * Equivalent to:
-     * <pre>
-     *     out.println(solver.getMeasures().toString());
-     * </pre>
-     *
-     * @param model the solver to evaluate
      */
-    public static void printStatistics(Model model) {
-        printVersion(model);
-        printFeatures(model);
-        out.println(model.getSolver().getMeasures().toString());
+    default void printStatistics() {
+        printVersion();
+        printFeatures();
+        getOut().println(_me().getMeasures().toString());
     }
 
     /**
      * Output the resolution statistics in a single line.
      * <p>
      * Recommended usage: to be called after the resolution step.
-     * <p>
-     * Equivalent to:
-     * <pre>
-     *     out.println(solver.getMeasures().toOneLineString());
-     * </pre>
-     *
-     * @param model the solver to evaluate
      */
-    public static void printShortStatistics(Model model) {
-        out.println(model.getSolver().getMeasures().toOneLineString());
+    default void printShortStatistics() {
+        getOut().println(_me().getMeasures().toOneLineString());
     }
 
     /**
@@ -156,55 +144,44 @@ public class Chatterbox {
      * <pre>
      *     solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
      * </pre>
-     * <p>
-     * Equivalent to:
-     * <pre>
-     *     out.println(solver.getMeasures().toCSV());
-     * </pre>
-     *
-     * @param model the solver to evaluate
      */
-    public static void printCSVStatistics(Model model) {
-        out.println(model.getSolver().getMeasures().toCSV());
+    default void printCSVStatistics() {
+        getOut().println(_me().getMeasures().toCSV());
     }
 
     /**
-     * Plug a search monitor which calls {@link #printVersion(Model)}
-     * and {@link #printStatistics(Model)} before closing the search.
+     * Plug a search monitor which calls {@link #printVersion()}
+     * and {@link #printStatistics()} before closing the search.
      * <p>
      * Recommended usage: to be called before the resolution step.
-     *
-     * @param model the solver to evaluate
      */
-    public static void showStatistics(final Model model) {
-        model.getSolver().plugMonitor(new IMonitorInitialize() {
+    default void showStatistics() {
+        _me().plugMonitor(new IMonitorInitialize() {
 
             @Override
             public void beforeInitialize() {
-                printVersion(model);
-                printFeatures(model);
+                printVersion();
+                printFeatures();
             }
         });
-        model.getSolver().plugMonitor(new IMonitorClose() {
+        _me().plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
-                out.println(model.getSolver().getMeasures().toString());
+                getOut().println(_me().getMeasures().toString());
             }
         });
     }
 
     /**
-     * Plug a search monitor which calls {@link #printShortStatistics(Model)} before closing the search.
+     * Plug a search monitor which calls {@link #printShortStatistics()} before closing the search.
      * <p>
      * Recommended usage: to be called before the resolution step.
-     *
-     * @param model the solver to evaluate
      */
-    public static void showShortStatistics(final Model model) {
-        model.getSolver().plugMonitor(new IMonitorClose() {
+    default void showShortStatistics() {
+        _me().plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                out.println(model.getSolver().getMeasures().toOneShortLineString());
+                getOut().println(_me().getMeasures().toOneLineString());
             }
         });
     }
@@ -214,11 +191,10 @@ public class Chatterbox {
      * <p>
      * Recommended usage: to be called before the resolution step.
      *
-     * @param model  the solver to evaluate
      * @param message the message to print.
      */
-    public static void showSolutions(Model model, final IMessage message) {
-        model.getSolver().plugMonitor((IMonitorSolution) () -> out.println(message.print()));
+    default void showSolutions(final IMessage message) {
+        _me().plugMonitor((IMonitorSolution) () -> getOut().println(message.print()));
     }
 
     /**
@@ -226,32 +202,29 @@ public class Chatterbox {
      * <p>
      * Recommended usage: to be called before the resolution step.
      *
-     * @param model the solver to evaluate
-     * @see Chatterbox.DefaultSolutionMessage
+     * @see IOutputFactory.DefaultSolutionMessage
      */
-    public static void showSolutions(Model model) {
-        showSolutions(model, new DefaultSolutionMessage(model));
+    default void showSolutions() {
+        showSolutions(new DefaultSolutionMessage(_me()));
     }
 
     /**
      * Plug a search monitor which outputs <code>message</code> on each decision.
      * <p>
      * Recommended usage: to be called before the resolution step.
-     *
-     * @param model  the solver to evaluate
      * @param message the message to print.
      */
-    public static void showDecisions(final Model model, final IMessage message) {
-        model.getSolver().plugMonitor(new IMonitorDownBranch() {
+    default void showDecisions(final IMessage message) {
+        _me().plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownBranch(boolean left) {
-                Decision d = model.getSolver().getLastDecision();
-                out.printf("%s[%d/%d] %s%s ", pad("", model.getEnvironment().getWorldIndex(), "."),
+                Decision d = _me().getLastDecision();
+                getOut().printf("%s[%d/%d] %s%s ", StringUtils.pad("", _me().getModel().getEnvironment().getWorldIndex(), "."),
                         d.getArity() - d.triesLeft() +1, d.getArity(),
-                        model.getSettings().outputWithANSIColors()?ANSI_BLUE:"",
+                        _me().getModel().getSettings().outputWithANSIColors()?ANSI_BLUE:"",
                         d.toString());
-                out.printf("%s // %s %s\n", model.getSettings().outputWithANSIColors()?ANSI_GRAY:"",
-                        message.print(), model.getSettings().outputWithANSIColors()?ANSI_RESET:"");
+                getOut().printf("%s // %s %s\n", _me().getModel().getSettings().outputWithANSIColors()?ANSI_GRAY:"",
+                        message.print(), _me().getModel().getSettings().outputWithANSIColors()?ANSI_RESET:"");
             }
         });
     }
@@ -261,31 +234,27 @@ public class Chatterbox {
      * <p>
      * Recommended usage: to be called before the resolution step.
      *
-     * @param model the solver to evaluate
-     * @see Chatterbox.DefaultSolutionMessage
+     * @see IOutputFactory.DefaultSolutionMessage
      */
-    public static void showDecisions(Model model) {
-        showDecisions(model, new DefaultDecisionMessage(model));
+    default void showDecisions() {
+        showDecisions(new DefaultDecisionMessage(_me()));
     }
 
     /**
      * Plug a search monitor which outputs the contradictions thrown during the search.
-     *
-     * @param model the solver to evaluate
      */
-    public static void showContradiction(Model model) {
-        model.getSolver().plugMonitor((IMonitorContradiction) cex -> out.println(String.format("\t/!\\ %s", cex.toString())));
+    default void showContradiction() {
+        _me().plugMonitor((IMonitorContradiction) cex -> getOut().println(String.format("\t/!\\ %s", cex.toString())));
     }
 
     /**
      * Plug a search monitor which prints a one-line statistics every <code>f</code> ms.
      *
-     * @param model the solver to evaluate
      * @param f      frequency, in millisecond
      */
-    public static void showStatisticsDuringResolution(Model model, long f) {
+    default void showStatisticsDuringResolution(long f) {
         if (f > 0) {
-            model.getSolver().plugMonitor(new LogStatEveryXXms(model, f));
+            _me().plugMonitor(new LogStatEveryXXms(_me(), f));
         }
     }
 
@@ -295,22 +264,29 @@ public class Chatterbox {
     /**
      * The default solution message format
      */
-    public static class DefaultSolutionMessage implements IMessage {
+    class DefaultSolutionMessage implements IMessage {
 
-        private Model model;
+        /**
+         * Solver to output
+         */
+        private Solver solver;
 
-        public DefaultSolutionMessage(Model model) {
-            this.model = model;
+        /**
+         * Create a solution message
+         * @param solver solver to output
+         */
+        public DefaultSolutionMessage(Solver solver) {
+            this.solver = solver;
         }
 
         @Override
         public String print() {
             return String.format("%s- Solution #%s found. %s \n\t%s.%s",
-                    model.getSettings().outputWithANSIColors()?ANSI_GREEN:"",
-                    model.getSolver().getSolutionCount(),
-                    model.getSolver().getMeasures().toOneShortLineString(),
-                    print(model.getSolver().getStrategy().getVariables()),
-                    model.getSettings().outputWithANSIColors()?ANSI_RESET:""
+                    solver.getModel().getSettings().outputWithANSIColors()?ANSI_GREEN:"",
+                    solver.getSolutionCount(),
+                    solver.getMeasures().toOneLineString(),
+                    print(solver.getStrategy().getVariables()),
+                    solver.getModel().getSettings().outputWithANSIColors()?ANSI_RESET:""
             );
         }
 
@@ -327,18 +303,25 @@ public class Chatterbox {
     /**
      * The default decision message format
      */
-    public static class DefaultDecisionMessage implements IMessage {
+    class DefaultDecisionMessage implements IMessage {
 
-        private Model model;
+        /**
+         * Solver to output
+         */
+        private Solver solver;
 
-        public DefaultDecisionMessage(Model model) {
-            this.model = model;
+        /**
+         * Create a decision message
+         * @param solver solver to output
+         */
+        public DefaultDecisionMessage(Solver solver) {
+            this.solver = solver;
         }
 
         @Override
         public String print() {
             int limit = 120;
-            Variable[] vars = model.getSolver().getStrategy().getVariables();
+            Variable[] vars = solver.getStrategy().getVariables();
             StringBuilder s = new StringBuilder(32);
             for (int i = 0; i < vars.length && s.length() < limit; i++) {
                 s.append(vars[i]).append(' ');

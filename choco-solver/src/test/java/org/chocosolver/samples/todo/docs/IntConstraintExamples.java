@@ -40,7 +40,6 @@ import org.testng.annotations.Test;
 import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeMultiResources;
 import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeSingleResource;
 import static org.chocosolver.solver.constraints.nary.circuit.CircuitConf.LIGHT;
-import static org.chocosolver.solver.trace.Chatterbox.showSolutions;
 
 /**
  * BEWARE: 5_elements.rst SHOULD BE UPDATED ANYTIME THIS CLASS IS CHANGED
@@ -55,7 +54,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar X = model.intVar("X", 1, 4, false);
         model.arithm(X, ">", 2).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -64,7 +63,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar X = model.intVar("X", 1, 4, false);
         model.member(X, new int[]{-2, -1, 0, 1, 2}).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -73,7 +72,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar X = model.intVar("X", 1, 4, false);
         model.member(X, 2, 5).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -82,7 +81,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar X = model.intVar("X", 1, 4, false);
         model.notMember(X, new int[]{-2, -1, 0, 1, 2}).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -92,7 +91,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar X = model.intVar("X", 1, 4, false);
         model.notMember(X, 2, 5).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -102,7 +101,7 @@ public class IntConstraintExamples {
         IntVar X = model.intVar("X", 0, 2, false);
         IntVar Y = model.intVar("X", -6, 1, false);
         model.absolute(X, Y).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -112,7 +111,7 @@ public class IntConstraintExamples {
         IntVar X = model.intVar("X", 0, 2, false);
         IntVar Y = model.intVar("X", -6, 1, false);
         model.arithm(X, "<=", Y, "+", 1).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -122,7 +121,7 @@ public class IntConstraintExamples {
         IntVar X = model.intVar("X", 0, 2, false);
         IntVar Y = model.intVar("X", -3, 1, false);
         model.distance(X, Y, "=", 1).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -132,7 +131,7 @@ public class IntConstraintExamples {
         IntVar V = model.intVar("V", -2, 2, false);
         IntVar I = model.intVar("I", 0, 5, false);
         model.element(V, new int[]{2, -2, 1, -1, 0}, I, 0).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -142,7 +141,7 @@ public class IntConstraintExamples {
         IntVar X = model.intVar("X", 0, 5, false);
         IntVar Y = model.intVar("Y", -1, 3, false);
         model.square(X, Y).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -157,7 +156,7 @@ public class IntConstraintExamples {
         tuples.add(4, 2);
         tuples.add(1, 4);
         model.table(X, Y, tuples, "AC2001").post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -168,7 +167,7 @@ public class IntConstraintExamples {
         IntVar Y = model.intVar("Y", -1, 1, false);
         IntVar Z = model.intVar("Z", 2, 3, false);
         model.distance(X, Y, "<", Z).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -179,7 +178,7 @@ public class IntConstraintExamples {
         IntVar Y = model.intVar("Y", -1, 1, false);
         IntVar Z = model.intVar("Z", 2, 3, false);
         model.div(X, Y, Z).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -190,7 +189,7 @@ public class IntConstraintExamples {
         IntVar Y = model.intVar("Y", -1, 1, false);
         IntVar Z = model.intVar("Z", 2, 3, false);
         model.max(MAX, Y, Z).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -201,7 +200,7 @@ public class IntConstraintExamples {
         IntVar Y = model.intVar("Y", -1, 1, false);
         IntVar Z = model.intVar("Z", 2, 3, false);
         model.min(MIN, Y, Z).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -212,7 +211,7 @@ public class IntConstraintExamples {
         IntVar Y = model.intVar("Y", -1, 4, false);
         IntVar Z = model.intVar("Z", 1, 3, false);
         model.mod(X, Y, Z).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -223,7 +222,7 @@ public class IntConstraintExamples {
         IntVar Y = model.intVar("Y", 2, 4, false);
         IntVar Z = model.intVar("Z", 5, 7, false);
         model.times(X, Y, Z).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -235,7 +234,7 @@ public class IntConstraintExamples {
         IntVar Y = model.intVar("Y", 2, 4, false);
         IntVar Z = model.intVar("Z", 5, 7, false);
         model.allDifferent(new IntVar[]{W, X, Y, Z}).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -245,7 +244,7 @@ public class IntConstraintExamples {
         IntVar[] XS = model.intVarArray("XS", 5, 0, 3, false);
         model.allDifferentUnderCondition(XS,
                 x -> !x.contains(1) && !x.contains(3)).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -254,7 +253,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         model.allDifferentExcept0(XS).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -264,7 +263,7 @@ public class IntConstraintExamples {
         IntVar N = model.intVar("N", 2, 3, false);
         IntVar[] XS = model.intVarArray("XS", 4, 0, 6, false);
         model.among(N, XS, new int[]{1, 2, 3}).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
 
     }
@@ -275,7 +274,7 @@ public class IntConstraintExamples {
         IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         IntVar N = model.intVar("N", 2, 3, false);
         model.atLeastNValues(XS, N, true).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -285,7 +284,7 @@ public class IntConstraintExamples {
         IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         IntVar N = model.intVar("N", 1, 3, false);
         model.atMostNVvalues(XS, N, false).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -296,7 +295,7 @@ public class IntConstraintExamples {
         int[] sizes = new int[]{2, 3, 1, 4, 2};
         IntVar[] BLOADS = model.intVarArray("BLOADS", 3, 0, 5, false);
         model.binPacking(IBIN, sizes, BLOADS, 1).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -306,7 +305,7 @@ public class IntConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BVARS", 5);
         IntVar VAR = model.intVar("VAR", 1, 5, false);
         model.boolsIntChanneling(BVARS, VAR, 1).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -315,7 +314,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar[] NODES = model.intVarArray("NODES", 5, 0, 4, false);
         model.circuit(NODES, 0, LIGHT).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -344,7 +343,7 @@ public class IntConstraintExamples {
         costs[4] = new int[]{2, 1, 3};
 
         model.costRegular(VARS, COST, makeSingleResource(fauto, costs, COST.getLB(), COST.getUB())).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -355,7 +354,7 @@ public class IntConstraintExamples {
         IntVar VA = model.intVar("VA", new int[]{1, 3});
         IntVar CO = model.intVar("CO", new int[]{0, 2, 4});
         model.count(VA, VS, CO).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -375,7 +374,7 @@ public class IntConstraintExamples {
         }
         IntVar CA = model.intVar("CA", 1, 3, false);
         model.cumulative(TS, HE, CA, true).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -391,7 +390,7 @@ public class IntConstraintExamples {
             W[i] = model.intVar("W_" + i, i + 1);
         }
         model.diffN(X, Y, D, W, true).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -402,7 +401,7 @@ public class IntConstraintExamples {
         int[] values = new int[]{-1, 1, 2};
         IntVar[] OCC = model.intVarArray("OCC", 3, 0, 2, true);
         model.globalCardinality(VS, values, OCC, true).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -412,7 +411,7 @@ public class IntConstraintExamples {
         IntVar[] X = model.intVarArray("X", 3, 0, 3, false);
         IntVar[] Y = model.intVarArray("Y", 3, 1, 4, false);
         model.inverseChanneling(X, Y, 0, 1).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -428,7 +427,7 @@ public class IntConstraintExamples {
         int[] weights = new int[]{1, 3, 4};
         int[] energies = new int[]{1, 4, 6};
         model.knapsack(IT, WE, EN, weights, energies).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -439,7 +438,7 @@ public class IntConstraintExamples {
         IntVar[] Y = model.intVarArray("Y", 3, 1, 2, false);
         IntVar[] Z = model.intVarArray("Z", 3, 0, 2, false);
         model.lexChainLess(X, Y, Z).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -450,7 +449,7 @@ public class IntConstraintExamples {
         IntVar[] Y = model.intVarArray("Y", 3, 1, 2, false);
         IntVar[] Z = model.intVarArray("Z", 3, 0, 2, false);
         model.lexChainLessEq(X, Y, Z).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -460,7 +459,7 @@ public class IntConstraintExamples {
         IntVar[] X = model.intVarArray("X", 3, -1, 1, false);
         IntVar[] Y = model.intVarArray("Y", 3, 1, 2, false);
         model.lexLess(X, Y).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -470,7 +469,7 @@ public class IntConstraintExamples {
         IntVar[] X = model.intVarArray("X", 3, -1, 1, false);
         IntVar[] Y = model.intVarArray("Y", 3, 1, 2, false);
         model.lexLessEq(X, Y).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -499,7 +498,7 @@ public class IntConstraintExamples {
 //        costs[4] = new int[]{2, 1, 3};
 
         model.multiCostRegular(VARS, CVARS, makeMultiResources(fauto, costs, CVARS)).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -509,7 +508,7 @@ public class IntConstraintExamples {
         IntVar[] VS = model.intVarArray("VS", 4, 0, 2, false);
         IntVar N = model.intVar("N", 0, 3, false);
         model.nValues(VS, N).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -520,7 +519,7 @@ public class IntConstraintExamples {
         IntVar S = model.intVar("S", 0, 3, false);
         IntVar E = model.intVar("E", 0, 3, false);
         model.path(VS, S, E, 0).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -530,7 +529,7 @@ public class IntConstraintExamples {
         IntVar[] CS = model.intVarArray("CS", 4, 1, 5, false);
         model.regular(CS,
                 new FiniteAutomaton("(1|2)(3*)(4|5)")).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -541,7 +540,7 @@ public class IntConstraintExamples {
         int[] coeffs = new int[]{1, 2, 3, 4};
         IntVar R = model.intVar("R", 0, 20, true);
         model.scalar(CS, coeffs, "=", R).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -551,7 +550,7 @@ public class IntConstraintExamples {
         IntVar[] X = model.intVarArray("X", 3, 0, 2, false);
         IntVar[] Y = model.intVarArray("Y", 3, 0, 2, false);
         model.sort(X, Y).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -561,7 +560,7 @@ public class IntConstraintExamples {
         IntVar[] NODES = model.intVarArray("NS", 5, 0, 4, false);
         IntVar SI = model.intVar("SI", 2, 3, false);
         model.subCircuit(NODES, 0, SI).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -573,7 +572,7 @@ public class IntConstraintExamples {
         IntVar E = model.intVar("E", 0, 3, false);
         IntVar SI = model.intVar("SI", 2, 3, false);
         model.subPath(VS, S, E, 0, SI).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -583,7 +582,7 @@ public class IntConstraintExamples {
         IntVar[] VS = model.intVarArray("VS", 4, 0, 4, false);
         IntVar SU = model.intVar("SU", 2, 3, false);
         model.sum(VS, "<=", SU).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -593,7 +592,7 @@ public class IntConstraintExamples {
         IntVar[] VS = model.intVarArray("VS", 4, 0, 4, false);
         IntVar NT = model.intVar("NT", 2, 3, false);
         model.tree(VS, NT, 0).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 
@@ -603,7 +602,7 @@ public class IntConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BVARS", 4);
         IntVar VAR = model.intVar("VAR", 0, 15, false);
         model.bitsIntChanneling(BVARS, VAR).post();
-        showSolutions(model);
+        model.getSolver().showSolutions();
         while (model.solve()) ;
     }
 }

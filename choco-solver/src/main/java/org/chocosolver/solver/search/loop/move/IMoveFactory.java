@@ -30,7 +30,7 @@
 package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.IMyself;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
@@ -43,11 +43,10 @@ import org.chocosolver.util.criteria.LongCriterion;
 /**
  * Interface to define how to explore the search space from a macro perspective
  * (DFS, LDS, LNS, etc.)
- * @author Charles Prud'Homme, Jean-Guillaume Fages
+ * @author Charles Prud'Homme
+ * @author Jean-Guillaume Fages
  */
-public interface IMoveFactory {
-
-    Solver _me();
+public interface IMoveFactory extends IMyself{
 
     /**
      * Depth-First Search algorithm with binary decisions

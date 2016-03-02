@@ -32,7 +32,6 @@ package org.chocosolver.samples.todo.problems.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
@@ -113,7 +112,7 @@ public class Knapsack extends AbstractProblem {
         Solver r = model.getSolver();
         // trick : top-down maximization
         r.set(inputOrderUBSearch(power), inputOrderLBSearch(objects));
-        Chatterbox.showDecisions(model);
+        model.getSolver().showDecisions();
     }
 
     @Override

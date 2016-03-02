@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.trace;
 
-import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 
@@ -43,7 +43,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
 
     /**
-     * A thread which prints short line statistics to {@link Chatterbox#out}.
+     * A thread which prints short line statistics to {@link Solver#getOut()}.
      */
     Thread printer;
 
@@ -54,10 +54,10 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
 
     /**
      * Create a monitor which outputs shot-line statistics every <i>duration</i> milliseconds
-     * @param model the solver to instrument
+     * @param solver the solver to instrument
      * @param duration delay between two outputs, in milliseconds
      */
-    public LogStatEveryXXms(final Model model, final long duration) {
+    public LogStatEveryXXms(final Solver solver, final long duration) {
 
         printer = new Thread() {
 
@@ -68,8 +68,8 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
                     sleep(duration);
                     //noinspection InfiniteLoopStatement
                     do {
-                        model.getSolver().getMeasures().updateTime();
-                        Chatterbox.out.println(String.format(">> %s", model.getSolver().getMeasures().toOneShortLineString()));
+                        solver.getMeasures().updateTime();
+                        solver.getOut().println(String.format(">> %s", solver.getMeasures().toOneLineString()));
                         sleep(duration);
                     } while (alive);
                 } catch (InterruptedException ignored) {

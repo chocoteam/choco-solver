@@ -31,7 +31,6 @@ package org.chocosolver.samples;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -70,7 +69,7 @@ public class ExplainedOCProblem extends AbstractProblem {
     @Override
     public void solve() {
         model.solve();
-        Chatterbox.printStatistics(model);
+        model.getSolver().printStatistics();
     }
 
     @Test(groups = "10s", timeOut = 60000)

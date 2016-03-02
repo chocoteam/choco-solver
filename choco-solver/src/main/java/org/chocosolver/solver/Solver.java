@@ -53,7 +53,7 @@ import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.FilteringMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -63,6 +63,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,7 +99,7 @@ import static org.chocosolver.util.ESat.*;
  * Project: choco.
  * @author Charles Prud'homme
  */
-public final class Solver implements Serializable, ISolver, IMeasures {
+public final class Solver implements Serializable, ISolver, IMeasures, IOutputFactory {
 
     /** Define the possible actions of SearchLoop */
     protected enum Action {
@@ -127,6 +128,16 @@ public final class Solver implements Serializable, ISolver, IMeasures {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////    PRIVATE FIELDS     //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * The standard output stream (default: System.out)
+     */
+    private PrintStream out = System.out;
+
+    /**
+     * The standard error stream (default: System.err)
+     */
+    private PrintStream err = System.err;
 
     /** The propagate component of this search loop */
     private Propagate P;
@@ -549,7 +560,7 @@ public final class Solver implements Serializable, ISolver, IMeasures {
      */
     public <V extends Variable>  AbstractStrategy<V> getStrategy() {
         if(M.getChildMoves().size()>1 && mModel.getSettings().warnUser()){
-            Chatterbox.err.print("This search loop is based on a sequential Move, the strategy returned may not reflect the reality.");
+            err.print("This search loop is based on a sequential Move, the strategy returned may not reflect the reality.");
         }
         return M.getStrategy();
     }
@@ -976,5 +987,29 @@ public final class Solver implements Serializable, ISolver, IMeasures {
     @Override
     public Number getBestSolutionValue() {
         return getMeasures().getBestSolutionValue();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////       OUTPUT        ////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void setOut(PrintStream printStream) {
+        out = printStream;
+    }
+
+    @Override
+    public PrintStream getOut() {
+        return out;
+    }
+
+    @Override
+    public void setErr(PrintStream printStream) {
+        err = printStream;
+    }
+
+    @Override
+    public PrintStream getErr() {
+        return out;
     }
 }
