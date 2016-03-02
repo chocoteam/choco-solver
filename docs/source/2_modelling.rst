@@ -646,28 +646,33 @@ Mono-objective optimization
 ---------------------------
 
 The optimization process is the following: anytime a solution is found, the value of the objective variable is stored and a *cut* is posted.
-The cut is an additional constraint which states that the next solution must be (stricly) better than the current one.
+The cut is an additional constraint which states that the next solution must be (strictly) better than the current one.
 To solve an optimization problem, you must specify which variable to optimize and in which direction: ::
 
    // to maximize X
    model.setObjectives(ResolutionPolicy.MAXIMIZE, X);
+   // or model.setObjectives(ResolutionPolicy.MINIMIZE, X); to minimize X
    while(model.solve()){
        // an improving solution has been found
    }
    // the last solution found was optimal (if search completed)
 
-   // to minimize X
-   model.setObjectives(ResolutionPolicy.MINIMIZE, X);
-   model.solve();
+You can use custom cuts by overriding the default cut behavior.
+The *cut computer* function defines how the cut should bound the objective variable.
+The input *number* is the best solution value found so far, the output *number* define the new bound.
+When maximizing (resp. minimizing) a problem, the cut limits the lower bound (resp. upper bound) of the objective variable.
+For instance, one may want to indicate that the value of the objective variable is the next solution should be
+ greater than or equal to the best value + 10 ::
 
+    ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
+    oman.setCutComputer(n -> n - 10);
 
-You can use custom cuts (TODO)
 
 
 .. tip::
 
     When the objective is a function over multiple variables, you need to model it through
-    one objective variable and additionnal constraints: ::
+    one objective variable and additional constraints: ::
 
         // Model objective function 3X + 4Y
         IntVar OBJ = model.intVar("objective", 0, 999);
