@@ -5,9 +5,9 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-BUILDDIR      = ../../Choco3-site/
+BUILDDIR      = ../../../Choco3-docs/
 PDFBUILDDIR   = /tmp
-PDF	      = ../website.pdf
+PDF	      = ../../user_guide.pdf
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -88,17 +88,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/Website.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/Choco3UserGuide.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/Website.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/Choco3UserGuide.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/Website"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/Website"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/Choco3UserGuide"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/Choco3UserGuide"
 	@echo "# devhelp"
 
 epub:
@@ -114,6 +114,13 @@ latex:
 	      "(use \`make latexpdf' here to do that automatically)."
 
 latexpdf:
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(PDFBUILDDIR)/latex
+	@echo "Running LaTeX files through pdflatex..."
+	$(MAKE) -C $(PDFBUILDDIR)/latex all-pdf
+	cp $(PDFBUILDDIR)/latex/*.pdf $(PDF)
+	@echo "pdflatex finished; see $(PDF)"
+
+oldlatexpdf:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
@@ -178,3 +185,7 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+buildandcommithtml: 
+	html latexpdf
+	cd $(BUILDDIR)/html; git add . ; git commit -m "rebuilt docs"; git push origin gh-pages

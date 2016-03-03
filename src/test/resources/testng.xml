@@ -3,7 +3,7 @@
 <suite name="Propagation" verbose="1">
     <test name="All">
         <classes>
-            <class name="samples.AllTestFactory"/>
+            <class name="org.chocosolver.samples.todo.tests.AllTestFactory"/>
         </classes>
     </test>
 </suite>
