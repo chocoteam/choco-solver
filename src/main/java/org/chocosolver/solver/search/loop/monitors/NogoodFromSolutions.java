@@ -31,8 +31,8 @@ package org.chocosolver.solver.search.loop.monitors;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.solver.constraints.nary.cnf.PropNogoods;
-import org.chocosolver.solver.constraints.nary.cnf.SatSolver;
+import org.chocosolver.sat.PropNogoods;
+import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.variables.IntVar;
 
 /**

@@ -31,8 +31,12 @@ package org.chocosolver.solver.constraints;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.sat.PropSat;
+import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.nary.cnf.*;
+import org.chocosolver.solver.constraints.nary.cnf.ILogical;
+import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
 import org.chocosolver.solver.constraints.reification.PropConDis;
 import org.chocosolver.solver.variables.BoolVar;
 

@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.constraints.nary.cnf;
+package org.chocosolver.sat;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -47,7 +47,7 @@ import org.chocosolver.util.ESat;
 
 import java.util.*;
 
-import static org.chocosolver.solver.constraints.nary.cnf.SatSolver.*;
+import static org.chocosolver.sat.SatSolver.*;
 
 
 /**
@@ -365,7 +365,7 @@ public class PropNogoods extends Propagator<IntVar> {
             lit2pos[var] = pos;
             lit2val[var] = lvalue;
         }
-        return SatSolver.makeLiteral(var, true);
+        return makeLiteral(var, true);
     }
 
     /**
@@ -458,7 +458,7 @@ public class PropNogoods extends Propagator<IntVar> {
         // 2. add clauses
         // 2a.  [ x <= d ] => [ x <= d +1 ]
         for (int j = size; j < 2 * size - 1; j++) {
-            clauses.add(SatSolver.negated(lits[j]));
+            clauses.add(negated(lits[j]));
             clauses.add(lits[j + 1]);
             add |= sat_.addClause(clauses);
             clauses.clear();
@@ -467,18 +467,18 @@ public class PropNogoods extends Propagator<IntVar> {
         for (int k = 0; k < size - 1; k++) {
             // [ x = d ] or not[ x <= d ] or [ x <= d +1 ]
             clauses.add(lits[k]);
-            clauses.add(SatSolver.negated(lits[size + k]));
+            clauses.add(negated(lits[size + k]));
             clauses.add(lits[size + k + 1]);
             add |= sat_.addClause(clauses);
             clauses.clear();
             // not [ x = d ] or [ x <= d ]
-            clauses.add(SatSolver.negated(lits[k]));
+            clauses.add(negated(lits[k]));
             clauses.add(lits[size + k]);
             add |= sat_.addClause(clauses);
             clauses.clear();
             // not [ x = d ] or not[ x <= d +1 ]
-            clauses.add(SatSolver.negated(lits[k]));
-            clauses.add(SatSolver.negated(lits[size + k + 1]));
+            clauses.add(negated(lits[k]));
+            clauses.add(negated(lits[size + k + 1]));
             add |= sat_.addClause(clauses);
             clauses.clear();
         }

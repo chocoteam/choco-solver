@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.constraints.nary.cnf;
+package org.chocosolver.sat;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -47,7 +47,7 @@ import org.chocosolver.util.ESat;
 
 import java.util.ArrayList;
 
-import static org.chocosolver.solver.constraints.nary.cnf.SatSolver.*;
+import static org.chocosolver.sat.SatSolver.*;
 
 /**
  * A propagator to deal with clauses and interface a {@link SatSolver}.
