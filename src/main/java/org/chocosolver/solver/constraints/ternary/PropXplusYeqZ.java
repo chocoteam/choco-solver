@@ -94,9 +94,7 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        filterPlus(z, x, y);
-        filterMinus(x, z, y);
-        filterMinus(y, z, x);
+        while (filterPlus(z, x, y) | filterMinus(x, z, y) | filterMinus(y, z, x));
     }
 
     /**

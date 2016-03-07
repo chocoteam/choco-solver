@@ -36,6 +36,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -338,34 +339,53 @@ public class ViewsTest {
         }
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testTernArithm() {
+        // note did not pass because PropXplusYeqZ did not reach a fix point
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 2, false);
+        IntVar y = model.intVar("y", 0, 2, false);
+        IntVar z = model.intVar("Z", -2, 2, false);
+        IntVar absZ = model.intVar("|Z|", 0, 2, false);
+        model.absolute(absZ,z).post();
+        System.out.println(model.arithm(x,"-",y, "=", z));
+        model.arithm(x,"-",y, "=", z).post(); // test passes if added twice
+        model.arithm(absZ,"=",1).post();
+        model.arithm(y,"=",0).post();
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        System.out.println("x - y = z");
+        System.out.println(x);
+        System.out.println(y);
+        System.out.println(z);
+        Assert.assertTrue(x.isInstantiatedTo(1));
+    }
+
     @Test(groups="10s", timeOut=60000)
     public void test3() {
         // Z = |X - Y|
-        for (int seed = 0; seed < 9999; seed++) {
+        for (int seed = 0; seed < 999; seed++) {
             Model ref = new Model();
-            ref.set(new Settings() {
-                @Override
-                public boolean enableACOnTernarySum() {
-                    return true;
-                }
-            });
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", -2, 2, false);
+                ref.arithm(x,"-",y, "=", z).post();
                 IntVar az = ref.intVar("az", 0, 2, false);
-                new Constraint("SP", new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
                 ref.absolute(az, z).post();
-                ref.getSolver().set(intVarSearch(randomVar(seed), randomIntBound(seed),new IntVar[]{x, y, az}));
+                ref.getSolver().set(intVarSearch(randomVar(seed), randomIntBound(seed),x, y, az));
             }
             Model model = new Model();
             {
                 IntVar x = model.intVar("x", 0, 2, false);
                 IntVar y = model.intVar("y", 0, 2, false);
                 IntVar z = model.intVar("Z", -2, 2, false);
+                model.arithm(x,"-",y, "=", z).post();
                 IntVar az = model.intAbsView(z);
-                model.sum(new IntVar[]{z, y}, "=", x).post();
-                model.getSolver().set(intVarSearch(randomVar(seed), randomIntBound(seed),new IntVar[]{x, y, az}));
+                model.getSolver().set(intVarSearch(randomVar(seed), randomIntBound(seed),x, y, az));
             }
             check(ref, model, seed, true, true);
         }
@@ -374,7 +394,7 @@ public class ViewsTest {
     @Test(groups="10s", timeOut=60000)
     public void test4() {
         // Z = |X - Y| + AllDiff
-        for (int seed = 0; seed < 9999; seed++) {
+        for (int seed = 0; seed < 999; seed++) {
             Model ref = new Model();
             Model model = new Model();
             {
