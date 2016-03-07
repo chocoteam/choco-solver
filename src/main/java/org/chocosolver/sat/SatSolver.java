@@ -494,8 +494,10 @@ public class SatSolver implements SatFactory {
 
 
     /**
-     * inline bool Sign(Literal p) { return p.value() & 1; }
-     * int(true) is always 1. And int(false) is always 0
+     * @param l a literal
+     * @return <tt>true</tt> if <i>l</i> is odd (<tt>false</tt> literal),
+     *          <tt>false</tt> if <i>l</i> is even (<tt>true<tt/> literal)
+     *
      */
     protected static boolean sign(int l) {
         return (l & 1) != 0;

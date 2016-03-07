@@ -400,7 +400,18 @@ public class SatSolverTest {
 
     @Test(groups = "1s")
     public void testSign() throws Exception {
+        Assert.assertTrue(SatSolver.sign(3));
+        Assert.assertTrue(SatSolver.sign(1));
+        Assert.assertFalse(SatSolver.sign(0));
+        Assert.assertFalse(SatSolver.sign(2));
 
+        int ta = SatSolver.makeLiteral(a,true);
+        Assert.assertEquals(ta, 1);
+        Assert.assertTrue(SatSolver.sign(ta));
+
+        int fa = SatSolver.makeLiteral(a,false);
+        Assert.assertEquals(fa, 0);
+        Assert.assertFalse(SatSolver.sign(fa));
     }
 
     @Test(groups = "1s")
@@ -431,5 +442,304 @@ public class SatSolverTest {
     @Test(groups = "1s")
     public void testNumvars() throws Exception {
         Assert.assertEquals(sat.num_vars_, 4);
+    }
+
+    @Test(groups = "1s")
+    public void testAddTrue() throws Exception {
+        sat.addTrue(a);
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddFalse() throws Exception {
+        sat.addFalse(a);
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolEq() throws Exception {
+        sat.addBoolEq(a, b);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolLe1() throws Exception {
+        sat.addBoolLe(a, b);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolLe2() throws Exception {
+        sat.addBoolLe(a, b);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolLe3() throws Exception {
+        sat.addBoolLe(a, b);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(b, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kTrue);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolLt() throws Exception {
+        sat.addBoolLt(a, b);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolNot() throws Exception {
+        sat.addBoolNot(a, b);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kTrue);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolOrArrayEqVar1() throws Exception {
+        sat.addBoolOrArrayEqVar(new int[]{a,b,c}, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(d, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kTrue);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolOrArrayEqVar2() throws Exception {
+        sat.addBoolOrArrayEqVar(new int[]{a,b,c}, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolAndArrayEqVar1() throws Exception {
+        sat.addBoolAndArrayEqVar(new int[]{a,b,c}, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(d, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolAndArrayEqVar2() throws Exception {
+        sat.addBoolAndArrayEqVar(new int[]{a,b,c}, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(d, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kTrue);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolAndArrayEqVar3() throws Exception {
+        sat.addBoolAndArrayEqVar(new int[]{a,b,c}, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(b, true));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(c, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolOrEqVar1() throws Exception {
+        sat.addBoolOrEqVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolOrEqVar2() throws Exception {
+        sat.addBoolOrEqVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(c, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolOrEqVar3() throws Exception {
+        sat.addBoolOrEqVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(b, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kTrue);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolAndEqVar() throws Exception {
+        sat.addBoolAndEqVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(c, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolXorEqVar() throws Exception {
+        sat.addBoolXorEqVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(c, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolIsEqVar() throws Exception {
+        sat.addBoolIsEqVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(c, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolIsNeqVar() throws Exception {
+        sat.addBoolIsNeqVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(c, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolIsLeVar() throws Exception {
+        sat.addBoolIsLeVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(c, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolIsLtVar() throws Exception {
+        sat.addBoolIsLtVar(a,b,c);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(c, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kFalse);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolOrArrayEqualTrue() throws Exception {
+        sat.addBoolOrArrayEqualTrue(a, b, c, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kUndefined);
+    }
+
+    @Test(groups = "1s")
+    public void testAddBoolAndArrayEqualFalse() throws Exception {
+        sat.addBoolAndArrayEqualFalse(a, b, c, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kUndefined);
+    }
+
+    @Test(groups = "1s")
+    public void testAddAtMostOne() throws Exception {
+        sat.addAtMostOne(a, b, c, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kUndefined);
+    }
+
+    @Test(groups = "1s")
+    public void testAddAtMostNMinusOne() throws Exception {
+        sat.addAtMostNMinusOne(a, b, c, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kUndefined);
+    }
+
+    @Test(groups = "1s")
+    public void testAddSumBoolArrayGreaterEqVar() throws Exception {
+        sat.addSumBoolArrayGreaterEqVar(new int[]{a, b, c}, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kUndefined);
+    }
+
+    @Test(groups = "1s")
+    public void testAddMaxBoolArrayLessEqVar() throws Exception {
+        sat.addMaxBoolArrayLessEqVar(new int[]{a, b, c}, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kUndefined);
+    }
+
+    @Test(groups = "1s")
+    public void testAddSumBoolArrayLessEqVar() throws Exception {
+        sat.addSumBoolArrayLessEqVar(new int[]{a, b, c}, d);
+        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kUndefined);
     }
 }
