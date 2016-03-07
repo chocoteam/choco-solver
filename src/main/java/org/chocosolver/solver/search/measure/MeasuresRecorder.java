@@ -398,7 +398,9 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         } else if (model.getSolver().hasEndedUnexpectedly()) {
             st.append("- Incomplete search - Unexpected interruption.\n");
         } else {
-            st.append("- Complete search - ");
+            if(model.getSolver().isSearchCompleted()) {
+                st.append("- Complete search - ");
+            }
             if (solutionCount == 0) {
                 st.append("No solution.");
             } else if (solutionCount == 1) {
