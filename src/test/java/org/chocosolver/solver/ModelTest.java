@@ -282,11 +282,12 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             Model finder = null;
-            Solution sol = new Solution(finder);
+            Solution sol = null;
             while(pares.solve()){
                 finder = pares.getBestModel();
-                sol.record();
+                sol = new Solution(finder).record();
             }
+            System.out.println(sol);
             Assert.assertNotNull(finder);
             finder.getSolver().printStatistics();
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
@@ -420,6 +421,7 @@ public class ModelTest {
         model.setObjective(MAXIMIZE, v[0]);
         model.solve();
         assertTrue(v[0].isInstantiated());
+        model.solve();
         assertTrue(v[0].isInstantiatedTo(1));
     }
 
