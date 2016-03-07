@@ -282,10 +282,10 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             Model finder = null;
-            Solution sol;
+            Solution sol = new Solution(finder);
             while(pares.solve()){
                 finder = pares.getBestModel();
-                sol = new Solution(true,finder);
+                sol.record();
             }
             Assert.assertNotNull(finder);
             finder.getSolver().printStatistics();

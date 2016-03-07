@@ -65,7 +65,7 @@ public class RealDecision extends Decision<RealVar> {
     }
 
     public void set(RealVar v, double value) {
-        super.set(v, v.getModel().getEnvironment().getWorldIndex());
+        super.set(v, v.getEnvironment().getWorldIndex());
         this.value = value;
     }
 

@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
@@ -167,7 +168,8 @@ public class SearchStrategyFactory {
      * @return a default search strategy
      */
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
-        return domOverWDegSearch(vars);
+        boolean satOrMin = vars[0].getModel().getResolutionPolicy()!= ResolutionPolicy.MAXIMIZE;
+        return new DomOverWDeg(vars, 0, satOrMin?minIntVal():maxIntVal());
     }
 
     /**

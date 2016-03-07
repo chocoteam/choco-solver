@@ -126,9 +126,9 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
             Decision tmp = solver.getLastDecision();
             solver.setLastDecision(neighbor[current++]);
             assert solver.getLastDecision() != null;
-            solver.getLastDecision().setWorldIndex(solver.getModel().getEnvironment().getWorldIndex());
+            solver.getLastDecision().setWorldIndex(solver.getEnvironment().getWorldIndex());
             solver.getLastDecision().setPrevious(tmp);
-            solver.getModel().getEnvironment().worldPush();
+            solver.getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
             // TODO: incomplete, have to deal with gamma when extending
@@ -278,7 +278,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
 
     private IntMetaDecision extractConlict(Solver solver, Explanation lastExplanation) {
         int offset = solver.getSearchWorldIndex();
-        int wi = solver.getModel().getEnvironment().getWorldIndex() - 1;
+        int wi = solver.getEnvironment().getWorldIndex() - 1;
         int k = wi - offset;
         int size = lastExplanation.getDecisions().cardinality();
         double w = 1d / size;

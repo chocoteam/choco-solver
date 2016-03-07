@@ -64,7 +64,7 @@ public class CostRegular extends Constraint {
     }
 
     private static StoredValuedDirectedMultiGraph initGraph(IntVar[] vars, ICostAutomaton pi) {
-		IEnvironment environment = vars[0].getModel().getEnvironment();
+		IEnvironment environment = vars[0].getEnvironment();
         int aid = 0;
         int nid = 0;
 
@@ -278,7 +278,7 @@ public class CostRegular extends Constraint {
 //		for (int i = 0; i < lays.length; i++) {
 //			lays[i] = layers[i].toArray();
 //		}
-//		IEnvironment environment = vars[0].getModel().getEnvironment();
+//		IEnvironment environment = vars[0].getEnvironment();
 //		return new StoredValuedDirectedMultiGraph(environment, graph, lays, starts, offsets, totalSizes);
 //	}
 }

@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -545,6 +546,13 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
      */
     public Move getMove() {
         return M;
+    }
+
+    /**
+     * @return the backtracking environment used for this solver
+     */
+    public IEnvironment getEnvironment(){
+        return getModel().getEnvironment();
     }
 
     /**

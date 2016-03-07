@@ -219,7 +219,7 @@ public interface IOutputFactory extends IMyself {
             @Override
             public void beforeDownBranch(boolean left) {
                 Decision d = _me().getLastDecision();
-                getOut().printf("%s[%d/%d] %s%s ", StringUtils.pad("", _me().getModel().getEnvironment().getWorldIndex(), "."),
+                getOut().printf("%s[%d/%d] %s%s ", StringUtils.pad("", _me().getEnvironment().getWorldIndex(), "."),
                         d.getArity() - d.triesLeft() +1, d.getArity(),
                         _me().getModel().getSettings().outputWithANSIColors()?ANSI_BLUE:"",
                         d.toString());

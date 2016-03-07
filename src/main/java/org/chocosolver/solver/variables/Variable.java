@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
@@ -257,6 +258,13 @@ public interface Variable extends Identity, Serializable, Comparable<Variable> {
      * @return a Model object
      */
     Model getModel();
+
+	/**
+     * @return the backtracking environment used for this variable
+     */
+    default IEnvironment getEnvironment(){
+        return getModel().getEnvironment();
+    }
 
     /**
      * Return a MASK composed of 2 main information: TYPE and KIND.

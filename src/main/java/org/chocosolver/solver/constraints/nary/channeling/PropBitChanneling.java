@@ -63,7 +63,7 @@ public class PropBitChanneling extends Propagator<IntVar> {
         this.bits = BITS;
         this.SIZE = BITS.length;
         this.MAX = (int) Math.pow(2, SIZE) - 1;
-        this.KNOW_BIT = OCTET.getModel().getEnvironment().makeInt();
+        this.KNOW_BIT = OCTET.getEnvironment().makeInt();
     }
 
 

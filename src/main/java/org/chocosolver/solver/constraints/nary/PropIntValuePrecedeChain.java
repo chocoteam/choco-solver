@@ -56,7 +56,7 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
         this.s = s;
         this.t = t;
         this.n = vars.length;
-        IEnvironment env = vars[0].getModel().getEnvironment();
+        IEnvironment env = vars[0].getEnvironment();
         a = env.makeInt();
         b = env.makeInt();
         g = env.makeInt();

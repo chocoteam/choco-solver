@@ -64,7 +64,7 @@ public class SetDecision extends Decision<SetVar> {
     }
 
     public void set(SetVar v, int value, DecisionOperator<SetVar> operator) {
-        super.set(v, v.getModel().getEnvironment().getWorldIndex());
+        super.set(v, v.getEnvironment().getWorldIndex());
         this.var = v;
         this.value = value;
         this.operator = operator;

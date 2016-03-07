@@ -32,7 +32,6 @@ package org.chocosolver.solver.explanations;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.learn.LearnCBJ;
@@ -671,9 +670,9 @@ public class ExplanationEngineTest {
         Model model = new Model();
         BoolVar[] bs = model.boolVarArray("B", n);
         for (int i = 1; i < n; i++) {
-            SatFactory.addBoolEq(bs[0], bs[i]);
+            model.addClausesBoolEq(bs[0], bs[i]);
         }
-        SatFactory.addBoolNot(bs[0], bs[n - 1]);
+        model.addClausesBoolNot(bs[0], bs[n - 1]);
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Solver r = model.getSolver();
@@ -696,10 +695,10 @@ public class ExplanationEngineTest {
         int n = 5;
         Model model = new Model();
         BoolVar[] bs = model.boolVarArray("B", n);
-        SatFactory.addBoolOrArrayEqualTrue(bs); // useless
-        SatFactory.addBoolIsLeVar(bs[0], bs[1], bs[2]);
-        SatFactory.addBoolIsLeVar(bs[1], bs[0], bs[2]);
-        SatFactory.addBoolNot(bs[0], bs[1]);
+        model.addClausesBoolOrArrayEqualTrue(bs); // useless
+        model.addClausesBoolIsLeVar(bs[0], bs[1], bs[2]);
+        model.addClausesBoolIsLeVar(bs[1], bs[0], bs[2]);
+        model.addClausesBoolNot(bs[0], bs[1]);
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;
@@ -722,12 +721,12 @@ public class ExplanationEngineTest {
         int n = 12;
         Model model = new Model();
         BoolVar[] bs = model.boolVarArray("B", n);
-        SatFactory.addClauses(new BoolVar[]{bs[0], bs[1], bs[2]}, new BoolVar[]{});
-        SatFactory.addClauses(new BoolVar[]{bs[0], bs[1]}, new BoolVar[]{bs[2]});
+        model.addClauses(new BoolVar[]{bs[0], bs[1], bs[2]}, new BoolVar[]{});
+        model.addClauses(new BoolVar[]{bs[0], bs[1]}, new BoolVar[]{bs[2]});
         // pollution
-        SatFactory.addClauses(new BoolVar[]{bs[3], bs[4], bs[5]}, new BoolVar[]{bs[1]});
-        SatFactory.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
-        SatFactory.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
+        model.addClauses(new BoolVar[]{bs[3], bs[4], bs[5]}, new BoolVar[]{bs[1]});
+        model.addClauses(new BoolVar[]{bs[6], bs[7], bs[8]}, new BoolVar[]{});
+        model.addClauses(new BoolVar[]{bs[9], bs[10], bs[11]}, new BoolVar[]{});
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;
@@ -754,8 +753,8 @@ public class ExplanationEngineTest {
         int n = 12;
         Model model = new Model();
         BoolVar[] bs = model.boolVarArray("B", n);
-        SatFactory.addClauses(new BoolVar[]{bs[2]}, new BoolVar[]{bs[0], bs[1]});
-        SatFactory.addClauses(new BoolVar[]{}, new BoolVar[]{bs[0], bs[1], bs[2]});
+        model.addClauses(new BoolVar[]{bs[2]}, new BoolVar[]{bs[0], bs[1]});
+        model.addClauses(new BoolVar[]{}, new BoolVar[]{bs[0], bs[1], bs[2]});
 
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;

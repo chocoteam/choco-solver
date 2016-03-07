@@ -38,7 +38,6 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -96,7 +95,7 @@ public class SetCstrsTest {
 		BoolVar b1 = s.notEmpty(Yleft).reify();
 		BoolVar b2 = s.notEmpty(Yright).reify();
 		// ---
-		addBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
+		s.addClausesBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
 		s.getSolver().showStatistics();
 		s.getSolver().showSolutions();
 		try {

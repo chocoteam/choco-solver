@@ -42,7 +42,6 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.*;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
@@ -79,7 +78,7 @@ public class ClauseTest {
                 }
 
                 LogOp or = or(bs);
-                addClauses(or, s);
+                s.addClauses(or);
                 s.getSolver().set(inputOrderLBSearch(bs));
 
                 while (s.solve()) ;
@@ -99,7 +98,7 @@ public class ClauseTest {
 
         LogOp and = and(bs[0], bs[0].not());
 
-        addClauses(and, s);
+        s.addClauses(and);
         s.getSolver().set(inputOrderLBSearch(bs));
         while (s.solve()) ;
         long sol = s.getSolver().getSolutionCount();
@@ -114,7 +113,7 @@ public class ClauseTest {
 
         LogOp or = or(b, b.not());
 
-        addClauses(or, s);
+        s.addClauses(or);
 
         BoolVar[] bs = new BoolVar[]{b};
         s.getSolver().set(inputOrderLBSearch(bs));
@@ -130,7 +129,7 @@ public class ClauseTest {
         Model model = new Model();
         BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1]);
-        SatFactory.addClauses(tree, model);
+        model.addClauses(tree);
 
         try {
             model.getSolver().propagate();
@@ -147,7 +146,7 @@ public class ClauseTest {
         Model model = new Model();
         BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1]);
-        SatFactory.addClauses(tree, model);
+        model.addClauses(tree);
 
         try {
             model.getSolver().propagate();
@@ -164,7 +163,7 @@ public class ClauseTest {
         Model model = new Model();
         BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not());
-        SatFactory.addClauses(tree, model);
+        model.addClauses(tree);
 
         try {
             model.getSolver().propagate();
@@ -181,7 +180,7 @@ public class ClauseTest {
         Model model = new Model();
         BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not());
-        SatFactory.addClauses(tree, model);
+        model.addClauses(tree);
 
         try {
             model.getSolver().propagate();
@@ -198,7 +197,7 @@ public class ClauseTest {
         Model model = new Model();
         BoolVar[] bvars = model.boolVarArray("b", 3);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not(), bvars[2].not());
-        SatFactory.addClauses(tree, model);
+        model.addClauses(tree);
 
         try {
             model.getSolver().propagate();
@@ -221,7 +220,7 @@ public class ClauseTest {
                 LogOp tree = ifOnlyIf(
                         and(bvars[1], bvars[2]),
                         bvars[0]);
-                addClauses(tree, model);
+                model.addClauses(tree);
 
                 model.getSolver().set(randomSearch(bvars, seed));
                 while (model.solve()) ;
@@ -260,7 +259,7 @@ public class ClauseTest {
                 LogOp tree = LogOp.ifOnlyIf(
                         LogOp.and(bvars[1], bvars[2]),
                         bvars[0]);
-                SatFactory.addClauses(tree, model);
+                model.addClauses(tree);
                 try {
                     model.getSolver().propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);
@@ -295,7 +294,7 @@ public class ClauseTest {
         IEnvironment e = s.getEnvironment();
         BoolVar[] bs = new BoolVar[n];
         bs[0] = s.boolVar("b0");
-        SatFactory.addFalse(bs[0]);
+        s.addClauseFalse(bs[0]);
         PropSat sat = s.getMinisat().getPropSat();
 
         e.worldPush();

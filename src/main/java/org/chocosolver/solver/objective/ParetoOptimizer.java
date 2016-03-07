@@ -120,7 +120,7 @@ public class ParetoOptimizer implements IMonitorSolution {
         }
         // store current solution
         if(pool.isEmpty()){
-            paretoFront.add(new Solution(true,model,variablesToStore));
+            paretoFront.add(new Solution(model,variablesToStore).record());
         }else{
             Solution solution = pool.remove();
 

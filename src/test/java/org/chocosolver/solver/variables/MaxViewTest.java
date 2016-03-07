@@ -30,7 +30,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.testng.annotations.Test;
 
@@ -54,8 +53,8 @@ public class MaxViewTest {
         model.ifThenElse(bs[0], model.arithm(z, "=", x), model.arithm(z, "!=", x));
         model.ifThenElse(bs[1], model.arithm(z, "=", y), model.arithm(z, "!=", y));
         model.ifThenElse(bs[2], model.arithm(x, ">=", y), model.arithm(x, "<", y));
-        SatFactory.addClauses(LogOp.or(LogOp.and(bs[0], bs[2]),
-                LogOp.and(bs[1], bs[2].not())), model);
+        model.addClauses(LogOp.or(LogOp.and(bs[0], bs[2]),
+                LogOp.and(bs[1], bs[2].not())));
     }
 
     public void max(Model model, IntVar x, IntVar y, IntVar z) {

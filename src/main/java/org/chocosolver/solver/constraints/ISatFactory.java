@@ -50,20 +50,25 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
  * @author Charles Prud'homme
  * @since 15/07/13
  */
-public class SatFactory {
+public interface ISatFactory {
 
-    private SatFactory() {
-    }
+    Model _me();
 
-    private static boolean buildOnLogicalOperator(LogOp logOp, Model model) {
+    /**
+     * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
+     *
+     * @param TREE   the syntactic tree
+     * @return true if the clause has been added to the clause store
+     */
+    default boolean addClauses(LogOp TREE) {
+        Model model = _me();
         PropSat sat = model.getMinisat().getPropSat();
-        ILogical tree = LogicTreeToolBox.toCNF(logOp, model);
+        ILogical tree = LogicTreeToolBox.toCNF(TREE, model);
         if (model.ONE().equals(tree)) {
-            return addTrue(model.ONE());
+            return addClauseTrue(model.ONE());
         } else if (model.ZERO().equals(tree)) {
-            return addTrue(model.ZERO());
+            return addClauseTrue(model.ZERO());
         } else {
-
             ILogical[] clauses;
             if (!tree.isLit() && ((LogOp) tree).is(LogOp.Operator.AND)) {
                 clauses = ((LogOp) tree).getChildren();
@@ -76,7 +81,7 @@ public class SatFactory {
                 ILogical clause = clauses[i];
                 if (clause.isLit()) {
                     BoolVar bv = (BoolVar) clause;
-                    ret &= addTrue(bv);
+                    ret &= addClauseTrue(bv);
                 } else {
                     LogOp n = (LogOp) clause;
                     BoolVar[] bvars = n.flattenBoolVar();
@@ -91,18 +96,6 @@ public class SatFactory {
         }
     }
 
-
-    /**
-     * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
-     *
-     * @param TREE   the syntactic tree
-     * @param Model model is required, as the TREE can be declared without any variables
-     * @return true if the clause has been added to the clause store
-     */
-    public static boolean addClauses(LogOp TREE, Model Model) {
-        return buildOnLogicalOperator(TREE, Model);
-    }
-
     /**
      * Ensures that the clause defined by POSLITS and NEGLITS is satisfied.
      *
@@ -110,7 +103,7 @@ public class SatFactory {
      * @param NEGLITS negative literals
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addClauses(BoolVar[] POSLITS, BoolVar[] NEGLITS) {
+    default boolean addClauses(BoolVar[] POSLITS, BoolVar[] NEGLITS) {
         Model model = POSLITS.length > 0 ? POSLITS[0].getModel() : NEGLITS[0].getModel();
         PropSat sat = model.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(POSLITS.length + NEGLITS.length);
@@ -130,7 +123,7 @@ public class SatFactory {
      * @param BOOLVAR a boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addTrue(BoolVar BOOLVAR) {
+    default boolean addClauseTrue(BoolVar BOOLVAR) {
         Model model = BOOLVAR.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int lit = sat.Literal(BOOLVAR);
@@ -144,7 +137,7 @@ public class SatFactory {
      * @param BOOLVAR a boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addFalse(BoolVar BOOLVAR) {
+    default boolean addClauseFalse(BoolVar BOOLVAR) {
         Model model = BOOLVAR.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int lit = SatSolver.negated(sat.Literal(BOOLVAR));
@@ -159,7 +152,7 @@ public class SatFactory {
      * @param RIGHT another boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolEq(BoolVar LEFT, BoolVar RIGHT) {
+    default boolean addClausesBoolEq(BoolVar LEFT, BoolVar RIGHT) {
         Model model = LEFT.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -176,7 +169,7 @@ public class SatFactory {
      * @param RIGHT another boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolLe(BoolVar LEFT, BoolVar RIGHT) {
+    default boolean addClausesBoolLe(BoolVar LEFT, BoolVar RIGHT) {
         Model model = LEFT.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -192,7 +185,7 @@ public class SatFactory {
      * @param RIGHT another boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolLt(BoolVar LEFT, BoolVar RIGHT) {
+    default boolean addClausesBoolLt(BoolVar LEFT, BoolVar RIGHT) {
         Model model = LEFT.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -209,7 +202,7 @@ public class SatFactory {
      * @param RIGHT another boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolNot(BoolVar LEFT, BoolVar RIGHT) {
+    default boolean addClausesBoolNot(BoolVar LEFT, BoolVar RIGHT) {
         Model model = LEFT.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -226,7 +219,7 @@ public class SatFactory {
      * @param TARGET   the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolOrArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    default boolean addClausesBoolOrArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         Model model = TARGET.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int target_lit = sat.Literal(TARGET);
@@ -249,7 +242,7 @@ public class SatFactory {
      * @param TARGET   the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolAndArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    default boolean addClausesBoolAndArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         Model model = TARGET.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int target_lit = sat.Literal(TARGET);
@@ -273,7 +266,7 @@ public class SatFactory {
      * @param TARGET the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolOrEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
+    default boolean addClausesBoolOrEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         Model model = TARGET.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -293,7 +286,7 @@ public class SatFactory {
      * @param TARGET the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolAndEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
+    default boolean addClausesBoolAndEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         Model model = TARGET.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -313,8 +306,8 @@ public class SatFactory {
      * @param TARGET the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolXorEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
-        return addBoolIsNeqVar(LEFT, RIGHT, TARGET);
+    default boolean addClausesBoolXorEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
+        return addClausesBoolIsNeqVar(LEFT, RIGHT, TARGET);
     }
 
     /**
@@ -325,7 +318,7 @@ public class SatFactory {
      * @param TARGET the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolIsEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
+    default boolean addClausesBoolIsEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         Model model = TARGET.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -346,7 +339,7 @@ public class SatFactory {
      * @param TARGET the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolIsNeqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
+    default boolean addClausesBoolIsNeqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         Model model = TARGET.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -367,7 +360,7 @@ public class SatFactory {
      * @param TARGET the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolIsLeVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
+    default boolean addClausesBoolIsLeVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         Model model = TARGET.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -379,7 +372,6 @@ public class SatFactory {
         return true;
     }
 
-
     /**
      * Add a clause stating that: (LEFT < RIGHT) &hArr; TARGET
      *
@@ -388,7 +380,7 @@ public class SatFactory {
      * @param TARGET the reified boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolIsLtVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
+    default boolean addClausesBoolIsLtVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         Model model = TARGET.getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int left_lit = sat.Literal(LEFT);
@@ -407,7 +399,7 @@ public class SatFactory {
      * @param BOOLVARS a list of boolean variables
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolOrArrayEqualTrue(BoolVar[] BOOLVARS) {
+    default boolean addClausesBoolOrArrayEqualTrue(BoolVar[] BOOLVARS) {
         Model model = BOOLVARS[0].getModel();
         PropSat sat = model.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(BOOLVARS.length);
@@ -424,8 +416,8 @@ public class SatFactory {
      * @param BOOLVARS a list of boolean variables
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addBoolAndArrayEqualFalse(BoolVar[] BOOLVARS) {
-        return addAtMostNMinusOne(BOOLVARS);
+    default boolean addClausesBoolAndArrayEqualFalse(BoolVar[] BOOLVARS) {
+        return addClausesAtMostNMinusOne(BOOLVARS);
     }
 
     /**
@@ -434,7 +426,7 @@ public class SatFactory {
      * @param BOOLVARS a list of boolean variables
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addAtMostOne(BoolVar[] BOOLVARS) {
+    default boolean addClausesAtMostOne(BoolVar[] BOOLVARS) {
         Model model = BOOLVARS[0].getModel();
         PropSat sat = model.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(BOOLVARS.length);
@@ -455,7 +447,7 @@ public class SatFactory {
      * @param BOOLVARS a list of boolean variables
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addAtMostNMinusOne(BoolVar[] BOOLVARS) {
+    default boolean addClausesAtMostNMinusOne(BoolVar[] BOOLVARS) {
         Model model = BOOLVARS[0].getModel();
         PropSat sat = model.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(BOOLVARS.length);
@@ -473,7 +465,7 @@ public class SatFactory {
      * @param TARGET a boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    default boolean addClausesSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         Model model = BOOLVARS[0].getModel();
         PropSat sat = model.getMinisat().getPropSat();
         TIntList lits = new TIntArrayList(BOOLVARS.length + 1);
@@ -492,7 +484,7 @@ public class SatFactory {
      * @param TARGET a boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    default boolean addClausesMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         Model model = BOOLVARS[0].getModel();
         PropSat sat = model.getMinisat().getPropSat();
         int tlit = sat.Literal(TARGET);
@@ -509,12 +501,12 @@ public class SatFactory {
      * @param TARGET a boolean variable
      * @return true if the clause has been added to the clause store
      */
-    public static boolean addSumBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+    default boolean addClausesSumBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
 
         Model model = BOOLVARS[0].getModel();
         PropSat sat = model.getMinisat().getPropSat();
         if (BOOLVARS.length == 1) {
-            return addBoolLe(BOOLVARS[0], TARGET);
+            return addClausesBoolLe(BOOLVARS[0], TARGET);
         }
 
         BoolVar extra = model.boolVar(randomName());
@@ -539,14 +531,10 @@ public class SatFactory {
      * @param BOOLS an array of boolean variable
      * @return <tt>true</tt> if the disjunction has been added to the constructive disjunction store.
      */
-    public static boolean addConstructiveDisjunction(BoolVar... BOOLS) {
+    default boolean addConstructiveDisjunction(BoolVar... BOOLS) {
         Model model = BOOLS[0].getModel();
         PropConDis condis = model.getConDisStore().getPropCondis();
         condis.addDisjunction(BOOLS);
         return true;
     }
-
-//    public static boolean addArrayXor(PropSat sat, BoolVar[] vars) {
-//        return false;
-//    }
 }

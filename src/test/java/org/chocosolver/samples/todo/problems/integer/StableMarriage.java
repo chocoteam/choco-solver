@@ -50,7 +50,6 @@ import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.implies;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
@@ -266,7 +265,7 @@ public class StableMarriage extends AbstractProblem {
 
                 // b1 -> b2
                 LogOp t = implies(b1, b2);
-                addClauses(t, model);
+                model.addClauses(t);
 
                 // solver.post(solver.arithm(b1, "<=", b2));
 
@@ -318,7 +317,7 @@ public class StableMarriage extends AbstractProblem {
 
                 // b1 -> b2
                 LogOp t = implies(b1, b2);
-                addClauses(t, model);
+                model.addClauses(t);
 
                 // solver.post(solver.arithm(b1, "<=", b2));
 
