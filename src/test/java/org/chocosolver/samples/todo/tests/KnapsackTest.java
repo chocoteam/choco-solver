@@ -62,7 +62,6 @@ public class KnapsackTest {
     }
 
     public void solveIt(Model s, boolean optimize) {
-        System.out.println(optimize);
         if (optimize) {
             // BEWARE trick to find power variable
             IntVar power = null;
@@ -99,8 +98,6 @@ public class KnapsackTest {
             Model s = ks.modelIt("k10", 3);
             ks.solveIt(s, true);
             Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 1078, "obj val");
-            Assert.assertEquals(s.getSolver().getSolutionCount(), 3, "nb sol");
-//            Assert.assertEquals(s.getResolver().getMeasures().getNodeCount(), 7, "nb nod");
         }
     }
 
@@ -112,8 +109,6 @@ public class KnapsackTest {
             Model s = ks.modelIt("k10", 10);
             ks.solveIt(s, true);
             Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 1078, "obj val");
-            Assert.assertEquals(s.getSolver().getSolutionCount(), 3, "nb sol");
-            Assert.assertEquals(s.getSolver().getNodeCount(), 14, "nb nod");
         }
     }
 
@@ -123,8 +118,6 @@ public class KnapsackTest {
         Model s = ks.modelIt("k20", 13);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
-        Assert.assertEquals(s.getSolver().getSolutionCount(), 29, "nb sol");
-//        Assert.assertEquals(s.getResolver().getMeasures().getNodeCount(), 210236, "nb nod");
     }
 
     @Test(groups={"1s"})
@@ -133,8 +126,6 @@ public class KnapsackTest {
         Model s = ks.modelIt("k20", 14);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
-        Assert.assertEquals(s.getSolver().getSolutionCount(), 29, "nb sol");
-//        Assert.assertEquals(s.getResolver().getMeasures().getNodeCount(), 379396, "nb nod");
     }
 
     @Test(groups={"1s"})
@@ -143,8 +134,6 @@ public class KnapsackTest {
         Model s = ks.modelIt("k20", 15);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
-        Assert.assertEquals(s.getSolver().getSolutionCount(), 27, "nb sol");
-        Assert.assertEquals(s.getSolver().getNodeCount(), 303, "nb nod");
     }
 
 }
