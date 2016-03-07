@@ -175,10 +175,11 @@ public class SatSolverTest {
     @Test(groups = "1s")
     public void testAddClause6() throws Exception {
         int ap = SatSolver.makeLiteral(a, true);
-        sat.propagateOneLiteral(ap);
+        sat.uncheckedEnqueue(ap);
         Assert.assertEquals(sat.assignment_.get(a), SatSolver.Boolean.kFalse);
         int an = SatSolver.makeLiteral(a, false);
         Assert.assertFalse(sat.addClause(an));
+        sat.propagate();
         Assert.assertEquals(sat.assignment_.get(a), SatSolver.Boolean.kFalse);
         Assert.assertEquals(sat.qhead_, 1);
         Assert.assertFalse(sat.ok_);
