@@ -84,7 +84,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
             } else nbElt += vars[i].getUB() - vars[i].getLB() + 1;
         }
         this.supports = new IStateInt[nbElt * size];
-        IEnvironment env = vs[0].getModel().getEnvironment();
+        IEnvironment env = vs[0].getEnvironment();
         for (int i = 0; i < supports.length; i++) {
             supports[i] = env.makeInt(Integer.MIN_VALUE);
         }

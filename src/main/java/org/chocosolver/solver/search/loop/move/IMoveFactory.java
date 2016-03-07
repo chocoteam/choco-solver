@@ -63,7 +63,7 @@ public interface IMoveFactory extends IMyself{
      * @param discrepancy     the maximum discrepancy
      */
     default void setLDS(int discrepancy) {
-        IEnvironment env = _me().getModel().getEnvironment();
+        IEnvironment env = _me().getEnvironment();
         _me().set(new MoveBinaryLDS(_me().getStrategy(), discrepancy, env));
     }
 
@@ -75,7 +75,7 @@ public interface IMoveFactory extends IMyself{
      * @param discrepancy     the maximum discrepancy
      */
     default void setDDS(int discrepancy) {
-        IEnvironment env = _me().getModel().getEnvironment();
+        IEnvironment env = _me().getEnvironment();
         _me().set(new MoveBinaryDDS(_me().getStrategy(), discrepancy, env));
     }
 

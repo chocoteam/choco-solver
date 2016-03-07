@@ -111,7 +111,7 @@ public class MoveLNS implements Move {
                 assert tmp == RootDecision.ROOT;
                 solver.setLastDecision(neighbor.fixSomeVariables());
                 solver.getLastDecision().setPrevious(tmp);
-                solver.getModel().getEnvironment().worldPush();
+                solver.getEnvironment().worldPush();
                 freshRestart = false;
                 extend = true;
             } else {

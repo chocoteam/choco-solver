@@ -157,7 +157,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             solver.setLastDecision(copen[current++]);
             assert solver.getLastDecision() != null;
             solver.getLastDecision().setPrevious(tmp);
-            solver.getModel().getEnvironment().worldPush();
+            solver.getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
             extend = super.extend(solver);
@@ -248,7 +248,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     private void extractOB(Solver solver, int i) {
         Decision stopAt = _unkopen.get(i).getPrevious();
         // then, goes up in the search tree, and detect open nodes
-        solver.getModel().getEnvironment().worldPop();
+        solver.getEnvironment().worldPop();
         Decision decision = solver.getLastDecision();
         int bound;
         while (decision != stopAt) {
@@ -261,7 +261,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             solver.setLastDecision(solver.getLastDecision().getPrevious());
             decision.free();
             decision = solver.getLastDecision();
-            solver.getModel().getEnvironment().worldPop();
+            solver.getEnvironment().worldPop();
         }
     }
 

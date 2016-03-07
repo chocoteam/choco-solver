@@ -65,7 +65,7 @@ public class PropLargeMDDC extends Propagator<IntVar> {
         this.MDD = MDD;
         this.nvars = vars.length;
         this.yes = new TIntHashSet();
-        this.no = new StoredSparseSet(VARS[0].getModel().getEnvironment());
+        this.no = new StoredSparseSet(VARS[0].getEnvironment());
         this.sets = new TIntHashSet[nvars];
         for (int i = 0; i < nvars; i++) {
             this.sets[i] = new TIntHashSet(vars[i].getDomainSize());

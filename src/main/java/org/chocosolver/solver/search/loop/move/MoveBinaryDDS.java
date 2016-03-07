@@ -64,7 +64,7 @@ public class MoveBinaryDDS extends MoveBinaryLDS {
         solver.setLastDecision(strategy.getDecision());
         if (solver.getLastDecision() != null) { // null means there is no more decision
             solver.getLastDecision().setPrevious(tmp);
-            solver.getModel().getEnvironment().worldPush();
+            solver.getEnvironment().worldPush();
             if (dis.get() == 1) {
                 solver.getLastDecision().buildNext();
             }

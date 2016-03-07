@@ -96,7 +96,7 @@ public class MoveSeq implements Move {
             Decision tmp = solver.getLastDecision();
             solver.setLastDecision(tds[i - 1]);
             solver.getLastDecision().setPrevious(tmp);
-            solver.getModel().getEnvironment().worldPush();
+            solver.getEnvironment().worldPush();
             moves.get(i).setTopDecision(tds[i - 1]);
             extend = moves.get(i).extend(solver);
         }
