@@ -38,7 +38,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.constraints.SatFactory.*;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
@@ -58,7 +57,7 @@ public class SatTest {
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
-        addBoolEq(b1, b2);
+        model.addClausesBoolEq(b1, b2);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
@@ -69,7 +68,7 @@ public class SatTest {
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
-        addBoolNot(b1, b2);
+        model.addClausesBoolNot(b1, b2);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
@@ -80,7 +79,7 @@ public class SatTest {
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
-        addBoolLe(b1, b2);
+        model.addClausesBoolLe(b1, b2);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 3);
     }
@@ -93,7 +92,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        addBoolIsEqVar(b1, b2, r);
+        model.addClausesBoolIsEqVar(b1, b2, r);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
@@ -105,7 +104,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        addBoolAndEqVar(b1, b2, r);
+        model.addClausesBoolAndEqVar(b1, b2, r);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
@@ -117,7 +116,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        addBoolOrEqVar(b1, b2, r);
+        model.addClausesBoolOrEqVar(b1, b2, r);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
@@ -128,7 +127,7 @@ public class SatTest {
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
-        addBoolLt(b1, b2);
+        model.addClausesBoolLt(b1, b2);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
@@ -140,7 +139,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        addBoolIsLeVar(b1, b2, r);
+        model.addClausesBoolIsLeVar(b1, b2, r);
 //        SMF.log(solver, true, true);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
@@ -153,7 +152,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
-        addBoolIsLtVar(b1, b2, r);
+        model.addClausesBoolIsLtVar(b1, b2, r);
 //        SMF.log(solver, true, true);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
@@ -165,7 +164,7 @@ public class SatTest {
         Model model = new Model();
         BoolVar b1;
         b1 = model.boolVar("b1");
-        addTrue(b1);
+        model.addClauseTrue(b1);
         //        SMF.log(solver, true, true);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
@@ -177,7 +176,7 @@ public class SatTest {
         Model model = new Model();
         BoolVar b1;
         b1 = model.boolVar("b1");
-        addFalse(b1);
+        model.addClauseFalse(b1);
         //        SMF.log(solver, true, true);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
@@ -188,10 +187,10 @@ public class SatTest {
     public void test12() {
         Model model = new Model();
         BoolVar[] bs = model.boolVarArray("b", 3);
-        addBoolOrArrayEqualTrue(bs);
-        addFalse(bs[0]);
-        addFalse(bs[1]);
-        addFalse(bs[2]);
+        model.addClausesBoolOrArrayEqualTrue(bs);
+        model.addClauseFalse(bs[0]);
+        model.addClauseFalse(bs[1]);
+        model.addClauseFalse(bs[2]);
         //        SMF.log(solver, true, true);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 0);
@@ -207,11 +206,11 @@ public class SatTest {
         BoolVar bvar2 = model.boolVar("bvar2");
         BoolVar cond = model.boolVar("cond");
         // CSTRS
-        addFalse(bvar);
+        model.addClauseFalse(bvar);
         model.arithm(var, "=", 2).reifyWith(eq2);
-        addBoolAndArrayEqVar(new BoolVar[]{eq2, bvar.not()}, cond);
-        addBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
-        addBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
+        model.addClausesBoolAndArrayEqVar(new BoolVar[]{eq2, bvar.not()}, cond);
+        model.addClausesBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
+        model.addClausesBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
         // SEARCH
         model.getSolver().set(inputOrderLBSearch(var));
 

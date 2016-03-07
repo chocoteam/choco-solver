@@ -37,7 +37,6 @@ import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.and;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifOnlyIf;
 
@@ -111,7 +110,7 @@ public class OpenStacks extends AbstractProblem {
                 model.ifThenElse(btmp[1],
                         model.arithm(o[i][j], ">", model.intVar(0)),
                         model.arithm(o[i][j], "<=", model.intVar(0)));
-                addClauses(ifOnlyIf(o2b[j - 1][i], and(btmp[0], btmp[1])), model);
+                model.addClauses(ifOnlyIf(o2b[j - 1][i], and(btmp[0], btmp[1])));
             }
         }
         open = model.intVarArray("open", np, 0, nc + 1, true);

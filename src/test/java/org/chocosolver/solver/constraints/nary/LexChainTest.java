@@ -39,7 +39,6 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -102,7 +101,7 @@ public class LexChainTest {
             //refor.post(new SatConstraint(reformulate(0, X[i], X[i + 1], refor), refor));
         }
 
-        SatFactory.addClauses(LogOp.and(trees), model);
+        model.addClauses(LogOp.and(trees));
         model.getSolver().set(randomSearch(ArrayUtils.flatten(X), seed));
         return model;
     }

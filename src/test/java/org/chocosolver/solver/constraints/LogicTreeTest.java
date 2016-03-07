@@ -40,7 +40,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.and;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifOnlyIf;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
@@ -242,7 +241,7 @@ public class LogicTreeTest {
                     rCNF[0],
                     and(rCNF[1], rCNF[2])
             );
-            addClauses(tree, sCNF);
+            sCNF.addClauses(tree);
             sCNF.getSolver().set(randomSearch(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);
@@ -300,7 +299,7 @@ public class LogicTreeTest {
                 LogOp.and(b1.not(), b2),
                 LogOp.and(b1.not(), b2.not())
         );
-        SatFactory.addClauses(l, model);
+        model.addClauses(l);
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);
@@ -322,7 +321,7 @@ public class LogicTreeTest {
         model.arithm(a,">",0).reifyWith(b2);
 
         LogOp l = LogOp.or(b1.not(), b2.not());
-        SatFactory.addClauses(l, model);
+        model.addClauses(l);
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);
@@ -344,7 +343,7 @@ public class LogicTreeTest {
         model.arithm(a,"=",0).reifyWith(b1);
         model.arithm(a,">",0).reifyWith(b2);
 
-        SatFactory.addClauses(new BoolVar[0], new BoolVar[]{b1, b2});
+        model.addClauses(new BoolVar[0], new BoolVar[]{b1, b2});
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);

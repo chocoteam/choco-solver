@@ -41,8 +41,6 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.constraints.SatFactory.addBoolOrArrayEqualTrue;
-import static org.chocosolver.solver.constraints.SatFactory.addConstructiveDisjunction;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
@@ -64,7 +62,7 @@ public class PropConDisTest {
         IntVar a = s.intVar("A", 0, 10, false);
         BoolVar b1 = s.arithm(a, "=", 9).reify();
         BoolVar b2 = s.arithm(a, "=", 10).reify();
-        addConstructiveDisjunction(b1, b2);
+        s.addConstructiveDisjunction(b1, b2);
         s.getSolver().propagate();
         assertEquals(a.getDomainSize(), 2);
         assertEquals(a.getLB(), 9);
@@ -81,7 +79,7 @@ public class PropConDisTest {
         Constraint c1 = s.arithm(X, "-", Y, "<=", -9);
         Constraint c2 = s.arithm(Y, "-", X, "<=", -9);
 
-        addConstructiveDisjunction(c1.reify(), c2.reify());
+        s.addConstructiveDisjunction(c1.reify(), c2.reify());
         s.getSolver().propagate();
         assertEquals(X.getDomainSize(), 4);
         assertEquals(Y.getDomainSize(), 4);
@@ -166,9 +164,9 @@ public class PropConDisTest {
                 ).reify();
             }
             if (cd) {
-                addConstructiveDisjunction(disjunction);
+                model.addConstructiveDisjunction(disjunction);
             } else {
-                addBoolOrArrayEqualTrue(disjunction);
+                model.addClausesBoolOrArrayEqualTrue(disjunction);
             }
         }
         IntVar horizon = model.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);

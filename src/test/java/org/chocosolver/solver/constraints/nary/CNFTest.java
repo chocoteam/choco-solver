@@ -34,7 +34,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.constraints.SatFactory.addClauses;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.implies;
 
 /**
@@ -56,15 +55,15 @@ public class CNFTest {
             IntVar y = model.intVar("y", 0, 24, true);
 
             if (i == 0) {
-                addClauses(implies(
+                model.addClauses(implies(
                         a,
                         b
-                ), model);
+                ));
             } else {
-                addClauses(implies(
+                model.addClauses(implies(
                         b.not(),
                         a.not()
-                ), model);
+                ));
             }
             model.ifThenElse(b, model.arithm(x, ">=", y), model.arithm(x, "<", y));
 //            SearchMonitorFactory.log(solver, true, true);

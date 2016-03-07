@@ -30,6 +30,7 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.IConstraintFactory;
+import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.variables.IVariableFactory;
 import org.chocosolver.solver.variables.IViewFactory;
 
@@ -39,6 +40,6 @@ import org.chocosolver.solver.variables.IViewFactory;
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface IModel extends IVariableFactory, IViewFactory, IConstraintFactory {
+public interface IModel extends IVariableFactory, IViewFactory, IConstraintFactory, ISatFactory {
 
 }

@@ -30,7 +30,6 @@
 package org.chocosolver.samples.todo.problems.nsp;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.SatFactory;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
@@ -454,7 +453,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         bvars[0],
                         LogOp.or(bvars[1], bvars[2], bvars[3])
                 );
-                SatFactory.addClauses(tree, model);
+                model.addClauses(tree);
                 model.ifThenElse(bvars[0],
                         model.arithm(s[t], "=", n), model.arithm(s[t], "!=", n));
                 model.ifThenElse(bvars[1],
@@ -468,7 +467,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             BoolVar[] bvars = model.boolVarArray("b", 2);
 //            solver.post(ConstraintFactory.ifThenElse(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
             LogOp tree = LogOp.implies(bvars[0], bvars[1]);
-            SatFactory.addClauses(tree, model);
+            model.addClauses(tree);
             model.ifThenElse(bvars[0],
                     model.arithm(s[t], "=", n), model.arithm(s[t], "!=", n));
             model.ifThenElse(bvars[1],
@@ -504,7 +503,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                                 LogOp.or(bvars[2], bvars[3])),
                         LogOp.and(bvars[4], bvars[5])
                 );
-                SatFactory.addClauses(tree, model);
+                model.addClauses(tree);
                 model.ifThenElse(bvars[0],
                         model.arithm(s[t], "=", r),
                         model.arithm(s[t], "!=", r));
@@ -577,7 +576,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int t = 5; t + 1 < data.nbDays(); t += 7) {
                 BoolVar[] bvars = model.boolVarArray("b", 2);
                 LogOp tree = LogOp.ifOnlyIf(bvars[0], bvars[1]);
-                SatFactory.addClauses(tree, model);
+                model.addClauses(tree);
                 model.ifThenElse(bvars[0],
                         model.arithm(s[t], "=", r),
                         model.arithm(s[t], "!=", r));
