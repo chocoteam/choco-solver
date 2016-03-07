@@ -31,6 +31,9 @@ package org.chocosolver.solver.search;
 
 import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -93,8 +96,12 @@ public class ParetoTest {
         // --- Monitor
         s.getSolver().plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
         // --- solve
-//        s.setObjective(ResolutionPolicy.MAXIMIZE,totalProfit_1, totalProfit_2);
-//        while(s.solve());
-        throw new UnsupportedOperationException("Pareto not supported anymore");
+        ParetoOptimizer pareto = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{totalProfit_1,totalProfit_2});
+        s.getSolver().plugMonitor(pareto);
+        while(s.solve());
+        System.out.println("Pareto Front:");
+        for(Solution sol:pareto.getParetoFront()){
+            System.out.println(sol.getIntVal(totalProfit_1)+" // "+sol.getIntVal(totalProfit_2));
+        }
     }
 }
