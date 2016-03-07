@@ -497,9 +497,8 @@ public class SatSolverTest {
     @Test(groups = "1s")
     public void testAddBoolLt() throws Exception {
         sat.addBoolLt(a, b);
-        sat.uncheckedEnqueue(SatSolver.makeLiteral(a, true));
         sat.propagate();
-        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kFalse);
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);
         Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kFalse);
     }
 
