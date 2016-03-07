@@ -73,33 +73,21 @@ public class Solution implements Serializable, ICause {
     private Variable[] varsToStore;
 
     //***********************************************************************************
-    // CONSTRUCTORS
+    // CONSTRUCTOR
     //***********************************************************************************
 
-	/**
-     * Create an empty solution object that will be able to store decision variables (variables in the scope of the search strategy)
-     * @param model the model to store
-     */
-    public Solution(Model model){
-        this(false,model);
-    }
-
     /**
-     * Create a solution object and stores the current solution if <code>recordNow</code>
-     * (value of each variable in <code>varsToStore</code>)
+     * Create an empty solution object
+     * able to store the value of each variable in <code>varsToStore</code> when calling <code>record()</code>
      *
-     * @param recordNow indicates whether to record the current solution or simply create an empty solution object
      * @param model model of the solution
      * @param varsToStore variables to store in this object
      */
-    public Solution(boolean recordNow, Model model, Variable... varsToStore) {
+    public Solution(Model model, Variable... varsToStore) {
         this.varsToStore = varsToStore;
         empty = true;
         this.model = model;
         assert varsToStore != null;
-        if (recordNow) {
-            record();
-        }
     }
 
     //***********************************************************************************
@@ -109,8 +97,9 @@ public class Solution implements Serializable, ICause {
     /**
      * Records the current solution of the solver
      * clears all previous recordings
+     * @return this object
      */
-    public void record() {
+    public Solution record() {
         empty = false;
         boolean warn = false;
         if(varsToStore.length == 0) {
@@ -150,6 +139,7 @@ public class Solution implements Serializable, ICause {
         if (warn && varsToStore[0].getModel().getSettings().warnUser()) {
             model.getSolver().getOut().printf("Some non decision variables are not instantiated in the current solution.");
         }
+        return this;
     }
 
     @Override

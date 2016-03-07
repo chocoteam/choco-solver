@@ -216,7 +216,7 @@ public class SatTest {
         model.getSolver().set(inputOrderLBSearch(var));
 
         model.setObjective(MAXIMIZE, var);
-        Solution solution = new Solution(false,model);
+        Solution solution = new Solution(model);
         while(model.solve()){
             solution.record();
         }

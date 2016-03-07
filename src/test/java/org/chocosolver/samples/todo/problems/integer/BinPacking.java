@@ -89,7 +89,7 @@ public class BinPacking extends AbstractProblem{
 			case 0:// to check
 				model.arithm(minLoad, "=", 17).post();
 				while(model.solve()){
-                    solutions.add(new Solution(true,model));
+                    solutions.add(new Solution(model).record());
 					nbOpt ++;
 				}
 				System.out.println("There are "+nbOpt+" optima");

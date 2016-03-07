@@ -228,7 +228,7 @@ public class RegularTest {
         model.getSolver().showSolutions();
         List<Solution> solutions = new ArrayList<>();
         while (model.solve()) {
-            solutions.add(new Solution(true, model));
+            solutions.add(new Solution(model).record());
         }
 
         out.println(solutions);
