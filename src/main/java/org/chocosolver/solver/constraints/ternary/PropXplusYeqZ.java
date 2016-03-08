@@ -85,8 +85,7 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
      */
     public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z, boolean enableAC) {
         super(new IntVar[]{X,Y,Z}, PropagatorPriority.TERNARY, false);
-        allbounded = !enableAC
-                || (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
+        allbounded = !enableAC || (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
         r1 = new IntIterableRangeSet();
         r2 = new IntIterableRangeSet();
         r3 = new IntIterableRangeSet();
@@ -94,7 +93,14 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        while (filterPlus(z, x, y) | filterMinus(x, z, y) | filterMinus(y, z, x));
+        /*while */
+        boolean loop;
+        do {
+            loop = filterPlus(z, x, y);
+            loop |= filterMinus(x, z, y);
+            loop |= filterMinus(y, z, x);
+            loop &= allbounded; // loop only when BC is selected
+        }while (loop);
     }
 
     /**

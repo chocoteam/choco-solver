@@ -36,15 +36,14 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.constraints.Operator.EQ;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
-import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.*;
-import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.*;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.randomIntBound;
+import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.randomVar;
 import static org.testng.Assert.*;
 
 /**
@@ -340,7 +339,38 @@ public class ViewsTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testTernArithm() {
+    public void testTernArithmBC() {
+        // note did not pass because PropXplusYeqZ did not reach a fix point
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public boolean enableACOnTernarySum() {
+                return true;
+            }
+        });
+        IntVar x = model.intVar("x", 0, 2, false);
+        IntVar y = model.intVar("y", 0, 2, false);
+        IntVar z = model.intVar("Z", -2, 2, false);
+        IntVar absZ = model.intVar("|Z|", 0, 2, false);
+        model.absolute(absZ,z).post();
+        System.out.println(model.arithm(x,"-",y, "=", z));
+        model.arithm(x,"-",y, "=", z).post(); // test passes if added twice
+        model.arithm(absZ,"=",1).post();
+        model.arithm(y,"=",0).post();
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        System.out.println("x - y = z");
+        System.out.println(x);
+        System.out.println(y);
+        System.out.println(z);
+        Assert.assertTrue(x.isInstantiatedTo(1));
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testTernArithmAC() {
         // note did not pass because PropXplusYeqZ did not reach a fix point
         Model model = new Model();
         IntVar x = model.intVar("x", 0, 2, false);
