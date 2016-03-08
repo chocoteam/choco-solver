@@ -93,7 +93,7 @@ public class PropSat extends Propagator<BoolVar> {
         super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
         this.vars = new BoolVar[0];    // erase model.ONE from the variable scope
 
-        this.indices_ = new TObjectIntHashMap<>();
+        this.indices_ = new TObjectIntHashMap<>(16,.5f, -1);
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = model.getEnvironment().makeInt();
@@ -195,16 +195,31 @@ public class PropSat extends Propagator<BoolVar> {
      * @param expr a boolean variable
      * @return its literal
      */
-    public int Literal(BoolVar expr) {
-        if (indices_.containsKey(expr)) {
-            return makeLiteral(indices_.get(expr), true);
-        } else {
-            int var = sat_.newVariable();
+    public int makeVar(BoolVar expr) {
+        int var = indices_.get(expr);
+        if (var == -1) {
+            var = sat_.newVariable();
             assert (vars.length == var);
             addVariable(expr);
             indices_.put(expr, var);
-            return makeLiteral(var, true);
         }
+        return var;
+    }
+
+
+    /**
+     * Creates, or returns if already existing, the literal corresponding to :
+     * <p>
+     * <code>expr</code> is <tt>true</tt>
+     * <p>
+     * The negation of the literal is managed outside.
+     *
+     * @param expr a boolean variable
+     * @param sign true for even
+     * @return its literal
+     */
+    public int makeLiteral(BoolVar expr, boolean sign) {
+        return SatSolver.makeLiteral(makeVar(expr), sign);
     }
 
     /**
@@ -221,7 +236,7 @@ public class PropSat extends Propagator<BoolVar> {
             }
             int var = index;
             boolean sign = vars[index].getValue() != 0;
-            int lit = makeLiteral(var, sign);
+            int lit = SatSolver.makeLiteral(var, sign);
             boolean fail = !sat_.propagateOneLiteral(lit);
             // Remark: explanations require to instantiated variables even if fail is set to true
             sat_trail_.set(sat_.trailMarker());
@@ -336,11 +351,6 @@ public class PropSat extends Propagator<BoolVar> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static void declareVariable(PropSat sat, BoolVar var) {
-        //CHECK(sat.Check(var));
-        sat.Literal(var);
-    }
-
     @Override
     public boolean why(RuleStore ruleStore, IntVar bvar, IEventType evt, int bvalue) {
         if (inClauses == null) {
@@ -355,7 +365,7 @@ public class PropSat extends Propagator<BoolVar> {
         // get the index of the variable in the sat solver
         int var = indices_.get(bvar);
         boolean new_value = bvar.getValue() != 0;
-        int lit = makeLiteral(var, new_value);
+        int lit = SatSolver.makeLiteral(var, new_value);
         int neg = negated(lit);
         // A. implications:
         // simply iterate over implies_ and add the instantiated variables

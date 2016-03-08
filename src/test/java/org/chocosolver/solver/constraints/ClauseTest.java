@@ -302,7 +302,7 @@ public class ClauseTest {
         for (int i = 1; i < n; i++) {
             e.worldPush();
             bs[i] = s.boolVar("b" + i);
-            sat.addLearnt(sat.Literal(bs[i]));
+            sat.addLearnt(sat.makeLiteral(bs[i], true));
             s.getSolver().propagate();
             Assert.assertTrue(bs[i].isInstantiatedTo(1));
         }

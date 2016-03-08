@@ -133,12 +133,12 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     /**
      * The standard output stream (default: System.out)
      */
-    private PrintStream out = System.out;
+    private transient PrintStream out = System.out;
 
     /**
      * The standard error stream (default: System.err)
      */
-    private PrintStream err = System.err;
+    private transient PrintStream err = System.err;
 
     /** The propagate component of this search loop */
     private Propagate P;

@@ -133,7 +133,7 @@ public class ParetoOptimizer implements IMonitorSolution {
             symbol = Operator.LT;
         }
         for (int i = 0; i < n; i++) {
-            lits[i] = psat.Literal(model.arithm(objectives[i], symbol.toString(), vals[i]).reify());
+            lits[i] = psat.makeLiteral(model.arithm(objectives[i], symbol.toString(), vals[i]).reify(), true);
         }
         psat.addLearnt(lits);
     }
