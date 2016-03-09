@@ -249,8 +249,8 @@
                         </property>
                     </properties>
                     <!--<groups>1s,10s,1m,10m,30m</groups>-->
-                    <parallel>methods</parallel>
-                    <threadCount>4</threadCount>
+                    <!--<parallel>methods</parallel>
+                    <threadCount>4</threadCount>-->
                 </configuration>
             </plugin>
             <plugin>

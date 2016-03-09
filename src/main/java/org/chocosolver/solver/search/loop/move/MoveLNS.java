@@ -226,7 +226,7 @@ public class MoveLNS implements Move {
      * @param solver SearchLoop
      */
     private void doRestart(Solver solver) {
-        if (freshRestart) {
+        if (!freshRestart) {
             neighbor.restrictLess();
         }
         freshRestart = true;
