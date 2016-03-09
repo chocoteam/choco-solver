@@ -210,24 +210,21 @@ public class IntLinCombFactory {
                             || (COEFFS[0] == -1 && COEFFS[1] == -1 && COEFFS[2] == 1)) {
                         return new Constraint(String.format("%s + %s = %s",
                                 VARS[0].getName(), VARS[1].getName(), VARS[2].getName()),
-                                new PropXplusYeqZ(VARS[0], VARS[1], VARS[2],
-                                        VARS[0].getModel().getSettings().enableACOnTernarySum()));
+                                new PropXplusYeqZ(VARS[0], VARS[1], VARS[2]));
                     }
                     // deal with X + Z  = Y
                     if ((COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == 1)
                             || (COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == -1)) {
                         return new Constraint(String.format("%s + %s = %s",
                                 VARS[0].getName(), VARS[2].getName(), VARS[1].getName()),
-                                new PropXplusYeqZ(VARS[0], VARS[2], VARS[1],
-                                        VARS[0].getModel().getSettings().enableACOnTernarySum()));
+                                new PropXplusYeqZ(VARS[0], VARS[2], VARS[1]));
                     }
                     // deal with Y + Z  = X
                     if ((COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == 1)
                             || (COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == -1)) {
                         return new Constraint(String.format("%s + %s = %s",
                                 VARS[1].getName(), VARS[2].getName(), VARS[0].getName()),
-                                new PropXplusYeqZ(VARS[1], VARS[2], VARS[0],
-                                        VARS[0].getModel().getSettings().enableACOnTernarySum()));
+                                new PropXplusYeqZ(VARS[1], VARS[2], VARS[0]));
                     }
                 }
             default:

@@ -33,6 +33,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
@@ -41,8 +43,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
@@ -166,9 +167,13 @@ public class DynamicPostTest {
         final Constraint c2 = model.arithm(X, "=", Z);
         c1.post();
         c2.post();
+        ArrayDeque<Constraint> cs = new ArrayDeque<>();
+        cs.add(c1);
+        cs.add(c2);
         model.getSolver().plugMonitor((IMonitorSolution) () -> {
-            model.unpost(c1);
-            model.unpost(c2);
+            while(cs.size()>0){
+                model.unpost(cs.pop());
+            }
         });
         model.getSolver().set(engine.make(model));
         while (model.solve()) ;
@@ -176,18 +181,18 @@ public class DynamicPostTest {
         assertEquals(model.getNbCstrs(), 0);
     }
 
-    private static void popAll(List<Constraint> stack, Model model) {
-        stack.forEach(model::unpost);
+    private static void popAll(ArrayDeque<Constraint> stack, Model model) {
+        while(stack.size()>0) {
+            model.unpost(stack.poll());
+        }
     }
 
-    private static void push(Constraint constraint, List<Constraint> stack, Model model) {
+    private static void push(Constraint constraint, ArrayDeque<Constraint> stack, Model model) {
         stack.add(constraint);
         constraint.post();
     }
 
-    @SuppressWarnings("UnusedDeclaration")
-    @Test(groups="1s", timeOut=60000)
-    public void testJLpareto() {
+    private void pareto(boolean clauses, boolean svnQ){
         // Objectives are to maximize "a" and maximize "b".
         Model model = new Model();
         IntVar a = model.intVar("a", 0, 2, false);
@@ -197,7 +202,7 @@ public class DynamicPostTest {
         model.arithm(a, "+", b, "<", 3).post();
 
         // START extra variables/constraints for guided improvement algorithm
-        List<Constraint> stack = new ArrayList<>();
+        ArrayDeque<Constraint> stack = new ArrayDeque<>();
         IntVar lbA = model.intVar("lbA", 0, 2, false);
         IntVar lbB = model.intVar("lbB", 0, 2, false);
         BoolVar aSBetter = model.arithm(a, ">", lbA).reify();
@@ -212,6 +217,11 @@ public class DynamicPostTest {
                 model.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
         Solver r = model.getSolver();
+        r.set(
+                svnQ?
+                        new SevenQueuesPropagatorEngine(model):
+                        new TwoBucketPropagationEngine(model)
+        );
         r.set(inputOrderLBSearch(a, b, c, lbA, lbB));
         int nbSolution = 0;
         while (model.solve()) {
@@ -249,11 +259,28 @@ public class DynamicPostTest {
             model.getSolver().getEngine().flush();
             model.getSolver().reset();
 
-            model.or(
-                    model.arithm(a, ">", bestA),
-                    model.arithm(b, ">", bestB)).post();
+            if(clauses) {
+                model.addClausesBoolOrArrayEqualTrue(new BoolVar[]{
+                        model.arithm(a, ">", bestA).reify(),
+                        model.arithm(b, ">", bestB).reify()
+                });
+            }else{
+                model.or(
+                        model.arithm(a, ">", bestA),
+                        model.arithm(b, ">", bestB)).post();
+            }
         }
         assertEquals(9, nbSolution);
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    @Test(groups="1s", timeOut=60000)
+    public void testJLpareto() {
+        pareto(false, true);
+        pareto(false, false);
+        pareto(true, true);
+        pareto(true, false);
+
     }
 
     @Test(groups="1s", timeOut=60000)

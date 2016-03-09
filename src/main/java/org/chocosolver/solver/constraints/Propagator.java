@@ -273,8 +273,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * Should not be called by the user.
      *
      * @param c the constraint containing this propagator
+     * @throws SolverException if the propagator is declared in more than one constraint
      */
-    public void defineIn(Constraint c) {
+    public void defineIn(Constraint c) throws SolverException{
+        if((constraint != null && constraint.getStatus() != Constraint.Status.FREE)
+            || (c.getStatus() != Constraint.Status.FREE)){
+            throw new SolverException("This propagator is already defined in a constraint. " +
+                    "This happens when a constraint is reified and posted.");
+        }
         this.constraint = c;
     }
 
@@ -372,42 +378,62 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * informs that this propagator is now active. Should not be called by the user.
+     * @throws SolverException if the propagator cannot be activated due to its current state
      */
-    public void setActive() {
-        assert isStateLess() : "the propagator is already active, it cannot set active";
-        state = ACTIVE;
-        model.getEnvironment().save(operations[NEW]);
+    public void setActive() throws SolverException{
+        if(isStateLess()) {
+            state = ACTIVE;
+            model.getEnvironment().save(operations[NEW]);
+        }else{
+            throw new SolverException("Try to activate a propagator already active, passive or reified.\n" +
+                this + " of "+ this.getConstraint());
+        }
     }
 
     /**
      * informs that this reified propagator must hold. Should not be called by the user.
+     * @throws SolverException if the propagator cannot be activated due to its current state
      */
-    public void setReifiedTrue() {
-        assert isReifiedAndSilent() : "the propagator was not in a silent reified state";
-        state = ACTIVE;
-        model.getEnvironment().save(operations[REIFIED]);
+    public void setReifiedTrue() throws SolverException{
+        if(isReifiedAndSilent()) {
+            state = ACTIVE;
+            model.getEnvironment().save(operations[REIFIED]);
+        }else{
+            throw new SolverException("Reification process tries to force activation of a propagator already active or passive.\n" +
+                    this + " of "+ this.getConstraint());
+        }
     }
 
     /**
      * informs that this reified propagator may not hold. Should not be called by the user.
+     * @throws SolverException if the propagator cannot be reified due to its current state
      */
-    public void setReifiedSilent() {
-        assert isStateLess() || isReifiedAndSilent() : "the propagator was neither stateless nor reified";
-        state = REIFIED;
+    public void setReifiedSilent() throws SolverException{
+        if (isStateLess() || isReifiedAndSilent()) {
+            state = REIFIED;
+        } else {
+            throw new SolverException("Reification process try to reify a propagator already active or posted.\n" +
+                    this + " of "+ this.getConstraint());
+        }
     }
 
     /**
      * informs that this propagator is now passive : it holds but no further filtering can occur,
      * so it is useless to propagate it. Should not be called by the user.
+     * @throws SolverException if the propagator cannot be set passive due to its current state
      */
     @SuppressWarnings({"unchecked"})
-    public void setPassive() {
-        if (!isCompletelyInstantiated()) {// useless call to setPassive if all vars are instantiated
-            assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
+    public void setPassive() throws SolverException{
+        // Note: calling isCompletelyInstantiated() to avoid next steps may lead to error when
+        // dealing with reification and dynamic addition.
+        if(isActive()){
             state = PASSIVE;
             model.getEnvironment().save(operations[ACTIVE]);
             //TODO: update var mask back
             model.getSolver().getEngine().desactivatePropagator(this);
+        }else{
+            throw new SolverException("Try to passivate a propagator already passive or reified.\n"+
+                    this + " of "+ this.getConstraint());
         }
     }
 

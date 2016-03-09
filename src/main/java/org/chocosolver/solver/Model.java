@@ -42,17 +42,11 @@ import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.constraints.reification.ConDisConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
-import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.*;
-import org.chocosolver.util.ESat;
-import org.chocosolver.util.criteria.Criterion;
 
 import java.io.*;
 import java.util.Arrays;
@@ -123,12 +117,6 @@ public class Model implements Serializable, IModel {
     /** Counter used to set ids to variables and propagators */
     private int id = 1;
 
-    /** Basic TRUE constraint, cached to avoid multiple useless occurrences */
-    private Constraint TRUE;
-
-    /** Basic FALSE constraint, cached to avoid multiple useless occurrences */
-    private Constraint FALSE;
-
     /** Basic ZERO constant, cached to avoid multiple useless occurrences. */
     private BoolVar ZERO;
 
@@ -136,13 +124,13 @@ public class Model implements Serializable, IModel {
     private BoolVar ONE;
 
     /** A MiniSat instance, useful to deal with clauses*/
-    private SatConstraint minisat;
+    SatConstraint minisat;
 
     /** A MiniSat instance adapted to nogood management */
-    private NogoodConstraint nogoods;
+    NogoodConstraint nogoods;
 
     /** A CondisConstraint instance adapted to constructive disjunction management */
-    private ConDisConstraint condis;
+    ConDisConstraint condis;
 
     /** An Ibex (continuous constraint model) instance */
     private Ibex ibex;
@@ -271,10 +259,7 @@ public class Model implements Serializable, IModel {
      * @return a "true" constraint
      */
     public Constraint TRUE() {
-        if (TRUE == null) {
-            TRUE = new Constraint("TRUE cstr", new PropTrue(ONE()));
-        }
-        return TRUE;
+        return new Constraint("TRUE cstr", new PropTrue(ONE()));
     }
 
     /**
@@ -282,10 +267,7 @@ public class Model implements Serializable, IModel {
      * @return a "false" constraint
      */
     public Constraint FALSE() {
-        if (FALSE == null) {
-            FALSE = new Constraint("FALSE cstr", new PropFalse(ZERO()));
-        }
-        return FALSE;
+        return new Constraint("FALSE cstr", new PropFalse(ZERO()));
     }
 
     /**
@@ -651,8 +633,9 @@ public class Model implements Serializable, IModel {
      * - checks for restrictions
      *
      * @param cs Constraints
+     * @throws SolverException if the constraint is posted twice, posted although reified or reified twice.
      */
-    public void post(Constraint... cs) {
+    public void post(Constraint... cs) throws SolverException{
         _post(true, cs);
     }
 
@@ -661,15 +644,16 @@ public class Model implements Serializable, IModel {
      *
      * @param permanent specify whether the constraints are added permanently (if set to true) or temporary (ie, should be removed on backtrack)
      * @param cs        list of constraints
+     * @throws SolverException if a constraint is posted twice, posted although reified or reified twice.
      */
-    private void _post(boolean permanent, Constraint... cs) {
+    private void _post(boolean permanent, Constraint... cs) throws SolverException{
         boolean dynAdd = false;
         // check if the resolution already started -> if true, dynamic addition
         IPropagationEngine engine = getSolver().getEngine();
         if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
             dynAdd = true;
         }
-        // then store the constraints
+        // then prepare storage of the constraints
         if (cIdx + cs.length >= cstrs.length) {
             int nsize = cstrs.length;
             while (cIdx + cs.length >= nsize) {
@@ -679,20 +663,16 @@ public class Model implements Serializable, IModel {
             cstrs = new Constraint[nsize];
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
-        System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
-        cIdx += cs.length;
         // specific behavior for dynamic addition and/or reified constraints
         for (int i = 0; i < cs.length; i++) {
             if (dynAdd) {
                 engine.dynamicAddition(permanent, cs[i].getPropagators());
             }
-            if (cs[i].isReified()) {
-                try {
-                    cs[i].reify().setToTrue(Cause.Null);
-                } catch (ContradictionException e) {
-                    throw new SolverException("post a constraint whose reification BoolVar is already set to false: no solution can exist");
-                }
+            for(Propagator p: cs[i].getPropagators()){
+                p.getConstraint().checkNewStatus(Constraint.Status.POSTED);
             }
+            cs[i].declareAs(Constraint.Status.POSTED, cIdx);
+            cstrs[cIdx++] = cs[i];
         }
     }
 
@@ -700,6 +680,7 @@ public class Model implements Serializable, IModel {
      * Posts constraints <code>cs</code> temporary, that is, they will be unposted upon backtrack.
      * @param cs a set of constraints to add
      * @throws ContradictionException if the addition of constraints <code>cs</code> detects inconsistency.
+     * @throws SolverException if a constraint is posted twice, posted although reified or reified twice.
      */
     public void postTemp(Constraint... cs) throws ContradictionException {
         for(Constraint c:cs) {
@@ -721,33 +702,29 @@ public class Model implements Serializable, IModel {
      * Remove permanently the constraint <code>c</code> from the constraint network.
      *
      * @param c the constraint to remove
+     * @throws SolverException if a constraint is unknown from the model
      */
-    public void unpost(Constraint c) {
+    public void unpost(Constraint c)  throws SolverException{
         // 1. look for the constraint c
-        int idx = 0;
-        while (idx < cIdx && cstrs[idx] != c) {
-            idx++;
-        }
-        IPropagationEngine engine = getSolver().getEngine();
+        int idx = c.getCidxInModel();
+        c.declareAs(Constraint.Status.FREE, -1);
         // 2. remove it from the network
-        while (idx < cIdx) {
-            Constraint cm = cstrs[--cIdx];
+        Constraint cm = cstrs[--cIdx];
+        if(idx < cIdx) {
             cstrs[idx] = cm;
-            cstrs[cIdx] = null;
-            // 3. check if the resolution already started -> if true, dynamic deletion
-            if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
-                engine.dynamicDeletion(c.getPropagators());
-            }
-            // 4. remove the propagators of the constraint from its variables
-            for (Propagator prop : c.getPropagators()) {
-                for (int v = 0; v < prop.getNbVars(); v++) {
-                    prop.getVar(v).unlink(prop);
-                }
-            }
-            // the constraint can have been posted more than once "accidentally" (but that's not a big deal, expect for
-            // performance issue) but all occurrences should be removed now.
-            while (idx < cIdx && cstrs[idx] != c) {
-                idx++;
+            cstrs[idx].declareAs(Constraint.Status.FREE, -1); // needed, to avoid throwing an exception
+            cstrs[idx].declareAs(Constraint.Status.POSTED, idx);
+        }
+        cstrs[cIdx] = null;
+        // 3. check if the resolution already started -> if true, dynamic deletion
+        IPropagationEngine engine = getSolver().getEngine();
+        if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
+            engine.dynamicDeletion(c.getPropagators());
+        }
+        // 4. remove the propagators of the constraint from its variables
+        for (Propagator prop : c.getPropagators()) {
+            for (int v = 0; v < prop.getNbVars(); v++) {
+                prop.getVar(v).unlink(prop);
             }
         }
     }

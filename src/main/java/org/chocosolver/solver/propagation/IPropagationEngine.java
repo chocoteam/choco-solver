@@ -32,6 +32,7 @@ package org.chocosolver.solver.propagation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -109,8 +110,9 @@ public interface IPropagationEngine extends Serializable {
      * Build up internal structure, if not yet done, in order to allow propagation.
      * If new constraints are added after having initializing the engine, dynamic addition is used.
      * A call to clear erase the internal structure, and allow new initialisation.
+     * @throws SolverException if a constraint is declared more than once in this propagation engine
      */
-    default void initialize(){}
+    default void initialize() throws SolverException{}
 
     /**
      * Is the engine initialized?
@@ -202,8 +204,9 @@ public interface IPropagationEngine extends Serializable {
      *
      * @param permanent does the constraint is permanently added
      * @param ps        propagators to add
+     * * @throws SolverException if a constraint is declared more than once in this propagation engine
      */
-    default void dynamicAddition(boolean permanent, Propagator... ps) {
+    default void dynamicAddition(boolean permanent, Propagator... ps) throws SolverException{
     }
 
     /**

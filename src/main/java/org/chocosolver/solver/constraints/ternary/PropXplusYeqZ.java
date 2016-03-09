@@ -81,11 +81,10 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
      * @param X an integer variable
      * @param Y an integer variable
      * @param Z an integer variable
-     * @param enableAC set to <tt>true</tt> to enable AC filter algorithm
      */
-    public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z, boolean enableAC) {
+    public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X,Y,Z}, PropagatorPriority.TERNARY, false);
-        allbounded = !enableAC || (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
+        allbounded = !model.getSettings().enableACOnTernarySum() || (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
         r1 = new IntIterableRangeSet();
         r2 = new IntIterableRangeSet();
         r3 = new IntIterableRangeSet();

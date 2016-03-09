@@ -187,6 +187,18 @@ public class IntMap implements Serializable{
     }
 
     /**
+     * Remove the value to which the specified key is mapped.
+     *
+     * @param key   key with which the specified value is to be cleared
+     */
+    public void clear(int key) {
+        if (key >= 0 && key <= elements.length) {
+            elements[key] = FREE;
+        }
+    }
+
+
+    /**
      * Removes all of the mappings from this map.
      * The map will be empty after this call returns.
      */

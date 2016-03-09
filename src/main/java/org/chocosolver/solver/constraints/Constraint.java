@@ -31,6 +31,7 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.PropOpposite;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
@@ -55,18 +56,54 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
  */
 public class Constraint implements Serializable {
 
-    // propagators of the constraint (they will filter domains and eventually check solutions)
-    final protected Propagator[] propagators;
+    /**
+     * Status of this constraint wrt the model
+     */
+    public enum Status {
+        /**
+         * Indicate that this constraint is posted in the model
+         */
+        POSTED,
+        /**
+         * Indicate that this constraint is reified in the model
+         */
+        REIFIED,
+        /**
+         * Indicate that this constraint is not posted or reified yet
+         */
+        FREE
+    }
 
-    // for reification
+    /**
+     * For serialization purpose
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
+     *  Propagators of the constraint (they will filter domains and eventually check solutions)
+     */
+    final protected Propagator[] propagators;
+    /**
+     * BoolVar that reifies this constraint, unique.
+     */
     BoolVar boolReif;
+    /**
+     * Opposite constraint of this constraint, unique.
+     */
     Constraint opposite;
 
-    // name
+    /**
+     * Status of this constraint in the model
+     */
+    Status mStatus;
+    /**
+     * Index of this constraint in the model data structure
+     */
+    int cidx;
+    /**
+     * Name of this constraint
+     */
     protected String name;
-
-    // serialization stuff
-    private static final long serialVersionUID = 1L;
 
     /**
      * Make a new constraint defined as a set of given propagators
@@ -80,6 +117,8 @@ public class Constraint implements Serializable {
         }
         this.name = name;
         this.propagators = propagators;
+        this.mStatus = Status.FREE;
+        this.cidx = -1;
         for (int i = 0; i < propagators.length; i++) {
             propagators[i].defineIn(this);
         }
@@ -147,10 +186,16 @@ public class Constraint implements Serializable {
      */
     public final void reifyWith(BoolVar bool) {
         Model s = propagators[0].getModel();
+        if (opposite == null) {
+            opposite = makeOpposite();
+            opposite.opposite = this;
+        }
         if (boolReif == null) {
             boolReif = bool;
-            new ReificationConstraint(boolReif, this, getOpposite()).post();
-        } else if(bool!=boolReif) {
+            assert opposite.boolReif == null;
+            opposite.boolReif = this.boolReif.not();
+            new ReificationConstraint(boolReif, this, opposite).post();
+        } else if (bool != boolReif) {
             s.arithm(bool, "=", boolReif).post();
         }
     }
@@ -163,42 +208,107 @@ public class Constraint implements Serializable {
     public final BoolVar reify() {
         if (boolReif == null) {
             Model s = propagators[0].getModel();
-            boolReif = s.boolVar(randomName());
-            new ReificationConstraint(boolReif, this, getOpposite()).post();
+            reifyWith(s.boolVar(randomName()));
         }
         return boolReif;
     }
 
-	/**
+    /**
      * Posts the constraint to its model so that the constraint must be satisfied.
      * This should not be reified.
      */
-    public final void post(){
+    public final void post() {
         propagators[0].getModel().post(this);
     }
 
     /**
-     * Get/make the opposite constraint of this
-     * The default opposite constraint does not filter domains but fails if this constraint is satisfied
+     * For internal usage only, declare the status of this constraint in the model
+     * and, if need be, its position in the constraint list.
+     * @param aStatus status of this constraint in the model
+     * @param idx position of this constraint in the constraint list.
+     * @throws SolverException if the constraint a incoherent status is declared
+     */
+    public final void declareAs(Status aStatus, int idx) throws SolverException {
+        checkNewStatus(aStatus);
+        mStatus = aStatus;
+        cidx = idx;
+    }
+
+    /**
+     * Check if the new status is not in conflict with the current one
+     * @param aStatus new status of the constraint
+     * @throws SolverException if the constraint a incoherent status is declared
+     */
+    public final void checkNewStatus(Status aStatus) throws SolverException{
+        switch (mStatus) {
+            default:
+            case FREE:
+                if(aStatus == Status.FREE){
+                    throw new SolverException("Try to remove a constraint which is not known from the model.");
+                }
+                break;
+            case POSTED:
+                switch (aStatus) {
+                    case POSTED:
+                        throw new SolverException("Try to post a constraint which is already posted in the model.");
+                    case REIFIED:
+                        throw new SolverException("Try to post a constraint which is already reified in the model.");
+                    default:
+                        break;
+                }
+                break;
+            case REIFIED:
+                switch (aStatus) {
+                    case POSTED:
+                        throw new SolverException("Try to reify a constraint which is already posted in the model.");
+                    case REIFIED:
+                        throw new SolverException("Try to reify a constraint which is already reified in the model.");
+                    default:
+                        break;
+                }
+                break;
+        }
+    }
+
+    /**
+     * @return the {@link Status} of this constraint
+     */
+    public final Status getStatus() {
+        return mStatus;
+    }
+
+    /**
+     * @return the position of this constraint in the model
+     */
+    public int getCidxInModel() {
+        return cidx;
+    }
+
+    /**
+     * Get the opposite constraint of this constraint.
+     * At first call, it creates the opposite constraint,
+     * links them together (the opposite constraint of this opposite constraint is this constraint)
+     * and returns the opposite.
+     * Next calls will return the previously created opposite constraint.
+     * In other words, there can be only one opposite per instance of constraint.
+     * The default opposite constraint does not filter domains but fails if this constraint is satisfied.
      *
      * @return the opposite constraint of this
      */
-    public final Constraint getOpposite() {
-        reify();
+    public Constraint getOpposite() {
         if (opposite == null) {
             opposite = makeOpposite();
             opposite.opposite = this;
-            opposite.boolReif = boolReif.not();
         }
         return opposite;
     }
 
     /**
-     * Make the opposite constraint of this
+     * Make the opposite constraint of this.
      * BEWARE: this method should never be called by the user
      * but it can be overridden to provide better constraint negations
      */
-    public Constraint makeOpposite() {
+    protected Constraint makeOpposite() {
         Variable[] vars;
         if (propagators.length == 1) {
             vars = propagators[0].vars;
@@ -239,19 +349,17 @@ public class Constraint implements Serializable {
         return PropagatorPriority.get(priority);
     }
 
-	/**
+    /**
      * Creates a new constraint with all propagators of toMerge
      * @param name name of the new constraint
      * @param toMerge a set of constraints to merge in this
      * @return a new constraint with all propagators of toMerge
      */
-    public static Constraint merge(String name, Constraint... toMerge){
+    public static Constraint merge(String name, Constraint... toMerge) {
         ArrayList<Propagator> props = new ArrayList<>();
-        for(Constraint c:toMerge){
-            for(Propagator p:c.getPropagators()){
-                props.add(p);
-            }
+        for (Constraint c : toMerge) {
+            Collections.addAll(props, c.getPropagators());
         }
-        return new Constraint(name,props.toArray(new Propagator[0]));
+        return new Constraint(name, props.toArray(new Propagator[props.size()]));
     }
 }

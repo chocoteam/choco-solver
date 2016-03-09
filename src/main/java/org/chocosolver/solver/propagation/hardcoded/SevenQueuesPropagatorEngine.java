@@ -171,7 +171,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void initialize() {
+    public void initialize() throws SolverException{
         if (!init) {
             List<Propagator> _propagators = new ArrayList<>();
             Constraint[] constraints = model.getCstrs();
@@ -187,9 +187,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             p2i = new IntMap(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
                 if(p2i.containsKey(propagators[j].getId())){
-                    throw new SolverException("A propagator of "+propagators[j].getConstraint()+" is added more than once" +
-                            " into the propagation engine." +
-                            "\nThis may lead to incoherent behavior.");
+                    throw new SolverException("The following propagator " +
+                            "is declared more than once into the propagation engine " +
+                            "(this happens when a constraint is posted twice " +
+                            "or when a posted constraint is also reified.)\n" +
+                            propagators[j]+" of "+propagators[j].getConstraint());
                 }
                 p2i.put(propagators[j].getId(), j);
             }
@@ -400,7 +402,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void dynamicAddition(boolean permanent, Propagator... ps) {
+    public void dynamicAddition(boolean permanent, Propagator... ps) throws SolverException{
         int osize = propagators.length;
         int nbp = ps.length;
         int nsize = osize + nbp;
@@ -410,9 +412,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
             if(p2i.containsKey(propagators[j].getId())){
-                throw new SolverException("A propagator of "+propagators[j].getConstraint()+" is added more than once" +
-                        " into the propagation engine." +
-                        "\nThis may lead to incoherent behavior.");
+                throw new SolverException("The following propagator " +
+                        "is declared more than once into the propagation engine " +
+                        "(this happens when a constraint is posted twice " +
+                        "or when a posted constraint is also reified.)\n" +
+                        propagators[j]+" of "+propagators[j].getConstraint());
             }
             p2i.put(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
@@ -467,6 +471,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             Propagator toMove = propagators[nsize];
             int idtd = p2i.get(toDelete.getId());
             int idtm = p2i.get(toMove.getId());
+            p2i.clear(toDelete.getId());
 
             assert idtd <= idtm : "wrong id for prop to delete";
 
