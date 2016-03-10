@@ -256,6 +256,17 @@ public class PropSat extends Propagator<BoolVar> {
     }
 
 
+    public void beforeAddingClauses(){
+        if (sat_trail_.get() < sat_.trailMarker()) {
+            sat_.cancelUntil(sat_trail_.get());
+            assert (sat_trail_.get() == sat_.trailMarker());
+        }
+    }
+
+    public void afterAddingClauses(){
+        storeEarlyDeductions();
+    }
+
     /**
      * Add a clause to SAT solver
      *
@@ -264,54 +275,6 @@ public class PropSat extends Propagator<BoolVar> {
      */
     public boolean addClause(TIntList lits) {
         boolean result = sat_.addClause(lits);
-        storeEarlyDeductions();
-        return result;
-    }
-
-    /**
-     * Add empty clause, make SAT solver fails
-     *
-     * @return <tt>false</tt>
-     */
-    public boolean addEmptyClause() {
-        return sat_.addEmptyClause();
-    }
-
-    /**
-     * Add unit clause to SAT solver
-     *
-     * @param p unit clause
-     * @return <tt>false</tt> if failure is detected
-     */
-    public boolean addClause(int p) {
-        boolean result = sat_.addClause(p);
-        storeEarlyDeductions();
-        return result;
-    }
-
-    /**
-     * Add binary clause to SAT solver
-     *
-     * @param p literal
-     * @param q literal
-     * @return <tt>false</tt> if failure is detected
-     */
-    public boolean addClause(int p, int q) {
-        boolean result = sat_.addClause(p, q);
-        storeEarlyDeductions();
-        return result;
-    }
-
-    /**
-     * Add ternary clause to SAT solver
-     *
-     * @param p literal
-     * @param q literal
-    * @param r literal
-     * @return <tt>false</tt> if failure is detected
-     */
-    public boolean addClause(int p, int q, int r) {
-        boolean result = sat_.addClause(p, q, r);
         storeEarlyDeductions();
         return result;
     }

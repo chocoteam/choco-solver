@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.nary.cnf;
 
 import org.chocosolver.sat.PropSat;
-import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.util.ESat;
@@ -60,10 +59,6 @@ public class SatConstraint extends Constraint {
 			}
 		}
 		return so;
-	}
-
-	public SatSolver getSatSolver() {
-		return miniSat.getSatSolver();
 	}
 
 	public PropSat getPropSat() {
