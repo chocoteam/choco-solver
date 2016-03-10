@@ -29,11 +29,13 @@
  */
 package org.chocosolver.util.objects.setDataStructures;
 
-public enum SetType {
-	BIPARTITESET,
-    LINKED_LIST,
-	BITSET,
-	FIXED_ARRAY,
-	FIXED_INTERVAL
-}
+/**
+ * @author Alexandre LEBRUN
+ */
+public class BipartiteSetTest extends ISetTest {
 
+    @Override
+    public ISet create(int offset) {
+        return SetFactory.makeBipartiteSet(offset);
+    }
+}

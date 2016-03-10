@@ -36,12 +36,12 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import java.util.Iterator;
 
 /**
- * Interval set of the form [min, max]
- * BEWARE: Cannot add/remove elements other than bounds
+ * Constant Interval set of the form [min, max]
+ * BEWARE: Cannot add/remove elements
  *
  * @author Jean-Guillaume Fages
  */
-public class Set_Interval implements ISet {
+public class Set_CstInterval implements ISet {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -55,19 +55,16 @@ public class Set_Interval implements ISet {
 	//***********************************************************************************
 
 	/**
-	 * Creates a set of integers encoded as an interval [min, max]
-	 * Initially empty
-	 */
-	public Set_Interval() {
-		this(0,-1);
-	}
-
-	/**
-	 * Creates a set of integers encoded as an interval [min, max]
+	 * Creates a constant set of integers encoded as an interval [min, max]
 	 * @param min lowest value in the set
 	 * @param max highest value in the set
 	 */
-	public Set_Interval(int min, int max) {
+	public Set_CstInterval(int min, int max) {
+		if(min>max){
+			throw new UnsupportedOperationException("Wrong interval definition ["+min+", "+max+"] for Set_CstInterval (lb should be lower or equal than ub)");
+		}
+		assert min!=Integer.MIN_VALUE;
+		assert max!=Integer.MAX_VALUE;
 		this.lb = min;
 		this.ub = max;
 	}
@@ -78,26 +75,12 @@ public class Set_Interval implements ISet {
 
 	@Override
 	public boolean add(int element) {
-		int s = getSize();
-		if(lb-1 == element){
-			lb--;
-		}
-		if(ub+1 == element){
-			ub++;
-		}
-		return s!=getSize();
+		throw new UnsupportedOperationException("It is forbidden to add an element to a constant set (Set_CstInterval)");
 	}
 
 	@Override
 	public boolean remove(int element) {
-		int s = getSize();
-		if(lb == element){
-			lb++;
-		}
-		if(ub == element){
-			ub--;
-		}
-		return s!=getSize();
+		throw new UnsupportedOperationException("It is forbidden to remove an element from a constant set (Set_CstInterval)");
 	}
 
 	@Override
@@ -112,13 +95,12 @@ public class Set_Interval implements ISet {
 
 	@Override
 	public void clear() {
-		lb = 0;
-		ub = -1;
+		throw new UnsupportedOperationException("It is forbidden to remove an element from a constant set (Set_CstInterval)");
 	}
 
 	@Override
 	public SetType getSetType(){
-		return SetType.INTERVAL;
+		return SetType.FIXED_INTERVAL;
 	}
 
 	@Override

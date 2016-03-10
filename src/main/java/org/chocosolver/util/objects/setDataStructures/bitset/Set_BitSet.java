@@ -154,4 +154,9 @@ public class Set_BitSet extends BitSet implements ISet {
 		st+="}";
 		return st.replace(", }","}");
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj == this;
+	}
 }

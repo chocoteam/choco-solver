@@ -45,7 +45,8 @@ public interface ISet extends Serializable, Iterable<Integer>{
 	 * for(int i:this){
 	 *     //
 	 * }
-	 * @return the default iterator of this set
+	 * Do not use this iterator to make nested loops over {@link ISet} (prefer {@link ISet#newIterator()})
+	 * @return the default iterator (singleton) of this set
 	 */
 	Iterator<Integer> iterator();
 
@@ -60,7 +61,6 @@ public interface ISet extends Serializable, Iterable<Integer>{
 
     /**
      * Add element to the set
-     * Does not guaranty there is no duplications
      *
      * @param element element to add
      * @return true iff element was not in the set and has been added
@@ -68,7 +68,7 @@ public interface ISet extends Serializable, Iterable<Integer>{
     boolean add(int element);
 
     /**
-     * Remove the first occurence of element from the set
+     * Remove the first occurrence of element from the set
      *
      * @param element element to add
      * @return true iff element was in the set and has been removed

@@ -75,7 +75,7 @@ public class DirectedGraph implements IGraph {
             successors[i] = SetFactory.makeSet(type, 0);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeIntervalSet(0,n-1);
+            this.nodes = SetFactory.makeConstantSet(0,n-1);
         } else {
             this.nodes = SetFactory.makeBitSet(0);
         }
@@ -101,7 +101,7 @@ public class DirectedGraph implements IGraph {
             successors[i] = SetFactory.makeStoredSet(type, 0, model);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeIntervalSet(0,n-1);
+            this.nodes = SetFactory.makeConstantSet(0,n-1);
         } else {
             this.nodes = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
         }

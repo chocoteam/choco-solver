@@ -29,11 +29,23 @@
  */
 package org.chocosolver.util.objects.setDataStructures;
 
-public enum SetType {
-	BIPARTITESET,
-    LINKED_LIST,
-	BITSET,
-	FIXED_ARRAY,
-	FIXED_INTERVAL
-}
+import org.testng.annotations.Test;
 
+/**
+ * @author Alexandre LEBRUN
+ */
+public class LinkedListTest extends ISetTest {
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMaxSpan() {
+        ISet set = create();
+
+        set.add(1);
+        set.add(Integer.MAX_VALUE / 2);
+    }
+
+    @Override
+    public ISet create(int offset) {
+        return SetFactory.makeLinkedList();
+    }
+}
