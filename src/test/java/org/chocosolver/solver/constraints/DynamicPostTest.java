@@ -274,13 +274,12 @@ public class DynamicPostTest {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="1s", timeOut=6000000)
     public void testJLpareto() {
         pareto(false, true);
         pareto(false, false);
         pareto(true, true);
         pareto(true, false);
-
     }
 
     @Test(groups="1s", timeOut=60000)

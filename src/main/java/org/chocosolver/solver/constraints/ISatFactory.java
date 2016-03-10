@@ -60,10 +60,12 @@ public interface ISatFactory {
     default boolean addClauses(LogOp TREE) {
         PropSat sat = _me().getMinisat().getPropSat();
         ILogical tree = LogicTreeToolBox.toCNF(TREE, _me());
+        sat.beforeAddingClauses();
+        boolean ret = true;
         if (_me().ONE().equals(tree)) {
-            return addClauseTrue(_me().ONE());
+            ret = addClauseTrue(_me().ONE());
         } else if (_me().ZERO().equals(tree)) {
-            return addClauseTrue(_me().ZERO());
+            ret = addClauseTrue(_me().ZERO());
         } else {
             ILogical[] clauses;
             if (!tree.isLit() && ((LogOp) tree).is(LogOp.Operator.AND)) {
@@ -71,7 +73,6 @@ public interface ISatFactory {
             } else {
                 clauses = new ILogical[]{tree};
             }
-            boolean ret = true;
             // init internal structures
             for (int i = 0; i < clauses.length; i++) {
                 ILogical clause = clauses[i];
@@ -85,11 +86,13 @@ public interface ISatFactory {
                     for (int j = 0; j < bvars.length; j++) {
                         lits.add(sat.makeLiteral(bvars[j], true));
                     }
+                    // TODO: pass by satsolver directly
                     ret &= sat.addClause(lits);
                 }
             }
-            return ret;
         }
+        sat.afterAddingClauses();
+        return ret;
     }
 
     /**
@@ -101,15 +104,18 @@ public interface ISatFactory {
      */
     default boolean addClauses(BoolVar[] POSLITS, BoolVar[] NEGLITS) {
         PropSat sat = _me().getMinisat().getPropSat();
-        TIntList lits = new TIntArrayList(POSLITS.length + NEGLITS.length);
+        sat.beforeAddingClauses();
+        int[] pos = new int[POSLITS.length];
         for (int i = 0; i < POSLITS.length; i++) {
-            lits.add(sat.makeLiteral(POSLITS[i], true));
+            pos[i] = sat.makeVar(POSLITS[i]);
         }
+        int[] neg = new int[NEGLITS.length];
         for (int i = 0; i < NEGLITS.length; i++) {
-            lits.add(sat.makeLiteral(NEGLITS[i], false));
+            neg[i] = sat.makeVar(NEGLITS[i]);
         }
-        sat.addClause(lits);
-        return true;
+        boolean add = sat.getSatSolver().addClause(pos, neg);
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -120,7 +126,10 @@ public interface ISatFactory {
      */
     default boolean addClauseTrue(BoolVar BOOLVAR) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addTrue(sat.makeVar(BOOLVAR));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addTrue(sat.makeVar(BOOLVAR));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -131,7 +140,10 @@ public interface ISatFactory {
      */
     default boolean addClauseFalse(BoolVar BOOLVAR) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addFalse(sat.makeVar(BOOLVAR));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addFalse(sat.makeVar(BOOLVAR));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -143,7 +155,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolEq(BoolVar LEFT, BoolVar RIGHT) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolEq(sat.makeVar(LEFT), sat.makeVar(RIGHT));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolEq(sat.makeVar(LEFT), sat.makeVar(RIGHT));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -155,7 +170,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolLe(BoolVar LEFT, BoolVar RIGHT) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolLe(sat.makeVar(LEFT), sat.makeVar(RIGHT));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolLe(sat.makeVar(LEFT), sat.makeVar(RIGHT));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -167,7 +185,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolLt(BoolVar LEFT, BoolVar RIGHT) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolLt(sat.makeVar(LEFT), sat.makeVar(RIGHT));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolLt(sat.makeVar(LEFT), sat.makeVar(RIGHT));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -179,7 +200,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolNot(BoolVar LEFT, BoolVar RIGHT) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolNot(sat.makeVar(LEFT), sat.makeVar(RIGHT));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolNot(sat.makeVar(LEFT), sat.makeVar(RIGHT));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -191,11 +215,14 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolOrArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
+        sat.beforeAddingClauses();
         int[] vars = new int[BOOLVARS.length];
         for (int i = 0; i < BOOLVARS.length; i++) {
             vars[i] = sat.makeVar(BOOLVARS[i]);
         }
-        return sat.getSatSolver().addBoolOrArrayEqVar(vars, sat.makeVar(TARGET));
+        boolean add = sat.getSatSolver().addBoolOrArrayEqVar(vars, sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -207,11 +234,14 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolAndArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
+        sat.beforeAddingClauses();
         int[] vars = new int[BOOLVARS.length];
         for (int i = 0; i < BOOLVARS.length; i++) {
             vars[i] = sat.makeVar(BOOLVARS[i]);
         }
-        return sat.getSatSolver().addBoolAndArrayEqVar(vars, sat.makeVar(TARGET));
+        boolean add = sat.getSatSolver().addBoolAndArrayEqVar(vars, sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -224,7 +254,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolOrEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolOrEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolOrEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -237,7 +270,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolAndEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolAndEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolAndEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -262,7 +298,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolIsEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolIsEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolIsEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -275,7 +314,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolIsNeqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolIsNeqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolIsNeqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -288,7 +330,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolIsLeVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolIsLeVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolIsLeVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -301,7 +346,10 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolIsLtVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
-        return sat.getSatSolver().addBoolIsLtVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.beforeAddingClauses();
+        boolean add = sat.getSatSolver().addBoolIsLtVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -312,11 +360,14 @@ public interface ISatFactory {
      */
     default boolean addClausesBoolOrArrayEqualTrue(BoolVar[] BOOLVARS) {
         PropSat sat = _me().getMinisat().getPropSat();
+        sat.beforeAddingClauses();
         int[] vars = new int[BOOLVARS.length];
         for (int i = 0; i < BOOLVARS.length; i++) {
             vars[i] = sat.makeVar(BOOLVARS[i]);
         }
-        return sat.getSatSolver().addBoolOrArrayEqualTrue(vars);
+        boolean add = sat.getSatSolver().addBoolOrArrayEqualTrue(vars);
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -337,11 +388,14 @@ public interface ISatFactory {
      */
     default boolean addClausesAtMostOne(BoolVar[] BOOLVARS) {
         PropSat sat = _me().getMinisat().getPropSat();
+        sat.beforeAddingClauses();
         int[] vars = new int[BOOLVARS.length];
         for (int i = 0; i < BOOLVARS.length; i++) {
             vars[i] = sat.makeVar(BOOLVARS[i]);
         }
-        return sat.getSatSolver().addAtMostOne(vars);
+        boolean add = sat.getSatSolver().addAtMostOne(vars);
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -352,11 +406,14 @@ public interface ISatFactory {
      */
     default boolean addClausesAtMostNMinusOne(BoolVar[] BOOLVARS) {
         PropSat sat = _me().getMinisat().getPropSat();
+        sat.beforeAddingClauses();
         int[] vars = new int[BOOLVARS.length];
         for (int i = 0; i < BOOLVARS.length; i++) {
             vars[i] = sat.makeVar(BOOLVARS[i]);
         }
-        return sat.getSatSolver().addAtMostNMinusOne(vars);
+        boolean add = sat.getSatSolver().addAtMostNMinusOne(vars);
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -368,11 +425,14 @@ public interface ISatFactory {
      */
     default boolean addClausesSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
+        sat.beforeAddingClauses();
         int[] vars = new int[BOOLVARS.length];
         for (int i = 0; i < BOOLVARS.length; i++) {
             vars[i] = sat.makeVar(BOOLVARS[i]);
         }
-        return sat.getSatSolver().addSumBoolArrayGreaterEqVar(vars, sat.makeVar(TARGET));
+        boolean add = sat.getSatSolver().addSumBoolArrayGreaterEqVar(vars, sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -384,11 +444,14 @@ public interface ISatFactory {
      */
     default boolean addClausesMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
+        sat.beforeAddingClauses();
         int[] vars = new int[BOOLVARS.length];
         for (int i = 0; i < BOOLVARS.length; i++) {
             vars[i] = sat.makeVar(BOOLVARS[i]);
         }
-        return sat.getSatSolver().addMaxBoolArrayLessEqVar(vars, sat.makeVar(TARGET));
+        boolean add = sat.getSatSolver().addMaxBoolArrayLessEqVar(vars, sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**
@@ -400,14 +463,18 @@ public interface ISatFactory {
      */
     default boolean addClausesSumBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
         PropSat sat = _me().getMinisat().getPropSat();
+        sat.beforeAddingClauses();
+        boolean add;
         if (BOOLVARS.length == 1) {
-            return addClausesBoolLe(BOOLVARS[0], TARGET);
+            add = addClausesBoolLe(BOOLVARS[0], TARGET);
         }
         int[] vars = new int[BOOLVARS.length];
         for (int i = 0; i < BOOLVARS.length; i++) {
             vars[i] = sat.makeVar(BOOLVARS[i]);
         }
-        return sat.getSatSolver().addSumBoolArrayLessEqVar(vars, sat.makeVar(TARGET));
+        add = sat.getSatSolver().addSumBoolArrayLessEqVar(vars, sat.makeVar(TARGET));
+        sat.afterAddingClauses();
+        return add;
     }
 
     /**

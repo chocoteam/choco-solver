@@ -573,7 +573,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     public void updateInvolvedVariables(Propagator p) {
         if (p.reactToFineEvent()) {
             int i = p2i.get(p.getId());
-            assert !schedule_f[i] && schedule_c[i] : "Try to update variable scope during propagation";
+            assert !schedule_f[i] && !schedule_c[i] : "Try to update variable scope during propagation";
             int nbv = p.getNbVars();
             eventmasks[i] = new int[nbv];
             event_f[i] = new IntCircularQueue(nbv);
