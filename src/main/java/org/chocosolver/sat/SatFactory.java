@@ -58,7 +58,7 @@ public interface SatFactory {
             lits.add(makeLiteral(p, true));
         }
         for(int n : NEGVARS){
-            lits.add(makeLiteral(n, true));
+            lits.add(makeLiteral(n, false));
         }
         return _me().addClause(lits);
     }
