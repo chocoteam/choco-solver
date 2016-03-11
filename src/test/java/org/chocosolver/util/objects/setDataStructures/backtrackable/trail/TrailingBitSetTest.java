@@ -27,22 +27,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.backtrackable;
+package org.chocosolver.util.objects.setDataStructures.backtrackable.trail;
 
+import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-import org.testng.annotations.BeforeMethod;
 
 /**
  * @author Alexandre LEBRUN
  */
-public class StoredBitSetTest extends IStoredSetTest {
+public class TrailingBitSetTest extends TrailingSetTest {
 
-
-    @BeforeMethod
     @Override
-    public void setup() {
-        super.setup();
-        this.set = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+    public ISet create() {
+        return SetFactory.makeStoredSet(SetType.BITSET, 0, model);
     }
 }

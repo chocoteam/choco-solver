@@ -27,25 +27,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.backtrackable.trail;
 
-import org.testng.annotations.Test;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * @author Alexandre LEBRUN
  */
-public class LinkedListTest extends SetTest {
-
-    @Test(groups="1s", timeOut=60000)
-    public void testMaxSpan() {
-        ISet set = create();
-
-        set.add(1);
-        set.add(Integer.MAX_VALUE / 2);
-    }
+public class TrailingBipartiteSetTest extends TrailingBitSetTest {
 
     @Override
-    public ISet create(int offset) {
-        return SetFactory.makeLinkedList();
+    public ISet create() {
+        return SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
     }
 }

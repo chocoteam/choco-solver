@@ -38,7 +38,7 @@ import static org.testng.Assert.*;
 /**
  * @author Alexandre LEBRUN
  */
-public abstract class ISetTest {
+public abstract class SetTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAddNominal() {
@@ -191,6 +191,36 @@ public abstract class ISetTest {
 
         b.add(1);
         assertEquals(a == b, a.equals(b));
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testReadOnlySet() {
+        ISet set = create();
+        ISet ro = new Set_ReadOnly(set);
+
+        assertTrue(ro.isEmpty());
+
+        assertTrue(set.add(1));
+        assertTrue(ro.contain(1));
+        try {
+            ro.remove(1);
+            fail();
+        } catch(UnsupportedOperationException e) {
+            assertTrue(set.contain(1));
+        }
+
+        assertTrue(set.remove(1));
+        assertFalse(ro.contain(1));
+
+        set.add(2);
+
+        try {
+            ro.clear();
+        } catch(UnsupportedOperationException e) {
+            assertFalse(ro.isEmpty());
+        }
+
+        assertTrue(ro.toArray().equals(set.toArray()));
     }
 
 

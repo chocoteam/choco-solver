@@ -27,25 +27,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.backtrackable.trail;
 
+import org.chocosolver.solver.Model;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.annotations.Test;
 
 /**
  * @author Alexandre LEBRUN
  */
-public class LinkedListTest extends SetTest {
+public class TrailingSetFactoryTest {
 
-    @Test(groups="1s", timeOut=60000)
-    public void testMaxSpan() {
-        ISet set = create();
 
-        set.add(1);
-        set.add(Integer.MAX_VALUE / 2);
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
+    public void testCstIntervalSet() {
+        SetFactory.makeStoredSet(SetType.FIXED_INTERVAL, 0, new Model());
     }
 
-    @Override
-    public ISet create(int offset) {
-        return SetFactory.makeLinkedList();
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
+    public void testCstArraySet() {
+        SetFactory.makeStoredSet(SetType.FIXED_ARRAY, 0, new Model());
     }
+
+
 }

@@ -27,8 +27,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.backtrackable;
+package org.chocosolver.util.objects.setDataStructures.backtrackable.trail;
 
+import org.chocosolver.memory.Environments;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
@@ -40,22 +41,24 @@ import static org.testng.Assert.*;
 /**
  * @author Alexandre LEBRUN
  */
-public abstract class IStoredSetTest {
+public abstract class TrailingSetTest {
 
 
     protected Model model;
-    protected ISet set;
     protected IEnvironment environment;
 
     @BeforeMethod
     public void setup() {
-        model = new Model();
+        model = new Model(Environments.TRAIL.make(), "trail");
         environment = model.getEnvironment();
     }
 
+    public abstract ISet create();
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void nominalTestCase() {
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testNominal() {
+        ISet set = create();
         set.add(1);
         environment.worldPush();
 
@@ -68,8 +71,9 @@ public abstract class IStoredSetTest {
         assertTrue(set.contain(1));
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void twoPushes() {
+    @Test(groups = "1s", timeOut=60000)
+    public void testTwoPushes() {
+        ISet set = create();
         environment.worldPush();
         set.add(1);
         environment.worldPush();
@@ -80,13 +84,14 @@ public abstract class IStoredSetTest {
         assertTrue(set.isEmpty());
     }
 
-    @Test(groups = "1s", timeOut = 60000, expectedExceptions = AssertionError.class)
-    public void TwoMuchPop() {
+    @Test(groups = "1s", timeOut=60000, expectedExceptions = AssertionError.class)
+    public void testTwoMuchPop() {
         environment.worldPop();
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut=60000)
     public void testPopUntilZero() {
+        ISet set = create();
         environment.worldPush();
 
         for (int i = 0; i < 100; i++) {
@@ -98,8 +103,9 @@ public abstract class IStoredSetTest {
         assertTrue(set.isEmpty());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "10s", timeOut=60000)
     public void testSeveralPushes() {
+        ISet set = create();
         environment.worldPush();
 
         for (int i = 0; i < 10000; i++) {
@@ -108,7 +114,6 @@ public abstract class IStoredSetTest {
         }
 
         environment.worldPop();
-
         for (int i = 10000 - 1; i >= 0; i--) {
             assertTrue(set.contain(i));
             assertFalse(set.contain(i+1));
@@ -118,8 +123,9 @@ public abstract class IStoredSetTest {
         assertEquals(environment.getWorldIndex(), 0);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut=60000)
     public void testVoidPushes() {
+        ISet set = create();
         environment.worldPush();
 
         set.add(1);
@@ -135,8 +141,57 @@ public abstract class IStoredSetTest {
         assertTrue(set.isEmpty());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test() {
+    @Test(groups = "1s", timeOut=60000)
+    public void testTwoSets() {
+        ISet a = create();
+        ISet b = create();
+        environment.worldPush();
 
+        a.add(1);
+        environment.worldPush();
+
+        b.add(2);
+        environment.worldPush();
+        a.add(3); // not read
+
+        environment.worldPop();
+        assertTrue(a.contain(1));
+        assertFalse(a.contain(2));
+        assertFalse(b.contain(1));
+        assertTrue(b.contain(2));
+        assertFalse(a.contain(3));
+
+        environment.worldPop();
+        assertTrue(a.contain(1));
+        assertFalse(b.contain(1));
     }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testOrder() { // TODO order ?
+        ISet set = create();
+        set.add(1);
+        set.add(2);
+        set.add(3);
+        set.add(4);
+
+        System.out.println(set.getClass());
+        set.forEach(System.out::print);
+        System.out.println();
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testAddRemoveReturnValue() {
+        ISet set = create();
+        environment.worldPush();
+        set.add(1);
+        environment.worldPush();
+        assertFalse(set.add(1));
+        assertTrue(set.remove(1));
+        assertTrue(set.add(2));
+        environment.worldPop();
+        environment.worldPop();
+        assertFalse(set.contain(2));
+        assertFalse(set.remove(1));
+    }
+
 }

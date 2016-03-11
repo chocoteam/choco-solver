@@ -32,7 +32,7 @@ package org.chocosolver.util.objects.setDataStructures;
 /**
  * @author Alexandre LEBRUN
  */
-public class BipartiteSetTest extends ISetTest {
+public class BipartiteSetTest extends SetTest {
 
     @Override
     public ISet create(int offset) {

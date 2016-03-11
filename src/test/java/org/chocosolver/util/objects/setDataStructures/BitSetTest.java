@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 /**
  * @author Alexandre LEBRUN
  */
-public class BitSetTest extends ISetTest {
+public class BitSetTest extends SetTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMaxSpan() {
