@@ -32,9 +32,16 @@ package org.chocosolver.memory.structure;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 
+import java.io.Serializable;
+
 /**
  */
-public final class BasicIndexedBipartiteSet {
+public final class BasicIndexedBipartiteSet implements Serializable{
+
+    /**
+     * Serial number for serialization purpose
+     */
+    private static final long serialVersionUID = 1L;
 
     /**
      * The list of values

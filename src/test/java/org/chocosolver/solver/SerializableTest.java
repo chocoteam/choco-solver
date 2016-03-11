@@ -78,6 +78,17 @@ public class SerializableTest {
     }
 
     @Test(groups="1s", timeOut=60000)
+    public void testAddBooleanVariable(){
+        Model m = new Model() ;
+        m.boolVar();
+        try{
+            File file = write(m);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testEmptyModel() {
         Model model = new Model();
         File file = null;
