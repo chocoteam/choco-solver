@@ -27,10 +27,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.Set_ReadOnly;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static org.testng.Assert.*;
@@ -107,7 +111,6 @@ public abstract class SetTest {
         assertEquals(3, size);
 
         set.remove(3);
-
         size = 0;
         for (Integer integer : set) {
             assertNotNull(integer);
@@ -220,7 +223,7 @@ public abstract class SetTest {
             assertFalse(ro.isEmpty());
         }
 
-        assertTrue(ro.toArray().equals(set.toArray()));
+        assertTrue(Arrays.equals(ro.toArray(), set.toArray()));
     }
 
 

@@ -27,59 +27,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.testng.annotations.Test;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Alexandre LEBRUN
  */
-public class IntervalSetTest {
+public class BitSetTest extends SetTest {
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testSize() {
-        ISet set = create();
-        assertEquals(set.getSize(), 9);
-    }
-
-    @Test(groups = "1s", timeOut=60000)
-    public void testIterator() {
+    @Test(groups="1s", timeOut=60000)
+    public void testMaxSpan() {
         ISet set = create();
 
-        Set<Integer> reached = new HashSet<>();
-        for (int i : set) {
-            reached.add(i);
-        }
-        assertEquals(reached.size(), set.getSize());
-        for(int i=-5;i<=20;i++){
-            assertEquals(reached.contains(i),set.contain(i));
-        }
+        set.add(1);
+        set.add(Integer.MAX_VALUE / 2);
     }
 
-    @Test(groups = "1s", timeOut=60000, expectedExceptions = UnsupportedOperationException.class)
-    public void testAdd() {
-        ISet set = create();
-        set.add(6);
+    @Override
+    public ISet create(int offset) {
+        return SetFactory.makeBitSet(offset);
     }
 
-    @Test(groups = "1s", timeOut=60000, expectedExceptions = UnsupportedOperationException.class)
-    public void testRemove() {
-        ISet set = create();
-        set.remove(5);
-    }
-
-    @Test(groups = "1s", timeOut=60000, expectedExceptions = UnsupportedOperationException.class)
-    public void testClear() {
-        ISet set = create();
-        set.clear();
-    }
-
-    private ISet create() {
-        return SetFactory.makeConstantSet(0,8);
-    }
 }
