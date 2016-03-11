@@ -742,6 +742,7 @@ public class ExplanationEngineTest {
             d.buildNext();
             d.apply();
             r.propagate();
+            Assert.fail("failure expected");
         } catch (ContradictionException c) {
             ex = ee.explain(c);
         }
@@ -770,6 +771,7 @@ public class ExplanationEngineTest {
             d.buildNext();
             d.apply();
             r.propagate();
+            Assert.fail("failure expected");
         } catch (ContradictionException c) {
             ex = ee.explain(c);
         }
