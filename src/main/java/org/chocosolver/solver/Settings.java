@@ -92,7 +92,7 @@ public interface Settings extends Serializable {
      * @return <tt>true</tt> if views are enabled.
      */
     default boolean enableViews() {
-        return false;
+        return true;
     }
 
     /**
