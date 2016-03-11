@@ -39,7 +39,7 @@ import org.testng.annotations.BeforeMethod;
  */
 public abstract class CopySetTest extends BacktrackableSetTest {
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void setup() {
         model = new Model(Environments.COPY.make(), "copy");
         environment = model.getEnvironment();

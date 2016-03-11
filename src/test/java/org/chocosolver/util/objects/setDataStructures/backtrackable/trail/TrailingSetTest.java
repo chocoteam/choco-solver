@@ -39,7 +39,8 @@ import org.testng.annotations.BeforeMethod;
  */
 public abstract class TrailingSetTest extends BacktrackableSetTest {
 
-    @BeforeMethod
+
+    @BeforeMethod(alwaysRun = true)
     public void setup() {
         model = new Model(Environments.TRAIL.make(), "trail");
         environment = model.getEnvironment();
