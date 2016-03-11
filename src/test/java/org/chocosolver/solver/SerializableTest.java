@@ -34,6 +34,7 @@ import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -75,17 +76,6 @@ public class SerializableTest {
         final Object o = in.readObject();
         in.close();
         return o;
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testAddBooleanVariable(){
-        Model m = new Model() ;
-        m.boolVar();
-        try{
-            File file = write(m);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -162,6 +152,25 @@ public class SerializableTest {
     }
 
     @Test(groups="1s", timeOut=60000)
+    public void testBoolVar(){
+        Model m = new Model() ;
+        m.boolVar();
+        File file = null;
+        try {
+            file = write(m);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        m = null;
+        try {
+            m = (Model) read(file);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Assert.assertNotNull(m);
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testConstraint() {
         Model s = new Model();
         IntVar var = s.intVar("v", 1, 10, false);
@@ -219,4 +228,21 @@ public class SerializableTest {
         assertEquals(s.getSolver().getSolutionCount(), 92, "nb sol incorrect");
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testCostas() {
+        Model m = ProblemMaker.makeCostasArrays(8);
+        File file = null;
+        try {
+            file = write(m);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        m = null;
+        try {
+            m = (Model) read(file);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Assert.assertNotNull(m);
+    }
 }
