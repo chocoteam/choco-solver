@@ -43,6 +43,7 @@ import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IntEventType;
 
 /**
  * a specific neighborhood for LNS based on the explanation of the objective variable.
@@ -260,9 +261,14 @@ public class ExplainingObjective extends ExplainingCut{
                 if (rs.match(i, es)) {
                     int val = es.getFirstValue(i);
                     int old = es.getSecondValue(i);
+                    // need to check event: 2nd pos is old lb in case of instantiation
+                    if(es.getEventType(i) == IntEventType.INSTANTIATE){
+                        old = es.getThirdValue(i);
+                    }
                     if (far >= near && far > val && far <= old) {
                         explainValueB(far, es, i);
                         far = val;
+                        rs.init(explanation);
                     }
                     if (far < near) {
                         explanation.recycle();
@@ -280,9 +286,11 @@ public class ExplainingObjective extends ExplainingCut{
                 if (rs.match(i, es)) {
                     int val = es.getFirstValue(i);
                     int old = es.getSecondValue(i);
+                    // no need to check event; 2nd pos is always old lb
                     if (far <= near && far < val && far >= old) {
                         explainValueB(far, es, i);
                         far = val;
+                        rs.init(explanation);
                     }
                     if (far > near) {
                         explanation.recycle();

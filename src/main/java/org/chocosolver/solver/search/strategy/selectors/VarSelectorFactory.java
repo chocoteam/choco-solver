@@ -31,6 +31,7 @@ package org.chocosolver.solver.search.strategy.selectors;
 
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * Strategies over real variables
@@ -49,7 +50,7 @@ public class VarSelectorFactory {
      * Selects the first free (non-instantiated) variable
      * @return a variable selector choosing always the first non-instantiated variable
      */
-    public static VariableSelector inputOrderVar() {
+    public static <V extends Variable> VariableSelector<V> inputOrderVar() {
         return new InputOrder<>();
     }
 
@@ -61,7 +62,7 @@ public class VarSelectorFactory {
      * example : selects vars[0], then vars[1] even if vars[0] is still uninstantiated
      * @return a variable selector iterating over variables one by one
      */
-    public static VariableSelector roundRobinVar() {
+    public static <V extends Variable> VariableSelector<V> roundRobinVar() {
         return new Cyclic<>();
     }
 
@@ -70,7 +71,7 @@ public class VarSelectorFactory {
      * @param seed randomness seed
      * @return a variable selector choosing variables randomly
      */
-    public static VariableSelector randomVar(long seed){
+    public static <V extends Variable> VariableSelector<V> randomVar(long seed){
         return new Random<>(seed);
     }
 
@@ -78,7 +79,7 @@ public class VarSelectorFactory {
      * Selects randomly a non-instantiated variable
      * @return a variable selector choosing variables randomly
      */
-    public static VariableSelector randomVar(){
+    public static <V extends Variable> VariableSelector<V> randomVar(){
         return randomVar(0);
     }
 
@@ -86,7 +87,7 @@ public class VarSelectorFactory {
      * Selects the non instantiated variable involved in the largest number of constraints
      * @return a variable selector choosing the variable involved in the largest number of constraints
      */
-    public static VariableSelector maxCstrsVar(){
+    public static <V extends Variable> VariableSelector<V> maxCstrsVar(){
         return new Occurrence<>();
     }
 
@@ -94,7 +95,7 @@ public class VarSelectorFactory {
      * Selects the non instantiated variable with the smallest domain
      * @return a variable selector choosing the variable with the smallest domain
      */
-    public static VariableSelector minDomVar(){
+    public static <V extends Variable> VariableSelector<V> minDomVar(){
         return new GeneralizedMinDomVarSelector();
     }
 
@@ -102,7 +103,7 @@ public class VarSelectorFactory {
      * Selects the non instantiated variable with the largest domain
      * @return a variable selector choosing the variable with the largest domain
      */
-    public static VariableSelector maxDomVar(){
+    public static <V extends Variable> VariableSelector<V> maxDomVar(){
         return new GeneralizedMinDomVarSelector(false);
     }
 
