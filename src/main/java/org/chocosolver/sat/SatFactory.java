@@ -37,7 +37,7 @@ import static org.chocosolver.sat.SatSolver.negated;
 
 /**
  * <p>
- * Project: choco-_me().
+ * Project: choco-sat.
  *
  * @author Charles Prud'homme
  * @since 07/03/2016.
@@ -45,6 +45,23 @@ import static org.chocosolver.sat.SatSolver.negated;
 public interface SatFactory {
 
     SatSolver _me();
+    /**
+     * Ensures that the clause defined by POSLITS and NEGLITS is satisfied.
+     *
+     * @param POSVARS positive variables
+     * @param NEGVARS negative variables
+     * @return true if the clause has been added to the clause store
+     */
+    default boolean addClause(int[] POSVARS, int[] NEGVARS) {
+        TIntList lits = new TIntArrayList(POSVARS.length + NEGVARS.length);
+        for(int p : POSVARS){
+            lits.add(makeLiteral(p, true));
+        }
+        for(int n : NEGVARS){
+            lits.add(makeLiteral(n, true));
+        }
+        return _me().addClause(lits);
+    }
 
     /**
      * Add a unit clause stating that BOOLVAR must be true

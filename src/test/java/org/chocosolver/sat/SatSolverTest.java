@@ -445,6 +445,16 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
+    public void testAddClause_() throws Exception {
+        sat.addClause(new int[]{a,b},new int[]{c,d});
+        sat.propagate();
+        Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(b), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(c), SatSolver.Boolean.kUndefined);
+        Assert.assertEquals(sat.valueVar(d), SatSolver.Boolean.kUndefined);
+    }
+
+    @Test(groups = "1s")
     public void testAddTrue() throws Exception {
         sat.addTrue(a);
         sat.propagate();
