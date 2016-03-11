@@ -31,20 +31,11 @@ package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
-import org.testng.annotations.Test;
 
 /**
  * @author Alexandre LEBRUN
  */
 public class BitSetTest extends SetTest {
-
-    @Test(groups="1s", timeOut=60000)
-    public void testMaxSpan() {
-        ISet set = create();
-
-        set.add(1);
-        set.add(Integer.MAX_VALUE / 2);
-    }
 
     @Override
     public ISet create(int offset) {

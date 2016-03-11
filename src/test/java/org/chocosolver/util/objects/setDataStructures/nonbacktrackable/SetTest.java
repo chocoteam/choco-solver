@@ -75,7 +75,6 @@ public abstract class SetTest {
         ISet set = create(Integer.MAX_VALUE);
         set.add(Integer.MAX_VALUE);
         assertEquals(set.getSize(), 1);
-        for(int i:set) System.out.println(i);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -124,11 +123,9 @@ public abstract class SetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testClear() {
         ISet set = create();
-
         for (int i = 0; i < 100; i++) {
             set.add(i);
         }
-
         set.clear();
         assertEquals(set.getSize(), 0);
     }
