@@ -36,9 +36,13 @@
 
 package org.chocosolver.util.sort;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-public class ArraySort<T> {
+public class ArraySort<T> implements Serializable{
+
+	/** For serialization purpose */
+	private static final long serialVersionUID = 1L;
 
 	//***********************************************************************************
 	// VARIABLES

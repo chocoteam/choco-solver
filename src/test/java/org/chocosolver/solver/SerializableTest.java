@@ -245,4 +245,76 @@ public class SerializableTest {
         }
         Assert.assertNotNull(m);
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testContrived() {
+        Model m = ProblemMaker.makeContrived();
+        File file = null;
+        try {
+            file = write(m);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        m = null;
+        try {
+            m = (Model) read(file);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Assert.assertNotNull(m);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testGR() {
+        Model m = ProblemMaker.makeGolombRuler(4);
+        File file = null;
+        try {
+            file = write(m);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        m = null;
+        try {
+            m = (Model) read(file);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Assert.assertNotNull(m);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNQ1() {
+        Model m = ProblemMaker.makeNQueenWithBinaryConstraints(6);
+        File file = null;
+        try {
+            file = write(m);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        m = null;
+        try {
+            m = (Model) read(file);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Assert.assertNotNull(m);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNQ2() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(6);
+        File file = null;
+        try {
+            file = write(m);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        m = null;
+        try {
+            m = (Model) read(file);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Assert.assertNotNull(m);
+    }
 }

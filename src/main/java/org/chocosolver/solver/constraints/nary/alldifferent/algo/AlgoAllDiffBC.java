@@ -37,7 +37,10 @@ import org.chocosolver.util.sort.ArraySort;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class AlgoAllDiffBC {
+public class AlgoAllDiffBC implements Serializable{
+
+    /** For serialization purpose */
+   	private static final long serialVersionUID = 1L;
 
     int[] t; // Tree links
     int[] d; // Diffs between critical capacities

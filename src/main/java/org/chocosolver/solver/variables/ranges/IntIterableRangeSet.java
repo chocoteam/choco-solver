@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.variables.ranges;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -42,7 +43,10 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 14/01/2016.
  */
-public class IntIterableRangeSet implements IntIterableSet {
+public class IntIterableRangeSet implements IntIterableSet, Serializable {
+
+    /** For serialization purpose */
+   	private static final long serialVersionUID = 1L;
 
     /**
      * Store elements
