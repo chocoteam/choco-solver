@@ -76,6 +76,21 @@ public class TrailCopyTest {
         testModels(copy,trail,copy2,trail2);
     }
 
+    @Test(groups = "1s", timeOut=60000)
+    public void testCopyEnv() {
+        IEnvironment copy = Environments.COPY.make();
+        copy.makeBitSet(4);
+        copy.makeBool(false);
+        copy.makeFloat();
+        copy.makeFloat(4);
+        copy.makeLong();
+        copy.makeLong(4);
+        copy.makeIntVector(10,10);
+        copy.makeDoubleVector(2,4);
+        copy.worldPush();
+        copy.worldPop();
+    }
+
     private static void testModels(Model... models) {
         IntVar[][] vars = new IntVar[models.length][];
         for(int i=0;i<models.length;i++){
