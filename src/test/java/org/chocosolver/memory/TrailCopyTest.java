@@ -77,18 +77,22 @@ public class TrailCopyTest {
     }
 
     @Test(groups = "1s", timeOut=60000)
-    public void testCopyEnv() {
-        IEnvironment copy = Environments.COPY.make();
-        copy.makeBitSet(4);
-        copy.makeBool(false);
-        copy.makeFloat();
-        copy.makeFloat(4);
-        copy.makeLong();
-        copy.makeLong(4);
-        copy.makeIntVector(10,10);
-        copy.makeDoubleVector(2,4);
-        copy.worldPush();
-        copy.worldPop();
+    public void testBasic() {
+        test(Environments.TRAIL.make());
+        test(Environments.COPY.make());
+    }
+
+    private static void test(IEnvironment env) {
+        env.makeBitSet(4);
+        env.makeBool(false);
+        env.makeFloat();
+        env.makeFloat(4);
+        env.makeLong();
+        env.makeLong(4);
+        env.makeIntVector(10,10);
+        env.makeDoubleVector(2,4);
+        env.worldPush();
+        env.worldPop();
     }
 
     private static void testModels(Model... models) {
