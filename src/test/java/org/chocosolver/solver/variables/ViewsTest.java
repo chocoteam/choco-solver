@@ -29,13 +29,11 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -628,5 +626,185 @@ public class ViewsTest {
         }
         assertTrue(x3.isInstantiated());
         assertEquals(x3.getValue(), 1);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testScale(){
+        int n = 15;
+        Model viewModel = makeModel(true);
+        scale(viewModel,n);
+        Model noViewModel = makeModel(false);
+        scale(noViewModel,n);
+        testModels(viewModel,noViewModel);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testOffset(){
+        int n = 15;
+        Model viewModel = makeModel(true);
+        offset(viewModel,n);
+        Model noViewModel = makeModel(false);
+        offset(noViewModel,n);
+        testModels(viewModel,noViewModel);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testIntEq(){
+        int n = 15;
+        Model viewModel = makeModel(true);
+        intEq(viewModel,n);
+        Model noViewModel = makeModel(false);
+        intEq(noViewModel,n);
+        testModels(viewModel,noViewModel);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testMinus(){
+        int n = 9;
+        Model viewModel = makeModel(true);
+        minus(viewModel,n);
+        Model noViewModel = makeModel(false);
+        minus(noViewModel,n);
+        testModels(viewModel,noViewModel);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testBoolEq(){
+        int n = 24;
+        Model viewModel = makeModel(true);
+        boolEq(viewModel,n);
+        Model noViewModel = makeModel(false);
+        boolEq(noViewModel,n);
+        testModels(viewModel,noViewModel);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testBoolNot(){
+        int n = 24;
+        Model viewModel = makeModel(true);
+        boolNot(viewModel,n);
+        Model noViewModel = makeModel(false);
+        boolNot(noViewModel,n);
+        testModels(viewModel,noViewModel);
+    }
+
+    private static Model makeModel(final boolean withViews){
+        Model m = new Model("with"+(withViews?"":"out")+" views");
+        m.set(new Settings() {
+            @Override
+            public boolean enableViews() {
+                return withViews;
+            }
+        });
+        return m;
+    }
+
+    private static void offset(Model model, int n){
+        IntVar[] x = model.intVarArray(n,0,n-1);
+        IntVar[] y = new IntVar[n];
+        for(int i=0;i<n;i++){
+            y[i] = model.intOffsetView(x[i],42);
+        }
+        model.allDifferent(x).post();
+        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
+    }
+
+    private static void scale(Model model, int n){
+        IntVar[] x = model.intVarArray(n,0,n-1);
+        IntVar[] y = new IntVar[n];
+        for(int i=0;i<n;i++){
+            y[i] = model.intScaleView(x[i],42);
+        }
+        model.allDifferent(x).post();
+        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
+    }
+
+    private static void intEq(Model model, int n){
+        IntVar[] x = model.intVarArray(n,0,n-1);
+        IntVar[] y = new IntVar[n];
+        for(int i=0;i<n;i++){
+            y[i] = model.intEqView(x[i]);
+        }
+        model.allDifferent(x).post();
+        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
+    }
+
+    private static void minus(Model model, int n){
+        IntVar[] x = model.intVarArray(n,0,n-1);
+        IntVar[] y = new IntVar[n];
+        for(int i=0;i<n;i++){
+            y[i] = model.intMinusView(x[i]);
+        }
+        model.allDifferent(x).post();
+        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
+    }
+
+    private static void boolEq(Model model, int n){
+        BoolVar[] x = model.boolVarArray(n);
+        BoolVar[] y = new BoolVar[n];
+        for(int i=0;i<n;i++){
+            y[i] = model.boolEqView(x[i]);
+        }
+        model.sum(x,"=",n/2).post();
+        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
+    }
+
+    private static void boolNot(Model model, int n){
+        BoolVar[] x = model.boolVarArray(n);
+        BoolVar[] y = new BoolVar[n];
+        for(int i=0;i<n;i++){
+            y[i] = model.boolNotView(x[i]);
+        }
+        model.sum(x,"=",n/2).post();
+        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
+    }
+
+    private static void testModels(Model... models) {
+        IntVar[][] vars = new IntVar[models.length][];
+        for(int i=0;i<models.length;i++){
+            Assert.assertEquals(models[0].getResolutionPolicy(),models[i].getResolutionPolicy());
+            vars[i] = models[i].retrieveIntVars(true);
+            Assert.assertEquals(vars[i].length,vars[0].length);
+        }
+        long t;
+        long[] time = new long[models.length];
+        boolean bc;
+        int nbSols=0;
+        do {
+            t = System.currentTimeMillis();
+            bc = models[0].solve();
+            time[0] += System.currentTimeMillis() - t;
+            if(bc) nbSols++;
+            for(int k=1;k<models.length;k++) {
+                t = System.currentTimeMillis();
+                Assert.assertEquals(bc, models[k].solve());
+                time[k] += System.currentTimeMillis() - t;
+                Assert.assertEquals(
+                        models[k].getSolver().getBackTrackCount(),
+                        models[0].getSolver().getBackTrackCount());
+                Assert.assertEquals(
+                        models[k].getSolver().getCurrentDepth(),
+                        models[0].getSolver().getCurrentDepth());
+                Assert.assertEquals(
+                        models[k].getSolver().getMaxDepth(),
+                        models[0].getSolver().getMaxDepth());
+                Assert.assertEquals(
+                        models[k].getSolver().getFailCount(),
+                        models[0].getSolver().getFailCount());
+                if(models[0].getResolutionPolicy()!= ResolutionPolicy.SATISFACTION)
+                    Assert.assertEquals(
+                            models[k].getSolver().getBestSolutionValue(),
+                            models[0].getSolver().getBestSolutionValue());
+                if (bc) {
+                    for (int i = 0; i < vars[k].length; i++) {
+                        Assert.assertEquals(vars[0][i].getValue(), vars[0][i].getValue());
+                    }
+                }
+            }
+        }while (bc);
+        System.out.println(nbSols+" solutions");
+        for(int i=0;i<models.length;i++){
+            System.out.println(models[i].getName()+" solved in "+time[i]+" ms");
+        }
     }
 }
