@@ -30,7 +30,6 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;

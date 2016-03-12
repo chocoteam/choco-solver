@@ -37,13 +37,11 @@
 package org.chocosolver.util.objects.setDataStructures;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.copy.EnvironmentCopying;
-import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.array.Set_FixedArray;
+import org.chocosolver.util.objects.setDataStructures.constant.Set_FixedArray;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_Std_BitSet;
-import org.chocosolver.util.objects.setDataStructures.interval.Set_CstInterval;
+import org.chocosolver.util.objects.setDataStructures.constant.Set_CstInterval;
 import org.chocosolver.util.objects.setDataStructures.linkedlist.Set_LinkedList;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap;
@@ -72,22 +70,15 @@ public class SetFactory {
 	 */
 	public static ISet makeStoredSet(SetType type, int offSet, Model model) {
 		IEnvironment environment = model.getEnvironment();
-		if (HARD_CODED)
+		if (HARD_CODED) {
 			switch (type) {
 				case BIPARTITESET:
 					return new Set_Std_Swap(environment, offSet);
 				case BITSET:
 					return new Set_Std_BitSet(environment, offSet);
 			}
-		if (environment instanceof EnvironmentTrailing) {
-			return new Set_Trail((EnvironmentTrailing) environment, makeSet(type,offSet));
-		} else if (environment instanceof EnvironmentCopying) {
-			return new Set_Copy((EnvironmentCopying) environment, makeSet(type,offSet));
-		} else if(environment==null){
-			throw new UnsupportedOperationException("Cannot create a backtrackable set with a backtracking environment equal to null.");
-		} else {
-			throw new UnsupportedOperationException("Set not implemented yet for environment "+environment.getClass().getSimpleName());
 		}
+		return new StdSet(environment,makeSet(type,offSet));
 	}
 
 

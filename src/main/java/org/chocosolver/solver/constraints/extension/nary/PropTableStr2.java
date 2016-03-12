@@ -41,7 +41,6 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
 
 import java.util.ArrayList;
 import java.util.BitSet;
