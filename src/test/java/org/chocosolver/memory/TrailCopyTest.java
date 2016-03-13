@@ -31,7 +31,9 @@ package org.chocosolver.memory;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -74,6 +76,24 @@ public class TrailCopyTest {
         Model copy2 = makeDiffN(n,Environments.COPY.make(),"copy generic");
         Model trail2 = makeDiffN(n,Environments.TRAIL.make(),"trail generic");
         testModels(copy,trail,copy2,trail2);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testTrailBest() {
+        System.out.println("Trail best test");
+        int n = 10;
+        Model copy = makeTrailBest(n,Environments.COPY.make(),"copy");
+        Model trail = makeTrailBest(n,Environments.TRAIL.make(),"trail");
+        testModels(copy,trail);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testCopyBest() {
+        System.out.println("Copy best test");
+        int n = 15000;
+        Model copy = makeCopyBest(n,Environments.COPY.make(),"copy");
+        Model trail = makeCopyBest(n,Environments.TRAIL.make(),"trail");
+        testModels(copy,trail);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -184,6 +204,24 @@ public class TrailCopyTest {
         IntVar[] w = model.intVarArray("w", n, 1,1);
         IntVar[] h = model.intVarArray("h", n, 1,1);
         model.diffN(x,y,w,h,true).post();
+        return model;
+    }
+
+    private static Model makeTrailBest(int n, IEnvironment env, String suffix) {
+        Model model = new Model(env,"Trail best "+suffix);
+        IntVar[] x = model.intVarArray("x", n, 0, 5);
+        for(int i=0;i<x.length-1;i++){
+            model.arithm(x[i],"!=",x[i+1]).post();
+        }
+        model.getSolver().set(SearchStrategyFactory.randomSearch(x,0));
+        return model;
+    }
+
+    private static Model makeCopyBest(int n, IEnvironment env, String suffix) {
+        Model model = new Model(env,"Copy best "+suffix);
+        IntVar[] x = model.intVarArray("x", n, 0, 100000);
+        for(int i=0;i<n-1;i++)model.arithm(x[i],"=",x[i+1]).post();
+        model.getSolver().limitSolution(500);
         return model;
     }
 }
