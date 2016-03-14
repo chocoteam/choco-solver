@@ -36,7 +36,7 @@ package org.chocosolver.solver;
  * @author Charles Prud'homme
  * @since 02/03/2016.
  */
-public interface IMySelf<V> {
+public interface ISelf<V> {
 
     /**
      * @return the encapsulated type

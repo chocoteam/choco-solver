@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.IMySelf;
+import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
 import org.chocosolver.solver.variables.view.*;
@@ -43,7 +43,7 @@ import static java.lang.Math.max;
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface IViewFactory extends IMySelf<Model> {
+public interface IViewFactory extends ISelf<Model> {
 
     //*************************************************************************************
     // BOOLEAN VARIABLES

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.trace;
 
-import org.chocosolver.solver.IMySelf;
+import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -47,7 +47,7 @@ import java.io.PrintStream;
  * @version choco
  * @since 12/11/14
  */
-public interface IOutputFactory extends IMySelf<Solver> {
+public interface IOutputFactory extends ISelf<Solver> {
 
     // http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
     /**
