@@ -486,7 +486,7 @@ public interface IIntConstraintFactory {
 	 *
 	 * @param vars list of variables
 	 */
-	default Constraint allDifferent(IntVar[] vars) {
+	default Constraint allDifferent(IntVar... vars) {
 		return allDifferent(vars, "DEFAULT");
 	}
 
