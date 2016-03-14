@@ -34,7 +34,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 

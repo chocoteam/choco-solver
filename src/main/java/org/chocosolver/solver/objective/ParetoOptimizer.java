@@ -29,12 +29,12 @@
  */
 package org.chocosolver.solver.objective;
 
+import org.chocosolver.sat.PropSat;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.sat.PropSat;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 

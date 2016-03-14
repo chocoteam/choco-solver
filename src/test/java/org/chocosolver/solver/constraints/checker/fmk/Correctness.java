@@ -35,8 +35,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
 import static java.lang.System.arraycopy;

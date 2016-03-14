@@ -48,7 +48,6 @@ import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
 import org.chocosolver.solver.variables.*;
 
-import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

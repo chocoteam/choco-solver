@@ -36,7 +36,6 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
-
 import java.util.Arrays;
 
 /**

@@ -35,8 +35,6 @@ import org.chocosolver.solver.constraints.checker.Modeler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
 import static java.lang.System.arraycopy;

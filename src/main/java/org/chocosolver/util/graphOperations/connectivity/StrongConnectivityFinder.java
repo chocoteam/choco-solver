@@ -32,7 +32,6 @@ package org.chocosolver.util.graphOperations.connectivity;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
-
 import java.util.BitSet;
 import java.util.Iterator;
 

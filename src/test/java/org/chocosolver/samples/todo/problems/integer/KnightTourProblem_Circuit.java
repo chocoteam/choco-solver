@@ -36,9 +36,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.util.objects.graphs.input.HCP_Utils.generateKingTourInstance;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.intVarSearch;
 import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.minDomIntVar;
+import static org.chocosolver.util.objects.graphs.input.HCP_Utils.generateKingTourInstance;
 
 /**
  * Solves the Knight's Tour Problem

@@ -39,7 +39,6 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.PriorityQueue;
 import org.chocosolver.util.tools.ArrayUtils;
 
-
 import java.util.Arrays;
 
 /**

@@ -31,7 +31,6 @@ package org.chocosolver.util.objects.setDataStructures;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.structure.Operation;
-import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.util.PoolManager;
 
 import java.util.Iterator;

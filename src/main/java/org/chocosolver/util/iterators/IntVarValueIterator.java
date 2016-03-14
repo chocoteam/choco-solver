@@ -31,7 +31,6 @@ package org.chocosolver.util.iterators;
 
 import org.chocosolver.solver.variables.IntVar;
 
-
 import java.util.Iterator;
 
 /**

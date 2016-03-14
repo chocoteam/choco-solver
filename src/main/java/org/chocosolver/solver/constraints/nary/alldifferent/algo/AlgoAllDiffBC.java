@@ -34,7 +34,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.sort.ArraySort;
 
-
 import java.util.Comparator;
 
 public class AlgoAllDiffBC {

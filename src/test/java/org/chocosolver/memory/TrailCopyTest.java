@@ -33,7 +33,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;

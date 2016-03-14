@@ -31,10 +31,10 @@ package org.chocosolver.samples.todo.problems.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;

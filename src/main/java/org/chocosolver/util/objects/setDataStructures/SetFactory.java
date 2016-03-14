@@ -38,10 +38,10 @@ package org.chocosolver.util.objects.setDataStructures;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.constant.Set_FixedArray;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_Std_BitSet;
 import org.chocosolver.util.objects.setDataStructures.constant.Set_CstInterval;
+import org.chocosolver.util.objects.setDataStructures.constant.Set_FixedArray;
 import org.chocosolver.util.objects.setDataStructures.linkedlist.Set_LinkedList;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap;

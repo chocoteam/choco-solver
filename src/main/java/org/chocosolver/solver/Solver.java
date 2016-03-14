@@ -65,7 +65,6 @@ import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.io.PrintStream;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

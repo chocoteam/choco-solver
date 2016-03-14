@@ -31,10 +31,10 @@ package org.chocosolver.solver.search.loop.learn;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.sat.PropNogoods;
 import org.chocosolver.sat.SatSolver;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.IntVar;

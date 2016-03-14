@@ -38,7 +38,6 @@ import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-
 import java.util.BitSet;
 
 /**

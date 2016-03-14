@@ -29,9 +29,9 @@
  */
 package org.chocosolver.solver.constraints.nary.nogood;
 
+import org.chocosolver.sat.PropNogoods;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.sat.PropNogoods;
 import org.chocosolver.util.ESat;
 
 /**
