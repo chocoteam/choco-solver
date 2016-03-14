@@ -30,24 +30,12 @@
 package org.chocosolver.util.objects.queues;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 04/04/12
+ * @author Alexandre LEBRUN
  */
-public interface IHeap {
+public class LinkedListTest extends QueueTest {
 
-    void insert(int key, int elem);
-
-    void update(int new_value, int elem);
-
-    int removemin();
-
-    int remove(int elem);
-
-    boolean isEmpty();
-
-    int size();
-
-
+    @Override
+    public AQueue<Integer> create() {
+        return new LinkedList<>();
+    }
 }
