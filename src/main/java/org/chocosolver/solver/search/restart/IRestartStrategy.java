@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.restart;
 
-import java.io.Serializable;
+
 
 /**
  * Interface defining services for restart strategy
@@ -38,7 +38,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme, Arnaud Malapert
  * @since 13/05/11
  */
-public interface IRestartStrategy extends Serializable {
+public interface IRestartStrategy  {
 
     int getFirstCutOff();
 

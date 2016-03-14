@@ -29,14 +29,14 @@
  */
 package org.chocosolver.solver.search.measure;
 
-import java.io.Serializable;
+
 
 /**
  * Interface for providing resolution statistics
  *
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public interface IMeasures extends Serializable {
+public interface IMeasures  {
 
     /**
      * @return the current world unique id

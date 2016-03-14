@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.objects;
 
-import java.io.Serializable;
+
 import java.util.Arrays;
 
 /**
@@ -38,7 +38,7 @@ import java.util.Arrays;
  * Created by cprudhom on 20/10/2015.
  * Project: choco.
  */
-public class IntMap implements Serializable{
+public class IntMap {
 
     /**
      * Default initial capacity.

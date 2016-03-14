@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures;
 
-import java.io.Serializable;
+
 import java.util.Iterator;
 
 /**
@@ -38,7 +38,7 @@ import java.util.Iterator;
  * @since 9 feb. 2011, update 2016
  * @author chameau, Jean-Guillaume Fages
  */
-public interface ISet extends Serializable, Iterable<Integer>{
+public interface ISet extends Iterable<Integer>{
 
 	/**
 	 * Use the following loop to iterate over this set.

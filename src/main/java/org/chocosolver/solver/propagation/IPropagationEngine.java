@@ -38,7 +38,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 
-import java.io.Serializable;
+
 
 /**
  * An interface for propagation engines, it defines every required services.
@@ -47,7 +47,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public interface IPropagationEngine extends Serializable {
+public interface IPropagationEngine  {
 
     enum Trace {;
 

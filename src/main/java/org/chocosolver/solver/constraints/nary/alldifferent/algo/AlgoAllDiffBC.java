@@ -34,13 +34,10 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.sort.ArraySort;
 
-import java.io.Serializable;
+
 import java.util.Comparator;
 
-public class AlgoAllDiffBC implements Serializable{
-
-    /** For serialization purpose */
-   	private static final long serialVersionUID = 1L;
+public class AlgoAllDiffBC {
 
     int[] t; // Tree links
     int[] d; // Diffs between critical capacities
@@ -255,7 +252,7 @@ public class AlgoAllDiffBC implements Serializable{
         return filter;
     }
 
-    private static class Interval implements Serializable {
+    private static class Interval  {
         int minrank, maxrank;
         IntVar var;
         int idx;

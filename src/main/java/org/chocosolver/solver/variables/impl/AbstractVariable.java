@@ -58,11 +58,6 @@ import java.util.Arrays;
 public abstract class AbstractVariable implements Variable {
 
     /**
-     * For serialization purpose.
-     */
-    private static final long serialVersionUID = 1L;
-
-    /**
      * Message associated with last value removals exception.
      */
     public static final String MSG_REMOVE = "remove last value";

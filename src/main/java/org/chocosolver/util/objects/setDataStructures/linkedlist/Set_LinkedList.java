@@ -33,7 +33,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.io.Serializable;
+
 import java.util.Iterator;
 
 /**
@@ -194,7 +194,7 @@ public class Set_LinkedList implements ISet {
 	// STRUCTURE
 	//***********************************************************************************
 
-	protected class IntCell implements Serializable {
+	protected class IntCell  {
 
 		int element;
 		IntCell next;

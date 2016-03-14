@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.strategy.selectors;
 
 import org.chocosolver.solver.variables.Variable;
 
-import java.io.Serializable;
+
 
 /**
  * A variable selector specifies which variable should be selected at a fix point. It is based specifications
@@ -42,7 +42,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public interface VariableSelector<V extends Variable> extends Serializable {
+public interface VariableSelector<V extends Variable>  {
 
     /**
      * Provides access to the current selected variable among {@code variables}.

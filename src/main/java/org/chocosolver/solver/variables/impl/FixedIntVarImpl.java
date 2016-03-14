@@ -60,11 +60,6 @@ import java.util.Iterator;
 public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     /**
-     * For serialization purpose.
-     */
-    private static final long serialVersionUID = 1L;
-
-    /**
      * The constant this variable relies on.
      */
     protected final int constante;

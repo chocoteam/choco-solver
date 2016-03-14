@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.objects;
 
-import java.io.Serializable;
+
 
 /**
  * A fix sized circular queue optimized for removing first and last elements.
@@ -45,7 +45,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 29 sept. 2010
  */
-public class IntCircularQueue implements Serializable {
+public class IntCircularQueue  {
 
     int[] elementData;
     // head points to the first logical element in the array, and

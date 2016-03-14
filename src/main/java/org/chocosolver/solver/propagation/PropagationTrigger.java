@@ -36,7 +36,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.objects.IntList;
 
-import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -51,7 +51,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 15/12/12
  */
-public class PropagationTrigger implements Serializable {
+public class PropagationTrigger  {
 
     final IPropagationEngine engine; // wrapped engine
     final IEnvironment environment;

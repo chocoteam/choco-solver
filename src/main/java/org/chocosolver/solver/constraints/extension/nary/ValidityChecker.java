@@ -33,14 +33,14 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.sort.ArraySort;
 import org.chocosolver.util.sort.IntComparator;
 
-import java.io.Serializable;
+
 
 /**
  * A simple class that provides a method to check if a given
  * tuple is valid i.e. if it is ok regarding the current domain
  * of the variables
  */
-public class ValidityChecker implements IntComparator, Serializable {
+public class ValidityChecker implements IntComparator {
 
     //variables sorted from the minimum domain to the max
     protected IntVar[] vars;

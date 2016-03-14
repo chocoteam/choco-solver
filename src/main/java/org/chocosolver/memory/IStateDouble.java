@@ -29,7 +29,7 @@
  */
 package org.chocosolver.memory;
 
-import java.io.Serializable;
+
 
 /**
  * An abstract class for backtrackable double.
@@ -38,7 +38,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public abstract class IStateDouble implements Serializable {
+public abstract class IStateDouble  {
 
     protected final IEnvironment environment;
     protected double currentValue;

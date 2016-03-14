@@ -61,10 +61,6 @@ import java.util.Iterator;
 public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     /**
-     * Serial number for serialization purpose
-     */
-    private static final long serialVersionUID = 1L;
-    /**
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
      * on value removal
      */

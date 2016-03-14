@@ -38,20 +38,17 @@ import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.io.Serializable;
+
 import java.util.BitSet;
 
 /**
  * Algorithm of Alldifferent with AC
  */
-public class AlgoAllDiffAC implements Serializable{
+public class AlgoAllDiffAC {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
-
-    /** For serialization purpose */
-   	private static final long serialVersionUID = 1L;
 
     protected int n, n2;
     protected DirectedGraph digraph;

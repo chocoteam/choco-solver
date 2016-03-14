@@ -37,7 +37,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.sort.ArraySort;
 
-import java.io.Serializable;
+
 import java.util.Comparator;
 
 /**
@@ -250,7 +250,7 @@ public class SweepCumulFilter extends CumulFilter {
 	// DATA STRUCTURES
 	//***********************************************************************************
 
-	public static class Event implements Serializable{
+	public static class Event {
 		protected int type;
 		protected int index;
 		protected int date;

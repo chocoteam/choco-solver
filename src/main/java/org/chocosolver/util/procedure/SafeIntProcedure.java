@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.procedure;
 
-import java.io.Serializable;
+
 
 /**
  * <br/>
@@ -37,7 +37,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 29 sept. 2010
  */
-public interface SafeIntProcedure extends Serializable {
+public interface SafeIntProcedure  {
 
     /**
      * Action to execute in a <code>Delta</code> object, within the <code>forEachRemVal</code> method.

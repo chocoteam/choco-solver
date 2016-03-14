@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.strategy.selectors;
 
 import org.chocosolver.solver.variables.RealVar;
 
-import java.io.Serializable;
+
 
 /**
  * A value selector specifies which value should be chosen to constrain the selected variable.
@@ -41,7 +41,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 28 sept. 2010
  */
-public interface RealValueSelector extends Serializable {
+public interface RealValueSelector  {
 
     /**
      * Selects and returns the value to constrained chosen variable with.

@@ -32,7 +32,7 @@ package org.chocosolver.solver.search.limits;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.criteria.LongCriterion;
 
-import java.io.Serializable;
+
 
 /**
  * An interface to define count smth during search process
@@ -44,7 +44,7 @@ import java.io.Serializable;
  * @see SolutionCounter
  * @since 15 juil. 2010
  */
-public interface ICounter extends Criterion, LongCriterion, Serializable{
+public interface ICounter extends Criterion, LongCriterion{
 
     void init();
 

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.iterators;
 
-import java.io.Serializable;
+
 
 
 /**
@@ -44,7 +44,7 @@ import java.io.Serializable;
  * Use directly DisposableIntIterator!!
  */
 
-public interface IntIterator extends Serializable {
+public interface IntIterator  {
     /**
      * Returns <tt>true</tt> if the iteration has more elements. (In other
      * words, returns <tt>true</tt> if <tt>next</tt> would return an element

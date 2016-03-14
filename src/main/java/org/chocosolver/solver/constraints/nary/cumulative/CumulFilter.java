@@ -34,13 +34,13 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
-import java.io.Serializable;
+
 
 /**
  * Class able to filter a subset of tasks for the cumulative constraint
  * @author Jean-Guillaume Fages
  */
-public abstract class CumulFilter implements Serializable{
+public abstract class CumulFilter {
 
 	//***********************************************************************************
 	// VARIABLES

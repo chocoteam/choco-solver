@@ -29,12 +29,12 @@
  */
 package org.chocosolver.memory;
 
-import java.io.Serializable;
+
 
 /**
  * Describes an search vector with states (describing some history of the data structure).
  */
-public abstract class IStateIntVector implements Serializable {
+public abstract class IStateIntVector  {
 
     /**
      * Minimal capacity of a vector

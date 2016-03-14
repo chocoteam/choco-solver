@@ -34,7 +34,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 
-import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -43,7 +43,7 @@ import java.util.Arrays;
  * <p>
  * Created by cprudhom on 30/10/14.
  */
-public class MultivaluedDecisionDiagram implements Serializable {
+public class MultivaluedDecisionDiagram  {
 
     /**
      * The terminal node. An extreme (likely unused) value is set

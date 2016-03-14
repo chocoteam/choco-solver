@@ -45,8 +45,6 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 
-import java.io.Serializable;
-
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
@@ -93,12 +91,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * @since 0.01
  * @param <V> type of variables involved in this propagator
  */
-public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
-
-    /**
-     * For serialization purpose.
-     */
-    private static final long serialVersionUID = 2L;
+public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator> {
 
     /**
      * Status of this propagator on creation.

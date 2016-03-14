@@ -36,7 +36,7 @@ import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.variables.IntVar;
 
-import java.io.Serializable;
+
 
 /**
  * Settings for {@link Model}.
@@ -46,7 +46,7 @@ import java.io.Serializable;
  * Project: choco.
  * @author Charles Prud'homme
  */
-public interface Settings extends Serializable {
+public interface Settings  {
 
     /**
      * List possible reaction to lack of propagator's idempotency.

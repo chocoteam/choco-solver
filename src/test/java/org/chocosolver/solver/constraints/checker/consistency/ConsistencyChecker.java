@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.util.Random;
 
 import static java.lang.System.arraycopy;
-import static org.chocosolver.solver.Model.writeInFile;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildDomainsFromVar;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
 import static org.chocosolver.solver.constraints.checker.consistency.ConsistencyChecker.Consistency.valueOf;
@@ -99,13 +98,11 @@ public class ConsistencyChecker {
                                             String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
                                             ds, ide, h, rvars[d], val, loop, seed));
                                     System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
-                                    writeDown(ref);
                                     fail("no solution found");
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 System.out.println(e.getMessage());
-                                writeDown(ref);
                                 fail();
                             }
                         }
@@ -125,7 +122,6 @@ public class ConsistencyChecker {
 //            System.out.printf("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
-            writeDown(ref);
             System.out.println(e.getMessage());
             System.out.println(String.format("REF:\n%s\n", ref));
             fail();
@@ -146,15 +142,5 @@ public class ConsistencyChecker {
             default:
                 throw new UnsupportedOperationException();
         }
-    }
-
-    protected static void writeDown(Model ref) {
-        File f = new File("SOLVER_ERROR.ser");
-        try {
-            writeInFile(ref, f);
-        } catch (IOException ee) {
-            ee.printStackTrace();
-        }
-        System.out.println(""+ f.getAbsolutePath());
     }
 }

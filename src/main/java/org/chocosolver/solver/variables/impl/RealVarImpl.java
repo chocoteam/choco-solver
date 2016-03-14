@@ -49,8 +49,6 @@ import org.chocosolver.util.tools.StringUtils;
  */
 public class RealVarImpl extends AbstractVariable implements RealVar {
 
-    private static final long serialVersionUID = 1L;
-
     IStateDouble LB, UB;
     double precision;
 

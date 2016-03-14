@@ -31,7 +31,7 @@ package org.chocosolver.memory.structure;
 
 import org.chocosolver.memory.IEnvironment;
 
-import java.io.Serializable;
+
 
 /**
  * <br/>
@@ -39,7 +39,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 11/02/11
  */
-public abstract class Operation implements Serializable {
+public abstract class Operation  {
 
     protected Operation(IEnvironment environment) {
         environment.save(this);

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.objects.queues;
 
-import java.io.Serializable;
+
 import java.util.NoSuchElementException;
 
 /**
@@ -39,7 +39,7 @@ import java.util.NoSuchElementException;
  * @author Charles Prud'homme
  * @since 25/02/11
  */
-public class LinkedList<E> implements AQueue<E>, Serializable {
+public class LinkedList<E> implements AQueue<E> {
 
     transient int size; // could be computed, but more efficient to maintain
 

@@ -50,8 +50,6 @@ import org.chocosolver.solver.variables.Variable;
  */
 public final class ContradictionException extends Exception {
 
-    private static final long serialVersionUID = 2L;
-
     public ICause c = Cause.Null;
     public Variable v = null;
     public String s;

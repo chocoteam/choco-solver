@@ -44,9 +44,6 @@ package org.chocosolver.solver.exception;
  */
 public class SolverException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
-
-
     /**
      * Constructs a new solver exception with the specified detailed message.
      *

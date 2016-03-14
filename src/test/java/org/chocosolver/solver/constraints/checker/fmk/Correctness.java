@@ -41,7 +41,6 @@ import java.util.Random;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
-import static org.chocosolver.solver.Model.writeInFile;
 import static org.chocosolver.solver.constraints.checker.fmk.Domain.*;
 import static org.testng.Assert.fail;
 
@@ -144,15 +143,8 @@ public class Correctness {
 //            System.out.println("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
-            File f = new File("SOLVER_ERROR.ser");
-            try {
-                writeInFile(ref, f);
-            } catch (IOException ee) {
-                ee.printStackTrace();
-            }
             System.out.println(e.getMessage());
             System.out.println("REF:\n" + ref + "\n");
-            System.out.println("" + f.getAbsolutePath());
             fail();
         }
         return ref;
@@ -176,13 +168,6 @@ public class Correctness {
             System.out.println("REF:\n" + ref + "\n");
             ref.getEnvironment().worldPop();
             System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
-            File f = new File("SOLVER_ERROR.ser");
-            try {
-                writeInFile(ref, f);
-            } catch (IOException ee) {
-                ee.printStackTrace();
-            }
-            System.out.printf("" + f.getAbsolutePath());
             fail();
         }
     }

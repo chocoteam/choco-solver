@@ -49,7 +49,6 @@ import org.chocosolver.util.tools.StringUtils;
  */
 public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
-    private static final long serialVersionUID = 1L;
     private BoolVar not;
 
     public FixedBoolVarImpl(String name, int constant, Model model) {

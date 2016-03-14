@@ -36,7 +36,7 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
-import java.io.Serializable;
+
 import java.util.Arrays;
 
 /**
@@ -47,7 +47,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 05/06/2013
  */
-public class Solution implements Serializable, ICause {
+public class Solution implements ICause {
 
     //***********************************************************************************
     // VARIABLES

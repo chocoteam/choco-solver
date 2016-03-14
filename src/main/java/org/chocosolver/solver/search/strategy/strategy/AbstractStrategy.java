@@ -32,7 +32,7 @@ package org.chocosolver.solver.search.strategy.strategy;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 
-import java.io.Serializable;
+
 
 /**
  * A search strategy provides decisions to go down in the search space.
@@ -41,7 +41,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 1 juil. 2010
  */
-public abstract class AbstractStrategy<V extends Variable> implements Serializable {
+public abstract class AbstractStrategy<V extends Variable>  {
 
     protected final V[] vars;
 

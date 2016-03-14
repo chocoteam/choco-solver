@@ -39,7 +39,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.PriorityQueue;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import java.io.Serializable;
+
 import java.util.Arrays;
 
 /**
@@ -390,7 +390,7 @@ public final class PropSort extends Propagator<IntVar> {
     //////////////////////
 
 
-    private static class Stack2 implements Serializable {
+    private static class Stack2  {
         private int[] roots;
         private int[] rightMosts;
         private int[] maxXs;

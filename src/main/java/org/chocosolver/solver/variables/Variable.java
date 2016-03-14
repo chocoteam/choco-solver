@@ -40,8 +40,6 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
 
-import java.io.Serializable;
-
 /**
  *
  * To developers: any constructor of variable must pass in parameter
@@ -51,7 +49,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca, Charles Prud'homme
  */
-public interface Variable extends Identity, Serializable, Comparable<Variable> {
+public interface Variable extends Identity, Comparable<Variable> {
 
     /**
      * Type of variable: variable (unique).
