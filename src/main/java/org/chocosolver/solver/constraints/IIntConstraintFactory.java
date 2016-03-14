@@ -143,6 +143,16 @@ public interface IIntConstraintFactory {
 	}
 
 	/**
+	 * Gets the opposite of a given constraint
+	 * Works for any constraint, including globals, but the associated performances might be weak
+	 * @param cstr a constraint
+	 * @return the opposite constraint of <i>cstr</i>
+	 */
+	default Constraint not(Constraint cstr){
+		return cstr.getOpposite();
+	}
+
+	/**
 	 * Creates a notMember constraint.
 	 * Ensures var does not take its values in table
 	 *
@@ -559,6 +569,32 @@ public interface IIntConstraintFactory {
 		int[] vls = new TIntHashSet(values).toArray(); // remove double occurrences
 		Arrays.sort(vls);                              // sort
 		return new Constraint("Among", new PropAmongGAC_GoodImpl(ArrayUtils.append(vars, new IntVar[]{nbVar}), vls));
+	}
+
+	/**
+	 * Creates an and constraint that is satisfied if all boolean variables in <i>bools</i> are true
+	 * @param bools an array of boolean variable
+	 * @return a constraint and ensuring that variables in <i>bools</i> are all set to true
+	 */
+	default Constraint and(BoolVar... bools) {
+		Model s = bools[0].getModel();
+		IntVar sum = s.intVar(0, bools.length, true);
+		s.sum(bools, "=", sum).post();
+		return s.arithm(sum, "=", bools.length);
+	}
+
+	/**
+	 * Creates an and constraint that is satisfied if all constraints in <i>cstrs</i> are satisfied
+	 * BEWARE: this should not be used to post several constraints at once but in a reification context
+	 * @param cstrs an array of constraints
+	 * @return a constraint and ensuring that all constraints in <i>cstrs</i> are satisfied
+	 */
+	default Constraint and(Constraint... cstrs){
+		BoolVar[] bools = new BoolVar[cstrs.length];
+		for(int i=0;i<cstrs.length;i++){
+			bools[i] = cstrs[i].reify();
+		}
+		return and(bools);
 	}
 
 	/**
@@ -1287,6 +1323,31 @@ public interface IIntConstraintFactory {
 	 */
 	default Constraint nValues(IntVar[] vars, IntVar nValues) {
 		return Constraint.merge("nValue",atLeastNValues(vars, nValues, false), atMostNVvalues(vars, nValues, true));
+	}
+
+	/**
+	 * Creates an and constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
+	 * @param bools an array of boolean variable
+	 * @return a constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
+	 */
+	default Constraint or(BoolVar... bools) {
+		Model s = bools[0].getModel();
+		IntVar sum = s.intVar(0, bools.length, true);
+		s.sum(bools, "=", sum).post();
+		return s.arithm(sum, ">=", 1);
+	}
+
+	/**
+	 * Creates an and constraint that is satisfied if at least one constraint in <i>cstrs</i> are satisfied
+	 * @param cstrs an array of constraints
+	 * @return a constraint and ensuring that at least one constraint in <i>cstrs</i> are satisfied
+	 */
+	default Constraint or(Constraint... cstrs){
+		BoolVar[] bools = new BoolVar[cstrs.length];
+		for(int i=0;i<cstrs.length;i++){
+			bools[i] = cstrs[i].reify();
+		}
+		return or(bools);
 	}
 
 	/**

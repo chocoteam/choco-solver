@@ -30,17 +30,16 @@
 package org.chocosolver.solver;
 
 /**
- * An interface dedicated to interfaces of {@link Solver} who need the following method:
- * <code>Solver _me();<code/>
+ * An interface dedicated to encapsulate a given type
  * <p>
  * Project: choco.
  * @author Charles Prud'homme
  * @since 02/03/2016.
  */
-public interface IMyself {
+public interface IMySelf<V> {
 
     /**
-     * @return the encapsulated Solver
+     * @return the encapsulated type
      */
-    Solver _me();
+    V _me();
 }

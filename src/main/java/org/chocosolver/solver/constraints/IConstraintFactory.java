@@ -36,6 +36,6 @@ package org.chocosolver.solver.constraints;
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface IConstraintFactory extends IIntConstraintFactory, ILogicalConstraintFactory, IRealConstraintFactory, ISetConstraintFactory {
+public interface IConstraintFactory extends IIntConstraintFactory, IRealConstraintFactory, ISetConstraintFactory {
 
 }

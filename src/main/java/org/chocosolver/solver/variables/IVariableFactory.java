@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.solver.IMySelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.impl.*;
@@ -43,16 +44,9 @@ import org.chocosolver.util.tools.StringUtils;
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface IVariableFactory {
+public interface IVariableFactory extends IMySelf<Model> {
 
     String CSTE_NAME = "cste -- ";
-
-    /**
-     * Simple method to get a model object
-     * Should not be called by the user
-     * @return a model object
-     */
-    Model _me();
 
     //*************************************************************************************
     // BOOLEAN VARIABLES

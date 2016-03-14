@@ -32,6 +32,7 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.sat.PropSat;
+import org.chocosolver.solver.IMySelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
@@ -47,9 +48,7 @@ import org.chocosolver.solver.variables.BoolVar;
  * @author Charles Prud'homme
  * @since 15/07/13
  */
-public interface ISatFactory {
-
-    Model _me();
+public interface ISatFactory extends IMySelf<Model> {
 
     /**
      * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
