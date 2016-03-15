@@ -108,6 +108,9 @@ public class CircularQueue<E> {
      * @see CircularQueue#indexOf(Object)
      */
     public E get(int index) {
+        if(index < 0 || index >= size){
+            return null;
+        }
         return elementData[convert(index, head)];
     }
 
@@ -175,6 +178,9 @@ public class CircularQueue<E> {
      * @return last element of the queue
      */
     public E pollLast() {
+        if(size == 0){
+            return null;
+        }
         int pos = convert(tail, -1);
         // an interesting application of try/finally is to avoid
         // having to use local variables
@@ -206,6 +212,9 @@ public class CircularQueue<E> {
      * @return removed element
      */
     public E remove(int index) {
+        if(size == 0){
+            return null;
+        }
         int pos = convert(head, index);
         E tmp = elementData[pos];
 //        elementData[pos] = null; // Let gc do its work
@@ -267,6 +276,9 @@ public class CircularQueue<E> {
 
 
     private E pollAndClean(boolean clean){
+        if(size == 0){
+            return null;
+        }
         int pos = convert(head, 0);
         // an interesting application of try/finally is to avoid
         // having to use local variables
