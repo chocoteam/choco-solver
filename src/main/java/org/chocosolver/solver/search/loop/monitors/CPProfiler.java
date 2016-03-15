@@ -35,6 +35,7 @@ import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.trace.IMessage;
 import org.chocosolver.solver.variables.Variable;
 
@@ -46,26 +47,53 @@ import org.chocosolver.solver.variables.Variable;
  * <p>
  * Created by cprudhom on 22/10/2015.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 3.3.2
  */
 public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMonitorUpBranch,
         IMonitorClose, IMonitorSolution, IMonitorContradiction, IMonitorRestart {
 
+    /**
+     * Set to true to activate trace for debugging
+     */
     public static boolean DEBUG = false;
 
+    /**
+     * Reference to the model
+     */
     Model mModel;
-
-    // Stacks of 'Parent Id' and 'Alternative' used when backtrack
+    /**
+     *  Stacks of 'Parent Id'  used when backtrack
+     */
     TIntStack pid_stack = new TIntArrayStack();
+    /**
+     *  Stacks of 'Alternative' used when backtrack
+     */
     TIntStack alt_stack = new TIntArrayStack();
-     // Stacks of current node, to deal with jumps
+    /**
+     * Stacks of current node, to deal with jumps
+     */
     TIntStack last_stack = new TIntArrayStack();
-    // Node count: different from measures.getNodeCount() as we count failure nodes as well
+    /**
+     * Node count: different from measures.getNodeCount() as we count failure nodes as well
+     */
     int nc = 0;
-    int rid; // restart id
-    int last; // last node index sent
-    // Used to communicate every node
+    /**
+     * restart id
+     */
+    int rid;
+    /**
+     * last node index sent
+     */
+    int last;
+    /**
+     * Used to communicate every node
+     */
     Connector connector = new Connector();
 
+    /**
+     * Format for solution output
+     */
     IMessage solutionMessage = new IMessage() {
         @Override
         public String print() {
@@ -86,17 +114,6 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
         this.mModel = aModel;
     }
 
-    /**
-     * Create a bridge to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
-     *
-     * @param aModel         model to observe resolution
-     * @param solutionMessage to send to cp-profiler when a solution is found
-     */
-    public CPProfiler(Model aModel, IMessage solutionMessage) {
-        this.mModel = aModel;
-        this.solutionMessage = solutionMessage;
-    }
-
     @Override
     public void afterInitialize() {
         if (DEBUG) System.out.printf(
@@ -112,8 +129,10 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     @Override
     public void beforeDownBranch(boolean left) {
         if (left) {
-            Decision dec = mModel.getSolver().getLastDecision();
-            String pdec = pretty(dec.getPrevious());
+            DecisionPath dp = mModel.getSolver().getDecisionPath();
+            int last = dp.size() - 1;
+            Decision dec = dp.getLastDecision();
+            String pdec = pretty(dp.getDecision(last-1));
             int ari = dec.getArity();
             send(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, Connector.NodeStatus.BRANCH, pdec, "");
             for (int i = 0; i < ari; i++) {
@@ -140,13 +159,13 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
 
     @Override
     public void onSolution() {
-        String dec = pretty(mModel.getSolver().getLastDecision());
+        String dec = pretty(mModel.getSolver().getDecisionPath().getLastDecision());
         send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.SOLVED, dec, solutionMessage.print());
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        String dec = pretty(mModel.getSolver().getLastDecision());
+        String dec = pretty(mModel.getSolver().getDecisionPath().getLastDecision());
         send(nc, pid_stack.peek(), alt_stack.pop(), 0, rid, Connector.NodeStatus.FAILED, dec, cex.toString());
     }
 
@@ -183,19 +202,23 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     }
 
     private static String pretty(Decision dec) {
-        // to print decision correctly (since the previous one is sent)
-        int a = dec.getArity();
-        int b = dec.triesLeft();
-        dec.rewind();
-        while (dec.triesLeft() > b + 1) {
-            a--;
-            dec.buildNext();
+        if(dec == null){
+            return "ROOT";
+        }else {
+            // to print decision correctly (since the previous one is sent)
+            int a = dec.getArity();
+            int b = dec.triesLeft();
+            dec.rewind();
+            while (dec.triesLeft() > b + 1) {
+                a--;
+                dec.buildNext();
+            }
+            String pretty = dec.toString();
+            while (a > b) {
+                b++;
+                dec.buildNext();
+            }
+            return pretty;
         }
-        String pretty = dec.toString();
-        while (a > b) {
-            b++;
-            dec.buildNext();
-        }
-        return pretty;
     }
 }

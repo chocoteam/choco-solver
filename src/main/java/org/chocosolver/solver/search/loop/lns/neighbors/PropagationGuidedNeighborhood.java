@@ -32,8 +32,9 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.BitSet;
@@ -52,22 +53,66 @@ import java.util.TreeMap;
  */
 public class PropagationGuidedNeighborhood implements INeighbor {
 
+    /**
+     * Number of variables
+     */
     protected final int n;
+    /**
+     * Array of variables to consider in a fragment
+     */
     protected final IntVar[] vars;
+    /**
+     * Last solution found, wrt {@link #vars}
+     */
     protected final int[] bestSolution;
+    /**
+     * Domain size of each variable in {@link #vars}
+     */
     protected int[] dsize;
+    /**
+     * For randomness
+     */
     protected Random rd;
+    /**
+     * Intial size of the fragment
+     */
     protected int fgmtSize = 100;
+    /**
+     * Number of variables modified through propagation to consider while computing the neighbor
+     */
     protected int listSize;
+    /**
+     * Restriction parameter
+     */
     protected double epsilon = 1.;
+    /**
+     * Logarithmic cardinality of domains
+     */
     protected double logSum = 0.;
-
+    /**
+     * Store the modified variables
+     */
     protected SortedMap<Integer, Integer> all;
+    /**
+     * Store the variable elligible for propagation
+     */
     protected SortedMap<Integer, Integer> candidate;
-    BitSet fragment;  // index of variable to set unfrozen
-    IntMetaDecision decision;
+    /**
+     * Indicate which variables are selected in a fragment
+     */
+    BitSet fragment;
+    /**
+     * Reference to the model
+     */
     Model mModel;
 
+    /**
+     * Create a propagation-guided neighbor for LNS
+     * @param vars set of variables to consider
+     * @param fgmtSize initial size of the fragment
+     * @param listSize number of modified variable to store while propagating
+     * @param seed for randomness
+     */
     public PropagationGuidedNeighborhood(IntVar[] vars, int fgmtSize, int listSize, long seed) {
         this.mModel = vars[0].getModel();
 
@@ -82,7 +127,6 @@ public class PropagationGuidedNeighborhood implements INeighbor {
         this.all = new TreeMap<>();
         this.candidate = new TreeMap<>();
         this.fragment = new BitSet(n);
-        this.decision = new IntMetaDecision();
     }
 
     @Override
@@ -98,8 +142,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     }
 
     @Override
-    public Decision fixSomeVariables() {
-        decision.free();
+    public void fixSomeVariables(DecisionPath decisionPath) {
         logSum = 0.;
         for (int i = 0; i < n; i++) {
             int ds = vars[i].getDomainSize();
@@ -109,16 +152,20 @@ public class PropagationGuidedNeighborhood implements INeighbor {
         fragment.set(0, n); // all variables are frozen
         mModel.getEnvironment().worldPush();
         try {
-            update();
+            update(decisionPath);
         } catch (ContradictionException cex) {
             mModel.getSolver().getEngine().flush();
         }
         mModel.getEnvironment().worldPop();
         epsilon = (.95 * epsilon) + (.05 * (logSum / fgmtSize));
-        return decision;
     }
 
-    protected void update() throws ContradictionException {
+    /**
+     * Create the fragment
+     * @param decisionPath the decision path to feed
+     * @throws ContradictionException if the fragment is trivially infeasible
+     */
+    protected void update(DecisionPath decisionPath) throws ContradictionException {
         while (logSum > fgmtSize && fragment.cardinality() > 0) {
             all.clear();
             // 1. pick a variable
@@ -126,7 +173,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
 
             // 2. fix it to its solution value
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                impose(id);
+                impose(id, decisionPath);
                 mModel.getSolver().propagate();
                 fragment.clear(id);
 
@@ -158,12 +205,23 @@ public class PropagationGuidedNeighborhood implements INeighbor {
         }
     }
 
-    protected void impose(int id) throws ContradictionException {
-        decision.add(vars[id], bestSolution[id]);
+    /**
+     * Impose a decision to be part of the fragment
+     * @param id variable id in {@link #vars}
+     * @param decisionPath the current decision path
+     * @throws ContradictionException if the application of the decision fails
+     */
+    protected void impose(int id, DecisionPath decisionPath) throws ContradictionException {
+        IntDecision decision = decisionPath.makeIntDecision(vars[id], DecisionOperator.int_eq, bestSolution[id]);
+        decisionPath.pushDecision(decision);
+
         vars[id].instantiateTo(bestSolution[id], Cause.Null);
     }
 
 
+    /**
+     * @return a variable id in {@link #vars} to be part of the fragment
+     */
     protected int selectVariable() {
         int id;
         if (candidate.isEmpty()) {

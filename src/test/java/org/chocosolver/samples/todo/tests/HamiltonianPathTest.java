@@ -30,15 +30,13 @@
 package org.chocosolver.samples.todo.tests;
 
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.util.objects.graphs.input.GraphGenerator;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.PoolManager;
+import org.chocosolver.util.objects.graphs.input.GraphGenerator;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
@@ -126,13 +124,11 @@ public class HamiltonianPathTest {
 
 	private static class ConstructorIntHeur extends AbstractStrategy<IntVar> {
 		int n, offset;
-		PoolManager<IntDecision> pool;
 
 		public ConstructorIntHeur(IntVar[] v, int off) {
 			super(v);
 			offset = off;
 			n = v.length;
-			pool = new PoolManager<>();
 		}
 
 		@Override
@@ -144,10 +140,7 @@ public class HamiltonianPathTest {
 					return null;
 				}
 			}
-			IntDecision d = pool.getE();
-			if(d==null)d=new IntDecision(pool);
-			d.set(vars[x], vars[x].getLB(), DecisionOperator.int_eq);
-			return d;
+			return vars[x].getModel().getSolver().getDecisionPath().makeIntDecision(vars[x], DecisionOperator.int_eq, vars[x].getLB());
 		}
 	}
 }

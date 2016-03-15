@@ -216,25 +216,6 @@ public class Rules {
     }
 
     /**
-     * Duplicate the current rules
-     *
-     * @return a copy of the current object
-     */
-    public Rules duplicate() {
-        Rules nrules = new Rules(this.vmMasks.length, this.remVal.length);
-        nrules.paRules.or(this.paRules);
-        for (int i = vmRules.nextSetBit(0); i > -1; i = vmRules.nextSetBit(i + 1)) {
-            nrules.vmRules.set(i);
-            nrules.vmMasks[i] = this.vmMasks[i];
-            if (this.remVal[i] != null && this.remVal[i].size() > 0) {
-                nrules.remVal[i] = new NoIteratorIntHashSet(16, .5f, NO_ENTRY);
-                this.remVal[i].addAllIn(nrules.remVal[i]);
-            }
-        }
-        return nrules;
-    }
-
-    /**
      * Merge 'rules' into this
      *
      * @param rules a set of rules
@@ -255,6 +236,13 @@ public class Rules {
                 }
             }
         }
+    }
+
+    /**
+     * @return <tt>true</tt> if the rules are not valuated, meaning that the explanation is complete
+     */
+    public boolean isEmpty() {
+        return paRules.isEmpty() && vmRules.isEmpty();
     }
 
     /**

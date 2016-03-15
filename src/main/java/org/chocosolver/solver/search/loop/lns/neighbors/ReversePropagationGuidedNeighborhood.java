@@ -31,6 +31,7 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -44,12 +45,19 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeighborhood {
 
+    /**
+     * Create a neighbor for LNS based on PGLNS, which selects variables to not be part of a fragment
+     * @param vars variables to consider
+     * @param fgmtSize initial size of the fragment
+     * @param listSize number of modified variable to store while propagating
+     * @param seed for randomness
+     */
     public ReversePropagationGuidedNeighborhood(IntVar[] vars, int fgmtSize, int listSize, long seed) {
         super(vars, fgmtSize, listSize, seed);
     }
 
     @Override
-    protected void update() throws ContradictionException {
+    protected void update(DecisionPath decisionPath) throws ContradictionException {
         while (logSum > fgmtSize && fragment.cardinality() > 0) {
             all.clear();
             // 1. pick a variable
@@ -98,7 +106,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
         }
         for (int i = fragment.nextSetBit(0); i > -1 && i < n; i = fragment.nextSetBit(i + 1)) {
             if (vars[i].contains(bestSolution[i])) {
-                impose(i);
+                impose(i, decisionPath);
             }
         }
         mModel.getSolver().propagate();

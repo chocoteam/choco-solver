@@ -29,9 +29,11 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 
 /**
+ * A neighbor which is based on mutliple neighbors.
+ * They are called sequentially.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -39,10 +41,21 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
  */
 public class SequenceNeighborhood implements INeighbor {
 
-
+    /**
+     * neighbor currently selected
+     */
     protected int who;
+    /**
+     * number of neighbors declared
+     */
     protected int count;
+    /**
+     * neighbors declared
+     */
     protected INeighbor[] neighbors;
+    /**
+     * Number of time each neighbor succeed in finding a solution
+     */
     protected int[] counters;
 
     public SequenceNeighborhood(INeighbor... neighbors) {
@@ -64,10 +77,10 @@ public class SequenceNeighborhood implements INeighbor {
     }
 
     @Override
-    public Decision fixSomeVariables(){
+    public void fixSomeVariables(DecisionPath decisionPath){
         nextNeighbor();
         if (who == count) who = 0;
-        return neighbors[who].fixSomeVariables();
+        neighbors[who].fixSomeVariables(decisionPath);
     }
 
     @Override

@@ -43,6 +43,7 @@ import org.chocosolver.solver.variables.Variable;
  * use of variables involved in recent conflicts
  *
  * @author Jean-Guillaume Fages, Charles Prud'homme
+ * @since 03/05/2013
  */
 public class LastConflict extends AbstractStrategy<Variable> implements IMonitorRestart, IMonitorSolution, IMonitorContradiction {
 
@@ -105,6 +106,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
         return mainStrategy.init();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Decision<Variable> getDecision() {
         if (active) {
@@ -127,17 +129,15 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        if(!model.getSolver().getLastDecision().isMeta()) {
-            Variable curDecVar = (Variable) model.getSolver().getLastDecision().getDecisionVariables();
-            if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
-            if (inScope(curDecVar)) {
-                if (nbCV < conflictingVariables.length) {
-                    conflictingVariables[nbCV++] = curDecVar;
-                } else {
-                    assert nbCV == conflictingVariables.length;
-                    System.arraycopy(conflictingVariables, 1, conflictingVariables, 0, nbCV - 1);
-                    conflictingVariables[nbCV - 1] = curDecVar;
-                }
+        Variable curDecVar = model.getSolver().getDecisionPath().getLastDecision().getDecisionVariable();
+        if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
+        if (inScope(curDecVar)) {
+            if (nbCV < conflictingVariables.length) {
+                conflictingVariables[nbCV++] = curDecVar;
+            } else {
+                assert nbCV == conflictingVariables.length;
+                System.arraycopy(conflictingVariables, 1, conflictingVariables, 0, nbCV - 1);
+                conflictingVariables[nbCV - 1] = curDecVar;
             }
         }
     }

@@ -32,13 +32,9 @@ package org.chocosolver.solver.search.loop;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.StringUtils;
-
-import java.util.ArrayDeque;
-import java.util.Deque;
 
 /**
  * <br/>
@@ -51,16 +47,8 @@ public enum Reporting {
 
     public static String onDecisions(Model model) {
         Solver solver = model.getSolver();
-        Decision last = solver.getLastDecision();
-        Deque<Decision> stack = new ArrayDeque<>();
-        while (last != null) {
-            stack.push(last);
-            last = last.getPrevious();
-        }
         StringBuilder sb = new StringBuilder();
-        while (!stack.isEmpty()) {
-            sb.append(stack.removeFirst().toString()).append(" & ");
-        }
+        sb.append(solver.getDecisionPath().toString());
         sb.append("\n").append(model.getSolver().getObjectiveManager().toString());
         return sb.toString();
     }

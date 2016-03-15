@@ -27,37 +27,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.decision;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
-import org.chocosolver.solver.variables.IntVar;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
- * <br/>
+ * <p>
+ * Project: choco-solver.
  *
  * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * @since 14/03/2016.
  */
-public class Once extends IntStrategy {
+public class DecisionMakerTest {
 
-    public Once(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector) {
-        super(scope, varselector, valueSelector);
+    Model model;
+    DecisionMaker dm;
+
+    @BeforeMethod(alwaysRun = true)
+    public void setUp(){
+        model = new Model();
+        dm = new DecisionMaker();
     }
 
-    public Once(IntVar[] scope, VariableSelector<IntVar> varselector, IntValueSelector valueSelector,
-                DecisionOperator<IntVar> assgnt) {
-        super(scope, varselector, valueSelector, assgnt);
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testMakeIntDecision() throws Exception {
+        IntDecision d = dm.makeIntDecision(model.boolVar(), DecisionOperator.int_eq, 0);
+        d.free();
+        d = dm.makeIntDecision(model.boolVar(), DecisionOperator.int_eq, 1);
+        d.free();
     }
 
-    @Override
-    public Decision<IntVar> computeDecision(IntVar variable) {
-        Decision<IntVar> d = super.computeDecision(variable);
-        if (d != null) {
-            d.setRefutable(false);
-        }
-        return d;
+    @Test(groups = "1s", timeOut=60000)
+    public void testMakeRealDecision() throws Exception {
+        RealDecision d = dm.makeRealDecision(model.realVar(1d, 3d), 1.5);
+        d.free();
+        d = dm.makeRealDecision(model.realVar(2d, 4d), 2.5);
+        d.free();
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testMakeSetDecision() throws Exception {
+        SetDecision d = dm.makeSetDecision(model.setVar(new int[]{2,3,4}), DecisionOperator.set_force, 3);
+        d.free();
+        d = dm.makeSetDecision(model.setVar(new int[]{3,4, 5}), DecisionOperator.set_remove, 4);
+        d.free();
     }
 }

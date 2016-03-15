@@ -34,13 +34,13 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
-import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
-import org.chocosolver.solver.search.strategy.decision.RootDecision;
-import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.tools.StatisticUtils;
 
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -63,35 +63,74 @@ import java.util.Random;
  */
 public class ExplainingCut implements INeighbor {
 
-    protected ExplanationEngine mExplanationEngine; // the explanation engine -- it works faster when it's a lazy one
+    /**
+     * The explanation engine that computes explanation on solution
+     */
+    protected ExplanationEngine mExplanationEngine;
+    /**
+     * For randomness purpose
+     */
     protected final Random random;
-
-    IntMetaDecision path; // decision path that leads to a solution
-
-    BitSet related; // a bitset indicating which decisions of the path are related to the cut
-    BitSet unrelated; // a bitset to indicate which decisions of the path are NOT related to the cut
+    /**
+     * A copy of the decision path which led to the solution
+     */
+    protected List<IntDecision> mDecisionPath;
+    /**
+     * Indicates which decisions are related to the explanation in {@link #mDecisionPath}
+     */
+    BitSet related;
+    /**
+     * Indicates which decisions are not related to the explanation in {@link #mDecisionPath}
+     */
+    BitSet unrelated;
+    /**
+     * Indicates which decisions are frozen in the current fragment
+     */
     BitSet notFrozen;
-    boolean forceCft; // does the cut has already been explained?
-    boolean isTerminated; // if explanations do not contain decisions, then the optimality has been proven
-
-    double nbFixedVariables = 0d; // number of decision to fix in the set of decisions explaining the cut
-    int nbCall, limit;
-    final int level; // relaxing factor
-
+    /**
+     * Indicates if the cut has already been explained
+     */
+    boolean forceCft;
+    /**
+     * Indicates if the explanation contains no decision, ie optimality is proven
+     */
+    boolean isTerminated;
+    /**
+     * Number of decisions to fix in the fragment
+     */
+    double nbFixedVariables = 0d;
+    /**
+     * Number of times this neighbor is called
+     */
+    int nbCall;
+    /**
+     * Next time the level should be increased
+     */
+    int limit;
+    /**
+     * Relaxing factor
+     */
+    final int level;
+    /**
+     * Reference to the model
+     */
     Model mModel;
-    IntMetaDecision decision;
-    PoolManager<IntDecision> decisionPool;
 
+    /**
+     * Create a neighborhood which analyses the explanation of the cut wrt decision path to focus on decisions
+     * more prone to not interact with the cut
+     * @param aModel the model
+     * @param level the relaxing factor
+     * @param seed a seed for randomness
+     */
     public ExplainingCut(Model aModel, int level, long seed) {
         this.mModel = aModel;
         this.level = level;
         this.random = new Random(seed);
-        path = new IntMetaDecision();
+        this.mDecisionPath = new ArrayList<>();
         related = new BitSet(16);
         notFrozen = new BitSet(16);
         unrelated = new BitSet(16);
-        this.decision = new IntMetaDecision();
-        this.decisionPool = new PoolManager<>();
     }
 
     @Override
@@ -112,24 +151,26 @@ public class ExplainingCut implements INeighbor {
     }
 
     @Override
-    public Decision fixSomeVariables() {
+    public void fixSomeVariables(DecisionPath decisionPath) {
         // this is called after restart
         // if required, force the cut and explain the cut
+        assert mModel.getSolver().getDecisionPath().size() == 1: "unexpected size " + mModel.getSolver().getDecisionPath().size();
         if (forceCft) {
             explain();
         }
-        decision.free();
         // then fix variables
         _fixVar();
-        assert mModel.getSolver().getLastDecision() == RootDecision.ROOT;
+        assert mModel.getSolver().getDecisionPath().size() == 1: "unexpected size " + mModel.getSolver().getDecisionPath().size();
         // add unrelated
         notFrozen.or(unrelated);
         for (int id = notFrozen.nextSetBit(0); id >= 0; id = notFrozen.nextSetBit(id + 1)) {
-            decision.add(path.getVar(id), path.getVal(id));
+            decisionPath.pushDecision(mDecisionPath.get(id).duplicate());
         }
-        return decision;
     }
 
+    /**
+     * Regarding the explanation, pick decisions to create a fragment
+     */
     protected void _fixVar() {
         // this part is specific: a fake decision path has to be created
         nbCall++;
@@ -158,6 +199,9 @@ public class ExplainingCut implements INeighbor {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+    /**
+     * Increase the relaxing limit
+     */
     void increaseLimit() {
         long ank = (long) (1.2 * StatisticUtils.binomialCoefficients(related.cardinality(), (int) nbFixedVariables - 1));
         int step = (int) Math.min(ank, level);
@@ -178,11 +222,12 @@ public class ExplainingCut implements INeighbor {
      * Compute the initial fragment, ie set of decisions to keep.
      */
     void clonePath() {
-        path.free();
-        Decision dec = mModel.getSolver().getLastDecision();
-        while ((dec != RootDecision.ROOT)) {
-            addToPath(dec);
-            dec = dec.getPrevious();
+        mDecisionPath.clear();
+        mDecisionPath.add(null); // to
+        DecisionPath dp = mModel.getSolver().getDecisionPath();
+        int last = dp.size();
+        while (last > 1) {
+            addToPath(dp.getDecision(--last));
         }
 //        Collections.reverse(path);
     }
@@ -194,22 +239,15 @@ public class ExplainingCut implements INeighbor {
      * @param dec a decision of the current decision path
      */
     private void addToPath(Decision dec) {
-        if (dec instanceof IntMetaDecision) {
-            IntMetaDecision imd = (IntMetaDecision) dec;
-            for (int j = 0; j < imd.size(); j++) {
-                path.add(imd.getVar(j), imd.getVal(j), imd.getDop(j));
-            }
-        } else {
-            IntDecision id = (IntDecision) dec;
-            boolean tofree = false;
-            if(!id.hasNext()){
-                id = id.flip();
-                tofree = true;
-            }
-            path.add(id.getDecisionVariables(), id.getDecisionValue(), id.getDecOp());
-            if(tofree){
-                id.free();
-            }
+        IntDecision id = (IntDecision) dec;
+        boolean tofree = false;
+        if (!id.hasNext()) {
+            id = id.flip();
+            tofree = true;
+        }
+        mDecisionPath.add(id.duplicate());//add(id.getDecisionVariable(), id.getDecisionValue(), id.getDecOp());
+        if (tofree) {
+            id.free();
         }
     }
 
@@ -221,28 +259,21 @@ public class ExplainingCut implements INeighbor {
         forceCft = false;
         // 1. make a backup
         mModel.getEnvironment().worldPush();
-        IntDecision d;
+        DecisionPath dp = mModel.getSolver().getDecisionPath();
         int i = 0;
         try {
-
-            Decision previous = mModel.getSolver().getLastDecision();
-            assert previous == RootDecision.ROOT;
+            assert mModel.getSolver().getDecisionPath().size() == 1;
             // 2. apply the decisions
-            mExplanationEngine.getSolver().getSolver().getObjectiveManager().postDynamicCut();
-            for (i = path.size() - 1; i >= 0; i--) {
-                if ((d = decisionPool.getE()) == null) {
-                    d = new IntDecision(decisionPool);
-                }
-                d.set(path.getVar(i), path.getVal(i), path.getDop(i));
-                d.setPrevious(previous);
-                d.buildNext();
-                d.apply();
+            mModel.getSolver().getObjectiveManager().postDynamicCut();
+            for (i = mDecisionPath.size() - 1; i >= 0; i--) {
+                dp.pushDecision(mDecisionPath.get(i).duplicate());
+                dp.apply();
                 mModel.getSolver().propagate();
-                previous = d;
             }
             //mModel.propagate();
             assert false : "SHOULD FAIL!";
         } catch (ContradictionException cex) {
+            dp.reset();
             if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
 
                 // 3. explain the failure
@@ -263,7 +294,11 @@ public class ExplainingCut implements INeighbor {
                 unrelated.flip(0, i);
 
                 // 4. remove all decisions above i in path
-                path.remove(0, i);
+                int size = mDecisionPath.size();
+                while (size > i) {
+                    mDecisionPath.remove(mDecisionPath.size() - 1);
+                    size--;
+                }
 
             } else {
                 throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
@@ -271,7 +306,7 @@ public class ExplainingCut implements INeighbor {
         }
         mModel.getEnvironment().worldPop();
         mModel.getSolver().getEngine().flush();
-
+        assert mModel.getSolver().getDecisionPath().size() == 1;
         nbFixedVariables = related.cardinality() - 1;
         nbCall = 0;
         increaseLimit();

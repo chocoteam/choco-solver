@@ -57,23 +57,52 @@ import org.chocosolver.solver.variables.events.IntEventType;
  */
 public class ExplainingObjective extends ExplainingCut{
 
+    /**
+     * Reference the objective manager, to
+     */
     private ObjectiveManager<IntVar, Integer> om;
+    /**
+     * The objective variable
+     */
     private IntVar objective;
-    private int LB, UB;
-
-    // list of index of clusters
+    /**
+     * The lower bound of the {@link #objective}
+     */
+    private int LB;
+    /**
+     * The upper bound of the {@link #objective}
+     */
+    private int UB;
+    /**
+     * Clusters of decisions, each of them are related to a domain reduction
+     */
     private final TIntArrayList clusters;
+    /**
+     * Strategy to build clusters, based on geometrical evolution
+     */
     private final IRestartStrategy geo4cluster;
-    // current cluster treated
+    /**
+     * current cluster used in the fragment
+     */
     private int cluster;
-    // various status of the decisions
 
-    // TEMPORARY DATA STRUCTURES
+    /**
+     * TEMPORARY DATA STRUCTURES.
+     */
     private final TIntArrayList tmpDeductions;
 
+    /**
+     * TEMPORARY DATA STRUCTURES
+     */
     private final TIntSet tmpValueDeductions;
 
-
+    /**
+     * Create a neighborhood which analyses the explanation of the objective current value to focus on decisions
+     * more prone to improve its value
+     * @param aModel a model
+     * @param level relaxong factor
+     * @param seed for randomness
+     */
     public ExplainingObjective(Model aModel, int level, long seed) {
         super(aModel, level, seed);
         clusters = new TIntArrayList(16);
@@ -90,7 +119,7 @@ public class ExplainingObjective extends ExplainingCut{
         tmpDeductions.clear();
         tmpValueDeductions.clear();
         clusters.clear();
-        path.free();
+        mDecisionPath.clear();
 
         // 2. get anti domain of the objective variable
         readRemovedValues();
@@ -106,6 +135,7 @@ public class ExplainingObjective extends ExplainingCut{
         }
         unrelated.clear();
         unrelated.or(related);
+        unrelated.flip(0, mModel.getSolver().getDecisionPath().size());
         forceCft = true;
     }
 

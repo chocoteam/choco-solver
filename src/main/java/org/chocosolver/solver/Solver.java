@@ -51,8 +51,7 @@ import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.FilteringMonitor;
@@ -73,7 +72,6 @@ import java.util.List;
 import static org.chocosolver.solver.Solver.Action.*;
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
 import static org.chocosolver.solver.search.loop.Reporting.fullReport;
-import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 import static org.chocosolver.util.ESat.*;
 
 /**
@@ -99,6 +97,7 @@ import static org.chocosolver.util.ESat.*;
  * Created by cprudhom on 01/09/15.
  * Project: choco.
  * @author Charles Prud'homme
+ * @since 01/09/15.
  */
 public final class Solver implements Serializable, ISolver, IMeasures, IOutputFactory {
 
@@ -162,7 +161,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     private MeasuresRecorder mMeasures;
 
     /** The current decision */
-    private Decision decision;
+    private DecisionPath dpath;
 
     /**
      * Index of the initial world, before initialization.
@@ -231,7 +230,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
         eoList = new FilteringMonitorList();
         engine = NoPropagationEngine.SINGLETON;
         objectivemanager = SAT();
-        decision = RootDecision.ROOT;
+        dpath = new DecisionPath(aModel.getEnvironment());
         action = initialize;
         mMeasures = new MeasuresRecorder(mModel);
         criteria = new ArrayList<>();
@@ -254,7 +253,6 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
      * - OPTIMISATION : If an objective has been defined, searches an optimal solution
      * (and prove optimality by closing the search space). Then restores the best solution found after solving.
      * @return if at least one new solution has been found.
-     * @see {@link Solver}
      */
     public boolean solve(){
         // prepare
@@ -375,6 +373,9 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
         mMeasures.startStopwatch();
         rootWorldIndex = mModel.getEnvironment().getWorldIndex();
         mModel.getEnvironment().buildFakeHistoryOn(mModel.getSettings().getEnvironmentHistorySimulationCondition());
+        // Indicates which decision was previously applied before selecting the move.
+        // Always sets to ROOT for the first move
+        M.setTopDecisionPosition(0);
         mModel.getEnvironment().worldPush(); // store state before initial propagation; w = 0 -> 1
         try {
             P.execute(this);
@@ -409,9 +410,6 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
             getMeasures().incFailCount();
             stop = true;
         }
-        // Indicates which decision was previously applied before selecting the move.
-        // Always sets to ROOT for the first move
-        M.setTopDecision(ROOT);
         mMeasures.updateTime();
         for (Criterion c : criteria) {
             if (c instanceof ICounter) {
@@ -453,12 +451,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
         // if a resolution has already been done
         if (rootWorldIndex > -1) {
             mModel.getEnvironment().worldPopUntil(rootWorldIndex);
-            Decision tmp;
-            while (decision != ROOT) {
-                tmp = decision;
-                decision = tmp.getPrevious();
-                tmp.free();
-            }
+            dpath.reset();
             feasible = ESat.UNDEFINED;
             action = initialize;
             mMeasures.reset();
@@ -508,12 +501,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
      */
     public void restoreRootNode() {
         mModel.getEnvironment().worldPopUntil(searchWorldIndex); // restore state after initial propagation
-        Decision tmp;
-        while (decision != ROOT) {
-            tmp = decision;
-            decision = tmp.getPrevious();
-            tmp.free();
-        }
+        dpath.reset();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -556,10 +544,10 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     }
 
     /**
-     * @return the downmost taken decision
+     * @return the current decision path
      */
-    public Decision getLastDecision() {
-        return decision;
+    public DecisionPath getDecisionPath() {
+        return dpath;
     }
 
     /**
@@ -642,7 +630,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     }
 
     /**
-     * Return the explanation engine plugged into <code>this</code>.
+     * Return the explanation engine plugged into {@code this}.
      * @return this model's explanation engine
      */
     public ExplanationEngine getExplainer() {
@@ -650,7 +638,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     }
 
     /**
-     * @return the propagation engine used in <code>this</code>.
+     * @return the propagation engine used in {@code this}.
      */
     public IPropagationEngine getEngine() {
         return engine;
@@ -724,7 +712,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Replaces the current propagate with <code>p</code>
+     * Replaces the current propagate with {@code p}
      * @param p the new propagate to apply
      */
     public void set(Propagate p){
@@ -732,7 +720,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     }
 
     /**
-     * Replaces the current learn with <code>l</code>
+     * Replaces the current learn with {@code l}
      * @param l the new learn to apply
      */
     public void set(Learn l) {
@@ -740,7 +728,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     }
 
     /**
-     * Replaces the current move with <code>m</code>
+     * Replaces the current move with {@code m}
      * @param m the new move to apply
      */
     public void set(Move... m) {
@@ -763,7 +751,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     }
 
     /**
-     * Override the default search strategies to use in <code>this</code>.
+     * Override the default search strategies to use in {@code this}.
      * In case many strategies are given, they will be called in sequence:
      * The first strategy in parameter is first called to compute a decision, if possible.
      * If it cannot provide a new decision, the second strategy is called ...
@@ -795,7 +783,7 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
     }
 
     /**
-     * Attaches a propagation engine <code>this</code>.
+     * Attaches a propagation engine {@code this}.
      * It overrides the previously defined one, if any.
      * @param propagationEngine a propagation strategy
      */
@@ -809,14 +797,6 @@ public final class Solver implements Serializable, ISolver, IMeasures, IOutputFa
      */
     public void makeCompleteStrategy(boolean isComplete) {
         this.completeSearch = isComplete;
-    }
-
-    /**
-     * Replaces the downmost taken decision by <code>ldec</code>.
-     * @param ldec the new downmost decision
-     */
-    public void setLastDecision(Decision ldec) {
-        this.decision = ldec;
     }
 
     /**

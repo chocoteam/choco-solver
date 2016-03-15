@@ -34,6 +34,7 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.PoolManager;
 
 /**
+ * A decision based on a {@link RealVar}
  * <br/>
  *
  * @author Charles Prud'homme
@@ -41,10 +42,19 @@ import org.chocosolver.util.PoolManager;
  */
 public class RealDecision extends Decision<RealVar> {
 
+    /**
+     * The decision value
+     */
     double value;
-
+    /**
+     * Decision pool manager, to recycle decisions
+     */
     final PoolManager<RealDecision> poolManager;
 
+    /**
+     * Create an decision based on an {@link RealVar}
+     * @param poolManager decision pool manager, to recycle decisions
+     */
     public RealDecision(PoolManager<RealDecision> poolManager) {
         super(2);
         this.poolManager = poolManager;
@@ -64,14 +74,18 @@ public class RealDecision extends Decision<RealVar> {
         }
     }
 
+    /**
+     * Instantiate this decision with the parameters
+     * @param v a variable
+     * @param value a value
+     */
     public void set(RealVar v, double value) {
-        super.set(v, v.getEnvironment().getWorldIndex());
+        super.set(v);
         this.value = value;
     }
 
     @Override
     public void free() {
-        previous = null;
         poolManager.returnE(this);
     }
 

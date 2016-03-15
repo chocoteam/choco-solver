@@ -45,7 +45,6 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.PoolManager;
 
 import static org.chocosolver.solver.objective.OptimizationPolicy.DICHOTOMIC;
 
@@ -66,7 +65,6 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     private IntVar obj;
     private long nbSols;
     private Model model;
-    private PoolManager<IntDecision> pool;
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
     private OptimizationPolicy optPolicy;
@@ -98,7 +96,6 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
      */
     public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
         super(new IntVar[]{objective});
-        this.pool = new PoolManager<>();
         this.obj = objective;
         this.model = obj.getModel();
         this.firstCall = true;
@@ -183,9 +180,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
-        IntDecision dec = pool.getE();
-        if (dec == null) dec = new IntDecision(pool);
-        dec.set(obj, target, decOperator);
+        IntDecision dec = model.getSolver().getDecisionPath().makeIntDecision(obj, decOperator, target);
         if(model.getSettings().warnUser()){
             model.getSolver().getErr().printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
         }

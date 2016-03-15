@@ -32,8 +32,6 @@ package org.chocosolver.solver.search.loop.move;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.Variable;
@@ -50,24 +48,35 @@ import java.util.List;
  *
  * Created by cprudhom on 29/10/2015.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 29/10/2015
  */
 public class MoveSeq implements Move {
 
+    /**
+     * List of moves to consider
+     */
     List<Move> moves;
+    /**
+     * Index of the current move
+     */
     IStateInt index;
+    /**
+     * Sequence of strategies in use
+     */
     AbstractStrategy seqStrat;
-    TransitionDecision[] tds;
 
+    /**
+     * Create a move which sequentially apply a move. When a move can not be extended, the next one is used.
+     * @param model a model
+     * @param moves list of moves to apply
+     */
     public MoveSeq(Model model, Move... moves) {
         this.moves = Arrays.asList(moves);
         this.index = model.getEnvironment().makeInt(0);
         AbstractStrategy[] strats = new AbstractStrategy[moves.length];
         for (int i = 0; i < moves.length; i++) {
             strats[i] = moves[i].getStrategy();
-        }
-        tds = new TransitionDecision[moves.length - 1];
-        for (int i = 0; i < tds.length; i++) {
-            tds[i] = new TransitionDecision();
         }
         this.seqStrat = new StrategiesSequencer(strats);
     }
@@ -93,11 +102,7 @@ public class MoveSeq implements Move {
         while (i < moves.size() - 1 && !extend) {
             // first, store the world index in which the first decision of this move is taken.
             i++;
-            Decision tmp = solver.getLastDecision();
-            solver.setLastDecision(tds[i - 1]);
-            solver.getLastDecision().setPrevious(tmp);
-            solver.getEnvironment().worldPush();
-            moves.get(i).setTopDecision(tds[i - 1]);
+            moves.get(i).setTopDecisionPosition(solver.getDecisionPath().size());
             extend = moves.get(i).extend(solver);
         }
         index.set(i);
@@ -111,9 +116,7 @@ public class MoveSeq implements Move {
         while (i > 0 && !repair) {
             repair = moves.get(--i).repair(solver);
             if (i > 0) {
-                Decision tmp = solver.getLastDecision();
-                solver.setLastDecision(solver.getLastDecision().getPrevious());
-                tmp.free();
+                solver.getDecisionPath().removeLast();
             }
         }
         index.set(i);
@@ -121,9 +124,9 @@ public class MoveSeq implements Move {
     }
 
     @Override
-    public void setTopDecision(Decision topDecision) {
+    public void setTopDecisionPosition(int position) {
         for (int i = 0; i < moves.size(); i++) {
-            moves.get(i).setTopDecision(topDecision);
+            moves.get(i).setTopDecisionPosition(position);
         }
     }
 
@@ -146,32 +149,5 @@ public class MoveSeq implements Move {
     @Override
     public void setChildMoves(List<Move> someMoves) {
         this.moves = someMoves;
-    }
-
-    private static class TransitionDecision extends Decision {
-
-        public TransitionDecision() {
-            super(1);
-        }
-
-        @Override
-        public void apply() throws ContradictionException {
-            // do nothing
-        }
-
-        @Override
-        public Object getDecisionValue() {
-            return null;
-        }
-
-        @Override
-        public void free() {
-
-        }
-
-        @Override
-        public String toString() {
-            return "Transition";
-        }
     }
 }

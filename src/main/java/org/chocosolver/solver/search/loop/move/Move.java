@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 
@@ -45,6 +44,8 @@ import java.util.List;
  * <p>
  * Created by cprudhom on 01/09/15.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 3.3.1
  */
 public interface Move extends Serializable {
 
@@ -58,14 +59,16 @@ public interface Move extends Serializable {
     /**
      * Performs a move when the CSP associated to the current node of the search space is not proven to be not consistent.
      *
-     * @return <code>true</code> if an extension can be done, <code>false</code> when no more extension is possible.
+     * @param solver reference the solver
+     * @return {@code true} if an extension can be done, {@code false} when no more extension is possible.
      */
     boolean extend(Solver solver);
 
     /**
      * Performs a move when the CSP associated to the current node of the search space is proven to be not consistent.
      *
-     * @return <code>true</code> if a reparation can be done, <code>false</code> when no more reparation is possible.
+     * @param solver reference the solver
+     * @return {@code true} if a reparation can be done, {@code false} when no more reparation is possible.
      */
     boolean repair(Solver solver);
 
@@ -99,11 +102,12 @@ public interface Move extends Serializable {
     void setChildMoves(List<Move> someMoves);
 
     /**
-     * Indicates which decision has been made just before selecting this move.
-     * When only one "terminal" move is declared, the top decision is ROOT.
-     * When dealing with a sequence of Move, the top decision is the last one of the previous move.
+     * Indicates the position of decision made just before selecting this move.
+     * When only one "terminal" move is declared, the top decision decision is <i>-1</i>.
+     * When dealing with a sequence of Move, the position is the one of the last decision of the previous move.
      * In consequence, when backtracking, the right move can be applied or stopped when needed.
      * This has to be declared on the first call to {@link #extend(Solver)} and is checked on {@link #repair(Solver)}.
+     * @param position position of the last decision taken before applying this move
      */
-    void setTopDecision(Decision topDecision);
+    void setTopDecisionPosition(int position);
 }

@@ -35,8 +35,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-
-import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 
 /**
  * An abstract class to deal with explanation-based learning.
@@ -108,19 +107,21 @@ public class LearnExplained implements Learn {
      */
     public void onSolution(Solver solver){
         // we need to prepare a "false" backtrack on this decision
-        Decision dec = mModel.getSolver().getLastDecision();
-        while ((dec != ROOT) && (!dec.hasNext())) {
-            dec = dec.getPrevious();
+        DecisionPath path = mModel.getSolver().getDecisionPath();
+        int i = path.size() -1;
+        Decision dec = path.getDecision(i);
+        while (i > 0 && !dec.hasNext()) {
+            dec = path.getDecision(--i);
         }
-        if (dec != ROOT) {
+        if (i > 0) {
             Explanation explanation = mExplainer.makeExplanation(saveCauses);
             // 1. skip the current one which is refuted...
-            Decision d = dec.getPrevious();
-            while ((d != ROOT)) {
+            Decision d = path.getDecision(--i);
+            while (i > 0) {
                 if (d.hasNext()) {
-                    explanation.addDecicion(d);
+                    explanation.addDecision(d);
                 }
-                d = d.getPrevious();
+                d = path.getDecision(--i);
             }
             mExplainer.storeDecisionExplanation(dec, explanation);
         }

@@ -36,10 +36,10 @@ import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
 
 import java.util.ArrayDeque;
 import java.util.BitSet;
@@ -91,7 +91,7 @@ public class LearnDBT extends LearnCBJ {
      *
      * @param nworld index of the world to backtrack to
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored"})
     @Override
     void identifyRefutedDecision(int nworld) {
         dbTstrategy.clear();
@@ -100,23 +100,26 @@ public class LearnDBT extends LearnCBJ {
             return;
         }
         // preliminary : compute where to jump back
-        Decision dup, dec = mModel.getSolver().getLastDecision(); // the current decision to undo
+        DecisionPath path = mModel.getSolver().getDecisionPath();
+        int last = path.size();
+        Decision dup, dec = path.getDecision(--last); // the current decision to undo
         int myworld = nworld;
         while (dec != RootDecision.ROOT && myworld > 1) {
-            dec = dec.getPrevious();
+            dec = path.getDecision(--last);
             myworld--;
         }
         Decision jmpBck = dec;
 
         // now we can explicitly enforce the jump
-        dec = mModel.getSolver().getLastDecision(); // the current decision to undo
+        last = path.size();
+        dec = path.getDecision(--last); // the current decision to undo
         int decIdx = lastExplanation.getEvtstrIdx(); // index of the decision to refute in the event store
         while (dec != RootDecision.ROOT && nworld > 1) {
 
             if (dec.hasNext()) {
                 // on a left branch, we need to keep things as is (a left branch can not depend from anything, it is always a unrelated decision
                 dup = dec.duplicate();
-                dup.setWorldIndex(dec.getWorldIndex()); // BEWARE we need to keep the wi for to maintain explanations
+                dup.setPosition(dec.getPosition()); // BEWARE we need to keep the position for to maintain explanations
                 dup.rewind();
                 dbTstrategy.add(dup);
             } else {
@@ -127,11 +130,11 @@ public class LearnDBT extends LearnCBJ {
                     keepUp(anExplanation, decIdx);
                 }
 
-                if (!anExplanation.getDecisions().get(jmpBck.getWorldIndex())) {
+                if (!anExplanation.getDecisions().get(jmpBck.getPosition())) {
                     // everything is fine ... this refutation does not depend on what we are reconsidering
                     // set it as non activated and
                     dup = dec.duplicate();
-                    dup.setWorldIndex(dec.getWorldIndex()); // BEWARE we need to keep the wi for to maintain explanations
+                    dup.setPosition(dec.getPosition()); // BEWARE we need to keep the position for to maintain explanations
                     dup.rewind();
                     dup.buildNext();
                     // add it to the decisions to force
@@ -142,7 +145,7 @@ public class LearnDBT extends LearnCBJ {
                 }
             }
             // get the previous
-            dec = dec.getPrevious();
+            dec = path.getDecision(--last);
             nworld--;
         }
         if (dec != RootDecision.ROOT) {
@@ -180,7 +183,7 @@ public class LearnDBT extends LearnCBJ {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @SuppressWarnings("unchecked")
-    private static class DBTstrategy extends AbstractStrategy implements IMonitorInitialize {
+    private static class DBTstrategy extends AbstractStrategy<IntVar> implements IMonitorInitialize {
 
         private final ArrayDeque<Decision<IntVar>> decision_path;
         private final Model mModel;
@@ -188,7 +191,7 @@ public class LearnDBT extends LearnCBJ {
         private AbstractStrategy mainStrategy;
 
         protected DBTstrategy(Model model, ExplanationEngine mExplainer) {
-            super(new Variable[0]);
+            super();
             this.decision_path = new ArrayDeque<>();
             this.mModel = model;
             this.mExplainer = mExplainer;
@@ -218,9 +221,9 @@ public class LearnDBT extends LearnCBJ {
         @Override
         public Decision getDecision() {
             if (decision_path.size() > 0) {
-                int wi = mModel.getEnvironment().getWorldIndex();
+                int wi = mModel.getSolver().getDecisionPath().size();
                 Decision d = decision_path.pollLast();
-                int old = d.getWorldIndex();
+                int old = d.getPosition();
 //                System.out.printf("MOVE %s (%d -> %d)\n", d, old, wi);
                 if (old != wi) {
                     if (d.triesLeft() == 1) { // previously explained refuted decision needs to be kept
@@ -238,7 +241,7 @@ public class LearnDBT extends LearnCBJ {
                         }
                     }
                 }
-                d.setWorldIndex(wi);
+                d.setPosition(wi);
                 return d;
             }
             return mainStrategy.getDecision();

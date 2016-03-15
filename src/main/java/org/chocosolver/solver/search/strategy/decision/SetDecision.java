@@ -35,15 +35,29 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.PoolManager;
 
 /**
+ * A decision based on a {@link SetVar}
  * @author Jean-Guillaume Fages
  * @since Jan. 2013
  */
 public class SetDecision extends Decision<SetVar> {
 
+    /**
+     * The decision value
+     */
     int value;
+    /**
+     * The assignment operator
+     */
     DecisionOperator<SetVar> operator;
+    /**
+     * Decision pool manager, to recycle decisions
+     */
     final PoolManager<SetDecision> poolManager;
 
+    /**
+     * Create an decision based on an {@link SetVar}
+     * @param poolManager decision pool manager, to recycle decisions
+     */
     public SetDecision(PoolManager<SetDecision> poolManager) {
         super(2);
         this.poolManager = poolManager;
@@ -63,13 +77,19 @@ public class SetDecision extends Decision<SetVar> {
         }
     }
 
+    /**
+     * Instantiate this decision with the parameters
+     * @param v a variable
+     * @param value a value
+     */
     public void set(SetVar v, int value, DecisionOperator<SetVar> operator) {
-        super.set(v, v.getEnvironment().getWorldIndex());
+        super.set(v);
         this.var = v;
         this.value = value;
         this.operator = operator;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void reverse() {
         this.operator = operator.opposite();
@@ -77,7 +97,6 @@ public class SetDecision extends Decision<SetVar> {
 
     @Override
     public void free() {
-        previous = null;
         poolManager.returnE(this);
     }
 

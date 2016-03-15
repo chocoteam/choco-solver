@@ -27,45 +27,92 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.strategy;
+package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.PoolManager;
 
 /**
- * A factory which eases unit decision creation (for debugging mainly).
- * Created by cprudhom on 27/11/2015.
- * Project: choco.
+ * A class that creates decisions on demand and maintains pool manager
+ * <p>
+ * Project: choco-solver.
+ * @author Charles Prud'homme
+ * @since 14/03/2016.
  */
-public class OnDemandIntStrategy{
+public class DecisionMaker {
 
     /**
      * object recycling management
      */
-    PoolManager<IntDecision> decisionPool;
+    PoolManager<IntDecision> intDecisionPool;
 
     /**
-     * Create an instance of this decision creator
+     * object recycling management
      */
-    public OnDemandIntStrategy() {
-        this.decisionPool = new PoolManager<>();
+    PoolManager<RealDecision> realDecisionPool;
+
+    /**
+     * object recycling management
+     */
+    PoolManager<SetDecision> setDecisionPool;
+
+    /**
+     * Create a decision maker, that eases decision creation.
+     */
+    public DecisionMaker() {
+        this.intDecisionPool = new PoolManager<>();
+        this.realDecisionPool = new PoolManager<>();
+        this.setDecisionPool = new PoolManager<>();
     }
 
     /**
-     * Creates and returns an {@link IntDecision}: "<code>var</code> <code>dop</code> <code>value</code>".
-     * @param var a integer variable
+     * Creates and returns an {@link IntDecision}: "{@code var} {@code dop} {@code value}".
+     * @param var an integer variable
      * @param dop a decision operator
      * @param value a value
      * @return an IntDecision
      */
-    public IntDecision makeIntDecision(IntVar var, DecisionOperator dop, int value) {
-        IntDecision d = decisionPool.getE();
+    public IntDecision makeIntDecision(IntVar var, DecisionOperator<IntVar> dop, int value) {
+        IntDecision d = intDecisionPool.getE();
         if (d == null) {
-            d = new IntDecision(decisionPool);
+            d = new IntDecision(intDecisionPool);
         }
         d.set(var, value, dop);
         return d;
     }
+
+    /**
+     * Creates and returns an {@link RealDecision}: "{@code var} &le; {@code value}".
+     * @param var a real variable
+     * @param value a value
+     * @return an IntDecision
+     */
+    public RealDecision makeRealDecision(RealVar var, double value) {
+        RealDecision d = realDecisionPool.getE();
+        if (d == null) {
+            d = new RealDecision(realDecisionPool);
+        }
+        d.set(var, value);
+        return d;
+    }
+
+    /**
+     * Creates and returns an {@link SetDecision}: "{@code var} {@code dop} {@code value}".
+     * @param var a set variable
+     * @param dop a decision operator
+     * @param value a value
+     * @return an SetDecision
+     */
+    public SetDecision makeSetDecision(SetVar var, DecisionOperator<SetVar> dop, int value) {
+        SetDecision d = setDecisionPool.getE();
+        if (d == null) {
+            d = new SetDecision(setDecisionPool);
+        }
+        d.set(var, value, dop);
+        return d;
+    }
+
 }

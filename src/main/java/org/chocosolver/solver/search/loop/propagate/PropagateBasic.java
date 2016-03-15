@@ -31,19 +31,19 @@ package org.chocosolver.solver.search.loop.propagate;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 
 /**
+ * A basic {@link Propagate} implementation
  * Created by cprudhom on 02/09/15.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 02/09/15
  */
 public class PropagateBasic implements Propagate {
 
     @Override
     public void execute(Solver solver) throws ContradictionException {
-        Decision cd = solver.getLastDecision();
-        cd.buildNext();
-        solver.getObjectiveManager().apply(cd);
+        solver.getDecisionPath().apply();
         solver.getObjectiveManager().postDynamicCut();
         solver.getEngine().propagate();
     }

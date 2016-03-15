@@ -42,16 +42,31 @@ import java.util.List;
  * <p>
  * Created by cprudhom on 02/09/15.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 3.3.1
  */
 public class MoveBinaryDFS implements Move {
 
+    /**
+     * Search strategy to extend the search tree
+     */
     AbstractStrategy strategy;
-    Decision topDecision; // the decision taken just before selecting this move.
+    /**
+     * Index, in the decision path, of the decision taken just before selecting this move.
+     */
+    int topDecisionPosition;
 
+    /**
+     * Create this move without any search strategy
+     */
     public MoveBinaryDFS(){
         this(null);
     }
 
+    /**
+     * Create this move with a search strategy
+     * @param strategy a search strategy
+     */
     public MoveBinaryDFS(AbstractStrategy strategy) {
         this.strategy = strategy;
     }
@@ -64,14 +79,11 @@ public class MoveBinaryDFS implements Move {
     @Override
     public boolean extend(Solver solver) {
         boolean extended = false;
-        Decision tmp = solver.getLastDecision();
-        solver.setLastDecision(strategy.getDecision());
-        if (solver.getLastDecision() != null) { // null means there is no more decision
-            solver.getLastDecision().setPrevious(tmp);
+        Decision current = strategy.getDecision();
+        if (current != null) { // null means there is no more decision
+            solver.getDecisionPath().pushDecision(current);
             solver.getEnvironment().worldPush();
             extended = true;
-        } else {
-            solver.setLastDecision(tmp);
         }
         return extended;
     }
@@ -85,10 +97,11 @@ public class MoveBinaryDFS implements Move {
     }
 
     @Override
-    public void setTopDecision(Decision topDecision) {
-        this.topDecision = topDecision;
+    public void setTopDecisionPosition(int position) {
+        this.topDecisionPosition = position;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <V extends Variable> AbstractStrategy<V> getStrategy() {
         return strategy;
@@ -99,24 +112,33 @@ public class MoveBinaryDFS implements Move {
         this.strategy = aStrategy;
     }
 
+    /**
+     * Go back in the search tree. Either refute a decision, or backtrack.
+     * @param solver reference to the solver
+     * @return {@code true} if a reparation has been found
+     */
     protected boolean rewind(Solver solver) {
         boolean repaired = false;
-        while (!repaired && solver.getLastDecision() != topDecision) {
+        Decision head = solver.getDecisionPath().getLastDecision();
+        while (!repaired && head.getPosition() != topDecisionPosition) {
             solver.setJumpTo(solver.getJumpTo()-1);
-            if (solver.getJumpTo() <= 0 && solver.getLastDecision().hasNext()) {
+            if (solver.getJumpTo() <= 0 && head.hasNext()) {
                 solver.getEnvironment().worldPush();
                 repaired = true;
             } else {
                 prevDecision(solver);
             }
+            head = solver.getDecisionPath().getLastDecision();
         }
         return repaired;
     }
 
+    /**
+     * Backtrack in the search tree
+     * @param solver reference to the solver
+     */
     protected void prevDecision(Solver solver) {
-        Decision tmp = solver.getLastDecision();
-        solver.setLastDecision(solver.getLastDecision().getPrevious());
-        tmp.free();
+        solver.getDecisionPath().removeLast();
         // goes up in the search tree and makes sure search monitors are correctly informed
         solver.getSearchMonitors().afterUpBranch();
         solver.getMeasures().incBackTrackCount();

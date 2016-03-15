@@ -29,16 +29,15 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.sat.PropNogoods;
 import org.chocosolver.sat.SatSolver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
-import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.queues.CircularQueue;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 
 /**
@@ -59,7 +58,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
     /**
      * Stores the decision path before
      */
-    CircularQueue<Decision<IntVar>> decisions;
+    ArrayDeque<Decision> decisions;
 
     /**
      * The (unique) no-good store
@@ -78,7 +77,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
      */
     public NogoodFromRestarts(Model model) {
         png = model.getNogoodStore().getPropNogoods();
-        decisions = new CircularQueue<>(16);
+        decisions = new ArrayDeque<>(16);
     }
 
     @Override
@@ -89,38 +88,35 @@ public class NogoodFromRestarts implements IMonitorRestart {
     @SuppressWarnings("unchecked")
     private void extractNogoodFromPath() {
         int d = (int) png.getModel().getSolver().getNodeCount();
-        Decision<IntVar> decision = png.getModel().getSolver().getLastDecision();
-        while (decision != RootDecision.ROOT) {
-            decisions.addLast(decision);
-            decision = decision.getPrevious();
-        }
+        png.getModel().getSolver().getDecisionPath().transferInto(decisions, false);
+        Decision<IntVar> decision;
         int[] lits = new int[d];
         int i = 0;
         while (!decisions.isEmpty()) {
-            decision = decisions.pollLast();
+            decision = decisions.pollFirst();
             if (decision instanceof IntDecision) {
                 IntDecision id = (IntDecision) decision;
                 if (id.getDecOp() == DecisionOperator.int_eq) {
                     if (id.hasNext()) {
-                        lits[i++] = SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true));
+                        lits[i++] = SatSolver.negated(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true));
                     } else {
                         if (i == 0) {
                             // value can be removed permanently from var!
-                            png.addLearnt(SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true)));
+                            png.addLearnt(SatSolver.negated(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true)));
                         } else {
-                            lits[i] = SatSolver.negated(png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true));
+                            lits[i] = SatSolver.negated(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true));
                             png.addLearnt(Arrays.copyOf(lits, i + 1));
                         }
                     }
                 } else if (id.getDecOp() == DecisionOperator.int_neq) {
                     if (id.hasNext()) {
-                        lits[i++] = png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true);
+                        lits[i++] = png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true);
                     } else {
                         if (i == 0) {
                             // value can be removed permanently from var!
-                            png.addLearnt(png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true));
+                            png.addLearnt(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true));
                         } else {
-                            lits[i] = png.Literal(id.getDecisionVariables(), id.getDecisionValue(), true);
+                            lits[i] = png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true);
                             png.addLearnt(Arrays.copyOf(lits, i + 1));
                         }
                     }

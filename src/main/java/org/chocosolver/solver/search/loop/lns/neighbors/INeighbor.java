@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 
 /**
  * An interface defining services required for the LNS to select variables to freeze-unfreeze.
@@ -40,6 +40,9 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
  */
 public interface INeighbor {
 
+    /**
+     * Initialize this neighbor
+     */
     void init();
 
     /**
@@ -48,10 +51,12 @@ public interface INeighbor {
     void recordSolution();
 
     /**
-     * Freezes some variables in order to have a fast computation
+     * Freezes some variables in order to have a fast computation.
+     * The fixed variables are declared as decisions in the decision path.
      *
+     * @param decisionPath the decision path in which declaring variable to freeze
      */
-    Decision fixSomeVariables();
+    void fixSomeVariables(DecisionPath decisionPath);
 
     /**
      * Use less restriction at the beginning of a LNS run

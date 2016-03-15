@@ -37,6 +37,7 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.PoolManager;
 
 /**
+ * A decision based on a {@link IntVar}
  * <br/>
  *
  * @author Charles Prud'homme
@@ -44,12 +45,23 @@ import org.chocosolver.util.PoolManager;
  */
 public class IntDecision extends Decision<IntVar> {
 
+    /**
+     * The decision value
+     */
     int value;
-
+    /**
+     * The assignment operator
+     */
     DecisionOperator<IntVar> assignment;
-
+    /**
+     * Decision pool manager, to recycle decisions
+     */
     final PoolManager<IntDecision> poolManager;
 
+    /**
+     * Create an decision based on an {@link IntVar}
+     * @param poolManager decision pool manager, to recycle decisions
+     */
     public IntDecision(PoolManager<IntDecision> poolManager) {
         super(2);
         this.poolManager = poolManager;
@@ -69,12 +81,19 @@ public class IntDecision extends Decision<IntVar> {
         }
     }
 
+    /**
+     * Instantiate this decision with the parameters
+     * @param v a variable
+     * @param value a value
+     * @param assignment a decision operator
+     */
     public void set(IntVar v, int value, DecisionOperator<IntVar> assignment) {
-        super.set(v, v.getEnvironment().getWorldIndex());
+        super.set(v);
         this.value = value;
         this.assignment = assignment;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void reverse() {
         this.assignment = assignment.opposite();
@@ -82,12 +101,11 @@ public class IntDecision extends Decision<IntVar> {
 
     @Override
     public void free() {
-        previous = null;
         poolManager.returnE(this);
     }
 
     @Override
-    public Decision<IntVar> duplicate() {
+    public IntDecision duplicate() {
         IntDecision d = poolManager.getE();
         if (d == null) {
             d = new IntDecision(poolManager);
@@ -110,10 +128,17 @@ public class IntDecision extends Decision<IntVar> {
         }
     }
 
+    /**
+     * @return the current decision operator
+     */
     public DecisionOperator<IntVar> getDecOp() {
         return assignment;
     }
 
+    /**
+     * @return a copy of this decision wherein the he decision operator is reversed
+     */
+    @SuppressWarnings("unchecked")
     public IntDecision flip(){
         IntDecision d = poolManager.getE();
         if (d == null) {

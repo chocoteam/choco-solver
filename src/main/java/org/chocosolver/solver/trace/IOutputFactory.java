@@ -187,7 +187,7 @@ public interface IOutputFactory extends IMyself {
     }
 
     /**
-     * Plug a search monitor which outputs <code>message</code> on each solution.
+     * Plug a search monitor which outputs {@code message} on each solution.
      * <p>
      * Recommended usage: to be called before the resolution step.
      *
@@ -209,7 +209,7 @@ public interface IOutputFactory extends IMyself {
     }
 
     /**
-     * Plug a search monitor which outputs <code>message</code> on each decision.
+     * Plug a search monitor which outputs {@code message} on each decision.
      * <p>
      * Recommended usage: to be called before the resolution step.
      * @param message the message to print.
@@ -218,11 +218,11 @@ public interface IOutputFactory extends IMyself {
         _me().plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownBranch(boolean left) {
-                Decision d = _me().getLastDecision();
+                Decision head = _me().getDecisionPath().getLastDecision();
                 getOut().printf("%s[%d/%d] %s%s ", StringUtils.pad("", _me().getEnvironment().getWorldIndex(), "."),
-                        d.getArity() - d.triesLeft() +1, d.getArity(),
+                        head.getArity() - head.triesLeft() +1, head.getArity(),
                         _me().getModel().getSettings().outputWithANSIColors()?ANSI_BLUE:"",
-                        d.toString());
+                        head.toString());
                 getOut().printf("%s // %s %s\n", _me().getModel().getSettings().outputWithANSIColors()?ANSI_GRAY:"",
                         message.print(), _me().getModel().getSettings().outputWithANSIColors()?ANSI_RESET:"");
             }
@@ -248,7 +248,7 @@ public interface IOutputFactory extends IMyself {
     }
 
     /**
-     * Plug a search monitor which prints a one-line statistics every <code>f</code> ms.
+     * Plug a search monitor which prints a one-line statistics every {@code f} ms.
      *
      * @param f      frequency, in millisecond
      */

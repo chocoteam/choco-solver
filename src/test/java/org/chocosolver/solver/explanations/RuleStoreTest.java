@@ -63,7 +63,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnumFullDom() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(E);
@@ -84,7 +84,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnumLow() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
 
         rs.addLowerBoundRule(E);
@@ -113,7 +113,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnumUpp() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
 
         rs.addUpperBoundRule(E);
@@ -142,7 +142,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnumBound() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
 
         rs.addLowerBoundRule(E);
@@ -173,7 +173,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnumRem() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
 
         rs.addRemovalRule(E, 8);
@@ -212,7 +212,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testBoundFullDom() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(I);
@@ -234,7 +234,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testBoundLow() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
 
         rs.addLowerBoundRule(I);
@@ -262,7 +262,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testBoundUpp() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
 
         rs.addUpperBoundRule(I);
@@ -291,7 +291,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testBoundBound() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
 
         rs.addLowerBoundRule(I);
@@ -321,7 +321,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testBoundRem() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
         rs.addRemovalRule(I, 8);
         rs.addRemovalRule(I, -2);
@@ -347,7 +347,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
     public void testBoundRem2() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
         rs.matchDomain(RuleStore.RM, I, IntEventType.REMOVE, 7, -1, -1);
     }
@@ -355,7 +355,7 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testBoolFullDom() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
         // add a rule on all event which has occurred on E
         rs.addFullDomainRule(B);
@@ -369,24 +369,24 @@ public class RuleStoreTest {
     @Test(groups="1s", timeOut=60000)
     public void testDecRefutation() {
         setUp();
-        RuleStore rs = new RuleStore(model, true, true);
+        RuleStore rs = new RuleStore(true, true);
         rs.init(new Explanation(null, false));
 
         IntStrategy is = inputOrderLBSearch(E, I, B);
         Decision d1 = null, d2 = null, d3 = null;
         try {
             d1 = is.getDecision();
-            d1.setWorldIndex(1);
+            d1.setPosition(1);
             d1.buildNext();
             d1.apply();
 
             d2 = is.getDecision();
-            d2.setWorldIndex(2);
+            d2.setPosition(2);
             d2.buildNext();
             d2.apply();
 
             d3 = is.getDecision();
-            d3.setWorldIndex(3);
+            d3.setPosition(3);
             d3.buildNext();
             d3.apply();
         } catch (ContradictionException cex) {
@@ -394,8 +394,8 @@ public class RuleStoreTest {
         }
 
         Explanation r = new Explanation(null, false);
-        r.addDecicion(d1);
-        r.addDecicion(d2);
+        r.addDecision(d1);
+        r.addDecision(d2);
 
         rs.storeDecisionRefutation(d3, r);
 

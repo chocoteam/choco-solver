@@ -31,11 +31,9 @@ package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.SetDecision;
 import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.util.PoolManager;
 
 /**
  * Strategy for branching on set variables
@@ -49,9 +47,17 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    protected PoolManager<SetDecision> pool;
+    /**
+     * How a variable is selected
+     */
     protected VariableSelector<SetVar> varSelector;
+    /**
+     * How a value is selected
+     */
     protected SetValueSelector valSelector;
+    /**
+     * A decision operator
+     */
     protected DecisionOperator<SetVar> operator;
 
     //***********************************************************************************
@@ -71,7 +77,6 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
         varSelector = varS;
         valSelector = valS;
         operator = enforceFirst ? DecisionOperator.set_force : DecisionOperator.set_remove;
-        pool = new PoolManager<>();
     }
 
     //***********************************************************************************
@@ -95,11 +100,6 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
             return null;
         }
         assert !s.isInstantiated();
-        SetDecision d = pool.getE();
-        if (d == null) {
-            d = new SetDecision(pool);
-        }
-        d.set(s, valSelector.selectValue(s), operator);
-        return d;
+        return s.getModel().getSolver().getDecisionPath().makeSetDecision(s, operator, valSelector.selectValue(s));
     }
 }

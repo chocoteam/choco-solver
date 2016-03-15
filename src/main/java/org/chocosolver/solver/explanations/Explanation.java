@@ -67,7 +67,6 @@ public class Explanation {
     /**
      * Set of decisions related to this explanation.
      * BitSet is selected because of efficient operations provided.
-     * However, in some cases, this may be a restriction (for instance, when dealing with {@link org.chocosolver.solver.search.strategy.decision.IntMetaDecision}.
      */
     private final BitSet decisions;
 
@@ -110,8 +109,8 @@ public class Explanation {
      *
      * @param decision a decision
      */
-    public void addDecicion(Decision decision) {
-        decisions.set(decision.getWorldIndex());
+    public void addDecision(Decision decision) {
+        decisions.set(decision.getPosition());
     }
 
 
@@ -172,7 +171,7 @@ public class Explanation {
      * @param decision a decision to remove
      */
     public void remove(Decision decision) {
-        decisions.clear(decision.getWorldIndex());
+        decisions.clear(decision.getPosition());
     }
 
 
@@ -196,7 +195,7 @@ public class Explanation {
      */
     public boolean isComplete() {
         // since rules is valuated only when the explanation is not complete, this test is correct
-        return rules == null;
+        return rules.isEmpty();
     }
 
     /**
@@ -224,21 +223,6 @@ public class Explanation {
      */
     public Rules getRules() {
         return rules;
-    }
-
-    /**
-     * Duplicate the current explanation
-     *
-     * @return a new explanation
-     */
-    public Explanation duplicate() {
-        Explanation explanation = explanationPool.getE();
-        if (explanation == null) {
-            explanation = new Explanation(explanationPool, saveCauses);
-        }
-        explanation.addCausesAndDecisions(this);
-        explanation.addRules(this.rules);
-        return explanation;
     }
 
     @Override

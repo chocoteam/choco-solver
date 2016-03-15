@@ -30,8 +30,9 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.BitSet;
@@ -46,20 +47,57 @@ import java.util.Random;
  */
 public class RandomNeighborhood implements INeighbor {
 
+    /**
+     * Number of variables to consider in this neighbor
+     */
     protected final int n;
+    /**
+     * Variables to consider in this neighbor
+     */
     protected final IntVar[] vars;
+    /**
+     * Last solution found, wrt {@link #vars}
+     */
     protected final int[] bestSolution;
+    /**
+     * Before last solution found, wrt {@link #vars}
+     */
     private final int[] previous;
+    /**
+     * For randomness
+     */
     private Random rd;
+    /**
+     * Size of the fragment
+     */
     private double nbFixedVariables = 0d;
-    private int nbCall;
-    private int limit;
-    private int level;
-
-    protected BitSet fragment;  // index of variable to set unfrozen
-    IntMetaDecision decision;
+    /**
+     * Number of times this neighbor is called
+     */
+    int nbCall;
+    /**
+     * Next time the level should be increased
+     */
+    int limit;
+    /**
+     * Relaxing factor
+     */
+    final int level;
+    /**
+     * Indicate which variables are selected to be part of the fragment
+     */
+    protected BitSet fragment;
+    /**
+     * Reference to the model
+     */
     Model mModel;
 
+    /**
+     * Create a neighbor for LNS which randomly selects variable to be part of a fragment
+     * @param vars variables to consider in this
+     * @param level relaxing factor
+     * @param seed for randomness
+     */
     public RandomNeighborhood(IntVar[] vars, int level, long seed) {
         this.mModel = vars[0].getModel();
         this.n = vars.length;
@@ -70,7 +108,6 @@ public class RandomNeighborhood implements INeighbor {
         this.bestSolution = new int[n];
         this.previous = new int[n];
         this.fragment = new BitSet(n);
-        this.decision = new IntMetaDecision();
     }
 
     @Override
@@ -94,25 +131,32 @@ public class RandomNeighborhood implements INeighbor {
     }
 
     @Override
-    public Decision fixSomeVariables() {
-        decision.free();
+    public void fixSomeVariables(DecisionPath decisionPath) {
         nbCall++;
         restrictLess();
         fragment.set(0, n); // all variables are frozen
         for (int i = 0; i < nbFixedVariables - 1 && fragment.cardinality() > 0; i++) {
             int id = selectVariable();
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                impose(id);
+                impose(id, decisionPath);
             }
             fragment.clear(id);
         }
-        return decision;
     }
 
-    protected void impose(int id) {
-        decision.add(vars[id], bestSolution[id]);
+    /**
+     * Impose a decision to be part of the fragment
+     * @param id variable id in {@link #vars}
+     * @param decisionPath the current decision path
+     */
+    protected void impose(int id, DecisionPath decisionPath) {
+        IntDecision decision = decisionPath.makeIntDecision(vars[id], DecisionOperator.int_eq, bestSolution[id]);
+        decisionPath.pushDecision(decision);
     }
 
+    /**
+     * @return a variable id in {@link #vars} to be part of the fragment
+     */
     protected int selectVariable() {
         int id;
         int cc = rd.nextInt(fragment.cardinality());

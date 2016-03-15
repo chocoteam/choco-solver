@@ -44,6 +44,8 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
  * which should not happen.
  * Created by cprudhom on 07/10/15.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 3.3.1
  */
 public class MoveBinaryDDS extends MoveBinaryLDS {
 
@@ -52,6 +54,7 @@ public class MoveBinaryDDS extends MoveBinaryLDS {
      *
      * @param strategy    how (binary) decisions are selected
      * @param discrepancy maximum discrepancy
+     * @param environment backtracking environment
      */
     public MoveBinaryDDS(AbstractStrategy strategy, int discrepancy, IEnvironment environment) {
         super(strategy, discrepancy, environment);
@@ -60,18 +63,15 @@ public class MoveBinaryDDS extends MoveBinaryLDS {
     @Override
     public boolean extend(Solver solver) {
         boolean extended = false;
-        Decision tmp = solver.getLastDecision();
-        solver.setLastDecision(strategy.getDecision());
-        if (solver.getLastDecision() != null) { // null means there is no more decision
-            solver.getLastDecision().setPrevious(tmp);
+        Decision current = strategy.getDecision();
+        if (current != null) { // null means there is no more decision
+            solver.getDecisionPath().pushDecision(current);
             solver.getEnvironment().worldPush();
             if (dis.get() == 1) {
-                solver.getLastDecision().buildNext();
+                solver.getDecisionPath().getLastDecision().buildNext();
             }
             dis.add(-1);
             extended = true;
-        } else {
-            solver.setLastDecision(tmp);
         }
         return extended;
     }

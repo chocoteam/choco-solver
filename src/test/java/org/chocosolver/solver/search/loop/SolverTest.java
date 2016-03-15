@@ -218,8 +218,8 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         r.setLDS(1);
-        model.getSolver().showSolutions();
-//        IOutputFactory.showDecisions(solver);
+        r.showDecisions();
+        r.showSolutions();
         r.limitSolution(10);
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);

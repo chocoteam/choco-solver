@@ -31,11 +31,9 @@ package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.PoolManager;
 
 /**
  * Class to perform branching decisions over integer variables
@@ -47,12 +45,18 @@ import org.chocosolver.util.PoolManager;
 public class IntStrategy extends AbstractStrategy<IntVar> {
 
 	// Search strategy parameters
+	/**
+	 * How a variable is selected
+	 */
     VariableSelector<IntVar> variableSelector;
+    /**
+     * How a value is selected
+     */
     IntValueSelector valueSelector;
+    /**
+     * The decision operator
+     */
 	DecisionOperator<IntVar> decisionOperator;
-
-	// object recycling management
-    PoolManager<IntDecision> decisionPool;
 
 	/**
 	 * Creates a search strategy which selects a variable X and a value V to perform
@@ -90,7 +94,6 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
         this.variableSelector = varSelector;
         this.valueSelector = valSelector;
 		this.decisionOperator = decOperator;
-        this.decisionPool = new PoolManager<>();
     }
 
     @Override
@@ -104,12 +107,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
             return null;
         }
         int value = valueSelector.selectValue(variable);
-        IntDecision d = decisionPool.getE();
-        if (d == null) {
-            d = new IntDecision(decisionPool);
-        }
-        d.set(variable, value, decisionOperator);
-        return d;
+        return variable.getModel().getSolver().getDecisionPath().makeIntDecision(variable, decisionOperator, value);
     }
 
     @SuppressWarnings({"unchecked"})

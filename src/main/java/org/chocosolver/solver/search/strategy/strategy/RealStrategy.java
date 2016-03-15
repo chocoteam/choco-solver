@@ -30,13 +30,14 @@
 package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.RealDecision;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.util.PoolManager;
 
 /**
+ * Define a strategy based on {@link RealVar}.
+ * It defines how a variable is selected to be part of the next decision, and which value from its domain is selected too.
+ * Then, the decision will be {@code var} &le; {value}.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -44,17 +45,19 @@ import org.chocosolver.util.PoolManager;
  */
 public class RealStrategy extends AbstractStrategy<RealVar> {
 
+    /**
+     * How a variable is selected
+     */
     VariableSelector<RealVar> varselector;
-
+    /**
+     * How a value is selected
+     */
     RealValueSelector valueIterator;
-
-    PoolManager<RealDecision> decisionPool;
 
     public RealStrategy(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
         super(scope);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<>();
     }
 
     @Override
@@ -68,12 +71,7 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
             return null;
         }
         double value = valueIterator.selectValue(variable);
-        RealDecision d = decisionPool.getE();
-        if (d == null) {
-            d = new RealDecision(decisionPool);
-        }
-        d.set(variable, value);
-        return d;
+        return variable.getModel().getSolver().getDecisionPath().makeRealDecision(variable, value);
     }
 
     @SuppressWarnings({"unchecked"})

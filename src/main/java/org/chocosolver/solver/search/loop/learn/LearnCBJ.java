@@ -31,15 +31,13 @@ package org.chocosolver.solver.search.loop.learn;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.sat.PropNogoods;
 import org.chocosolver.sat.SatSolver;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.variables.IntVar;
-
-import static org.chocosolver.solver.search.strategy.decision.RootDecision.ROOT;
 
 /**
  * Conflict-based Backjumping[1] (CBJ) explanation strategy.
@@ -89,13 +87,16 @@ public class LearnCBJ extends LearnExplained {
      * @param nworld index of the world to backtrack to
      */
     void identifyRefutedDecision(int nworld) {
-        Decision dec = mModel.getSolver().getLastDecision(); // the current decision to undo
-        while (dec != ROOT && nworld > 1) {
+        DecisionPath path = mModel.getSolver().getDecisionPath();
+        int last = path.size() -1 ;
+        Decision dec = path.getLastDecision(); // the current decision to undo
+        while (last > 0 && nworld > 1) {
             mExplainer.freeDecisionExplanation(dec); // not mandatory, for efficiency purpose only
-            dec = dec.getPrevious();
             nworld--;
+            dec = path.getDecision(--last);
+
         }
-        if (dec != ROOT) {
+        if (last > 0) {
             if (!dec.hasNext()) {
                 throw new UnsupportedOperationException("LearnCBJ.identifyRefutedDecision should get to a LEFT decision:" + dec);
             }
@@ -110,7 +111,7 @@ public class LearnCBJ extends LearnExplained {
         if (this.nogoodFromConflict) {
             postNogood();
         }
-        int upto = compute(mModel.getEnvironment().getWorldIndex());
+        int upto = compute(mModel.getSolver().getDecisionPath());
         assert upto > 0;
         solver.setJumpTo(upto);
         identifyRefutedDecision(upto);
@@ -124,15 +125,17 @@ public class LearnCBJ extends LearnExplained {
     private void postNogood() {
         if (lastExplanation.isComplete()) {
             Model mModel = ngstore.getModel();
-            Decision<IntVar> decision = mModel.getSolver().getLastDecision();
+            DecisionPath dp = mModel.getSolver().getDecisionPath();
+            int last = dp.size()-1;
+            Decision<IntVar> decision;
             ps.clear();
-            while (decision != RootDecision.ROOT) {
-                if (lastExplanation.getDecisions().get(decision.getWorldIndex())) {
+            while (last > 0) {
+                decision = dp.getDecision(last--);
+                if (lastExplanation.getDecisions().get(decision.getPosition())) {
                     assert decision.hasNext();
-                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariables(),
+                    ps.add(SatSolver.negated(ngstore.Literal(decision.getDecisionVariable(),
                             (Integer) decision.getDecisionValue(), true)));
                 }
-                decision = decision.getPrevious();
             }
             ngstore.addLearnt(ps.toArray());
         }
@@ -142,12 +145,13 @@ public class LearnCBJ extends LearnExplained {
     /**
      * Compute the world to backtrack to
      *
-     * @param currentWorldIndex current world index
+     * @param decisionPath current decision path
      * @return the number of world to backtrack to.
      */
-    int compute(int currentWorldIndex) {
-        assert currentWorldIndex >= lastExplanation.getDecisions().length();
-        return currentWorldIndex - lastExplanation.getDecisions().previousSetBit(lastExplanation.getDecisions().length());
+    int compute(DecisionPath decisionPath) {
+        assert decisionPath.size() >= lastExplanation.getDecisions().length();
+        // TODO: should include levels too
+        return decisionPath.size() - lastExplanation.getDecisions().previousSetBit(lastExplanation.getDecisions().length());
     }
 
     @Override

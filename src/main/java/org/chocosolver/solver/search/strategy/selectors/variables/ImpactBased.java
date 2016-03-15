@@ -38,10 +38,8 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.IntList;
 
@@ -76,8 +74,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     protected int nodeImpact;
 
-    PoolManager<IntDecision> decisionPool;
-
     protected Model model;
 
     protected boolean asgntFailed; // does the assignment leads to a failure
@@ -107,7 +103,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         this.split = (int) Math.pow(2, split);
         this.searchSpaceSize = model.getEnvironment().makeFloat();
         random = new Random(seed);
-        decisionPool = new PoolManager<>();
         this.nodeImpact = nodeImpact;
         if (!initOnly) model.getSolver().plugMonitor(this);
     }
@@ -154,14 +149,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             int ub = variable.getUB();
             currentVal = random.nextBoolean() ? lb : ub;
         }
-
-        IntDecision currrent = decisionPool.getE();
-        if (currrent == null) {
-            currrent = new IntDecision(decisionPool);
-        }
-        currrent.set(variable, currentVal, DecisionOperator.int_eq);
-        //System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
-        return currrent;
+        return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperator.int_eq, currentVal);
     }
 
     @Override

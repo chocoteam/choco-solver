@@ -71,7 +71,7 @@ public class ExplanationEngine implements FilteringMonitor {
         this.saveCauses = recordCauses;
         this.enablePartialExplanation = partialExplanationsOn;
         eventStore = new ArrayEventStore(model.getEnvironment());
-        ruleStore = new RuleStore(model, saveCauses, enablePartialExplanation);
+        ruleStore = new RuleStore(saveCauses, enablePartialExplanation);
         model.getSolver().set(this);
         this.explanationPool = new PoolManager<>();
     }
@@ -128,10 +128,6 @@ public class ExplanationEngine implements FilteringMonitor {
 
     public IEventStore getEventStore() {
         return eventStore;
-    }
-
-    public Model getSolver() {
-        return mModel;
     }
 
     /**

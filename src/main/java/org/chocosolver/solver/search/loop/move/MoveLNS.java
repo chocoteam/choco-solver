@@ -32,7 +32,6 @@ package org.chocosolver.solver.search.loop.move;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
@@ -41,20 +40,45 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This {@link Move}'s implementation defines a Lager Neighborhood Search.
+ * This {@link Move}'s implementation defines a Large Neighborhood Search.
  * Created by cprudhom on 03/09/15.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 03/09/2015
  */
 public class MoveLNS implements Move {
 
-    protected Move move; // the strategy required to complete the generated fragment
+    /**
+     * the strategy required to complete the generated fragment
+     */
+    protected Move move;
+    /**
+     * Neighbor to used
+     */
     protected INeighbor neighbor;
-
-    protected long solutions; // nb solutions found so far
+    /**
+     * Number of solutions found so far
+     */
+    protected long solutions;
+    /**
+     * Indicate a restart has been triggered
+     */
     boolean freshRestart;
+    /**
+     * Restart counter
+     */
     ICounter counter;
+    /**
+     * For restart strategy
+     */
     long frequency;
 
+    /**
+     * Create a move which defines a Large Neighborhood Search.
+     * @param move how the subtree is explored
+     * @param neighbor how the fragment are computed
+     * @param restartCounter when a restart should occur
+     */
     public MoveLNS(Move move, INeighbor neighbor, ICounter restartCounter) {
         this.move = move;
         this.neighbor = neighbor;
@@ -107,10 +131,9 @@ public class MoveLNS implements Move {
         // when a new fragment is needed (condition: at least one solution has been found)
         if (solutions > 0) {
             if (freshRestart) {
-                Decision tmp = solver.getLastDecision();
-                assert tmp == RootDecision.ROOT;
-                solver.setLastDecision(neighbor.fixSomeVariables());
-                solver.getLastDecision().setPrevious(tmp);
+                assert solver.getDecisionPath().size() == 1;
+                assert solver.getDecisionPath().getDecision(0) == RootDecision.ROOT;
+                neighbor.fixSomeVariables(solver.getDecisionPath());
                 solver.getEnvironment().worldPush();
                 freshRestart = false;
                 extend = true;
@@ -206,8 +229,8 @@ public class MoveLNS implements Move {
     }
 
     @Override
-    public void setTopDecision(Decision topDecision) {
-        this.move.setTopDecision(topDecision);
+    public void setTopDecisionPosition(int position) {
+        move.setTopDecisionPosition(position);
     }
 
     @Override

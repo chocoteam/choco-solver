@@ -31,7 +31,6 @@ package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.criteria.LongCriterion;
@@ -46,13 +45,34 @@ import java.util.List;
  * <p>
  * Created by cprudhom on 03/09/15.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 03/09/2015
  */
 public class MoveRestart implements Move {
 
+    /**
+     * the default {@link Move} to execute when no restart has to be done
+     */
     Move move;
+    /**
+     * How often the restart should occur
+     */
     IRestartStrategy restartStrategy;
+    /**
+     * How to trigger a restart
+     */
     LongCriterion criterion;
-    int restartFromStrategyCount, restartLimit;
+    /**
+     * Count the number of restarts
+     */
+    int restartFromStrategyCount;
+    /**
+     * restrict the total number of restart
+     */
+    int restartLimit;
+    /**
+     * When the next restart should be triggered
+     */
     long limit;
 
     /**
@@ -100,8 +120,8 @@ public class MoveRestart implements Move {
     }
 
     @Override
-    public void setTopDecision(Decision topDecision) {
-        this.move.setTopDecision(topDecision);
+    public void setTopDecisionPosition(int position) {
+        this.move.setTopDecisionPosition(position);
     }
 
     @Override
@@ -114,6 +134,10 @@ public class MoveRestart implements Move {
         move.setStrategy(aStrategy);
     }
 
+    /**
+     * Execute the restart and update measures
+     * @param solver reference to the solver
+     */
     protected void restart(Solver solver) {
         // update parameters for restarts
         restartFromStrategyCount++;

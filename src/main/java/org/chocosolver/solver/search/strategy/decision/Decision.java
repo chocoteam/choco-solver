@@ -31,53 +31,63 @@ package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.Variable;
 
 /**
+ * An abstract which defines a Decision
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 2 juil. 2010
+ * @param <E> type of variable handle by this decision
  */
-public abstract class Decision<E> implements ICause {
+public abstract class Decision<E extends Variable> implements ICause {
 
+    /**
+     * Variable of this decision
+     */
     protected E var;
 
-    protected int max_branching; // binary decision: 2
-    // 0: not applied yet, 1: applied once, 2: refuted once, ...
+    /**
+     * Number of time a decision can be applied.
+     * For unary decision set to 1 , for binary decision, set to 2, ...
+     */
+    protected int max_branching = 2;
+    /**
+     * Indication of the decision state.
+     * 0: not yet applied
+     * 1: applied once
+     * 2: refuter once, ...
+     */
     protected int branch;
-
-    int worldIndex; // indication on the world in which it has been selected
-
-    protected Decision previous;
-
+    /**
+     * Indicate the position of this decision in the decision path.
+     */
+    int position;
+    /**
+     * Create a <i>arity</i>-decision.
+     * @param arity how many time this decision can be applied (and then refuted)
+     */
     public Decision(int arity) {
         this.max_branching = arity;
     }
 
     /**
-     * Set the previous decision applied in the tree search
-     *
-     * @param decision previous decision
+     * Set the position of this decision in the decision path.
+     * Note that the position a decision is unique, but some decisions taken together have the same rank.
+     * @param p position of this decision in the decision path
      */
-    public final void setPrevious(Decision decision) {
-        this.previous = decision;
+    public final void setPosition(int p) {
+        this.position = p;
     }
 
     /**
-     * Return the previous decision applied in the tree search
-     *
-     * @return the previous decision
+     * Get the position of this decision in the decision path
+     * Note that the position a decision is unique, but some decisions taken together have the same rank.
+     * @return position of this decision in the decision path
      */
-    public final Decision getPrevious() {
-        return previous;
-    }
-
-    public final void setWorldIndex(int wi) {
-        this.worldIndex = wi;
-    }
-
-    public final int getWorldIndex() {
-        return worldIndex;
+    public final int getPosition() {
+        return position;
     }
 
     /**
@@ -116,21 +126,17 @@ public abstract class Decision<E> implements ICause {
         max_branching = isRefutable ? 2 : 1;
     }
 
+    /**
+     * @return number of time a decision can be applied. For unary decision set to 1 , for binary decision, set to 2, ...
+     */
     public final int getArity(){
         return max_branching;
-    }
-
-	/**
-     * @return true iff this decision is a meta decision (over multiple variables)
-     */
-    public boolean isMeta(){
-        return false;
     }
 
     /**
      * Apply the current decision
      *
-     * @throws ContradictionException
+     * @throws ContradictionException if the application of this decision fails
      */
     public abstract void apply() throws ContradictionException;
 
@@ -144,12 +150,11 @@ public abstract class Decision<E> implements ICause {
     /**
      * Reuse the decision
      * @param var the decision object (commonly a variable)
-     * @param wi the current world index
      */
-    protected void set(E var, int wi) {
+    protected void set(E var) {
         this.var = var;
         branch = 0;
-        this.setWorldIndex(wi);
+        max_branching = 2;
     }
 
     /**
@@ -157,7 +162,7 @@ public abstract class Decision<E> implements ICause {
      *
      * @return a variable V
      */
-    public final E getDecisionVariables() {
+    public final E getDecisionVariable() {
         return var;
     }
 
@@ -180,10 +185,17 @@ public abstract class Decision<E> implements ICause {
         throw new UnsupportedOperationException();
     }
 
-    public Decision duplicate() {
+    /**
+     * @return a copy of this decision
+     */
+    public Decision<E> duplicate() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @param dec a decision
+     * @return <tt>true</tt> if the two decisions are equivalent (same variable, same operator, same value)
+     */
     public boolean isEquivalentTo(Decision dec){
         return false;
     }

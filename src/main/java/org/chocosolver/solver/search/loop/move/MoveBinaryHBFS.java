@@ -35,6 +35,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -54,6 +55,8 @@ import java.util.PriorityQueue;
  * <p>
  * Created by cprudhom on 02/11/2015.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 02/11/2015.
  */
 public class MoveBinaryHBFS extends MoveBinaryDFS {
 
@@ -82,9 +85,13 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     long nodesRecompute;
 
     /**
-     * lower and upper bounds to limit the rate of redundantly propagated decisions.
+     * lower bound to limit the rate of redundantly propagated decisions.
      */
-    double a, b;
+    double a;
+    /**
+     * upper bound to limit the rate of redundantly propagated decisions.
+     */
+    double b;
 
     /**
      * The current objective manager, to deal with best bounds.
@@ -121,6 +128,14 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
      */
     Model mModel;
 
+    /**
+     * Create a move dedicated to run an Hybrid Best-First Search[1] (HBFS) with binary decisions.
+     * @param model a model
+     * @param strategy the search strategy to use
+     * @param a lower bound to limit the rate of redundantly propagated decisions.
+     * @param b upper bound to limit the rate of redundantly propagated decisions.
+     * @param N maximum number of backtracks to not exceed when updating node recomputation parameters.
+     */
     public MoveBinaryHBFS(Model model, AbstractStrategy strategy, double a, double b, long N) {
         super(strategy);
         this.mModel = model;
@@ -139,8 +154,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     @Override
     public boolean init() {
         boolean init = super.init();
-        ObjectiveManager<IntVar, Integer> om = mModel.getSolver().getObjectiveManager();
-        this.objectiveManager = om;
+        this.objectiveManager = mModel.getSolver().getObjectiveManager();
         if (objectiveManager.getPolicy() == ResolutionPolicy.SATISFACTION) {
             throw new UnsupportedOperationException("HBFS is not adapted to satisfaction problems.");
         }
@@ -153,10 +167,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
         boolean extend;
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < copen.length) {
-            Decision tmp = solver.getLastDecision();
-            solver.setLastDecision(copen[current++]);
-            assert solver.getLastDecision() != null;
-            solver.getLastDecision().setPrevious(tmp);
+            solver.getDecisionPath().pushDecision(copen[current++]);
             solver.getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
@@ -180,6 +191,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
 
     /**
      * This methods extracts and stores all open right branches for future exploration
+     * @param solver reference to the solver
      */
     protected void extractOpenRightBranches(Solver solver) {
         // update parameters for restarts
@@ -225,10 +237,12 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
      */
     private int compareSubpath(Solver solver) {
         _unkopen.clear();
-        Decision decision = solver.getLastDecision();
-        while (decision != topDecision) {
+        DecisionPath decisionPath = solver.getDecisionPath();
+        int pos = decisionPath.size() - 1;
+        Decision decision = decisionPath.getDecision(pos);
+        while (decision.getPosition() != topDecisionPosition) {
             _unkopen.add(decision);
-            decision = decision.getPrevious();
+            decision = decisionPath.getDecision(--pos);
         }
         Collections.reverse(_unkopen);
         //
@@ -246,21 +260,22 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
      * @param i the index of the decision, in _unkopen, that stops the loop
      */
     private void extractOB(Solver solver, int i) {
-        Decision stopAt = _unkopen.get(i).getPrevious();
+//        Decision stopAt = solver.getDecisionPath().getDecision(_unkopen.get(i).getPosition()-1);
+        int stopAt = _unkopen.get(i).getPosition()-1;
         // then, goes up in the search tree, and detect open nodes
         solver.getEnvironment().worldPop();
-        Decision decision = solver.getLastDecision();
+        DecisionPath dp = solver.getDecisionPath();
         int bound;
-        while (decision != stopAt) {
+        Decision decision = dp.getLastDecision();
+        while (decision.getPosition() != stopAt) {
             bound = isMinimization ?
                     objectiveManager.getObjective().getLB() :
                     objectiveManager.getObjective().getUB();
             if (decision.hasNext() && isValid(bound)) {
-                opens.add(new Open(decision, bound, isMinimization));
+                opens.add(new Open(decision, dp, bound, isMinimization));
             }
-            solver.setLastDecision(solver.getLastDecision().getPrevious());
-            decision.free();
-            decision = solver.getLastDecision();
+            dp.removeLast();
+            decision = dp.getLastDecision();
             solver.getEnvironment().worldPop();
         }
     }
@@ -281,26 +296,36 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
      */
     private class Open implements Comparable<Open> {
 
+        /**
+         * List of open decisions
+         */
         List<Decision> path;
-        int currentBound; // store the current lower bound of the decision path for minimization
-        byte minimization; // 1 for minimization, -1 for maximization
+        /**
+         * store the current lower bound of the decision path for minimization
+         */
+        int currentBound;
+        /**
+         * 1 for minimization, -1 for maximization
+         */
+        byte minimization;
 
         /**
          * Create an open right branch for HBFS
          *
-         * @param decision     an open decision
+         * @param decision      an open decision in <i>decisionPath</i>
+         * @param decisionPath  the current decision path
          * @param currentBound current lower (resp. upper) bound of the objective value for mimimization (resp. maximization)
          * @param minimization set to <tt>true</tt> for minimization
          */
-        public Open(Decision<IntVar> decision, int currentBound, boolean minimization) {
+        public Open(Decision decision, DecisionPath decisionPath, int currentBound, boolean minimization) {
             this.path = new ArrayList<>();
-            while (decision != topDecision) {
+            while (decision.getPosition() != topDecisionPosition) {
                 Decision d = decision.duplicate();
                 while (decision.triesLeft() != d.triesLeft() - 1) {
                     d.buildNext();
                 }
                 path.add(d);
-                decision = decision.getPrevious();
+                decision = decisionPath.getDecision(decision.getPosition() -1);
             }
             this.currentBound = currentBound;
             this.minimization = (byte) (minimization ? 1 : -1);

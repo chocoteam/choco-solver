@@ -37,10 +37,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.search.loop.learn.LearnExplained;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
-import org.chocosolver.solver.search.strategy.decision.IntMetaDecision;
-import org.chocosolver.solver.search.strategy.decision.RootDecision;
+import org.chocosolver.solver.search.strategy.decision.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -70,7 +67,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
     /**
      * List of "n" last conflicts.
      */
-    List<IntMetaDecision> gamma;
+    List<List<IntDecision>> gamma;
 
     /**
      * Limited size of conflicts to store in the tabu list.
@@ -123,11 +120,9 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
         boolean extend;
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < neighbor.length) {
-            Decision tmp = solver.getLastDecision();
-            solver.setLastDecision(neighbor[current++]);
-            assert solver.getLastDecision() != null;
-            solver.getLastDecision().setWorldIndex(solver.getEnvironment().getWorldIndex());
-            solver.getLastDecision().setPrevious(tmp);
+            DecisionPath dp = solver.getDecisionPath();
+            assert neighbor[current++] != null;
+            dp.pushDecision(neighbor[current++]);
             solver.getEnvironment().worldPush();
             extend = true;
         } else /*cut will checker with propagation */ {
@@ -161,23 +156,26 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
 
     private void neighbor(Solver solver) {
         Explanation expl = getLastExplanation();
-        IntMetaDecision k = extractConlict(solver, expl);
+        List<IntDecision> k = extractConlict(solver, expl);
         // add k to the list of conflicts
         gamma.add(k);
         // remove the oldest element in gamma if the tabu size is met
         if (gamma.size() > s) {
-            IntMetaDecision r = gamma.remove(0);
+            List<IntDecision> r = gamma.remove(0);
             // update weight of decisions
             decWeight(r);
-            r.free();
         }
         // prepare getting the decision of k in decreasing order wrt to their weights
         if (DEBUG) {
             System.out.printf("G:\n");
-            for (IntMetaDecision g : gamma) {
+            for (List<IntDecision> g : gamma) {
                 System.out.printf("\t");
                 for (int i = g.size() - 1; i > -1; i--) {
-                    System.out.printf("%s %s %d, ", g.getVar(i).getName(), g.getDop(i), g.getVal(i));
+                    IntDecision d = g.get(i);
+                    System.out.printf("%s %s %d, ",
+                            d.getDecisionVariable().getName(),
+                            d.getDecOp(),
+                            d.getDecisionValue());
                 }
                 System.out.printf("\n");
             }
@@ -226,19 +224,19 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
      * @param conflict one of the stored conflict
      * @return <tt>true</tt> if <code>conflict</code> is contained in <code>neighbor</code>, <tt>false</tt> otherwise.
      */
-    private boolean isSubsetOfNeighbor(IntMetaDecision conflict) {
+    private boolean isSubsetOfNeighbor(List<IntDecision> conflict) {
         boolean subset = true;
         // for all decisions in the conflict
         for (int j = 0; j < conflict.size() && subset; j++) {
-            IntVar var = conflict.getVar(j);
-            int val = conflict.getVal(j);
-            DecisionOperator dop = conflict.getDop(j);
+            IntVar var = conflict.get(j).getDecisionVariable();
+            int val = conflict.get(j).getDecisionValue();
+            DecisionOperator dop = conflict.get(j).getDecOp();
             boolean contains = false;
             // iteration over decisions in the neighbor
             for (int k = 0; k < neighbor.length && !contains; k++) {
                 // if the decision is not found, the neighbor is not in conflict
                 contains = (dop == neighbor[k].getDecOp()
-                        && var == neighbor[k].getDecisionVariables()
+                        && var == neighbor[k].getDecisionVariable()
                         && val == neighbor[k].getDecisionValue());
             }
             subset = contains;
@@ -246,37 +244,37 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
         return subset;
     }
 
-    private void incWeight(IntMetaDecision k, int i, double w) {
-        TIntObjectHashMap<TObjectDoubleMap<DecisionOperator>> _w1 = weights.get(k.getVar(i).getId());
+    private void incWeight(List<IntDecision> k, int i, double w) {
+        TIntObjectHashMap<TObjectDoubleMap<DecisionOperator>> _w1 = weights.get(k.get(i).getDecisionVariable().getId());
         if (_w1 == null) {
             _w1 = new TIntObjectHashMap<>(10, .5f, Integer.MAX_VALUE);
-            weights.put(k.getVar(i).getId(), _w1);
+            weights.put(k.get(i).getDecisionVariable().getId(), _w1);
         }
-        TObjectDoubleMap<DecisionOperator> _w2 = _w1.get(k.getVal(i));
+        TObjectDoubleMap<DecisionOperator> _w2 = _w1.get(k.get(i).getDecisionValue());
         if (_w2 == null) {
             _w2 = new TObjectDoubleHashMap<>(10, .5f, 0);
-            _w1.put(k.getVal(i), _w2);
+            _w1.put(k.get(i).getDecisionValue(), _w2);
         }
-        _w2.adjustOrPutValue(k.getDop(i), w, w);
+        _w2.adjustOrPutValue(k.get(i).getDecOp(), w, w);
     }
 
-    private void decWeight(IntMetaDecision k) {
+    private void decWeight(List<IntDecision> k) {
         int size = k.size();
         double w = -1d / size;
         for (int i = 0; i < size; i++) {
-            TIntObjectHashMap<TObjectDoubleMap<DecisionOperator>> _w1 = weights.get(k.getVar(i).getId());
-            TObjectDoubleMap<DecisionOperator> _w2 = _w1.get(k.getVal(i));
-            _w2.adjustValue(k.getDop(i), w);
+            TIntObjectHashMap<TObjectDoubleMap<DecisionOperator>> _w1 = weights.get(k.get(i).getDecisionVariable().getId());
+            TObjectDoubleMap<DecisionOperator> _w2 = _w1.get(k.get(i).getDecisionValue());
+            _w2.adjustValue(k.get(i).getDecOp(), w);
         }
     }
 
-    private double getWeight(IntMetaDecision k, int i) {
-        TIntObjectHashMap<TObjectDoubleMap<DecisionOperator>> _w1 = weights.get(k.getVar(i).getId());
-        TObjectDoubleMap<DecisionOperator> _w2 = _w1.get(k.getVal(i));
-        return _w2.get(k.getDop(i));
+    private double getWeight(List<IntDecision> k, int i) {
+        TIntObjectHashMap<TObjectDoubleMap<DecisionOperator>> _w1 = weights.get(k.get(i).getDecisionVariable().getId());
+        TObjectDoubleMap<DecisionOperator> _w2 = _w1.get(k.get(i).getDecisionValue());
+        return _w2.get(k.get(i).getDecOp());
     }
 
-    private IntMetaDecision extractConlict(Solver solver, Explanation lastExplanation) {
+    private List<IntDecision> extractConlict(Solver solver, Explanation lastExplanation) {
         int offset = solver.getSearchWorldIndex();
         int wi = solver.getEnvironment().getWorldIndex() - 1;
         int k = wi - offset;
@@ -289,26 +287,26 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
         L.clear();
 
         // start iteration over decisions
-        IntMetaDecision md = new IntMetaDecision();
-        Decision decision = solver.getLastDecision();
+        List<IntDecision> md = new ArrayList<>();
+        DecisionPath dp = solver.getDecisionPath();
+        int last = dp.size() - 1;
+        Decision decision;
         IntDecision id;
         if (DEBUG) System.out.printf("Conflict: ");
-        while (decision != RootDecision.ROOT) { // all decisions needs to be explored
+        while (last > 0) { // all decisions needs to be explored
+            decision = dp.getDecision(last--);
             id = (IntDecision) decision.duplicate();
             if (decision.triesLeft() != id.triesLeft() - 1) {
                 id.flip();
             }
             neighbor[--k] = id;
             if (lastExplanation.getDecisions().get(wi)) {
-                md.add(id.getDecisionVariables(),
-                        id.getDecisionValue(),
-                        id.getDecOp());
+                md.add(id);
                 incWeight(md, md.size() - 1, w);
                 L.put(k, getWeight(md, md.size() - 1));
                 if (DEBUG) System.out.printf("%s, ", neighbor[k]);
             }
             wi--;
-            decision = decision.getPrevious();
         }
         if (DEBUG) System.out.printf("\n");
         assert md.size() == size;
@@ -345,7 +343,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
     }
 
     @Override
-    public void setTopDecision(Decision topDecision) {
-        move.setTopDecision(topDecision);
+    public void setTopDecisionPosition(int position) {
+        move.setTopDecisionPosition(position);
     }
 }

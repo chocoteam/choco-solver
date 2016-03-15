@@ -33,20 +33,19 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.LastConflict;
-import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.ArrayDeque;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.intVarSearch;
@@ -81,6 +80,14 @@ public class StrategyTest {
 
         env.worldPush();
         Decision decision = r.getStrategy().getDecision();
+        ArrayDeque<Decision> stack = new ArrayDeque<>();
+        stack.push(decision);
+        testStrat(stack, variables, n, r);
+    }
+
+    private void testStrat(ArrayDeque<Decision> stack, IntVar[] variables, int n, Solver r) {
+        IEnvironment env = r.getEnvironment();
+        Decision decision = stack.peek();
         for (int i = 0; i < n; i++) {
             decision.buildNext();
             try {
@@ -90,17 +97,13 @@ public class StrategyTest {
             }
             Assert.assertTrue(variables[i].isInstantiated());
             Assert.assertEquals(variables[i].getValue(), i);
-            Decision tmp = decision;
             decision = r.getStrategy().getDecision();
-            if (decision != null) {
-                decision.setPrevious(tmp);
-            } else {
-                decision = tmp;
-            }
+            if(decision!=null)stack.push(decision);
             env.worldPush();
         }
         env.worldPop();
         for (int i = n - 1; i >= 0; i--) {
+            decision = stack.pop();
             env.worldPop();
             decision.buildNext();
             try {
@@ -110,7 +113,6 @@ public class StrategyTest {
             }
             Assert.assertFalse(variables[i].isInstantiated());
             Assert.assertFalse(variables[i].contains(i));
-            decision = decision.getPrevious();
         }
     }
 
@@ -133,39 +135,9 @@ public class StrategyTest {
 
         env.worldPush();
         Decision decision = r.getStrategy().getDecision();
-        for (int i = 0; i < n; i++) {
-            decision.buildNext();
-            try {
-                decision.apply();
-            } catch (ContradictionException e) {
-                e.printStackTrace();
-            }
-            Assert.assertTrue(variables[i].isInstantiated());
-            Assert.assertEquals(variables[i].getValue(), i);
-            Decision tmp = decision;
-            decision = r.getStrategy().getDecision();
-            if (decision != null) {
-                decision.setPrevious(tmp);
-            } else {
-                decision = tmp;
-            }
-            env.worldPush();
-        }
-        env.worldPop();
-        for (int i = n - 1; i >= 0; i--) {
-            env.worldPop();
-            decision.buildNext();
-            try {
-                decision.apply();
-            } catch (ContradictionException e) {
-                e.printStackTrace();
-            }
-            Assert.assertFalse(variables[i].isInstantiated());
-            Assert.assertFalse(variables[i].contains(i));
-            decision = decision.getPrevious();
-        }
-
-
+        ArrayDeque<Decision> stack = new ArrayDeque<>();
+        stack.push(decision);
+        testStrat(stack, variables, n, r);
     }
 
 
@@ -174,10 +146,7 @@ public class StrategyTest {
         Model model = new Model("OnceTest");
         IntVar x = model.intVar("x", 1, 2, false);
         IntVar[] v = {x};
-        VariableSelector varsel = new InputOrder<>();
-        IntValueSelector valsel = new IntDomainMin();
-        DecisionOperator assgnt = DecisionOperator.int_eq;
-        model.getSolver().set(new Once(v, varsel, valsel, assgnt));
+        model.getSolver().set(SearchStrategyFactory.greedySearch(SearchStrategyFactory.inputOrderLBSearch(v)));
         model.solve();
         Assert.assertTrue(x.getValue() == 1);
     }

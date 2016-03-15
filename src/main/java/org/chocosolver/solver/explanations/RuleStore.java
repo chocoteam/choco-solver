@@ -31,7 +31,6 @@ package org.chocosolver.solver.explanations;
 
 import gnu.trove.set.TIntSet;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.store.IEventStore;
@@ -102,20 +101,10 @@ public class RuleStore {
      */
     private boolean preemptedStop;
     /**
-     * Stores the index of the world from which search has begun
-     */
-    private int swi;
-    /**
-     * The observed model
-     */
-    private final Model mModel;
-
-    /**
      * Local-like parameter.
      * Reference to the last variable popped from the event store.
      */
     private IntVar lastVar;
-
     /**
      * Local-like parameter.
      * Reference to the last event popped from the event store.
@@ -129,13 +118,10 @@ public class RuleStore {
 
     /**
      * Instantiate a rule store to compute explanations
-     *
-     * @param model                   the model to observe
-     * @param saveCauses               does it keep trace of the constraints in conflict ?
+     *  @param saveCauses               does it keep trace of the constraints in conflict ?
      * @param enablePartialExplanation do explanations need to be complete (for DBT or nogood extraction) ?
      */
-    public RuleStore(Model model, boolean saveCauses, boolean enablePartialExplanation) {
-        this.mModel = model;
+    public RuleStore(boolean saveCauses, boolean enablePartialExplanation) {
         this.saveCauses = saveCauses;
         this.enablePartialExplanation = enablePartialExplanation;
         decRefut = new Explanation[16];
@@ -148,7 +134,6 @@ public class RuleStore {
     public void init(Explanation expl) {
         this.cRules = expl.getRules();
         preemptedStop = false;
-        swi = mModel.getSolver().getSearchWorldIndex();
     }
 
     /**
@@ -275,7 +260,7 @@ public class RuleStore {
                 Decision decision = (Decision) lastCause;
                 // If it is a LEFT decision, simply add it
                 if (decision.hasNext()) {
-                    explanation.addDecicion(decision);
+                    explanation.addDecision(decision);
                     // if partial explanation is enabled, finding the first decision in conflict is enough
                     if (preemptedStop |= enablePartialExplanation) {
                         explanation.setEvtstrIdx(idx);
@@ -291,7 +276,7 @@ public class RuleStore {
                 if (!saveCauses) {
                     // if all decisions, from the current refuted one to ROOT, explained the conflict,
                     // we can stop prematurely the algorithm
-                    preemptedStop |= explanation.getDecisions().previousClearBit(decision.getWorldIndex()) == swi - 1;
+                    preemptedStop |= explanation.getDecisions().previousClearBit(decision.getPosition()) == 0;
                     // we do not need to copy the rules, since the explanation is complete, in term of decisions.
                 }
             } else {
@@ -411,7 +396,7 @@ public class RuleStore {
      * @param explanation the explanation of the refutation
      */
     public void storeDecisionRefutation(Decision decision, Explanation explanation) {
-        int w = decision.getWorldIndex();
+        int w = decision.getPosition();
         if (w >= decRefut.length) {
             Explanation[] tmp = decRefut;
             decRefut = new Explanation[w + 10];
@@ -428,10 +413,10 @@ public class RuleStore {
      * @param to       the new index
      */
     public void moveDecisionRefutation(Decision decision, int to) {
-        assert to <= decision.getWorldIndex();
-        if (to < decision.getWorldIndex()) {
-            decRefut[to] = decRefut[decision.getWorldIndex()];
-            decRefut[decision.getWorldIndex()] = null;
+        assert to <= decision.getPosition();
+        if (to < decision.getPosition()) {
+            decRefut[to] = decRefut[decision.getPosition()];
+            decRefut[decision.getPosition()] = null;
         }
     }
 
@@ -441,7 +426,7 @@ public class RuleStore {
      * @param decision the decision which is going to be forgotten
      */
     public void freeDecisionExplanation(Decision decision) {
-        int w = decision.getWorldIndex();
+        int w = decision.getPosition();
         // when dealing with parallel portfolio, the cut given by another worker
         // may lead to free a decision which was not explained yet
         if (w < decRefut.length) {
@@ -460,6 +445,6 @@ public class RuleStore {
      */
     public Explanation getDecisionRefutation(Decision decision) {
         assert decision.triesLeft() < 2 : decision.toString() + "is not explained yet";
-        return decRefut[decision.getWorldIndex()];
+        return decRefut[decision.getPosition()];
     }
 }

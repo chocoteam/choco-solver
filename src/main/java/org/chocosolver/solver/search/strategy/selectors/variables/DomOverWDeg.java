@@ -36,11 +36,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.objects.IntMap;
 
 /**
@@ -75,11 +73,6 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
     java.util.Random random;
 
     /**
-     * Decisions pool, to limit memory footprint
-     */
-    PoolManager<IntDecision> decisionPool;
-
-    /**
      * The way value is selected for a given variable
      */
     IntValueSelector valueSelector;
@@ -98,7 +91,6 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
         pid2arity = new IntMap(model.getCstrs().length * 3 / 2 + 1, -1);
         bests = new TIntArrayList();
         this.valueSelector = valueSelector;
-        decisionPool = new PoolManager<>();
         random = new java.util.Random(seed);
     }
 
@@ -109,12 +101,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
             return null;
         }
         int currentVal = valueSelector.selectValue(variable);
-        IntDecision current = decisionPool.getE();
-        if (current == null) {
-            current = new IntDecision(decisionPool);
-        }
-        current.set(variable, currentVal, DecisionOperator.int_eq);
-        return current;
+        return variable.getModel().getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperator.int_eq, currentVal);
     }
 
     @Override
