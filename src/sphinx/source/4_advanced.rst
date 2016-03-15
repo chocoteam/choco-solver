@@ -81,9 +81,9 @@ Choco |version| provides a simple way to use several threads to treat a problem.
 The main idea of that driver is to solve the *same* model with different search strategies and to share few information
 to make these threads help each others.
 
-To use a portfolio of solvers in parallel, use ``Portfolio`` as follows: ::
+To use a portfolio of solvers in parallel, use ``ParallelPortfolio`` as follows: ::
 
-        Portfolio portfolio = new Portfolio();
+        ParallelPortfolio portfolio = new ParallelPortfolio();
         int nbModels = 5;
         for(int s=0;s<nbModels;s++){
             portfolio.addModel(makeModel(s));

@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     A Portfolio helper.
  * </p>
  * <p>
- *     The Portfolio resolution of a problem is made of four steps:
+ *     The ParallelPortfolio resolution of a problem is made of four steps:
  *      <ol>
  *          <li>adding models to be run in parallel,</li>
  *          <li>running resolution in parallel,</li>
@@ -79,7 +79,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     Example of use.
  *
  * <pre>
- * <code>Portfolio pares = new Portfolio();
+ * <code>ParallelPortfolio pares = new ParallelPortfolio();
  * int n = 4; // number of models to use
  * for (int i = 0; i < n; i++) {
  *      pares.addModel(modeller());
@@ -100,7 +100,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 23/12/2015.
  */
-public class Portfolio {
+public class ParallelPortfolio {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////       VARIABLES       //////////////////////////////////////////////////////
@@ -123,10 +123,10 @@ public class Portfolio {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Creates a new Portfolio
+     * Creates a new ParallelPortfolio
      * This class stores the models to be executed in parallel in a {@link LinkedList} initially empty.
      */
-    public Portfolio() {
+    public ParallelPortfolio() {
         this.models = new LinkedList<>();
     }
 
@@ -142,7 +142,7 @@ public class Portfolio {
      * <p>
      *     <b>Important:</b>
      *  <ul>
-     *      <li>the populating process is not managed by this Portfolio
+     *      <li>the populating process is not managed by this ParallelPortfolio
      *  and should be done externally, with a dedicated method for example.
      *  </li>
      *  <li>
@@ -200,7 +200,7 @@ public class Portfolio {
     }
 
     /**
-     * @return the (mutable!) list of models used in this Portfolio
+     * @return the (mutable!) list of models used in this ParallelPortfolio
      */
     public List<Model> getModels(){
         return models;
@@ -249,7 +249,7 @@ public class Portfolio {
                 throw new UnsupportedOperationException("No objective has been defined");
             }
             if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
-                throw new UnsupportedOperationException("Portfolio cannot deal with " +
+                throw new UnsupportedOperationException("ParallelPortfolio cannot deal with " +
                         "real variable objective optimization problems");
             }
         }
