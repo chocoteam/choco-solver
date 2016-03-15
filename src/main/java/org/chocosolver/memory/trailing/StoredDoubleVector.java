@@ -55,7 +55,6 @@ public final class StoredDoubleVector extends IStateDoubleVector {
      * @param initialSize  The initial size.
      * @param initialValue The initial common value.
      */
-
     public StoredDoubleVector(EnvironmentTrailing env, int initialSize, double initialValue) {
         super(env, initialSize, initialValue);
         int initialCapacity = Math.max(MIN_CAPACITY, initialSize);
@@ -88,7 +87,6 @@ public final class StoredDoubleVector extends IStateDoubleVector {
      *
      * @param minCapacity the necessary capacity.
      */
-
     public void ensureCapacity(int minCapacity) {
         int oldCapacity = elementData.length;
         if (minCapacity > oldCapacity) {
@@ -110,7 +108,7 @@ public final class StoredDoubleVector extends IStateDoubleVector {
      *
      * @param i The search to add.
      */
-
+    @Override
     public void add(double i) {
         int newsize = size.get() + 1;
         ensureCapacity(newsize);
@@ -142,7 +140,7 @@ public final class StoredDoubleVector extends IStateDoubleVector {
      * removes the search at the end of the vector.
      * does nothing when called on an empty vector
      */
-
+    @Override
     public void removeLast() {
         int newsize = size.get() - 1;
         if (newsize >= 0)
@@ -153,7 +151,7 @@ public final class StoredDoubleVector extends IStateDoubleVector {
     /**
      * Assigns a new value <code>val</code> to the element <code>index</code>.
      */
-
+    @Override
     public double set(int index, double val) {
         if (rangeCheck(index)) {
             //<hca> je vire cet assert en cas de postCut il n est pas vrai ok ?
@@ -164,7 +162,7 @@ public final class StoredDoubleVector extends IStateDoubleVector {
         throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
     }
 
-
+    @Override
     public double quickSet(int index, double val) {
         assert (rangeCheck(index));
         double oldValue = elementData[index];
@@ -189,7 +187,6 @@ public final class StoredDoubleVector extends IStateDoubleVector {
      * @param stamp world when the modification is done
      * @return the old value
      */
-
     public double _set(int index, double val, int stamp) {
         assert (rangeCheck(index));
         double oldval = elementData[index];

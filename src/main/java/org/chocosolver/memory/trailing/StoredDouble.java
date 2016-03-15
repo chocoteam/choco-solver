@@ -57,6 +57,7 @@ public class StoredDouble extends IStateDouble {
      * Modifies the value and stores if needed the former value on the
      * trailing stack.
      */
+    @Override
     public final void set(final double y) {
         if (y != currentValue) {
             final int wi = environment.getWorldIndex();

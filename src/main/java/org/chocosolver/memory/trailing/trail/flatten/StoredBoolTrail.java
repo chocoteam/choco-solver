@@ -66,13 +66,13 @@ public class StoredBoolTrail implements IStoredBoolTrail {
      */
     private int[] worldStartLevels;
 
+
     /**
      * Constructs a trail with predefined size.
      *
      * @param nUpdates maximal number of updates that will be stored
      * @param nWorlds  maximal number of worlds that will be stored
      */
-
     public StoredBoolTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
         variableStack = new StoredBool[nUpdates];
@@ -87,7 +87,7 @@ public class StoredBoolTrail implements IStoredBoolTrail {
      *
      * @param worldIndex current world index
      */
-
+    @Override
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
     }
@@ -98,7 +98,7 @@ public class StoredBoolTrail implements IStoredBoolTrail {
      *
      * @param worldIndex current world index
      */
-
+    @Override
     public void worldPop(int worldIndex) {
         final int wsl = worldStartLevels[worldIndex];
         while (currentLevel > wsl) {
@@ -112,7 +112,6 @@ public class StoredBoolTrail implements IStoredBoolTrail {
     /**
      * Returns the current size of the stack.
      */
-
     public int getSize() {
         return currentLevel;
     }
@@ -121,7 +120,7 @@ public class StoredBoolTrail implements IStoredBoolTrail {
     /**
      * Comits a world: merging it with the previous one.
      */
-
+    @Override
     public void worldCommit(int worldIndex) {
         // principle:
         //   currentLevel decreases to end of previous world
@@ -154,7 +153,7 @@ public class StoredBoolTrail implements IStoredBoolTrail {
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
-
+    @Override
     public void savePreviousState(StoredBool v, boolean oldValue, int oldStamp) {
         valueStack[currentLevel] = oldValue;
         variableStack[currentLevel] = v;
@@ -209,6 +208,7 @@ public class StoredBoolTrail implements IStoredBoolTrail {
         stampStack = tmp3;
     }
 
+    @Override
     public void resizeWorldCapacity(int newWorldCapacity) {
         final int[] tmp = new int[newWorldCapacity];
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);

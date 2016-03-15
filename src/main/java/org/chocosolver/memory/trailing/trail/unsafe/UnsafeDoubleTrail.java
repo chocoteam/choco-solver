@@ -111,7 +111,7 @@ public class UnsafeDoubleTrail implements IStoredDoubleTrail {
      *
      * @param worldIndex current world index
      */
-
+    @Override
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
     }
@@ -122,7 +122,7 @@ public class UnsafeDoubleTrail implements IStoredDoubleTrail {
      *
      * @param worldIndex current world index
      */
-
+    @Override
     public void worldPop(int worldIndex) {
         StoredDouble v;
         double value;
@@ -150,7 +150,7 @@ public class UnsafeDoubleTrail implements IStoredDoubleTrail {
     /**
      * Comits a world: merging it with the previous one.
      */
-
+    @Override
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
     }
@@ -160,6 +160,7 @@ public class UnsafeDoubleTrail implements IStoredDoubleTrail {
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
+    @Override
     public void savePreviousState(StoredDouble v, double oldValue, int oldStamp) {
         unsafe.putDouble(valueStack + currentLevel * SIZEOF_DATA, oldValue);
         variableStack[currentLevel] = v;
@@ -217,6 +218,7 @@ public class UnsafeDoubleTrail implements IStoredDoubleTrail {
         stampStack = ad2;
     }
 
+    @Override
     public void resizeWorldCapacity(int newWorldCapacity) {
         final int[] tmp = new int[newWorldCapacity];
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);

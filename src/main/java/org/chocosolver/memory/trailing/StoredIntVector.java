@@ -90,7 +90,6 @@ public final class StoredIntVector extends IStateIntVector {
      *
      * @param minCapacity the necessary capacity.
      */
-
     public void ensureCapacity(int minCapacity) {
         int oldCapacity = elementData.length;
         if (minCapacity > oldCapacity) {
@@ -112,7 +111,7 @@ public final class StoredIntVector extends IStateIntVector {
      *
      * @param i The search to add.
      */
-
+    @Override
     public void add(int i) {
         int newsize = size.get() + 1;
         ensureCapacity(newsize);
@@ -144,7 +143,7 @@ public final class StoredIntVector extends IStateIntVector {
      * removes the search at the end of the vector.
      * does nothing when called on an empty vector
      */
-
+    @Override
     public void removeLast() {
         int newsize = size.get() - 1;
         if (newsize >= 0)
@@ -155,7 +154,7 @@ public final class StoredIntVector extends IStateIntVector {
     /**
      * Assigns a new value <code>val</code> to the element <code>index</code>.
      */
-
+    @Override
     public int set(int index, int val) {
         if (rangeCheck(index)) {
             //<hca> je vire cet assert en cas de postCut il n est pas vrai ok ?
@@ -184,7 +183,6 @@ public final class StoredIntVector extends IStateIntVector {
     /**
      * Sets an element without storing the previous value.
      */
-
     public int _set(int index, int val, int stamp) {
         assert (rangeCheck(index));
         int oldval = elementData[index];
