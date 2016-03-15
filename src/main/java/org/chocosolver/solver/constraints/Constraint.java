@@ -36,7 +36,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
-import java.io.Serializable;
 import java.util.*;
 
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -54,7 +53,7 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
  * @see org.chocosolver.solver.propagation.IPropagationEngine
  * @since 0.01
  */
-public class Constraint implements Serializable {
+public class Constraint {
 
     /**
      * Status of this constraint wrt the model
@@ -73,11 +72,6 @@ public class Constraint implements Serializable {
          */
         FREE
     }
-
-    /**
-     * For serialization purpose
-     */
-    private static final long serialVersionUID = 1L;
 
     /**
      *  Propagators of the constraint (they will filter domains and eventually check solutions)

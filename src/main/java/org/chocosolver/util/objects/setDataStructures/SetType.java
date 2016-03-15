@@ -34,6 +34,6 @@ public enum SetType {
     LINKED_LIST,
 	BITSET,
 	FIXED_ARRAY,
-	INTERVAL;
+	FIXED_INTERVAL
 }
 

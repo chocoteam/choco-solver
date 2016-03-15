@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.Solver;
 
-import java.io.Serializable;
+
 
 /**
  * The "Learn" component
@@ -42,7 +42,7 @@ import java.io.Serializable;
  * Created by cprudhom on 01/09/15.
  * Project: choco.
  */
-public interface Learn extends Serializable{
+public interface Learn {
 
     /**
      * Validate and record a new piece of knowledge, that is, the current position is a dead-end.

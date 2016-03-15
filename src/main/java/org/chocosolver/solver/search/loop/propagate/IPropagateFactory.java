@@ -29,13 +29,14 @@
  */
 package org.chocosolver.solver.search.loop.propagate;
 
-import org.chocosolver.solver.IMyself;
+import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Solver;
 
 /**
  * Interface to define how to handle constraint propagation
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public interface IPropagateFactory extends IMyself {
+public interface IPropagateFactory extends ISelf<Solver> {
 
 	/**
      * Creates a basic Propagate object to handle constraint propagation

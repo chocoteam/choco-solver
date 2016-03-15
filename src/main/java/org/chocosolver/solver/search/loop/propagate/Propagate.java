@@ -32,7 +32,7 @@ package org.chocosolver.solver.search.loop.propagate;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 
-import java.io.Serializable;
+
 
 /**
  * The "Propagate" component
@@ -43,7 +43,7 @@ import java.io.Serializable;
  * Created by cprudhom on 01/09/15.
  * Project: choco.
  */
-public interface Propagate extends Serializable{
+public interface Propagate {
 
     /**
      * Propagate information throughout the constraint network, that is, apply decision and post dynamic cut (if any).

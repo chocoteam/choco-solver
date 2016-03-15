@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.iterators;
 
-import java.io.Serializable;
+
 import java.util.Iterator;
 
 /*
@@ -39,6 +39,6 @@ import java.util.Iterator;
 * Since : Choco 2.1.0
 * Update : Choco 2.1.0
 */
-public abstract class DisposableIterator<E> extends Disposable implements Iterator<E>, Serializable {
+public abstract class DisposableIterator<E> extends Disposable implements Iterator<E> {
 
 }

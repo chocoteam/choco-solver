@@ -27,125 +27,119 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.constant;
 
-import org.chocosolver.memory.copy.EnvironmentCopying;
-import org.chocosolver.memory.copy.RcObject;
-import org.chocosolver.memory.copy.RecomputableElement;
-import org.chocosolver.memory.copy.store.StoredObjectCopy;
+import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
- * Generic backtrable set for copy
+ * Fixed array of integers (cannot add nor remove items)
  *
- * @author Jean-Guillaume Fages
- * @since Nov 2012
+ * @author : Jean-Guillaume Fages, jimmy
  */
-public class Set_Copy extends RcObject implements ISet {
+public class Set_FixedArray implements ISet {
 
 	//***********************************************************************************
-	// VARIABLE
+	// VARIABLES
 	//***********************************************************************************
 
-    private ISet set;// set to be maintained during search (decorator design pattern)
-    private StoredObjectCopy copies;
+	protected final int size;
+	protected final int[] values;
+	protected ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-    public Set_Copy(EnvironmentCopying environment, ISet set) {
-        super(environment, null);
-        this.set = set;
-        copies = environment.getObjectCopy();
-        copies.add(this);
-    }
+	/**
+	 * Creates an empty array of integers
+	 */
+	public Set_FixedArray(int[] vls){
+		values = new TIntHashSet(vls).toArray();
+		Arrays.sort(values);
+		size = values.length;
+	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-    public Object deepCopy() {
-        return set.toArray();
-    }
-
-    public void _set(final Object y, final int wstamp) {
-        int[] vals = (int[]) y;
-        set.clear();
-        for (int i : vals) {
-            set.add(i);
-        }
-        timeStamp = wstamp;
-    }
-
 	@Override
-	public Iterator<Integer> iterator(){
-		return set.iterator();
+	public boolean add(int element) {
+		if(contain(element))return false;
+		throw new UnsupportedOperationException("Cannot add element to Set_FixedArray");
 	}
 
-    @Override
-    public ISetIterator newIterator() {
-        return set.newIterator();
-    }
+	@Override
+	public boolean remove(int element) {
+		if(!contain(element))return false;
+		throw new UnsupportedOperationException("Cannot remove element from Set_FixedArray");
+	}
 
-    @Override
-    public boolean add(int element) {
-        if (set.add(element)) {
-            timeStamp = environment.getWorldIndex();
-            return true;
-        }
-        return false;
-    }
+	@Override
+	public boolean contain(int element) {
+		return Arrays.binarySearch(values,element) >= 0;
+	}
 
-    @Override
-    public boolean remove(int element) {
-        if (set.remove(element)) {
-            timeStamp = environment.getWorldIndex();
-            return true;
-        }
-        return false;
-    }
+	@Override
+	public int getSize() {
+		return size;
+	}
 
-    @Override
-    public boolean contain(int element) {
-        return set.contain(element);
-    }
+	@Override
+	public void clear() {
+		if(size>0){
+			throw new UnsupportedOperationException("Cannot clear Set_FixedArray");
+		}
+	}
 
-    @Override
-    public int getSize() {
-        return set.getSize();
-    }
-
-    @Override
-    public void clear() {
-        if (!set.isEmpty()) {
-            timeStamp = environment.getWorldIndex();
-        }
-        set.clear();
-    }
-
-    @Override
-    public int getType() {
-        return RecomputableElement.OBJECT;
-    }
-
-    @Override
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void set(Object y) {
-        throw new UnsupportedOperationException("this method should not be called");
-    }
-
-    @Override
-    public String toString() {
-        return set.toString();
-    }
+	@Override
+	public String toString() {
+		String st = "{";
+		for(int i:this){
+			st+=i+", ";
+		}
+		st+="}";
+		return st.replace(", }","}");
+	}
 
 	@Override
 	public SetType getSetType(){
-		return set.getSetType();
+		return SetType.FIXED_ARRAY;
+	}
+
+	//***********************************************************************************
+	// ITERATOR
+	//***********************************************************************************
+
+	@Override
+	public Iterator<Integer> iterator(){
+		iter.reset();
+		return iter;
+	}
+
+	@Override
+	public ISetIterator newIterator(){
+		return new ISetIterator() {
+			int idx;
+			@Override
+			public void reset() {
+				idx = 0;
+			}
+			@Override
+			public boolean hasNext() {
+				return idx < size;
+			}
+			@Override
+			public Integer next() {
+				idx ++;
+				return values[idx-1];
+			}
+		};
 	}
 }

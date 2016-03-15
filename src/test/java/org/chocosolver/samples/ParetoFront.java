@@ -36,8 +36,8 @@ package org.chocosolver.samples;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;

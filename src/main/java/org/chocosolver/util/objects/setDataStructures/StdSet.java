@@ -29,8 +29,8 @@
  */
 package org.chocosolver.util.objects.setDataStructures;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.structure.Operation;
-import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.util.PoolManager;
 
 import java.util.Iterator;
@@ -41,14 +41,14 @@ import java.util.Iterator;
  * @author Jean-Guillaume Fages
  * @since Nov 2012
  */
-public class Set_Trail implements ISet {
+public class StdSet implements ISet {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
     // trailing
-    private final EnvironmentTrailing environment;
+    private final IEnvironment environment;
     private PoolManager<ListOP> operationPoolGC;
     private final static boolean ADD = true;
     private final static boolean REMOVE = false;
@@ -59,7 +59,7 @@ public class Set_Trail implements ISet {
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-    public Set_Trail(EnvironmentTrailing environment, ISet set) {
+    public StdSet(IEnvironment environment, ISet set) {
         super();
         this.environment = environment;
         this.operationPoolGC = new PoolManager<>();

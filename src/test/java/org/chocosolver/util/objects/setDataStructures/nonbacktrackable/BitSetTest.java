@@ -27,27 +27,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.queues;
+package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
+
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 04/04/12
+ * @author Alexandre LEBRUN
  */
-public interface IHeap {
+public class BitSetTest extends SetTest {
 
-    void insert(int key, int elem);
-
-    void update(int new_value, int elem);
-
-    int removemin();
-
-    int remove(int elem);
-
-    boolean isEmpty();
-
-    int size();
-
+    @Override
+    public ISet create(int offset) {
+        return SetFactory.makeBitSet(offset);
+    }
 
 }

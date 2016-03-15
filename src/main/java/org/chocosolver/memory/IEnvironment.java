@@ -32,7 +32,7 @@ package org.chocosolver.memory;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.memory.structure.Operation;
 
-import java.io.Serializable;
+
 
 
 /**
@@ -40,7 +40,7 @@ import java.io.Serializable;
  *
  * @author Charles Prud'homme, Hadrien Cambazard, Guillaume Rochart
  */
-public interface IEnvironment extends Serializable {
+public interface IEnvironment  {
 
     /**
      * Returns the world number.

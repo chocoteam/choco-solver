@@ -29,7 +29,6 @@
  */
 package org.chocosolver.util.objects.setDataStructures.swapList;
 
-import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 

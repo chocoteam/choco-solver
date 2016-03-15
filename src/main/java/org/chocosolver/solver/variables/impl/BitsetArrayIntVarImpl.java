@@ -62,11 +62,6 @@ import java.util.Iterator;
 public final class BitsetArrayIntVarImpl extends AbstractVariable implements IntVar {
 
     /**
-     * For serialization purpose.
-     */
-    private static final long serialVersionUID = 1L;
-
-    /**
      * Valuated to <tt>true</tt> when removed values are stored.
      */
     protected boolean reactOnRemoval = false;

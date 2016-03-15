@@ -29,8 +29,6 @@
  */
 package org.chocosolver;
 
-import gnu.trove.list.array.TFloatArrayList;
-import org.chocosolver.samples.todo.problems.integer.Knapsack;
 import org.chocosolver.samples.todo.tests.KnapsackTest;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
@@ -40,13 +38,11 @@ import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
-import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
 import static org.testng.Assert.assertEquals;
 

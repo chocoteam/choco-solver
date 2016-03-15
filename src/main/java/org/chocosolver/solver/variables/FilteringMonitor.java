@@ -32,7 +32,7 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 
-import java.io.Serializable;
+
 
 /**
  * Monitor filter generated during resolution.
@@ -40,7 +40,7 @@ import java.io.Serializable;
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
-public interface FilteringMonitor extends Serializable {
+public interface FilteringMonitor  {
 
     /**
      * Explain the activation of a propagator involved in a reified constraint

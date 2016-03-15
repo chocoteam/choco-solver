@@ -35,13 +35,10 @@ import org.chocosolver.solver.constraints.checker.Modeler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
-import static org.chocosolver.solver.Model.writeInFile;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
 import static org.testng.Assert.fail;
 
@@ -92,13 +89,6 @@ public class CorrectnessChecker {
                                     System.out.println(String.format("REF:\n%s\n", ref));
                                     ref.getEnvironment().worldPop();
                                     System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
-                                    File f = new File("SOLVER_ERROR.ser");
-                                    try {
-                                        writeInFile(ref, f);
-                                    } catch (IOException ee) {
-                                        ee.printStackTrace();
-                                    }
-                                    System.out.println("" + f.getAbsolutePath());
                                     fail("one solution found");
                                 }
                             } catch (Exception e) {
@@ -106,13 +96,6 @@ public class CorrectnessChecker {
                                 System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
                                         ds, ide, h, rvars[d], val, loop, seed));
                                 System.out.println("REF:\n" + ref + "\nTEST:\n" + test);
-                                File f = new File("SOLVER_ERROR.ser");
-                                try {
-                                    writeInFile(ref, f);
-                                } catch (IOException ee) {
-                                    ee.printStackTrace();
-                                }
-                                System.out.println("" + f.getAbsolutePath());
                                 fail();
                             }
                         }
@@ -132,15 +115,8 @@ public class CorrectnessChecker {
 //            System.out.println("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
-            File f = new File("SOLVER_ERROR.ser");
-            try {
-                writeInFile(ref, f);
-            } catch (IOException ee) {
-                ee.printStackTrace();
-            }
             System.out.println(e.getMessage());
             System.out.println("REF:\n" + ref + "\n");
-            System.out.println("" + f.getAbsolutePath());
             fail();
         }
         return ref;

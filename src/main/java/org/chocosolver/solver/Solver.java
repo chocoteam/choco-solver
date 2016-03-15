@@ -64,7 +64,6 @@ import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.io.PrintStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -99,7 +98,7 @@ import static org.chocosolver.util.ESat.*;
  * @author Charles Prud'homme
  * @since 01/09/15.
  */
-public final class Solver implements Serializable, ISolver, IMeasures, IOutputFactory {
+public final class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /** Define the possible actions of SearchLoop */
     protected enum Action {

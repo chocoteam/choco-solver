@@ -32,7 +32,7 @@ package org.chocosolver.util.objects;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 
-import java.io.Serializable;
+
 
 /**
  * Implementation based on "Maintaining GAC on adhoc r-ary constraints", Cheng and Yap, CP12.
@@ -41,7 +41,7 @@ import java.io.Serializable;
  * Created by cprudhom on 04/11/14.
  * Project: choco.
  */
-public class StoredSparseSet implements Serializable{
+public class StoredSparseSet {
 
     int[] sparse;
     int[] dense;

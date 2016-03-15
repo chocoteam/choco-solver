@@ -29,7 +29,7 @@
  */
 package org.chocosolver.memory;
 
-import java.io.Serializable;
+
 
 
 /**
@@ -39,7 +39,7 @@ import java.io.Serializable;
  * permettre a l'environnement de deleguer la gestion des mondes pour chaque type
  * de donnee.
  */
-public interface IStorage extends Serializable {
+public interface IStorage  {
 
     /**
      * Moving up to the next world.

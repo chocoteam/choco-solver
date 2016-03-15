@@ -33,7 +33,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -47,7 +46,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 3.3.1
  */
-public interface Move extends Serializable {
+public interface Move  {
 
     /**
      * Called before the search starts.

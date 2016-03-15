@@ -31,9 +31,9 @@ package org.chocosolver.solver.constraints.extension.nary;
 
 import org.chocosolver.solver.variables.IntVar;
 
-import java.io.Serializable;
 
-public abstract class LargeRelation implements Serializable {
+
+public abstract class LargeRelation  {
 
     /**
      * return true if tuple is feasible according

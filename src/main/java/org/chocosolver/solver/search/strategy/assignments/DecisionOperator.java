@@ -35,7 +35,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
-import java.io.Serializable;
+
 
 /**
  * <br/>
@@ -43,7 +43,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 03/02/11
  */
-public interface DecisionOperator<V extends Variable> extends Serializable {
+public interface DecisionOperator<V extends Variable>  {
 
     void apply(V var, int value, ICause cause) throws ContradictionException;
 

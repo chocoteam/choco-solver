@@ -35,7 +35,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.IEventType;
 
-import java.io.Serializable;
+
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
@@ -53,7 +53,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public interface IVariableMonitor<V extends Variable> extends Serializable, ICause {
+public interface IVariableMonitor<V extends Variable> extends ICause {
 
     /**
      * Operations to execute after updating the domain variable

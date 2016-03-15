@@ -34,14 +34,14 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.io.Serializable;
+
 
 /**
  * @author Jean-Guillaume Fages, Xavier Lorca
  *         <p/>
  *         Provide an interface for the graph manipulation
  */
-public interface IGraph extends Serializable {
+public interface IGraph  {
 
 
     /**

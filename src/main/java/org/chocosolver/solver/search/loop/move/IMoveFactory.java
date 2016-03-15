@@ -30,7 +30,8 @@
 package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.solver.IMyself;
+import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
@@ -46,7 +47,7 @@ import org.chocosolver.util.criteria.LongCriterion;
  * @author Charles Prud'Homme
  * @author Jean-Guillaume Fages
  */
-public interface IMoveFactory extends IMyself{
+public interface IMoveFactory extends ISelf<Solver> {
 
     /**
      * Depth-First Search algorithm with binary decisions

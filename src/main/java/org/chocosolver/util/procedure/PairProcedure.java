@@ -31,7 +31,7 @@ package org.chocosolver.util.procedure;
 
 import org.chocosolver.solver.exception.ContradictionException;
 
-import java.io.Serializable;
+
 
 /**
  * <br/>
@@ -39,7 +39,7 @@ import java.io.Serializable;
  * @author Jean-Guillaume Fages
  * @since may 2012
  */
-public interface PairProcedure extends Serializable {
+public interface PairProcedure  {
 
     /**
      * Action to execute in a <code>GraphDelta</code> object, within the <code>forEachRemVal</code> method.

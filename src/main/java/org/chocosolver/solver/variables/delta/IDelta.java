@@ -31,7 +31,7 @@ package org.chocosolver.solver.variables.delta;
 
 import org.chocosolver.memory.IEnvironment;
 
-import java.io.Serializable;
+
 
 /**
  * <br/>
@@ -39,7 +39,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 18 oct. 2010
  */
-public interface IDelta extends Serializable {
+public interface IDelta  {
 
     /**
      * Lazy clear the delta, on world change

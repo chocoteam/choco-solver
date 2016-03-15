@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.iterators;
 
-import java.io.Serializable;
+
 
 /**
  * <br/>
@@ -37,7 +37,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 05/10/11
  */
-public abstract class Disposable implements Serializable {
+public abstract class Disposable  {
 
     private boolean reusable = true;
 

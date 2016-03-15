@@ -29,7 +29,7 @@
  */
 package org.chocosolver.memory;
 
-import java.io.Serializable;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,5 +37,5 @@ import java.io.Serializable;
  * Date: 12 juil. 2007
  * Time: 10:25:05
  */
-public interface IStateObject extends Serializable {
+public interface IStateObject  {
 }

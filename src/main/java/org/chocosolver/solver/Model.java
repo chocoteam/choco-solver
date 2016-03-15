@@ -48,7 +48,6 @@ import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
 import org.chocosolver.solver.variables.*;
 
-import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,14 +68,11 @@ import java.util.function.Function;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Model implements Serializable, IModel {
+public class Model implements IModel {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /** For serialization purpose */
-    private static final long serialVersionUID = 1L;
 
     /** Settings to use with this solver */
     private Settings settings = new Settings() {};
@@ -751,60 +747,6 @@ public class Model implements Serializable, IModel {
             st.append(cstrs[c].toString()).append('\n');
         }
         return st.toString();
-    }
-
-    /**
-     * Kicks off the serialization mechanism and flatten the {@code model} into the given {@code file}.
-     *
-     * @param model to flatten
-     * @param file   scope file
-     * @throws java.io.IOException if an I/O exception occurs.
-     */
-    public static void writeInFile(final Model model, final File file) throws IOException {
-        FileOutputStream fos;
-        ObjectOutputStream out;
-        fos = new FileOutputStream(file);
-        out = new ObjectOutputStream(fos);
-        out.writeObject(model);
-        out.close();
-    }
-
-    /**
-     * Kicks off the serialization mechanism and flatten the {@code model} into a file
-     * in the default temporary-file directory.
-     *
-     * @param model to flatten
-     * @return output file
-     * @throws IOException if an I/O exception occurs.
-     */
-    public static File writeInFile(final Model model) throws IOException {
-        final File file = File.createTempFile("SOLVER_", ".ser");
-        FileOutputStream fos;
-        ObjectOutputStream out;
-        fos = new FileOutputStream(file);
-        out = new ObjectOutputStream(fos);
-        out.writeObject(model);
-        out.close();
-        return file;
-    }
-
-    /**
-     * Restore flatten {@link Model} from the given {@code file}.
-     *
-     * @param file input file
-     * @return a {@link Model}
-     * @throws IOException            if an I/O exception occurs.
-     * @throws ClassNotFoundException if wrong flattened object.
-     */
-    @SuppressWarnings("unused")
-    public static Model readFromFile(final String file) throws IOException, ClassNotFoundException {
-        FileInputStream fis;
-        ObjectInputStream in;
-        fis = new FileInputStream(file);
-        in = new ObjectInputStream(fis);
-        final Model model = (Model) in.readObject();
-        in.close();
-        return model;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

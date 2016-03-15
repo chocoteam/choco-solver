@@ -258,7 +258,7 @@ public class ModelTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testP1() {
-        ParallelResolution pares = new ParallelResolution();
+        ParallelPortfolio pares = new ParallelPortfolio();
         int n = 4; // number of solvers to use
         for (int i = 0; i < n; i++) {
             pares.addModel(knapsack(true));
@@ -275,7 +275,7 @@ public class ModelTest {
     @Test(groups="1s", timeOut=60000)
     public void testParBug() {
         for (int iter = 0; iter < 50; iter++) {
-            ParallelResolution pares = new ParallelResolution();
+            ParallelPortfolio pares = new ParallelPortfolio();
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
@@ -307,7 +307,7 @@ public class ModelTest {
     @Test(groups="1s", timeOut=60000)
     public void testP2() {
         for (int iter = 0; iter < 50; iter++) {
-            ParallelResolution pares = new ParallelResolution();
+            ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
                 pares.addModel(knapsack(false));
                 pares.addModel(knapsack(true));

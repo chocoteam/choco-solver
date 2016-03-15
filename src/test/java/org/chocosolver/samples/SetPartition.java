@@ -37,7 +37,6 @@
 package org.chocosolver.samples;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;

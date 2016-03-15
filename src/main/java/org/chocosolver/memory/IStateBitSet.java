@@ -29,7 +29,7 @@
  */
 package org.chocosolver.memory;
 
-import java.io.Serializable;
+
 import java.util.BitSet;
 
 /**
@@ -38,7 +38,7 @@ import java.util.BitSet;
  * Date: 12 juil. 2007
  * Time: 10:16:08
  */
-public interface IStateBitSet extends Serializable {
+public interface IStateBitSet  {
 
 
     /**

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures;
 
-import java.io.Serializable;
+
 import java.util.Iterator;
 
 /**
@@ -38,14 +38,15 @@ import java.util.Iterator;
  * @since 9 feb. 2011, update 2016
  * @author chameau, Jean-Guillaume Fages
  */
-public interface ISet extends Serializable, Iterable<Integer>{
+public interface ISet extends Iterable<Integer>{
 
 	/**
 	 * Use the following loop to iterate over this set.
 	 * for(int i:this){
 	 *     //
 	 * }
-	 * @return the default iterator of this set
+	 * Do not use this iterator to make nested loops over {@link ISet} (prefer {@link ISet#newIterator()})
+	 * @return the default iterator (singleton) of this set
 	 */
 	Iterator<Integer> iterator();
 
@@ -60,7 +61,6 @@ public interface ISet extends Serializable, Iterable<Integer>{
 
     /**
      * Add element to the set
-     * Does not guaranty there is no duplications
      *
      * @param element element to add
      * @return true iff element was not in the set and has been added
@@ -68,7 +68,7 @@ public interface ISet extends Serializable, Iterable<Integer>{
     boolean add(int element);
 
     /**
-     * Remove the first occurence of element from the set
+     * Remove the first occurrence of element from the set
      *
      * @param element element to add
      * @return true iff element was in the set and has been removed

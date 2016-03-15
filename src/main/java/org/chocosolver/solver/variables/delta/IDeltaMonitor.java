@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.variables.delta;
 
-import java.io.Serializable;
+
 
 /**
  * A delta monitor.
@@ -40,7 +40,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public interface IDeltaMonitor extends Serializable {
+public interface IDeltaMonitor  {
 
     void freeze();
 

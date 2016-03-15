@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.variables.ranges;
 
+
 import java.util.Arrays;
 
 /**

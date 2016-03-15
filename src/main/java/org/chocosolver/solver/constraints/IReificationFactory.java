@@ -31,82 +31,16 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
 /**
- * Interface to make constraints for logical operations and constraint reification
+ * Interface to reify constraints
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
  * @author Jean-Guillaume FAGES (www.cosling.com)
  */
-public interface ILogicalConstraintFactory {
-
-	//***********************************************************************************
-	// simple logical constraints
-	//***********************************************************************************
-
-	/**
-	 * Creates an and constraint that is satisfied if all boolean variables in <i>bools</i> are true
-	 * @param bools an array of boolean variable
-	 * @return a constraint and ensuring that variables in <i>bools</i> are all set to true
-	 */
-	default Constraint and(BoolVar... bools) {
-		Model s = bools[0].getModel();
-		IntVar sum = s.intVar(0, bools.length, true);
-		s.sum(bools, "=", sum).post();
-		return s.arithm(sum, "=", bools.length);
-	}
-
-	/**
-	 * Creates an and constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
-	 * @param bools an array of boolean variable
-	 * @return a constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
-	 */
-	default Constraint or(BoolVar... bools) {
-		Model s = bools[0].getModel();
-		IntVar sum = s.intVar(0, bools.length, true);
-		s.sum(bools, "=", sum).post();
-		return s.arithm(sum, ">=", 1);
-	}
-
-	/**
-	 * Creates an and constraint that is satisfied if all constraints in <i>cstrs</i> are satisfied
-	 * BEWARE: this should not be used to post several constraints at once but in a reification context
-	 * @param cstrs an array of constraints
-	 * @return a constraint and ensuring that all constraints in <i>cstrs</i> are satisfied
-	 */
-	default Constraint and(Constraint... cstrs){
-		BoolVar[] bools = new BoolVar[cstrs.length];
-		for(int i=0;i<cstrs.length;i++){
-			bools[i] = cstrs[i].reify();
-		}
-		return and(bools);
-	}
-
-	/**
-	 * Creates an and constraint that is satisfied if at least one constraint in <i>cstrs</i> are satisfied
-	 * @param cstrs an array of constraints
-	 * @return a constraint and ensuring that at least one constraint in <i>cstrs</i> are satisfied
-	 */
-	default Constraint or(Constraint... cstrs){
-		BoolVar[] bools = new BoolVar[cstrs.length];
-		for(int i=0;i<cstrs.length;i++){
-			bools[i] = cstrs[i].reify();
-		}
-		return or(bools);
-	}
-
-	/**
-	 * Gets the opposite of a given constraint
-	 * Works for any constraint, including globals, but the associated performances might be weak
-	 * @param cstr a constraint
-	 * @return the opposite constraint of <i>cstr</i>
-	 */
-	default Constraint not(Constraint cstr){
-		return cstr.getOpposite();
-	}
+public interface IReificationFactory {
 
 	//***********************************************************************************
 	// Non-reifiable reification constraints
@@ -228,7 +162,7 @@ public interface ILogicalConstraintFactory {
 		if(var.isInstantiatedTo(1)) {
 			cstr.post();
 		}else if(var.isInstantiatedTo(0)) {
-			not(cstr).post();
+			cstr.getOpposite().post();
 		}else if(entail == ESat.TRUE) {
 			s.arithm(var, "=", 1).post();
 		}else if(entail == ESat.FALSE) {

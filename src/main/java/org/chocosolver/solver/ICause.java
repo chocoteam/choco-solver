@@ -35,7 +35,7 @@ import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 
-import java.io.Serializable;
+
 
 /**
  * This interface describes services of smallest element which can act on variables.
@@ -51,7 +51,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 26 oct. 2010
  */
-public interface ICause extends Serializable {
+public interface ICause  {
 
 
     /**

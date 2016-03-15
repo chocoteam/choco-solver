@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import java.io.Serializable;
+
 
 /**
  * <br/>
@@ -37,5 +37,5 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 06/05/11
  */
-public interface ISearchMonitor extends Serializable {
+public interface ISearchMonitor  {
 }

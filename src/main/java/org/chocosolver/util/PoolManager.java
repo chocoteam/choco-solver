@@ -29,7 +29,7 @@
  */
 package org.chocosolver.util;
 
-import java.io.Serializable;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -39,7 +39,7 @@ import java.util.Deque;
  * @author Charles Prud'homme
  * @since 17/02/11
  */
-public class PoolManager<E> implements Serializable {
+public class PoolManager<E>  {
 
     Deque<E> elements;
 

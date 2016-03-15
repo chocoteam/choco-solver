@@ -58,11 +58,6 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
 public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     /**
-     * Serial number for serialization purpose
-     */
-    private static final long serialVersionUID = 1L;
-
-    /**
      * The offset, that is the minimal value of the domain (stored at index 0).
      * Thus the entry at index i corresponds to x=i+offset).
      */

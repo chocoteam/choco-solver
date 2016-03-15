@@ -29,9 +29,7 @@
  */
 package org.chocosolver.memory.trailing;
 
-import java.io.Serializable;
-
-public class AbstractStoredObject implements Serializable {
+public class AbstractStoredObject  {
 
     /**
      * The current {@link EnvironmentTrailing}.

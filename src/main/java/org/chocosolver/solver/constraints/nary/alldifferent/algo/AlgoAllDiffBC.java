@@ -34,7 +34,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.sort.ArraySort;
 
-import java.io.Serializable;
 import java.util.Comparator;
 
 public class AlgoAllDiffBC {
@@ -252,7 +251,7 @@ public class AlgoAllDiffBC {
         return filter;
     }
 
-    private static class Interval implements Serializable {
+    private static class Interval  {
         int minrank, maxrank;
         IntVar var;
         int idx;

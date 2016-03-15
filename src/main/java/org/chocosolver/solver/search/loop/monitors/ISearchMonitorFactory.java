@@ -29,7 +29,8 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import org.chocosolver.solver.IMyself;
+import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.criteria.Criterion;
@@ -40,7 +41,7 @@ import org.chocosolver.util.tools.TimeUtils;
  * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
  */
-public interface ISearchMonitorFactory extends IMyself {
+public interface ISearchMonitorFactory extends ISelf<Solver> {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

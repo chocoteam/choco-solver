@@ -32,6 +32,8 @@ package org.chocosolver.memory.structure;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 
+
+
 /**
  */
 public final class BasicIndexedBipartiteSet {

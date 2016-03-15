@@ -31,14 +31,14 @@ package org.chocosolver.util.procedure;
 
 import org.chocosolver.solver.exception.ContradictionException;
 
-import java.io.Serializable;
+
 
 /**
  * A class that permits to execute a embeded "function"
  *
  * @param <E>
  */
-public interface Procedure<E> extends Serializable {
+public interface Procedure<E>  {
     /**
      * Action to execute in a <code>Delta</code> object, within the <code>forEachRemVal</code> method.
      *

@@ -27,35 +27,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.queues;
+package org.chocosolver.util.objects.setDataStructures.backtrackable.trail;
+
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 10/03/11
+ * @author Alexandre LEBRUN
  */
-public interface AQueue<E> {
+public class TrailingBitSetTest extends TrailingSetTest {
 
-    boolean isEmpty();
-
-    int size();
-
-    E get(int index);
-
-    boolean addFirst(E e);
-
-    boolean addLast(E e);
-
-    E pollFirst();
-
-    E pollLast();
-
-    E remove(int index);
-
-    boolean remove(E e);
-
-    int indexOf(E e);
-
-    void clear();
+    @Override
+    public ISet create() {
+        return SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+    }
 }

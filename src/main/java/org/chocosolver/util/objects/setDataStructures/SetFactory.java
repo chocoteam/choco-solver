@@ -37,15 +37,12 @@
 package org.chocosolver.util.objects.setDataStructures;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.copy.EnvironmentCopying;
-import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.array.Set_FixedArray;
-import org.chocosolver.util.objects.setDataStructures.bitset.Set_Std_BitSet;
-import org.chocosolver.util.objects.setDataStructures.interval.Set_Interval;
-import org.chocosolver.util.objects.setDataStructures.interval.Set_Std_Interval;
-import org.chocosolver.util.objects.setDataStructures.linkedlist.*;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
+import org.chocosolver.util.objects.setDataStructures.bitset.Set_Std_BitSet;
+import org.chocosolver.util.objects.setDataStructures.constant.Set_CstInterval;
+import org.chocosolver.util.objects.setDataStructures.constant.Set_FixedArray;
+import org.chocosolver.util.objects.setDataStructures.linkedlist.Set_LinkedList;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap;
 
@@ -73,22 +70,15 @@ public class SetFactory {
 	 */
 	public static ISet makeStoredSet(SetType type, int offSet, Model model) {
 		IEnvironment environment = model.getEnvironment();
-		if (HARD_CODED)
+		if (HARD_CODED) {
 			switch (type) {
 				case BIPARTITESET:
 					return new Set_Std_Swap(environment, offSet);
-				case INTERVAL:
-					return new Set_Std_Interval(environment);
 				case BITSET:
 					return new Set_Std_BitSet(environment, offSet);
 			}
-		if (environment instanceof EnvironmentTrailing) {
-			return new Set_Trail((EnvironmentTrailing) environment, makeSet(type,offSet));
-		} else if (environment instanceof EnvironmentCopying) {
-			return new Set_Copy((EnvironmentCopying) environment, makeSet(type,offSet));
-		} else {
-			throw new UnsupportedOperationException("not implemented yet");
 		}
+		return new StdSet(environment,makeSet(type,offSet));
 	}
 
 
@@ -108,33 +98,12 @@ public class SetFactory {
 				return makeBipartiteSet(offSet);
 			case LINKED_LIST:
 				return makeLinkedList();
-			case INTERVAL:
-				return makeIntervalSet();
 			case BITSET:
 				return makeBitSet(offSet);
+			case FIXED_ARRAY: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_ARRAY+" set");
+			case FIXED_INTERVAL: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_INTERVAL+" set");
 		}
-		throw new UnsupportedOperationException("unknown SetType");
-	}
-
-	// --- Interval
-
-	/**
-	 * Creates a set of integers represented with an interval [lb, ub]
-	 * Does not support holes
-	 * Initially empty
-	 * @return a new interval
-	 */
-	public static ISet makeIntervalSet() {
-		return new Set_Interval();
-	}
-
-	/**
-	 * Creates a set of integers represented with an interval [lb, ub]
-	 * Does not support holes
-	 * @return a new interval
-	 */
-	public static ISet makeIntervalSet(int lb, int ub) {
-		return new Set_Interval(lb, ub);
+		throw new UnsupportedOperationException("SetType");
 	}
 
 	// --- List
@@ -163,7 +132,7 @@ public class SetFactory {
 	// --- Bipartite Set
 
 	/**
-	 * Creates a set of integers, based on an offseted bitpartite set,
+	 * Creates a set of integers, based on an offseted bipartite set,
 	 * Supports integers greater or equal than <code>offSet</code>
 	 * Optimal complexity
 	 * @param offSet	smallest value allowed in the set (possibly < 0)
@@ -182,5 +151,13 @@ public class SetFactory {
 	 */
 	public static ISet makeConstantSet(int[] cst) {
 		return new Set_FixedArray(cst);
+	}
+
+	/**
+	 * Creates a constant set of integers represented with an interval [lb, ub]
+	 * @return a new interval (constant)
+	 */
+	public static ISet makeConstantSet(int lb, int ub) {
+		return new Set_CstInterval(lb, ub);
 	}
 }
