@@ -76,8 +76,10 @@ public class StoredLongCopy implements IStoredLongCopy {
     @Override
     public void worldPop(int worldIndex) {
         long[] tmplong = values[worldIndex];
-        for (int i = tmplong.length; --i >= 0; )
-            objects[i]._set(tmplong[i], worldIndex);
+        if(tmplong != null) {
+            for (int i = tmplong.length; --i >= 0; )
+                objects[i]._set(tmplong[i], worldIndex);
+        }
     }
 
     @Override

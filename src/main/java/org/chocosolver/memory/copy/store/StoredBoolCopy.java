@@ -76,8 +76,10 @@ public class StoredBoolCopy implements IStoredBoolCopy {
     @Override
     public void worldPop(int worldIndex) {
         boolean[] tmpboolean = values[worldIndex];
-        for (int i = tmpboolean.length; --i >= 0; )
-            objects[i]._set(tmpboolean[i], worldIndex);
+        if(tmpboolean!=null) {
+            for (int i = tmpboolean.length; --i >= 0; )
+                objects[i]._set(tmpboolean[i], worldIndex);
+        }
     }
 
     @Override

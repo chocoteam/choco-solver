@@ -76,8 +76,10 @@ public class StoredDoubleCopy implements IStoredDoubleCopy {
     @Override
     public void worldPop(int worldIndex) {
         double[] tmpdouble = values[worldIndex];
-        for (int i = tmpdouble.length; --i >= 0; )
-            objects[i]._set(tmpdouble[i], worldIndex);
+        if(tmpdouble!=null) {
+            for (int i = tmpdouble.length; --i >= 0; )
+                objects[i]._set(tmpdouble[i], worldIndex);
+        }
     }
 
     @Override

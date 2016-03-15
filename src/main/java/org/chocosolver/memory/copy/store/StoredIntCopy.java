@@ -76,8 +76,10 @@ public class StoredIntCopy implements IStoredIntCopy {
     @Override
     public void worldPop(int worldIndex) {
         int[] tmpint = values[worldIndex];
-        for (int i = tmpint.length; --i >= 0; )
-            objects[i]._set(tmpint[i], worldIndex);
+        if(tmpint!=null) {
+            for (int i = tmpint.length; --i >= 0; )
+                objects[i]._set(tmpint[i], worldIndex);
+        }
     }
 
     @Override

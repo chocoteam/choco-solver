@@ -60,9 +60,8 @@ public class EnvironmentCopying extends AbstractEnvironment {
     @Override
     public void worldPush() {
         timestamp++;
-        final int wi = currentWorld + 1;
         for (int i = 0; i < copySize; i++) {
-            copies[i].worldPush(wi);
+            copies[i].worldPush(currentWorld+1);
         }
         currentWorld++;
     }
@@ -81,14 +80,15 @@ public class EnvironmentCopying extends AbstractEnvironment {
         assert currentWorld>=0;
     }
 
-    @Override
-    public void worldPopUntil(int w) {
-        timestamp++;
-        for (int i = copySize - 1; i >= 0; i--) {
-            copies[i].worldPop(w);
-        }
-        currentWorld=w;
-    }
+    // TODO: deal with addition of objects while backtracking already started
+//    @Override
+//    public void worldPopUntil(int w) {
+//        timestamp++;
+//        for (int i = copySize - 1; i >= 0; i--) {
+//            copies[i].worldPop(w);
+//        }
+//        currentWorld=w;
+//    }
 
     @Override
     public void save(Operation operation) {

@@ -57,6 +57,7 @@ public class Stored#E# extends IState#E# {
      * Modifies the value and stores if needed the former value on the
      * trailing stack.
      */
+    @Override
     public final void set(final #e# y) {
         if (y != currentValue) {
             final int wi = environment.getWorldIndex();

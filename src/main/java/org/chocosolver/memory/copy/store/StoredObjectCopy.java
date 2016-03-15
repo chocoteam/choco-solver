@@ -48,6 +48,7 @@ public class StoredObjectCopy implements IStorage {
 
     public StoredObjectCopy(int worldIndex) {
         objects = new RcObject[64];
+        values = new Object[64][];
         lastSavedWorldIndex = worldIndex;
     }
 
@@ -86,8 +87,10 @@ public class StoredObjectCopy implements IStorage {
     @Override
     public void worldPop(int worldIndex) {
         Object[] tmpobj = values[worldIndex];
-        for (int i = tmpobj.length; --i >= 0; )
-            objects[i]._set(tmpobj[i], worldIndex);
+        if(tmpobj!=null) {
+            for (int i = tmpobj.length; --i >= 0; )
+                objects[i]._set(tmpobj[i], worldIndex);
+        }
     }
 
     @Override

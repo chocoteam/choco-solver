@@ -49,7 +49,7 @@ public class Stored#E#Copy implements IStored#E#Copy {
         values = new #e#[64][];
     }
 
-
+    @Override
     public void add(Rc#E# rc) {
         if (position == objects.length) {
             int newSize = objects.length * 3 / 2 + 1;
@@ -60,6 +60,7 @@ public class Stored#E#Copy implements IStored#E#Copy {
         objects[position++] = rc;
     }
 
+    @Override
     public void worldPush(int worldIndex) {
         if (values.length <= worldIndex) {
             #e#[][] tmp = values;
@@ -73,10 +74,13 @@ public class Stored#E#Copy implements IStored#E#Copy {
         values[worldIndex] = tmp#e#;
     }
 
+    @Override
     public void worldPop(int worldIndex) {
         #e#[] tmp#e# = values[worldIndex];
-        for (int i = tmp#e#.length; --i >= 0; )
+        if(tmp#e# != null){
+        for (int i = position; --i >= 0; )
             objects[i]._set(tmp#e#[i], worldIndex);
+        }
     }
 
     @Override
