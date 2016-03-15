@@ -87,7 +87,7 @@ public class Unsafe#E#Trail implements IStored#E#Trail {
      * @param nWorlds  maximal number of worlds that will be stored
      */
 
-    public UnsafeIntTrail2(int nUpdates, int nWorlds) {
+    public Unsafe#E#Trail(int nUpdates, int nWorlds) {
         unsafe = getTheUnsafe();
         currentLevel = 0;
         variableStack = new Stored#E#[nUpdates];
@@ -111,7 +111,7 @@ public class Unsafe#E#Trail implements IStored#E#Trail {
      *
      * @param worldIndex current world index
      */
-
+    @Override
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
     }
@@ -122,7 +122,7 @@ public class Unsafe#E#Trail implements IStored#E#Trail {
      *
      * @param worldIndex current world index
      */
-
+    @Override
     public void worldPop(int worldIndex) {
         Stored#E# v;
         #e# value;
@@ -150,7 +150,7 @@ public class Unsafe#E#Trail implements IStored#E#Trail {
     /**
      * Comits a world: merging it with the previous one.
      */
-
+    @Override
     public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
     }
@@ -160,6 +160,7 @@ public class Unsafe#E#Trail implements IStored#E#Trail {
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
+    @Override
     public void savePreviousState(Stored#E# v, #e# oldValue, int oldStamp) {
         unsafe.put#E#(valueStack + currentLevel * SIZEOF_DATA, oldValue);
         variableStack[currentLevel] = v;
@@ -217,6 +218,7 @@ public class Unsafe#E#Trail implements IStored#E#Trail {
         stampStack = ad2;
     }
 
+    @Override
     public void resizeWorldCapacity(int newWorldCapacity) {
         final int[] tmp = new int[newWorldCapacity];
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
