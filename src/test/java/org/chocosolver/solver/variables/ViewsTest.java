@@ -630,7 +630,7 @@ public class ViewsTest {
 
     @Test(groups="10s", timeOut=60000)
     public void testScale(){
-        int n = 15;
+        int n = 9;
         Model viewModel = makeModel(true);
         scale(viewModel,n);
         Model noViewModel = makeModel(false);
@@ -640,7 +640,7 @@ public class ViewsTest {
 
     @Test(groups="10s", timeOut=60000)
     public void testOffset(){
-        int n = 15;
+        int n = 9;
         Model viewModel = makeModel(true);
         offset(viewModel,n);
         Model noViewModel = makeModel(false);
@@ -650,7 +650,7 @@ public class ViewsTest {
 
     @Test(groups="10s", timeOut=60000)
     public void testIntEq(){
-        int n = 15;
+        int n = 9;
         Model viewModel = makeModel(true);
         intEq(viewModel,n);
         Model noViewModel = makeModel(false);
