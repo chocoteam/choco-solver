@@ -33,7 +33,6 @@ package org.chocosolver.memory.trailing;
 import org.chocosolver.memory.*;
 import org.chocosolver.memory.structure.Operation;
 import org.chocosolver.memory.trailing.trail.*;
-import org.chocosolver.memory.trailing.trail.chunck.*;
 import org.chocosolver.memory.trailing.trail.flatten.*;
 import org.chocosolver.memory.trailing.trail.unsafe.UnsafeBoolTrail;
 import org.chocosolver.memory.trailing.trail.unsafe.UnsafeDoubleTrail;
@@ -225,9 +224,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                 case FLAT:
                     intTrail = new StoredIntTrail(MaxHist, maxWorld);
                     break;
-                case CHUNK:
-                    intTrail = new StoredIntChunckTrail(maxWorld);
-                    break;
                 case UNSAFE:
                     intTrail = new UnsafeIntTrail(MaxHist, maxWorld);
                     break;
@@ -243,9 +239,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
             switch (type) {
                 case FLAT:
                     longTrail = new StoredLongTrail(MaxHist, maxWorld);
-                    break;
-                case CHUNK:
-                    longTrail = new StoredLongChunckTrail(maxWorld);
                     break;
                 case UNSAFE:
                     longTrail = new UnsafeLongTrail(MaxHist, maxWorld);
@@ -264,9 +257,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                 case FLAT:
                     boolTrail = new StoredBoolTrail(MaxHist, maxWorld);
                     break;
-                case CHUNK:
-                    boolTrail = new StoredBoolChunckTrail(maxWorld);
-                    break;
                 case UNSAFE:
                     boolTrail = new UnsafeBoolTrail(MaxHist, maxWorld);
                     break;
@@ -284,9 +274,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
                 case FLAT:
                     doubleTrail = new StoredDoubleTrail(MaxHist, maxWorld);
                     break;
-                case CHUNK:
-                    doubleTrail = new StoredDoubleChunckTrail(maxWorld);
-                    break;
                 case UNSAFE:
                     doubleTrail = new UnsafeDoubleTrail(MaxHist, maxWorld);
                     break;
@@ -300,12 +287,9 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
     public IOperationTrail getOperationTrail() {
         if (operationTrail == null) {
             switch (type) {
+                case UNSAFE:
                 case FLAT:
                     operationTrail = new OperationTrail(MaxHist, maxWorld);
-                    break;
-                case CHUNK:
-                case UNSAFE:
-                    operationTrail = new OperationChunckTrail(maxWorld);
                     break;
             }
             increaseTrail();

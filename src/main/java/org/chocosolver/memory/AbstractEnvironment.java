@@ -40,7 +40,7 @@ import org.chocosolver.memory.structure.S64BitSet;
 public abstract class AbstractEnvironment implements IEnvironment {
 
     protected enum Type {
-        FLAT, CHUNK, UNSAFE
+        FLAT, UNSAFE
     }
 
     protected final Type type;
