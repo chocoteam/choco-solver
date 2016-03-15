@@ -72,9 +72,9 @@ public class StoredDoubleVectorCopy implements IStorage {
             values = new double[worldIndex * 3 / 2 + 1][][];
             System.arraycopy(tmp, 0, values, 0, worldIndex - 1);
         }
-        double[][] tmpint = new double[objects.length][];
-        for (int i = objects.length; --i >= 0; ) {
-            if (worldIndex != 0 && lastSavedWorldIndex >= (objects[i]).getTimeStamp()) {
+        double[][] tmpint = new double[position][];
+        for (int i = position; --i >= 0; ) {
+            if (worldIndex != 0 && lastSavedWorldIndex > (objects[i]).getTimeStamp()) {
                 tmpint[i] = values[lastSavedWorldIndex][i];
             } else {
                 tmpint[i] = objects[i].deepCopy();
