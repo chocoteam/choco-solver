@@ -31,8 +31,10 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -312,5 +314,27 @@ public class EqView extends IntView {
     @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
         return var.getRangeIterator(bottomUp);
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean newrules = false;
+        assert var == this.var;
+        IntEventType ievt = (IntEventType) evt;
+        switch (ievt) {
+            case REMOVE:
+                newrules |= ruleStore.addRemovalRule(this, value);
+                break;
+            case DECUPP:
+                newrules |= ruleStore.addUpperBoundRule(this);
+                break;
+            case INCLOW:
+                newrules |= ruleStore.addLowerBoundRule(this);
+                break;
+            case INSTANTIATE:
+                newrules |= ruleStore.addFullDomainRule(this);
+                break;
+        }
+        return newrules;
     }
 }
