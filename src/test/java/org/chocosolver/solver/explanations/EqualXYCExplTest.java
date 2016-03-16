@@ -30,7 +30,6 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
@@ -57,19 +56,8 @@ public class EqualXYCExplTest {
         for (int i = 0; i < values.length; i++) {
             values[i] = r.nextInt(nbvars);
         }
-        Settings nset = new Settings() {
-            @Override
-            public boolean plugExplanationIn() {
-                return true;
-            }
-        };
-
-
         Model ref = new Model();
         Model sol = new Model();
-        ref.set(nset);
-        sol.set(nset);
-
         sol.getSolver().setCBJLearning(false, false);
 
         IntVar[] varsr = new IntVar[nbvars];

@@ -110,14 +110,14 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * Removes {@code value}from the domain of {@code this}. The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if removing <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if removing <code>value</code> from the domain can be done safely,
+     * <li>If {@code value} is out of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if removing {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if removing {@code value} from the domain can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value value to remove from the domain (int)
@@ -132,9 +132,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            if (_plugexpl) {
-                model.getSolver().getEventObserver().removeValue(this, value, cause);
-            }
+            model.getSolver().getEventObserver().removeValue(this, value, cause);
             this.contradiction(cause, MSG_REMOVE);
         } else if (inf == value || value == sup) {
             IntEventType e;
@@ -153,19 +151,14 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 UB.set(value - 1);
                 e = IntEventType.DECUPP;
             }
+            model.getSolver().getEventObserver().removeValue(this, value, cause);
             if (SIZE.get() > 0) {
                 if (this.isInstantiated()) {
                     e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-            } else if (SIZE.get() == 0) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().removeValue(this, value, cause);
-                }
+            } else {
                 this.contradiction(cause, MSG_EMPTY);
-            }
-            if (_plugexpl) {
-                model.getSolver().getEventObserver().removeValue(this, value, cause);
             }
             return true;
         }
@@ -210,9 +203,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return updateBounds(nlb, nub, cause);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
@@ -224,14 +214,14 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     /**
-     * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
+     * Instantiates the domain of {@code this} to {@code value}. The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If the domain of <code>this</code> is already instantiated to <code>value</code>,
-     * nothing is done and the return value is <code>false</code>,</li>
-     * <li>If the domain of <code>this</code> is already instantiated to another value,
-     * then a <code>ContradictionException</code> is thrown,</li>
-     * <li>Otherwise, the domain of <code>this</code> is restricted to <code>value</code> and the observers are notified
-     * and the return value is <code>true</code>.</li>
+     * <li>If the domain of {@code this} is already instantiated to {@code value},
+     * nothing is done and the return value is {@code false},</li>
+     * <li>If the domain of {@code this} is already instantiated to another value,
+     * then a {@code ContradictionException} is thrown,</li>
+     * <li>Otherwise, the domain of {@code this} is restricted to {@code value} and the observers are notified
+     * and the return value is {@code true}.</li>
      * </ul>
      *
      * @param value instantiation value (int)
@@ -242,57 +232,37 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (this.isInstantiated()) {
-            int cvalue = this.getValue();
-            if (value != cvalue) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
-                }
-                this.contradiction(cause, MSG_INST);
-            }
-            return false;
-        } else if (contains(value)) {
+        if (!this.contains(value)) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+            this.contradiction(cause, MSG_INST);
+        } else if (!isInstantiated()) {
+            int lb = this.getLB();
+            int ub = this.getUB();
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, lb, ub);
             IntEventType e = IntEventType.INSTANTIATE;
-
-            int lb = 0;
-            int ub = 0;
             if (reactOnRemoval) {
-                lb = this.LB.get();
-                ub = this.UB.get();
                 if (lb <= value - 1) delta.add(lb, value - 1, cause);
                 if (value + 1 <= ub) delta.add(value + 1, ub, cause);
-            } else if (_plugexpl) {
-                lb = LB.get();
-                ub = UB.get();
             }
             this.LB.set(value);
             this.UB.set(value);
             this.SIZE.set(1);
-
-            if (_plugexpl) {
-                model.getSolver().getEventObserver().instantiateTo(this, value, cause, lb, ub);
-            }
             this.notifyPropagators(e, cause);
             return true;
-        } else {
-            if (_plugexpl) {
-                model.getSolver().getEventObserver().instantiateTo(this, value, cause, LB.get(), UB.get());
-            }
-            this.contradiction(cause, MSG_UNKNOWN);
-            return false;
         }
+        return false;
     }
 
     /**
-     * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
-     * The instruction comes from <code>propagator</code>.
+     * Updates the lower bound of the domain of {@code this} to {@code value}.
+     * The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if updating the lower bound to <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if updating the lower bound to <code>value</code> can be done safely,
+     * <li>If {@code value} is smaller than the lower bound of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if updating the lower bound to {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if updating the lower bound to {@code value} can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value new lower bound (included)
@@ -305,15 +275,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
+            model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
             int oub = this.getUB();
             if (oub < value) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateLowerBound(this, oub + 1, old, cause);
-                }
                 this.contradiction(cause, MSG_LOW);
             } else {
                 IntEventType e = IntEventType.INCLOW;
-
                 if (reactOnRemoval) {
                     if (old <= value - 1) delta.add(old, value - 1, cause);
                 }
@@ -323,27 +290,22 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
-                }
                 return true;
-
             }
         }
         return false;
     }
 
     /**
-     * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
-     * The instruction comes from <code>propagator</code>.
+     * Updates the upper bound of the domain of {@code this} to {@code value}.
+     * The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if updating the upper bound to <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if updating the upper bound to <code>value</code> can be done safely,
+     * <li>If {@code value} is greater than the upper bound of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if updating the upper bound to {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if updating the upper bound to {@code value} can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value new upper bound (included)
@@ -356,15 +318,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
+            model.getSolver().getEventObserver().updateUpperBound(this, value, old, cause);
             int olb = this.getLB();
             if (olb > value) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateUpperBound(this, olb - 1, old, cause);
-                }
                 this.contradiction(cause, MSG_UPP);
             } else {
                 IntEventType e = IntEventType.DECUPP;
-
                 if (reactOnRemoval) {
                     if (value + 1 <= old) delta.add(value + 1, old, cause);
                 }
@@ -375,9 +334,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateUpperBound(this, value, old, cause);
-                }
                 return true;
             }
         }
@@ -391,6 +347,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int oub = this.getUB();
         boolean update = false;
         if (olb < lb || ub < oub) {
+            if (olb < lb){
+                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
+            }
+            if (oub > ub){
+                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
+            }
             if (oub >= lb && olb <= ub) {
                 int d = 0;
                 IntEventType e = null;
@@ -415,25 +377,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-
-                if (_plugexpl) {
-                    if (olb < lb) model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
-                    if (oub > ub) model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
-                }
                 update = true;
             } else { // fails
-                if (oub < lb) {
-                    if (_plugexpl) {
-                        model.getSolver().getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
-                    }
-                    this.contradiction(cause, MSG_LOW);
-                } else {
-                    //if (olb > ub) {
-                    if (_plugexpl) {
-                        model.getSolver().getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
-                    }
-                    this.contradiction(cause, MSG_UPP);
-                }
+                this.contradiction(cause, oub < lb?MSG_LOW:MSG_UPP);
             }
         }
         return update;

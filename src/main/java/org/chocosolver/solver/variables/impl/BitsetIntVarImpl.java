@@ -174,14 +174,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * Removes {@code value}from the domain of {@code this}. The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if removing <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if removing <code>value</code> from the domain can be done safely,
+     * <li>If {@code value} is out of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if removing {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if removing {@code value} from the domain can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value value to remove from the domain (int)
@@ -191,16 +191,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      */
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-//        records.forEachRemVal(beforeModification.set(this, EventType.REMOVE, cause));
         assert cause != null;
         int aValue = value - OFFSET;
         boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
         if (change) {
+            model.getSolver().getEventObserver().removeValue(this, value, cause);
             if (SIZE.get() == 1) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().removeValue(this, value, cause);
-                }
                 this.contradiction(cause, MSG_REMOVE);
             }
             IntEventType e = IntEventType.REMOVE;
@@ -222,16 +218,10 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 e = IntEventType.INSTANTIATE;
             }
             this.notifyPropagators(e, cause);
-            if (_plugexpl) {
-                model.getSolver().getEventObserver().removeValue(this, value, cause);
-            }
         }
         return change;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         assert cause != null;
@@ -269,10 +259,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         while (value <= to) {
             int aValue = value - OFFSET;
             if (aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue)) {
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
                 if (count == 1) {
-                    if (_plugexpl) {
-                        model.getSolver().getEventObserver().removeValue(this, value, cause);
-                    }
                     this.contradiction(cause, MSG_REMOVE);
                 }
                 count--;
@@ -281,21 +269,22 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (reactOnRemoval) {
                     delta.add(value, cause);
                 }
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().removeValue(this, value, cause);
-                }
             }
             value = values.nextValue(value);
         }
         if (hasRemoved) {
-            SIZE.set(count);
-            IntEventType e = IntEventType.REMOVE;
-            if (count == 1) {
-                e = IntEventType.INSTANTIATE;
-            }
-            this.notifyPropagators(e, cause);
+            notifyRemovals(count, cause);
         }
         return hasRemoved || hasChanged;
+    }
+
+    private void notifyRemovals(int count, ICause cause) throws ContradictionException {
+        SIZE.set(count);
+        IntEventType e = IntEventType.REMOVE;
+        if (count == 1) {
+            e = IntEventType.INSTANTIATE;
+        }
+        this.notifyPropagators(e, cause);
     }
 
     @Override
@@ -334,10 +323,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         for (int aValue = VALUES.nextSetBit(from); aValue > -1 && aValue <= to; aValue = VALUES.nextSetBit(aValue + 1)) {
             value = aValue + OFFSET;
             if (!values.contains(value)) {
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
                 if (count == 1) {
-                    if (_plugexpl) {
-                        model.getSolver().getEventObserver().removeValue(this, value, cause);
-                    }
                     this.contradiction(cause, MSG_REMOVE);
                 }
                 count--;
@@ -346,25 +333,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (reactOnRemoval) {
                     delta.add(value, cause);
                 }
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().removeValue(this, value, cause);
-                }
             }
         }
         if (hasRemoved) {
-            SIZE.set(count);
-            IntEventType e = IntEventType.REMOVE;
-            if (count == 1) {
-                e = IntEventType.INSTANTIATE;
-            }
-            this.notifyPropagators(e, cause);
+            notifyRemovals(count, cause);
         }
         return hasRemoved || hasChanged;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
@@ -386,9 +362,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (reactOnRemoval) {
                     delta.add(aValue, cause);
                 }
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().removeValue(this, aValue, cause);
-                }
+                model.getSolver().getEventObserver().removeValue(this, aValue, cause);
             }
             if (anyChange) {
                 SIZE.set(count);
@@ -399,14 +373,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     /**
-     * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
+     * Instantiates the domain of {@code this} to {@code value}. The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If the domain of <code>this</code> is already instantiated to <code>value</code>,
-     * nothing is done and the return value is <code>false</code>,</li>
-     * <li>If the domain of <code>this</code> is already instantiated to another value,
-     * then a <code>ContradictionException</code> is thrown,</li>
-     * <li>Otherwise, the domain of <code>this</code> is restricted to <code>value</code> and the observers are notified
-     * and the return value is <code>true</code>.</li>
+     * <li>If the domain of {@code this} is already instantiated to {@code value},
+     * nothing is done and the return value is {@code false},</li>
+     * <li>If the domain of {@code this} is already instantiated to another value,
+     * then a {@code ContradictionException} is thrown,</li>
+     * <li>Otherwise, the domain of {@code this} is restricted to {@code value} and the observers are notified
+     * and the return value is {@code true}.</li>
      * </ul>
      *
      * @param value instantiation value (int)
@@ -418,16 +392,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
-        if (this.isInstantiated()) {
-            int cvalue = this.getValue();
-            if (value != cvalue) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
-                }
-                this.contradiction(cause, MSG_INST);
-            }
-            return false;
-        } else if (contains(value)) {
+        if (!contains(value)) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+            this.contradiction(cause, MSG_INST);
+        } else if (!isInstantiated()) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+
             int aValue = value - OFFSET;
             if (reactOnRemoval) {
                 int i = VALUES.nextSetBit(this.LB.get());
@@ -439,46 +409,28 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                     delta.add(i + OFFSET, cause);
                 }
             }
-            int oldLB = 0;
-            int oldUB = 0;
-            if (_plugexpl) {
-                oldLB = getLB(); // call getter to avoid adding OFFSET..
-                oldUB = getUB();
-            }
-
             this.VALUES.clear();
             this.VALUES.set(aValue);
             this.LB.set(aValue);
             this.UB.set(aValue);
             this.SIZE.set(1);
-
-            if (VALUES.isEmpty()) {
-                this.contradiction(cause, MSG_EMPTY);
-            }
-            if (_plugexpl) {
-                model.getSolver().getEventObserver().instantiateTo(this, value, cause, oldLB, oldUB);
-            }
+            assert !VALUES.isEmpty();
             this.notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
-        } else {
-            if (_plugexpl) {
-                model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
-            }
-            this.contradiction(cause, MSG_UNKNOWN);
-            return false;
         }
+        return false;
     }
 
     /**
-     * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
-     * The instruction comes from <code>propagator</code>.
+     * Updates the lower bound of the domain of {@code this} to {@code value}.
+     * The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if updating the lower bound to <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if updating the lower bound to <code>value</code> can be done safely,
+     * <li>If {@code value} is smaller than the lower bound of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if updating the lower bound to {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if updating the lower bound to {@code value} can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value new lower bound (included)
@@ -492,14 +444,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
+            model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
             if (oub < value) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateLowerBound(this, oub + 1, old, cause);
-                }
                 this.contradiction(cause, MSG_LOW);
             } else {
                 IntEventType e = IntEventType.INCLOW;
-
                 int aValue = value - OFFSET;
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
@@ -514,27 +463,24 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (isInstantiated()) {
                     e = IntEventType.INSTANTIATE;
                 }
-                this.notifyPropagators(e, cause);
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
-                }
-                return true;
 
+                this.notifyPropagators(e, cause);
+                return true;
             }
         }
         return false;
     }
 
     /**
-     * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
-     * The instruction comes from <code>propagator</code>.
+     * Updates the upper bound of the domain of {@code this} to {@code value}.
+     * The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if updating the upper bound to <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if updating the upper bound to <code>value</code> can be done safely,
+     * <li>If {@code value} is greater than the upper bound of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if updating the upper bound to {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if updating the upper bound to {@code value} can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value new upper bound (included)
@@ -548,10 +494,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int oub = this.getUB();
         if (oub > value) {
             int olb = this.getLB();
+            model.getSolver().getEventObserver().updateUpperBound(this, value, oub, cause);
             if (olb > value) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
-                }
                 this.contradiction(cause, MSG_UPP);
             } else {
                 IntEventType e = IntEventType.DECUPP;
@@ -570,9 +514,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                     e = IntEventType.INSTANTIATE;
                 }
                 this.notifyPropagators(e, cause);
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateUpperBound(this, value, oub, cause);
-                }
                 return true;
             }
         }
@@ -586,11 +527,10 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int oub = this.getUB();
         boolean update = false;
         if (olb < lb || oub > ub) {
+            if (olb < lb) model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
+            if (oub > ub) model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
             IntEventType e = null;
             if (oub < lb) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateLowerBound(this, oub + 1, olb, cause);
-                }
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < lb) {
                 e = IntEventType.INCLOW;
@@ -607,9 +547,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 olb += OFFSET; // required because we will treat upper bound just after
             }
             if (olb > ub) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().updateUpperBound(this, olb - 1, oub, cause);
-                }
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > ub) {
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
@@ -629,10 +566,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 e = IntEventType.INSTANTIATE;
             }
             this.notifyPropagators(e, cause);
-            if (_plugexpl) {
-                if (olb < lb) model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
-                if (oub > ub) model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
-            }
             update = true;
         }
         return update;

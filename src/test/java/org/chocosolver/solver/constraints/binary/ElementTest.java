@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.BoolVar;
@@ -113,12 +112,6 @@ public class ElementTest {
     @Test(groups="1s", timeOut=60000)
     public void test5() {
         Model s = new Model();
-        s.set(new Settings() {
-            @Override
-            public boolean plugExplanationIn() {
-                return true;
-            }
-        });
         s.getSolver().setCBJLearning(false, false);
 
         Random r = new Random(125);

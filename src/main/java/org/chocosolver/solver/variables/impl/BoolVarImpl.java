@@ -120,14 +120,14 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * Removes {@code value}from the domain of {@code this}. The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if removing <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if removing <code>value</code> from the domain can be done safely,
+     * <li>If {@code value} is out of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if removing {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if removing {@code value} from the domain can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value value to remove from the domain (int)
@@ -169,9 +169,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         return hasChanged;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
@@ -181,9 +178,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             } else if (to == 0) {
                 hasChanged = instantiateTo(1, cause);
             } else {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
-                }
+                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
                 this.contradiction(cause, MSG_UNKNOWN);
 
             }
@@ -192,14 +187,14 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     /**
-     * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
+     * Instantiates the domain of {@code this} to {@code value}. The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If the domain of <code>this</code> is already instantiated to <code>value</code>,
-     * nothing is done and the return value is <code>false</code>,</li>
-     * <li>If the domain of <code>this</code> is already instantiated to another value,
-     * then a <code>ContradictionException</code> is thrown,</li>
-     * <li>Otherwise, the domain of <code>this</code> is restricted to <code>value</code> and the observers are notified
-     * and the return value is <code>true</code>.</li>
+     * <li>If the domain of {@code this} is already instantiated to {@code value},
+     * nothing is done and the return value is {@code false},</li>
+     * <li>If the domain of {@code this} is already instantiated to another value,
+     * then a {@code ContradictionException} is thrown,</li>
+     * <li>Otherwise, the domain of {@code this} is restricted to {@code value} and the observers are notified
+     * and the return value is {@code true}.</li>
      * </ul>
      *
      * @param value instantiation value (int)
@@ -210,51 +205,35 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-//        records.forEachRemVal(beforeModification.set(this, EventType.INSTANTIATE, cause));
         assert cause != null;
-        if (this.isInstantiated()) {
-            int cvalue = this.getValue();
-            if (value != cvalue) {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, cvalue, cvalue);
-                }
-                this.contradiction(cause, MSG_INST);
+        if (!this.contains(value)) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+            this.contradiction(cause, MSG_INST);
+        } else if (!isInstantiated()){
+            IntEventType e = IntEventType.INSTANTIATE;
+            assert notInstanciated.contains(offset);
+            notInstanciated.swap(offset);
+            if (reactOnRemoval) {
+                delta.add(1 - value, cause);
             }
-            return false;
-        } else {
-            if (value == 0 || value == 1) {
-                IntEventType e = IntEventType.INSTANTIATE;
-                assert notInstanciated.contains(offset);
-                notInstanciated.swap(offset);
-                if (reactOnRemoval) {
-                    delta.add(1 - value, cause);
-                }
-                mValue = value;
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, 0, 1);
-                }
-                this.notifyPropagators(e, cause);
-                return true;
-            } else {
-                if (_plugexpl) {
-                    model.getSolver().getEventObserver().instantiateTo(this, value, cause, 0, 1);
-                }
-                this.contradiction(cause, MSG_UNKNOWN);
-                return false;
-            }
+            mValue = value;
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, 0, 1);
+            this.notifyPropagators(e, cause);
+            return true;
         }
+        return false;
     }
 
     /**
-     * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
-     * The instruction comes from <code>propagator</code>.
+     * Updates the lower bound of the domain of {@code this} to {@code value}.
+     * The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if updating the lower bound to <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if updating the lower bound to <code>value</code> can be done safely,
+     * <li>If {@code value} is smaller than the lower bound of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if updating the lower bound to {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if updating the lower bound to {@code value} can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value new lower bound (included)
@@ -269,15 +248,15 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     /**
-     * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
-     * The instruction comes from <code>propagator</code>.
+     * Updates the upper bound of the domain of {@code this} to {@code value}.
+     * The instruction comes from {@code propagator}.
      * <ul>
-     * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
-     * <li>if updating the upper bound to <code>value</code> leads to a dead-end (domain wipe-out),
-     * a <code>ContradictionException</code> is thrown,</li>
-     * <li>otherwise, if updating the upper bound to <code>value</code> can be done safely,
+     * <li>If {@code value} is greater than the upper bound of the domain, nothing is done and the return value is {@code false},</li>
+     * <li>if updating the upper bound to {@code value} leads to a dead-end (domain wipe-out),
+     * a {@code ContradictionException} is thrown,</li>
+     * <li>otherwise, if updating the upper bound to {@code value} can be done safely,
      * the event type is created (the original event can be promoted) and observers are notified
-     * and the return value is <code>true</code></li>
+     * and the return value is {@code true}</li>
      * </ul>
      *
      * @param value new upper bound (included)
@@ -295,9 +274,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
         if (lb > 1 || ub < 0) {
-            if (_plugexpl) {
-                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
-            }
+            model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
             this.contradiction(cause, MSG_UNKNOWN);
         } else {
             if (lb == 1) {

@@ -30,7 +30,6 @@
 package org.chocosolver.samples.todo.tests;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -99,12 +98,6 @@ public class PertTest {
     public void testAll() {
         Model sol;
         sol = modeler();
-        sol.set(new Settings() {
-            @Override
-            public boolean plugExplanationIn() {
-                return true;
-            }
-        });
         values()[0].make(sol);
         sol.setObjective(MINIMIZE, objective);
         while(sol.solve());

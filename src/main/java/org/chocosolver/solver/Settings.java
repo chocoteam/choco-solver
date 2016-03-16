@@ -122,14 +122,6 @@ public interface Settings  {
     }
 
     /**
-     * Set to true to plug explanation engine in.
-     * @return <tt>true</tt> if explanations are plugged in
-     */
-    default boolean plugExplanationIn() {
-        return true;
-    }
-
-    /**
      * Defines the smallest used double for {@link org.chocosolver.solver.Model#multiCostRegular(IntVar[], IntVar[], ICostAutomaton)} algorithm
      * @return the smallest used double for {@link org.chocosolver.solver.Model#multiCostRegular(IntVar[], IntVar[], ICostAutomaton)} algorithm
      */

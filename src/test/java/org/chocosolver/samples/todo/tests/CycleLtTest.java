@@ -30,7 +30,6 @@
 package org.chocosolver.samples.todo.tests;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.StringUtils;
@@ -71,12 +70,6 @@ public class CycleLtTest {
     public void testAll() {
         StringBuilder st = new StringBuilder("\nCycle LT \n");
 
-        Settings nset = new Settings() {
-            @Override
-            public boolean plugExplanationIn() {
-                return true;
-            }
-        };
         int n = 6;
         int nbIt = 4;
         st.append(StringUtils.pad("TIME ", -7, " "));
@@ -93,7 +86,6 @@ public class CycleLtTest {
             st.append("-- ").append(j).append(" ------------------------------------------------------------------------------------\n");
             for (int i = 0; i < nbIt; i++) {
                 Model rand = modeler(n);
-                rand.set(nset);
                 values()[j].make(rand);
                 while (rand.solve()) ;
                 st.append(pad(format("%d ", rand.getSolver().getNodeCount()), -7, " "));

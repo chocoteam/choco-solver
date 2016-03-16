@@ -147,11 +147,6 @@ public abstract class AbstractVariable implements Variable {
     protected int mIdx;
 
     /**
-     * Indicates whether an explanation engine can be plugged (almost always set to <tt>true</tt>).
-     */
-    protected final boolean _plugexpl;
-
-    /**
      * The event scheduler of this variable, for efficient scheduling purpose.
      * It stores propagators wrt the propagation conditions.
      */
@@ -173,7 +168,6 @@ public abstract class AbstractVariable implements Variable {
         this.pindices = new int[8];
         this.dindices = new int[6];
         this.ID = this.model.nextId();
-        this._plugexpl = this.model.getSettings().plugExplanationIn();
         this.model.associates(this);
         int kind = getTypeAndKind() & Variable.KIND;
         switch (kind) {
