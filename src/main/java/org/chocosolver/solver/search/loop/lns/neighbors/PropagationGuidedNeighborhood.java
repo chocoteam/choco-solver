@@ -213,6 +213,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
      */
     protected void impose(int id, DecisionPath decisionPath) throws ContradictionException {
         IntDecision decision = decisionPath.makeIntDecision(vars[id], DecisionOperator.int_eq, bestSolution[id]);
+        decision.setRefutable(false);
         decisionPath.pushDecision(decision);
 
         vars[id].instantiateTo(bestSolution[id], Cause.Null);

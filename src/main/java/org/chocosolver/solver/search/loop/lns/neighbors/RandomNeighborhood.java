@@ -151,6 +151,7 @@ public class RandomNeighborhood implements INeighbor {
      */
     protected void impose(int id, DecisionPath decisionPath) {
         IntDecision decision = decisionPath.makeIntDecision(vars[id], DecisionOperator.int_eq, bestSolution[id]);
+        decision.setRefutable(false);
         decisionPath.pushDecision(decision);
     }
 
