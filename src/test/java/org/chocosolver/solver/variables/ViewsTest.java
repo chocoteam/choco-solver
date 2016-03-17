@@ -554,9 +554,10 @@ public class ViewsTest {
     public void testJL4() throws ContradictionException {
         Model s = new Model();
         BoolVar bool = s.boolVar("bool");
-        BoolVar view = s.boolEqView(bool);
         SetVar set = s.setVar("set", new int[]{}, new int[]{0, 1});
-        s.setBoolsChanneling(new BoolVar[]{view, bool}, set, 0).post();
+        // 17/03/16 : seems not idempotent when multiple occurrence of same var
+        // possible fix : split propagator in two ways
+        s.setBoolsChanneling(new BoolVar[]{bool, bool}, set, 0).post();
         s.member(s.ONE(), set).post();
         Solver r = s.getSolver();
         r.set(minDomUBSearch(bool));
@@ -568,7 +569,7 @@ public class ViewsTest {
     public void testJG() throws ContradictionException {
         Model s = new Model();
         BoolVar bool = s.boolVar("bool");
-        BoolVar view = s.boolEqView(bool);
+        BoolVar view = bool;
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
@@ -592,7 +593,7 @@ public class ViewsTest {
     public void testJG3() throws ContradictionException {
         Model s = new Model();
         IntVar var = s.intVar("int", 0, 2, true);
-        IntVar view = s.intEqView(var);
+        IntVar view = var;
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
@@ -650,32 +651,12 @@ public class ViewsTest {
     }
 
     @Test(groups="10s", timeOut=60000)
-    public void testIntEq(){
-        int n = 9;
-        Model viewModel = makeModel(true);
-        intEq(viewModel,n);
-        Model noViewModel = makeModel(false);
-        intEq(noViewModel,n);
-        testModels(viewModel,noViewModel);
-    }
-
-    @Test(groups="10s", timeOut=60000)
     public void testMinus(){
         int n = 9;
         Model viewModel = makeModel(true);
         minus(viewModel,n);
         Model noViewModel = makeModel(false);
         minus(noViewModel,n);
-        testModels(viewModel,noViewModel);
-    }
-
-    @Test(groups="10s", timeOut=60000)
-    public void testBoolEq(){
-        int n = 22;
-        Model viewModel = makeModel(true);
-        boolEq(viewModel,n);
-        Model noViewModel = makeModel(false);
-        boolEq(noViewModel,n);
         testModels(viewModel,noViewModel);
     }
 
@@ -734,18 +715,6 @@ public class ViewsTest {
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
 
-    private static void intEq(Model model, int n){
-        IntVar[] x = model.intVarArray(n,0,n-1);
-        IntVar[] y = new IntVar[n];
-        for(int i=0;i<n;i++){
-            y[i] = model.intEqView(x[i]);
-        }
-        checkDomains(true, x, y);
-
-        model.allDifferent(x).post();
-        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
-    }
-
     private static void minus(Model model, int n){
         IntVar[] x = model.intVarArray(n,0,n-1);
         IntVar[] y = new IntVar[n];
@@ -755,18 +724,6 @@ public class ViewsTest {
         checkDomains(true, x, y);
 
         model.allDifferent(x).post();
-        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
-    }
-
-    private static void boolEq(Model model, int n){
-        BoolVar[] x = model.boolVarArray(n);
-        BoolVar[] y = new BoolVar[n];
-        for(int i=0;i<n;i++){
-            y[i] = model.boolEqView(x[i]);
-        }
-        checkDomains(true, x, y);
-
-        model.sum(x,"=",n/2).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
 
@@ -791,6 +748,7 @@ public class ViewsTest {
         BoolVar[] z = new BoolVar[n];
         for (int i = 0; i < y.length; i++) {
             z[i] = model.boolNotView(y[i]);
+            Assert.assertTrue(z[i]==x[i]);
         }
         checkDomains(true, x, y, z);
 

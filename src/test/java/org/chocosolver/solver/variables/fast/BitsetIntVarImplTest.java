@@ -378,17 +378,6 @@ public class BitsetIntVarImplTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testSte() throws ContradictionException {
-        Model model = new Model();
-        IntVar v = model.intVar("V", new int[]{1, 2, 4, 5});
-        v.removeValue(1, Cause.Null);
-        IntVar w = v.duplicate();
-        Assert.assertEquals(w.getLB(), v.getLB());
-        Assert.assertEquals(w.getUB(), v.getUB());
-        Assert.assertEquals(w.getDomainSize(), v.getDomainSize());
-    }
-
-    @Test(groups="1s", timeOut=60000)
     public void testUpdBounds1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);

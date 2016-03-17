@@ -333,11 +333,6 @@ public final class ScaleView extends IntView {
     }
 
     @Override
-    public IntVar duplicate() {
-        return model.intScaleView(this.var, this.cste);
-    }
-
-    @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {

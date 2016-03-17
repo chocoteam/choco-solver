@@ -47,8 +47,6 @@ import org.chocosolver.util.iterators.*;
 
 import java.util.Iterator;
 
-import static org.chocosolver.util.tools.StringUtils.randomName;
-
 /**
  * <br/>
  *
@@ -488,12 +486,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public int getTypeAndKind() {
         return VAR | BOOL;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public BoolVar duplicate() {
-        return model.boolVar(randomName(this.name));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

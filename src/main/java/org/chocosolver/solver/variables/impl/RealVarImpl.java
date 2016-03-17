@@ -38,7 +38,6 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.RealEventType;
-import org.chocosolver.util.tools.StringUtils;
 
 /**
  * An implementation of RealVar, variable for continuous constraints (solved using IBEX).
@@ -186,11 +185,6 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     @Override
     public int getTypeAndKind() {
         return VAR | REAL;
-    }
-
-    @Override
-    public RealVar duplicate() {
-        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, model);
     }
 
     @Override
