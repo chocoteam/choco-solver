@@ -670,7 +670,7 @@ public class ViewsTest {
 
     @Test(groups="10s", timeOut=60000)
     public void testBoolEq(){
-        int n = 24;
+        int n = 22;
         Model viewModel = makeModel(true);
         boolEq(viewModel,n);
         Model noViewModel = makeModel(false);
@@ -680,7 +680,7 @@ public class ViewsTest {
 
     @Test(groups="10s", timeOut=60000)
     public void testBoolNot(){
-        int n = 24;
+        int n = 23;
         Model viewModel = makeModel(true);
         boolNot(viewModel,n);
         Model noViewModel = makeModel(false);

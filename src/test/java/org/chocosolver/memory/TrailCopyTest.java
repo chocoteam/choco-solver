@@ -89,7 +89,7 @@ public class TrailCopyTest {
     @Test(groups="10s", timeOut=60000)
     public void testCopyBest() {
         System.out.println("Copy best test");
-        int n = 8000;
+        int n = 5000;
         Model copy = makeCopyBest(n,Environments.COPY.make(),"copy");
         Model trail = makeCopyBest(n,Environments.TRAIL.make(),"trail");
         testModels(copy,trail);
