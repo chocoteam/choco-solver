@@ -201,4 +201,31 @@ public class DecisionPath extends DecisionMaker implements Serializable {
         }
     }
 
+    /**
+     * @return a pretty print of the downmost decision(s)
+     */
+    public String lastDecisionToString(){
+        StringBuilder st  =new StringBuilder();
+        int l = mLevel.get();
+        int f = levels[l];
+        int t = decisions.size();
+        Decision decision;
+        if(f < t - 1){
+            st.append("[1/1] ");
+            decision = decisions.get(f);
+            st.append(decision.toString());
+            for (int i = f + 1; i < t; i++) {
+                decision = decisions.get(i);
+                st.append(" /\\ ").append(decision.toString());
+            }
+        }else{
+            decision = decisions.get(f);
+            st.append(String.format("[%d/%d] %s",
+                    decision.getArity() - decision.triesLeft() +1, decision.getArity(), decision.toString())
+            );
+        }
+        return st.toString();
+
+    }
+
 }

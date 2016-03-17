@@ -90,11 +90,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        if (var.removeValue(1 - value, this)) {
-            notifyPropagators(IntEventType.INSTANTIATE, cause);
-            return true;
-        }
-        return false;
+        return contains(value) && instantiateTo(1 - value, cause);
     }
 
     @Override
@@ -138,9 +134,12 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
         if (var.instantiateTo(1 - value, this)) {
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
+        }else{
+            model.getSolver().getEventObserver().undo();
         }
         return false;
     }
@@ -148,9 +147,12 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > 0) {
+            model.getSolver().getEventObserver().updateLowerBound(this, value, getLB(), cause);
             if (var.instantiateTo(1 - value, this)) {
                 notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
+            }else{
+                model.getSolver().getEventObserver().undo();
             }
         }
         return false;
@@ -159,9 +161,12 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < 1) {
+            model.getSolver().getEventObserver().updateUpperBound(this, value, getUB(), cause);
             if (var.instantiateTo(1 - value, this)) {
                 notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
+            }else{
+                model.getSolver().getEventObserver().undo();
             }
         }
         return false;

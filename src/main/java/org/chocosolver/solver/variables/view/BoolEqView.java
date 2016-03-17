@@ -37,6 +37,8 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
 
 /**
@@ -53,6 +55,107 @@ public final class BoolEqView extends EqView implements BoolVar {
     public BoolEqView(BoolVar var) {
         super(var);
         this.var = var;
+    }
+
+    @Override
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        return contains(value) && instantiateTo(1 - value, cause);
+    }
+
+    @Override
+    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (values.contains(0)) {
+            hasChanged = instantiateTo(0, cause);
+        }
+        if (values.contains(1)) {
+            hasChanged = instantiateTo(1, cause);
+        }
+        return hasChanged;
+    }
+
+    @Override
+    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (!values.contains(0)) {
+            hasChanged = instantiateTo(0, cause);
+        }
+        if (!values.contains(1)) {
+            hasChanged = instantiateTo(1, cause);
+        }
+        return hasChanged;
+    }
+
+    @Override
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (from <= to && from <= 1 && to >= 0) {
+            if (from == 1) {
+                hasChanged = instantiateTo(0, cause);
+            } else if (to == 0) {
+                hasChanged = instantiateTo(1, cause);
+            } else {
+                instantiateTo(2, cause);
+            }
+        }
+        return hasChanged;
+    }
+
+    @Override
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+        if (var.instantiateTo(value, this)) {
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
+            return true;
+        }else{
+            model.getSolver().getEventObserver().undo();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        if (value > 0) {
+            model.getSolver().getEventObserver().updateLowerBound(this, value, getLB(), cause);
+            if (var.instantiateTo(value, this)) {
+                notifyPropagators(IntEventType.INSTANTIATE, cause);
+                return true;
+            }else{
+                model.getSolver().getEventObserver().undo();
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        if (value < 1) {
+            model.getSolver().getEventObserver().updateUpperBound(this, value, getUB(), cause);
+            if (var.instantiateTo(value, this)) {
+                notifyPropagators(IntEventType.INSTANTIATE, cause);
+                return true;
+            }else{
+                model.getSolver().getEventObserver().undo();
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        boolean hasChanged = false;
+        if (lb > 1) {
+            var.instantiateTo(-1, cause);
+        } else if (ub < 0) {
+            var.instantiateTo(2, cause);
+        } else {
+            if (lb == 1) {
+                hasChanged = instantiateTo(1, cause);
+            } else if (ub == 0) {
+                hasChanged = instantiateTo(0, cause);
+            }
+        }
+        return hasChanged;
     }
 
     @Override

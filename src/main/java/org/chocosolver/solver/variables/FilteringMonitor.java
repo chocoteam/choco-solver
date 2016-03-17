@@ -39,6 +39,8 @@ import org.chocosolver.solver.constraints.Propagator;
  * Defined initially for explanation engine.
  * Created by cprudhom on 09/12/14.
  * Project: choco.
+ * @author Charles Prud'homme
+ * @since 09/12/14
  */
 public interface FilteringMonitor  {
 
@@ -52,7 +54,7 @@ public interface FilteringMonitor  {
     }
 
     /**
-     * Explain the removal of the <code>val</code> from <code>var</code>, due to <code>cause</code>.
+     * Explain the removal of the {@code val} from {@code var}, due to {@code cause}.
      *
      * @param var   an integer variable
      * @param val   a value
@@ -62,9 +64,9 @@ public interface FilteringMonitor  {
     }
 
     /**
-     * Explain the removal of [<code>old</code>,<code>value</code>[ from <code>var</code>, due to <code>cause</code>.
+     * Explain the removal of [{@code old},{@code value}[ from {@code var}, due to {@code cause}.
      * <p/>
-     * Prerequisite: <code>value</code> should belong to <code>var</code>
+     * Prerequisite: {@code value} should belong to {@code var}
      *  @param intVar an integer variable
      * @param value  the current lower bound
      * @param old    the previous lower bound
@@ -74,9 +76,9 @@ public interface FilteringMonitor  {
     }
 
     /**
-     * Explain the removal of ]<code>value</code>,<code>old</code>] from <code>var</code>, due to <code>cause</code>.
+     * Explain the removal of ]{@code value},{@code old}] from {@code var}, due to {@code cause}.
      * <p/>
-     * Prerequisite: <code>value</code> should belong to <code>var</code>
+     * Prerequisite: {@code value} should belong to {@code var}
      *  @param var   an integer variable
      * @param value the current upper bound
      * @param old   the previous upper bound
@@ -86,7 +88,7 @@ public interface FilteringMonitor  {
     }
 
     /**
-     * Explain the assignment to <code>val</code> of <code>var</code> due to <code>cause</code>.
+     * Explain the assignment to {@code val} of {@code var} due to {@code cause}.
      *
      * @param var   an integer variable
      * @param val   the assignment value
@@ -96,5 +98,10 @@ public interface FilteringMonitor  {
      */
     default void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
     }
+
+    /**
+     * Undo the last operation done
+     */
+    default void undo(){}
 
 }

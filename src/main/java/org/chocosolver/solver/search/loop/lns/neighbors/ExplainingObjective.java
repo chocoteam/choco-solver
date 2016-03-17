@@ -38,7 +38,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
-import org.chocosolver.solver.explanations.store.IEventStore;
+import org.chocosolver.solver.explanations.ArrayEventStore;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
@@ -136,6 +136,7 @@ public class ExplainingObjective extends ExplainingCut{
         unrelated.clear();
         unrelated.or(related);
         unrelated.flip(0, mModel.getSolver().getDecisionPath().size());
+        unrelated.clear(0); // clear ROOT decision
         forceCft = true;
     }
 
@@ -247,7 +248,7 @@ public class ExplainingObjective extends ExplainingCut{
         RuleStore rs = mExplanationEngine.getRuleStore();
         rs.init(explanation);
         rs.addRemovalRule(objective, value);
-        IEventStore es = mExplanationEngine.getEventStore();
+        ArrayEventStore es = mExplanationEngine.getEventStore();
         int i = es.getSize() - 1;
 
         while (i > -1) {
@@ -279,7 +280,7 @@ public class ExplainingObjective extends ExplainingCut{
         boolean ismax = om.getPolicy() == ResolutionPolicy.MAXIMIZE;
         Explanation explanation = mExplanationEngine.makeExplanation(false);
         RuleStore rs = mExplanationEngine.getRuleStore();
-        IEventStore es = mExplanationEngine.getEventStore();
+        ArrayEventStore es = mExplanationEngine.getEventStore();
         rs.init(explanation);
         int i = 0;
         int far, near;
@@ -334,7 +335,7 @@ public class ExplainingObjective extends ExplainingCut{
     }
 
 
-    private void explainValueB(int value, IEventStore es, int i) {
+    private void explainValueB(int value, ArrayEventStore es, int i) {
 
         // mimic explanation computation
         Explanation explanation = mExplanationEngine.makeExplanation(false);

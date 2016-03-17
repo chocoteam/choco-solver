@@ -32,7 +32,6 @@ package org.chocosolver.solver.trace;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.*;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.StringUtils;
 
@@ -218,11 +217,8 @@ public interface IOutputFactory extends ISelf<Solver> {
         _me().plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownBranch(boolean left) {
-                Decision head = _me().getDecisionPath().getLastDecision();
-                getOut().printf("%s[%d/%d] %s%s ", StringUtils.pad("", _me().getEnvironment().getWorldIndex(), "."),
-                        head.getArity() - head.triesLeft() +1, head.getArity(),
-                        _me().getModel().getSettings().outputWithANSIColors()?ANSI_BLUE:"",
-                        head.toString());
+                getOut().printf("%s %s ", StringUtils.pad("", _me().getEnvironment().getWorldIndex(), "."),
+                        _me().getDecisionPath().lastDecisionToString());
                 getOut().printf("%s // %s %s\n", _me().getModel().getSettings().outputWithANSIColors()?ANSI_GRAY:"",
                         message.print(), _me().getModel().getSettings().outputWithANSIColors()?ANSI_RESET:"");
             }

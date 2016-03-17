@@ -97,7 +97,7 @@ public class LearnCBJ extends LearnExplained {
 
         }
         if (last > 0) {
-            if (!dec.hasNext()) {
+            if (dec.getArity()> 1 && !dec.hasNext()) {
                 throw new UnsupportedOperationException("LearnCBJ.identifyRefutedDecision should get to a LEFT decision:" + dec);
             }
             lastExplanation.remove(dec);
@@ -112,7 +112,7 @@ public class LearnCBJ extends LearnExplained {
             postNogood();
         }
         int upto = compute(mModel.getSolver().getDecisionPath());
-        assert upto > 0;
+        assert upto > 0 && upto <= solver.getDecisionPath().size();
         solver.setJumpTo(upto);
         identifyRefutedDecision(upto);
     }
@@ -151,7 +151,11 @@ public class LearnCBJ extends LearnExplained {
     int compute(DecisionPath decisionPath) {
         assert decisionPath.size() >= lastExplanation.getDecisions().length();
         // TODO: should include levels too
-        return decisionPath.size() - lastExplanation.getDecisions().previousSetBit(lastExplanation.getDecisions().length());
+        if(lastExplanation.getDecisions().cardinality()>0) {
+            return decisionPath.size() - lastExplanation.getDecisions().previousSetBit(lastExplanation.getDecisions().length());
+        }else{
+            return decisionPath.size();
+        }
     }
 
     @Override

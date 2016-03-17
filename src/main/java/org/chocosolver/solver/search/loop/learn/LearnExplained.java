@@ -32,10 +32,13 @@ package org.chocosolver.solver.search.loop.learn;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * An abstract class to deal with explanation-based learning.
@@ -76,8 +79,22 @@ public class LearnExplained implements Learn {
      * @param mModel the solver to equip
      * @param partialExplanationsOn set to <tt>true</tt> to enable partial explanations, <tt>false</tt> otherwise
      * @param recordCauses set to <tt>true</tt> to record causes in explanations, <tt>false</tt> otherwise
+     * @throws SolverException if views are enabled. Views provide incomplete explanation.
      */
     public LearnExplained(Model mModel, boolean partialExplanationsOn, boolean recordCauses) {
+        for(IntVar iv : mModel.retrieveIntVars(true)){
+            if((iv.getTypeAndKind() & Variable.VIEW) !=0){
+                throw new SolverException("Using explanations with views is not possible yet.\n" +
+                        "Consider disabling views:\n" +
+                        "mModel.set(new Settings() {\n" +
+                        "            @Override\n" +
+                        "            public boolean enableViews() {\n" +
+                        "                return false;\n" +
+                        "            }\n" +
+                        "        });" +
+                        "");
+            }
+        }
         this.mModel = mModel;
         if (mModel.getSolver().getExplainer() == null) {
             mModel.getSolver().set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));

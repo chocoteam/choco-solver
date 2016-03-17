@@ -31,10 +31,7 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
-import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingObjective;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
@@ -50,7 +47,7 @@ import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.rando
  */
 public class ELNSTest {
 
-    private void small(long seed) {
+    private void small(long seed, int n) {
         Model model = new Model();
         final IntVar[] vars = model.intVarArray("var", 6, 0, 4, true);
         final IntVar obj = model.intVar("obj", 0, 6, true);
@@ -62,13 +59,41 @@ public class ELNSTest {
         model.getSolver().setCBJLearning(false, false);
 
         Solver r = model.getSolver();
-        r.setLNS(new SequenceNeighborhood(
+        INeighbor neighbor = null;
+        switch (n){
+            case 0:
+                neighbor = new RandomNeighborhood(vars, 200, 123456L);
+                break;
+            case 1:
+                neighbor = new ExplainingCut(model, 200, 123456L);
+                break;
+            case 2:
+                neighbor = new ExplainingObjective(model, 200, 123456L);
+                break;
+            case 3:
+                neighbor = new SequenceNeighborhood(
+                        new ExplainingCut(model, 200, 123456L),
+                        new RandomNeighborhood(vars, 200, 123456L)
+                );
+                break;
+            case 4:
+                neighbor = new SequenceNeighborhood(
+                        new ExplainingObjective(model, 200, 123456L),
+                        new RandomNeighborhood(vars, 200, 123456L)
+                );
+                break;
+            case 5:
+                neighbor = new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(vars, 200, 123456L)
-                ), None);
-        r.set(randomSearch(vars, seed));
+                );
+                break;
+        }
 
+        r.setLNS(neighbor, None);
+        r.set(randomSearch(vars, seed));
+        r.limitFail(500);
         r.showSolutions();
         model.setObjective(MINIMIZE, obj);
         while(model.solve());
@@ -77,7 +102,10 @@ public class ELNSTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        small(8);
+        for(int i = 0; i < 6; i++) {
+            System.out.printf("case: %d\n", i);
+            small(8, i);
+        }
     }
 
 

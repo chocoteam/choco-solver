@@ -33,8 +33,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.store.ArrayEventStore;
-import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.FilteringMonitor;
@@ -52,11 +50,25 @@ import org.chocosolver.util.PoolManager;
  */
 public class ExplanationEngine implements FilteringMonitor {
 
-    protected final IEventStore eventStore; // set of generated events
-    private final RuleStore ruleStore; // set of active rules
-    private final boolean saveCauses; // save the clauses in Explanation
+    /**
+     * Events generated during search
+     */
+    protected final ArrayEventStore eventStore;
+    /**
+     * Active rules, to compute explanation backward
+     */
+    private final RuleStore ruleStore;
+    /**
+     * Set to <tt>true</tt> to save causes, for human reading purpose only
+     */
+    private final boolean saveCauses;
+    /**
+     * Set to <tt>true</tt> to enable partial explanation, ie allow stopping explanation before reaching ROOT node.
+     */
     private final boolean enablePartialExplanation;
-    private final Model mModel;
+    /**
+     * To recycle explanations
+     */
     PoolManager<Explanation> explanationPool;
 
 
@@ -67,7 +79,6 @@ public class ExplanationEngine implements FilteringMonitor {
      * @param recordCauses set to <tt>true</tt> to record causes in explanations, <tt>false</tt> otherwise
      */
     public ExplanationEngine(Model model, boolean partialExplanationsOn, boolean recordCauses) {
-        this.mModel = model;
         this.saveCauses = recordCauses;
         this.enablePartialExplanation = partialExplanationsOn;
         eventStore = new ArrayEventStore(model.getEnvironment());
@@ -89,6 +100,7 @@ public class ExplanationEngine implements FilteringMonitor {
      * Compute the explanation of the last event from the event store (naturally, the one that leads to a conflict),
      * and return the explanation of the failure, that is, the (sub-)set of decisions and propagators explaining the conflict.
      *
+     * @param cex    contradiction to explain
      * @return an explanation (set of decisions and propagators).
      */
     public Explanation explain(ContradictionException cex) {
@@ -114,6 +126,10 @@ public class ExplanationEngine implements FilteringMonitor {
         return explanation;
     }
 
+    /**
+     * @param saveCauses set to <tt>true</tt> if causes need to be stored
+     * @return an empty explanation, ready to be filled up
+     */
     public Explanation makeExplanation(boolean saveCauses) {
         Explanation explanation = explanationPool.getE();
         if (explanation == null) {
@@ -122,11 +138,17 @@ public class ExplanationEngine implements FilteringMonitor {
         return explanation;
     }
 
+    /**
+     * @return the current rule store
+     */
     public RuleStore getRuleStore() {
         return ruleStore;
     }
 
-    public IEventStore getEventStore() {
+    /**
+     * @return the current store of events
+     */
+    public ArrayEventStore getEventStore() {
         return eventStore;
     }
 
@@ -171,7 +193,10 @@ public class ExplanationEngine implements FilteringMonitor {
         ruleStore.freeDecisionExplanation(decision);
     }
 
+
+
     /**
+     * Explain the removal of the {@code val} from {@code var}, due to {@code cause}.
      * This is the main explanation why we create this class.
      * Record operations to execute for explicit call to explanation.
      *
@@ -185,6 +210,9 @@ public class ExplanationEngine implements FilteringMonitor {
     }
 
     /**
+     * Explain the removal of [{@code old},{@code value}[ from {@code var}, due to {@code cause}.
+     * <p/>
+     * Prerequisite: {@code value} should belong to {@code var}
      * This is the main reason why we create this class.
      * Record operations to execute for explicit call to explanation.
      *
@@ -199,6 +227,9 @@ public class ExplanationEngine implements FilteringMonitor {
     }
 
     /**
+     * Explain the removal of ]{@code value},{@code old}] from {@code var}, due to {@code cause}.
+     * <p/>
+     * Prerequisite: {@code value} should belong to {@code var}
      * This is the main reason why we create this class.
      * Record operations to execute for explicit call to explanation.
      *
@@ -213,6 +244,7 @@ public class ExplanationEngine implements FilteringMonitor {
     }
 
     /**
+     * Explain the assignment to {@code val} of {@code var} due to {@code cause}.
      * This is the main reason why we create this class.
      * Record operations to execute for explicit call to explanation.
      *
@@ -227,8 +259,19 @@ public class ExplanationEngine implements FilteringMonitor {
         eventStore.pushEvent(var, cause, IntEventType.INSTANTIATE, val, oldLB, oldUB);
     }
 
+    /**
+     * Explain the activation of a propagator involved in a reified constraint
+     *
+     * @param var        the reified variable
+     * @param propagator the propagator to awake.
+     */
     @Override
     public void activePropagator(BoolVar var, Propagator propagator) {
         eventStore.pushEvent(var, propagator, PropagatorEventType.FULL_PROPAGATION, propagator.getId(), 0, 0);
+    }
+
+    @Override
+    public void undo(){
+        eventStore.forgetLast();
     }
 }

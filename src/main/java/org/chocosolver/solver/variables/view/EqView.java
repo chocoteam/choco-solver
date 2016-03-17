@@ -36,7 +36,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
@@ -63,192 +62,28 @@ public class EqView extends IntView {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        assert cause != null;
-        int inf = getLB();
-        int sup = getUB();
-        if (inf <= value && value <= sup) {
-            IntEventType e = IntEventType.REMOVE;
-
-            boolean done = var.removeValue(value, this);
-            if (done) {
-                if (value == inf) {
-                    e = IntEventType.INCLOW;
-                } else if (value == sup) {
-                    e = IntEventType.DECUPP;
-                }
-                if (this.isInstantiated()) {
-                    e = IntEventType.INSTANTIATE;
-                }
-                this.notifyPropagators(e, cause);
-                return true;
-            }
-        }
-        return false;
+    boolean doInstantiateVar(int value) throws ContradictionException {
+        return var.instantiateTo(value, this);
     }
 
     @Override
-    public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
-        assert cause != null;
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
-        if (nlb > oub || nub < olb) {
-            return false;
-        }
-        if (nlb == olb) {
-            // look for the new lb
-            do {
-                olb = nextValue(olb);
-                nlb = values.nextValue(olb - 1);
-            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
-        }
-        if (nub == oub) {
-            // look for the new ub
-            do {
-                oub = previousValue(oub);
-                nub = values.previousValue(oub + 1);
-            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
-        }
-        // the new bounds are now known, delegate to the right method
-        boolean hasChanged = updateBounds(olb, oub, cause);
-        // now deal with holes
-        int value = nlb;
-        int to = nub;
-        boolean hasRemoved = false;
-        while (value <= to) {
-            hasRemoved |= var.removeValue(value, cause);
-            value = values.nextValue(value);
-        }
-        if (hasRemoved) {
-            IntEventType e = IntEventType.REMOVE;
-            if (var.isInstantiated()) {
-                e = IntEventType.INSTANTIATE;
-            }
-            this.notifyPropagators(e, cause);
-        }
-        return hasRemoved || hasChanged;
+    boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException {
+        return var.updateLowerBound(value, this);
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        assert cause != null;
-        if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause);
-        } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause);
-        } else {
-            boolean done = var.removeInterval(from, to, this);
-            if (done) {
-                notifyPropagators(IntEventType.REMOVE, cause);
-            }
-            return done;
-        }
+    boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException {
+        return var.updateUpperBound(value, this);
     }
 
     @Override
-    public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
-        // the new bounds are now known, delegate to the right method
-        boolean hasChanged = updateBounds(nlb, nub, cause);
-        // now deal with holes
-        int to = previousValue(nub);
-        boolean hasRemoved = false;
-        int value = nextValue(nlb);
-        // iterate over the values in the domain, remove the ones that are not in values
-        for (; value <= to; value = nextValue(value)) {
-            if (!values.contains(value)) {
-                hasRemoved |= var.removeValue(value, cause);
-            }
-        }
-        if (hasRemoved) {
-            IntEventType e = IntEventType.REMOVE;
-            if (isInstantiated()) {
-                e = IntEventType.INSTANTIATE;
-            }
-            this.notifyPropagators(e, cause);
-        }
-        return hasRemoved || hasChanged;
+    boolean doRemoveValueFromVar(int value) throws ContradictionException {
+        return var.removeValue(value, this);
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        assert cause != null;
-        boolean done = var.instantiateTo(value, this);
-        if (done) {
-            notifyPropagators(IntEventType.INSTANTIATE, cause);
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        assert cause != null;
-        int old = this.getLB();
-        if (old < value) {
-            IntEventType e = IntEventType.INCLOW;
-            boolean done = var.updateLowerBound(value, this);
-            if (isInstantiated()) {
-                e = IntEventType.INSTANTIATE;
-            }
-            if (done) {
-                this.notifyPropagators(e, cause);
-                return true;
-            }
-        }
-        //        }
-        return false;
-    }
-
-    @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        assert cause != null;
-        int old = this.getUB();
-        if (old > value) {
-            IntEventType e = IntEventType.DECUPP;
-            boolean done = var.updateUpperBound(value, this);
-            if (isInstantiated()) {
-                e = IntEventType.INSTANTIATE;
-            }
-            if (done) {
-                this.notifyPropagators(e, cause);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
-        assert cause != null;
-        int olb = this.getLB();
-        int oub = this.getUB();
-        boolean hasChanged = false;
-        if (olb < lb || oub > ub) {
-            IntEventType e = null;
-
-            if (olb < lb) {
-                e = IntEventType.INCLOW;
-                hasChanged = var.updateLowerBound(lb, this);
-            }
-            if (oub > ub) {
-                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
-                hasChanged |= var.updateUpperBound(ub, this);
-            }
-            if (isInstantiated()) {
-                e = IntEventType.INSTANTIATE;
-            }
-            if (hasChanged) {
-                this.notifyPropagators(e, cause);
-            }
-        }
-        return hasChanged;
+    boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException {
+        return var.removeInterval(from, to, this);
     }
 
     @Override

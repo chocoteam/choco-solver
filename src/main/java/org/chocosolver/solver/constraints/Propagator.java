@@ -350,7 +350,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             throw new SolverException(this + " has been declared to ignore which variable is modified.\n" +
                     "To change the configuration, consider:\n" +
                     "- to set 'reactToFineEvt' to false or,\n" +
-                    "- to override the following methode:\n" +
+                    "- to override the following method:\n" +
                     "\t'public void propagate(int idxVarInProp, int mask) throws ContradictionException'." +
                     "The latter enables incrementality but also to delay calls to complex filtering algorithm (see the method 'forcePropagate(EventType evt)'.");
         }

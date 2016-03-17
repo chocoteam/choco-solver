@@ -41,6 +41,7 @@ import org.chocosolver.solver.propagation.PropagationEngineFactory;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.search.limits.ICounter;
+import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
@@ -70,7 +71,6 @@ import java.util.List;
 
 import static org.chocosolver.solver.Solver.Action.*;
 import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
-import static org.chocosolver.solver.search.loop.Reporting.fullReport;
 import static org.chocosolver.util.ESat.*;
 
 /**
@@ -332,7 +332,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                     }
                     break;
                 case validate:
-                    assert (TRUE.equals(isSatisfied())) : fullReport(mModel);
+                    if(!getModel().getSettings().checkModel(this)){
+                        throw new SolverException("The current solution does not satisfy the checker.\n" +
+                                Reporting.fullReport(mModel));
+                    }
                     feasible = TRUE;
                     mMeasures.incSolutionCount();
                     getObjectiveManager().update();

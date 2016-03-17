@@ -35,7 +35,7 @@ import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
 import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.variables.IntVar;
-
+import org.chocosolver.util.ESat;
 
 
 /**
@@ -84,6 +84,27 @@ public interface Settings  {
      */
     default Idem getIdempotencyStrategy() {
         return Idem.disabled;
+    }
+
+    /**
+     * Define what to do when a solution is found.
+     * By default, it makes a weak check of the model:
+     * <pre>
+     *     {@code
+     *         return !ESat.FALSE.equals(solver.isSatisfied());
+     *     }
+     * </pre>
+     * A hard check of the model can be done like this:
+     * <pre>
+     *     {@code
+     *     return ESat.TRUE.equals(solver.isSatisfied());
+     *     }
+     * </pre>
+     * @param solver the solver
+     * @return <tt>true</tt> if the model is OK wrt the checker, <tt>false</tt> otherwise
+     */
+    default boolean checkModel(Solver solver){
+        return !ESat.FALSE.equals(solver.isSatisfied());
     }
 
     /**

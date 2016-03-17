@@ -80,6 +80,13 @@ public class FilteringMonitorList implements FilteringMonitor {
         }
     }
 
+    @Override
+    public void undo() {
+        for (int i = observers.size() - 1; i >= 0; i--) {
+            observers.get(i).undo();
+        }
+    }
+
     public boolean add(FilteringMonitor anObserver) {
         for (FilteringMonitor eo : observers) {
             if (eo == anObserver) {

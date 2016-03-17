@@ -33,7 +33,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
-import org.chocosolver.solver.explanations.store.IEventStore;
+import org.chocosolver.solver.explanations.ArrayEventStore;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
@@ -67,10 +67,10 @@ public class LearnDBT extends LearnCBJ {
     final RuleStore mRuleStore;
 
     /**
-     * Because computing explanation can be lazy, a {@link IEventStore} is needed to continue computing partial explanations.
+     * Because computing explanation can be lazy, a {@link ArrayEventStore} is needed to continue computing partial explanations.
      * A reference to the one used by the explanation engine is thus needed.
      */
-    final IEventStore mEventStore;
+    final ArrayEventStore mEventStore;
 
     /**
      * Create a Dynamic Backtracking strategy.
@@ -102,17 +102,11 @@ public class LearnDBT extends LearnCBJ {
         // preliminary : compute where to jump back
         DecisionPath path = mModel.getSolver().getDecisionPath();
         int last = path.size();
-        Decision dup, dec = path.getDecision(--last); // the current decision to undo
-        int myworld = nworld;
-        while (dec != RootDecision.ROOT && myworld > 1) {
-            dec = path.getDecision(--last);
-            myworld--;
-        }
-        Decision jmpBck = dec;
+        Decision jmpBck = path.getDecision(last - nworld);
 
         // now we can explicitly enforce the jump
         last = path.size();
-        dec = path.getDecision(--last); // the current decision to undo
+        Decision dup, dec = path.getDecision(--last); // the current decision to undo
         int decIdx = lastExplanation.getEvtstrIdx(); // index of the decision to refute in the event store
         while (dec != RootDecision.ROOT && nworld > 1) {
 
@@ -149,7 +143,7 @@ public class LearnDBT extends LearnCBJ {
             nworld--;
         }
         if (dec != RootDecision.ROOT) {
-            if (!dec.hasNext()) {
+            if (dec.getArity() > 1 && !dec.hasNext()) {
                 throw new UnsupportedOperationException("LearnDBT.identifyRefutedDecision should get to a POSITIVE decision " + dec);
             }
             lastExplanation.remove(dec);

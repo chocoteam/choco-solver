@@ -33,7 +33,6 @@ import gnu.trove.set.TIntSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.store.IEventStore;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -51,6 +50,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_P
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  * @author Charles Prud'homme
+ * @since 09/12/14
  */
 public class RuleStore {
 
@@ -147,12 +147,12 @@ public class RuleStore {
     /**
      * Return true if the event represented by matches one of the active rules.
      *
-     * @param idx        index in <code>eventStore</code> of the event to evaluate
+     * @param idx        index in {@code eventStore} of the event to evaluate
      * @param eventStore set of events
      * @throws org.chocosolver.solver.exception.SolverException when the type of the variable is neither {@link Variable#BOOL} or {@link Variable#INT}.
-     * @return <tt>true</tt> if the event in position <code>idx</code> in <code>eventStore</code> matches a rule
+     * @return <tt>true</tt> if the event in position {@code idx} in {@code eventStore} matches a rule
      */
-    public boolean match(final int idx, final IEventStore eventStore) {
+    public boolean match(final int idx, final ArrayEventStore eventStore) {
         lastVar = eventStore.getVariable(idx);
         lastValue = eventStore.getFirstValue(idx); // either the propagator ID, or a value related to the variable event (eg, instantiated value)
         lastEvt = eventStore.getEventType(idx);
@@ -248,7 +248,7 @@ public class RuleStore {
      * @param explanation the explanation to compute
      */
     @SuppressWarnings({"PointlessBooleanExpression", "ConstantConditions"})
-    public void update(final int idx, final IEventStore eventStore, Explanation explanation) {
+    public void update(final int idx, final ArrayEventStore eventStore, Explanation explanation) {
         assert lastVar == eventStore.getVariable(idx) : "Wrong variable loaded";
         assert lastEvt == eventStore.getEventType(idx) : "Wrong event loaded";
         if (!lastEvt.equals(FULL_PROPAGATION)) {
@@ -259,10 +259,10 @@ public class RuleStore {
             if (lastCause instanceof Decision) {
                 Decision decision = (Decision) lastCause;
                 // If it is a LEFT decision, simply add it
-                if (decision.hasNext()) {
+                if (decision.hasNext() || decision.getArity() == 1) {
                     explanation.addDecision(decision);
                     // if partial explanation is enabled, finding the first decision in conflict is enough
-                    if (preemptedStop |= enablePartialExplanation) {
+                    if (decision.getArity() > 1 && (preemptedStop |= enablePartialExplanation)) {
                         explanation.setEvtstrIdx(idx);
                     }
                 } else if (decision.getArity() > 1) { //  to deal with unary decision (once = true)

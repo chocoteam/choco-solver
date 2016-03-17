@@ -177,7 +177,7 @@ public class ExplainingCut implements INeighbor {
         restrictLess();
         notFrozen.clear();
         notFrozen.or(related);
-        for (; !notFrozen.isEmpty() && notFrozen.cardinality() > nbFixedVariables; ) {
+        for (; !notFrozen.isEmpty() && notFrozen.cardinality() + 1 > nbFixedVariables; ) {
             int idx = selectVariable();
             notFrozen.clear(idx);
         }
@@ -292,12 +292,12 @@ public class ExplainingCut implements INeighbor {
                 unrelated.clear();
                 unrelated.or(related);
                 unrelated.flip(0, i);
+                unrelated.clear(0); // clear ROOT decision
 
                 // 4. remove all decisions above i in path
-                int size = mDecisionPath.size();
-                while (size > i) {
-                    mDecisionPath.remove(mDecisionPath.size() - 1);
-                    size--;
+                while (i > 1) {
+                    mDecisionPath.remove(1);
+                    i--;
                 }
 
             } else {
