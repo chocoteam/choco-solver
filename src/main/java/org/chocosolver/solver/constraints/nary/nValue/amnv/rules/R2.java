@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -69,10 +68,5 @@ public class R2 implements R {
 				}
 			}
 		}
-	}
-
-	@Override
-	public R duplicate(Model model) {
-		return new R2();
 	}
 }

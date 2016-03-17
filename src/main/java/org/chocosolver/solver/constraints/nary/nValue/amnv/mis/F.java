@@ -29,9 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Model;
-
 import java.util.BitSet;
 
 /**
@@ -57,6 +54,4 @@ public interface F {
 	 * @return a BitSet representing vertices that belong to the independent set
 	 */
 	BitSet getMIS();
-
-	void duplicate(Model model, THashMap<Object, Object> identitymap);
 }

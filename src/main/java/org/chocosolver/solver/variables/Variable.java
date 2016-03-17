@@ -291,14 +291,6 @@ public interface Variable extends Identity, Comparable<Variable> {
     int getTypeAndKind();
 
     /**
-     * Duplicate <code>this</code>.
-     *
-     * @param <V> the copy
-     * @return a copy of <code>this</code>
-     */
-    <V extends Variable> V duplicate();
-
-    /**
      * For scheduling purpose only
      * @return the scheduler
      */

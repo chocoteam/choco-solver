@@ -42,7 +42,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.Set_ReadOnly;
-import org.chocosolver.util.tools.StringUtils;
 
 /**
  * Set variable to represent a set of integers, i.e. a value is a set
@@ -195,18 +194,6 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public int getTypeAndKind() {
         return VAR | SET;
-    }
-
-    @Override
-    public SetVar duplicate() {
-		if(lb == ub){
-			return new SetVarImpl(StringUtils.randomName(this.name),ub.toArray(), model);
-		}
-        return new SetVarImpl(StringUtils.randomName(this.name),
-				ub.toArray(), ub.getSetType(),
-				lb.toArray(), lb.getSetType(),
-				model
-		);
     }
 
     @Override

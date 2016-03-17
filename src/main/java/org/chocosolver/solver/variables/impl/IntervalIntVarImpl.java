@@ -44,7 +44,6 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.*;
-import org.chocosolver.util.tools.StringUtils;
 
 import java.util.Iterator;
 
@@ -542,12 +541,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public int getTypeAndKind() {
         return VAR | INT;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public IntVar duplicate() {
-        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), model);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

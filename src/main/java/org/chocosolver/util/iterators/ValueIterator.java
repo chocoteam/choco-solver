@@ -60,13 +60,46 @@ package org.chocosolver.util.iterators;
  */
 public interface ValueIterator {
 
+    /**
+     * Prepare iteration from smallest value to highest value (using {@link #hasNext()} / {@link #next()})
+     * <pre>
+     * ValueIterator vit = ...;
+     * vit.bottomUpInit();
+     * while(vit.hasNext()){
+     *    int v = vit.next();
+     *    // operate on value v here
+     * }</pre>
+     * OR
+     * <pre>
+     */
     void bottomUpInit();
 
+    /**
+     * Prepare iteration from highest value to smallest value (using {@link #hasPrevious()} / {@link #previous()})
+     * <pre>
+     * ValueIterator vit = ...;
+     * vit.topDownInit();
+     * while(vit.hasPrevious()){
+     *    int v = vit.previous();
+     *    // operate on value v here
+     * }</pre>
+     */
     void topDownInit();
 
     /**
      * Returns <tt>true</tt> if the iteration has more values. (In other
      * words, returns <tt>true</tt> if <tt>next</tt> would return valid value.)
+     * <pre>
+     * ValueIterator vit = ...;
+     * vit.bottomUpInit();
+     * while(vit.hasNext()){
+     *    int v = vit.next();
+     *    // operate on value v here
+     * }</pre>
+     * OR
+     * <pre>
+     *
+     * @beware incompatible with {@link #hasPrevious()}
      *
      * @return <tt>true</tt> if the getIterator has more values.
      */
@@ -74,7 +107,16 @@ public interface ValueIterator {
 
     /**
      * Returns <tt>true</tt> if the iteration has more ranges. (In other
-     * words, returns <tt>true</tt> if <tt>next</tt> would return a valid value.)
+     * words, returns <tt>true</tt> if <tt>previous</tt> would return a valid value.)
+     * <pre>
+     * ValueIterator vit = ...;
+     * vit.topDownInit();
+     * while(vit.hasPrevious()){
+     *    int v = vit.previous();
+     *    // operate on value v here
+     * }</pre>
+     *
+     * @beware incompatible with {@link #hasNext()}
      *
      * @return <tt>true</tt> if the getIterator has more values.
      */
@@ -82,16 +124,35 @@ public interface ValueIterator {
 
     /**
      * Compute and return the next value.
+     * <pre>
+     * ValueIterator vit = ...;
+     * vit.bottomUpInit();
+     * while(vit.hasNext()){
+     *    int v = vit.next();
+     *    // operate on value v here
+     * }</pre>
+     * OR
+     * <pre>
+     *
+     * @beware incompatible with {@link #previous()}
      *
      * @return the next element in the iteration.
      */
     int next();
 
     /**
-     * Compute and return the next value.
+     * Compute and return the previous value.
+     * <pre>
+     * ValueIterator vit = ...;
+     * vit.topDownInit();
+     * while(vit.hasPrevious()){
+     *    int v = vit.previous();
+     *    // operate on value v here
+     * }</pre>
+     *
+     * @beware incompatible with {@link #next()}
      *
      * @return the previous element in the iteration.
      */
     int previous();
-
 }
