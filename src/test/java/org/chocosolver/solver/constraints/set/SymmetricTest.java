@@ -27,39 +27,57 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
+package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.graphs.UndirectedGraph;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.variables.SetVar;
+import org.testng.annotations.Test;
 
-import java.util.BitSet;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
- * R4 filtering rule (AllDifferent propagation)
- *
- * @author Jean-Guillaume Fages
- * @since 01/01/2014
+ * @author Alexandre LEBRUN
  */
-public class R4 implements R {
+public class SymmetricTest {
 
-    private AlgoAllDiffBC filter;
 
-    public void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException {
-        int n = vars.length - 1;
-        BitSet mis = heur.getMIS();
-        if (mis.cardinality() == vars[n].getUB()) {
-            IntVar[] vs = new IntVar[mis.cardinality()];
-            int idx = 0;
-            for (int x = mis.nextSetBit(0); x >= 0; x = mis.nextSetBit(x + 1)) {
-                vs[idx++] = vars[x];
+    @Test(groups = "1s", timeOut=60000)
+    public void testNominal() {
+        Model model = new Model();
+
+
+        SetVar[] vars = model.setVarArray(5, new int[]{}, new int[]{1, 2, 3, 4});
+        model.symmetric(vars).post();
+
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testHeadOnly() {
+        Model model = new Model();
+        SetVar[] vars = model.setVarArray(5, new int[]{}, new int[]{0, 1});
+        model.symmetric(vars).post();
+        int nbSol = checkSolutions(model, vars);
+
+        // The number of results must be the same as a 2-sized array
+        model = new Model();
+        vars = model.setVarArray(2, new int[]{}, new int[]{0, 1});
+        model.symmetric(vars).post();
+        assertEquals(nbSol, checkSolutions(model, vars));
+    }
+
+
+    private int checkSolutions(Model model, SetVar[] vars) {
+        int nbSol = 0;
+        while (model.solve()) {
+            nbSol++;
+            for (int i = 0; i < vars.length; i++) {
+                for (Integer value : vars[i].getValue()) {
+                    assertTrue(vars[value].getValue().contain(i));
+                }
             }
-            if (filter == null) filter = new AlgoAllDiffBC(aCause);
-            filter.reset(vs);
-            filter.filter();
         }
+        assertTrue(nbSol > 0);
+        return nbSol;
     }
 }

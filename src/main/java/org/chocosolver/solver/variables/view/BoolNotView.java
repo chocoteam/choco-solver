@@ -275,11 +275,6 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     @Override
-    public BoolVar duplicate() {
-        return model.boolNotView(this.var);
-    }
-
-    @Override
     public BoolVar not() {
         return var;
     }
@@ -306,7 +301,7 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public void setNot(boolean isNot) {
-        throw new UnsupportedOperationException();
+        assert isNot;
     }
 
     @Override

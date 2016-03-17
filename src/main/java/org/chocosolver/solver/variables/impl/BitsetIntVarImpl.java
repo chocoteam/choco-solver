@@ -47,7 +47,6 @@ import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.IntVarValueIterator;
-import org.chocosolver.util.tools.StringUtils;
 
 import java.util.BitSet;
 import java.util.Iterator;
@@ -740,12 +739,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public int getTypeAndKind() {
         return VAR | INT;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public IntVar duplicate() {
-        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copyToBitSet(), model);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

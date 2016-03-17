@@ -34,6 +34,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -553,9 +554,10 @@ public class ViewsTest {
     public void testJL4() throws ContradictionException {
         Model s = new Model();
         BoolVar bool = s.boolVar("bool");
-        BoolVar view = s.boolEqView(bool);
         SetVar set = s.setVar("set", new int[]{}, new int[]{0, 1});
-        s.setBoolsChanneling(new BoolVar[]{view, bool}, set, 0).post();
+        // 17/03/16 : seems not idempotent when multiple occurrence of same var
+        // possible fix : split propagator in two ways
+        s.setBoolsChanneling(new BoolVar[]{bool, bool}, set, 0).post();
         s.member(s.ONE(), set).post();
         Solver r = s.getSolver();
         r.set(minDomUBSearch(bool));
@@ -567,7 +569,7 @@ public class ViewsTest {
     public void testJG() throws ContradictionException {
         Model s = new Model();
         BoolVar bool = s.boolVar("bool");
-        BoolVar view = s.boolEqView(bool);
+        BoolVar view = bool;
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
@@ -591,7 +593,7 @@ public class ViewsTest {
     public void testJG3() throws ContradictionException {
         Model s = new Model();
         IntVar var = s.intVar("int", 0, 2, true);
-        IntVar view = s.intEqView(var);
+        IntVar view = var;
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
@@ -649,16 +651,6 @@ public class ViewsTest {
     }
 
     @Test(groups="10s", timeOut=60000)
-    public void testIntEq(){
-        int n = 9;
-        Model viewModel = makeModel(true);
-        intEq(viewModel,n);
-        Model noViewModel = makeModel(false);
-        intEq(noViewModel,n);
-        testModels(viewModel,noViewModel);
-    }
-
-    @Test(groups="10s", timeOut=60000)
     public void testMinus(){
         int n = 9;
         Model viewModel = makeModel(true);
@@ -669,23 +661,23 @@ public class ViewsTest {
     }
 
     @Test(groups="10s", timeOut=60000)
-    public void testBoolEq(){
-        int n = 24;
-        Model viewModel = makeModel(true);
-        boolEq(viewModel,n);
-        Model noViewModel = makeModel(false);
-        boolEq(noViewModel,n);
-        testModels(viewModel,noViewModel);
-    }
-
-    @Test(groups="10s", timeOut=60000)
     public void testBoolNot(){
-        int n = 24;
+        int n = 23;
         Model viewModel = makeModel(true);
         boolNot(viewModel,n);
         Model noViewModel = makeModel(false);
         boolNot(noViewModel,n);
         testModels(viewModel,noViewModel);
+    }
+
+    @Test(groups = "10s", timeOut=60000)
+    public void testBoolNotNot() {
+        int n = 20;
+        Model viewModel = makeModel(true);
+        boolNotNot(viewModel, n);
+        Model noViewModel = makeModel(false);
+        boolNotNot(noViewModel, n);
+        testModels(viewModel, noViewModel);
     }
 
     private static Model makeModel(final boolean withViews){
@@ -705,6 +697,8 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.intOffsetView(x[i],42);
         }
+        checkDomains(true, x, y);
+
         model.allDifferent(x).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
@@ -715,16 +709,8 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.intScaleView(x[i],42);
         }
-        model.allDifferent(x).post();
-        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
-    }
+        checkDomains(false, x, y);
 
-    private static void intEq(Model model, int n){
-        IntVar[] x = model.intVarArray(n,0,n-1);
-        IntVar[] y = new IntVar[n];
-        for(int i=0;i<n;i++){
-            y[i] = model.intEqView(x[i]);
-        }
         model.allDifferent(x).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
@@ -735,17 +721,9 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.intMinusView(x[i]);
         }
-        model.allDifferent(x).post();
-        model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
-    }
+        checkDomains(true, x, y);
 
-    private static void boolEq(Model model, int n){
-        BoolVar[] x = model.boolVarArray(n);
-        BoolVar[] y = new BoolVar[n];
-        for(int i=0;i<n;i++){
-            y[i] = model.boolEqView(x[i]);
-        }
-        model.sum(x,"=",n/2).post();
+        model.allDifferent(x).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
 
@@ -755,8 +733,56 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.boolNotView(x[i]);
         }
+        checkDomains(true, x, y);
+
         model.sum(x,"=",n/2).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
+    }
+
+    public static void boolNotNot(Model model, int n) {
+        BoolVar[] x = model.boolVarArray(n);
+        BoolVar[] y = new BoolVar[n];
+        for (int i = 0; i < x.length; i++) {
+            y[i] = model.boolNotView(x[i]);
+        }
+        BoolVar[] z = new BoolVar[n];
+        for (int i = 0; i < y.length; i++) {
+            z[i] = model.boolNotView(y[i]);
+            Assert.assertTrue(z[i]==x[i]);
+        }
+        checkDomains(true, x, y, z);
+
+        model.sum(x, "=", n/2).post();
+        model.getSolver().set(SearchStrategyFactory.randomSearch(z, 0));
+    }
+
+    private static <T extends IntVar> void checkDomains(boolean noHoles, T[] ... vars) {
+        assert vars.length > 0;
+
+        for (T[] varArray : vars) {
+            for (T var : varArray) {
+                // Not in the domain
+                int prev = -1;
+
+                DisposableValueIterator it = var.getValueIterator(true);
+                for(int i = var.getLB(); i != Integer.MAX_VALUE; i = var.nextValue(i)) {
+                    assertTrue(it.hasNext());
+                    if(prev != -1) {
+                        if(noHoles) {
+                            assertEquals(var.nextValueOut(i), var.getUB()+1);
+                            assertEquals(var.previousValueOut(i), var.getLB()-1);
+                        }
+                        assertTrue(it.hasPrevious());
+//                        assertEquals(it.previous(), prev);
+                        assertEquals(var.previousValue(i), prev);
+                    }
+                    prev = i;
+                    assertEquals(it.next(), i);
+                }
+
+            }
+        }
+
     }
 
     private static void testModels(Model... models) {

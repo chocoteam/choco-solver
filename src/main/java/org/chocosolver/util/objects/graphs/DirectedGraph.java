@@ -29,7 +29,6 @@
  */
 package org.chocosolver.util.objects.graphs;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
@@ -252,10 +251,5 @@ public class DirectedGraph implements IGraph {
     @Override
     public ISet getPredOrNeighOf(int x) {
         return predecessors[x];
-    }
-
-    @Override
-    public void duplicate(Model model, THashMap<Object, Object> identitymap) {
-        throw new UnsupportedOperationException("Cannot duplicate DirectedGraph yet");
     }
 }

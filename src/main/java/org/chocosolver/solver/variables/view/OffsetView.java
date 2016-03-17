@@ -168,11 +168,6 @@ public final class OffsetView extends IntView {
     }
 
     @Override
-    public IntVar duplicate() {
-        return model.intOffsetView(this.var, this.cste);
-    }
-
-    @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {

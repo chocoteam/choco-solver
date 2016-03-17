@@ -27,39 +27,67 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
+package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
-import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.graphs.UndirectedGraph;
+import org.chocosolver.solver.variables.SetVar;
+import org.testng.annotations.Test;
 
-import java.util.BitSet;
+import static org.testng.Assert.*;
 
 /**
- * R4 filtering rule (AllDifferent propagation)
- *
- * @author Jean-Guillaume Fages
- * @since 01/01/2014
+ * @author Alexandre LEBRUN
  */
-public class R4 implements R {
+public class ElementTest {
 
-    private AlgoAllDiffBC filter;
 
-    public void filter(IntVar[] vars, UndirectedGraph graph, F heur, Propagator aCause) throws ContradictionException {
-        int n = vars.length - 1;
-        BitSet mis = heur.getMIS();
-        if (mis.cardinality() == vars[n].getUB()) {
-            IntVar[] vs = new IntVar[mis.cardinality()];
-            int idx = 0;
-            for (int x = mis.nextSetBit(0); x >= 0; x = mis.nextSetBit(x + 1)) {
-                vs[idx++] = vars[x];
+    private Model model;
+    private SetVar[] sets;
+    private SetVar element;
+    private IntVar index;
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testNominal() {
+        model = new Model();
+        sets = model.setVarArray(3, new int[]{}, new int[]{1, 2, 3});
+        element = model.setVar(new int[]{1, 3});
+        index = model.intVar(0, 100);
+        model.element(index, sets, element).post();
+
+        checkSolutions();
+    }
+
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testFixedValues() {
+        Model model = new Model();
+        SetVar[] sets = new SetVar[3];
+        sets[0] = model.setVar(new int[]{1, 3});
+        sets[1] = model.setVar(new int[]{3, 4});
+        sets[2] = model.setVar(new int[]{4, 5});
+        element = model.setVar(new int[]{4, 5});
+        index = model.intVar(0, sets.length - 1);
+        model.element(index, sets, element).post();
+
+        assertTrue(model.solve());
+        assertEquals(index.getValue(), 2);
+        assertFalse(model.solve());
+    }
+
+
+    private int checkSolutions() {
+        int nbSol = 0;
+        while (model.solve()) {
+            nbSol++;
+            for (Integer val : sets[index.getValue()].getValue()) {
+                assertTrue(element.getValue().contain(val));
             }
-            if (filter == null) filter = new AlgoAllDiffBC(aCause);
-            filter.reset(vs);
-            filter.filter();
+            for (Integer val : element.getValue()) {
+                assertTrue(sets[index.getValue()].getValue().contain(val));
+            }
         }
+        assertTrue(nbSol > 0);
+        return nbSol;
     }
 }

@@ -73,7 +73,7 @@ public class PropElement extends Propagator<Variable> {
      * Propagator for element constraint over sets
      * states that array[index-offSet] = set
      *
-     * @param index integer variabme
+     * @param index integer variable
      * @param array array of set variables
      * @param offSet int
      * @param set set variable

@@ -193,11 +193,6 @@ public class MinusView extends IntView {
     }
 
     @Override
-    public IntVar duplicate() {
-        return model.intMinusView(this.var);
-    }
-
-    @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {

@@ -43,7 +43,6 @@ import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.IntVarValueIterator;
-import org.chocosolver.util.tools.StringUtils;
 
 import java.util.Iterator;
 
@@ -299,12 +298,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public int getTypeAndKind() {
         return Variable.INT | Variable.CSTE;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public IntVar duplicate() {
-        return model.intVar(StringUtils.randomName(), this.constante);
     }
 
     @Override

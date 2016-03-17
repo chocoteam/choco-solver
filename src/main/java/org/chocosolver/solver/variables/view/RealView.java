@@ -170,10 +170,4 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     public int getTypeAndKind() {
         return VIEW | REAL;
     }
-
-    @Override
-    public RealVar duplicate() {
-        return model.realIntView(this.var, this.precision);
-    }
-
 }

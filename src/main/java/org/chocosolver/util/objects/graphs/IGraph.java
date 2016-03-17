@@ -29,12 +29,8 @@
  */
 package org.chocosolver.util.objects.graphs;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-
-
 
 /**
  * @author Jean-Guillaume Fages, Xavier Lorca
@@ -121,6 +117,4 @@ public interface IGraph  {
      * @return true if and only if <code>this</code> is a directed graph
      */
     boolean isDirected();
-
-    void duplicate(Model model, THashMap<Object, Object> identitymap);
 }

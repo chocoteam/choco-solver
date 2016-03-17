@@ -58,62 +58,25 @@ public interface IViewFactory extends ISelf<Model> {
         if (bool.hasNot()) {
             return bool.not();
         } else {
-            if (_me().getSettings().enableViews()) {
-                return new BoolNotView(bool);
+            BoolVar not;
+            if(bool.isInstantiated()) {
+                not = bool.getValue() == 1 ? _me().ZERO() : _me().ONE();
+            }else if (_me().getSettings().enableViews()) {
+                not = new BoolNotView(bool);
             }else {
-                BoolVar ov = _me().boolVar("not(" + bool.getName() + ")");
-                _me().arithm(ov, "!=", bool).post();
-                bool._setNot(ov);
-                ov._setNot(bool);
-                ov.setNot(true);
-                return ov;
+                not = _me().boolVar("not(" + bool.getName() + ")");
+                _me().arithm(not, "!=", bool).post();
             }
+            bool._setNot(not);
+            not._setNot(bool);
+            not.setNot(true);
+            return not;
         }
     }
-
-    /**
-     * Creates a view over <i>var</i>, equal to <i>var</i>.
-     * @param var a boolean variable
-     * @return a BoolVar equal to <i>var</i>
-     */
-    default BoolVar boolEqView(BoolVar var) {
-        if (_me().getSettings().enableViews()) {
-            return new BoolEqView(var);
-
-        } else {
-            BoolVar ov = var.duplicate();
-            _me().arithm(ov, "=", var).post();
-            if (var.hasNot()) {
-                ov._setNot(var.not());
-            }
-            ov.setNot(var.isNot());
-            return ov;
-        }
-    }
-
 
     //*************************************************************************************
     // INTEGER VARIABLES
     //*************************************************************************************
-
-    /**
-     * Creates a view over <i>var</i>, equal to <i>var</i>.
-     * @param var an integer variable
-     * @return an IntVar equal to <i>var</i>
-     */
-    default IntVar intEqView(IntVar var) {
-        if ((var.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
-            return boolEqView((BoolVar) var);
-        } else {
-            if (_me().getSettings().enableViews()) {
-                return new EqView(var);
-            } else {
-                IntVar ov = var.duplicate();
-                _me().arithm(ov, "=", var).post();
-                return ov;
-            }
-        }
-    }
 
     /**
      * Creates a view based on <i>var</i>, equal to <i>var+cste</i>.
@@ -125,12 +88,15 @@ public interface IViewFactory extends ISelf<Model> {
         if (cste == 0) {
             return var;
         }
+        String name = "(" + var.getName() + "+" + cste + ")";
+        if(var.isInstantiated()) {
+            return _me().intVar(name, var.getValue() + cste);
+        }
         if (_me().getSettings().enableViews()) {
             return new OffsetView(var, cste);
         } else {
             int lb = var.getLB() + cste;
             int ub = var.getUB() + cste;
-            String name = "(" + var.getName() + "+" + cste + ")";
             IntVar ov;
             if (var.hasEnumeratedDomain()) {
                 ov = _me().intVar(name, lb, ub, false);
@@ -150,6 +116,9 @@ public interface IViewFactory extends ISelf<Model> {
      * @return an IntVar equal to <i>-var</i>
      */
     default IntVar intMinusView(IntVar var) {
+        if(var.isInstantiated()) {
+            return _me().intVar(-var.getValue());
+        }
         if (_me().getSettings().enableViews()) {
             return new MinusView(var);
         } else {
@@ -194,6 +163,9 @@ public interface IViewFactory extends ISelf<Model> {
             } else if (cste == 1) {
                 v2 = var;
             } else {
+                if(var.isInstantiated()) {
+                    return _me().intVar(var.getValue() * cste);
+                }
                 if (_me().getSettings().enableViews()) {
                     v2 = new ScaleView(var, cste);
                 } else {
