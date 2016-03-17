@@ -371,7 +371,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (!contains(value)) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
-        } else {
+        } else if(!isInstantiated()){
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             int index = V2I.get(value);
             assert index > -1 && this.INDICES.get(index);
