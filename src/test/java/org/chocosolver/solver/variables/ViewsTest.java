@@ -34,6 +34,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -688,6 +689,16 @@ public class ViewsTest {
         testModels(viewModel,noViewModel);
     }
 
+    @Test(groups = "10s", timeOut=60000)
+    public void testBoolNotNot() {
+        int n = 20;
+        Model viewModel = makeModel(true);
+        boolNotNot(viewModel, n);
+        Model noViewModel = makeModel(false);
+        boolNotNot(noViewModel, n);
+        testModels(viewModel, noViewModel);
+    }
+
     private static Model makeModel(final boolean withViews){
         Model m = new Model("with"+(withViews?"":"out")+" views");
         m.set(new Settings() {
@@ -705,6 +716,8 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.intOffsetView(x[i],42);
         }
+        checkDomains(true, x, y);
+
         model.allDifferent(x).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
@@ -715,6 +728,8 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.intScaleView(x[i],42);
         }
+        checkDomains(false, x, y);
+
         model.allDifferent(x).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
@@ -725,6 +740,8 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.intEqView(x[i]);
         }
+        checkDomains(true, x, y);
+
         model.allDifferent(x).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
@@ -735,6 +752,8 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.intMinusView(x[i]);
         }
+        checkDomains(true, x, y);
+
         model.allDifferent(x).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
@@ -745,6 +764,8 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.boolEqView(x[i]);
         }
+        checkDomains(true, x, y);
+
         model.sum(x,"=",n/2).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
@@ -755,8 +776,55 @@ public class ViewsTest {
         for(int i=0;i<n;i++){
             y[i] = model.boolNotView(x[i]);
         }
+        checkDomains(true, x, y);
+
         model.sum(x,"=",n/2).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
+    }
+
+    public static void boolNotNot(Model model, int n) {
+        BoolVar[] x = model.boolVarArray(n);
+        BoolVar[] y = new BoolVar[n];
+        for (int i = 0; i < x.length; i++) {
+            y[i] = model.boolNotView(x[i]);
+        }
+        BoolVar[] z = new BoolVar[n];
+        for (int i = 0; i < y.length; i++) {
+            z[i] = model.boolNotView(y[i]);
+        }
+        checkDomains(true, x, y, z);
+
+        model.sum(x, "=", n/2).post();
+        model.getSolver().set(SearchStrategyFactory.randomSearch(z, 0));
+    }
+
+    private static <T extends IntVar> void checkDomains(boolean noHoles, T[] ... vars) {
+        assert vars.length > 0;
+
+        for (T[] varArray : vars) {
+            for (T var : varArray) {
+                // Not in the domain
+                int prev = -1;
+
+                DisposableValueIterator it = var.getValueIterator(true);
+                for(int i = var.getLB(); i != Integer.MAX_VALUE; i = var.nextValue(i)) {
+                    assertTrue(it.hasNext());
+                    if(prev != -1) {
+                        if(noHoles) {
+                            assertEquals(var.nextValueOut(i), var.getUB()+1);
+                            assertEquals(var.previousValueOut(i), var.getLB()-1);
+                        }
+                        assertTrue(it.hasPrevious());
+//                        assertEquals(it.previous(), prev);
+                        assertEquals(var.previousValue(i), prev);
+                    }
+                    prev = i;
+                    assertEquals(it.next(), i);
+                }
+
+            }
+        }
+
     }
 
     private static void testModels(Model... models) {
