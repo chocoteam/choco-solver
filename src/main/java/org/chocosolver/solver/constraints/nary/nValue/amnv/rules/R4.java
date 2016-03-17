@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.rules;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
@@ -62,10 +61,5 @@ public class R4 implements R {
             filter.reset(vs);
             filter.filter();
         }
-    }
-
-    @Override
-    public R duplicate(Model model) {
-        return new R4();
     }
 }

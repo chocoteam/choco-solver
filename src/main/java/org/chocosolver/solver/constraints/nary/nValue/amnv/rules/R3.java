@@ -155,9 +155,4 @@ public class R3 implements R {
             }
         }
     }
-
-    @Override
-    public R duplicate(Model model) {
-        return new R3(n, model);
-    }
 }

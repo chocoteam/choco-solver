@@ -29,8 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
@@ -129,12 +127,4 @@ public class MD implements F{
 		return false;
 	}
 
-	@Override
-	public void duplicate(Model model, THashMap<Object, Object> identitymap) {
-		if(!identitymap.containsKey(this)){
-			graph.duplicate(model, identitymap);
-			UndirectedGraph g = (UndirectedGraph)identitymap.get(graph);
-			identitymap.put(this, new MD(g));
-		}
-	}
 }
