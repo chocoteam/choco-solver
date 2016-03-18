@@ -32,11 +32,8 @@ package org.chocosolver.util.objects;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.structure.IndexedObject;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.iterators.DisposableIntIterator;
-
-import java.util.ArrayList;
 
 /**
  * A stored list dedicated to positive integers and three operations :
@@ -48,7 +45,11 @@ import java.util.ArrayList;
  * the index of the first element.
  * IT DOES NOT PRESERVE THE ORDER OF THE LIST
  */
-public class StoredIndexedBipartiteSet /*implements IStateIntVector */ {
+public class StoredIndexedBipartiteSet {
+
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
     /**
      * The list of values
@@ -77,9 +78,9 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */ {
 
     protected BipartiteSetIterator _cachedIterator;
 
-    private StoredIndexedBipartiteSet() {
-
-    }
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
     /**
      * @param environment the environment
@@ -89,37 +90,9 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */ {
         buildList(environment, values);
     }
 
-    /**
-     * @param environment the environment
-     * @param values:     a set of IndexObjects which have different indexes !
-     */
-    public StoredIndexedBipartiteSet(final IEnvironment environment, final IndexedObject[] values) {
-        final int[] intvalues = new int[values.length];
-        for (int i = 0; i < intvalues.length; i++) {
-            intvalues[i] = values[i].getObjectIdx();
-        }
-        buildList(environment, intvalues);
-        idxToObjects = new IndexedObject[position.length];
-        for (int i = 0; i < intvalues.length; i++) {
-            idxToObjects[values[i].getObjectIdx()] = values[i];
-        }
-    }
-
-    /**
-     * @param environment the environment
-     * @param values:     a set of IndexObjects which have different indexes !
-     */
-    public StoredIndexedBipartiteSet(final IEnvironment environment, final ArrayList<IndexedObject> values) {
-        final int[] intvalues = new int[values.size()];
-        for (int i = 0; i < intvalues.length; i++) {
-            intvalues[i] = values.get(i).getObjectIdx();
-        }
-        buildList(environment, intvalues);
-        idxToObjects = new IndexedObject[position.length];
-        for (int i = 0; i < intvalues.length; i++) {
-            idxToObjects[values.get(i).getObjectIdx()] = values.get(i);
-        }
-    }
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     public void buildList(final IEnvironment environment, final int[] values) {
         this.list = values;
@@ -134,59 +107,6 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */ {
             position[values[i]] = i;
         }
         this.last = environment.makeInt(list.length - 1);
-    }
-
-    /**
-     * Create a stored bipartite set with a size.
-     * Thus the value stored will go from 0 to nbValues.
-     *
-     * @param environment the environment
-     * @param nbValues nb values
-     */
-    public StoredIndexedBipartiteSet(final IEnvironment environment, final int nbValues) {
-        final int[] values = new int[nbValues];
-        for (int i = 0; i < nbValues; i++) {
-            values[i] = i;
-        }
-        buildList(environment, values);
-    }
-
-    /**
-     * Increase the number of value watched.
-     * BEWARE: be sure your are correctly calling this method.
-     * It deletes everything already declared
-     *
-     * @param gap the gap the reach the expected size
-     */
-    public final void increaseSize(final int gap) {
-        final int l = list.length;
-        final int[] newList = new int[l + gap];
-        for (int i = 0; i < l + gap; i++) {
-            newList[i] = i;
-        }
-        int maxElt = 0;
-        for (int i = 0; i < newList.length; i++) {
-            if (newList[i] > maxElt) {
-                maxElt = newList[i];
-            }
-        }
-        final int[] newPosition = new int[maxElt + 1];
-        for (int i = 0; i < newList.length; i++) {
-            newPosition[newList[i]] = i;
-        }
-        // record already removed values
-        final int end = last.get() + 1;
-        final int[] removed = new int[list.length - end];
-        System.arraycopy(list, end, removed, 0, list.length - end);
-
-        this.list = newList;
-        this.position = newPosition;
-        final IEnvironment env = last.getEnvironment();
-        this.last = null;
-        this.last = env.makeInt(list.length - 1);
-        for (int i = 0; i < removed.length; i++) {
-            remove(removed[i]);
-        }
     }
 
     public final int size() {
@@ -241,10 +161,6 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */ {
 
     public final int get(final int index) {
         return list[index];
-    }
-
-    public final IndexedObject getObject(final int index) {
-        return idxToObjects[list[index]];
     }
 
     @SuppressWarnings("UnusedParameters")
@@ -368,24 +284,5 @@ public class StoredIndexedBipartiteSet /*implements IStateIntVector */ {
                 nlast--;
             }
         }
-    }
-
-    public StoredIndexedBipartiteSet duplicate(Model model) {
-        StoredIndexedBipartiteSet copy = new StoredIndexedBipartiteSet();
-        copy.list = list.clone();
-        copy.position = position.clone();
-        copy.last = model.getEnvironment().makeInt(list.length - 1);
-        if (this.idxToObjects != null) {
-            copy.idxToObjects = new IndexedObject[position.length];
-            for (int i = 0; i < idxToObjects.length; i++) {
-                try {
-                    copy.idxToObjects[i] = idxToObjects[i].clone();
-                } catch (CloneNotSupportedException e) {
-                    e.printStackTrace();
-                    throw new SolverException("Clone not supported");
-                }
-            }
-        }
-        return copy;
     }
 }

@@ -125,16 +125,4 @@ class CouplesBitSetTable extends BinRelation {
         }
         return false;
     }
-
-    @Override
-    public BinRelation duplicate() {
-        BitSet[][] nTables = new BitSet[table.length][];
-        for (int i = 0; i < table.length; i++) {
-            nTables[i] = new BitSet[table[i].length];
-            for (int j = 0; j < table[i].length; j++) {
-                nTables[i][j] = (BitSet) table[i][j].clone();
-            }
-        }
-        return new CouplesBitSetTable(nTables, offsets.clone(), feasible);
-    }
 }

@@ -129,11 +129,4 @@ public class TuplesVeryLargeTable extends LargeRelation {
             deepCopy(from.get(k), _to);
         }
     }
-
-    @Override
-    public LargeRelation duplicate() {
-        TIntObjectHashMap<TIntObjectHashMap> _supports = new TIntObjectHashMap<>();
-        deepCopy(supports, _supports);
-        return new TuplesVeryLargeTable(n, lowerbounds.clone(), upperbounds.clone(), feasible, _supports);
-    }
 }

@@ -160,27 +160,6 @@ public class MultivaluedDecisionDiagram  {
         init(TUPLES);
     }
 
-    /**
-     * Create a new MDD, perfect copy of the input one.
-     *
-     * @param MDD input MDD
-     */
-    @SuppressWarnings("unchecked")
-    private MultivaluedDecisionDiagram(MultivaluedDecisionDiagram MDD) {
-        this.nbLayers = MDD.nbLayers;
-        this.offsets = MDD.offsets.clone();
-        this.sizes = MDD.sizes.clone();
-        this.compactOnce = MDD.compactOnce;
-        this.sortTuples = MDD.sortTuples;
-        this.mdd = MDD.mdd.clone();
-        this.nextFreeCell = sizes[0];
-        this._nodesToRemove = new TIntIntHashMap(16, .5f, -1, -1);
-        this._identicalNodes = new ArrayList[nbLayers][];
-        this._nodeId = new TIntArrayList[nbLayers][];
-        this._removedCells = MDD._removedCells;
-        this._pos = MDD._pos.clone();
-    }
-
     @SuppressWarnings("unchecked")
     private void init(Tuples TUPLES) {
         nextFreeCell = sizes[0];
@@ -447,14 +426,4 @@ public class MultivaluedDecisionDiagram  {
         }
         return false;
     }
-
-    /**
-     * Duplicate the current MDD
-     *
-     * @return a copy of the current MDD
-     */
-    public MultivaluedDecisionDiagram duplicate() {
-        return new MultivaluedDecisionDiagram(this);
-    }
-
 }

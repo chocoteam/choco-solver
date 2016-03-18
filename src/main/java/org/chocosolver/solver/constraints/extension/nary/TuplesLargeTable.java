@@ -142,13 +142,4 @@ public class TuplesLargeTable extends LargeRelation {
         }
         ts.add(a);
     }
-
-    @Override
-    public LargeRelation duplicate() {
-        TIntObjectHashMap<TIntSet> ntables = new TIntObjectHashMap<>();
-        for (int t : tables.keys()) {
-            ntables.put(t, new TIntHashSet(tables.get(t)));
-        }
-        return new TuplesLargeTable(n, ntables, lowerbounds.clone(), upperbounds.clone(), feasible, blocks.clone());
-    }
 }

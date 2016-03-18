@@ -56,6 +56,4 @@ public abstract class LargeRelation  {
         }
         return true;
     }
-
-    public abstract LargeRelation duplicate();
 }

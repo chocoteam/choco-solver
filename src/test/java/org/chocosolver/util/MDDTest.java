@@ -51,8 +51,6 @@ public class MDDTest {
         Tuples tuples = new Tuples();
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples);
         Assert.assertEquals(mdd.getDiagram(), new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
-        mdd = mdd.duplicate();
-        Assert.assertEquals(mdd.getDiagram(), new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -70,8 +68,6 @@ public class MDDTest {
         tuples.add(0, 1, 1, 1);
         tuples.add(2, 2, 2, 2);
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples);
-        Assert.assertEquals(mdd.getDiagram(), new int[]{3, 0, 12, 6, 6, 0, 9, 9, 0, -1, -1, 0, 0, 0, 15, 0, 0, 18, 0, 0, -1});
-        mdd = mdd.duplicate();
         Assert.assertEquals(mdd.getDiagram(), new int[]{3, 0, 12, 6, 6, 0, 9, 9, 0, -1, -1, 0, 0, 0, 15, 0, 0, 18, 0, 0, -1});
         for (int t = 0; t < tuples.nbTuples(); t++) {
             Assert.assertTrue(mdd.exists(tuples.get(t)));
@@ -93,8 +89,6 @@ public class MDDTest {
         tuples.add(1, 1, 1);
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples);
         Assert.assertEquals(mdd.getDiagram(), new int[]{2, 2, 4, 4, -1, -1});
-        mdd = mdd.duplicate();
-        Assert.assertEquals(mdd.getDiagram(), new int[]{2, 2, 4, 4, -1, -1});
         for (int t = 0; t < tuples.nbTuples(); t++) {
             Assert.assertTrue(mdd.exists(tuples.get(t)));
         }
@@ -110,8 +104,6 @@ public class MDDTest {
         tuples.add(0, -1);
         tuples.add(-1, 2);
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples);
-        Assert.assertEquals(mdd.getDiagram(), new int[]{6, 2, -1, 0, 0, 0, 0, 0, 0, -1});
-        mdd = mdd.duplicate();
         Assert.assertEquals(mdd.getDiagram(), new int[]{6, 2, -1, 0, 0, 0, 0, 0, 0, -1});
         for (int t = 0; t < tuples.nbTuples(); t++) {
             Assert.assertTrue(mdd.exists(tuples.get(t)));
@@ -129,8 +121,6 @@ public class MDDTest {
         tuples.add(1, -1);
         tuples.add(0, 1);
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples);
-        Assert.assertEquals(mdd.getDiagram(), new int[]{2, 5, -1, 0, -1, -1, 0, 0});
-        mdd = mdd.duplicate();
         Assert.assertEquals(mdd.getDiagram(), new int[]{2, 5, -1, 0, -1, -1, 0, 0});
         for (int t = 0; t < tuples.nbTuples(); t++) {
             Assert.assertTrue(mdd.exists(tuples.get(t)));

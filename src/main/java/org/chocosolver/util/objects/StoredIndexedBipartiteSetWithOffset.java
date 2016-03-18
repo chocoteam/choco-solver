@@ -30,11 +30,6 @@
 package org.chocosolver.util.objects;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.structure.IndexedObject;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.exception.SolverException;
-
-import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.
@@ -45,23 +40,23 @@ import java.util.ArrayList;
  */
 public class StoredIndexedBipartiteSetWithOffset extends StoredIndexedBipartiteSet {
 
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
     int offset;
+
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
     public StoredIndexedBipartiteSetWithOffset(IEnvironment environment, int[] values) {
         super(environment, values);
     }
 
-    public StoredIndexedBipartiteSetWithOffset(IEnvironment environment, IndexedObject[] values) {
-        super(environment, values);
-    }
-
-    public StoredIndexedBipartiteSetWithOffset(IEnvironment environment, ArrayList<IndexedObject> values) {
-        super(environment, values);
-    }
-
-    public StoredIndexedBipartiteSetWithOffset(IEnvironment environment, int nbValues) {
-        super(environment, nbValues);
-    }
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     public void buildList(IEnvironment environment, int[] values) {
         this.list = values;
@@ -84,7 +79,6 @@ public class StoredIndexedBipartiteSetWithOffset extends StoredIndexedBipartiteS
         return position[object - offset] <= last.get();
     }
 
-
     public void remove(int object) {
         if (contain(object)) {
             int idxToRem = position[object - offset];
@@ -103,21 +97,5 @@ public class StoredIndexedBipartiteSetWithOffset extends StoredIndexedBipartiteS
 
     public final int getOffset() {
         return offset;
-    }
-
-    public StoredIndexedBipartiteSetWithOffset duplicate(Model model) {
-        StoredIndexedBipartiteSetWithOffset copy = new StoredIndexedBipartiteSetWithOffset(model.getEnvironment(), list.clone());
-        if (this.idxToObjects != null) {
-            copy.idxToObjects = new IndexedObject[position.length];
-            for (int i = 0; i < idxToObjects.length; i++) {
-                try {
-                    copy.idxToObjects[i] = idxToObjects[i].clone();
-                } catch (CloneNotSupportedException e) {
-                    e.printStackTrace();
-                    throw new SolverException("Clone not supported");
-                }
-            }
-        }
-        return copy;
     }
 }

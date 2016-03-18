@@ -94,9 +94,4 @@ public class TuplesList extends LargeRelation {
     public boolean isConsistent(int[] tuple) {
         return Arrays.binarySearch(tuplesIndexes, tuple, TCOMP) >= 0;
     }
-
-    @Override
-    public LargeRelation duplicate() {
-        return new TuplesList(this.tuplesIndexes.clone());
-    }
 }

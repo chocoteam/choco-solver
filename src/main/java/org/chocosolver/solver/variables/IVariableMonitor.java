@@ -61,14 +61,4 @@ public interface IVariableMonitor<V extends Variable> extends ICause {
      * @param evt modification event
 	 */
     void onUpdate(V var, IEventType evt) throws ContradictionException;
-
-    /**
-     * Duplicate <code>this</code> (which naturally adds it into <code>solver</code>).
-     * IMonitor should be duplicated only if it is about modeling and not solving (ie: search).
-     * @param model target model
-     * @param identitymap a map to guarantee uniqueness of objects
-     */
-    default void duplicate(Model model, THashMap<Object, Object> identitymap){
-        // nothing to do
-    }
 }

@@ -161,9 +161,4 @@ class IterTuplesTable extends TuplesList {
     public boolean checkTuple(int[] tuple) {
         throw new SolverException("checkTuple should not be used on an IterRelation");
     }
-
-    @Override
-    public LargeRelation duplicate() {
-        return new IterTuplesTable(this.tuplesIndexes.clone(), this.nbVar, this.lowerbounds.clone(), this.ranges.clone(), this.table.clone());
-    }
 }

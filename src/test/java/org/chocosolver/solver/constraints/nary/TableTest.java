@@ -411,27 +411,6 @@ public class TableTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testTuplesVeryLargeTableDuplicate() {
-        Model model = new Model();
-        IntVar[] vars = model.intVarArray("vars", 4, 0, 3, false);
-        Tuples t = new Tuples(false);
-        t.add(1, 1, 1, 1);
-        t.add(1, 1, 2, 1);
-        TuplesVeryLargeTable or = new TuplesVeryLargeTable(t, vars);
-        LargeRelation tt = or.duplicate();
-
-        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 1, 1}));
-        Assert.assertTrue(tt.checkTuple(new int[]{1, 1, 2, 1}));
-        Assert.assertFalse(tt.checkTuple(new int[]{2, 1, 1, 1}));
-        Assert.assertFalse(tt.checkTuple(new int[]{1, 2, 1, 1}));
-
-        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 1, 1}));
-        Assert.assertFalse(tt.isConsistent(new int[]{1, 1, 2, 1}));
-        Assert.assertTrue(tt.isConsistent(new int[]{2, 1, 1, 1}));
-        Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
-    }
-
-    @Test(groups="1s", timeOut=60000)
     public void testPDav() {
         for (String a : ALGOS) {
             Model model = new Model();

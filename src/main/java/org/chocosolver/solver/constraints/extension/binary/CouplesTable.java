@@ -87,9 +87,4 @@ class CouplesTable extends BinRelation {
     public boolean checkCouple(int x, int y) {
         return table.get((x - offset1) * range2 + y - offset2);
     }
-
-    @Override
-    public BinRelation duplicate() {
-        return new CouplesTable((BitSet) table.clone(), offset1, offset2, range1, range2, feasible);
-    }
 }

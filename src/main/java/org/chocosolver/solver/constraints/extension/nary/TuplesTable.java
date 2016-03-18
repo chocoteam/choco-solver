@@ -129,9 +129,4 @@ public class TuplesTable extends LargeRelation {
         }
         table.set(address);
     }
-
-    @Override
-    public LargeRelation duplicate() {
-        return new TuplesTable(n, (BitSet) table.clone(), lowerbounds.clone(), upperbounds.clone(), feasible, blocks.clone());
-    }
 }
