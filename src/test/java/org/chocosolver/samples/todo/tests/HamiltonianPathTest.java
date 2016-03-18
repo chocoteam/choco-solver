@@ -36,7 +36,7 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.graphs.input.GraphGenerator;
+import org.chocosolver.samples.todo.input.GraphGenerator;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;

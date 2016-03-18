@@ -38,7 +38,7 @@ import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.intVarSearch;
 import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.minDomIntVar;
-import static org.chocosolver.util.objects.graphs.input.HCP_Utils.generateKingTourInstance;
+import static org.chocosolver.samples.todo.input.HCP_Utils.generateKingTourInstance;
 
 /**
  * Solves the Knight's Tour Problem
@@ -68,7 +68,7 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
     @Override
     public void buildModel() {
         model = new Model();
-        boolean[][] matrix = generateKingTourInstance(40);
+        boolean[][] matrix = generateKingTourInstance(20);
         int n = matrix.length;
         succ = new IntVar[n];
         TIntArrayList values = new TIntArrayList();

@@ -34,7 +34,7 @@
  * Time: 01:57
  */
 
-package org.chocosolver.util.objects.graphs.input;
+package org.chocosolver.samples.todo.input;
 
 import java.io.BufferedReader;
 import java.io.File;
