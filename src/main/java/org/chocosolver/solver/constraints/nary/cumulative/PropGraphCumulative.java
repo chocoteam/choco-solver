@@ -145,7 +145,7 @@ public class PropGraphCumulative extends PropFullCumulative {
         tasks.add(taskIndex);
         ISet env = g.getNeighOf(taskIndex);
         for (int i : env) {
-            if (!disjoint(taskIndex, i)) {
+            if (notDisjoint(taskIndex, i)) {
                 tasks.add(i);
             }
         }
@@ -156,14 +156,14 @@ public class PropGraphCumulative extends PropFullCumulative {
         return s[i].getUB() < e[i].getLB();
     }
 
-    protected boolean disjoint(int i, int j) {
-        return s[i].getLB() >= e[j].getUB() || s[j].getLB() >= e[i].getUB();
+    protected boolean notDisjoint(int i, int j) {
+        return s[i].getLB() < e[j].getUB() && s[j].getLB() < e[i].getUB();
     }
 
     private void naiveGraphComputation() {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
-                if (!disjoint(i, j)) {
+                if (notDisjoint(i, j)) {
                     g.addEdge(i, j);
                 }
             }

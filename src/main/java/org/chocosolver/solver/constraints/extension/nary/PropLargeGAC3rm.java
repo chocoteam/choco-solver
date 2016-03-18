@@ -181,7 +181,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
             try {
                 while (it.hasNext()) {
                     val = it.next();
-                    if (!isValid(lastSupport(indexVar, val))) {
+                    if (isInvalid(lastSupport(indexVar, val))) {
                         currentSupport = seekNextSupport(indexVar, val);
                         if (currentSupport != null) {
                             setSupport(currentSupport);
@@ -197,7 +197,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
             }
         } else {
             int[] inf_supports = lastBoundSupport(indexVar, 0);
-            if (vars[indexVar].getLB() != inf_supports[indexVar] || !isValid(inf_supports)) {
+            if (vars[indexVar].getLB() != inf_supports[indexVar] || isInvalid(inf_supports)) {
                 for (val = vars[indexVar].getLB(); val <= vars[indexVar].getUB(); val++) {
                     currentSupport = seekNextSupport(indexVar, val);
                     if (currentSupport != null) {
@@ -208,7 +208,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
                 vars[indexVar].updateLowerBound(val, this);
             }
             int[] sup_supports = lastBoundSupport(indexVar, 1);
-            if (vars[indexVar].getUB() != sup_supports[indexVar] || !isValid(sup_supports)) {
+            if (vars[indexVar].getUB() != sup_supports[indexVar] || isInvalid(sup_supports)) {
                 for (val = vars[indexVar].getUB(); val >= vars[indexVar].getLB(); val--) {
                     currentSupport = seekNextSupport(indexVar, val);
                     if (currentSupport != null) {
@@ -268,11 +268,11 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
     }
 
 
-    // Is tuple valide ?
-    public boolean isValid(int[] tuple) {
+    // Is tuple invalid ?
+    public boolean isInvalid(int[] tuple) {
         for (int i = 0; i < size; i++)
-            if (!vars[i].contains(tuple[i])) return false;
-        return true;
+            if (!vars[i].contains(tuple[i])) return true;
+        return false;
     }
 
 

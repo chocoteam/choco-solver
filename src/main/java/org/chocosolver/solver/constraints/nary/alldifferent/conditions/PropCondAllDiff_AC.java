@@ -46,7 +46,6 @@ import org.chocosolver.util.ESat;
 public class PropCondAllDiff_AC extends Propagator<IntVar> {
 
     private Condition condition;
-    private AlgoAllDiffAC filter;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -84,7 +83,7 @@ public class PropCondAllDiff_AC extends Propagator<IntVar> {
                 vs[nb] = v;
             }
         }
-        filter = new AlgoAllDiffAC(vs, this);
+        AlgoAllDiffAC filter = new AlgoAllDiffAC(vs, this);
         filter.propagate();
     }
 

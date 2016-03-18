@@ -31,6 +31,7 @@ package org.chocosolver.solver.constraints.reification;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.util.ESat;
 
 /**
@@ -59,8 +60,8 @@ public class ConDisConstraint extends Constraint{
     @Override
     public ESat isSatisfied() {
         ESat so = ESat.UNDEFINED;
-        for (int i = 0; i < propagators.length; i++) {
-            so = propagators[i].isEntailed();
+        for (Propagator propagator : propagators) {
+            so = propagator.isEntailed();
             if (!so.equals(ESat.TRUE)) {
                 return so;
             }

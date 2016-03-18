@@ -36,7 +36,6 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateDoubleVector;
 import org.chocosolver.memory.IStateIntVector;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.automata.structure.Node;
 import org.chocosolver.solver.exception.ContradictionException;

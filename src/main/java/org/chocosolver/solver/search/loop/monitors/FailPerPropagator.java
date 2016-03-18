@@ -62,10 +62,9 @@ public class FailPerPropagator implements IMonitorContradiction {
     }
 
     private void init(Constraint[] constraints) {
-        for (int c = 0; c < constraints.length; c++) {
-            Propagator[] propagators = constraints[c].getPropagators();
-            for (int p = 0; p < propagators.length; p++) {
-                p2w.put(propagators[p].getId(), 0);
+        for (Constraint cstr : constraints) {
+            for (Propagator propagator : cstr.getPropagators()) {
+                p2w.put(propagator.getId(), 0);
             }
         }
     }

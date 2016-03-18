@@ -660,15 +660,15 @@ public class Model implements IModel {
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
         // specific behavior for dynamic addition and/or reified constraints
-        for (int i = 0; i < cs.length; i++) {
+        for (Constraint c : cs) {
             if (dynAdd) {
-                engine.dynamicAddition(permanent, cs[i].getPropagators());
+                engine.dynamicAddition(permanent, c.getPropagators());
             }
-            for(Propagator p: cs[i].getPropagators()){
+            for (Propagator p : c.getPropagators()) {
                 p.getConstraint().checkNewStatus(Constraint.Status.POSTED);
             }
-            cs[i].declareAs(Constraint.Status.POSTED, cIdx);
-            cstrs[cIdx++] = cs[i];
+            c.declareAs(Constraint.Status.POSTED, cIdx);
+            cstrs[cIdx++] = c;
         }
     }
 

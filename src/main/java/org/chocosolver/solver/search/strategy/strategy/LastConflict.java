@@ -171,8 +171,8 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     private boolean inScope(Variable target) {
         Variable[] scope = mainStrategy.vars;
         if (target != null) {
-            for (int v = 0; v < scope.length; v++) {
-                if (scope[v].getId() == target.getId()) {
+            for (Variable aScope : scope) {
+                if (aScope.getId() == target.getId()) {
                     return true;
                 }
             }

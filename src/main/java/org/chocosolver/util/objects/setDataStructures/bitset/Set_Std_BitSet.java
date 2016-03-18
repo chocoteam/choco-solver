@@ -98,8 +98,7 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 
 	@Override
 	public boolean contain(int element) {
-		if(element<offset)return false;
-		return get(element-offset);
+		return element >= offset && get(element - offset);
 	}
 
 	@Override

@@ -160,9 +160,9 @@ public final class MathUtils {
      */
     public static int sum(int[][] values) {
         int s = 0;
-        for (int i = 0; i < values.length; i++) {
-            for (int j = 0; j < values[i].length; j++) {
-                s += values[i][j];
+        for (int[] value : values) {
+            for (int j = 0; j < value.length; j++) {
+                s += value[j];
             }
         }
         return s;
@@ -175,9 +175,9 @@ public final class MathUtils {
      */
     public static int max(int[] values) {
         int max = Integer.MIN_VALUE;
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] > max) {
-                max = values[i];
+        for (int value : values) {
+            if (value > max) {
+                max = value;
             }
         }
         return max;
@@ -190,10 +190,10 @@ public final class MathUtils {
      */
     public static int max(int[][] values) {
         int max = Integer.MIN_VALUE;
-        for (int i = 0; i < values.length; i++) {
-            for (int j = 0; j < values[i].length; j++) {
-                if (values[i][j] > max) {
-                    max = values[i][j];
+        for (int[] value : values) {
+            for (int j = 0; j < value.length; j++) {
+                if (value[j] > max) {
+                    max = value[j];
                 }
             }
         }
@@ -207,9 +207,9 @@ public final class MathUtils {
      */
     public static int min(int[] values) {
         int min = Integer.MAX_VALUE;
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] < min) {
-                min = values[i];
+        for (int value : values) {
+            if (value < min) {
+                min = value;
             }
         }
         return min;
@@ -222,10 +222,10 @@ public final class MathUtils {
      */
     public static int min(int[][] values) {
         int min = Integer.MAX_VALUE;
-        for (int i = 0; i < values.length; i++) {
-            for (int j = 0; j < values[i].length; j++) {
-                if (values[i][j] < min) {
-                    min = values[i][j];
+        for (int[] value : values) {
+            for (int j = 0; j < value.length; j++) {
+                if (value[j] < min) {
+                    min = value[j];
                 }
             }
         }

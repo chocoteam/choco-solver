@@ -81,9 +81,7 @@ public class DefaultSearchBinder implements ISearchBinder {
         List<RealVar> lrvars = new ArrayList<>();
         Variable[] variables = model.getVars();
         Variable objective = null;
-        int n = variables.length;
-        for (int i = 0; i < n; i++) {
-            Variable var = variables[i];
+        for (Variable var : variables) {
             int type = var.getTypeAndKind();
             if ((type & Variable.CSTE) == 0) {
                 int kind = type & Variable.KIND;

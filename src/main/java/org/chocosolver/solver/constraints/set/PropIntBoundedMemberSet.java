@@ -97,7 +97,6 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
 		if (iv.isInstantiated()) {
 			set.force(iv.getValue(), this);
 			setPassive();
-			return;
 		}else {
 			ISet ub = set.getUB();
 			if (ub.getSize() == 0) {
@@ -116,7 +115,6 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
 				if (iv.isInstantiated()) {
 					set.force(iv.getValue(), this);
 					setPassive();
-					return;
 				}
 			}
 		}

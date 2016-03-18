@@ -29,9 +29,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.IEventType;
 

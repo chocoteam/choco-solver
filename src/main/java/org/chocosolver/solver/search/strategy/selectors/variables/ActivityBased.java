@@ -491,9 +491,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         @Override
         public void update(int nb_probes) {
             double activity, oldmA, U;
-            int[] keys = Av.keys();
-            for (int j = 0; j < keys.length; j++) {
-                int k = keys[j];
+            for (int k : Av.keys()) {
                 activity = Av.get(k);
                 oldmA = mAv.get(k);
                 U = activity - oldmA;

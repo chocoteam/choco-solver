@@ -113,8 +113,8 @@ public class Constraint {
         this.propagators = propagators;
         this.mStatus = Status.FREE;
         this.cidx = -1;
-        for (int i = 0; i < propagators.length; i++) {
-            propagators[i].defineIn(this);
+        for (Propagator propagator : propagators) {
+            propagator.defineIn(this);
         }
     }
 
@@ -146,8 +146,8 @@ public class Constraint {
      */
     public ESat isSatisfied() {
         int sat = 0;
-        for (int i = 0; i < propagators.length; i++) {
-            ESat entail = propagators[i].isEntailed();
+        for (Propagator propagator : propagators) {
+            ESat entail = propagator.isEntailed();
             if (entail.equals(ESat.FALSE)) {
                 return entail;
             } else if (entail.equals(ESat.TRUE)) {
