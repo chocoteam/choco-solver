@@ -130,28 +130,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     /**
      * Create an enumerated IntVar based on a bitset
      * @param name name of the variable
-     * @param offset lower bound
-     * @param values values in the domain (bit to true + offset)
-     * @param model declaring model
-     */
-    private BitsetIntVarImpl(String name, int offset, BitSet values, Model model) {
-        super(name, model);
-        IEnvironment env = this.model.getEnvironment();
-        OFFSET = offset;
-        int cardinality = values.previousSetBit(values.size());
-        this.VALUES = env.makeBitSet(cardinality);
-        for (int i = values.nextSetBit(0); i > -1; i = values.nextSetBit(i + 1)) {
-            this.VALUES.set(i);
-        }
-        this.LB = env.makeInt(VALUES.nextSetBit(0));
-        this.UB = env.makeInt(VALUES.prevSetBit(VALUES.size()));
-        this.SIZE = env.makeInt(values.cardinality());
-        LENGTH = this.UB.get();
-    }
-
-    /**
-     * Create an enumerated IntVar based on a bitset
-     * @param name name of the variable
      * @param min lower bound
      * @param max upper bound
      * @param model declaring model

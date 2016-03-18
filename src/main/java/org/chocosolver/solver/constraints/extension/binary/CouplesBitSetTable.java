@@ -94,14 +94,6 @@ class CouplesBitSetTable extends BinRelation {
         }
     }
 
-    // required for duplicate method, should not be called by default
-    private CouplesBitSetTable(BitSet[][] table, int[] offsets, boolean feasible) {
-        this.table = table;
-        this.offsets = offsets;
-        this.feasible = feasible;
-
-    }
-
     public boolean isConsistent(int x, int y) {
         return table[0][x - offsets[0]].get(y - offsets[1]);
     }
