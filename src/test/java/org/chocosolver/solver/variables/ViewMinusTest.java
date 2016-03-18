@@ -268,8 +268,8 @@ public class ViewMinusTest {
     }
 
     /**
-     * Provides two test data to use the two propagation methods: ac and without ac
-     * @return ac boolean
+     * Provides two test data to sample enableViews parameter
+     * @return views boolean
      */
     @DataProvider(name = "views")
     public Object[][] createData() {

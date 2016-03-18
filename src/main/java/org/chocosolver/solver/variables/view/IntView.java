@@ -47,7 +47,7 @@ import java.util.Iterator;
 
 /**
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
- * Invoking an operation on the view executes the appropriate operation on the view's varaible."
+ * Invoking an operation on the view executes the appropriate operation on the view's variable."
  * <p/>
  * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
  * C. Shulte and G. Tack.<br/>
@@ -335,6 +335,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     @Override
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         assert cause != null;
+        if(lb>ub)contradiction(cause,"");
         int olb = this.getLB();
         int oub = this.getUB();
         boolean hasChanged = false;
@@ -344,7 +345,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
             if (olb < lb) {
                 model.getSolver().getEventObserver().updateLowerBound(this, lb, getLB(), cause);
                 e = IntEventType.INCLOW;
-                if(doUpdateUpperBoundOfVar(lb)){
+                if(doUpdateLowerBoundOfVar(lb)){
                     hasChanged = true;
                 }else{
                     model.getSolver().getEventObserver().undo();

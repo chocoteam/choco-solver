@@ -700,6 +700,7 @@ public class ViewsTest {
         checkDomains(true, x, y);
 
         model.allDifferent(x).post();
+        model.sum(y, "<", n*2).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
 
@@ -712,6 +713,7 @@ public class ViewsTest {
         checkDomains(false, x, y);
 
         model.allDifferent(x).post();
+        model.sum(y, "<", n*2).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
 
@@ -724,6 +726,7 @@ public class ViewsTest {
         checkDomains(true, x, y);
 
         model.allDifferent(x).post();
+        model.sum(y, "<", n*2).post();
         model.getSolver().set(SearchStrategyFactory.randomSearch(y,0));
     }
 

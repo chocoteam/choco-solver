@@ -36,10 +36,9 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.testng.annotations.Test;
 
-import static java.util.Arrays.asList;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import java.util.Arrays;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Alexandre LEBRUN
@@ -104,7 +103,7 @@ public class AtMost1EmptyTest {
         int nbSol = 0;
         while (model.solve()) {
             nbSol++;
-            boolean atMostOne = asList(vars).stream()
+            boolean atMostOne = Arrays.stream(vars)
                     .map(SetVar::getValue)
                     .filter(ISet::isEmpty)
                     .count() <= 1;
