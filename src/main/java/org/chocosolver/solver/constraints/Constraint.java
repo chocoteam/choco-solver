@@ -77,27 +77,31 @@ public class Constraint {
      *  Propagators of the constraint (they will filter domains and eventually check solutions)
      */
     final protected Propagator[] propagators;
+
     /**
      * BoolVar that reifies this constraint, unique.
      */
-    BoolVar boolReif;
+    private BoolVar boolReif;
+
     /**
      * Opposite constraint of this constraint, unique.
      */
-    Constraint opposite;
+    private Constraint opposite;
 
     /**
      * Status of this constraint in the model
      */
-    Status mStatus;
+    private Status mStatus;
+
     /**
      * Index of this constraint in the model data structure
      */
-    int cidx;
+    private int cidx;
+
     /**
      * Name of this constraint
      */
-    protected String name;
+    private String name;
 
     /**
      * Make a new constraint defined as a set of given propagators

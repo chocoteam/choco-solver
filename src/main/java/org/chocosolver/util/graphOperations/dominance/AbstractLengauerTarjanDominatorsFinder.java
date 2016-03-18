@@ -137,7 +137,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		}
 	}
 
-	protected void DFS() {
+	private void DFS() {
 		int node = root;
 		int next;
 		k = 0;
@@ -171,7 +171,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	// SDOM & IDOM
 	//***********************************************************************************
 
-	protected void findAllIdom() {
+	private void findAllIdom() {
 		int w, u;
 		ISet prds;
 		for (int i = n - 1; i >= 1; i--) {
@@ -213,7 +213,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		dom[root] = root;
 	}
 
-	protected void addToBucket(int buckIdx, int element) {
+	private void addToBucket(int buckIdx, int element) {
 		if (bucket[buckIdx] == -1) {
 			bucket[buckIdx] = element;
 		} else {
@@ -267,7 +267,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	 * O(n+m) preprocessing for enabling dominance requests in O(1)
 	 * BEWARE : destroy the current data structure (recycling)
 	 */
-	protected void preprocessDominanceRequests() {
+	private void preprocessDominanceRequests() {
 		// RECYCLE DATA STRUCTURES
 		// ancestor = in  = opening time = preorder
 		// semi     = out = closing time = postorder

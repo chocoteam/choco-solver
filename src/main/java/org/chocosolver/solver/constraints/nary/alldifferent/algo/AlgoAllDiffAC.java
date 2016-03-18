@@ -49,19 +49,19 @@ public class AlgoAllDiffAC {
     // VARIABLES
     //***********************************************************************************
 
-    protected int n, n2;
-    protected DirectedGraph digraph;
+    private int n, n2;
+    private DirectedGraph digraph;
     private int[] matching;
     private int[] nodeSCC;
-    protected BitSet free;
+    private BitSet free;
     private StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
     private int[] father;
     private BitSet in;
     private TIntIntHashMap map;
-    int[] fifo;
-	IntVar[] vars;
-	ICause aCause;
+    private int[] fifo;
+    private IntVar[] vars;
+    private ICause aCause;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -111,7 +111,7 @@ public class AlgoAllDiffAC {
     // Initialization
     //***********************************************************************************
 
-    protected void findMaximumMatching() throws ContradictionException {
+    private void findMaximumMatching() throws ContradictionException {
         for (int i = 0; i < n2; i++) {
             digraph.getSuccOf(i).clear();
             digraph.getPredOf(i).clear();
@@ -203,7 +203,7 @@ public class AlgoAllDiffAC {
         digraph.removeNode(n2);
     }
 
-    protected boolean filter() throws ContradictionException {
+    private boolean filter() throws ContradictionException {
         boolean filter =false;
         buildSCC();
         int j, ub;

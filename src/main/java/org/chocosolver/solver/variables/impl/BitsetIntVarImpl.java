@@ -63,7 +63,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
      * on value removal
      */
-    protected boolean reactOnRemoval = false;
+    private boolean reactOnRemoval = false;
     /**
      * Bitset of available values -- includes offset
      */
@@ -745,7 +745,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
-        if (_viterator == null || !_viterator.isReusable()) {
+        if (_viterator == null || _viterator.isNotReusable()) {
             _viterator = new DisposableValueIterator() {
 
                 /**
@@ -800,7 +800,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
-        if (_riterator == null || !_riterator.isReusable()) {
+        if (_riterator == null || _riterator.isNotReusable()) {
             _riterator = new DisposableRangeIterator() {
 
                 /**

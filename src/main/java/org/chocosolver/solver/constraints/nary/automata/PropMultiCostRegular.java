@@ -388,7 +388,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         layerIter = layer.get(n).iterator();
         while (layerIter.hasNext()) {
             k = layerIter.next();
-            if (!pi.isFinal(k)) {
+            if (pi.isNotFinal(k)) {
                 layerIter.remove();
             }
 

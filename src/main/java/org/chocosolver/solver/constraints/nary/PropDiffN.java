@@ -130,13 +130,13 @@ public class PropDiffN extends Propagator<IntVar> {
     }
 
     private boolean mayOverlap(int i, int j) {
-        return !(disjoint(i, j, true) || disjoint(i, j, false));
+        return !(!isNotDisjoint(i, j, true) || !isNotDisjoint(i, j, false));
     }
 
-    private boolean disjoint(int i, int j, boolean horizontal) {
+    private boolean isNotDisjoint(int i, int j, boolean horizontal) {
         int off = (horizontal) ? 0 : n;
-        return (vars[i + off].getLB() >= vars[j + off].getUB() + vars[j + off + 2 * n].getUB())
-                || (vars[j + off].getLB() >= vars[i + off].getUB() + vars[i + off + 2 * n].getUB());
+        return (vars[i + off].getLB() < vars[j + off].getUB() + vars[j + off + 2 * n].getUB())
+                && (vars[j + off].getLB() < vars[i + off].getUB() + vars[i + off + 2 * n].getUB());
     }
 
     protected void filterFromBox(int i) throws ContradictionException {

@@ -183,7 +183,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             double lpft = this.graph.GNodes.lpft.get(dest);
 
 
-            if ((spfs + spft + acost > vars[zIdx].getUB() || lpfs + lpft + acost < vars[zIdx].getLB()) && !this.graph.isInStack(id)) {
+            if ((spfs + spft + acost > vars[zIdx].getUB() || lpfs + lpft + acost < vars[zIdx].getLB()) && this.graph.isNotInStack(id)) {
                 this.graph.setInStack(id);
                 this.toRemove.push(id);
             }
@@ -249,7 +249,7 @@ public class PropCostRegular extends Propagator<IntVar> {
                 double spft = this.graph.GNodes.spft.get(dest);
 
 
-                if ((lpfs + lpft + acost < vars[zIdx].getLB() || spfs + spft + acost > vars[zIdx].getUB()) && !this.graph.isInStack(id)) {
+                if ((lpfs + lpft + acost < vars[zIdx].getLB() || spfs + spft + acost > vars[zIdx].getUB()) && this.graph.isNotInStack(id)) {
                     this.graph.setInStack(id);
                     this.toRemove.push(id);
                 }
@@ -303,7 +303,7 @@ public class PropCostRegular extends Propagator<IntVar> {
                 DisposableIntIterator it = sup.getIterator();
                 while (it.hasNext()) {
                     int arcId = it.next();
-                    if (!p.graph.isInStack(arcId)) {
+                    if (p.graph.isNotInStack(arcId)) {
                         p.graph.setInStack(arcId);
                         p.toRemove.push(arcId);
 //                        mod = true;

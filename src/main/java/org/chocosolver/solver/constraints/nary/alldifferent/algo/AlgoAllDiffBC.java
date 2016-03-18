@@ -38,21 +38,19 @@ import java.util.Comparator;
 
 public class AlgoAllDiffBC {
 
-    int[] t; // Tree links
-    int[] d; // Diffs between critical capacities
-    int[] h; // Hall interval links
-    int[] bounds;
+    private int[] t; // Tree links
+    private int[] d; // Diffs between critical capacities
+    private int[] h; // Hall interval links
+    private int[] bounds;
 
-    int nbBounds;
+    private int nbBounds;
 
-    Interval[] intervals;
-    Interval[] minsorted;
-    Interval[] maxsorted;
+    private Interval[] intervals, minsorted, maxsorted;
 
     private Propagator aCause;
     private IntVar[] vars;
 
-    ArraySort sorter;
+    private ArraySort sorter;
 
     public AlgoAllDiffBC(Propagator cause) {
         this.aCause = cause;
@@ -114,7 +112,7 @@ public class AlgoAllDiffBC {
         return filter;
     }
 
-    protected void sortIt() {
+    private void sortIt() {
         int n = vars.length;
         IntVar vt;
         for (int i = 0; i < n; i++) {
@@ -154,7 +152,7 @@ public class AlgoAllDiffBC {
         bounds[nb + 1] = bounds[nb] + 2;
     }
 
-    protected void pathset(int[] tab, int start, int end, int to) {
+    private void pathset(int[] tab, int start, int end, int to) {
         int next = start;
         int prev = next;
         while (prev != end) {
@@ -164,21 +162,21 @@ public class AlgoAllDiffBC {
         }
     }
 
-    protected int pathmin(int[] tab, int i) {
+    private int pathmin(int[] tab, int i) {
         while (tab[i] < i) {
             i = tab[i];
         }
         return i;
     }
 
-    protected int pathmax(int[] tab, int i) {
+    private int pathmax(int[] tab, int i) {
         while (tab[i] > i) {
             i = tab[i];
         }
         return i;
     }
 
-    protected boolean filterLower() throws ContradictionException {
+    private boolean filterLower() throws ContradictionException {
         boolean filter = false;
         for (int i = 1; i <= nbBounds + 1; i++) {
             t[i] = h[i] = i - 1;
@@ -215,7 +213,7 @@ public class AlgoAllDiffBC {
         return filter;
     }
 
-    protected boolean filterUpper() throws ContradictionException {
+    private boolean filterUpper() throws ContradictionException {
         boolean filter = false;
         for (int i = 0; i <= nbBounds; i++) {
             t[i] = h[i] = i + 1;

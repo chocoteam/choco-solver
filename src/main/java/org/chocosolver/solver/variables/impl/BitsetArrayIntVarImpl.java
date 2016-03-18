@@ -63,7 +63,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     /**
      * Valuated to <tt>true</tt> when removed values are stored.
      */
-    protected boolean reactOnRemoval = false;
+    private boolean reactOnRemoval = false;
 
     /**
      * Array of domain values
@@ -803,7 +803,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
-        if (_viterator == null || !_viterator.isReusable()) {
+        if (_viterator == null || _viterator.isNotReusable()) {
             _viterator = new DisposableValueIterator() {
 
                 /**
@@ -858,7 +858,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
-        if (_riterator == null || !_riterator.isReusable()) {
+        if (_riterator == null || _riterator.isNotReusable()) {
             _riterator = new DisposableRangeIterator() {
 
                 /**

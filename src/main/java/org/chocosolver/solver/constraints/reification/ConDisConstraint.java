@@ -46,7 +46,7 @@ public class ConDisConstraint extends Constraint{
     /**
      * Unique constructive disjunction propagator
      */
-    final PropConDis condissol;
+    private final PropConDis condissol;
 
     /**
      * A constraint to deal with constructive disjunction (unique in a model instance)

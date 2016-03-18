@@ -83,7 +83,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
             try {
                 while (itv0.hasNext()) {
                     int val0 = itv0.next();
-                    if (!((CouplesBitSetTable) relation).checkValue(0, val0, v1)) {
+                    if (((CouplesBitSetTable) relation).checkUnsupportedValue(0, val0, v1)) {
                         v0.removeValue(val0, this);
                     }
                 }
@@ -94,7 +94,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
             try {
                 while (itv0.hasNext()) {
                     int val1 = itv0.next();
-                    if (!((CouplesBitSetTable) relation).checkValue(1, val1, v0)) {
+                    if (((CouplesBitSetTable) relation).checkUnsupportedValue(1, val1, v0)) {
                         v1.removeValue(val1, this);
                     }
                 }
@@ -159,7 +159,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
             try {
                 while (itv1.hasNext()) {
                     int y = itv1.next();
-                    if (!((CouplesBitSetTable) relation).checkValue(1, y, v0)) {
+                    if (((CouplesBitSetTable) relation).checkUnsupportedValue(1, y, v0)) {
                         v1.removeValue(y, this);
                     }
                 }
@@ -179,7 +179,7 @@ public class PropBinAC3bitrm extends PropBinCSP {
             try {
                 while (itv0.hasNext()) {
                     int x = itv0.next();
-                    if (!((CouplesBitSetTable) relation).checkValue(0, x, v1)) {
+                    if (((CouplesBitSetTable) relation).checkUnsupportedValue(0, x, v1)) {
                         v0.removeValue(x, this);
                     }
                 }

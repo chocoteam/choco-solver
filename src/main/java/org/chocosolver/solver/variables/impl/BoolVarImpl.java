@@ -469,7 +469,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
-        if (_viterator == null || !_viterator.isReusable()) {
+        if (_viterator == null || _viterator.isNotReusable()) {
             _viterator = new DisposableValueBoundIterator(this);
         }
         if (bottomUp) {
@@ -482,7 +482,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
-        if (_riterator == null || !_riterator.isReusable()) {
+        if (_riterator == null || _riterator.isNotReusable()) {
             _riterator = new DisposableRangeBoundIterator(this);
         }
         if (bottomUp) {

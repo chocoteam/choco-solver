@@ -54,7 +54,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     /**
      * Variable to observe
      */
-    protected final BoolVar var;
+    private final BoolVar var;
 
     /**
      * Create a not view based on <i>var<i/> 

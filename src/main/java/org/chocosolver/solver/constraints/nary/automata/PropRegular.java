@@ -219,7 +219,7 @@ public class PropRegular extends Propagator<IntVar> {
         layerIter = layer[n].iterator();
         while (layerIter.hasNext()) {
             k = layerIter.next();
-            if (!auto.isFinal(k)) {
+            if (auto.isNotFinal(k)) {
                 layerIter.remove();
             }
         }

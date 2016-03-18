@@ -110,19 +110,22 @@ class CouplesBitSetTable extends BinRelation {
         return table[0][x - offsets[0]].get(y - offsets[1]);
     }
 
-    /**
-     * check is there exist a support for value val of variable var
-     * within the domain of v
+	/**
+     * checks if var=val has no support within the domain of v
+     * @param var a variable index
+     * @param val a value for var
+     * @param v a variable
+     * @return true iff there exists no support for v where var = val
      */
-    public boolean checkValue(int var, int val, IntVar v) {
+    public boolean checkUnsupportedValue(int var, int val, IntVar v) {
         int UB = v.getUB();
         BitSet _table = table[var][val - offsets[var]];
         int o = offsets[1 - var];
         for (int i = v.getLB(); i <= UB; i = v.nextValue(i)) {
             if (_table.get(i - o)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }

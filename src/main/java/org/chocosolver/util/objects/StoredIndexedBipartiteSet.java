@@ -169,7 +169,7 @@ public class StoredIndexedBipartiteSet {
     }
 
     public final DisposableIntIterator getIterator() {
-        if (_cachedIterator == null || !_cachedIterator.isReusable()) {
+        if (_cachedIterator == null || _cachedIterator.isNotReusable()) {
             _cachedIterator = new BipartiteSetIterator();
         }
         _cachedIterator.init(list, position, last, idxToObjects);

@@ -41,7 +41,7 @@ public final class BasicIndexedBipartiteSet {
     /**
      * The list of values
      */
-    protected int[] list;
+    private int[] list;
 
     /**
      * The position of each element within the list.
@@ -49,17 +49,17 @@ public final class BasicIndexedBipartiteSet {
      * we assume that elements ranges from 0 ... list.length
      * in other words the elements must be indexed.
      */
-    protected int[] position;
+    private int[] position;
 
     /**
      * The first element of the list
      */
-    protected IStateInt first;
+    private IStateInt first;
 
     /**
      * The size of the valid list
      */
-    protected int size;
+    private int size;
 
     /**
      * Create a stored bipartite set with a size.

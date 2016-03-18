@@ -49,7 +49,7 @@ public interface IAutomaton extends Cloneable {
 
     void delta(int k, int j, TIntHashSet nexts);
 
-    boolean isFinal(int k);
+    boolean isNotFinal(int k);
 
     int getNbStates();
 

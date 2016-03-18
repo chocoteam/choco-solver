@@ -48,7 +48,7 @@ public class AutoDiffDetection implements D {
 
     public static boolean DYNAMIC_ADDITIONS = false;
 
-    protected Variable[] scope;
+    private Variable[] scope;
 
     //***********************************************************************************
     // CONSTRUCTORS

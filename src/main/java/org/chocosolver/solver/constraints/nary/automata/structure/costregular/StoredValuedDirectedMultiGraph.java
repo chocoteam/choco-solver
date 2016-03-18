@@ -371,7 +371,7 @@ public class StoredValuedDirectedMultiGraph {
                 double lpfs = GNodes.lpfs.quickGet(orig);
 
                 double acost = GArcs.costs[arcId];
-                if (!isInStack(arcId) && (tempPval + spfs + acost > propagator.getVar(starts.length).getUB()
+                if (isNotInStack(arcId) && (tempPval + spfs + acost > propagator.getVar(starts.length).getUB()
                         || tempPval2 + lpfs + acost < propagator.getVar(starts.length).getLB())) {
                     setInStack(arcId);
                     toRemove.push(arcId);
@@ -417,7 +417,7 @@ public class StoredValuedDirectedMultiGraph {
                 }
                 double spfs = GNodes.spfs.quickGet(orig);
                 double acost = GArcs.costs[arcId];
-                if (!isInStack(arcId) && tempPval + spfs + acost > propagator.getVar(starts.length).getUB()) {
+                if (isNotInStack(arcId) && tempPval + spfs + acost > propagator.getVar(starts.length).getUB()) {
                     setInStack(arcId);
                     toRemove.push(arcId);
                 }
@@ -460,7 +460,7 @@ public class StoredValuedDirectedMultiGraph {
                 }
                 double lpfs = GNodes.lpfs.quickGet(orig);
                 double acost = GArcs.costs[arcId];
-                if (!isInStack(arcId) && tempPval + lpfs + acost < propagator.getVar(starts.length).getLB()) {
+                if (isNotInStack(arcId) && tempPval + lpfs + acost < propagator.getVar(starts.length).getLB()) {
                     setInStack(arcId);
                     toRemove.push(arcId);
                 }
@@ -515,7 +515,7 @@ public class StoredValuedDirectedMultiGraph {
                 double spft = GNodes.spft.quickGet(dest);
                 double acost = GArcs.costs[arcId];
                 double lpft = GNodes.lpft.quickGet(dest);
-                if (!isInStack(arcId) && (tempPval + spft + acost > propagator.getVar(starts.length).getUB()
+                if (isNotInStack(arcId) && (tempPval + spft + acost > propagator.getVar(starts.length).getUB()
                         || tempPval2 + lpft + acost < propagator.getVar(starts.length).getLB())) {
                     setInStack(arcId);
                     toRemove.push(arcId);
@@ -560,7 +560,7 @@ public class StoredValuedDirectedMultiGraph {
                 }
                 double spft = GNodes.spft.quickGet(dest);
                 double acost = GArcs.costs[arcId];
-                if (!isInStack(arcId) && tempPval + spft + acost > propagator.getVar(starts.length).getUB()) {
+                if (isNotInStack(arcId) && tempPval + spft + acost > propagator.getVar(starts.length).getUB()) {
                     setInStack(arcId);
                     toRemove.push(arcId);
                 }
@@ -604,7 +604,7 @@ public class StoredValuedDirectedMultiGraph {
                 }
                 double lpft = GNodes.lpft.quickGet(dest);
                 double acost = GArcs.costs[arcId];
-                if (!isInStack(arcId) && tempPval + lpft + acost < propagator.getVar(starts.length).getLB()) {
+                if (isNotInStack(arcId) && tempPval + lpft + acost < propagator.getVar(starts.length).getLB()) {
                     setInStack(arcId);
                     toRemove.push(arcId);
                 }
@@ -621,8 +621,8 @@ public class StoredValuedDirectedMultiGraph {
      * @param idx the index of the arc
      * @return true if a given arc is to be deleted
      */
-    public final boolean isInStack(int idx) {
-        return inStack.get(idx);
+    public final boolean isNotInStack(int idx) {
+        return !inStack.get(idx);
     }
 
     /**

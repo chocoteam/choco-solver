@@ -75,11 +75,9 @@ public abstract class Disposable  {
     }
 
     /**
-     * Retrieve wether the iterator is free for reuse.
-     *
-     * @return true if the iterator is free for use, false otherwise.
+     * @return true if the iterator is not free for use (you should create a new instance)
      */
-    public final boolean isReusable() {
-        return reusable;
+    public final boolean isNotReusable() {
+        return !reusable;
     }
 }

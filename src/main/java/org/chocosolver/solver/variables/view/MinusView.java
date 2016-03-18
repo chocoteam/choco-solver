@@ -194,7 +194,7 @@ public class MinusView extends IntView {
 
     @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
-        if (_viterator == null || !_viterator.isReusable()) {
+        if (_viterator == null || _viterator.isNotReusable()) {
             _viterator = new DisposableValueIterator() {
 
                 DisposableValueIterator vit;
@@ -248,7 +248,7 @@ public class MinusView extends IntView {
 
     @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
-        if (_riterator == null || !_riterator.isReusable()) {
+        if (_riterator == null || _riterator.isNotReusable()) {
             _riterator = new DisposableRangeIterator() {
 
                 DisposableRangeIterator vir;

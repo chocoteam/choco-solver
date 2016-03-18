@@ -145,7 +145,7 @@ public class FiniteAutomaton implements IAutomaton {
             State s = new State();
             this.states.add(s);
             this.stateToIndex.put(s, i);
-            if (other.isFinal(i))
+            if (!other.isNotFinal(i))
                 s.setAccept(true);
             if (other.getInitialState() == i)
                 this.representedBy.setInitialState(s);
@@ -399,13 +399,13 @@ public class FiniteAutomaton implements IAutomaton {
             return stateToIndex.get(s);
     }
 
-    public boolean isFinal(int state) {
+    public boolean isNotFinal(int state) {
         try {
             checkState(state);
         } catch (StateNotInAutomatonException e) {
 //            LOGGER.warn("Unable to check if this state is final : " + e);
         }
-        return states.get(state).isAccept();
+        return !states.get(state).isAccept();
     }
 
     public void setInitialState(int state) {
@@ -714,7 +714,7 @@ public class FiniteAutomaton implements IAutomaton {
             State s = new State();
             auto.states.add(s);
             auto.stateToIndex.put(s, i);
-            if (this.isFinal(i))
+            if (!this.isNotFinal(i))
                 s.setAccept(true);
             if (this.getInitialState() == i)
                 auto.representedBy.setInitialState(s);
