@@ -56,7 +56,7 @@ public class Task {
     //***********************************************************************************
 
     private IntVar start, duration, end;
-    private IVariableMonitor update;
+    private IVariableMonitor<IntVar> update;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -88,7 +88,7 @@ public class Task {
     /**
      * Applies BC-filtering so that start + duration = end
      *
-     * @throws ContradictionException
+     * @throws ContradictionException thrown if a inconsistency has been detected between start, end and duration
      */
     public void ensureBoundConsistency() throws ContradictionException {
         update.onUpdate(start, IntEventType.REMOVE);
@@ -102,26 +102,13 @@ public class Task {
         return start;
     }
 
-    public void setStart(IntVar start) {
-        this.start = start;
-    }
-
     public IntVar getDuration() {
         return duration;
-    }
-
-    public void setDuration(IntVar duration) {
-        this.duration = duration;
     }
 
     public IntVar getEnd() {
         return end;
     }
-
-    public void setEnd(IntVar end) {
-        this.end = end;
-    }
-
 
     private class TaskMonitorEnum implements IVariableMonitor<IntVar> {
 
@@ -250,5 +237,14 @@ public class Task {
             }
             return nrules;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Task[" +
+                "start=" + start +
+                ", duration=" + duration +
+                ", end=" + end +
+                ']';
     }
 }
