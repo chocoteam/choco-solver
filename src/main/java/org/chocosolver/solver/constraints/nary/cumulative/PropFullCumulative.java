@@ -94,7 +94,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
 
         lastCapaMax = model.getEnvironment().makeInt(capa.getUB() + 1);
         allTasks = SetFactory.makeConstantSet(0,n-1);
-        super.linkVariables();
     }
 
     /**
@@ -112,11 +111,6 @@ public class PropFullCumulative extends Propagator<IntVar> {
     public PropFullCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
                               boolean fast, Cumulative.Filter... filters) {
         this(s, d, e, h, capa, false, fast, filters);
-    }
-
-    @Override
-    protected void linkVariables() {
-        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
     }
 
     //***********************************************************************************

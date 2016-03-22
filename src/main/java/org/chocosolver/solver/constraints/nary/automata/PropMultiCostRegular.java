@@ -249,12 +249,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         this.pi = cauto;
         rem_proc = new RemProc(this);
         vrms = new IntIterableBitSet();
-        super.linkVariables();
-    }
-
-    @Override
-    protected void linkVariables() {
-        // do nothing, the linking is postponed
     }
 
     @Override

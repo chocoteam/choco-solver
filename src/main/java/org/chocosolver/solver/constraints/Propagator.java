@@ -188,7 +188,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             this.vars = vars;
         }
         this.vindices = new int[vars.length];
-        this.linkVariables();
         ID = model.nextId();
         operations = new Operation[]{
                 new Operation() {
@@ -254,7 +253,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Creates links between this propagator and its variables.
      * The propagator will then be referenced in each of its variables.
      */
-    protected void linkVariables() {
+    public final void linkVariables() {
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
         }

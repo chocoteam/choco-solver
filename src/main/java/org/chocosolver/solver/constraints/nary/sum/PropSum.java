@@ -110,7 +110,6 @@ public class PropSum extends Propagator<IntVar> {
         this.b = b;
         l = variables.length;
         I = new int[l];
-        super.linkVariables();
     }
 
     /**
@@ -128,11 +127,6 @@ public class PropSum extends Propagator<IntVar> {
         } else {
             return PropagatorPriority.LINEAR;
         }
-    }
-
-    @Override
-    protected void linkVariables() {
-        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
     }
 
     @Override

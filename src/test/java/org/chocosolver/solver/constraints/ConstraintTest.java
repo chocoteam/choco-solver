@@ -222,7 +222,7 @@ public class ConstraintTest {
         Constraint c2 = m.arithm(v, ">", 0);
         c1.post();
         c2.post();
-            m.unpost(c1);
+        m.unpost(c1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -233,7 +233,26 @@ public class ConstraintTest {
         Constraint c2 = m.arithm(v, ">", 0);
         c1.post();
         c2.post();
-            m.unpost(c2);
+        m.unpost(c2);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testPostUnpostPost1() {
+        Model m = new Model();
+        IntVar v = m.intVar(1, 3);
+        IntVar w = m.intVar(0, 2);
+        Constraint c1 = m.arithm(v, ">", w);
+        c1.post();
+        while(m.solve());
+        Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 6);
+        m.getSolver().reset();
+        m.unpost(c1);
+        while(m.solve());
+        Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 9);
+        m.getSolver().reset();
+        c1.post();
+        while(m.solve());
+        Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 6);
     }
 
 }

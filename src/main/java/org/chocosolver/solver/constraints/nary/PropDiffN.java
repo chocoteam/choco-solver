@@ -70,13 +70,7 @@ public class PropDiffN extends Propagator<IntVar> {
         }
         overlappingBoxes = new UndirectedGraph(model, n, SetType.LINKED_LIST, true);
         boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, 0, model);
-        super.linkVariables();
-    }
-
-    @Override
-    protected void linkVariables() {
-        // do nothing, the linking is postponed because getPropagationConditions() needs some internal data
-    }
+     }
 
     //***********************************************************************************
     // METHODS

@@ -661,11 +661,12 @@ public class Model implements IModel {
         }
         // specific behavior for dynamic addition and/or reified constraints
         for (Constraint c : cs) {
-            if (dynAdd) {
-                engine.dynamicAddition(permanent, c.getPropagators());
-            }
             for (Propagator p : c.getPropagators()) {
                 p.getConstraint().checkNewStatus(Constraint.Status.POSTED);
+                p.linkVariables();
+            }
+            if (dynAdd) {
+                engine.dynamicAddition(permanent, c.getPropagators());
             }
             c.declareAs(Constraint.Status.POSTED, cIdx);
             cstrs[cIdx++] = c;
