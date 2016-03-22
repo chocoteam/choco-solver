@@ -35,10 +35,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.RuleStore;
-import org.chocosolver.solver.explanations.ArrayEventStore;
+import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
@@ -164,7 +161,7 @@ public class ExplainingObjective extends ExplainingCut{
         LB = objective.getLB();
         UB = objective.getUB();
         if (mExplanationEngine == null) {
-            if (r.getExplainer() == null) {
+            if (r.getExplainer() == NoExplanationEngine.SINGLETON) {
                 r.set(new ExplanationEngine(mModel, false, false));
             }
             this.mExplanationEngine = r.getExplainer();

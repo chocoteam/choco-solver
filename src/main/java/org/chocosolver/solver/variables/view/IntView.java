@@ -154,7 +154,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         int sup = getUB();
         if (inf <= value && value <= sup) {
             IntEventType e = IntEventType.REMOVE;
-            model.getSolver().getEventObserver().removeValue(this, value, cause);
+            model.getSolver().getExplainer().removeValue(this, value, cause);
             if (doRemoveValueFromVar(value)) {
                 if (value == inf) {
                     e = IntEventType.INCLOW;
@@ -167,7 +167,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
                 this.notifyPropagators(e, cause);
                 return true;
             }else{
-                model.getSolver().getEventObserver().undo();
+                model.getSolver().getExplainer().undo();
             }
         }
         return false;
@@ -203,11 +203,11 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         int value = nlb, to = nub;
         boolean hasRemoved = false;
         while (value <= to) {
-            model.getSolver().getEventObserver().removeValue(this, value, cause);
+            model.getSolver().getExplainer().removeValue(this, value, cause);
             if(doRemoveValueFromVar(value)){
                 hasRemoved |= true;
             }else{
-                model.getSolver().getEventObserver().undo();
+                model.getSolver().getExplainer().undo();
             }
             value = values.nextValue(value);
         }
@@ -231,7 +231,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         } else if(var.hasEnumeratedDomain()){
             for (int v = from; v <= to; v++) {
                 if (this.contains(v)) {
-                    model.getSolver().getEventObserver().removeValue(this, v, cause);
+                    model.getSolver().getExplainer().removeValue(this, v, cause);
                 }
             }
             boolean done = doRemoveIntervalFromVar(from, to);
@@ -258,11 +258,11 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         // iterate over the values in the domain, remove the ones that are not in values
         for (; value <= to; value = nextValue(value)) {
             if (!values.contains(value)) {
-                model.getSolver().getEventObserver().removeValue(this, value, cause);
+                model.getSolver().getExplainer().removeValue(this, value, cause);
                 if(doRemoveValueFromVar(value)){
                     hasRemoved |= true;
                 }else{
-                    model.getSolver().getEventObserver().undo();
+                    model.getSolver().getExplainer().undo();
                 }
             }
         }
@@ -279,13 +279,13 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+        model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
         boolean done = doInstantiateVar(value);
         if (done) {
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }else{
-            model.getSolver().getEventObserver().undo();
+            model.getSolver().getExplainer().undo();
         }
         return false;
     }
@@ -295,7 +295,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-            model.getSolver().getEventObserver().updateLowerBound(this, value, getLB(), cause);
+            model.getSolver().getExplainer().updateLowerBound(this, value, getLB(), cause);
             IntEventType e = IntEventType.INCLOW;
             boolean done = doUpdateLowerBoundOfVar(value);
             if (isInstantiated()) {
@@ -305,7 +305,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
                 this.notifyPropagators(e, cause);
                 return true;
             }else{
-                model.getSolver().getEventObserver().undo();
+                model.getSolver().getExplainer().undo();
             }
         }
         return false;
@@ -316,7 +316,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-            model.getSolver().getEventObserver().updateUpperBound(this, value, getUB(), cause);
+            model.getSolver().getExplainer().updateUpperBound(this, value, getUB(), cause);
             IntEventType e = IntEventType.DECUPP;
             boolean done = doUpdateUpperBoundOfVar(value);
             if (isInstantiated()) {
@@ -326,7 +326,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
                 this.notifyPropagators(e, cause);
                 return true;
             }else{
-                model.getSolver().getEventObserver().undo();
+                model.getSolver().getExplainer().undo();
             }
         }
         return false;
@@ -343,21 +343,21 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
             IntEventType e = null;
 
             if (olb < lb) {
-                model.getSolver().getEventObserver().updateLowerBound(this, lb, getLB(), cause);
+                model.getSolver().getExplainer().updateLowerBound(this, lb, getLB(), cause);
                 e = IntEventType.INCLOW;
                 if(doUpdateLowerBoundOfVar(lb)){
                     hasChanged = true;
                 }else{
-                    model.getSolver().getEventObserver().undo();
+                    model.getSolver().getExplainer().undo();
                 }
             }
             if (oub > ub) {
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
-                model.getSolver().getEventObserver().updateUpperBound(this, ub, getUB(), cause);
+                model.getSolver().getExplainer().updateUpperBound(this, ub, getUB(), cause);
                 if(doUpdateUpperBoundOfVar(ub)){
                     hasChanged |= true;
                 }else{
-                    model.getSolver().getEventObserver().undo();
+                    model.getSolver().getExplainer().undo();
                 }
             }
             if (isInstantiated()) {

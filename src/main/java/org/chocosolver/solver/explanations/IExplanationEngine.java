@@ -30,69 +30,27 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.util.PoolManager;
 
 /**
- * An Asynchronous, Reverse, Low-Intrusive and Lazy explanation engine
- * Based on "A Lazy explanation engine for Choco3", C.Prud'homme.
+ * Interface for Lazy explanation engine.
  * <p>
  * Created by cprudhom on 09/12/14.
  * Project: choco.
  */
-public class ExplanationEngine implements IExplanationEngine{
-
-    /**
-     * Events generated during search
-     */
-    protected final ArrayEventStore eventStore;
-    /**
-     * Active rules, to compute explanation backward
-     */
-    private final RuleStore ruleStore;
-    /**
-     * Set to <tt>true</tt> to save causes, for human reading purpose only
-     */
-    private final boolean saveCauses;
-    /**
-     * Set to <tt>true</tt> to enable partial explanation, ie allow stopping explanation before reaching ROOT node.
-     */
-    private final boolean enablePartialExplanation;
-    /**
-     * To recycle explanations
-     */
-    PoolManager<Explanation> explanationPool;
-
-
-    /**
-     * Create an explanation engine based on a rule store
-     * @param model                   a model
-     * @param partialExplanationsOn set to <tt>true</tt> to enable partial explanations, <tt>false</tt> otherwise
-     * @param recordCauses set to <tt>true</tt> to record causes in explanations, <tt>false</tt> otherwise
-     */
-    public ExplanationEngine(Model model, boolean partialExplanationsOn, boolean recordCauses) {
-        this.saveCauses = recordCauses;
-        this.enablePartialExplanation = partialExplanationsOn;
-        eventStore = new ArrayEventStore(model.getEnvironment());
-        ruleStore = new RuleStore(saveCauses, enablePartialExplanation);
-        model.getSolver().set(this);
-        this.explanationPool = new PoolManager<>();
-    }
+public interface IExplanationEngine {
 
     /**
      * Indicate whether or not the clauses are saved in Explanation
      *
      * @return if clauses are saved
      */
-    public boolean isSaveCauses() {
-        return saveCauses;
+    default boolean isSaveCauses() {
+        return false;
     }
 
     /**
@@ -102,53 +60,30 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param cex    contradiction to explain
      * @return an explanation (set of decisions and propagators).
      */
-    public Explanation explain(ContradictionException cex) {
-        Explanation explanation = makeExplanation(saveCauses);
-        ruleStore.init(explanation);
-
-        if (cex.v != null) {
-            ruleStore.addFullDomainRule((IntVar) cex.v);
-        } else {
-            explanation.addCause(cex.c); // otherwise, we could miss it ;)
-            cex.c.why(ruleStore, null, IntEventType.VOID, 0);
-        }
-        int i = eventStore.getSize() - 1;
-        while (i > -1 && !ruleStore.isPreemptedStop()) {
-            if (ruleStore.match(i, eventStore)) {
-                ruleStore.update(i, eventStore, explanation);
-            }
-            i--;
-        }
-        if (!enablePartialExplanation) {
-            explanation.getRules().clear(); // not required, for assertion purpose only
-        }
-        return explanation;
+    default Explanation explain(ContradictionException cex) {
+        return null;
     }
 
     /**
      * @param saveCauses set to <tt>true</tt> if causes need to be stored
      * @return an empty explanation, ready to be filled up
      */
-    public Explanation makeExplanation(boolean saveCauses) {
-        Explanation explanation = explanationPool.getE();
-        if (explanation == null) {
-            explanation = new Explanation(explanationPool, saveCauses);
-        }
-        return explanation;
+    default Explanation makeExplanation(boolean saveCauses) {
+        return null;
     }
 
     /**
      * @return the current rule store
      */
-    public RuleStore getRuleStore() {
-        return ruleStore;
+    default RuleStore getRuleStore() {
+        return null;
     }
 
     /**
      * @return the current store of events
      */
-    public ArrayEventStore getEventStore() {
-        return eventStore;
+    default ArrayEventStore getEventStore() {
+        return null;
     }
 
     /**
@@ -157,8 +92,8 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param decision a refuted decision
      * @return the explanation
      */
-    public Explanation getDecisionRefutationExplanation(Decision decision) {
-        return ruleStore.getDecisionRefutation(decision);
+    default Explanation getDecisionRefutationExplanation(Decision decision) {
+        return null;
     }
 
     /**
@@ -167,8 +102,7 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param decision    refuted decision
      * @param explanation the explanation of the refutation
      */
-    public void storeDecisionExplanation(Decision decision, Explanation explanation) {
-        ruleStore.storeDecisionRefutation(decision, explanation);
+    default void storeDecisionExplanation(Decision decision, Explanation explanation) {
     }
 
     /**
@@ -178,8 +112,7 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param decision a decision
      * @param to       the new index
      */
-    public void moveDecisionRefutation(Decision decision, int to) {
-        ruleStore.moveDecisionRefutation(decision, to);
+    default void moveDecisionRefutation(Decision decision, int to) {
     }
 
 
@@ -188,11 +121,8 @@ public class ExplanationEngine implements IExplanationEngine{
      *
      * @param decision the decision which is going to be forgotten
      */
-    public void freeDecisionExplanation(Decision decision) {
-        ruleStore.freeDecisionExplanation(decision);
+    default void freeDecisionExplanation(Decision decision) {
     }
-
-
 
     /**
      * Explain the removal of the {@code val} from {@code var}, due to {@code cause}.
@@ -203,8 +133,7 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param val   a value
      * @param cause a cause
      */
-    public void removeValue(IntVar var, int val, ICause cause) {
-        eventStore.pushEvent(var, cause, IntEventType.REMOVE, val, -1, -1);
+    default void removeValue(IntVar var, int val, ICause cause) {
     }
 
     /**
@@ -219,8 +148,7 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param cause a cause
      * @value old previous LB
      */
-    public void updateLowerBound(IntVar var, int value, int old, ICause cause) {
-        eventStore.pushEvent(var, cause, IntEventType.INCLOW, value, old, -1);
+    default void updateLowerBound(IntVar var, int value, int old, ICause cause) {
     }
 
     /**
@@ -235,8 +163,7 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param cause a cause
      * @value old previous LB
      */
-    public void updateUpperBound(IntVar var, int value, int old, ICause cause) {
-        eventStore.pushEvent(var, cause, IntEventType.DECUPP, value, old, -1);
+    default void updateUpperBound(IntVar var, int value, int old, ICause cause) {
     }
 
     /**
@@ -250,8 +177,7 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param oldLB previous lb
      * @param oldUB previous ub
      */
-    public void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
-        eventStore.pushEvent(var, cause, IntEventType.INSTANTIATE, val, oldLB, oldUB);
+    default void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
     }
 
     /**
@@ -260,14 +186,12 @@ public class ExplanationEngine implements IExplanationEngine{
      * @param var        the reified variable
      * @param propagator the propagator to awake.
      */
-    public void activePropagator(BoolVar var, Propagator propagator) {
-        eventStore.pushEvent(var, propagator, PropagatorEventType.FULL_PROPAGATION, propagator.getId(), 0, 0);
+    default void activePropagator(BoolVar var, Propagator propagator) {
     }
 
     /**
      * Undo the last operation done
      */
-    public void undo(){
-        eventStore.forgetLast();
+    default void undo(){
     }
 }

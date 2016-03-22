@@ -134,12 +134,12 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+        model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
         if (var.instantiateTo(1 - value, this)) {
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         }else{
-            model.getSolver().getEventObserver().undo();
+            model.getSolver().getExplainer().undo();
         }
         return false;
     }
@@ -147,12 +147,12 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > 0) {
-            model.getSolver().getEventObserver().updateLowerBound(this, value, getLB(), cause);
+            model.getSolver().getExplainer().updateLowerBound(this, value, getLB(), cause);
             if (var.instantiateTo(1 - value, this)) {
                 notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
             }else{
-                model.getSolver().getEventObserver().undo();
+                model.getSolver().getExplainer().undo();
             }
         }
         return false;
@@ -161,12 +161,12 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < 1) {
-            model.getSolver().getEventObserver().updateUpperBound(this, value, getUB(), cause);
+            model.getSolver().getExplainer().updateUpperBound(this, value, getUB(), cause);
             if (var.instantiateTo(1 - value, this)) {
                 notifyPropagators(IntEventType.INSTANTIATE, cause);
                 return true;
             }else{
-                model.getSolver().getEventObserver().undo();
+                model.getSolver().getExplainer().undo();
             }
         }
         return false;

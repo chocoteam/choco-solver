@@ -33,6 +33,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.IExplanationEngine;
+import org.chocosolver.solver.explanations.NoExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
@@ -66,7 +68,7 @@ public class ExplainingCut implements INeighbor {
     /**
      * The explanation engine that computes explanation on solution
      */
-    protected ExplanationEngine mExplanationEngine;
+    protected IExplanationEngine mExplanationEngine;
     /**
      * For randomness purpose
      */
@@ -141,7 +143,7 @@ public class ExplainingCut implements INeighbor {
     @Override
     public void recordSolution() {
         if (mExplanationEngine == null) {
-            if (mModel.getSolver().getExplainer() == null) {
+            if (mModel.getSolver().getExplainer() == NoExplanationEngine.SINGLETON) {
                 mModel.getSolver().set(new ExplanationEngine(mModel, false, false));
             }
             this.mExplanationEngine = mModel.getSolver().getExplainer();

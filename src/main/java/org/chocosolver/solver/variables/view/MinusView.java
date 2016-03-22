@@ -86,21 +86,21 @@ public class MinusView extends IntView {
             IntEventType e = null;
 
             if (olb < lb) {
-                model.getSolver().getEventObserver().updateLowerBound(this, lb, getLB(), cause);
+                model.getSolver().getExplainer().updateLowerBound(this, lb, getLB(), cause);
                 e = IntEventType.INCLOW;
                 if(var.updateUpperBound(-lb, this)){
                     hasChanged = true;
                 }else{
-                    model.getSolver().getEventObserver().undo();
+                    model.getSolver().getExplainer().undo();
                 }
             }
             if (oub > ub) {
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
-                model.getSolver().getEventObserver().updateUpperBound(this, ub, getUB(), cause);
+                model.getSolver().getExplainer().updateUpperBound(this, ub, getUB(), cause);
                 if(var.updateLowerBound(-ub, this)){
                     hasChanged |= true;
                 }else{
-                    model.getSolver().getEventObserver().undo();
+                    model.getSolver().getExplainer().undo();
                 }
             }
             if (isInstantiated()) {

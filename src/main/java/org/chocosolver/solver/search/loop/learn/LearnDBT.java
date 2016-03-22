@@ -30,10 +30,7 @@
 package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.RuleStore;
-import org.chocosolver.solver.explanations.ArrayEventStore;
+import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
@@ -181,10 +178,10 @@ public class LearnDBT extends LearnCBJ {
 
         private final ArrayDeque<Decision<IntVar>> decision_path;
         private final Model mModel;
-        private final ExplanationEngine mExplainer;
+        private final IExplanationEngine mExplainer;
         private AbstractStrategy mainStrategy;
 
-        protected DBTstrategy(Model model, ExplanationEngine mExplainer) {
+        protected DBTstrategy(Model model, IExplanationEngine mExplainer) {
             super();
             this.decision_path = new ArrayDeque<>();
             this.mModel = model;

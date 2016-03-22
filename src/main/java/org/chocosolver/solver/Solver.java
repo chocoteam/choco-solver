@@ -34,6 +34,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.IExplanationEngine;
+import org.chocosolver.solver.explanations.NoExplanationEngine;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
@@ -55,11 +57,9 @@ import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.IOutputFactory;
-import org.chocosolver.solver.variables.FilteringMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.observers.FilteringMonitorList;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -187,13 +187,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean completeSearch = false;
 
     /** An explanation engine */
-    private ExplanationEngine explainer;
+    private IExplanationEngine explainer;
 
     /** List of search monitors attached to this search loop */
     private SearchMonitorList searchMonitors;
-
-    /** A list of filtering monitors to be informed on any variable events */
-    private FilteringMonitorList eoList;
 
     /** The propagation engine to use */
     private IPropagationEngine engine;
@@ -226,8 +223,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public Solver(Model aModel) {
         mModel = aModel;
-        eoList = new FilteringMonitorList();
         engine = NoPropagationEngine.SINGLETON;
+        explainer = NoExplanationEngine.SINGLETON;
         objectivemanager = SAT();
         dpath = new DecisionPath(aModel.getEnvironment());
         action = initialize;
@@ -635,7 +632,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * Return the explanation engine plugged into {@code this}.
      * @return this model's explanation engine
      */
-    public ExplanationEngine getExplainer() {
+    public IExplanationEngine getExplainer() {
         return explainer;
     }
 
@@ -644,13 +641,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public IPropagationEngine getEngine() {
         return engine;
-    }
-
-    /**
-     * @return this solver's events observer
-     */
-    public FilteringMonitor getEventObserver() {
-        return this.eoList;
     }
 
     /**
@@ -781,7 +771,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void set(ExplanationEngine explainer) {
         this.explainer = explainer;
-        plugMonitor(explainer);
     }
 
     /**
@@ -865,17 +854,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void plugMonitor(ISearchMonitor sm) {
         searchMonitors.add(sm);
-    }
-
-    /**
-     * Add an event observer, that is an object that is kept informed of all (propagation) events generated during the resolution.
-     * <p>
-     * Erase the current event observer if any.
-     *
-     * @param filteringMonitor an event observer
-     */
-    public void plugMonitor(FilteringMonitor filteringMonitor) {
-        this.eoList.add(filteringMonitor);
     }
 
     /**

@@ -35,6 +35,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
+import org.chocosolver.solver.explanations.IExplanationEngine;
+import org.chocosolver.solver.explanations.NoExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.variables.IntVar;
@@ -55,7 +57,7 @@ public class LearnExplained implements Learn {
     /**
      * The explanation engine, which computes and returns explanation of a state.
      */
-    final ExplanationEngine mExplainer;
+    final IExplanationEngine mExplainer;
 
     /**
      * Indicates if the causes need to be stored.
@@ -96,7 +98,7 @@ public class LearnExplained implements Learn {
             }
         }
         this.mModel = mModel;
-        if (mModel.getSolver().getExplainer() == null) {
+        if (mModel.getSolver().getExplainer() == NoExplanationEngine.SINGLETON) {
             mModel.getSolver().set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));
         }
         this.mExplainer = mModel.getSolver().getExplainer();
