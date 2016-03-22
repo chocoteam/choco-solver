@@ -30,6 +30,7 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.search.loop.learn.LearnCBJ;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -148,6 +149,11 @@ public class ExplanationTest {
                         int ms = n * (n * n + 1) / 2;
 
                         final Model model = new Model();
+                        model.set(new Settings() {
+                            public boolean enableViews() {
+                                return false;
+                            }
+                        });
                         IntVar[][] matrix = new IntVar[n][n];
                         IntVar[][] invMatrix = new IntVar[n][n];
                         IntVar[] vars = new IntVar[n * n];
@@ -204,6 +210,11 @@ public class ExplanationTest {
             for (int e = 1; e < 4; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Model model = new Model();
+                    model.set(new Settings() {
+                        public boolean enableViews() {
+                            return false;
+                        }
+                    });
                     IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
                     BoolVar[] bs = model.boolVarArray("b", 2);
                     model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -236,6 +247,11 @@ public class ExplanationTest {
         for (int e = 1; e < 4; e++) {
             for (int ng = 0; ng < 2; ng++) {
                 final Model model = new Model();
+                model.set(new Settings() {
+                    public boolean enableViews() {
+                        return false;
+                    }
+                });
                 IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
                 BoolVar[] bs = model.boolVarArray("b", 2);
                 model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -270,6 +286,11 @@ public class ExplanationTest {
         for (int e = 1; e < 4; e++) {
             for (int ng = 0; ng < 2; ng++) {
                 final Model model = new Model();
+                model.set(new Settings() {
+                    public boolean enableViews() {
+                        return false;
+                    }
+                });
                 IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
                 BoolVar[] bs = model.boolVarArray("b", 2);
                 model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -303,6 +324,11 @@ public class ExplanationTest {
     public void testLazy() {
         for (int ng = 0; ng < 2; ng++) {
             Model model = new Model();
+            model.set(new Settings() {
+                public boolean enableViews() {
+                    return false;
+                }
+            });
             // The set of variables
             IntVar[] p = model.intVarArray("p", 5, 0, 4, false);
             // The initial constraints
