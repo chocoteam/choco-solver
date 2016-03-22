@@ -62,22 +62,6 @@ public class DecisionPathTest {
     }
 
     @Test(groups = "1s", timeOut=60000)
-    public void testReset() throws Exception {
-        dp.reset();
-        Assert.assertEquals(dp.size(), 1);
-        Assert.assertEquals(dp.mLevel.get(), 0);
-        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperator.int_eq, 4);
-        dp.pushDecision(d1);
-        m.getEnvironment().worldPush();
-        Assert.assertEquals(dp.size(), 2);
-        Assert.assertEquals(dp.mLevel.get(), 0);
-        m.getEnvironment().worldPop();
-        dp.reset();
-        Assert.assertEquals(dp.size(), 1);
-        Assert.assertEquals(dp.mLevel.get(), 0);
-    }
-
-    @Test(groups = "1s", timeOut=60000)
     public void testPushDecision() throws Exception {
         Assert.assertEquals(dp.size(), 1);
         Assert.assertEquals(dp.mLevel.get(), 0);
@@ -106,18 +90,18 @@ public class DecisionPathTest {
         Assert.assertEquals(d1.getPosition(), 0);
         dp.pushDecision(d1);
         Assert.assertEquals(dp.size(), 2);
-        Assert.assertEquals(dp.mLevel.get(), 1);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
+        Assert.assertEquals(dp.mLevel.get(), 0);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 0);
         Assert.assertEquals(dp.levels[2], 0);
         m.getEnvironment().worldPush();
         dp.apply();
         Assert.assertEquals(d1.hasNext(), true);
         Assert.assertEquals(dp.size(), 2);
-        Assert.assertEquals(dp.mLevel.get(), 2);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
-        Assert.assertEquals(dp.levels[2], 2);
+        Assert.assertEquals(dp.mLevel.get(), 1);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 2);
+        Assert.assertEquals(dp.levels[2], 0);
 
         IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperator.int_eq, 4);
         d1.setRefutable(true);
@@ -126,18 +110,18 @@ public class DecisionPathTest {
         dp.pushDecision(d2);
         Assert.assertEquals(d2.hasNext(), true);
         Assert.assertEquals(dp.size(), 3);
-        Assert.assertEquals(dp.mLevel.get(), 2);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
-        Assert.assertEquals(dp.levels[2], 2);
+        Assert.assertEquals(dp.mLevel.get(), 1);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 2);
+        Assert.assertEquals(dp.levels[2], 0);
         Assert.assertEquals(dp.levels[3], 0);
         dp.pushDecision(d3);
         Assert.assertEquals(d3.hasNext(), true);
         Assert.assertEquals(dp.size(), 4);
-        Assert.assertEquals(dp.mLevel.get(), 2);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
-        Assert.assertEquals(dp.levels[2], 2);
+        Assert.assertEquals(dp.mLevel.get(), 1);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 2);
+        Assert.assertEquals(dp.levels[2], 0);
         Assert.assertEquals(dp.levels[3], 0);
 
         m.getEnvironment().worldPush();
@@ -145,11 +129,11 @@ public class DecisionPathTest {
         Assert.assertEquals(d3.hasNext(), false);
         Assert.assertEquals(d2.hasNext(), false);
         Assert.assertEquals(dp.size(), 4);
-        Assert.assertEquals(dp.mLevel.get(), 3);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
-        Assert.assertEquals(dp.levels[2], 2);
-        Assert.assertEquals(dp.levels[3], 4);
+        Assert.assertEquals(dp.mLevel.get(), 2);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 2);
+        Assert.assertEquals(dp.levels[2], 4);
+        Assert.assertEquals(dp.levels[3], 0);
         Assert.assertEquals(dp.levels[4], 0);
     }
 
@@ -168,41 +152,41 @@ public class DecisionPathTest {
         m.getEnvironment().worldPush();
         dp.apply();
         Assert.assertEquals(dp.size(), 4);
-        Assert.assertEquals(dp.mLevel.get(), 3);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
-        Assert.assertEquals(dp.levels[2], 2);
-        Assert.assertEquals(dp.levels[3], 4);
-        Assert.assertEquals(dp.levels[4], 0);
-
-        m.getEnvironment().worldPop();
-        dp.removeLast();
-        Assert.assertEquals(dp.size(), 2);
         Assert.assertEquals(dp.mLevel.get(), 2);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
-        Assert.assertEquals(dp.levels[2], 2);
-        Assert.assertEquals(dp.levels[3], 4);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 2);
+        Assert.assertEquals(dp.levels[2], 4);
+        Assert.assertEquals(dp.levels[3], 0);
         Assert.assertEquals(dp.levels[4], 0);
 
         m.getEnvironment().worldPop();
-        dp.removeLast();
-        Assert.assertEquals(dp.size(), 1);
+        dp.synchronize();
+        Assert.assertEquals(dp.size(), 2);
         Assert.assertEquals(dp.mLevel.get(), 1);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
-        Assert.assertEquals(dp.levels[2], 2);
-        Assert.assertEquals(dp.levels[3], 4);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 2);
+        Assert.assertEquals(dp.levels[2], 4);
+        Assert.assertEquals(dp.levels[3], 0);
         Assert.assertEquals(dp.levels[4], 0);
 
         m.getEnvironment().worldPop();
-        dp.removeLast();
+        dp.synchronize();
         Assert.assertEquals(dp.size(), 1);
         Assert.assertEquals(dp.mLevel.get(), 0);
-        Assert.assertEquals(dp.levels[0], 0);
-        Assert.assertEquals(dp.levels[1], 1);
-        Assert.assertEquals(dp.levels[2], 2);
-        Assert.assertEquals(dp.levels[3], 4);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 2);
+        Assert.assertEquals(dp.levels[2], 4);
+        Assert.assertEquals(dp.levels[3], 0);
+        Assert.assertEquals(dp.levels[4], 0);
+
+        m.getEnvironment().worldPop();
+        dp.synchronize();
+        Assert.assertEquals(dp.size(), 1);
+        Assert.assertEquals(dp.mLevel.get(), 0);
+        Assert.assertEquals(dp.levels[0], 1);
+        Assert.assertEquals(dp.levels[1], 2);
+        Assert.assertEquals(dp.levels[2], 4);
+        Assert.assertEquals(dp.levels[3], 0);
         Assert.assertEquals(dp.levels[4], 0);
     }
 

@@ -71,23 +71,21 @@ public class LNSTest {
         Solver r = model.getSolver();
         r.set(lastConflict(domOverWDegSearch(objects)));
 //        SearchMonitorFactory.log(solver, true, false);
+        r.limitTime(10000);
         switch (lns) {
             case 0:
                 break;
             case 1:
                 r.setLNS(new RandomNeighborhood(objects, 200, 123456L));
-                r.limitTime(10000);
                 break;
             case 2:
                 r.setLNS(new PropagationGuidedNeighborhood(objects, 100, 10, 123456L));
-                r.limitTime(10000);
                 break;
             case 3:
                 r.setLNS(new SequenceNeighborhood(
                         new PropagationGuidedNeighborhood(objects, 100, 10, 123456L),
                         new ReversePropagationGuidedNeighborhood(objects, 100, 10, 123456L)
                 ));
-                r.limitTime(10000);
                 break;
             case 4:
                 r.setLNS(new SequenceNeighborhood(
@@ -95,22 +93,18 @@ public class LNSTest {
                         new ReversePropagationGuidedNeighborhood(objects, 100, 10, 123456L),
                         new RandomNeighborhood(objects, 200, 123456L)
                 ));
-                r.limitTime(10000);
                 break;
             case 5:
                 r.setLNS(new ExplainingCut(model, 200, 123456L));
-                r.limitTime(10000);
                 break;
             case 6:
                 r.setLNS(new ExplainingObjective(model, 200, 123456L));
-                r.limitTime(10000);
                 break;
             case 7:
                 r.setLNS(new SequenceNeighborhood(
                         new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(objects, 200, 123456L)));
-                r.limitTime(10000);
                 break;
         }
 //        IOutputFactory.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());

@@ -84,7 +84,7 @@ public class ExplainingObjectiveTest {
             Assert.assertEquals(eo.mDecisionPath.size(), 4);
             Assert.assertNull(eo.mDecisionPath.get(0));
             Assert.assertEquals(eo.related.cardinality(), 3);
-            Assert.assertEquals(eo.unrelated.cardinality(), 1);
+            Assert.assertEquals(eo.unrelated.cardinality(), 0);
         } catch (ContradictionException e) {
             Assert.fail();
         }

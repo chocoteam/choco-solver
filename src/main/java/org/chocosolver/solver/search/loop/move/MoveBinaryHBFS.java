@@ -274,7 +274,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             if (decision.hasNext() && isValid(bound)) {
                 opens.add(new Open(decision, dp, bound, isMinimization));
             }
-            dp.removeLast();
+            dp.synchronize();
             decision = dp.getLastDecision();
             solver.getEnvironment().worldPop();
         }

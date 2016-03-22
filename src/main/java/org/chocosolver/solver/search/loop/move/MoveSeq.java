@@ -116,7 +116,7 @@ public class MoveSeq implements Move {
         while (i > 0 && !repair) {
             repair = moves.get(--i).repair(solver);
             if (i > 0) {
-                solver.getDecisionPath().removeLast();
+                solver.getDecisionPath().synchronize();
             }
         }
         index.set(i);

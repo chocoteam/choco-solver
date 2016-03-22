@@ -35,7 +35,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -43,10 +42,10 @@ import java.util.List;
  * To handle set of decisions.
  * <p>
  * Decisions are added to this set of decisions with a call to {@link #pushDecision(Decision)},
- * Decisions are then applied in a call to {@link #apply()}, and removed in a call to {@link #removeLast()}.
+ * Decisions are then applied in a call to {@link #apply()}, and removed in a call to {@link #synchronize()}.
  * </br>
  * Note that, if more than one decision is added before calling {@link #apply()}, these decisions belong to the same level.
- * They will be applied at the same time in a call to {@link #apply()}, and remove at the same time in a call to {@link #removeLast()}.
+ * They will be applied at the same time in a call to {@link #apply()}, and remove at the same time in a call to {@link #synchronize()}.
  * Otherwise, only one decision is applied/removed at a time.
  * </br>
  * First decision is <b>always</b> {@link RootDecision#ROOT}, so, {@link #size()} returns at least 1.
@@ -81,18 +80,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
         this.mLevel = environment.makeInt(0);
         this.decisions.add(RootDecision.ROOT);
         this.levels = new int[10];
-        this.levels[0] = 0;
-    }
-
-    /**
-     * Empties the decision path and recycle each decision.
-     * Note that the {@link RootDecision#ROOT} is always kept.
-     */
-    public void reset() {
-        for (int i = decisions.size() - 1; i > 0; i--) { // we keep ROOT
-            decisions.remove(i).free();
-        }
-        Arrays.fill(this.levels, 0);
+        this.levels[0] = 1;
     }
 
     /**
@@ -104,7 +92,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      */
     public void apply() throws ContradictionException {
         // 1. look for the first decision in decisions with that rank
-        int l = mLevel.add(1) - 1;
+        int l = mLevel.get();
         int f = levels[l];
         int t = decisions.size();
         boolean samelevel = (f < t - 1);
@@ -117,14 +105,17 @@ public class DecisionPath extends DecisionMaker implements Serializable {
             decision.buildNext();
             decision.apply();
         }
-        ensureCapacity(l + 1);
-        levels[l + 1] = decisions.size();
+        if (t - f > 0) {
+            mLevel.add(1);
+            ensureCapacity(l + 1);
+            levels[l + 1] = decisions.size();
+        }
     }
 
-    private void ensureCapacity(int ncapa){
-        if(levels.length <= ncapa){
+    private void ensureCapacity(int ncapa) {
+        if (levels.length <= ncapa) {
             int[] tmp = levels;
-            levels = new int[ncapa * 3/ 2 +1];
+            levels = new int[ncapa * 3 / 2 + 1];
             System.arraycopy(tmp, 0, levels, 0, tmp.length);
         }
     }
@@ -140,10 +131,11 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     }
 
     /**
-     * Removes all decisions with the same level, ie applied together.
+     * Synchronizes the decision path after a backtrack.
+     * Removes all decisions with level greater or equal to the current level.
      * Recall that the very first decision, {@link RootDecision#ROOT}, can not be removed from this.
      */
-    public void removeLast() {
+    public void synchronize() {
         if (decisions.size() > 1) { // never remove ROOT decision.
             int t = levels[mLevel.get()];
             for (int f = decisions.size() - 1; f >= t; f--) {
@@ -184,7 +176,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      */
     public Decision getDecision(int i) {
         if (i < 0 || i >= decisions.size()) {
-            throw new IndexOutOfBoundsException("Index: " + i + ", Size: "+decisions.size());
+            throw new IndexOutOfBoundsException("Index: " + i + ", Size: " + decisions.size());
         }
         return decisions.get(i);
     }
@@ -204,13 +196,13 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     /**
      * @return a pretty print of the downmost decision(s)
      */
-    public String lastDecisionToString(){
-        StringBuilder st  =new StringBuilder();
+    public String lastDecisionToString() {
+        StringBuilder st = new StringBuilder();
         int l = mLevel.get();
         int f = levels[l];
         int t = decisions.size();
         Decision decision;
-        if(f < t - 1){
+        if (f < t - 1) {
             st.append("[1/1] ");
             decision = decisions.get(f);
             st.append(decision.toString());
@@ -218,10 +210,10 @@ public class DecisionPath extends DecisionMaker implements Serializable {
                 decision = decisions.get(i);
                 st.append(" /\\ ").append(decision.toString());
             }
-        }else{
+        } else {
             decision = decisions.get(f);
             st.append(String.format("[%d/%d] %s",
-                    decision.getArity() - decision.triesLeft() +1, decision.getArity(), decision.toString())
+                    decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision.toString())
             );
         }
         return st.toString();

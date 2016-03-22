@@ -273,7 +273,6 @@ public class ExplainingCut implements INeighbor {
             //mModel.propagate();
             assert false : "SHOULD FAIL!";
         } catch (ContradictionException cex) {
-            dp.reset();
             if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
 
                 // 3. explain the failure
@@ -305,6 +304,7 @@ public class ExplainingCut implements INeighbor {
             }
         }
         mModel.getEnvironment().worldPop();
+        dp.synchronize();
         mModel.getSolver().getEngine().flush();
         assert mModel.getSolver().getDecisionPath().size() == 1;
         nbFixedVariables = related.cardinality() - 1;

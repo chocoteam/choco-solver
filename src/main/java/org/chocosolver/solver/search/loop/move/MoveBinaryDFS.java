@@ -138,7 +138,7 @@ public class MoveBinaryDFS implements Move {
      * @param solver reference to the solver
      */
     protected void prevDecision(Solver solver) {
-        solver.getDecisionPath().removeLast();
+        solver.getDecisionPath().synchronize();
         // goes up in the search tree and makes sure search monitors are correctly informed
         solver.getSearchMonitors().afterUpBranch();
         solver.getMeasures().incBackTrackCount();

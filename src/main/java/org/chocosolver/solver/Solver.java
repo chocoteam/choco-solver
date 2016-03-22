@@ -453,7 +453,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         // if a resolution has already been done
         if (rootWorldIndex > -1) {
             mModel.getEnvironment().worldPopUntil(rootWorldIndex);
-            dpath.reset();
+            dpath.synchronize();
             feasible = ESat.UNDEFINED;
             action = initialize;
             mMeasures.reset();
@@ -503,7 +503,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void restoreRootNode() {
         mModel.getEnvironment().worldPopUntil(searchWorldIndex); // restore state after initial propagation
-        dpath.reset();
+        dpath.synchronize();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

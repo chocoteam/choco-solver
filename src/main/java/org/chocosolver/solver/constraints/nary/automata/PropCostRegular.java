@@ -195,7 +195,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             do {
                 while (toRemove.size() > 0) {
                     int id = toRemove.pop();
-                    // toRemove.removeLast();
+                    // toRemove.synchronize();
                     this.graph.removeArc(id, toRemove, this, this);
                 }
                 while (this.graph.toUpdateLeft.size() > 0) {
@@ -261,7 +261,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         do {
             while (toRemove.size() > 0) {
                 int id = toRemove.pop();
-                // toRemove.removeLast();
+                // toRemove.synchronize();
                 this.graph.removeArc(id, toRemove, this, this);
             }
             while (this.graph.toUpdateLeft.size() > 0) {
