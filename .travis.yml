@@ -13,7 +13,7 @@ env:
   matrix:
   - GROUP=1s
   - GROUP=10s
-script: travis_wait mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
+script: travis_wait mvn -eX clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
   - develop
