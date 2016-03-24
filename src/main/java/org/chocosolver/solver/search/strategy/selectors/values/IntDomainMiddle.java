@@ -72,7 +72,7 @@ public class IntDomainMiddle implements IntValueSelector {
 		double mean = (double)(low + upp) / 2;
 		int value;
 		if(roundingPolicy==FLOOR){
-			value = (int) mean;
+			value = (int) Math.floor(mean);
 		}else{
 			value = (int) Math.ceil(mean);
 		}

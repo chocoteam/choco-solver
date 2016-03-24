@@ -72,7 +72,7 @@ public class TuplesFactory {
             int j;
             for (j = 0; j < n; j++) {
                 i[j]++;
-                if (i[j] < n) {
+                if (i[j] < doms[j].length) {
                     t[j] = doms[j][i[j]];
                     break;
                 }

@@ -29,17 +29,28 @@
  */
 package org.chocosolver.solver.explanations;
 
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.search.loop.learn.LearnCBJ;
+import org.chocosolver.solver.search.loop.learn.LearnExplained;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.midIntVal;
+import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.inputOrderVar;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
@@ -149,11 +160,6 @@ public class ExplanationTest {
                         int ms = n * (n * n + 1) / 2;
 
                         final Model model = new Model();
-                        model.set(new Settings() {
-                            public boolean enableViews() {
-                                return false;
-                            }
-                        });
                         IntVar[][] matrix = new IntVar[n][n];
                         IntVar[][] invMatrix = new IntVar[n][n];
                         IntVar[] vars = new IntVar[n * n];
@@ -210,11 +216,6 @@ public class ExplanationTest {
             for (int e = 1; e < 4; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Model model = new Model();
-                    model.set(new Settings() {
-                        public boolean enableViews() {
-                            return false;
-                        }
-                    });
                     IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
                     BoolVar[] bs = model.boolVarArray("b", 2);
                     model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -247,11 +248,6 @@ public class ExplanationTest {
         for (int e = 1; e < 4; e++) {
             for (int ng = 0; ng < 2; ng++) {
                 final Model model = new Model();
-                model.set(new Settings() {
-                    public boolean enableViews() {
-                        return false;
-                    }
-                });
                 IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
                 BoolVar[] bs = model.boolVarArray("b", 2);
                 model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -286,11 +282,6 @@ public class ExplanationTest {
         for (int e = 1; e < 4; e++) {
             for (int ng = 0; ng < 2; ng++) {
                 final Model model = new Model();
-                model.set(new Settings() {
-                    public boolean enableViews() {
-                        return false;
-                    }
-                });
                 IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
                 BoolVar[] bs = model.boolVarArray("b", 2);
                 model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -324,11 +315,6 @@ public class ExplanationTest {
     public void testLazy() {
         for (int ng = 0; ng < 2; ng++) {
             Model model = new Model();
-            model.set(new Settings() {
-                public boolean enableViews() {
-                    return false;
-                }
-            });
             // The set of variables
             IntVar[] p = model.intVarArray("p", 5, 0, 4, false);
             // The initial constraints
@@ -348,6 +334,82 @@ public class ExplanationTest {
             model.getSolver().showSolutions();
             model.getSolver().showDecisions();
             assertFalse(model.solve());
+        }
+    }
+
+    /**
+     * Provides two test data to sample enableViews parameter
+     * @return views boolean
+     */
+    @DataProvider(name = "params")
+    public Object[][] createData() {
+        boolean[] views = {true, false};
+        int[] inds = {0,1,2,3,4};
+        DecisionOperator[] dops = {
+            DecisionOperator.int_eq,
+            DecisionOperator.int_neq,
+            DecisionOperator.int_reverse_split,
+            DecisionOperator.int_split
+        };
+        List<Object[]> data = new ArrayList<>();
+        int[][] doms = new int[][]{{0,1},{0,1,2,3,4},{0,1,2,3}};
+        int n = doms.length;
+        int[] t = new int[n];
+        int[] i = new int[n];
+        for (int j = 0; j < n; j++) {
+            t[j] = doms[j][0];
+        }
+        while (true) {
+            Object[] o = new Object[n];
+            o[0] = views[t[0]];
+            o[1] = inds[t[1]];
+            o[2] = dops[t[2]];
+            data.add(o);
+            int j;
+            for (j = 0; j < n; j++) {
+                i[j]++;
+                if (i[j] < doms[j].length) {
+                    t[j] = doms[j][i[j]];
+                    break;
+                }
+                i[j] = 0;
+                t[j] = doms[j][0];
+            }
+            if (j == n) break;
+        }
+        return data.toArray(new Object[data.size()][3]);
+    }
+
+    @Test(groups="1s", timeOut=6000000, dataProvider = "params")
+    public void testXP1(boolean views, int var, DecisionOperator dop) {
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public boolean enableViews() {
+                return views;
+            }
+        });
+        IntVar[] vs = new IntVar[5];
+        vs[0] = model.intVar("A", 0, 5);
+        vs[1] = model.intOffsetView(vs[0], 1);
+        vs[2] = model.intScaleView(vs[1], 2);
+        vs[3] = model.intMinusView(vs[2]);
+        vs[4] = model.intVar("B", -5, -2);
+        model.arithm(vs[0], "+", vs[4],"=", 0).post();
+        model.getSolver().set(SearchStrategyFactory.intVarSearch(
+                inputOrderVar(),
+                midIntVal(dop != DecisionOperator.int_reverse_split),
+                dop,
+                vs[var])
+        );
+        LearnExplained lex = new LearnExplained(model, true, false);
+        model.getSolver().set(lex);
+        model.solve();
+        // force fake failure
+        for(int i = 0; i < 5; i++){
+            model.getSolver().getEngine().getContradictionException().set(Cause.Null, vs[i], "");
+            lex.onFailure(model.getSolver());
+            Assert.assertEquals(lex.getLastExplanation().getDecisions().cardinality(), 1, "fails on "+i);
         }
     }
 }

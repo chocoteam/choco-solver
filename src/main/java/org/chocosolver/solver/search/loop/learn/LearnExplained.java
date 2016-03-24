@@ -39,8 +39,6 @@ import org.chocosolver.solver.explanations.IExplanationEngine;
 import org.chocosolver.solver.explanations.NoExplanationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
 
 /**
  * An abstract class to deal with explanation-based learning.
@@ -84,19 +82,6 @@ public class LearnExplained implements Learn {
      * @throws SolverException if views are enabled. Views provide incomplete explanation.
      */
     public LearnExplained(Model mModel, boolean partialExplanationsOn, boolean recordCauses) {
-        for(IntVar iv : mModel.retrieveIntVars(true)){
-            if((iv.getTypeAndKind() & Variable.VIEW) !=0){
-                throw new SolverException("Using explanations with views is not possible yet.\n" +
-                        "Consider disabling views:\n" +
-                        "mModel.set(new Settings() {\n" +
-                        "            @Override\n" +
-                        "            public boolean enableViews() {\n" +
-                        "                return false;\n" +
-                        "            }\n" +
-                        "        });" +
-                        "");
-            }
-        }
         this.mModel = mModel;
         if (mModel.getSolver().getExplainer() == NoExplanationEngine.SINGLETON) {
             mModel.getSolver().set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));

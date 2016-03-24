@@ -310,8 +310,20 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        assert var == this.var;
+    public boolean why(RuleStore ruleStore, IntVar modifiedVar, IEventType evt, int value) {
+        assert modifiedVar == this.var;
         return ruleStore.addFullDomainRule(this);
+    }
+
+    @Override
+    public int transformValue(int value) {
+        assert value == 0 || value == 1;
+        return 1- value;
+    }
+
+    @Override
+    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+        assert mask == IntEventType.INSTANTIATE;
+        model.getSolver().getExplainer().instantiateTo(this, 1 - one, var, 0, 1);
     }
 }

@@ -31,15 +31,11 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.learn.LearnExplained;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Random;
@@ -266,39 +262,4 @@ public class ViewMinusTest {
         while(model.solve());
         Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
     }
-
-    /**
-     * Provides two test data to sample enableViews parameter
-     * @return views boolean
-     */
-    @DataProvider(name = "views")
-    public Object[][] createData() {
-        return new Object[][] {
-                new Object[]{false},
-                new Object[]{true}
-        };
-    }
-
-    @Test(groups="1s", timeOut=60000, dataProvider = "views")
-    public void testXP(Boolean views){
-        Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return views;
-            }
-        });
-        IntVar v_0 = model.intVar("v_0",0 , 4);
-        IntVar v_1 = model.intOffsetView(v_0 , 4);
-        IntVar v_2 = model.intVar("v_2", 3, 8);
-        model.arithm(v_1, "=", v_2).post();
-        model.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(v_0));
-        LearnExplained lex = new LearnExplained(model, true, false);
-        model.getSolver().set(lex);
-        model.solve();
-        model.getSolver().getEngine().getContradictionException().set(Cause.Null, v_2, "");
-        lex.onFailure(model.getSolver());
-        Assert.assertEquals(lex.getLastExplanation().getDecisions().cardinality(), 1);
-    }
-
 }

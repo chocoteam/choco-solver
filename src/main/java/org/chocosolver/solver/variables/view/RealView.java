@@ -65,19 +65,8 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public void transformEvent(IEventType evt, ICause cause) throws ContradictionException {
-		RealEventType realevt;
-		IntEventType intevt = (IntEventType) evt;
-		switch (intevt){
-			case INSTANTIATE:
-			case BOUND:
-				realevt = RealEventType.BOUND;break;
-			case INCLOW:realevt = RealEventType.INCLOW;break;
-			case DECUPP:realevt = RealEventType.DECUPP;break;
-			case REMOVE:return;
-			default:throw new UnsupportedOperationException("unexpected event transformation in RealView");
-		}
-        notifyPropagators(realevt, this);
+    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+        throw new UnsupportedOperationException("RealView does not support explanation.");
     }
 
     @Override

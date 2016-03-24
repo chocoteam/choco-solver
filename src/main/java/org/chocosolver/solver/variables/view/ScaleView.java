@@ -31,11 +31,9 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -297,24 +295,30 @@ public final class ScaleView extends IntView {
     }
 
     @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = false;
-        assert var == this.var;
-        IntEventType ievt = (IntEventType) evt;
-        switch (ievt) {
-            case REMOVE:
-                newrules |= ruleStore.addRemovalRule(this, value  * cste);
-                break;
+    public int transformValue(int value) {
+        return value * cste;
+    }
+
+    @Override
+    public int reverseValue(int value) {
+        return value / cste;
+    }
+
+    @Override
+    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+        switch (mask) {
             case DECUPP:
-                newrules |= ruleStore.addUpperBoundRule(this);
+                model.getSolver().getExplainer().updateUpperBound(this, one * cste, two * cste, var);
                 break;
             case INCLOW:
-                newrules |= ruleStore.addLowerBoundRule(this);
+                model.getSolver().getExplainer().updateLowerBound(this, one * cste, two * cste, var);
+                break;
+            case REMOVE:
+                model.getSolver().getExplainer().removeValue(this, one * cste, var);
                 break;
             case INSTANTIATE:
-                newrules |= ruleStore.addFullDomainRule(this);
+                model.getSolver().getExplainer().instantiateTo(this, one * cste, var, two * cste, three * cste);
                 break;
         }
-        return newrules;
     }
 }

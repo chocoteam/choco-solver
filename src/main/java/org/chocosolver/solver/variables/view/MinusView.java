@@ -31,7 +31,6 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -39,6 +38,8 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+
+import static org.chocosolver.solver.variables.events.IntEventType.*;
 
 /**
  * View for -V, where V is a IntVar or view
@@ -87,24 +88,24 @@ public class MinusView extends IntView {
 
             if (olb < lb) {
                 model.getSolver().getExplainer().updateLowerBound(this, lb, getLB(), cause);
-                e = IntEventType.INCLOW;
-                if(var.updateUpperBound(-lb, this)){
+                e = INCLOW;
+                if (var.updateUpperBound(-lb, this)) {
                     hasChanged = true;
-                }else{
+                } else {
                     model.getSolver().getExplainer().undo();
                 }
             }
             if (oub > ub) {
-                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                e = e == null ? DECUPP : BOUND;
                 model.getSolver().getExplainer().updateUpperBound(this, ub, getUB(), cause);
-                if(var.updateLowerBound(-ub, this)){
+                if (var.updateLowerBound(-ub, this)) {
                     hasChanged |= true;
-                }else{
+                } else {
                     model.getSolver().getExplainer().undo();
                 }
             }
             if (isInstantiated()) {
-                e = IntEventType.INSTANTIATE;
+                e = INSTANTIATE;
             }
             if (hasChanged) {
                 this.notifyPropagators(e, cause);
@@ -311,34 +312,40 @@ public class MinusView extends IntView {
     }
 
     @Override
-    public void transformEvent(IEventType evt, ICause cause) throws ContradictionException {
-        if (evt == IntEventType.INCLOW) {
-            evt = IntEventType.DECUPP;
-        } else if (evt == IntEventType.DECUPP) {
-            evt = IntEventType.INCLOW;
-        }
-        notifyPropagators(evt, this);
+    public int transformValue(int value) {
+        return -value;
     }
 
     @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = false;
-        assert var == this.var;
-        IntEventType ievt = (IntEventType) evt;
-        switch (ievt) {
-            case REMOVE:
-                newrules |= ruleStore.addRemovalRule(this, -value);
-                break;
+    public int reverseValue(int value) {
+        return -value;
+    }
+
+    @Override
+    public IEventType transformEvent(IEventType evt) {
+        if (evt == INCLOW) {
+            return DECUPP;
+        } else if (evt == DECUPP) {
+            return INCLOW;
+        }
+        return evt;
+    }
+
+    @Override
+    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+        switch (mask) {
             case DECUPP:
-                newrules |= ruleStore.addLowerBoundRule(this);
+                model.getSolver().getExplainer().updateLowerBound(this, -one, -two, var);
                 break;
             case INCLOW:
-                newrules |= ruleStore.addUpperBoundRule(this);
+                model.getSolver().getExplainer().updateUpperBound(this, -one, -two, var);
+                break;
+            case REMOVE:
+                model.getSolver().getExplainer().removeValue(this, -one, var);
                 break;
             case INSTANTIATE:
-                newrules |= ruleStore.addFullDomainRule(this);
+                model.getSolver().getExplainer().instantiateTo(this, -one, var, -three, -two);
                 break;
         }
-        return newrules;
     }
 }

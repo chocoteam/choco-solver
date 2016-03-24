@@ -31,7 +31,10 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -47,7 +50,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends Variable, Iterable<Integer>{
+public interface IntVar extends ICause, Variable, Iterable<Integer>{
 
     /**
      * Provide a minimum value for integer variable lower bound.
@@ -421,4 +424,60 @@ public interface IntVar extends Variable, Iterable<Integer>{
      * @return true iff the variable has a binary domain
      */
     boolean isBool();
+
+    @Override
+    default boolean why(RuleStore ruleStore, IntVar modifiedVar, IEventType evt, int value) {
+        boolean newrules = false;
+        boolean observed = modifiedVar == this;
+        IntEventType ievt;
+        if(observed){
+            value = this.transformValue(value);
+            ievt = (IntEventType)this.transformEvent(evt);
+        }else {
+            value = modifiedVar.reverseValue(value);
+            ievt = (IntEventType)modifiedVar.transformEvent(evt);
+        }
+        switch (ievt) {
+            case REMOVE:
+                newrules = ruleStore.addRemovalRule(this, value);
+                break;
+            case DECUPP:
+                newrules = ruleStore.addUpperBoundRule(this);
+                break;
+            case INCLOW:
+                newrules = ruleStore.addLowerBoundRule(this);
+                break;
+            case INSTANTIATE:
+                newrules = ruleStore.addFullDomainRule(this);
+                break;
+        }
+        return newrules;
+    }
+
+
+    /**
+     * @param evt   original event
+     * @return transforms the original event wrt this IntVar
+     */
+    default IEventType transformEvent(IEventType evt){
+        return evt;
+    }
+
+
+    /**
+     * @param value original value
+     * @return transforms the original value wrt this IntVar
+     */
+    default int transformValue(int value){
+        return value;
+    }
+
+    /**
+     * @param value original value
+     * @return reverses the original value wrt this IntVar
+     */
+    default int reverseValue(int value){
+        return value;
+    }
+
 }

@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.PoolManager;
 
 /**
@@ -205,6 +206,11 @@ public class ExplanationEngine implements IExplanationEngine{
      */
     public void removeValue(IntVar var, int val, ICause cause) {
         eventStore.pushEvent(var, cause, IntEventType.REMOVE, val, -1, -1);
+        for(IView view : var.getViews()){
+            if(view != cause){
+                view.justifyEvent(var, cause, IntEventType.REMOVE, val, -1, -1);
+            }
+        }
     }
 
     /**
@@ -221,6 +227,11 @@ public class ExplanationEngine implements IExplanationEngine{
      */
     public void updateLowerBound(IntVar var, int value, int old, ICause cause) {
         eventStore.pushEvent(var, cause, IntEventType.INCLOW, value, old, -1);
+        for(IView view : var.getViews()){
+            if(view != cause){
+                view.justifyEvent(var, cause, IntEventType.INCLOW, value, old, -1);
+            }
+        }
     }
 
     /**
@@ -237,6 +248,11 @@ public class ExplanationEngine implements IExplanationEngine{
      */
     public void updateUpperBound(IntVar var, int value, int old, ICause cause) {
         eventStore.pushEvent(var, cause, IntEventType.DECUPP, value, old, -1);
+        for(IView view : var.getViews()){
+            if(view != cause){
+                view.justifyEvent(var, cause, IntEventType.DECUPP, value, old, -1);
+            }
+        }
     }
 
     /**
@@ -252,6 +268,11 @@ public class ExplanationEngine implements IExplanationEngine{
      */
     public void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
         eventStore.pushEvent(var, cause, IntEventType.INSTANTIATE, val, oldLB, oldUB);
+        for(IView view : var.getViews()){
+            if(view != cause){
+                view.justifyEvent(var, cause, IntEventType.INSTANTIATE, val, oldLB, oldUB);
+            }
+        }
     }
 
     /**

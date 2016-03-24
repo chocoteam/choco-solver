@@ -30,7 +30,6 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
@@ -274,12 +273,6 @@ public class ExplanationEngineTest {
         for (long seed = 0; seed < 10; seed++) {
 
             final Model model = new Model();
-            model.set(new Settings() {
-                @Override
-                public boolean enableViews() {
-                    return false;
-                }
-            });
             IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
             BoolVar[] bs = model.boolVarArray("b", 2);
             model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -301,12 +294,6 @@ public class ExplanationEngineTest {
     public void testReif2() { // to test PropagatorActivation, from bs to p
 
         final Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return false;
-            }
-        });
         IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
         BoolVar[] bs = model.boolVarArray("b", 2);
         model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -332,12 +319,6 @@ public class ExplanationEngineTest {
     public void testReif3() { // to test PropagatorActivation, from bs to p
 
         final Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return false;
-            }
-        });
         IntVar[] p = model.intVarArray("p", 10, 0, 3, false);
         BoolVar[] bs = model.boolVarArray("b", 2);
         model.arithm(p[9], "=", p[8]).reifyWith(bs[0]);
@@ -427,12 +408,6 @@ public class ExplanationEngineTest {
 
     private void testCA(int n, int a) {
         Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return false;
-            }
-        });
         IntVar[] vars = model.intVarArray("c", n, 0, n - 1, false);
         IntVar[] vectors = new IntVar[(n * (n - 1)) / 2];
         IntVar[][] diff = new IntVar[n][n];
@@ -522,12 +497,6 @@ public class ExplanationEngineTest {
 
     private void testLN(int n, int k, int a) {
         Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return false;
-            }
-        });
         IntVar[] position = model.intVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
@@ -844,13 +813,6 @@ public class ExplanationEngineTest {
     public void aTest() {
 
         Model s = new Model();
-        s.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return false;
-            }
-        });
-
         IntVar one = s.intVar(1);
         IntVar three = s.intVar(3);
         IntVar four = s.intVar(4);
@@ -887,12 +849,6 @@ public class ExplanationEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void testOnce1() {
         Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return false;
-            }
-        });
         int n = 4;
         IntVar[] X = model.intVarArray("X", 4, 1, 2, false);
         BoolVar[] B = model.boolVarArray("B", 4);

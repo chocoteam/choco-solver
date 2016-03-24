@@ -32,6 +32,7 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -423,8 +424,13 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
-    public void transformEvent(IEventType evt, ICause cause) throws ContradictionException {
-        notifyPropagators(evt, this);
+    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
+        super.notifyPropagators(transformEvent(event), this);
+    }
+
+    @Override
+    public IEventType transformEvent(IEventType evt){
+        return evt;
     }
 
     @Override
@@ -464,5 +470,34 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     public Iterator<Integer> iterator() {
         _javaIterator.reset();
         return _javaIterator;
+    }
+
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar modifiedVar, IEventType evt, int value) {
+        boolean newrules = false;
+        boolean observed = modifiedVar == var;
+        IntEventType ievt;
+        if(observed){
+            value = this.transformValue(value);
+            ievt = (IntEventType)this.transformEvent(evt);
+        }else {
+            value = modifiedVar.reverseValue(value);
+            ievt = (IntEventType)modifiedVar.transformEvent(evt);
+        }
+        switch (ievt) {
+            case REMOVE:
+                newrules = ruleStore.addRemovalRule(this, value);
+                break;
+            case DECUPP:
+                newrules = ruleStore.addUpperBoundRule(this);
+                break;
+            case INCLOW:
+                newrules = ruleStore.addLowerBoundRule(this);
+                break;
+            case INSTANTIATE:
+                newrules = ruleStore.addFullDomainRule(this);
+                break;
+        }
+        return newrules;
     }
 }
