@@ -33,9 +33,9 @@ import org.chocosolver.parser.flatzinc.ast.expression.EArray;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetList;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -48,7 +48,7 @@ import java.util.List;
  * Created by cprudhom on 18/06/15.
  * Project: choco-parsers.
  */
-public abstract class ASolutionPrinter implements IMonitorSolution {
+public abstract class ASolutionPrinter {
 
     boolean printAll;
     boolean printStat;
@@ -56,9 +56,6 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
     int nbSolution;
     boolean userinterruption = true;
     public boolean immutable = false;
-
-    final public Solution bestSolution = new Solution();
-
 
     List<String> output_names;
     List<Declaration.DType> output_types;
@@ -147,9 +144,9 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
         }
     }
 
-    public void printSolution(Solution solution) {
+    public void printSolution(){
         for (int i = 0; i < output_names.size(); i++) {
-            System.out.printf("%s = %s;\n", output_names.get(i), value(solution, output_vars.get(i), output_types.get(i)));
+            System.out.printf("%s = %s;\n", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
 
         }
         for (int i = 0; i < output_arrays_names.size(); i++) {
@@ -157,9 +154,9 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
             Variable[] ivars = output_arrays_vars.get(i);
             if (ivars.length > 0) {
                 Declaration.DType type = output_arrays_types.get(i);
-                stringBuilder.append(value(solution, ivars[0], type));
+                stringBuilder.append(value(ivars[0], type));
                 for (int j = 1; j < ivars.length; j++) {
-                    stringBuilder.append(", ").append(value(solution, ivars[j], type));
+                    stringBuilder.append(", ").append(value(ivars[j], type));
                 }
                 System.out.printf(name, stringBuilder.toString());
                 stringBuilder.setLength(0);
@@ -170,18 +167,18 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
         System.out.printf("----------\n");
     }
 
-    protected String value(Solution solution, Variable var, Declaration.DType type) {
+    protected String value(Variable var, Declaration.DType type) {
         switch (type) {
             case BOOL:
-                return solution.getIntVal((BoolVar) var) == 1 ? "true" : "false";
+                return ((BoolVar) var).getValue() == 1 ? "true" : "false";
             case INT:
             case INT2:
             case INTN:
-                return Integer.toString(solution.getIntVal(((IntVar) var)));
+                return Integer.toString(((IntVar) var).getValue());
             case SET:
                 StringBuilder st = new StringBuilder();
                 st.append('{');
-                for (int i : solution.getSetVal((SetVar) var)) {
+                for (int i : ((SetVar) var).getValue()) {
                     st.append(i).append(',');
                 }
                 if (st.length() > 1) st.deleteCharAt(st.length() - 1);
@@ -193,12 +190,11 @@ public abstract class ASolutionPrinter implements IMonitorSolution {
         return "";
     }
 
-    @Override
     public void onSolution() {
         wrongSolution = false;
         nbSolution++;
         if (printAll) {
-            printSolution(bestSolution);
+            printSolution();
         }
     }
 

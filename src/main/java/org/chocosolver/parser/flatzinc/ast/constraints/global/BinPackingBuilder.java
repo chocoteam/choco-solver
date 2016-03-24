@@ -31,12 +31,17 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+
 
 import java.util.List;
+
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * <br/>
@@ -47,17 +52,17 @@ import java.util.List;
 public class BinPackingBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        int c = exps.get(0).intValue();
-		IntVar[] item_bin = exps.get(1).toIntVarArray(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+		int c = exps.get(0).intValue();
+		IntVar[] item_bin = exps.get(1).toIntVarArray(model);
 		int[] item_size = exps.get(2).toIntArray();
-		int min = Integer.MAX_VALUE/2;
-		int max = Integer.MIN_VALUE/2;
-		for(int i=0; i<item_bin.length; i++){
-			min = Math.min(min, item_bin[i].getLB());
-			max = Math.max(max, item_bin[i].getUB());
+		int min = MAX_VALUE / 2;
+		int max = MIN_VALUE / 2;
+		for (int i = 0; i < item_bin.length; i++) {
+			min = min(min, item_bin[i].getLB());
+			max = max(max, item_bin[i].getUB());
 		}
-		IntVar[] loads = VF.boundedArray("TMPload",max-min+1,0,c,solver);
-		solver.post(ICF.bin_packing(item_bin,item_size,loads,min));
-    }
+		IntVar[] loads = model.intVarArray("TMPload", max - min + 1, 0, c, true);
+		model.binPacking(item_bin, item_size, loads, min).post();
+	}
 }

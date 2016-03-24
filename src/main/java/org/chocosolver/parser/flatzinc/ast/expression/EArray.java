@@ -27,7 +27,8 @@
 
 package org.chocosolver.parser.flatzinc.ast.expression;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -91,16 +92,16 @@ public final class EArray extends Expression {
     }
 
     @Override
-    public BoolVar[] toBoolVarArray(Solver solver) {
+    public BoolVar[] toBoolVarArray(Model model) {
         BoolVar[] arr = new BoolVar[what.size()];
         for (int i = 0; i < what.size(); i++) {
-            arr[i] = what.get(i).boolVarValue(solver);
+            arr[i] = what.get(i).boolVarValue(model);
         }
         return arr;
     }
 
     @Override
-    public IntVar[] toIntVarArray(Solver solver) {
+    public IntVar[] toIntVarArray(Model solver) {
         IntVar[] arr = new IntVar[what.size()];
         for (int i = 0; i < what.size(); i++) {
             arr[i] = what.get(i).intVarValue(solver);
@@ -109,7 +110,7 @@ public final class EArray extends Expression {
     }
 
     @Override
-    public SetVar[] toSetVarArray(Solver solver) {
+    public SetVar[] toSetVarArray(Model solver) {
         SetVar[] arr = new SetVar[what.size()];
         for (int i = 0; i < what.size(); i++) {
             arr[i] = what.get(i).setVarValue(solver);

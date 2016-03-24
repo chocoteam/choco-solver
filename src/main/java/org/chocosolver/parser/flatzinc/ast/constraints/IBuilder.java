@@ -30,7 +30,7 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 import java.util.List;
 
@@ -42,5 +42,5 @@ import java.util.List;
  */
 public interface IBuilder {
 
-    void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas);
+    void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas);
 }

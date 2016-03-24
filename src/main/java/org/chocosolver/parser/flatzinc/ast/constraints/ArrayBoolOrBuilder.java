@@ -30,8 +30,8 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.BoolVar;
 
 import java.util.List;
@@ -45,24 +45,24 @@ import java.util.List;
  */
 public class ArrayBoolOrBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar[] as = exps.get(0).toBoolVarArray(solver);
-        BoolVar r = exps.get(1).boolVarValue(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        BoolVar[] as = exps.get(0).toBoolVarArray(model);
+        BoolVar r = exps.get(1).boolVarValue(model);
 
         switch (as.length) {
             case 0:
                 break;
             /*case 1:
-                solver.post(ICF.arithm(as[0], "=", r));
+                solver.post(model.arithm(as[0], "=", r));
                 break;
             case 2:
-                ICF.arithm(as[0], "+", as[1], ">", 0).reifyWith(r);
+                model.arithm(as[0], "+", as[1], ">", 0).reifyWith(r);
                 break;*/
             default:
                 if (r.isInstantiatedTo(1)) {
-                    SatFactory.addBoolOrArrayEqualTrue(as);
+                    model.addClausesBoolOrArrayEqualTrue(as);
                 } else {
-                    SatFactory.addBoolOrArrayEqVar(as, r);
+                    model.addClausesBoolOrArrayEqVar(as, r);
                 }
                 break;
         }

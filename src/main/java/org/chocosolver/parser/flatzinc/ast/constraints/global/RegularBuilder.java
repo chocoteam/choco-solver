@@ -31,8 +31,8 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -47,10 +47,10 @@ import java.util.List;
 public class RegularBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
 //        array[int] of var int: x, int: Q, int: S,
 //        array[int,int] of int: d, int: q0, set of int: F
-        IntVar[] vars = exps.get(0).toIntVarArray(solver);
+        IntVar[] vars = exps.get(0).toIntVarArray(model);
         int Q = exps.get(1).intValue();
         int S = exps.get(2).intValue();
         int[] d = exps.get(3).toIntArray();
@@ -72,6 +72,6 @@ public class RegularBuilder implements IBuilder {
 //        auto.removeDeadTransitions();
 //        auto.minimize();
 
-        solver.post(IntConstraintFactory.regular(vars, auto));
+        model.regular(vars, auto).post();
     }
 }

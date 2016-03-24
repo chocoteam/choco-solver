@@ -30,8 +30,8 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -47,10 +47,10 @@ import java.util.List;
  */
 public class MemberReifBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
 		int[] x = exps.get(0).toIntArray();
-        IntVar y = exps.get(1).intVarValue(solver);
-		BoolVar b = exps.get(2).boolVarValue(solver);
-        IntConstraintFactory.member(y, x).reifyWith(b);
+        IntVar y = exps.get(1).intVarValue(model);
+		BoolVar b = exps.get(2).boolVarValue(model);
+        model.member(y, x).reifyWith(b);
     }
 }

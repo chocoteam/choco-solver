@@ -29,7 +29,8 @@ package org.chocosolver.parser.flatzinc.ast.expression;
 
 
 import org.chocosolver.parser.Exit;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -117,10 +118,10 @@ public abstract class Expression {
     /**
      * Get the {@link BoolVar} of the {@link Expression}
      *
-     * @param solver the Solver
+     * @param model the Model
      * @return {@link BoolVar}
      */
-    public BoolVar boolVarValue(Solver solver) {
+    public BoolVar boolVarValue(Model model) {
         Exit.log();
         return null;
     }
@@ -128,10 +129,10 @@ public abstract class Expression {
     /**
      * Get an array of {@link BoolVar}[] of the {@link Expression}
      *
-     * @param solver the Solver
+     * @param model the Model
      * @return {@link BoolVar}[]
      */
-    public BoolVar[] toBoolVarArray(Solver solver) {
+    public BoolVar[] toBoolVarArray(Model model) {
         Exit.log();
         return null;
     }
@@ -139,10 +140,10 @@ public abstract class Expression {
     /**
      * Get the {@link IntVar} of the {@link Expression}
      *
-     * @param solver the Solver
+     * @param model the Model
      * @return {@link IntVar}
      */
-    public IntVar intVarValue(Solver solver) {
+    public IntVar intVarValue(Model model) {
         Exit.log();
         return null;
     }
@@ -150,10 +151,10 @@ public abstract class Expression {
     /**
      * Get an array of {@link IntVar}[] of the {@link Expression}
      *
-     * @param solver the Solver
+     * @param solver the Model
      * @return {@link IntVar}[]
      */
-    public IntVar[] toIntVarArray(Solver solver) {
+    public IntVar[] toIntVarArray(Model solver) {
         Exit.log();
         return null;
     }
@@ -161,10 +162,10 @@ public abstract class Expression {
     /**
      * Get the {@link SetVar} of the {@link Expression}
      *
-     * @param solver the Solver
+     * @param solver the Model
      * @return {@link Variable} or {@link Variable}
      */
-    public SetVar setVarValue(Solver solver) {
+    public SetVar setVarValue(Model solver) {
         Exit.log();
         return null;
     }
@@ -172,10 +173,10 @@ public abstract class Expression {
     /**
      * Get an array of {@link SetVar}[] of the {@link Expression}
      *
-     * @param solver the Solver
+     * @param solver the Model
      * @return {@link SetVar}[]
      */
-    public SetVar[] toSetVarArray(Solver solver) {
+    public SetVar[] toSetVarArray(Model solver) {
         Exit.log();
         return null;
     }

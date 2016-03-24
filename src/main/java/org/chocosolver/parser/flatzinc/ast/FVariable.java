@@ -30,8 +30,7 @@ package org.chocosolver.parser.flatzinc.ast;
 import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.declaration.*;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.*;
 
 import java.util.List;
@@ -59,41 +58,41 @@ public final class FVariable {
     private static final String var_is_introduced = "var";//"var_is_introduced";
 
     public static void make_variable(Datas datas, Declaration type, String identifier, List<EAnnotation> annotations,
-                                     Expression expression, Solver aSolver) {
+                                     Expression expression, Model aModel) {
         // value is always null, except for ARRAY, it can be defined
         // see Flatzinc specifications for more informations.
         switch (type.typeOf) {
             case INT: {
-                IntVar iv = buildWithInt(identifier, expression, datas, aSolver);
+                IntVar iv = buildWithInt(identifier, expression, datas, aModel);
                 readAnnotations(identifier, iv, type, annotations, datas);
             }
             break;
             case INT2: {
-                IntVar iv = buildWithInt2(identifier, (DInt2) type, expression, datas, aSolver);
+                IntVar iv = buildWithInt2(identifier, (DInt2) type, expression, datas, aModel);
                 readAnnotations(identifier, iv, type, annotations, datas);
             }
             break;
             case INTN: {
-                IntVar iv = buildWithManyInt(identifier, (DManyInt) type, expression, datas, aSolver);
+                IntVar iv = buildWithManyInt(identifier, (DManyInt) type, expression, datas, aModel);
                 readAnnotations(identifier, iv, type, annotations, datas);
             }
             break;
             case BOOL: {
-                BoolVar bv = buildWithBool(identifier, expression, datas, aSolver);
+                BoolVar bv = buildWithBool(identifier, expression, datas, aModel);
                 readAnnotations(identifier, bv, type, annotations, datas);
             }
             break;
             case SET: {
-                SetVar sv = buildWithSet(identifier, (DSet) type, expression, datas, aSolver);
+                SetVar sv = buildWithSet(identifier, (DSet) type, expression, datas, aModel);
                 readAnnotations(identifier, sv, type, annotations, datas);
             }
             break;
             case ARRAY: {
                 Variable[] vs;
                 if (expression == null) {
-                    vs = buildWithDArray(identifier, (DArray) type, null, datas, aSolver);
+                    vs = buildWithDArray(identifier, (DArray) type, null, datas, aModel);
                 } else {
-                    vs = buildWithDArray(identifier, (DArray) type, expression, datas, aSolver);
+                    vs = buildWithDArray(identifier, (DArray) type, expression, datas, aModel);
                 }
                 readAnnotations(identifier, vs, type, annotations, datas);
             }
@@ -166,16 +165,16 @@ public final class FVariable {
      *
      * @param name   name of the boolean variable
      * @param datas map from Model to Solver
-     * @param solver the solver
+     * @param model the solver
      * @return {@link org.chocosolver.solver.variables.Variable}
      */
 
-    private static BoolVar buildWithBool(String name, Expression expression, Datas datas, Solver solver) {
+    private static BoolVar buildWithBool(String name, Expression expression, Datas datas, Model model) {
         final BoolVar bi;
         if (expression != null) {
-            bi = (BoolVar) buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, solver);
+            bi = (BoolVar) buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, model);
         } else {
-            bi = VariableFactory.bool(DEBUG ? name : NO_NAME, solver);
+            bi = model.boolVar(DEBUG ? name : NO_NAME);
         }
         datas.register(name, bi);
         return bi;
@@ -187,14 +186,14 @@ public final class FVariable {
      * @param name       name of the variable
      * @param expression the expression
      * @param datas map from Model to Solver
-     * @param solver     @return {@link org.chocosolver.solver.variables.Variable}
+     * @param model     @return {@link org.chocosolver.solver.variables.Variable}
      */
-    private static IntVar buildWithInt(String name, Expression expression, Datas datas, Solver solver) {
+    private static IntVar buildWithInt(String name, Expression expression, Datas datas, Model model) {
         final IntVar iv;
         if (expression != null) {
-            iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, solver);
+            iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, model);
         } else {
-            iv = VariableFactory.integer(DEBUG ? name : NO_NAME, -999999, 999999, solver);
+            iv = model.intVar(DEBUG ? name : NO_NAME, -999999, 999999);
         }
         datas.register(name, iv);
         return iv;
@@ -206,18 +205,18 @@ public final class FVariable {
      * @param name   name of the variable
      * @param type   {@link org.chocosolver.parser.flatzinc.ast.declaration.DInt2} object
      * @param datas map from Model to Solver
-     * @param solver the solver
+     * @param model the solver
      * @return {@link org.chocosolver.solver.variables.Variable}
      */
-    private static IntVar buildWithInt2(String name, DInt2 type, Expression expression, Datas datas, Solver solver) {
+    private static IntVar buildWithInt2(String name, DInt2 type, Expression expression, Datas datas, Model model) {
         final IntVar iv;
         if (expression != null) {
-            iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, solver);
+            iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, model);
             int lb = type.getLow();
             int ub = type.getUpp();
-            solver.post(IntConstraintFactory.member(iv, lb, ub));
+            model.member(iv, lb, ub).post();
         } else {
-            iv = VariableFactory.integer(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
+            iv = model.intVar(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp());
         }
         datas.register(name, iv);
         return iv;
@@ -230,34 +229,34 @@ public final class FVariable {
      * @param name   name of the variable
      * @param type   {@link org.chocosolver.parser.flatzinc.ast.declaration.DManyInt} object.
      * @param datas map from Model to Solver
-     * @param solver the solver
+     * @param model the solver
      * @return {@link org.chocosolver.solver.variables.Variable}
      */
-    private static IntVar buildWithManyInt(String name, DManyInt type, Expression expression, Datas datas, Solver solver) {
+    private static IntVar buildWithManyInt(String name, DManyInt type, Expression expression, Datas datas, Model model) {
         final IntVar iv;
         if (expression != null) {
-            iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, solver);
+            iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, model);
             int[] values = type.getValues();
-            solver.post(IntConstraintFactory.member(iv, values));
+            model.member(iv, values).post();
         } else {
-            iv = VariableFactory.enumerated(DEBUG ? name : NO_NAME, type.getValues(), solver);
+            iv = model.intVar(DEBUG ? name : NO_NAME, type.getValues());
         }
         datas.register(name, iv);
         return iv;
     }
 
 
-    private static IntVar buildOnExpression(String name, Expression expression, Datas datas, Solver solver) {
+    private static IntVar buildOnExpression(String name, Expression expression, Datas datas, Model model) {
         final IntVar iv;
         switch (expression.getTypeOf()) {
             case BOO:
-                iv = expression.boolVarValue(solver);
+                iv = expression.boolVarValue(model);
                 break;
             case INT:
-                iv = VariableFactory.fixed(name, expression.intValue(), solver);
+                iv = model.intVar(name, expression.intValue());
                 break;
             case IDE:
-                iv = VariableFactory.eq((IntVar) datas.get(expression.toString()));
+                iv = (IntVar) datas.get(expression.toString());
                 break;
             case IDA:
                 EIdArray eida = (EIdArray) expression;
@@ -278,33 +277,32 @@ public final class FVariable {
      * @param datas map from Model to Solver
      * @return {@link org.chocosolver.solver.variables.Variable}.
      */
-    private static SetVar buildWithSet(String name, DSet type, Expression expression, Datas datas, Solver solver) {
-        final Declaration what = type.getWhat();
-        final SetVar sv;
-        switch (what.typeOf) {
-            case INT2:
-                if (expression == null) {
+    private static SetVar buildWithSet(String name, DSet type, Expression expression, Datas datas, Model model) {
+        Declaration what = type.getWhat();
+        SetVar sv = null;
+        if(expression != null){
+            Exit.log("Unknown expression");
+        }else {
+            int[] ub = null;
+            switch (what.typeOf) {
+                case INT2:
                     DInt2 bounds = (DInt2) what;
-                    sv = VariableFactory.set(DEBUG ? name : NO_NAME, bounds.getLow(), bounds.getUpp(), solver);
-                } else {
-                    Exit.log();
-                    sv = null;
-                }
-                break;
-            case INTN:
-                DManyInt mint = (DManyInt) what;
-                if (expression == null) {
-                    sv = VariableFactory.set(DEBUG ? name : NO_NAME, mint.getValues(), solver);
-                } else {
-                    sv = null;
-                    Exit.log("Unknown expression");
-                }
-                break;
-            default:
-                sv = null;
-                Exit.log("Unknown expression");
-                break;
-
+                    ub = new int[bounds.getUpp()-bounds.getLow()+1];
+                    for(int i=0;i<ub.length;i++){
+                        ub[i] = i+bounds.getLow();
+                    }
+                    break;
+                case INTN:
+                    DManyInt mint = (DManyInt) what;
+                    ub = mint.getValues();
+                    break;
+                default:
+                    Exit.log("Unknown set type");
+                    break;
+            }
+            if(ub != null){
+                sv = model.setVar(DEBUG ? name : NO_NAME, new int[]{}, ub);
+            }
         }
         datas.register(name, sv);
         return sv;
@@ -320,7 +318,7 @@ public final class FVariable {
      * @param datas map from Model to Solver
      * @param solver the solver
      */
-    private static Variable[] buildWithDArray(String name, DArray type, Expression expression, Datas datas, Solver solver) {
+    private static Variable[] buildWithDArray(String name, DArray type, Expression expression, Datas datas, Model solver) {
         final DInt2 index = (DInt2) type.getIndex(0);
         // no need to get lowB, it is always 1 (see specification of FZN for more information)
         int size = index.getUpp();
@@ -390,7 +388,7 @@ public final class FVariable {
 
     }
 
-    private static void buildFromIntArray(Variable[] vs, EArray array, int size, Solver solver) {
+    private static void buildFromIntArray(Variable[] vs, EArray array, int size, Model solver) {
         //build the array
         for (int i = 0; i < size; i++) {
             vs[i] = array.getWhat_i(i).intVarValue(solver);

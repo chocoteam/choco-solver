@@ -30,9 +30,9 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
+
+
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -48,9 +48,9 @@ import java.util.List;
  */
 public class TableBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         // array[int] of var int: x, array[int, int] of int: t
-        IntVar[] x = exps.get(0).toIntVarArray(solver);
+        IntVar[] x = exps.get(0).toIntVarArray(model);
         int[] f_t = exps.get(1).toIntArray();
         int d2 = x.length;
         int d1 = f_t.length / d2;
@@ -63,9 +63,9 @@ public class TableBuilder implements IBuilder {
             tuples.add(couple);
         }
         if (x.length == 2) {
-            solver.post(ICF.table(x[0], x[1], tuples, "AC3bit+rm"));
+            model.table(x[0], x[1], tuples, "AC3bit+rm").post();
         } else {
-            solver.post(IntConstraintFactory.table(x, tuples, "GACSTR+"));
+            model.table(x, tuples, "GACSTR+").post();
         }
     }
 }

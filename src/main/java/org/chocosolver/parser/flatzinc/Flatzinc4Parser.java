@@ -32,7 +32,7 @@ import org.chocosolver.parser.flatzinc.ast.*;
 import org.chocosolver.parser.flatzinc.ast.declaration.*;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,8 +97,8 @@ public class Flatzinc4Parser extends Parser {
 
 	public Datas datas;
 
-	// the solver
-	public Solver mSolver;
+	// the model
+	public Model mModel;
 
 
 	public boolean allSolutions, freeSearch;
@@ -108,7 +108,7 @@ public class Flatzinc4Parser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class Flatzinc_modelContext extends ParserRuleContext {
-		public Solver aSolver;
+		public Model aModel;
 		public Datas datas;
 		public boolean allSolutions;
 		public boolean freeSearch;
@@ -140,9 +140,9 @@ public class Flatzinc4Parser extends Parser {
 			return getRuleContext(ConstraintContext.class,i);
 		}
 		public Flatzinc_modelContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
-		public Flatzinc_modelContext(ParserRuleContext parent, int invokingState, Solver aSolver, Datas datas, boolean allSolutions, boolean freeSearch) {
+		public Flatzinc_modelContext(ParserRuleContext parent, int invokingState, Model aModel, Datas datas, boolean allSolutions, boolean freeSearch) {
 			super(parent, invokingState);
-			this.aSolver = aSolver;
+			this.aModel = aModel;
 			this.datas = datas;
 			this.allSolutions = allSolutions;
 			this.freeSearch = freeSearch;
@@ -158,15 +158,15 @@ public class Flatzinc4Parser extends Parser {
 		}
 	}
 
-	public final Flatzinc_modelContext flatzinc_model(Solver aSolver,Datas datas,boolean allSolutions,boolean freeSearch) throws RecognitionException {
-		Flatzinc_modelContext _localctx = new Flatzinc_modelContext(_ctx, getState(), aSolver, datas, allSolutions, freeSearch);
+	public final Flatzinc_modelContext flatzinc_model(Model aModel,Datas datas,boolean allSolutions,boolean freeSearch) throws RecognitionException {
+		Flatzinc_modelContext _localctx = new Flatzinc_modelContext(_ctx, getState(), aModel, datas, allSolutions, freeSearch);
 		enterRule(_localctx, 0, RULE_flatzinc_model);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 
-			    this.mSolver = aSolver;
+			    this.mModel = aModel;
 			    this.datas = datas;
 			    this.allSolutions = allSolutions;
 			    this.freeSearch = freeSearch;
@@ -1184,7 +1184,7 @@ public class Flatzinc4Parser extends Parser {
 
 			setState(274); match(SC);
 
-				FVariable.make_variable(datas, ((Var_declContext)_localctx).vt.decl, (((Var_declContext)_localctx).IDENTIFIER!=null?((Var_declContext)_localctx).IDENTIFIER.getText():null), ((Var_declContext)_localctx).anns.anns, ((Var_declContext)_localctx).eq!=null?((Var_declContext)_localctx).e.exp:null, mSolver);
+				FVariable.make_variable(datas, ((Var_declContext)_localctx).vt.decl, (((Var_declContext)_localctx).IDENTIFIER!=null?((Var_declContext)_localctx).IDENTIFIER.getText():null), ((Var_declContext)_localctx).anns.anns, ((Var_declContext)_localctx).eq!=null?((Var_declContext)_localctx).e.exp:null, mModel);
 			    
 			}
 		}
@@ -1243,7 +1243,7 @@ public class Flatzinc4Parser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 
-			    //  Solver aSolver, String id, List<Expression> exps, List<EAnnotation> annotations
+			    //  Model aModel, String id, List<Expression> exps, List<EAnnotation> annotations
 			    ArrayList<Expression> exps = new ArrayList();
 			    
 			setState(278); match(CONSTRAINT);
@@ -1270,7 +1270,7 @@ public class Flatzinc4Parser extends Parser {
 			setState(293); ((ConstraintContext)_localctx).anns = annotations();
 			setState(294); match(SC);
 
-			    FConstraint.make_constraint(mSolver, datas, (((ConstraintContext)_localctx).IDENTIFIER!=null?((ConstraintContext)_localctx).IDENTIFIER.getText():null), exps, ((ConstraintContext)_localctx).anns.anns);
+			    FConstraint.make_constraint(mModel, datas, (((ConstraintContext)_localctx).IDENTIFIER!=null?((ConstraintContext)_localctx).IDENTIFIER.getText():null), exps, ((ConstraintContext)_localctx).anns.anns);
 			    
 			}
 		}
@@ -1321,7 +1321,7 @@ public class Flatzinc4Parser extends Parser {
 			setState(299); ((Solve_goalContext)_localctx).res = resolution();
 			setState(300); match(SC);
 
-			    FGoal.define_goal(mSolver, ((Solve_goalContext)_localctx).anns.anns,((Solve_goalContext)_localctx).res.rtype,((Solve_goalContext)_localctx).res.exp);
+			    FGoal.define_goal(mModel, ((Solve_goalContext)_localctx).anns.anns,((Solve_goalContext)_localctx).res.rtype,((Solve_goalContext)_localctx).res.exp);
 			    
 			}
 		}

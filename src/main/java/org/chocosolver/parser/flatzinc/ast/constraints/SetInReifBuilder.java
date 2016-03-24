@@ -30,9 +30,9 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.Model;
+
+
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -49,19 +49,19 @@ import java.util.List;
 public class SetInReifBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        IntVar a = exps.get(0).intVarValue(solver);
-        BoolVar r = exps.get(2).boolVarValue(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar a = exps.get(0).intVarValue(model);
+        BoolVar r = exps.get(2).boolVarValue(model);
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            ICF.member(a, values).reifyWith(r);
+            model.member(a, values).reifyWith(r);
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            ICF.member(a, low, upp).reifyWith(r);
+            model.member(a, low, upp).reifyWith(r);
         } else {
-            SetVar b = exps.get(1).setVarValue(solver);
-            SCF.member(a, b).reifyWith(r);
+            SetVar b = exps.get(1).setVarValue(model);
+            model.member(a, b).reifyWith(r);
         }
     }
 }

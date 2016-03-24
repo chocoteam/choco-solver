@@ -31,11 +31,13 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.List;
+
+import static java.lang.Math.min;
 
 /**
  * <br/>
@@ -46,14 +48,14 @@ import java.util.List;
 public class CircuitBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        IntVar[] vars = exps.get(0).toIntVarArray(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] vars = exps.get(0).toIntVarArray(model);
         if(vars.length>0) {
             int min = vars[0].getLB();
             for (IntVar v : vars) {
-                min = Math.min(min, v.getLB());
+                min = min(min, v.getLB());
             }
-            solver.post(ICF.circuit(vars, min));
+            model.circuit(vars, min).post();
         }
     }
 }

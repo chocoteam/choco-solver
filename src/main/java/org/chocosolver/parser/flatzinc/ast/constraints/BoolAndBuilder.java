@@ -30,8 +30,7 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 
 import java.util.List;
@@ -45,10 +44,10 @@ import java.util.List;
  */
 public class BoolAndBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar a = exps.get(0).boolVarValue(solver);
-        BoolVar b = exps.get(1).boolVarValue(solver);
-        BoolVar r = exps.get(2).boolVarValue(solver);
-        SatFactory.addBoolAndEqVar(a, b, r);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        BoolVar a = exps.get(0).boolVarValue(model);
+        BoolVar b = exps.get(1).boolVarValue(model);
+        BoolVar r = exps.get(2).boolVarValue(model);
+        model.addClausesBoolAndEqVar(a, b, r);
     }
 }

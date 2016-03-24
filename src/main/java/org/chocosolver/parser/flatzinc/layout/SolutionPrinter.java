@@ -26,6 +26,7 @@
  */
 package org.chocosolver.parser.flatzinc.layout;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 
 /**
@@ -36,26 +37,27 @@ public class SolutionPrinter extends ASolutionPrinter {
 
     Solver solver;
 
-    public SolutionPrinter(Solver solver, boolean printAll, boolean printStat) {
+    public SolutionPrinter(Model model, boolean printAll, boolean printStat) {
         super(printAll, printStat);
-        this.solver = solver;
-        solver.plugMonitor(this);
+        this.solver = model.getSolver();
     }
 
     @Override
     public void onSolution() {
-        bestSolution.record(solver);
         super.onSolution();
         if (printStat) {
-            System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
+            // TODO used to use the toOneShortLineString that has been removed
+            System.out.printf("%% %s \n", solver.getMeasures().toOneLineString());
         }
     }
 
     public void doFinalOutPut() {
         userinterruption = false;
-        boolean complete = solver.getSearchLoop().isComplete() && !solver.getSearchLoop().hasReachedLimit() && !solver.getSearchLoop().hasEndedUnexpectedly();
+        // TODO there used to be "isComplete" (e.g. in case LNS stops)
+        boolean complete = !solver.isStopCriterionMet() && !solver.hasEndedUnexpectedly();
         if(nbSolution>0){
-            printSolution(bestSolution);
+            if(!printAll)//already printed
+            printSolution();
             if(complete){
                 System.out.printf("==========\n");
             }else if (solver.getObjectiveManager().isOptimization()) {
@@ -69,7 +71,32 @@ public class SolutionPrinter extends ASolutionPrinter {
             }
         }
         if (printStat) {
-            System.out.printf("%% %s \n", solver.getMeasures().toOneShortLineString());
+            // TODO used to use the toOneShortLineString that has been removed
+            System.out.printf("%% %s \n", solver.getMeasures().toOneLineString());
         }
     }
+
+//    public String printSolution() {
+//        String s = "";
+//        for (int i = 0; i < output_names.size(); i++) {
+//            s += String.format("%s = %s;\n", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
+//        }
+//        for (int i = 0; i < output_arrays_names.size(); i++) {
+//            String name = output_arrays_names.get(i);
+//            Variable[] ivars = output_arrays_vars.get(i);
+//            if (ivars.length > 0) {
+//                Declaration.DType type = output_arrays_types.get(i);
+//                stringBuilder.append(value(ivars[0], type));
+//                for (int j = 1; j < ivars.length; j++) {
+//                    stringBuilder.append(", ").append(value(ivars[j], type));
+//                }
+//                s += String.format(name, stringBuilder.toString());
+//                stringBuilder.setLength(0);
+//            } else {
+//                s += String.format(name);
+//            }
+//        }
+//        s += String.format("----------\n");
+//        return s;
+//    }
 }

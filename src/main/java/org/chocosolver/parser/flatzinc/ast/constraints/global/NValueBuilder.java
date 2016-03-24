@@ -31,8 +31,8 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.List;
@@ -46,9 +46,9 @@ import java.util.List;
 public class NValueBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        IntVar nValues = exps.get(0).intVarValue(solver);
-        IntVar[] vars = exps.get(1).toIntVarArray(solver);
-        solver.post(IntConstraintFactory.nvalues(vars, nValues));
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar nValues = exps.get(0).intVarValue(model);
+        IntVar[] vars = exps.get(1).toIntVarArray(model);
+        model.nValues(vars, nValues).post();
     }
 }

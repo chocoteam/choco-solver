@@ -27,14 +27,12 @@
 package org.chocosolver.parser;
 
 import gnu.trove.set.hash.THashSet;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.ExplanationFactory;
-import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.strategy.Once;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.TimeUtils;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -43,6 +41,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 /**
  * A regular parser with default and common services
  * Created by cprudhom on 01/09/15.
@@ -59,12 +58,8 @@ public abstract class RegParser implements IParser {
     @Option(name = "-stat", aliases = {"--print-statistics"}, usage = "Print statistics on each solution (default: false).", required = false)
     protected boolean stat = false;
 
-    @Option(name = "-e", aliases = {"--explanations"}, usage = "Plug explanations in : CBJ, DBT or NONE (default: NONE).", required = false)
-    protected ExplanationFactory expl = ExplanationFactory.NONE;
-
-    // A unique solver
-    public Solver mSolver;
-    protected List<Solver> solvers;
+//    @Option(name = "-e", aliases = {"--explanations"}, usage = "Plug explanations in : CBJ, DBT or NONE (default: NONE).", required = false)
+//    protected ExplanationFactory expl = ExplanationFactory.NONE;
 
     protected long tl_ = -1;
     // List of listeners plugged, ease user interactions.
@@ -101,7 +96,7 @@ public abstract class RegParser implements IParser {
             return;
         }
         cmdparser.getArguments();
-        tl_ = SMF.convertInMilliseconds(tl);
+        tl_ = TimeUtils.convertInMilliseconds(tl);
         listeners.forEach(ParserListener::afterParsingParameters);
     }
 
@@ -120,22 +115,23 @@ public abstract class RegParser implements IParser {
     /**
      * Create a complementary search on non-decision variables
      *
-     * @param solver a solver
+     * @param m a Model
      */
-    protected static void makeComplementarySearch(Solver solver) {
+    protected static void makeComplementarySearch(Model m) {
         //TODO deal with no strategy
-        IntVar[] ovars = new IntVar[solver.getNbVars()];
+        Solver solver = m.getSolver();
+        IntVar[] ovars = new IntVar[m.getNbVars()];
         THashSet<Variable> dvars = new THashSet<>();
         if(solver.getStrategy() != null) {
             dvars.addAll(Arrays.asList(solver.getStrategy().getVariables()));
             int k = 0;
-            for (int i = 0; i < solver.getNbVars(); i++) {
-                Variable ivar = solver.getVar(i);
+            for (int i = 0; i < m.getNbVars(); i++) {
+                Variable ivar = m.getVar(i);
                 if (!dvars.contains(ivar) && (ivar.getTypeAndKind() & Variable.INT) != 0) {
                     ovars[k++] = (IntVar) ivar;
                 }
             }
-            solver.set(solver.getStrategy(), new Once(Arrays.copyOf(ovars, k), ISF.lexico_var_selector(), ISF.min_value_selector()));
+            solver.set(solver.getStrategy(), greedySearch(inputOrderLBSearch(Arrays.copyOf(ovars, k))));
         }
     }
 
@@ -145,7 +141,7 @@ public abstract class RegParser implements IParser {
     }
 
     @Override
-    public Solver getSolver() {
+    public Model getModel() {
         return null;
     }
 }

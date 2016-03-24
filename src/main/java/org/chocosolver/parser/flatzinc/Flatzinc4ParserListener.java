@@ -32,7 +32,7 @@ import org.chocosolver.parser.flatzinc.ast.*;
 import org.chocosolver.parser.flatzinc.ast.declaration.*;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 import java.util.ArrayList;
 import java.util.List;

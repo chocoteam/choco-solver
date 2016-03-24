@@ -26,11 +26,10 @@
  */
 package org.chocosolver.parser.flatzinc;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.bind.DefaultSearchBinder;
-import org.chocosolver.solver.search.strategy.ISF;
-import org.chocosolver.solver.search.strategy.SSF;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.BoolVar;
@@ -39,17 +38,20 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.*;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
 /**
  * Created by cprudhom on 08/12/14.
  * Project: choco-parsers.
  */
 public class FznSearchBinder extends DefaultSearchBinder {
+    // TODO : should rely on Choco default search binder... (jg)
     @Override
-    public void configureSearch(Solver solver) {
+    public void configureSearch(Model model) {
+        Solver solver = model.getSolver();
         AbstractStrategy current = solver.getStrategy();
         if (current == null) {
-            super.configureSearch(solver);
+            super.configureSearch(model);
         } else {
             // 1. extract variables
             Variable[] allVars = current.getVariables();
@@ -111,13 +113,13 @@ public class FznSearchBinder extends DefaultSearchBinder {
             // Make main search strategy
             List<AbstractStrategy> strats = new ArrayList<>();
             if (decintvars.size() > 0) {
-                strats.add(ISF.domOverWDeg(decintvars.toArray(new IntVar[decintvars.size()]), 29091981L));
+                strats.add(domOverWDegSearch(decintvars.toArray(new IntVar[decintvars.size()])));
             }
             if (decboolvars.size() > 0) {
-                strats.add(ISF.lexico_UB(decboolvars.toArray(new BoolVar[decboolvars.size()])));
+                strats.add(inputOrderUBSearch(decboolvars.toArray(new BoolVar[decboolvars.size()])));
             }
             if (decsetvars.size() > 0) {
-                strats.add(SSF.force_first(decsetvars.toArray(new SetVar[decsetvars.size()])));
+                strats.add(setVarSearch(decsetvars.toArray(new SetVar[decsetvars.size()])));
             }
 
             // Make complementary search
@@ -131,11 +133,7 @@ public class FznSearchBinder extends DefaultSearchBinder {
             }
 
             // declare the search strategy
-            if (strats.size() == 1) {
-                solver.set(strats.get(0));
-            } else {
-                solver.set(ISF.sequencer(strats.toArray(new AbstractStrategy[strats.size()])));
-            }
+            solver.set(strats.toArray(new AbstractStrategy[0]));
         }
     }
 
@@ -157,7 +155,7 @@ public class FznSearchBinder extends DefaultSearchBinder {
                     for (int i = 0; i < ivars.length; i++) {
                         if (!ivars[i].isInstantiated()) {
                             ivars[i].instantiateTo(ivars[i].getLB(), this);
-                            ivars[i].getSolver().propagate();
+                            ivars[i].getModel().getSolver().propagate();
                         }
                     }
                 }
@@ -188,7 +186,7 @@ public class FznSearchBinder extends DefaultSearchBinder {
             public Decision<IntVar> getDecision() {
                 if (!created) {
                     created = true;
-                    d.once(true);
+                    d.setRefutable(false);
                     return d;
                 }
                 return null;

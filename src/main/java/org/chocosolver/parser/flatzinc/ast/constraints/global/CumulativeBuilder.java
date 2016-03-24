@@ -31,11 +31,11 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VariableFactory;
+
 
 import java.util.List;
 
@@ -48,20 +48,20 @@ import java.util.List;
 public class CumulativeBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        final IntVar[] starts = exps.get(0).toIntVarArray(solver);
-        final IntVar[] durations = exps.get(1).toIntVarArray(solver);
-        final IntVar[] resources = exps.get(2).toIntVarArray(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        final IntVar[] starts = exps.get(0).toIntVarArray(model);
+        final IntVar[] durations = exps.get(1).toIntVarArray(model);
+        final IntVar[] resources = exps.get(2).toIntVarArray(model);
         final IntVar[] ends = new IntVar[starts.length];
         Task[] tasks = new Task[starts.length];
-        final IntVar limit = exps.get(3).intVarValue(solver);
+        final IntVar limit = exps.get(3).intVarValue(model);
         for (int i = 0; i < starts.length; i++) {
-            ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
+            ends[i] = model.intVar(starts[i].getName() + "_" + durations[i].getName(),
                     starts[i].getLB() + durations[i].getLB(),
                     starts[i].getUB() + durations[i].getUB(),
-                    solver);
+                    true);
             tasks[i] = new Task(starts[i], durations[i], ends[i]);
         }
-        solver.post(IntConstraintFactory.cumulative(tasks, resources, limit, true));
+        model.cumulative(tasks, resources, limit, true).post();
     }
 }

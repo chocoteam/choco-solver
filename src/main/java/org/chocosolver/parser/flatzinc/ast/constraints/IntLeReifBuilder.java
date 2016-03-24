@@ -31,7 +31,7 @@ import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
@@ -44,6 +44,11 @@ import org.chocosolver.util.ESat;
 
 import java.util.List;
 
+import static org.chocosolver.solver.constraints.PropagatorPriority.BINARY;
+import static org.chocosolver.solver.constraints.PropagatorPriority.TERNARY;
+import static org.chocosolver.solver.variables.events.IntEventType.DECUPP;
+import static org.chocosolver.util.ESat.TRUE;
+
 /**
  * (a &#8804; b) &#8660; r
  * <br/>
@@ -54,23 +59,23 @@ import java.util.List;
 public class IntLeReifBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        IntVar a = exps.get(0).intVarValue(solver);
-        IntVar b = exps.get(1).intVarValue(solver);
-        final BoolVar r = exps.get(2).boolVarValue(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar a = exps.get(0).intVarValue(model);
+        IntVar b = exps.get(1).intVarValue(model);
+        final BoolVar r = exps.get(2).boolVarValue(model);
         // this constraint is not poster, hence not returned, because it is reified
-        if (((FznSettings) solver.getSettings()).enableClause()
+        if (((FznSettings) model.getSettings()).enableClause()
                 && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
-            SatFactory.addBoolIsLeVar((BoolVar) a, (BoolVar) b, r);
+            model.addClausesBoolIsLeVar((BoolVar) a, (BoolVar) b, r);
         } else {
-            if (((FznSettings) solver.getSettings()).adhocReification()) {
+            if (((FznSettings) model.getSettings()).adhocReification()) {
                 if (a.isInstantiated() || b.isInstantiated()) {
                     final IntVar var;
                     final int cste;
                     if (a.isInstantiated()) {
                         var = b;
                         cste = a.getValue();
-                        solver.post(new Constraint("reif(a>=cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
+                        new Constraint("reif(a>=cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, BINARY, false) {
                             @Override
                             public void propagate(int evtmask) throws ContradictionException {
                                 if (r.getLB() == 1) {
@@ -96,7 +101,7 @@ public class IntLeReifBuilder implements IBuilder {
                             @Override
                             public ESat isEntailed() {
 //                                throw new UnsupportedOperationException("isEntailed not implemented ");
-                                return ESat.TRUE;
+                                return TRUE;
                             }
 
                             @Override
@@ -114,11 +119,11 @@ public class IntLeReifBuilder implements IBuilder {
                                 return nrules;
                             }
 
-                        }));
+                        }).post();
                     } else {
                         var = a;
                         cste = b.getValue();
-                        solver.post(new Constraint("reif(a<=cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
+                        new Constraint("reif(a<=cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, BINARY, false) {
                             @Override
                             public void propagate(int evtmask) throws ContradictionException {
                                 if (r.getLB() == 1) {
@@ -144,7 +149,7 @@ public class IntLeReifBuilder implements IBuilder {
                             @Override
                             public ESat isEntailed() {
 //                                throw new UnsupportedOperationException("isEntailed not implemented ");
-                                return ESat.TRUE;
+                                return TRUE;
                             }
 
                             @Override
@@ -161,10 +166,10 @@ public class IntLeReifBuilder implements IBuilder {
                                 }
                                 return nrules;
                             }
-                        }));
+                        }).post();
                     }
                 } else {
-                    solver.post(new Constraint("reif(a<=b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
+                    new Constraint("reif(a<=b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, TERNARY, false) {
                         @Override
                         public void propagate(int evtmask) throws ContradictionException {
                             if (r.getLB() == 1) {
@@ -210,13 +215,13 @@ public class IntLeReifBuilder implements IBuilder {
                                 }
                             } else {
                                 if (var == vars[0]) {
-                                    if (evt == IntEventType.DECUPP) {
+                                    if (evt == DECUPP) {
                                         nrules |= ruleStore.addUpperBoundRule(vars[1]);
                                     } else {
                                         nrules |= ruleStore.addLowerBoundRule(vars[1]);
                                     }
                                 } else if (var == vars[1]) {
-                                    if (evt == IntEventType.DECUPP) {
+                                    if (evt == DECUPP) {
                                         nrules |= ruleStore.addUpperBoundRule(vars[0]);
                                     } else {
                                         nrules |= ruleStore.addLowerBoundRule(vars[0]);
@@ -227,10 +232,10 @@ public class IntLeReifBuilder implements IBuilder {
                             return nrules;
                         }
 
-                    }));
+                    }).post();
                 }
             } else {
-                ICF.arithm(a, "<=", b).reifyWith(r);
+                model.arithm(a, "<=", b).reifyWith(r);
             }
         }
     }

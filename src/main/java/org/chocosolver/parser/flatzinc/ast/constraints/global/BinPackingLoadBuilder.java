@@ -31,9 +31,9 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
+
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -49,23 +49,18 @@ import java.util.List;
 public class BinPackingLoadBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-		IntVar[] loads = exps.get(0).toIntVarArray(solver);
-		IntVar[] item_bin = exps.get(1).toIntVarArray(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+		IntVar[] loads = exps.get(0).toIntVarArray(model);
+		IntVar[] item_bin = exps.get(1).toIntVarArray(model);
 		int[] item_size = exps.get(2).toIntArray();
-		LinkedList<Constraint> addCons = new LinkedList<>();
 		for(int i=0; i<item_bin.length; i++){
 			if(item_bin[i].getLB()<1){
-				addCons.add(ICF.arithm(item_bin[i],">=",1));
+				model.arithm(item_bin[i],">=",1).post();
 			}
 			if(item_bin[i].getUB()>loads.length){
-				addCons.add(ICF.arithm(item_bin[i],"<=",loads.length));
+				model.arithm(item_bin[i],"<=",loads.length).post();
 			}
 		}
-		if(addCons.size()>0){
-			solver.post(ArrayUtils.append(ICF.bin_packing(item_bin, item_size, loads, 1), (Constraint[])addCons.toArray()));
-		}else{
-			solver.post(ICF.bin_packing(item_bin, item_size, loads, 1));
-		}
+		model.binPacking(item_bin, item_size, loads, 1).post();
     }
 }

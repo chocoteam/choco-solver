@@ -31,7 +31,7 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.geost.Constants;
 import org.chocosolver.solver.constraints.nary.geost.GeostOptions;
@@ -47,6 +47,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.copyOfRange;
+import static org.chocosolver.solver.constraints.nary.geost.Constants.NON_OVERLAPPING;
+import static org.chocosolver.util.tools.ArrayUtils.oneToN;
+
 /**
  * <br/>
  *
@@ -56,13 +60,13 @@ import java.util.List;
 public class GeostBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int dim = exps.get(0).intValue();
         int[] rect_size = exps.get(1).toIntArray();
         int[] rect_offset = exps.get(2).toIntArray();
         int[][] shape = exps.get(3).toIntMatrix();
-        IntVar[] x = exps.get(4).toIntVarArray(solver);
-        IntVar[] kind = exps.get(5).toIntVarArray(solver);
+        IntVar[] x = exps.get(4).toIntVarArray(model);
+        IntVar[] kind = exps.get(5).toIntVarArray(model);
 
 
         //Create Objects
@@ -71,8 +75,8 @@ public class GeostBuilder implements IBuilder {
         List<GeostObject> objects = new ArrayList<>();
         for (int i = 0; i < nbOfObj; i++) {
             IntVar shapeId = kind[i];
-            IntVar[] coords = Arrays.copyOfRange(x, i * dim, (i+1) * dim);
-            objects.add(new GeostObject(dim, i, shapeId, coords, solver.ONE(), solver.ONE(), solver.ONE()));
+            IntVar[] coords = copyOfRange(x, i * dim, (i + 1) * dim);
+            objects.add(new GeostObject(dim, i, shapeId, coords, model.ONE(), model.ONE(), model.ONE()));
             objIds[i] = i;
         }
 
@@ -81,16 +85,16 @@ public class GeostBuilder implements IBuilder {
         for (int i = 0; i < shape.length; i++) {
             for (int j = 0; j < shape[i].length; j++) {
                 int h = shape[i][j];
-                int[] l = Arrays.copyOfRange(rect_size, (h-1) * dim, h * dim);
-                int[] t = Arrays.copyOfRange(rect_offset, (h-1) * dim, h * dim);
-                shapes.add(new ShiftedBox(i+1, t, l));
+                int[] l = copyOfRange(rect_size, (h - 1) * dim, h * dim);
+                int[] t = copyOfRange(rect_offset, (h - 1) * dim, h * dim);
+                shapes.add(new ShiftedBox(i + 1, t, l));
             }
         }
 
         //Create the external constraints vecotr
         List<ExternalConstraint> extcstr = new ArrayList<>(1);
         //add the external constraint of type non overlapping
-        extcstr.add(new NonOverlapping(Constants.NON_OVERLAPPING, ArrayUtils.oneToN(dim), objIds));
+        extcstr.add(new NonOverlapping(NON_OVERLAPPING, oneToN(dim), objIds));
 
 
         int originOfObjects = objects.size() * dim; //Number of domain variables to represent the origin of all objects
@@ -109,9 +113,9 @@ public class GeostBuilder implements IBuilder {
             vars[(i * (dim + 4)) + dim + 3] = objects.get(i).getEnd();
         }
         GeostOptions opt = new GeostOptions();
-        PropGeost propgeost = new PropGeost(vars, dim, objects, shapes, extcstr, false, opt.included, solver);
+        PropGeost propgeost = new PropGeost(vars, dim, objects, shapes, extcstr, false, opt.included, model.getSolver());
 
-        solver.post(new Constraint("Geost", propgeost));
+        new Constraint("Geost", propgeost).post();
         throw new UnsupportedOperationException("Geost is not robust");
     }
 }

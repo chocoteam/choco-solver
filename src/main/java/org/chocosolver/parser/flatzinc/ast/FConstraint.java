@@ -33,7 +33,7 @@ import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public final class FConstraint {
         name
     }
 
-    public static void make_constraint(Solver aSolver, Datas datas,
+    public static void make_constraint(Model aModel, Datas datas,
                                        String id, List<Expression> exps, List<EAnnotation> annotations) {
         if (!last.equals(id)) {
             if (builders.containsKey(id)) {
@@ -85,13 +85,13 @@ public final class FConstraint {
                     throw new FZNException("Unknown constraint: " + id);
                 }
                 builder = (IBuilder) loadManager(name);
-                if (((FznSettings) aSolver.getSettings()).printConstraint())
+                if (((FznSettings) aModel.getSettings()).printConstraint())
                     System.out.printf("%% %s\n", name);
                 builders.put(id, builder);
             }
             last = id;
         }
-        builder.build(aSolver, id, exps, annotations, datas);
+        builder.build(aModel, id, exps, annotations, datas);
         //readAnnotations(datas, annotations, c);
     }
 

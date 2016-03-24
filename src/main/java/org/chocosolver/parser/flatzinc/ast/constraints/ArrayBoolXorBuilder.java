@@ -30,11 +30,9 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.tools.StringUtils;
 
 import java.util.List;
@@ -48,14 +46,14 @@ import java.util.List;
  */
 public class ArrayBoolXorBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar[] as = exps.get(0).toBoolVarArray(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        BoolVar[] as = exps.get(0).toBoolVarArray(model);
 
         int[] values = new int[as.length % 2 == 0 ? as.length / 2 : (as.length + 1) / 2];
         for (int i = 0, j = 1; i < values.length; i++, j += 2) {
             values[i] = j;
         }
-        IntVar res = VariableFactory.enumerated(StringUtils.randomName(), values, solver);
-        solver.post(IntConstraintFactory.sum(as, res));
+        IntVar res = model.intVar(StringUtils.randomName(), values);
+        model.sum(as, "=", res).post();
     }
 }

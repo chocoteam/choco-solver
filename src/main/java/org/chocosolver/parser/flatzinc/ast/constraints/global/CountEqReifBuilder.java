@@ -30,15 +30,17 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
+
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
+
 import org.chocosolver.util.tools.StringUtils;
 
 import java.util.List;
+
+import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * <br/>
@@ -48,21 +50,21 @@ import java.util.List;
  */
 public class CountEqReifBuilder implements IBuilder {
 	@Override
-	public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        IntVar[] decVars = exps.get(0).toIntVarArray(solver);
-        IntVar valVar = exps.get(1).intVarValue(solver);
-        IntVar countVar = exps.get(2).intVarValue(solver);
-        BoolVar b = exps.get(3).boolVarValue(solver);
+	public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] decVars = exps.get(0).toIntVarArray(model);
+        IntVar valVar = exps.get(1).intVarValue(model);
+        IntVar countVar = exps.get(2).intVarValue(model);
+        BoolVar b = exps.get(3).boolVarValue(model);
         Constraint cstr;
         if (valVar.isInstantiated()) {
-            IntVar nbOcc = VF.bounded(StringUtils.randomName(), 0, decVars.length, countVar.getSolver());
-            cstr = ICF.count(valVar.getValue(), decVars, nbOcc);
-            ICF.arithm(nbOcc, "=", countVar).reifyWith(b);
+            IntVar nbOcc = model.intVar(randomName(), 0, decVars.length, true);
+            cstr = model.count(valVar.getValue(), decVars, nbOcc);
+            model.arithm(nbOcc, "=", countVar).reifyWith(b);
         } else {
-            IntVar value = VF.integer(StringUtils.randomName(), valVar.getLB(), valVar.getUB(), countVar.getSolver());
-            cstr = ICF.count(value, decVars, countVar);
-            ICF.arithm(value, "=", valVar).reifyWith(b);
+            IntVar value = model.intVar(randomName(), valVar.getLB(), valVar.getUB());
+            cstr = model.count(value, decVars, countVar);
+            model.arithm(value, "=", valVar).reifyWith(b);
         }
-        solver.post(cstr);
+        cstr.post();
     }
 }
