@@ -31,10 +31,13 @@ import org.antlr.v4.runtime.atn.PredictionMode;
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.parser.flatzinc.layout.SolutionPrinter;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.StringArrayOptionHandler;
@@ -43,17 +46,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
 /**
  * A Flatzinc to Choco parser.
  * <p>
  * <br/>
  *
- * @author Charles Prud'homme
- * @version choco-parsers
- * @since 21/10/2014
+ * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
 public class Flatzinc extends RegParser {
+
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
     @Argument(required = true, metaVar = "file", usage = "Flatzinc file to parse.")
     public String instance;
@@ -64,49 +73,81 @@ public class Flatzinc extends RegParser {
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ", required = false)
     protected boolean free = false;
 
+    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).", required = false)
+    protected int nb_cores = 1;
+
     @Option(name = "-ps", required = false, handler = StringArrayOptionHandler.class)
-    protected String[] ps = new String[]{"0", "1", "3", "5"};
+    protected String[] ps = new String[]{"0", "1", "3", "4"};
 
-    // Datas
-    public Datas datas;
-    public SolutionPrinter sprinter;
+    // Contains mapping with variables and output prints
+    public Datas[] datas;
 
-    // A unique solver
-    public Model mModel;
+    protected ParallelPortfolio portfolio = new ParallelPortfolio();
+
+    boolean userinterruption = true;
+    final Thread statOnKill;
+
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
     public Flatzinc() {
-        this(false,false,-1);
+        this(false,false,1,-1);
     }
 
-    public Flatzinc(boolean all, boolean free, long tl) {
+    public Flatzinc(boolean all, boolean free, int nb_cores, long tl) {
         super("ChocoFZN");
         this.all = all;
         this.free = free;
+        this.nb_cores = nb_cores;
         this.tl_ = tl;
         this.defaultSettings = new FznSettings();
+        statOnKill = new Thread() {
+            public void run() {
+                if (userinterruption) {
+                    datas[bestID()].doFinalOutPut(userinterruption);
+                    System.out.printf("%% Unexpected resolution interruption!");
+                }
+            }
+        };
+        Runtime.getRuntime().addShutdownHook(statOnKill);
     }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     @Override
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
-        System.out.printf("%% simple solver\n");
-        mModel = new Model(instance);
-        mModel.set(defaultSettings);
-        datas = new Datas();
-        sprinter = new SolutionPrinter(mModel,all,stat);
-        datas.setSolPrint(sprinter);
+        nb_cores = Math.min(nb_cores, ps.length);
+        assert nb_cores>0;
+        if(nb_cores>1) {
+            System.out.printf("%% solvers in parallel (%s)\n", Arrays.toString(Arrays.copyOf(ps, nb_cores)));
+        }else{
+            System.out.printf("%% simple solver\n");
+        }
+        datas = new Datas[nb_cores];
+        for (int i = 0; i < nb_cores; i++) {
+            Model threadModel = new Model(instance + "_" + (i+1));
+            threadModel.set(defaultSettings);
+            portfolio.addModel(threadModel);
+            datas[i] = new Datas(threadModel,all,stat);
+        }
         listeners.forEach(ParserListener::afterSolverCreation);
     }
 
     @Override
     public void parseInputFile() throws FileNotFoundException {
         listeners.forEach(ParserListener::beforeParsingFile);
-        parse(mModel, new FileInputStream(new File(instance)));
-        sprinter.immutable();
+        List<Model> models = portfolio.getModels();
+        for (int i=0;i<models.size();i++) {
+            parse(models.get(i), datas[i], new FileInputStream(new File(instance)));
+        }
         listeners.forEach(ParserListener::afterParsingFile);
     }
 
-    public void parse(Model target, InputStream is) {
+    public void parse(Model target, Datas data, InputStream is) {
         CharStream input = new UnbufferedCharStream(is);
         Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
         lexer.setTokenFactory(new CommonTokenFactory(true));
@@ -115,46 +156,144 @@ public class Flatzinc extends RegParser {
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         parser.setBuildParseTree(false);
         parser.setTrimParseTree(false);
-        parser.flatzinc_model(target, datas, all, free);
+        parser.flatzinc_model(target, data, all, free);
         // make complementary search
         makeComplementarySearch(target);
     }
 
+
     @Override
     public void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
-
         if (tl_ > -1) {
-            mModel.getSolver().limitTime(tl);
+            // The time is now initialized for all workers at the same point
+            portfolio.getModels().forEach(solver -> solver.getSolver().limitTime(tl));
         }
-
-        if (free) {
-            mModel.getSolver().set(SearchStrategyFactory.lastConflict(getModel().getSolver().getStrategy()));
+        for (int i = 0; i < nb_cores; i++) {
+            Model worker = portfolio.getModels().get(i);
+            Solver s = worker.getSolver();
+            Variable[] vars = worker.getVars();
+            if (s.getStrategy() != null && s.getStrategy().getVariables().length > 0) {
+                vars = s.getStrategy().getVariables();
+            }
+            IntVar[] dvars = new IntVar[vars.length];
+            int k = 0;
+            for (int j = 0; j < vars.length; j++) {
+                if ((vars[j].getTypeAndKind() & Variable.INT) > 0) {
+                    dvars[k++] = (IntVar) vars[j];
+                }
+            }
+            dvars = Arrays.copyOf(dvars, k);
+            pickStrategy(i, Integer.parseInt(ps[i]), dvars, worker.getResolutionPolicy());
         }
-
-//        expl.plugin(mSolver, false, false);
         listeners.forEach(ParserListener::afterConfiguringSearch);
     }
 
     @Override
     public void solve() {
         listeners.forEach(ParserListener::beforeSolving);
-        boolean enumerate = mModel.getResolutionPolicy()!=ResolutionPolicy.SATISFACTION || all;
+
+        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION || all;
         if (enumerate) {
-            while (mModel.getSolver().solve()){
-                sprinter.onSolution();
+            while (portfolio.solve()){
+                datas[bestID()].onSolution();
             }
         }else{
-            if(mModel.getSolver().solve()){
-                sprinter.onSolution();
+            if(portfolio.solve()){
+                datas[bestID()].onSolution();
             }
         }
-        sprinter.finalOutPut();
+        userinterruption = false;
+        Runtime.getRuntime().removeShutdownHook(statOnKill);
+        datas[bestID()].doFinalOutPut(userinterruption);
         listeners.forEach(ParserListener::afterSolving);
     }
 
     @Override
     public Model getModel() {
-        return mModel;
+        Model m = portfolio.getBestModel();
+        if (m==null){
+            m = portfolio.getModels().get(0);
+        }
+        return m;
+    }
+
+    private int bestID(){
+        Model best = getModel();
+        for(int i=0;i<nb_cores;i++){
+            if(best == portfolio.getModels().get(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * @param w      worker id
+     * @param s      strategy id
+     * @param vars   decision vars
+     * @param policy resolution policy
+     */
+    void pickStrategy(int w, int s, IntVar[] vars, ResolutionPolicy policy) {
+        Solver solver = portfolio.getModels().get(w).getSolver();
+        switch (s) {
+            case 0:
+                // MZN Search + LC (if free)
+                if(free)solver.set(lastConflict(solver.getStrategy()));
+                break;
+            case 1:
+                // MZN Search + LC (if first thread is not free)
+                if(!free)solver.set(lastConflict(solver.getStrategy()));
+                break;
+            case 2:
+                // Choco default search
+                solver.set(intVarSearch(vars));
+                break;
+            case 3:
+                // Choco default search with restars and pglns
+                solver.set(intVarSearch(vars));
+                solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
+                // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
+                break;
+            case 4:
+                solver.set(lastConflict(activityBasedSearch(vars)));
+                solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
+                solver.setNoGoodRecordingFromRestarts();
+                break;
+            case 5:
+                solver.set(lastConflict(solver.getStrategy()));
+                solver.setCBJLearning(false,false);
+                break;
+            case 6:
+                switch (policy) {
+                    case SATISFACTION: {
+                        solver.set(lastConflict(activityBasedSearch(vars)));
+                        solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
+                        solver.setNoGoodRecordingFromRestarts();
+                    }
+                    break;
+                    default: {
+                        solver.set(lastConflict(solver.getStrategy()));
+                        // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
+                    }
+                    break;
+                }
+                break;
+            case 7:
+                switch (policy) {
+                    case SATISFACTION: {
+                        solver.set(lastConflict(activityBasedSearch(vars)));
+                        solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
+                        solver.setNoGoodRecordingFromRestarts();
+                    }
+                    break;
+                    default: {
+                        solver.set(lastConflict(solver.getStrategy()));
+                        // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
+                    }
+                    break;
+                }
+                break;
+        }
     }
 }

@@ -102,7 +102,6 @@ public final class FVariable {
     }
 
     private static void readAnnotations(String name, Variable var, Declaration type, List<EAnnotation> expressions, Datas datas) {
-        boolean is_introduced = false;
         for (int i = 0; i < expressions.size(); i++) {
             Expression expression = expressions.get(i);
             Expression.EType etype = expression.getTypeOf();
@@ -120,17 +119,11 @@ public final class FVariable {
             }
             if (varanno.startsWith(output_var)) {
                 datas.declareOutput(name, var, type);
-            } else if (varanno.startsWith(var_is_introduced)) {
-                is_introduced = true;
             }
-        }
-        if (!is_introduced) {
-            datas.addSearchVars(var);
         }
     }
 
     private static void readAnnotations(String name, Variable[] vars, Declaration type, List<EAnnotation> expressions, Datas datas) {
-        boolean is_introduced = false;
         for (int i = 0; i < expressions.size(); i++) {
             Expression expression = expressions.get(i);
             Expression.EType etype = expression.getTypeOf();
@@ -149,13 +142,7 @@ public final class FVariable {
             if (varanno.startsWith(output_array)) {
                 EAnnotation eanno = (EAnnotation) expression;
                 datas.declareOutput(name, vars, eanno.exps, type);
-            } else if (varanno.startsWith(var_is_introduced)) {
-                is_introduced = true;
             }
-
-        }
-        if (!is_introduced) {
-            datas.addSearchVars(vars);
         }
     }
 
