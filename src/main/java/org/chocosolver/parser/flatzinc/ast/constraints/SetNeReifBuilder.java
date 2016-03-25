@@ -29,8 +29,8 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.SetVar;
 
@@ -46,10 +46,10 @@ import java.util.List;
  */
 public class SetNeReifBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        SetVar a = exps.get(0).setVarValue(solver);
-        SetVar b = exps.get(1).setVarValue(solver);
-        BoolVar r = exps.get(2).boolVarValue(solver);
-        SCF.all_different(new SetVar[]{a, b}).reifyWith(r);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        SetVar a = exps.get(0).setVarValue(model);
+        SetVar b = exps.get(1).setVarValue(model);
+        BoolVar r = exps.get(2).boolVarValue(model);
+        model.allDifferent(a, b).reifyWith(r);
     }
 }

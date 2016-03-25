@@ -30,8 +30,8 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.List;
@@ -46,12 +46,12 @@ import java.util.List;
 public class IntLinEqBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int[] as = exps.get(0).toIntArray();
-        IntVar[] bs = exps.get(1).toIntVarArray(solver);
-        IntVar c = exps.get(2).intVarValue(solver);
+        IntVar[] bs = exps.get(1).toIntVarArray(model);
+        IntVar c = exps.get(2).intVarValue(model);
         if (bs.length > 0) {
-            solver.post(IntConstraintFactory.scalar(bs, as, "=", c));
+            model.scalar(bs, as, "=", c).post();
         }
     }
 }

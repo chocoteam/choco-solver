@@ -29,10 +29,10 @@ package org.chocosolver.parser.flatzinc.parser;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -47,19 +47,19 @@ import java.io.IOException;
  */
 public class T_constraint extends GrammarTest {
 
-    Solver mSolver;
+    Model mSolver;
     Datas map;
 
     @BeforeMethod
     public void before() {
-        mSolver = new Solver();
+        mSolver = new Model();
         mSolver.set(new FznSettings());
         map = new Datas();
     }
 
     @Test(groups = "1s")
     public void test1() throws IOException {
-        map.register("x", VariableFactory.bounded("x", 0, 2, mSolver));
+        map.register("x", mSolver.intVar("x", 0, 2, true));
         Flatzinc4Parser fp = parser("constraint int_le(0,x); % 0<= x\n", mSolver, map);
         fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);
@@ -69,8 +69,8 @@ public class T_constraint extends GrammarTest {
 
     @Test(groups = "1s")
     public void test2() throws IOException {
-        map.register("x", VariableFactory.bounded("x", 0, 2, mSolver));
-        map.register("y", VariableFactory.bounded("y", 0, 2, mSolver));
+        map.register("x", mSolver.intVar("x", 0, 2, true));
+        map.register("y", mSolver.intVar("y", 0, 2, true));
         Flatzinc4Parser fp = parser("constraint int_lt(x,y); % x <= y\n", mSolver, map);
         fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);
@@ -81,8 +81,8 @@ public class T_constraint extends GrammarTest {
 
     @Test(groups = "1s")
     public void test3() throws IOException {
-        map.register("x", VariableFactory.bounded("x", 0, 2, mSolver));
-        map.register("y", VariableFactory.bounded("y", 0, 2, mSolver));
+        map.register("x", mSolver.intVar("x", 0, 2, true));
+        map.register("y", mSolver.intVar("y", 0, 2, true));
         Flatzinc4Parser fp = parser("constraint int_lin_eq([2,3],[x,y],10); % 0<= x\n", mSolver, map);
         fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);
@@ -93,7 +93,7 @@ public class T_constraint extends GrammarTest {
 
     @Test(groups = "1s")
     public void test4() throws IOException {
-        map.register("q", VariableFactory.boundedArray("q", 2, 0, 2, mSolver));
+        map.register("q", mSolver.intVarArray("q", 2, 0, 2, true));
         Flatzinc4Parser fp = parser("constraint int_lin_eq([ 1, -1 ], [ q[1], q[2] ], -1);", mSolver, map);
         fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);

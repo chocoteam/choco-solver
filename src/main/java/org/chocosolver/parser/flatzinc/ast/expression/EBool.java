@@ -27,10 +27,9 @@
 
 package org.chocosolver.parser.flatzinc.ast.expression;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /*
 * User : CPRUDHOM
@@ -83,22 +82,22 @@ public final class EBool extends Expression {
     }
 
     @Override
-    public BoolVar boolVarValue(Solver solver) {
-        return intValue() == 1? solver.ONE(): solver.ZERO();
+    public BoolVar boolVarValue(Model model) {
+        return intValue() == 1? model.ONE(): model.ZERO();
     }
 
     @Override
-    public BoolVar[] toBoolVarArray(Solver solver) {
-        return new BoolVar[]{boolVarValue(solver)};
+    public BoolVar[] toBoolVarArray(Model model) {
+        return new BoolVar[]{boolVarValue(model)};
     }
 
     @Override
-    public IntVar intVarValue(Solver solver) {
-        return VariableFactory.fixed(intValue(), solver);
+    public IntVar intVarValue(Model model) {
+        return model.intVar(intValue());
     }
 
     @Override
-    public IntVar[] toIntVarArray(Solver solver) {
+    public IntVar[] toIntVarArray(Model solver) {
         return new IntVar[]{intVarValue(solver)};
     }
 

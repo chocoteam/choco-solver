@@ -29,8 +29,8 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
@@ -46,9 +46,9 @@ import java.util.List;
  */
 public class SetCardBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        SetVar a = exps.get(0).setVarValue(solver);
-        IntVar b = exps.get(1).intVarValue(solver);
-        solver.post(SCF.cardinality(a, b));
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        SetVar a = exps.get(0).setVarValue(model);
+        IntVar b = exps.get(1).intVarValue(model);
+        model.cardinality(a, b).post();
     }
 }

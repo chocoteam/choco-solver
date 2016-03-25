@@ -27,7 +27,7 @@
 
 package org.chocosolver.parser.flatzinc.ast.searches;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
@@ -51,7 +51,7 @@ public class IntSearch {
     private IntSearch() {
     }
 
-    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Solver solver) {
+    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Model solver) {
         VariableSelector<IntVar> varsel = variableSelector(varChoice);
         if (varsel == null) { // free search
             return new ActivityBased(solver, variables, 0.999d, 0.02d, 8, 1, seed);

@@ -26,8 +26,8 @@
  */
 package org.chocosolver.parser;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
 
 import java.io.FileNotFoundException;
 
@@ -95,6 +95,6 @@ public interface IParser {
      *
      * @return solver
      */
-    Solver getSolver();
+    Model getModel();
 
 }

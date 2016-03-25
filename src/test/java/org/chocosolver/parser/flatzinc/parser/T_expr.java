@@ -30,6 +30,7 @@ import org.antlr.runtime.RecognitionException;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -102,7 +103,7 @@ public class T_expr extends GrammarTest {
         String[] _a = {"a","b"};
         Datas da = new Datas();
         da.register("a", _a);
-        Flatzinc4Parser fp = parser("a[1]", new Solver(), da);
+        Flatzinc4Parser fp = parser("a[1]", new Model(), da);
         Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EIdArray);
     }

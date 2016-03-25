@@ -28,8 +28,8 @@ package org.chocosolver.parser.flatzinc.parser;
 
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.variables.VariableFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,12 +43,12 @@ import java.io.IOException;
  */
 public class T_solve_goal extends GrammarTest {
 
-    Solver mSolver;
+    Model mSolver;
     Datas datas;
 
     @BeforeMethod
     public void before() {
-        mSolver = new Solver();
+        mSolver = new Model();
         datas = new Datas();
     }
 
@@ -60,21 +60,21 @@ public class T_solve_goal extends GrammarTest {
 
     @Test(groups = "1s")
     public void testMaximize() throws IOException {
-        datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
+        datas.register("a", mSolver.intVar("a", 0, 10, true));
         Flatzinc4Parser fp = parser("solve maximize a;", mSolver, datas);
         fp.solve_goal();
     }
 
     @Test(groups = "1s")
     public void testMinimize() throws IOException {
-        datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
+        datas.register("a", mSolver.intVar("a", 0, 10, true));
         Flatzinc4Parser fp = parser("solve minimize a;", mSolver, datas);
         fp.solve_goal();
     }
 
     @Test(groups = "1s")
     public void testSatisfy2() throws IOException {
-        datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
+        datas.register("a", mSolver.intVar("a", 0, 10, true));
         Flatzinc4Parser fp = parser("solve ::int_search([a],input_order,indomain_min, complete) satisfy;", mSolver, datas);
         fp.solve_goal();
     }
@@ -82,9 +82,9 @@ public class T_solve_goal extends GrammarTest {
 
     @Test(groups = "1s")
     public void testSatisfy3() throws IOException {
-        datas.register("r", VariableFactory.boundedArray("r", 5, 0, 10, mSolver));
-        datas.register("s", VariableFactory.boundedArray("s", 5, 0, 10, mSolver));
-        datas.register("o", VariableFactory.bounded("o", 0, 10, mSolver));
+        datas.register("r", mSolver.intVarArray("r", 5, 0, 10, true));
+        datas.register("s", mSolver.intVarArray("s", 5, 0, 10, true));
+        datas.register("o", mSolver.intVar("o", 0, 10, true));
         Flatzinc4Parser fp = parser(
                 "solve\n" +
                         "  ::seq_search(\n" +

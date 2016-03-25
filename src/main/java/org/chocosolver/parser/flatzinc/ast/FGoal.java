@@ -37,7 +37,7 @@ import org.chocosolver.parser.flatzinc.ast.searches.IntSearch;
 import org.chocosolver.parser.flatzinc.ast.searches.SetSearch;
 import org.chocosolver.parser.flatzinc.ast.searches.VarChoice;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
@@ -69,15 +69,14 @@ public class FGoal {
         set_search
     }
 
-    public static void define_goal(Solver aSolver, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
+    public static void define_goal(Model aModel, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         // First define solving process
         if (type != ResolutionPolicy.SATISFACTION) {
-            IntVar obj = expr.intVarValue(aSolver);
-            aSolver.setObjectives(obj);
-            aSolver.set(new ObjectiveManager<IntVar, Integer>(obj, type, true));
+            IntVar obj = expr.intVarValue(aModel);
+            aModel.setObjective(type, obj);
         }
         // Then define search goal
-        Variable[] vars = aSolver. getVars();
+        Variable[] vars = aModel. getVars();
         IntVar[] ivars = new IntVar[vars.length];
         for (int i = 0; i < ivars.length; i++) {
             ivars[i] = (IntVar) vars[i];
@@ -96,13 +95,13 @@ public class FGoal {
 
                     AbstractStrategy[] strategies = new AbstractStrategy[earray.what.size()];
                     for (int i = 0; i < strategies.length; i++) {
-                        strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), aSolver, description);
+                        strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), aModel, description);
                     }
-                    strategy = new StrategiesSequencer(aSolver.getEnvironment(), strategies);
+                    strategy = new StrategiesSequencer(aModel.getEnvironment(), strategies);
                 } else {
-                    strategy = readSearchAnnotation(annotation, aSolver, description);
+                    strategy = readSearchAnnotation(annotation, aModel, description);
                 }
-                aSolver.set(strategy);
+                aModel.getSolver().set(strategy);
             }
         }
     }
@@ -114,7 +113,7 @@ public class FGoal {
      * @param solver solver within the search is defined
      * @return {@code true} if a search strategy is defined
      */
-    private static AbstractStrategy readSearchAnnotation(EAnnotation e, Solver solver, StringBuilder description) {
+    private static AbstractStrategy readSearchAnnotation(EAnnotation e, Model solver, StringBuilder description) {
         Expression[] exps = new Expression[e.exps.size()];
         e.exps.toArray(exps);
         Search search = Search.valueOf(e.id.value);

@@ -30,8 +30,8 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -45,8 +45,8 @@ import java.util.List;
  */
 public class Lex2Builder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        IntVar[] xs = exps.get(0).toIntVarArray(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] xs = exps.get(0).toIntVarArray(model);
         boolean strict = exps.get(1).boolValue();
         int le = (int) Math.sqrt(xs.length);
         assert le * le == xs.length;
@@ -55,9 +55,9 @@ public class Lex2Builder implements IBuilder {
             ys[i] = Arrays.copyOfRange(xs, le * i, le * (i + 1));
         }
         if (strict) {
-            solver.post(IntConstraintFactory.lex_chain_less(ys));
+            model.lexChainLess(ys).post();
         } else {
-            solver.post(IntConstraintFactory.lex_chain_less_eq(ys));
+            model.lexChainLessEq(ys).post();
         }
     }
 }

@@ -27,9 +27,10 @@
 
 package org.chocosolver.parser.flatzinc.ast.expression;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VariableFactory;
+
 
 
 /*
@@ -102,12 +103,12 @@ public final class EInt extends Expression {
 
 
     @Override
-    public IntVar intVarValue(Solver solver) {
-        return VariableFactory.fixed(intValue(), solver);
+    public IntVar intVarValue(Model model) {
+        return model.intVar(intValue());
     }
 
     @Override
-    public IntVar[] toIntVarArray(Solver solver) {
+    public IntVar[] toIntVarArray(Model solver) {
         return new IntVar[]{intVarValue(solver)};
     }
 }

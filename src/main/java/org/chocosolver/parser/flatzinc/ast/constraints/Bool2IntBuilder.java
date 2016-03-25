@@ -31,9 +31,9 @@ import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.Model;
+
+
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -49,14 +49,14 @@ import java.util.List;
 public class Bool2IntBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar bVar = exps.get(0).boolVarValue(solver);
-        IntVar iVar = exps.get(1).intVarValue(solver);
-        if (iVar.isBool() && ((FznSettings) solver.getSettings()).enableClause()) {
-            SatFactory.addBoolEq(bVar, (BoolVar) iVar);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        BoolVar bVar = exps.get(0).boolVarValue(model);
+        IntVar iVar = exps.get(1).intVarValue(model);
+        if (iVar.isBool() && ((FznSettings) model.getSettings()).enableClause()) {
+            model.addClausesBoolEq(bVar, (BoolVar) iVar);
             return;
         }
-        solver.post(IntConstraintFactory.arithm(bVar, "=", iVar));
+        model.arithm(bVar, "=", iVar).post();
     }
 
 }

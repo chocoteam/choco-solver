@@ -31,40 +31,37 @@ import org.antlr.v4.runtime.atn.PredictionMode;
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.parser.flatzinc.layout.ASolutionPrinter;
-import org.chocosolver.parser.flatzinc.layout.SharedSolutionPrinter;
-import org.chocosolver.parser.flatzinc.layout.SolutionPrinter;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.ExplanationFactory;
 import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.loop.lns.LNSFactory;
-import org.chocosolver.solver.search.loop.monitors.SMF;
-import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
-import org.chocosolver.solver.search.strategy.ISF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.StringArrayOptionHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.List;
+
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
 /**
  * A Flatzinc to Choco parser.
  * <p>
  * <br/>
  *
- * @author Charles Prud'homme
- * @version choco-parsers
- * @since 21/10/2014
+ * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
 public class Flatzinc extends RegParser {
+
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
     @Argument(required = true, metaVar = "file", usage = "Flatzinc file to parse.")
     public String instance;
@@ -76,18 +73,22 @@ public class Flatzinc extends RegParser {
     protected boolean free = false;
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).", required = false)
-    protected int nb_cores = 1; // SEEMS USELESS, BUT NEEDED BY CHOCOFZN
+    protected int nb_cores = 1;
 
-    @Option(name = "-ps", required = false, handler = StringArrayOptionHandler.class)
-    protected String[] ps = new String[]{"0", "1", "3", "5"};
+    // Contains mapping with variables and output prints
+    public Datas[] datas;
 
-    // Datas
-    public Datas datas;
-    public ASolutionPrinter sprinter;
+    protected ParallelPortfolio portfolio = new ParallelPortfolio();
 
+    boolean userinterruption = true;
+    final Thread statOnKill;
+
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
     public Flatzinc() {
-        this(false, false, 1, -1);
+        this(false,false,1,-1);
     }
 
     public Flatzinc(boolean all, boolean free, int nb_cores, long tl) {
@@ -97,49 +98,51 @@ public class Flatzinc extends RegParser {
         this.nb_cores = nb_cores;
         this.tl_ = tl;
         this.defaultSettings = new FznSettings();
+        statOnKill = new Thread() {
+            public void run() {
+                if (userinterruption) {
+                    datas[bestModelID()].doFinalOutPut(userinterruption);
+                    System.out.printf("%% Unexpected resolution interruption!");
+                }
+            }
+        };
+        Runtime.getRuntime().addShutdownHook(statOnKill);
     }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     @Override
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
-        nb_cores = Math.min(nb_cores, ps.length);
-        if (nb_cores == 1) {
+        assert nb_cores>0;
+        if(nb_cores>1) {
+            System.out.printf("%% "+ nb_cores+" solvers in parallel\n");
+        }else{
             System.out.printf("%% simple solver\n");
-            mSolver = new Solver(instance);
-            mSolver.set(defaultSettings);
-            sprinter = new SolutionPrinter(mSolver, all, stat);
-//            Chatterbox.showSolutions(mSolver);
-        } else {
-            System.out.printf("%% solvers in parallel (%s)\n", Arrays.toString(Arrays.copyOf(ps, nb_cores)));
-            solvers = new LinkedList<>();
-            mSolver = new Solver(instance + "_1");
-            mSolver.set(defaultSettings);
-            solvers.add(mSolver);
-            for (int i = 1; i < nb_cores; i++) {
-                Solver solver = new Solver(instance + "_" + (i + 1));
-                solver.set(defaultSettings);
-                solvers.add(solver);
-            }
-            sprinter = new SharedSolutionPrinter(solvers, all, stat);
         }
-        datas = new Datas();
-        datas.setSolPrint(sprinter);
-
+        datas = new Datas[nb_cores];
+        for (int i = 0; i < nb_cores; i++) {
+            Model threadModel = new Model(instance + "_" + (i+1));
+            threadModel.set(defaultSettings);
+            portfolio.addModel(threadModel);
+            datas[i] = new Datas(threadModel,all,stat);
+        }
         listeners.forEach(ParserListener::afterSolverCreation);
     }
 
     @Override
     public void parseInputFile() throws FileNotFoundException {
         listeners.forEach(ParserListener::beforeParsingFile);
-        parse(mSolver, new FileInputStream(new File(instance)));
-        sprinter.immutable();
-        for (int i = 1; i < nb_cores; i++) {
-            parse(solvers.get(i), new FileInputStream(new File(instance)));
+        List<Model> models = portfolio.getModels();
+        for (int i=0;i<models.size();i++) {
+            parse(models.get(i), datas[i], new FileInputStream(new File(instance)));
         }
         listeners.forEach(ParserListener::afterParsingFile);
     }
 
-    public void parse(Solver target, InputStream is) {
+    public void parse(Model target, Datas data, InputStream is) {
         CharStream input = new UnbufferedCharStream(is);
         Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
         lexer.setTokenFactory(new CommonTokenFactory(true));
@@ -148,7 +151,7 @@ public class Flatzinc extends RegParser {
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         parser.setBuildParseTree(false);
         parser.setTrimParseTree(false);
-        parser.flatzinc_model(target, datas, all, free);
+        parser.flatzinc_model(target, data, all, free);
         // make complementary search
         makeComplementarySearch(target);
     }
@@ -157,41 +160,8 @@ public class Flatzinc extends RegParser {
     @Override
     public void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
-
-        if (tl_ > -1) {
-            if (nb_cores > 1) {
-                long _tl = SMF.convertInMilliseconds(tl);
-                // The time is now initialized for all workers at the same point
-                solvers.forEach(solver -> SMF.limitTime(solver, _tl));
-            } else {
-                SearchMonitorFactory.limitTime(mSolver, tl);
-            }
-        }
-
-        if (nb_cores > 1) {
-            ResolutionPolicy policy = mSolver.getObjectiveManager().getPolicy();
-            for (int i = 0; i < nb_cores; i++) {
-                Solver worker = solvers.get(i);
-                Variable[] vars = worker.getVars();
-                if (worker.getStrategy() != null
-                        && worker.getStrategy().getVariables().length > 0) {
-                    vars = worker.getStrategy().getVariables();
-                }
-                IntVar[] dvars = new IntVar[vars.length];
-                int k = 0;
-                for (int j = 0; j < vars.length; j++) {
-                    if ((vars[j].getTypeAndKind() & Variable.INT) > 0) {
-                        dvars[k++] = (IntVar) vars[j];
-                    }
-                }
-                dvars = Arrays.copyOf(dvars, k);
-                pickStrategy(i, Integer.parseInt(ps[i]), dvars, policy);
-            }
-        } else {
-            if (free) {
-                mSolver.set(ISF.lastConflict(mSolver));
-            }
-            expl.plugin(mSolver, false, false);
+        for (int i = 0; i < nb_cores; i++) {
+            configureModel(i);
         }
         listeners.forEach(ParserListener::afterConfiguringSearch);
     }
@@ -199,109 +169,123 @@ public class Flatzinc extends RegParser {
     @Override
     public void solve() {
         listeners.forEach(ParserListener::beforeSolving);
-        if (mSolver.getObjectiveManager().isOptimization()) { // optimization problem
-            // To deal with Portfolios, we need to get policy and objective
-            ResolutionPolicy policy = mSolver.getObjectiveManager().getPolicy();
-            if (nb_cores > 1) {
-                solvers.parallelStream().forEach(solver -> {
-                    solver.findOptimalSolution(policy);
-                    sprinter.imdone(solver);
-                    solvers.forEach(other -> other.getSearchLoop().interrupt("Loose thread race", false));
-                });
-            } else {
-                mSolver.findOptimalSolution(policy);
+
+        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION || all;
+        if (enumerate) {
+            while (portfolio.solve()){
+                datas[bestModelID()].onSolution();
             }
-        } else {
-            if (all) {
-                mSolver.findAllSolutions();
-            } else {
-                if (nb_cores > 1) {
-                    solvers.parallelStream().forEach(solver -> {
-                        solver.findSolution();
-                        sprinter.imdone(solver);
-                        solvers.forEach(other -> other.getSearchLoop().interrupt("Loose thread race", false));
-                    });
-                } else {
-                    mSolver.findSolution();
-                }
+        }else{
+            if(portfolio.solve()){
+                datas[bestModelID()].onSolution();
             }
         }
-        sprinter.finalOutPut();
+        userinterruption = false;
+        Runtime.getRuntime().removeShutdownHook(statOnKill);
+        datas[bestModelID()].doFinalOutPut(userinterruption);
+
         listeners.forEach(ParserListener::afterSolving);
     }
 
     @Override
-    public Solver getSolver() {
-        return mSolver;
+    public Model getModel() {
+        Model m = portfolio.getBestModel();
+        if (m==null){
+            m = portfolio.getModels().get(0);
+        }
+        return m;
     }
 
-    /**
-     * @param w      worker id
-     * @param s      strategy id
-     * @param vars   decision vars
-     * @param policy resolution policy
-     */
-    void pickStrategy(int w, int s, IntVar[] vars, ResolutionPolicy policy) {
-        Solver solver = solvers.get(w);
-        switch (s) {
+    private int bestModelID(){
+        Model best = getModel();
+        for(int i=0;i<nb_cores;i++){
+            if(best == portfolio.getModels().get(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void configureModel(int workerID) {
+
+        Model worker = portfolio.getModels().get(workerID);
+        Solver solver = worker.getSolver();
+        if (tl_ > -1) {
+            solver.limitTime(tl);
+        }
+        ResolutionPolicy policy = worker.getResolutionPolicy();
+
+        // compute decision variables
+        Variable[] varsX;
+        if (solver.getStrategy() != null && solver.getStrategy().getVariables().length > 0) {
+            varsX = solver.getStrategy().getVariables();
+        }else{
+            varsX = worker.getVars();
+        }
+        IntVar[] dvars = new IntVar[varsX.length];
+        int k = 0;
+        for (int j = 0; j < varsX.length; j++) {
+            if ((varsX[j].getTypeAndKind() & Variable.INT) > 0) {
+                dvars[k++] = (IntVar) varsX[j];
+            }
+        }
+        IntVar[] vars = Arrays.copyOf(dvars, k);
+
+        // set heuristic
+        switch (workerID) {
             case 0:
-//                System.out.printf("%% worker %d: fixed + LC\n", w);
-                solver.set(ISF.lastConflict(solver));
+                // MZN Search + LC (if free)
+                if(free)solver.set(lastConflict(solver.getStrategy()));
                 break;
-            case 1: {
-//                System.out.printf("%% worker %d: wdeg + LC\n", w);
-                solver.set(ISF.lastConflict(solver, ISF.domOverWDeg(vars, w)));
-                //SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(0), 1000);
-                //SMF.nogoodRecordingFromRestarts(solver);
-            }
-            break;
-            case 2: {
-//                System.out.printf("%% worker %d: wdeg + LNS + LC\n", w);
-                solver.set(ISF.lastConflict(solver, ISF.domOverWDeg(vars, w)));
-                SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(solver, 0), 1000);
-                LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
-            }
-            break;
+            case 1:
+                // MZN Search + LC (if first thread is not free)
+                if(!free)solver.set(lastConflict(solver.getStrategy()));
+                break;
+            case 2:
+                // Choco default search
+                solver.set(intVarSearch(vars));
+                break;
             case 3:
-//                System.out.printf("%% worker %d: abs + LC\n", w);
-                solver.set(ISF.lastConflict(solver, ISF.activity(vars, w)));
-                SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(solver, 0), 1000);
-                SMF.nogoodRecordingFromRestarts(solver);
+                // Choco default search with restars and pglns
+                solver.set(intVarSearch(vars));
+                solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
+                // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
                 break;
-            case 4: {
-//                System.out.printf("%% worker %d: fixed + cbj + lc\n", w);
-                solver.set(ISF.lastConflict(solver));
-                ExplanationFactory.CBJ.plugin(solver, false, false);
-            }
-            break;
+            case 4:
+                solver.set(lastConflict(activityBasedSearch(vars)));
+                solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
+                solver.setNoGoodRecordingFromRestarts();
+                break;
             case 5:
-//                System.out.printf("%% worker %d: abs / LNS\n", w);
+                solver.set(lastConflict(solver.getStrategy()));
+                solver.setCBJLearning(false,false);
+                break;
+            case 6:
                 switch (policy) {
                     case SATISFACTION: {
-                        solver.set(ISF.lastConflict(solver, ISF.activity(vars, w)));
-                        SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(solver, 0), 1000);
-                        SMF.nogoodRecordingFromRestarts(solver);
+                        solver.set(lastConflict(activityBasedSearch(vars)));
+                        solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
+                        solver.setNoGoodRecordingFromRestarts();
                     }
                     break;
                     default: {
-                        solver.set(ISF.lastConflict(solver));
-                        LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
+                        solver.set(lastConflict(solver.getStrategy()));
+                        // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
                     }
                     break;
                 }
                 break;
-            case 6:
-//                System.out.printf("%% worker %d: abs + LC / LNS\n", w);
+            case 7:
                 switch (policy) {
                     case SATISFACTION: {
-                        solver.set(ISF.lastConflict(solver, ISF.activity(vars, w)));
-                        SearchMonitorFactory.geometrical(solver, vars.length * 3, 1.1d, new FailCounter(solver, 0), 1000);
-                        SMF.nogoodRecordingFromRestarts(solver);
+                        solver.set(lastConflict(activityBasedSearch(vars)));
+                        solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
+                        solver.setNoGoodRecordingFromRestarts();
                     }
                     break;
                     default: {
-                        solver.set(ISF.lastConflict(solver));
-                        LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
+                        solver.set(lastConflict(solver.getStrategy()));
+                        // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
                     }
                     break;
                 }

@@ -31,13 +31,15 @@ import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
 
 import java.util.List;
+
+import static org.chocosolver.solver.constraints.PropagatorPriority.TERNARY;
 
 /**
  * (a &#8804; b) &#8660; r
@@ -49,15 +51,15 @@ import java.util.List;
 public class BoolLeReifBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar a = exps.get(0).boolVarValue(solver);
-        BoolVar b = exps.get(1).boolVarValue(solver);
-        BoolVar r = exps.get(2).boolVarValue(solver);
-        if (((FznSettings)solver.getSettings()).enableClause()) {
-            SatFactory.addBoolIsLeVar(a, b, r);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        BoolVar a = exps.get(0).boolVarValue(model);
+        BoolVar b = exps.get(1).boolVarValue(model);
+        BoolVar r = exps.get(2).boolVarValue(model);
+        if (((FznSettings) model.getSettings()).enableClause()) {
+            model.addClausesBoolIsLeVar(a, b, r);
         } else {
-            if (((FznSettings)solver.getSettings()).adhocReification()) {
-                solver.post(new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
+            if (((FznSettings) model.getSettings()).adhocReification()) {
+                new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, TERNARY, false) {
                     @Override
                     public void propagate(int evtmask) throws ContradictionException {
                         if (vars[0].contains(0) || vars[1].contains(1)) {
@@ -73,9 +75,9 @@ public class BoolLeReifBuilder implements IBuilder {
                     public ESat isEntailed() {
                         throw new UnsupportedOperationException("isEntailed not implemented ");
                     }
-                }));
+                }).post();
             } else {
-                ICF.arithm(a, "<=", b).reifyWith(r);
+                model.arithm(a, "<=", b).reifyWith(r);
             }
         }
     }

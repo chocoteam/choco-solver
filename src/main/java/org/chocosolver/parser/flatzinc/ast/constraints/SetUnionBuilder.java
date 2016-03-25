@@ -29,8 +29,8 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.SetVar;
 
 import java.util.List;
@@ -45,10 +45,10 @@ import java.util.List;
  */
 public class SetUnionBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        SetVar a = exps.get(0).setVarValue(solver);
-        SetVar b = exps.get(1).setVarValue(solver);
-        SetVar c = exps.get(2).setVarValue(solver);
-        solver.post(SCF.union(new SetVar[]{a, b}, c));
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        SetVar a = exps.get(0).setVarValue(model);
+        SetVar b = exps.get(1).setVarValue(model);
+        SetVar c = exps.get(2).setVarValue(model);
+        model.union(new SetVar[]{a, b}, c).post();
     }
 }

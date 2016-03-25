@@ -38,7 +38,7 @@ import org.chocosolver.parser.flatzinc.ast.*;
 import org.chocosolver.parser.flatzinc.ast.declaration.*;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +48,8 @@ import java.util.List;
 
 public Datas datas;
 
-// the solver
-public Solver mSolver;
+// the model
+public Model mModel;
 
 
 public boolean allSolutions, freeSearch;
@@ -58,10 +58,10 @@ public boolean allSolutions, freeSearch;
 
 // PARSER RULES
 
-flatzinc_model [Solver aSolver, Datas datas, boolean allSolutions, boolean freeSearch]
+flatzinc_model [Model aModel, Datas datas, boolean allSolutions, boolean freeSearch]
 	:
 	{
-    this.mSolver = aSolver;
+    this.mModel = aModel;
     this.datas = datas;
     this.allSolutions = allSolutions;
     this.freeSearch = freeSearch;
@@ -256,26 +256,26 @@ var_decl
 	:
 	vt=var_type CL IDENTIFIER anns=annotations (eq=EQ e=expr)? SC
 	{
-	FVariable.make_variable(datas, $vt.decl, $IDENTIFIER.text, $anns.anns, $eq!=null?$e.exp:null, mSolver);
+	FVariable.make_variable(datas, $vt.decl, $IDENTIFIER.text, $anns.anns, $eq!=null?$e.exp:null, mModel);
     }
 	;
 
 constraint
 	:
 	{
-    //  Solver aSolver, String id, List<Expression> exps, List<EAnnotation> annotations
+    //  Model aModel, String id, List<Expression> exps, List<EAnnotation> annotations
     ArrayList<Expression> exps = new ArrayList();
     }
 	    CONSTRAINT IDENTIFIER LP e=expr {exps.add($e.exp);} (CM e=expr{exps.add($e.exp);})* RP anns=annotations SC
     {
-    FConstraint.make_constraint(mSolver, datas, $IDENTIFIER.text, exps, $anns.anns);
+    FConstraint.make_constraint(mModel, datas, $IDENTIFIER.text, exps, $anns.anns);
     }
 	;
 
 solve_goal
 	:   SOLVE anns=annotations res=resolution SC
 	{
-    FGoal.define_goal(mSolver, $anns.anns,$res.rtype,$res.exp);
+    FGoal.define_goal(mModel, $anns.anns,$res.rtype,$res.exp);
     }
 	;
 

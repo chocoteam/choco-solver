@@ -29,9 +29,7 @@ package org.chocosolver.parser.flatzinc.parser;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.parser.flatzinc.layout.ASolutionPrinter;
-import org.chocosolver.parser.flatzinc.layout.SolutionPrinter;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -50,12 +48,12 @@ import java.io.IOException;
  */
 public class T_var_decl extends GrammarTest {
 
-    Solver mSolver;
+    Model mSolver;
     Datas datas;
 
     @BeforeMethod
     public void before() {
-        mSolver = new Solver();
+        mSolver = new Model();
         mSolver.set(new FznSettings(){
             @Override
             public boolean enableViews() {
@@ -102,10 +100,11 @@ public class T_var_decl extends GrammarTest {
         Assert.assertTrue(o instanceof SetVar);
         SetVar var = ((SetVar) o);
         Assert.assertEquals("s", var.getName());
-        Assert.assertEquals(1, var.getEnvelopeFirst());
-        Assert.assertEquals(2, var.getEnvelopeNext());
-        Assert.assertEquals(3, var.getEnvelopeNext());
-        Assert.assertEquals(SetVar.END, var.getEnvelopeNext());
+        int[] UB = var.getUB().toArray();
+        int[] values = new int[]{1,2,3};
+        for(int i=0;i<UB.length;i++){
+            Assert.assertEquals(UB[i],values[i]);
+        }
     }
 
     @Test(groups = "1s")
@@ -179,8 +178,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test8() throws IOException {
-        ASolutionPrinter sp = new SolutionPrinter(null, false, false);
-        datas.setSolPrint(sp);
+        datas = new Datas(null, false, false);
 
         Flatzinc4Parser fp = parser("var 123456789..987654321: INT____00001 :: is_defined_var :: var_is_introduced;", mSolver, datas);
 
@@ -198,13 +196,11 @@ public class T_var_decl extends GrammarTest {
 
         o = datas.get("num");
         Assert.assertNotNull(o);
-        Assert.assertTrue(o instanceof IntView);
     }
 
     @Test(groups = "1s")
     public void test9() throws IOException {
-        ASolutionPrinter sp = new SolutionPrinter(null, false, false);
-        datas.setSolPrint(sp);
+        datas = new Datas(null, false, false);
 
         Flatzinc4Parser fp = parser("array[1 .. 3] of var 0 .. 9: C::output_array([ 1 .. 3 ]);", mSolver, datas);
 
@@ -219,8 +215,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test10() throws IOException {
-        ASolutionPrinter sp = new SolutionPrinter(null, false, false);
-        datas.setSolPrint(sp);
+        datas = new Datas(null, false, false);
 
         Flatzinc4Parser fp = parser("var 1 .. 5: a ::output_var;", mSolver, datas);
         fp.var_decl();
@@ -243,8 +238,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test11() throws IOException {
-        ASolutionPrinter sp = new SolutionPrinter(null, false, false);
-        datas.setSolPrint(sp);
+        datas = new Datas(null, false, false);
 
         Flatzinc4Parser fp = parser("array [1..8] of var 1..8: queens " +
                 ":: output_array([1..8]) " +

@@ -30,8 +30,8 @@ package org.chocosolver.parser.flatzinc.ast.constraints;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.List;
@@ -46,11 +46,11 @@ import java.util.List;
 public class IntPlusBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar[] vars = new IntVar[2];
-        vars[0] = exps.get(0).intVarValue(solver);
-        vars[1] = exps.get(1).intVarValue(solver);
-        IntVar c = exps.get(2).intVarValue(solver);
-        solver.post(IntConstraintFactory.sum(vars, c));
+        vars[0] = exps.get(0).intVarValue(model);
+        vars[1] = exps.get(1).intVarValue(model);
+        IntVar c = exps.get(2).intVarValue(model);
+        model.sum(vars, "=", c).post();
     }
 }

@@ -27,6 +27,7 @@
 
 package org.chocosolver.parser.flatzinc;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -52,11 +53,11 @@ public class FlatzincModelTest {
         Flatzinc fzn = new Flatzinc(false, false, 1, -1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
-        fzn.parse(fzn.mSolver, in);
-        Solver solver = fzn.getSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model solver = fzn.getModel();
 
-        solver.findSolution();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        solver.solve();
+        Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups = "1s")
@@ -68,11 +69,11 @@ public class FlatzincModelTest {
         Flatzinc fzn = new Flatzinc(false, false, 1, -1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
-        fzn.parse(fzn.mSolver, in);
-        Solver solver = fzn.getSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model solver = fzn.getModel();
 
-        solver.findSolution();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        solver.solve();
+        Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups = "1s")
@@ -86,11 +87,11 @@ public class FlatzincModelTest {
         Flatzinc fzn = new Flatzinc(false, false, 1, -1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
-        fzn.parse(fzn.mSolver, in);
-        Solver solver = fzn.getSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model solver = fzn.getModel();
 
-        solver.findSolution();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        solver.solve();
+        Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups = "1s")
@@ -106,11 +107,11 @@ public class FlatzincModelTest {
         Flatzinc fzn = new Flatzinc(false, false, 1, -1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
-        fzn.parse(fzn.mSolver, in);
-        Solver solver = fzn.getSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model solver = fzn.getModel();
 
-        solver.findSolution();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        solver.solve();
+        Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
     }
 
 }

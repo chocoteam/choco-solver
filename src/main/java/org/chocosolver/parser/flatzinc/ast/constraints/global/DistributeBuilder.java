@@ -31,8 +31,8 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.List;
@@ -44,12 +44,12 @@ import java.util.List;
 public class DistributeBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        IntVar[] card = exps.get(0).toIntVarArray(solver);
-        IntVar[] value = exps.get(1).toIntVarArray(solver);
-        IntVar[] base = exps.get(2).toIntVarArray(solver);
-        for(int i = 0 ; i < card.length; i++){
-            solver.post(ICF.count(value[i], base, card[i]));
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] card = exps.get(0).toIntVarArray(model);
+        IntVar[] value = exps.get(1).toIntVarArray(model);
+        IntVar[] base = exps.get(2).toIntVarArray(model);
+        for(int i = 0 ; i < card.length; i++) {
+            model.count(value[i], base, card[i]).post();
         }
     }
 }

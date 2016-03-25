@@ -29,11 +29,10 @@ package org.chocosolver.parser.flatzinc.ast.expression;
 
 import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VariableFactory;
 
 /*
 * User : CPRUDHOM
@@ -90,31 +89,31 @@ public final class EIdArray extends Expression {
     }
 
     @Override
-    public BoolVar boolVarValue(Solver solver) {
+    public BoolVar boolVarValue(Model model) {
         if (Integer.class.isInstance(object)) {
-            return ((Integer) object == 1) ? solver.ONE() : solver.ZERO();
+            return ((Integer) object == 1) ? model.ONE() : model.ZERO();
         } else if (Boolean.class.isInstance(object)) {
-            return ((Boolean) object) ? solver.ONE() : solver.ZERO();
+            return ((Boolean) object) ? model.ONE() : model.ZERO();
         }
         return (BoolVar) object;
     }
 
     @Override
-    public BoolVar[] toBoolVarArray(Solver solver) {
+    public BoolVar[] toBoolVarArray(Model model) {
         if (object.getClass().isArray()) {
             //Can be array of int => array of IntegerConstantVariable
             if (int_arr.isInstance(object)) {
                 int[] values = (int[]) object;
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Integer) object == 1) ? solver.ONE() : solver.ZERO();
+                    vars[i] = ((Integer) object == 1) ? model.ONE() : model.ZERO();
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Boolean) object) ? solver.ONE() : solver.ZERO();
+                    vars[i] = ((Boolean) object) ? model.ONE() : model.ZERO();
                 }
                 return vars;
             }
@@ -125,31 +124,31 @@ public final class EIdArray extends Expression {
     }
 
     @Override
-    public IntVar intVarValue(Solver solver) {
+    public IntVar intVarValue(Model model) {
         if (Integer.class.isInstance(object)) {
-            return VariableFactory.fixed((Integer) object, solver);
+            return model.intVar((Integer) object);
         } else if (Boolean.class.isInstance(object)) {
-            return VariableFactory.fixed(((Boolean) object) ? 1 : 0, solver);
+            return model.intVar(((Boolean) object) ? 1 : 0);
         }
         return (IntVar) object;
     }
 
     @Override
-    public IntVar[] toIntVarArray(Solver solver) {
+    public IntVar[] toIntVarArray(Model model) {
         if (object.getClass().isArray()) {
             //Can be array of int => array of IntegerConstantVariable
             if (int_arr.isInstance(object)) {
                 int[] values = (int[]) object;
                 IntVar[] vars = new IntVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = VariableFactory.fixed(values[i], solver);
+                    vars[i] = model.intVar(values[i]);
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 IntVar[] vars = new IntVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = VariableFactory.fixed(values[i], solver);
+                    vars[i] = model.intVar(values[i]);
                 }
                 return vars;
             }
@@ -160,12 +159,12 @@ public final class EIdArray extends Expression {
     }
 
     @Override
-    public SetVar setVarValue(Solver solver) {
+    public SetVar setVarValue(Model solver) {
         return (SetVar) object;
     }
 
     @Override
-    public SetVar[] toSetVarArray(Solver solver) {
+    public SetVar[] toSetVarArray(Model solver) {
         if (object.getClass().isArray()) {
             return (SetVar[]) object;
         }

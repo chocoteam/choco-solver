@@ -27,9 +27,8 @@
 
 package org.chocosolver.parser.flatzinc.ast.expression;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.util.tools.StringUtils;
 
 /*
@@ -55,14 +54,14 @@ public abstract class ESet extends Expression {
     }
 
     @Override
-    public final SetVar setVarValue(Solver solver) {
+    public final SetVar setVarValue(Model model) {
         int[] values = enumVal();
-        return VF.set(StringUtils.randomName("set_const"), values, values, solver);
+        return model.setVar(StringUtils.randomName("set_const"), values);
     }
 
     //
     @Override
-    public final SetVar[] toSetVarArray(Solver solver) {
+    public final SetVar[] toSetVarArray(Model solver) {
         return new SetVar[]{setVarValue(solver)};
     }
 }

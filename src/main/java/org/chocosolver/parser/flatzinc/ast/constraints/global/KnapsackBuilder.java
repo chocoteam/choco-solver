@@ -31,9 +31,9 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ICF;
+
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -42,6 +42,11 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 import java.util.List;
+
+import static java.lang.Math.ceil;
+import static java.lang.Math.min;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
  * <br/>
@@ -52,15 +57,16 @@ import java.util.List;
 public class KnapsackBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int[] w = exps.get(0).toIntArray();
         int[] p = exps.get(1).toIntArray();
-        IntVar[] x = exps.get(2).toIntVarArray(solver);
-        IntVar W = exps.get(3).intVarValue(solver);
-        IntVar P = exps.get(4).intVarValue(solver);
+        IntVar[] x = exps.get(2).toIntVarArray(model);
+        IntVar W = exps.get(3).intVarValue(model);
+        IntVar P = exps.get(4).intVarValue(model);
 
-        solver.post(ICF.scalar(x, w, W),ICF.scalar(x, p, P));
-        solver.post(new Constraint("knapsack", new Propagator<IntVar>(ArrayUtils.append(x,new IntVar[]{W,P})) {
+        model.scalar(x, w, "=", W).post();
+        model.scalar(x, p, "=", P).post();
+        new Constraint("knapsack", new Propagator<IntVar>(append(x, new IntVar[]{W, P})) {
 
             private int[] order;
             private double[] ratio;
@@ -68,7 +74,7 @@ public class KnapsackBuilder implements IBuilder {
             @Override
             public void propagate(int evtmask) throws ContradictionException {
                 // initial sort
-                if(order == null){
+                if (order == null) {
                     order = new int[w.length];
                     ratio = new double[w.length];
                     for (int i = 0; i < w.length; i++) {
@@ -110,15 +116,15 @@ public class KnapsackBuilder implements IBuilder {
                 W.updateUpperBound(cmax, this);
 
                 {
-                    cmax = Math.min(cmax, W.getUB());
-                    for(int idx:order) {
+                    cmax = min(cmax, W.getUB());
+                    for (int idx : order) {
                         if (vars[idx].getUB() > vars[idx].getLB()) {
                             int deltaW = w[idx] * (vars[idx].getUB() - vars[idx].getLB());
                             if (cmin + deltaW <= cmax) {
                                 pomin += p[idx] * (vars[idx].getUB() - vars[idx].getLB());
                                 cmin += deltaW;
                             } else {
-                                pomin += Math.ceil((cmax-cmin) * ratio[idx]);
+                                pomin += ceil((cmax - cmin) * ratio[idx]);
                                 break;
                             }
                         }
@@ -129,8 +135,8 @@ public class KnapsackBuilder implements IBuilder {
 
             @Override
             public ESat isEntailed() {
-                return ESat.TRUE;
+                return TRUE;
             }
-        }));
+        }).post();
     }
 }

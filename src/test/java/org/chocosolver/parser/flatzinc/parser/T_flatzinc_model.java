@@ -29,6 +29,7 @@ package org.chocosolver.parser.flatzinc.parser;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -45,13 +46,13 @@ import java.io.IOException;
  */
 public class T_flatzinc_model extends GrammarTest {
 
-    Solver mSolver;
+    Model mSolver;
     Datas datas;
     StringBuilder st;
 
     @BeforeMethod
     public void before() {
-        mSolver = new Solver();
+        mSolver = new Model();
         mSolver.set(new FznSettings());
         datas = new Datas();
         st = new StringBuilder();
@@ -66,7 +67,7 @@ public class T_flatzinc_model extends GrammarTest {
             Assert.fail();
         }
         fp.flatzinc_model(mSolver, datas, false, false);
-        mSolver.findSolution();
+        mSolver.solve();
     }
 
     @Test(groups = "1s")

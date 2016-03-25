@@ -30,9 +30,9 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.constraints.set.SCF;
+import org.chocosolver.solver.Model;
+
+
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
@@ -48,18 +48,18 @@ import java.util.List;
 public class SetInBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        IntVar var = exps.get(0).intVarValue(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar var = exps.get(0).intVarValue(model);
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            solver.post(IntConstraintFactory.member(var, values));
+            model.member(var, values).post();
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            solver.post(IntConstraintFactory.member(var, low, upp));
+            model.member(var, low, upp).post();
         } else {
-            SetVar b = exps.get(1).setVarValue(solver);
-            solver.post(SCF.member(var, b));
+            SetVar b = exps.get(1).setVarValue(model);
+            model.member(var, b).post();
         }
     }
 }

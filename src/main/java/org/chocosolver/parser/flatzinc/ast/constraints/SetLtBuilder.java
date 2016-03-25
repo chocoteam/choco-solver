@@ -30,14 +30,14 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.SatFactory;
+import org.chocosolver.solver.Model;
+
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
-import org.chocosolver.solver.constraints.set.SCF;
+
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.VF;
+
 import org.chocosolver.util.tools.StringUtils;
 
 import java.util.Arrays;
@@ -53,36 +53,34 @@ import java.util.List;
  */
 public class SetLtBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        SetVar a = exps.get(0).setVarValue(solver);
-        SetVar b = exps.get(1).setVarValue(solver);
+    public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        SetVar a = exps.get(0).setVarValue(model);
+        SetVar b = exps.get(1).setVarValue(model);
 
-        SetVar ab = a.duplicate();
-        SetVar ba = b.duplicate();
+        SetVar ab = model.setVar(StringUtils.randomName(),a.getLB().toArray(),a.getUB().toArray());
+        SetVar ba = model.setVar(StringUtils.randomName(),b.getLB().toArray(),b.getUB().toArray());
 
         TIntHashSet values = new TIntHashSet();
-        for (int i = a.getEnvelopeFirst(); i != SetVar.END; i = a.getEnvelopeNext()) {
+        for (int i :a.getUB()) {
             values.add(i);
         }
-        for (int i = b.getEnvelopeFirst(); i != SetVar.END; i = b.getEnvelopeNext()) {
+        for (int i : b.getUB()) {
             values.add(i);
         }
         int[] env = values.toArray();
         Arrays.sort(env);
-        SetVar c = VF.set(StringUtils.randomName(), env, solver);
-        IntVar min = VF.integer(StringUtils.randomName(), env[0], env[env.length - 1], solver);
+        SetVar c = model.setVar(StringUtils.randomName(), new int[]{}, env);
+        IntVar min = model.intVar(StringUtils.randomName(), env[0], env[env.length - 1]);
 
-        BoolVar _b1 = SCF.subsetEq(new SetVar[]{a, b}).reif();
-        BoolVar _b2 = SCF.all_different(new SetVar[]{a, b}).reif();
+        BoolVar _b1 = model.subsetEq(a, b).reify();
+        BoolVar _b2 = model.allDifferent(a, b).reify();
 
-        solver.post(SCF.partition(new SetVar[]{ab, b}, a),
-                SCF.partition(new SetVar[]{ba, a}, b),
-                SCF.union(new SetVar[]{ab, ba}, c));
-        SCF.min(c, min, false);
-        BoolVar _b3 = SCF.member(min, a).reif();
+        model.post(model.partition(new SetVar[]{ab, b}, a),
+                model.partition(new SetVar[]{ba, a}, b),
+                model.union(new SetVar[]{ab, ba}, c));
+        model.min(c, min, false);
+        BoolVar _b3 = model.member(min, a).reify();
 
-        SatFactory.addClauses(
-                LogOp.or(_b3, LogOp.and(_b1, _b2)), solver
-        );
+        model.addClauses(LogOp.or(_b3, LogOp.and(_b1, _b2)));
     }
 }

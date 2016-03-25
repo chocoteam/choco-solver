@@ -29,7 +29,7 @@ package org.chocosolver.parser.xcsp;
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.xcsp.tools.XCSPParser;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.kohsuke.args4j.Argument;
 
 import java.io.FileNotFoundException;
@@ -51,19 +51,19 @@ public class XCSP extends RegParser {
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
         System.out.printf("%% simple solver\n");
-        mSolver = new Solver(instance);
-        mSolver.set(defaultSettings);
+//        mModel = new Model(instance);
+//        mModel.set(defaultSettings);
         listeners.forEach(ParserListener::afterSolverCreation);
     }
 
     @Override
     public void parseInputFile() throws FileNotFoundException {
         listeners.forEach(ParserListener::beforeParsingFile);
-        parse(mSolver, instance);
+//        parse(mModel, instance);
         listeners.forEach(ParserListener::afterParsingFile);
     }
 
-    private void parse(Solver solver, String input) {
+    private void parse(Model model, String input) {
         XCSPParser parser = new XCSPParser();
         parser.parse(input);
     }
@@ -79,7 +79,7 @@ public class XCSP extends RegParser {
     }
 
     @Override
-    public Solver getSolver() {
+    public Model getModel() {
         return null;
     }
 }
