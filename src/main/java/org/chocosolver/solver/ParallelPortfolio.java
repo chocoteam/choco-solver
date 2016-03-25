@@ -33,6 +33,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.Variable;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -124,10 +125,10 @@ public class ParallelPortfolio {
 
     /**
      * Creates a new ParallelPortfolio
-     * This class stores the models to be executed in parallel in a {@link LinkedList} initially empty.
+     * This class stores the models to be executed in parallel in a {@link ArrayList} initially empty.
      */
     public ParallelPortfolio() {
-        this.models = new LinkedList<>();
+        this.models = new ArrayList<>();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,8 +241,8 @@ public class ParallelPortfolio {
     }
 
     private void check(ResolutionPolicy policy){
-        if (models.size() <= 1) {
-            throw new SolverException("Try to run " + models.size() + " model in parallel (should be >1).");
+        if (models.size() == 0) {
+            throw new SolverException("No model found in the ParallelPortfolio.");
         }
         if(policy != ResolutionPolicy.SATISFACTION) {
             Variable objective = models.get(0).getObjective();

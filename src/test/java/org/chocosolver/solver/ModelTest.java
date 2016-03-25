@@ -257,11 +257,26 @@ public class ModelTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testP1() {
+    public void testP4() {
         ParallelPortfolio pares = new ParallelPortfolio();
         int n = 4; // number of solvers to use
         for (int i = 0; i < n; i++) {
             pares.addModel(knapsack(true));
+            pares.addModel(knapsack(false));
+        }
+        for(Model m:pares.getModels()){
+            m.clearObjective();
+        }
+        pares.solve();
+        pares.getBestModel().getSolver().printStatistics();
+        Assert.assertEquals(pares.getBestModel().getSolver().getSolutionCount(), 1);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testP1() {
+        ParallelPortfolio pares = new ParallelPortfolio();
+        int n = 1; // number of solvers to use
+        for (int i = 0; i < n; i++) {
             pares.addModel(knapsack(false));
         }
         for(Model m:pares.getModels()){
