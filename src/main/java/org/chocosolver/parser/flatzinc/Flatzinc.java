@@ -40,7 +40,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.StringArrayOptionHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -76,9 +75,6 @@ public class Flatzinc extends RegParser {
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).", required = false)
     protected int nb_cores = 1;
 
-    @Option(name = "-ps", required = false, handler = StringArrayOptionHandler.class)
-    protected String[] ps = new String[]{"0", "1", "3", "4"};
-
     // Contains mapping with variables and output prints
     public Datas[] datas;
 
@@ -105,7 +101,7 @@ public class Flatzinc extends RegParser {
         statOnKill = new Thread() {
             public void run() {
                 if (userinterruption) {
-                    datas[bestID()].doFinalOutPut(userinterruption);
+                    datas[bestModelID()].doFinalOutPut(userinterruption);
                     System.out.printf("%% Unexpected resolution interruption!");
                 }
             }
@@ -120,10 +116,9 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
-        nb_cores = Math.min(nb_cores, ps.length);
         assert nb_cores>0;
         if(nb_cores>1) {
-            System.out.printf("%% solvers in parallel (%s)\n", Arrays.toString(Arrays.copyOf(ps, nb_cores)));
+            System.out.printf("%% "+ nb_cores+" solvers in parallel\n");
         }else{
             System.out.printf("%% simple solver\n");
         }
@@ -165,26 +160,8 @@ public class Flatzinc extends RegParser {
     @Override
     public void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
-        if (tl_ > -1) {
-            // The time is now initialized for all workers at the same point
-            portfolio.getModels().forEach(solver -> solver.getSolver().limitTime(tl));
-        }
         for (int i = 0; i < nb_cores; i++) {
-            Model worker = portfolio.getModels().get(i);
-            Solver s = worker.getSolver();
-            Variable[] vars = worker.getVars();
-            if (s.getStrategy() != null && s.getStrategy().getVariables().length > 0) {
-                vars = s.getStrategy().getVariables();
-            }
-            IntVar[] dvars = new IntVar[vars.length];
-            int k = 0;
-            for (int j = 0; j < vars.length; j++) {
-                if ((vars[j].getTypeAndKind() & Variable.INT) > 0) {
-                    dvars[k++] = (IntVar) vars[j];
-                }
-            }
-            dvars = Arrays.copyOf(dvars, k);
-            pickStrategy(i, Integer.parseInt(ps[i]), dvars, worker.getResolutionPolicy());
+            configureModel(i);
         }
         listeners.forEach(ParserListener::afterConfiguringSearch);
     }
@@ -196,16 +173,17 @@ public class Flatzinc extends RegParser {
         boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION || all;
         if (enumerate) {
             while (portfolio.solve()){
-                datas[bestID()].onSolution();
+                datas[bestModelID()].onSolution();
             }
         }else{
             if(portfolio.solve()){
-                datas[bestID()].onSolution();
+                datas[bestModelID()].onSolution();
             }
         }
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
-        datas[bestID()].doFinalOutPut(userinterruption);
+        datas[bestModelID()].doFinalOutPut(userinterruption);
+
         listeners.forEach(ParserListener::afterSolving);
     }
 
@@ -218,7 +196,7 @@ public class Flatzinc extends RegParser {
         return m;
     }
 
-    private int bestID(){
+    private int bestModelID(){
         Model best = getModel();
         for(int i=0;i<nb_cores;i++){
             if(best == portfolio.getModels().get(i)) {
@@ -228,15 +206,33 @@ public class Flatzinc extends RegParser {
         return -1;
     }
 
-    /**
-     * @param w      worker id
-     * @param s      strategy id
-     * @param vars   decision vars
-     * @param policy resolution policy
-     */
-    void pickStrategy(int w, int s, IntVar[] vars, ResolutionPolicy policy) {
-        Solver solver = portfolio.getModels().get(w).getSolver();
-        switch (s) {
+    private void configureModel(int workerID) {
+
+        Model worker = portfolio.getModels().get(workerID);
+        Solver solver = worker.getSolver();
+        if (tl_ > -1) {
+            solver.limitTime(tl);
+        }
+        ResolutionPolicy policy = worker.getResolutionPolicy();
+
+        // compute decision variables
+        Variable[] varsX;
+        if (solver.getStrategy() != null && solver.getStrategy().getVariables().length > 0) {
+            varsX = solver.getStrategy().getVariables();
+        }else{
+            varsX = worker.getVars();
+        }
+        IntVar[] dvars = new IntVar[varsX.length];
+        int k = 0;
+        for (int j = 0; j < varsX.length; j++) {
+            if ((varsX[j].getTypeAndKind() & Variable.INT) > 0) {
+                dvars[k++] = (IntVar) varsX[j];
+            }
+        }
+        IntVar[] vars = Arrays.copyOf(dvars, k);
+
+        // set heuristic
+        switch (workerID) {
             case 0:
                 // MZN Search + LC (if free)
                 if(free)solver.set(lastConflict(solver.getStrategy()));
