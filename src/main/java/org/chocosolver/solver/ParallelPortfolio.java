@@ -179,6 +179,7 @@ public class ParallelPortfolio {
             m.solve();
             solverTerminated.set(true);
         });
+        solverTerminated.set(false);// otherwise, solver.isStopCriterionMet() always returns true
         return solutionFound.get();
     }
 
