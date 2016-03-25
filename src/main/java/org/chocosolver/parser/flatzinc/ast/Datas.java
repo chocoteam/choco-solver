@@ -35,12 +35,14 @@ import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetList;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +74,7 @@ public class Datas {
     StringBuilder stringBuilder = new StringBuilder();
 
     Model model;
+    Solution solution;
 
     //***********************************************************************************
     // VARIABLES
@@ -140,15 +143,15 @@ public class Datas {
     protected String value(Variable var, Declaration.DType type) {
         switch (type) {
             case BOOL:
-                return ((BoolVar) var).getValue() == 1 ? "true" : "false";
+                return solution.getIntVal((BoolVar) var) == 1 ? "true" : "false";
             case INT:
             case INT2:
             case INTN:
-                return Integer.toString(((IntVar) var).getValue());
+                return Integer.toString(solution.getIntVal((IntVar) var));
             case SET:
                 StringBuilder st = new StringBuilder();
                 st.append('{');
-                for (int i : ((SetVar) var).getValue()) {
+                for (int i : solution.getSetVal((SetVar) var)) {
                     st.append(i).append(',');
                 }
                 if (st.length() > 1) st.deleteCharAt(st.length() - 1);
@@ -205,6 +208,10 @@ public class Datas {
     public void onSolution() {
         wrongSolution = false;
         nbSolution++;
+        if(solution == null){
+            solution = new Solution(model, allOutPutVars());
+        }
+        solution.record();
         if (printAll) {
             printSolution();
         }
@@ -214,12 +221,22 @@ public class Datas {
         }
     }
 
+    private Variable[] allOutPutVars() {
+        ArrayList<Variable> vars = new ArrayList<>();
+        vars.addAll(output_vars);
+        for(Variable[] vs:output_arrays_vars){
+            for(Variable v:vs) {
+                vars.add(v);
+            }
+        }
+        return vars.toArray(new Variable[0]);
+    }
+
     public void doFinalOutPut(boolean userinterruption) {
         Solver solver = model.getSolver();
         // TODO there used to be "isComplete" (e.g. in case LNS stops)
         boolean complete = !solver.isStopCriterionMet() && !solver.hasEndedUnexpectedly();
         if(nbSolution>0){
-            // TODO last solution has not been restored so this does not work yet
             if(!printAll)//already printed
                 printSolution();
             if(complete){
