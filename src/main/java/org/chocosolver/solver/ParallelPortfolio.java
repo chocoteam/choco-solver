@@ -31,12 +31,13 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.criteria.Criterion;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -113,8 +114,8 @@ public class ParallelPortfolio {
     /** Stores whether or not prepare() method has been called */
     private boolean isPrepared = false;
 
-    /** Point to (one of) the solver(s) which found a solution */
-    private AtomicInteger finisher = new AtomicInteger(0);
+    private AtomicBoolean solverTerminated = new AtomicBoolean(false);
+    private AtomicBoolean solutionFound = new AtomicBoolean(false);
 
     /** Point to (one of) the solver(s) which found a solution */
     private Model finder;
@@ -169,16 +170,16 @@ public class ParallelPortfolio {
      * @throws SolverException if no model or only model has been added.
      */
     public boolean solve() {
+        solverTerminated.set(false);
+        solutionFound.set(false);
         if (!isPrepared) {
             prepare();
         }
-        finder = null;
         models.parallelStream().forEach(m -> {
-            if (m.solve() && finisher.get() == 0) {
-                finder = m;
-            }
+            m.solve();
+            solverTerminated.set(true);
         });
-        return finder != null;
+        return solutionFound.get();
     }
 
     /**
@@ -214,37 +215,40 @@ public class ParallelPortfolio {
     @SuppressWarnings("unchecked")
     private void prepare(){
         isPrepared = true;
-        ResolutionPolicy policy = models.get(0).getResolutionPolicy();
-        check(policy);
-        models.stream().forEach(s -> s.getSolver().addStopCriterion(()->finder!=null));
-        if(policy != ResolutionPolicy.SATISFACTION){
-            // share the best known bound
-            models.stream().forEach(s -> s.getSolver().plugMonitor(
-                    (IMonitorSolution) () -> {
-                        synchronized (s.getSolver().getObjectiveManager()) {
+        check();
+        models.stream().forEach(s -> s.getSolver().addStopCriterion((Criterion) () -> solverTerminated.get()));
+        // share the best known bound
+        models.stream().forEach(s -> s.getSolver().plugMonitor(
+                (IMonitorSolution) () -> {
+                    synchronized (s.getSolver().getObjectiveManager()) {
+                        solutionFound.set(true);
+                        if (s.getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
+                            finder = s;
+                        }else{
+                            int bestVal = s.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
+                            boolean bestSolver = ((IntVar)s.getObjective()).getValue() == bestVal;
+                            if(bestSolver || !solverTerminated.get()){
+                                finder = s;
+                            }
                             switch (s.getSolver().getObjectiveManager().getPolicy()) {
                                 case MAXIMIZE:
-                                    Number lb = s.getSolver().getObjectiveManager().getBestSolutionValue();
-                                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(lb));
+                                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(bestVal));
                                     break;
                                 case MINIMIZE:
-                                    int ub = s.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
-                                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(ub));
-                                    break;
-                                case SATISFACTION:
+                                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(bestVal));
                                     break;
                             }
                         }
                     }
-            ));
-        }
+                }
+        ));
     }
 
-    private void check(ResolutionPolicy policy){
+    private void check(){
         if (models.size() == 0) {
             throw new SolverException("No model found in the ParallelPortfolio.");
         }
-        if(policy != ResolutionPolicy.SATISFACTION) {
+        if(models.get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION) {
             Variable objective = models.get(0).getObjective();
             if (objective == null) {
                 throw new UnsupportedOperationException("No objective has been defined");

@@ -32,12 +32,15 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.restart.IRestartStrategy;
+import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.ProblemMaker;
 import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.criteria.LongCriterion;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -296,17 +299,36 @@ public class ModelTest {
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
             pares.addModel(knapsack(true));
-            Model finder = null;
             Solution sol = null;
             while(pares.solve()){
-                finder = pares.getBestModel();
-                sol = new Solution(finder).record();
+                sol = new Solution(pares.getBestModel()).record();
             }
+            Model finder = pares.getBestModel();
             System.out.println(sol);
             Assert.assertNotNull(finder);
             finder.getSolver().printStatistics();
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
+    }
+
+    @Test(groups="1s", timeOut=10000)
+    public void testParWait() {
+        ParallelPortfolio pares = new ParallelPortfolio();
+        // good solver
+        pares.addModel(knapsack(false));
+        // bad solver that always restarts and never terminates, to check that the first solver is able to kill it
+        Model m2 = knapsack(false);
+        m2.getSolver().setRestarts(value -> true, new MonotonicRestartStrategy(0),100000);
+        pares.addModel(m2);
+
+        int nbSols = 0;
+        while(pares.solve()){
+            nbSols++;
+        }
+        Model finder = pares.getBestModel();
+        Assert.assertTrue(nbSols>0);
+        Assert.assertNotNull(finder);
+        Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -327,11 +349,8 @@ public class ModelTest {
                 pares.addModel(knapsack(false));
                 pares.addModel(knapsack(true));
             }
-            Model finder = null;
-            while(pares.solve()){
-                finder = pares.getBestModel();
-                finder.getSolver().printStatistics();
-            }
+            while(pares.solve());
+            Model finder = pares.getBestModel();
             finder.getSolver().printStatistics();
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);
         }
