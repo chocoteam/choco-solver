@@ -1499,7 +1499,7 @@ public interface IIntConstraintFactory {
 		Model model = vars[0].getModel();
 		IntVar nbLoops = model.intVar("nLoops", 0, n, true);
 		return new Constraint("SubCircuit", ArrayUtils.append(
-				allDifferent(vars).getPropagators(),
+				allDifferent(vars, "AC").getPropagators(),
 				ArrayUtils.toArray(
 						new PropEqualXY_C(new IntVar[]{nbLoops, subCircuitLength}, n),
 						new PropKLoops(vars, offset, nbLoops),
