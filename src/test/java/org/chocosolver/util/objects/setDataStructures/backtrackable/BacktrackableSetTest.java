@@ -43,8 +43,7 @@ import static org.testng.Assert.*;
  */
 public abstract class BacktrackableSetTest {
 
-    protected Model model;
-    protected IEnvironment environment;
+    protected Model model = new Model();
 
     /**
      * Factory enabling to create an empty backtrackable set
@@ -52,10 +51,10 @@ public abstract class BacktrackableSetTest {
      */
     public abstract ISet create();
 
-
     @Test(groups = "1s", timeOut=60000)
     public void testNominal() {
         ISet set = create();
+        IEnvironment environment = model.getEnvironment();
         set.add(1);
         environment.worldPush();
 
@@ -71,6 +70,7 @@ public abstract class BacktrackableSetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testTwoPushes() {
         ISet set = create();
+        IEnvironment environment = model.getEnvironment();
         environment.worldPush();
         set.add(1);
         environment.worldPush();
@@ -81,14 +81,10 @@ public abstract class BacktrackableSetTest {
         assertTrue(set.isEmpty());
     }
 
-    @Test(groups = "1s", timeOut=60000, expectedExceptions = AssertionError.class)
-    public void testTwoMuchPop() {
-        environment.worldPop();
-    }
-
     @Test(groups = "1s", timeOut=60000)
     public void testPopUntilZero() {
         ISet set = create();
+        IEnvironment environment = model.getEnvironment();
         environment.worldPush();
 
         for (int i = 0; i < 100; i++) {
@@ -103,6 +99,7 @@ public abstract class BacktrackableSetTest {
     @Test(groups = "10s", timeOut=60000)
     public void testSeveralPushes() {
         ISet set = create();
+        IEnvironment environment = model.getEnvironment();
         environment.worldPush();
 
         for (int i = 0; i < 10000; i++) {
@@ -123,6 +120,7 @@ public abstract class BacktrackableSetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testVoidPushes() {
         ISet set = create();
+        IEnvironment environment = model.getEnvironment();
         environment.worldPush();
 
         set.add(1);
@@ -142,6 +140,7 @@ public abstract class BacktrackableSetTest {
     public void testTwoSets() {
         ISet a = create();
         ISet b = create();
+        IEnvironment environment = model.getEnvironment();
         environment.worldPush();
 
         a.add(1);
@@ -166,6 +165,7 @@ public abstract class BacktrackableSetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testAddRemoveReturnValue() {
         ISet set = create();
+        IEnvironment environment = model.getEnvironment();
         environment.worldPush();
         set.add(1);
         environment.worldPush();

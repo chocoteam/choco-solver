@@ -29,6 +29,7 @@
  */
 package org.chocosolver.memory;
 
+import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -37,25 +38,17 @@ public class PopTest {
     @Test(groups="1s", timeOut=60000)
     public void testEnvTPop() {
         try {
-            Environments.TRAIL.make().worldPop();
-            Assert.fail("poping above 0 is forbidden");
-        }catch (AssertionError e){}
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testEnvCPop() {
-        try {
-            Environments.COPY.make().worldPop();
+            new EnvironmentTrailing().worldPop();
             Assert.fail("poping above 0 is forbidden");
         }catch (AssertionError e){}
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testEnvPushPop() {
-        IEnvironment env = Environments.TRAIL.make();
+        IEnvironment env = new EnvironmentTrailing();
         env.worldPush();
         env.worldPop();
-        env = Environments.COPY.make();
+        env = new EnvironmentTrailing();
         env.worldPush();
         env.worldPop();
     }

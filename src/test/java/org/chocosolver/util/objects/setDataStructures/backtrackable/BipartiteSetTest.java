@@ -27,20 +27,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.memory.copy.store;
+package org.chocosolver.util.objects.setDataStructures.backtrackable;
 
-import org.chocosolver.memory.IStorage;
-import org.chocosolver.memory.copy.RcInt;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 14/05/13
+ * @author Alexandre LEBRUN
  */
-public interface IStoredIntCopy extends IStorage {
+public class BipartiteSetTest extends BitSetTest {
 
-    void add(RcInt rc);
-
-    void buildFakeHistory(RcInt v, int initValue, int olderStamp);
+    @Override
+    public ISet create() {
+        return SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
+    }
 }

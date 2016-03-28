@@ -40,14 +40,11 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.ProblemMaker;
 import org.chocosolver.util.criteria.Criterion;
-import org.chocosolver.util.criteria.LongCriterion;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.text.MessageFormat;
 
-import static org.chocosolver.memory.Environments.COPY;
-import static org.chocosolver.memory.Environments.TRAIL;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
@@ -78,13 +75,8 @@ public class ModelTest {
         return modelInitNumber++;
     }
 
-    public static Model knapsack(boolean copy) {
-        Model model;
-        if (copy) {
-            model = new Model(COPY.make(), "ModelC-"+nextModelNum());
-        } else {
-            model = new Model(TRAIL.make(), "ModelT-"+nextModelNum());
-        }
+    public static Model knapsack() {
+        Model model = new Model("ModelT-"+nextModelNum());
         IntVar power = model.intVar("v_" + n, 0, 9999, true);
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -127,16 +119,11 @@ public class ModelTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testRight() {
-        tr2(true);
-        tr2(false);
-    }
-
-    private void tr2(boolean copy){
         boolean alive = true;
         int cas = 0;
         while (alive) {
             cas++;
-            Model s = knapsack(copy);
+            Model s = knapsack();
             try {
                 switch (cas) {
                     case 1:
@@ -264,8 +251,8 @@ public class ModelTest {
         ParallelPortfolio pares = new ParallelPortfolio();
         int n = 4; // number of solvers to use
         for (int i = 0; i < n; i++) {
-            pares.addModel(knapsack(true));
-            pares.addModel(knapsack(false));
+            pares.addModel(knapsack());
+            pares.addModel(knapsack());
         }
         for(Model m:pares.getModels()){
             m.clearObjective();
@@ -280,7 +267,7 @@ public class ModelTest {
         ParallelPortfolio pares = new ParallelPortfolio();
         int n = 1; // number of solvers to use
         for (int i = 0; i < n; i++) {
-            pares.addModel(knapsack(false));
+            pares.addModel(knapsack());
         }
         for(Model m:pares.getModels()){
             m.clearObjective();
@@ -294,11 +281,11 @@ public class ModelTest {
     public void testParBug() {
         for (int iter = 0; iter < 50; iter++) {
             ParallelPortfolio pares = new ParallelPortfolio();
-            pares.addModel(knapsack(true));
-            pares.addModel(knapsack(true));
-            pares.addModel(knapsack(true));
-            pares.addModel(knapsack(true));
-            pares.addModel(knapsack(true));
+            pares.addModel(knapsack());
+            pares.addModel(knapsack());
+            pares.addModel(knapsack());
+            pares.addModel(knapsack());
+            pares.addModel(knapsack());
             Solution sol = null;
             while(pares.solve()){
                 sol = new Solution(pares.getBestModel()).record();
@@ -315,9 +302,9 @@ public class ModelTest {
     public void testParWait() {
         ParallelPortfolio pares = new ParallelPortfolio();
         // good solver
-        pares.addModel(knapsack(false));
+        pares.addModel(knapsack());
         // bad solver that always restarts and never terminates, to check that the first solver is able to kill it
-        Model m2 = knapsack(false);
+        Model m2 = knapsack();
         m2.getSolver().setRestarts(value -> true, new MonotonicRestartStrategy(0),100000);
         pares.addModel(m2);
 
@@ -334,7 +321,7 @@ public class ModelTest {
     @Test(groups="1s", timeOut=60000)
     public void testParBug2() {
         for (int iter = 0; iter < 50; iter++) {
-            Model model = knapsack(true);
+            Model model = knapsack();
             while(model.solve());
             model.getSolver().printStatistics();
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
@@ -346,8 +333,8 @@ public class ModelTest {
         for (int iter = 0; iter < 50; iter++) {
             ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
-                pares.addModel(knapsack(false));
-                pares.addModel(knapsack(true));
+                pares.addModel(knapsack());
+                pares.addModel(knapsack());
             }
             while(pares.solve());
             Model finder = pares.getBestModel();

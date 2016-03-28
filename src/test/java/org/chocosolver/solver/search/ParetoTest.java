@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.search;
 
-import org.chocosolver.memory.copy.EnvironmentCopying;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
@@ -80,7 +79,7 @@ public class ParetoTest {
             maxProfit_2 += nbItems[it] * profits_2[it];
         }
 
-        Model s = new Model(new EnvironmentCopying(), "Knapsack");
+        Model s = new Model("Knapsack");
         // --- Creates decision variables
         IntVar[] occurrences = new IntVar[nbItems.length];
         for (int i = 0; i < nbItems.length; i++) {

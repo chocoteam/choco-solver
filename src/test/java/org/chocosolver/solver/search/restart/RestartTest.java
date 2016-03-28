@@ -37,7 +37,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.memory.Environments.TRAIL;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
@@ -128,7 +127,7 @@ public class RestartTest {
 
         for (int j = 1; j < 5; j++) {
             int n = 200;
-            Model model = new Model(TRAIL.make(), "Test");
+            Model model = new Model("Test");
             IntVar[] X = model.intVarArray("X", n, 1, n, false);
             IntVar[] Y = model.intVarArray("Y", n, n + 1, 2 * (n + 1), false);
             model.allDifferent(X).post();

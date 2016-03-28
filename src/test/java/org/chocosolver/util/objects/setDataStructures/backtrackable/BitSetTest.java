@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.backtrackable.trail;
+package org.chocosolver.util.objects.setDataStructures.backtrackable;
 
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
@@ -36,7 +36,7 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 /**
  * @author Alexandre LEBRUN
  */
-public class TrailingBitSetTest extends TrailingSetTest {
+public class BitSetTest extends BacktrackableSetTest {
 
     @Override
     public ISet create() {

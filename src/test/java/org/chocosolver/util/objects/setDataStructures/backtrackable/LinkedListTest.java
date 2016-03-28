@@ -27,20 +27,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.memory.copy.store;
+package org.chocosolver.util.objects.setDataStructures.backtrackable;
 
-import org.chocosolver.memory.IStorage;
-import org.chocosolver.memory.copy.RcLong;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 14/05/13
+ * @author Alexandre LEBRUN
  */
-public interface IStoredLongCopy extends IStorage {
+public class LinkedListTest extends BacktrackableSetTest {
 
-    void add(RcLong rc);
-
-    void buildFakeHistory(RcLong v, long initValue, int olderStamp);
+    @Override
+    public ISet create() {
+        return SetFactory.makeStoredSet(SetType.LINKED_LIST, 0, model);
+    }
 }
