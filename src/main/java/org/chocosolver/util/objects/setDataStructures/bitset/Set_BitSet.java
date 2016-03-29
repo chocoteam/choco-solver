@@ -103,24 +103,25 @@ public class Set_BitSet extends BitSet implements ISet {
 
 	@Override
 	public boolean add(int element) {
-		assert element >= offset;
-		if (!get(element-offset)) {
+		if (get(element-offset)) {
+			return false;
+		}else{
+			assert element >= offset;
 			card++;
 			set(element-offset, true);
 			return true;
 		}
-		return false;
 	}
 
 	@Override
 	public boolean remove(int element) {
-		if(!contain(element))return false;
-		boolean isIn = get(element-offset);
-		if (isIn) {
-			set(element-offset, false);
+		if(contain(element)) {
+			set(element - offset, false);
 			card--;
+			return true;
+		}else{
+			return false;
 		}
-		return isIn;
 	}
 
 	@Override
