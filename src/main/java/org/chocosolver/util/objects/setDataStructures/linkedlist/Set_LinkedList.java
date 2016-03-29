@@ -67,10 +67,12 @@ public class Set_LinkedList implements ISet {
 
 	@Override
 	public boolean contain(int element) {
-		for(int i:this){
-			if(i==element){
+		IntCell cell = first;
+		while(cell != null){
+			if(cell.element == element){
 				return true;
 			}
+			cell = cell.next;
 		}
 		return false;
 	}
@@ -101,14 +103,15 @@ public class Set_LinkedList implements ISet {
 		if(first == null){
 			return false;
 		} else if(first.element == element){
+			System.out.println("remove first");
 			iter.notifyRemoving(element);
 			first = first.next;
 			if(first==null)last=null;
 			size--;
 			return true;
 		}else {
-			IntCell current = first;
-			IntCell previous = null;
+			IntCell previous = first;
+			IntCell current = first.next;
 			while (current != null) {
 				if (current.element == element) {
 					iter.notifyRemoving(element);
@@ -205,6 +208,11 @@ public class Set_LinkedList implements ISet {
 		public void init(int element, IntCell next) {
 			this.element = element;
 			this.next = next;
+		}
+
+		@Override
+		public String toString(){
+			return element+"";
 		}
 	}
 }
