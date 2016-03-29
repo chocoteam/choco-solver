@@ -177,4 +177,45 @@ public abstract class BacktrackableSetTest {
         assertFalse(set.contain(2));
         assertFalse(set.remove(1));
     }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testRemoveInLoop() {
+        ISet set = create();
+
+        set.add(1);
+        set.add(2);
+        set.add(3);
+        set.add(7);
+        set.add(6);
+        set.add(4);
+
+        int size = 0;
+        for (Integer integer : set) {
+            assertNotNull(integer);
+            size++;
+        }
+        assertEquals(6, size);
+
+        size = 0;
+        for (Integer integer : set) {
+            if(set.contain(1)){
+                set.remove(1);
+            }
+            assertNotNull(integer);
+            size++;
+        }
+        assertTrue(5 <= size);
+        assertEquals(5, set.getSize());
+
+        size = 0;
+        for (Integer integer : set) {
+            if(set.contain(6)){
+                set.remove(6);
+            }
+            assertNotNull(integer);
+            size++;
+        }
+        assertTrue(4 <= size);
+        assertEquals(4, set.getSize());
+    }
 }
