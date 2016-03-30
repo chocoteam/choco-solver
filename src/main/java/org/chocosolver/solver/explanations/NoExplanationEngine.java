@@ -38,5 +38,5 @@ package org.chocosolver.solver.explanations;
  * @version
  */
 public enum NoExplanationEngine implements IExplanationEngine{
-    SINGLETON;
+    SINGLETON
 }

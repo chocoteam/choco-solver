@@ -178,7 +178,7 @@ public class Nonogram extends AbstractProblem {
     }
 
     ////////////////////////////////////////// DATA ////////////////////////////////////////////////////////////////////
-    static enum Data {
+    enum Data {
         /**
          * From <a href="http://www.comp.lancs.ac.uk/~ss/nonogram/">http://www.comp.lancs.ac.uk/~ss/nonogram/</a>
          */

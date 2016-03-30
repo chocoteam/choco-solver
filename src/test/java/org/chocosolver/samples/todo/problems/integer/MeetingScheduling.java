@@ -174,7 +174,7 @@ public class MeetingScheduling extends AbstractProblem {
         return mspdata;
     }
 
-    static enum Data {
+    enum Data {
         small(
                 "4\n" +  //nb of meetings
                         "4\n" +     // nb of agents

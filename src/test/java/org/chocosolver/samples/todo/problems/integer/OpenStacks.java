@@ -171,7 +171,7 @@ public class OpenStacks extends AbstractProblem {
     }
 
     ////////////////////////////////////////// DATA ////////////////////////////////////////////////////////////////////
-    static enum Data {
+    enum Data {
         V_small(new int[]{
                 5, 6, //nb customers= 5, nb products = 6,
                 // orders

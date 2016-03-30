@@ -254,5 +254,5 @@ public interface SetTestModel {
         }
     };
 
-    public void fillTypes(int[] types);
+    void fillTypes(int[] types);
 }

@@ -167,7 +167,7 @@ public class WarehouseLocation extends AbstractProblem {
 
 
     ////////////////////////////////////////// DATA ////////////////////////////////////////////////////////////////////
-    static enum Data {
+    enum Data {
         small(new int[]{
                 5, 10, 30, //nWH = 5, nS = 10, cost = 30
                 1, 4, 2, 1, 3, // capacity

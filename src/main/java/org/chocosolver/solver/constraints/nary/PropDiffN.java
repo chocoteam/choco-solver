@@ -124,7 +124,7 @@ public class PropDiffN extends Propagator<IntVar> {
     }
 
     private boolean mayOverlap(int i, int j) {
-        return !(!isNotDisjoint(i, j, true) || !isNotDisjoint(i, j, false));
+        return isNotDisjoint(i, j, true) && isNotDisjoint(i, j, false);
     }
 
     private boolean isNotDisjoint(int i, int j, boolean horizontal) {

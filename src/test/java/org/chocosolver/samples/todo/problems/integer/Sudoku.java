@@ -121,7 +121,7 @@ public class Sudoku extends AbstractProblem {
     }
 
     /////////////////////////////////// DATA //////////////////////////////////////////////////
-    static enum Data {
+    enum Data {
         level1(
                 new int[][]{
                         {0, 0, 0, 2, 0, 0, 0, 0, 0},
