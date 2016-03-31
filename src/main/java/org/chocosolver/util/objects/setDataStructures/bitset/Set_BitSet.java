@@ -103,10 +103,10 @@ public class Set_BitSet extends BitSet implements ISet {
 
 	@Override
 	public boolean add(int element) {
+		assert element>=offset:"Cannot add "+element+" to set of offset "+offset;
 		if (get(element-offset)) {
 			return false;
 		}else{
-			assert element >= offset;
 			card++;
 			set(element-offset, true);
 			return true;

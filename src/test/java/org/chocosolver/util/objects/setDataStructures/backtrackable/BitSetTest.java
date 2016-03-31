@@ -39,6 +39,11 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 public class BitSetTest extends BacktrackableSetTest {
 
     @Override
+    public ISet create(int offset) {
+        return SetFactory.makeStoredSet(SetType.BITSET, offset, model);
+    }
+
+    @Override
     public ISet create() {
         return SetFactory.makeStoredSet(SetType.BITSET, 0, model);
     }

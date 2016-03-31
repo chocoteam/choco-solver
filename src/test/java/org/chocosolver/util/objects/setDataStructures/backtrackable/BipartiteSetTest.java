@@ -39,6 +39,11 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 public class BipartiteSetTest extends BitSetTest {
 
     @Override
+    public ISet create(int offset) {
+        return SetFactory.makeStoredSet(SetType.BIPARTITESET, offset, model);
+    }
+
+    @Override
     public ISet create() {
         return SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
     }

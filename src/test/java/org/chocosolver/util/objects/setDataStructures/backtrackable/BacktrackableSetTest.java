@@ -32,6 +32,7 @@ package org.chocosolver.util.objects.setDataStructures.backtrackable;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.nonbacktrackable.SetTest;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -41,7 +42,7 @@ import static org.testng.Assert.*;
  * and <code>TRAIL</code>.
  * @author Alexandre LEBRUN
  */
-public abstract class BacktrackableSetTest {
+public abstract class BacktrackableSetTest extends SetTest{
 
     protected Model model = new Model();
 

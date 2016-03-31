@@ -33,6 +33,8 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertTrue;
+
 /**
  * @author Alexandre LEBRUN
  */
@@ -49,5 +51,15 @@ public class LinkedListTest extends SetTest {
     @Override
     public ISet create(int offset) {
         return SetFactory.makeLinkedList();
+    }
+
+    /**
+     * Value which is lower than the offset
+     * There is no offset for linkedlists
+     */
+    @Test(groups = "1s", timeOut=60000)
+    public void testAddNegativeKO() {
+        ISet set = create();
+        assertTrue(set.add(-2));
     }
 }

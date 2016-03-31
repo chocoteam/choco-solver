@@ -103,7 +103,6 @@ public class Set_LinkedList implements ISet {
 		if(first == null){
 			return false;
 		} else if(first.element == element){
-			System.out.println("remove first");
 			iter.notifyRemoving(element);
 			first = first.next;
 			if(first==null)last=null;
