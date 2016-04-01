@@ -30,7 +30,9 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
@@ -50,6 +52,35 @@ import static org.testng.Assert.assertEquals;
  * Project: choco.
  */
 public class SolverTest {
+
+    @Test(groups="1s", timeOut=60000)
+   	public void testReset() {
+   		Model m = new Model();
+   		IntVar x =m.intVar("X", 0, 9);
+   		IntVar y= m.intVar("Y", 0, 9);
+
+        Constraint x_lesser_y = m.arithm(y, ">", x);
+        x_lesser_y.post();
+   		m.member(x, new int[]{1,2}).post();
+
+        // computeOptimum
+        m.setObjective(ResolutionPolicy.MAXIMIZE,x);
+        while (m.solve());
+        assertEquals(m.getSolver().getSolutionCount(),1);
+
+        // enumerate optima does not work because of previous cut
+        m.getSolver().reset();
+        m.getSolver().getObjectiveManager().setCutComputer(number -> number);
+        while (m.solve());
+   		assertEquals(m.getSolver().getSolutionCount(),7);
+
+        // reset, remove constraint and enumerate solutions
+        m.getSolver().reset();
+        m.clearObjective();
+   		m.unpost(x_lesser_y);
+        while (m.solve());
+        assertEquals(m.getSolver().getSolutionCount(),20);
+   	}
 
     @Test(groups="1s", timeOut=60000)
     public void test1DFS() {
