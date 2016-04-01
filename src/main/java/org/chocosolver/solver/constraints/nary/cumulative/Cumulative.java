@@ -160,6 +160,17 @@ public class Cumulative extends Constraint {
 			public CumulFilter make(int n, Propagator<IntVar> cause){
 				return new NRJCumulFilter(n,cause);
 			}
+		},
+		/**
+		 * energetic reasoning to filter disjunctive constraint
+		 * Only propagated on variable subsets of size < 30
+		 * not idempotent
+		 * not enough to ensure correctness (only an additional filtering)
+		 */
+		DISJUNCTIVE_TASK_INTERVAL {
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new DisjunctiveNRJFilter(n,cause);
+			}
 		};
 
 		/**

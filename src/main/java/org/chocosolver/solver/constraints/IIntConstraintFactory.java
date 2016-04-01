@@ -915,6 +915,9 @@ public interface IIntConstraintFactory {
 		if (addHeights) {
 			filters = ArrayUtils.append(filters, new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
 		}
+		if(capacity.isInstantiatedTo(1)){
+			filters = ArrayUtils.append(filters, new Cumulative.Filter[]{Cumulative.Filter.DISJUNCTIVE_TASK_INTERVAL});
+		}
 		return new Cumulative(tasks, heights, capacity, incremental, filters);
 	}
 
