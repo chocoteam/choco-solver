@@ -45,20 +45,17 @@ import org.chocosolver.solver.variables.events.IEventType;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class ObjectiveManager<V extends Variable, N extends Number> implements ICause {
+public class ObjectiveManager<V extends Variable, N extends Number> extends BoundsManager<N> implements ICause {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    final protected ResolutionPolicy policy;
     final protected boolean strict;
     final protected V objective;
 
     final private boolean intOrReal;
     final private double precision;
-
-    protected N bestProvedLB, bestProvedUB; // best bounds found so far
 
     // creates an objective manager for satisfaction problems
     public static ObjectiveManager SAT() {
@@ -70,7 +67,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     //***********************************************************************************
 
     private ObjectiveManager(V objective, ResolutionPolicy policy, double precision, boolean strict, boolean intOrReal) {
-        this.policy = policy;
+        super(policy);
         this.strict = strict;
         this.objective = objective;
         this.precision = precision;
@@ -114,13 +111,6 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    /**
-     * @return true iff the problem is an optimization problem
-     */
-    public boolean isOptimization() {
-        return policy != ResolutionPolicy.SATISFACTION;
-    }
 
     /**
      * Updates the lower (or upper) bound of the objective variable, considering its best know value.
@@ -216,50 +206,6 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
         }
     }
 
-    /**
-     * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
-     */
-    public N getBestSolutionValue() {
-        if (policy == ResolutionPolicy.MINIMIZE) {
-            return bestProvedUB;
-        }
-        if (policy == ResolutionPolicy.MAXIMIZE) {
-            return bestProvedLB;
-        }
-        throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
-    }
-
-    /**
-     * States that lb is a global lower bound on the problem
-     *
-     * @param lb lower bound
-     */
-    public void updateBestLB(N lb) {
-        if (bestProvedLB == null) {
-            // this may happen with multi-thread resolution
-            // when one thread find a solver before one other is being launched
-            bestProvedLB = lb;
-        }
-        if (lb.doubleValue() > bestProvedLB.doubleValue()) {
-            bestProvedLB = lb;
-        }
-    }
-
-    /**
-     * States that ub is a global upper bound on the problem
-     *
-     * @param ub upper bound
-     */
-    public void updateBestUB(N ub) {
-        if (bestProvedUB == null) {
-            // this may happen with multi-thread resolution
-            // when one thread find a solver before one other is being launched
-            bestProvedUB = ub;
-        }
-        if (ub.doubleValue() < bestProvedUB.doubleValue()) {
-            bestProvedUB = ub;
-        }
-    }
 
     @SuppressWarnings("unchecked")
     private N getObjLB() {
@@ -302,30 +248,9 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     //***********************************************************************************
 
     /**
-     * @return the ResolutionPolicy of the problem
-     */
-    public ResolutionPolicy getPolicy() {
-        return policy;
-    }
-
-    /**
      * @return the objective variable
      */
     public V getObjective() {
         return objective;
-    }
-
-    /**
-     * @return the best lower bound computed so far
-     */
-    public N getBestLB() {
-        return bestProvedLB;
-    }
-
-    /**
-     * @return the best upper bound computed so far
-     */
-    public N getBestUB() {
-        return bestProvedUB;
     }
 }
