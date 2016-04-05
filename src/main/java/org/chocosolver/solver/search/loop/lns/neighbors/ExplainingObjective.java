@@ -52,7 +52,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
  * @author Charles Prud'homme
  * @since 03/07/13
  */
-public class ExplainingObjective extends ExplainingCut{
+class ExplainingObjective extends ExplainingCut{
 
     /**
      * Reference the objective manager, to
@@ -100,7 +100,7 @@ public class ExplainingObjective extends ExplainingCut{
      * @param level relaxong factor
      * @param seed for randomness
      */
-    public ExplainingObjective(Model aModel, int level, long seed) {
+    ExplainingObjective(Model aModel, int level, long seed) {
         super(aModel, level, seed);
         clusters = new TIntArrayList(16);
         // TEMPORARY DATA STRUCTURES

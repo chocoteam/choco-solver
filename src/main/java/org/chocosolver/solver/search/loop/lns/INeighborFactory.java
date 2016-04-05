@@ -86,10 +86,10 @@ public class INeighborFactory {
      */
     public static INeighbor explanationBased(IntVar... vars) {
         Model model = vars[0].getModel();
-        INeighbor neighbor1 = new ExplainingObjective(model, 5, 0);
+//        INeighbor neighbor1 = new ExplainingObjective(model, 5, 0);
         INeighbor neighbor2 = new ExplainingCut(model, 5, 0);
         INeighbor neighbor3 = new RandomNeighborhood(vars, 5, 0);
-        return sequencer(neighbor1, neighbor2, neighbor3);
+        return sequencer(/*neighbor1, */neighbor2, neighbor3);
     }
 
 	/**

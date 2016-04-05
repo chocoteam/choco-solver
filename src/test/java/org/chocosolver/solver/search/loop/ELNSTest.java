@@ -68,23 +68,7 @@ public class ELNSTest {
                 neighbor = new ExplainingCut(model, 200, 123456L);
                 break;
             case 2:
-                neighbor = new ExplainingObjective(model, 200, 123456L);
-                break;
-            case 3:
                 neighbor = new SequenceNeighborhood(
-                        new ExplainingCut(model, 200, 123456L),
-                        new RandomNeighborhood(vars, 200, 123456L)
-                );
-                break;
-            case 4:
-                neighbor = new SequenceNeighborhood(
-                        new ExplainingObjective(model, 200, 123456L),
-                        new RandomNeighborhood(vars, 200, 123456L)
-                );
-                break;
-            case 5:
-                neighbor = new SequenceNeighborhood(
-                        new ExplainingObjective(model, 200, 123456L),
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(vars, 200, 123456L)
                 );
@@ -102,7 +86,7 @@ public class ELNSTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
-        for(int i = 0; i < 6; i++) {
+        for(int i = 0; i < 3; i++) {
             System.out.printf("case: %d\n", i);
             small(8, i);
         }
