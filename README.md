@@ -1,6 +1,6 @@
 ![logo](http://choco-solver.org/sites/default/files/ChocoLogo-160x135.png)
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/chocoteam/choco-solver.svg?branch=develop)](https://travis-ci.org/chocoteam/choco-solver) [![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=develop)](https://codecov.io/github/chocoteam/choco-solver?branch=develop)[![Coverity](https://scan.coverity.com/projects/8383/badge.svg)](https://scan.coverity.com/projects/choco-solver)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/chocoteam/choco-solver.svg?branch=develop)](https://travis-ci.org/chocoteam/choco-solver) [![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=develop)](https://codecov.io/github/chocoteam/choco-solver?branch=develop)[![Coverity](https://scan.coverity.com/projects/8383/badge.svg)](https://scan.coverity.com/projects/choco-solver) [![Codacy Badge](https://api.codacy.com/project/badge/grade/b0ab28bdd7fd4da095ad72c2c46bce57)](https://www.codacy.com/app/cprudhom/choco-solver)
 
 * [Documentation, Support and Issues](#doc)
 * [Contributing](#con)
