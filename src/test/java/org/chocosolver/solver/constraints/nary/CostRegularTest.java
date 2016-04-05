@@ -32,10 +32,13 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.Counter;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.CounterState;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -422,5 +425,37 @@ public class CostRegularTest {
 
         while (model.solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 64008);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJM1(){
+        Model model = new Model();
+        int taille = 2;
+        ICostAutomaton auto = makeCostAutomaton(taille);
+        IntVar[] vars = model.intVarArray("x",taille,0,1);
+        IntVar cost = model.intVar("c",0,taille);
+
+        model.costRegular(vars,cost,auto).post();
+        model.post(model.arithm(vars[0],"=",1));
+        model.post(model.arithm(vars[1],"=",1));
+        model.getSolver().showDecisions();
+        model.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(vars));
+        model.solve();
+        Assert.assertTrue(cost.isInstantiated());
+    }
+
+    static ICostAutomaton makeCostAutomaton(int taille) {
+        FiniteAutomaton fa = new FiniteAutomaton();
+        int q0 = fa.addState();
+        fa.setInitialState(q0);
+        fa.setFinal(q0);
+        fa.addTransition(q0, q0, 0,1); // transition 1 de 0 vers 0
+
+        int[][] costmatrix = new int[taille][2];
+        for (int i = 0 ; i < taille ; ++i)
+            for (int j = 0 ; j < 2 ; ++j)
+                costmatrix[i][j] = (j==1 ? 1 : 0);
+
+        return CostAutomaton.makeSingleResource(fa,costmatrix,0,taille);
     }
 }
