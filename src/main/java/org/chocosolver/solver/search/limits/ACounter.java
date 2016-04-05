@@ -81,6 +81,4 @@ public abstract class ACounter implements ICounter {
     public long getLimitValue() {
         return max;
     }
-
-    public abstract long currentValue();
 }

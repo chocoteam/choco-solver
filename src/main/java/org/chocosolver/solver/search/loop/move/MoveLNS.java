@@ -253,7 +253,7 @@ public class MoveLNS implements Move {
             neighbor.restrictLess();
         }
         freshRestart = true;
-        counter.overrideLimit(counter.getLimitValue() + frequency);
+        counter.overrideLimit(counter.currentValue() + frequency);
         solver.restart();
     }
 

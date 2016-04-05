@@ -121,14 +121,14 @@ public class LNSTest {
     public void
     test1() {
         // opt: 8372
-        knapsack20(0);
-        knapsack20(1);
-        knapsack20(2);
-        knapsack20(3);
-        knapsack20(4);
-        knapsack20(5);
+//        knapsack20(0);
+//        knapsack20(1);
+//        knapsack20(2);
+//        knapsack20(3);
+//        knapsack20(4);
+//        knapsack20(5);
         knapsack20(6);
-        knapsack20(7);
+//        knapsack20(7);
     }
 
 

@@ -54,6 +54,8 @@ public interface ICounter extends Criterion, LongCriterion{
 
     void overrideLimit(long newLimit);
 
+    long currentValue();
+
     enum Impl implements ICounter{
         None {
             @Override
@@ -82,8 +84,11 @@ public interface ICounter extends Criterion, LongCriterion{
             }
 
             @Override
-            public void overrideLimit(long newLimit) {
+            public void overrideLimit(long newLimit) {}
 
+            @Override
+            public long currentValue() {
+                return 0;
             }
         }
     }

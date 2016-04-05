@@ -376,7 +376,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                     if(m == rfMove){
                         sl.set(rfMove.getChildMoves().get(0));
                     }else{
-                        while(m.getChildMoves()!= null && m.getChildMoves()!= rfMove){
+                        while(m.getChildMoves()!= null && m.getChildMoves().get(0)!= rfMove){
                             m = m.getChildMoves().get(0);
                         }
                         if(m.getChildMoves()!= rfMove){
