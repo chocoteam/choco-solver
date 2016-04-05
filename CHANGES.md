@@ -31,7 +31,7 @@ like getting a solver which a solution -- or the best one (#362)
 
 #### Bug fixes: 
 
-\#361, #364, #365, #368, #369, #370, #379
+\#361, #364, #365, #368, #369, #370, #379, #380
 
 Fix array out of bound exception in `PropLargeMDDC`.
 

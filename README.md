@@ -117,6 +117,18 @@ So you only have to edit your `pom.xml` to declare the following library depende
 </dependency>
 ```
 
+Note that if you want to test snapshot release, you should update your `pom.xml` with :
+
+```xml
+<repository>
+    <id>sonatype</id>
+    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    <snapshots>
+        <enabled>true</enabled>
+    </snapshots>
+</repository>
+```
+
 ### As a stand-alone application ###
 
 The jar file contains all required dependencies.
