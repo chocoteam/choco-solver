@@ -31,12 +31,18 @@ package org.chocosolver.solver.search.measure;
 
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
+
 /**
  * Object which stores resolution information to get statistics
  *
  * @author Charles Prud'Homme
  */
 public final class MeasuresRecorder implements IMeasures, Cloneable {
+
+    //***********************************************************************************
+    // VARIABLE
+    //***********************************************************************************
 
     /**
      * To transform time from nanoseconds to seconds
@@ -46,67 +52,71 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
     /**
      * Indicates if an objective is declared (<tt>false</tt> means satisfaction problem).
      */
-    public boolean hasObjective;
+    private boolean hasObjective;
 
     /**
      * Indicates if the optimal value has been proven for the objective (set to <tt>true</tt>).
      */
-    public boolean objectiveOptimal;
+    private boolean objectiveOptimal;
 
     /**
      * Counts the number of solutions found so far.
      */
-    public long solutionCount;
+    private long solutionCount;
 
     /**
      * Counts the time spent so far, starting from solver construction call.
      */
-    public long timeCount;
+    private long timeCount;
 
     /**
      * Counts the time spent into reading the model
      */
-    public long readingTimeCount;
+    private long readingTimeCount;
 
     /**
      * Counts the number of nodes opened so far.
      */
-    public long nodeCount;
+    private long nodeCount;
 
     /**
      * Counts the number of backtracks done so far.
      */
-    public long backtrackCount;
+    private long backtrackCount;
 
     /**
      * Counts the number of failures encountered so far.
      */
-    public long failCount;
+    private long failCount;
 
     /**
      * Counts the number of restarts done so far.
      */
-    public long restartCount;
+    private long restartCount;
 
     /**
      * Stores the overall maximum depth
      */
-    public long maxDepth;
+    private long maxDepth;
 
     /**
      * Stores the current depth
      */
-    public long depth;
+    private long depth;
 
     /**
      * When the clock watch starts
      */
-    protected long startingTime;
+    private long startingTime;
 
     /**
      * The solver to measure
      */
-    protected Model model;
+    private Model model;
+
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
     /**
      * Create a measures recorder observing a <code>solver</code>
@@ -117,6 +127,9 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         this.model = model;
     }
 
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     /**
      * Clones the IMeasure object (copy every measure)
@@ -259,9 +272,19 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         return nodeCount + backtrackCount;
     }
 
+    @Override
+    public Solver getSolver() {
+        return model.getSolver();
+    }
+
     //****************************************************************************************************************//
     //**************************************** INCREMENTERS **********************************************************//
     //****************************************************************************************************************//
+
+    @Override
+    public void updateTime() {
+        timeCount = System.nanoTime() - startingTime;
+    }
 
     /**
      * increment node counter
@@ -323,70 +346,7 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         startingTime = System.nanoTime();
     }
 
-    /**
-     * Update resolution time
-     */
-    public void updateTime() {
-        timeCount = System.nanoTime() - startingTime;
-    }
-
     //****************************************************************************************************************//
-    //**************************************** PRINTERS **************************************************************//
-    //****************************************************************************************************************//
-
-    /**
-     * @return statistic values only
-     */
-    public Number[] toArray() {
-        return new Number[]{
-                getSolutionCount(),
-                getReadingTimeCount(),
-                getTimeCount(),
-                hasObjective() ? getBestSolutionValue() : 0,
-                getNodeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount()
-        };
-    }
-
-    /**
-     * @return a summary of recorded statistics
-     */
-    public String toOneLineString() {
-        updateTime();
-        StringBuilder st = new StringBuilder(256);
-        st.append("Model[").append(model.getName()).append("], ");
-        st.append(String.format("%d Solutions, ", solutionCount));
-        if (hasObjective()) {
-            st.append(model.getSolver().getObjectiveManager()).append(", ");
-        }
-        st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
-                getTimeCount(),
-                getNodeCount(),
-                getNodeCount() / getTimeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount()));
-        return st.toString();
-    }
-
-    /**
-     * @return statistics in a CSV format
-     */
-    public String toCSV() {
-        updateTime();
-        // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
-        return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
-                getSolutionCount(),
-                getReadingTimeCount(),
-                getTimeCount(),
-                hasObjective() ? getBestSolutionValue().doubleValue() : 0,
-                getNodeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount());
-    }
 
     @Override
     public String toString() {

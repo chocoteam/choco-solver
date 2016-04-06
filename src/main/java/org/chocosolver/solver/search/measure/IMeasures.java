@@ -30,13 +30,14 @@
 package org.chocosolver.solver.search.measure;
 
 
+import org.chocosolver.solver.Solver;
 
 /**
  * Interface for providing resolution statistics
  *
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public interface IMeasures  {
+public interface IMeasures {
 
     /**
      * @return the current world unique id
@@ -45,6 +46,7 @@ public interface IMeasures  {
 
     /**
      * @return the time count (in sec), including initial propagation time count
+     * More precise after a call to <code>updateTime()</code>
      */
     float getTimeCount();
 
@@ -102,4 +104,69 @@ public interface IMeasures  {
      * @return the objective value of the best solution found (can be Integer or Double)
      */
     Number getBestSolutionValue();
+
+    /**
+     * @return a summary of recorded statistics
+     */
+    default String toOneLineString() {
+        updateTime();
+        StringBuilder st = new StringBuilder(256);
+        st.append("Model[").append(getSolver().getModel().getName()).append("], ");
+        st.append(String.format("%d Solutions, ", getSolutionCount()));
+        if (hasObjective()) {
+            st.append(getSolver().getObjectiveManager()).append(", ");
+        }
+        st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
+                getTimeCount(),
+                getNodeCount(),
+                getNodeCount() / getTimeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount()));
+        return st.toString();
+    }
+
+    /**
+     * @return statistic values only
+     */
+    default Number[] toArray() {
+        updateTime();
+        return new Number[]{
+                getSolutionCount(),
+                getReadingTimeCount(),
+                getTimeCount(),
+                hasObjective() ? getBestSolutionValue() : 0,
+                getNodeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount()
+        };
+    }
+
+    /**
+     * @return statistics in a CSV format
+     */
+    default String toCSV() {
+        updateTime();
+        // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
+        return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
+                getSolutionCount(),
+                getReadingTimeCount(),
+                getTimeCount(),
+                hasObjective() ? getBestSolutionValue().doubleValue() : 0,
+                getNodeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount());
+    }
+
+    /**
+     * Update resolution time of the solver (may be worth calling before calling <code>getTimeCount()</code>)
+     */
+    void updateTime();
+
+    /**
+     * returns the solver object associated with this measures
+     */
+    Solver getSolver();
 }
