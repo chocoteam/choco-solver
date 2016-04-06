@@ -37,7 +37,9 @@ import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -88,10 +90,15 @@ public class ParetoOptimizer implements IMonitorSolution {
      *
      * @param policy    optimization policy : either MINIMIZE or MAXIMIZE
      * @param objectives    objective variables (must all be optimized in the same direction)
-     * @param variablesToStore set of variables to store in every solution (takes decision variables by default)
+     * @param otherVariablesToStore variables, other than objectives, to store in every solution
+     *                              (stores objective variables only by default)
      */
-    public ParetoOptimizer(final ResolutionPolicy policy, final IntVar[] objectives, Variable... variablesToStore) {
-        this.variablesToStore = variablesToStore;
+    public ParetoOptimizer(final ResolutionPolicy policy, final IntVar[] objectives, Variable... otherVariablesToStore) {
+        HashSet<Variable> vrs = new HashSet<>();
+        for(Variable v: ArrayUtils.append(otherVariablesToStore,objectives)){
+            vrs.add(v);
+        }
+        this.variablesToStore = vrs.toArray(new Variable[vrs.size()]);
         this.paretoFront = new LinkedList<>();
         this.objectives = objectives.clone();
         this.policy = policy;
