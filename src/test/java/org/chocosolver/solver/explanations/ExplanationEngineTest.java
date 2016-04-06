@@ -41,7 +41,11 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
@@ -132,36 +136,43 @@ public class ExplanationEngineTest {
         model.arithm(vs[n - 2], "!=", vs[n - 1]).post();
     }
 
+    @DataProvider(name = "xp1")
+    public Object[][] createDataXP(){
+        Object[][] os = new Object[15][1];
+        for (int n = 3, i = 0; n < 64000; n *= 2, i++) {
+            os[i] = new Object[]{n};
+        }
+        return os;
+    }
+
     /**
      * This test evaluates the case where a subset of the constraints are in conflict
      */
-    @Test(groups="5m", timeOut=300000)
-    public void test3() {
-        for (int n = 3; n < 64000; n *= 2) {
-            System.out.printf("n = %d : ", n);
-            Model expl = new Model();
-            model3(expl, n);
+    @Test(groups="10s", timeOut=60000, dataProvider = "xp1")
+    public void test3(int n) {
+        System.out.printf("n = %d : ", n);
+        Model expl = new Model();
+        model3(expl, n);
 
-            Solver r = expl.getSolver();
-            IntStrategy is = inputOrderLBSearch(expl.retrieveIntVars(false));
-            ExplanationEngine ee = new ExplanationEngine(expl, true, true);
-            Explanation ex = null;
-            try {
+        Solver r = expl.getSolver();
+        IntStrategy is = inputOrderLBSearch(expl.retrieveIntVars(false));
+        ExplanationEngine ee = new ExplanationEngine(expl, true, true);
+        Explanation ex = null;
+        try {
+            r.propagate();
+            for (int i = 0; i < n; i++) {
+                Decision d = is.getDecision();
+                d.buildNext();
+                d.apply();
                 r.propagate();
-                for (int i = 0; i < n; i++) {
-                    Decision d = is.getDecision();
-                    d.buildNext();
-                    d.apply();
-                    r.propagate();
-                }
-                Assert.fail();
-            } catch (ContradictionException e) {
-                ex = ee.explain(e);
             }
-            Assert.assertNotNull(ex);
-            Assert.assertEquals(ex.nbCauses(), 2);
-            Assert.assertEquals(ex.nbDecisions(), 1);
+            Assert.fail();
+        } catch (ContradictionException e) {
+            ex = ee.explain(e);
         }
+        Assert.assertNotNull(ex);
+        Assert.assertEquals(ex.nbCauses(), 2);
+        Assert.assertEquals(ex.nbDecisions(), 1);
     }
 
     /**
@@ -396,14 +407,20 @@ public class ExplanationEngineTest {
         assertTrue(model.solve() || model.getSolver().isStopCriterionMet());
     }
 
-    @Test(groups="5m", timeOut=300000)
-    public void testLSsmall() {
-        for (int m = 4; m < 18; m++) {
-            System.out.printf("LS(%d)\n", m);
+    @DataProvider(name = "ls")
+    public Object[][] dataLS(){
+        List<Object[]> elt = new ArrayList<>();
+        for (int m = 4; m < 15; m++) {
             for (int a = 0; a < 5; a++) {
-                testLS(m, a);
+                elt.add(new Object[]{m,a});
             }
         }
+        return elt.toArray(new Object[elt.size()][2]);
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "ls")
+    public void testLSsmall(int m, int a) {
+        testLS(m, a);
     }
 
     private void testCA(int n, int a) {
@@ -436,14 +453,20 @@ public class ExplanationEngineTest {
         assertTrue(model.solve());
     }
 
-    @Test(groups="5m", timeOut=300000)
-    public void testCA() {
-        for (int n = 6; n < 16; n++) {
-            System.out.printf("CA(%d):\n", n);
+    @DataProvider(name = "ca")
+    public Object[][] dataCA(){
+        List<Object[]> elt = new ArrayList<>();
+        for (int m = 6; m < 15; m++) {
             for (int a = 0; a < 5; a++) {
-                testCA(n, a);
+                elt.add(new Object[]{m,a});
             }
         }
+        return elt.toArray(new Object[elt.size()][2]);
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "ca")
+    public void testsmallCA(int n, int a) {
+        testCA(n, a);
     }
 
     private void testGR(int m, int a) {
@@ -485,14 +508,20 @@ public class ExplanationEngineTest {
         assertTrue(model.getSolver().getSolutionCount() > 0);
     }
 
-    @Test(groups="10s", timeOut=60000)
-    public void testGR() {
+    @DataProvider(name = "gr")
+    public Object[][] dataGR(){
+        List<Object[]> elt = new ArrayList<>();
         for (int m = 6; m < 10; m++) {
-            System.out.printf("GR(%d):\n", m);
             for (int a = 0; a < 5; a++) {
-                testGR(m, a);
+                elt.add(new Object[]{m,a});
             }
         }
+        return elt.toArray(new Object[elt.size()][2]);
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "gr")
+    public void testsmallGR(int m, int a) {
+        testGR(m, a);
     }
 
     private void testLN(int n, int k, int a) {
@@ -513,17 +542,23 @@ public class ExplanationEngineTest {
         assertTrue(model.solve());
     }
 
-    @Test(groups="10s", timeOut=60000)
-    public void testLN() {
+    @DataProvider(name = "ln")
+    public Object[][] dataLN(){
+        List<Object[]> elt = new ArrayList<>();
         int[][] params = new int[][]{{2, 3}, {2, 4}, {3, 9}, {3, 17}};
         for (int m = 0; m < params.length; m++) {
             int k = params[m][0];
             int n = params[m][1];
-            System.out.printf("LN(%d,%d):\n", k, n);
             for (int a = 0; a < 5; a++) {
-                testLN(n, k, a);
+                elt.add(new Object[]{n,k,a});
             }
         }
+        return elt.toArray(new Object[elt.size()][3]);
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "ln")
+    public void testsmallLN(int n, int k, int a) {
+        testLN(n, k, a);
     }
 
     private void testMS(int n, int a) {
@@ -575,14 +610,20 @@ public class ExplanationEngineTest {
         assertTrue(model.solve() || r.isStopCriterionMet());
     }
 
-    @Test(groups="10s", timeOut=60000)
-    public void testMSsmall() {
-        for (int n = 5; n < 7; n++) {
-            System.out.printf("MS(%d):\n", n);
+    @DataProvider(name = "ms")
+    public Object[][] dataMS(){
+        List<Object[]> elt = new ArrayList<>();
+        for (int m = 5; m < 7; m++) {
             for (int a = 0; a < 5; a++) {
-                testMS(n, a);
+                elt.add(new Object[]{m,a});
             }
         }
+        return elt.toArray(new Object[elt.size()][2]);
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "ms")
+    public void testMSsmall(int n, int a) {
+        testMS(n, a);
     }
 
     private void testPA(int N, int a) {
@@ -654,13 +695,20 @@ public class ExplanationEngineTest {
         assertTrue(model.solve() || model.getSolver().isStopCriterionMet());
     }
 
-    @Test(groups="5m", timeOut=300000)
-    public void testPAsmall() {
-        int N = 32;
-        System.out.printf("Pa(%d)\n", N);
-        for (int a = 0; a < 5; a++) {
-            testPA(N, a);
+    @DataProvider(name = "pa")
+    public Object[][] dataPA(){
+        List<Object[]> elt = new ArrayList<>();
+        for (int m = 16; m < 32; m+=4) {
+            for (int a = 0; a < 5; a++) {
+                elt.add(new Object[]{m,a});
+            }
         }
+        return elt.toArray(new Object[elt.size()][2]);
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "pa")
+    public void testPAsmall(int N, int a) {
+        testPA(N, a);
     }
 
     @Test(groups="1s", timeOut=60000)

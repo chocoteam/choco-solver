@@ -37,8 +37,11 @@ import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
@@ -55,38 +58,43 @@ import static org.testng.Assert.assertEquals;
  */
 public class ClauseTest {
 
-    @Test(groups="5m", timeOut=300000)
-    public void test1() {
+    @DataProvider(name = "cl1")
+    public Object[][] dataCL1(){
+        List<Object[]> elt = new ArrayList<>();
         int nSol = 1;
         for (int n = 1; n < 16; n++) {
-            for (int i = 0; i <= n; i++) {
-                Model s = new Model();
-
-                final BoolVar[] bsource = new BoolVar[n];
-                final BoolVar[] bs = new BoolVar[n];
-
-                for (int j = 0; j < n; j++) {
-                    bsource[j] = s.boolVar("b" + j);
-                }
-
-                for (int j = 0; j < n; j++) {
-                    if (j >= i) {
-                        bs[j] = bsource[j].not();
-                    } else {
-                        bs[j] = bsource[j];
-                    }
-                }
-
-                LogOp or = or(bs);
-                s.addClauses(or);
-                s.getSolver().set(inputOrderLBSearch(bs));
-
-                while (s.solve()) ;
-                long sol = s.getSolver().getSolutionCount();
-                assertEquals(sol, nSol);
-            }
+            for (int i = 0; i <= n; i++){
+                elt.add(new Object[]{n, i, nSol});
+           }
             nSol = nSol * 2 + 1;
         }
+        return elt.toArray(new Object[elt.size()][3]);
+    }
+
+    @Test(groups="10s", timeOut=60000, dataProvider = "cl1")
+    public void test1(int n, int i, int ns) {
+        Model s = new Model();
+        final BoolVar[] bsource = new BoolVar[n];
+        final BoolVar[] bs = new BoolVar[n];
+
+        for (int j = 0; j < n; j++) {
+            bsource[j] = s.boolVar("b" + j);
+        }
+
+        for (int j = 0; j < n; j++) {
+            if (j >= i) {
+                bs[j] = bsource[j].not();
+            } else {
+                bs[j] = bsource[j];
+            }
+        }
+        LogOp or = or(bs);
+        s.addClauses(or);
+        s.getSolver().set(inputOrderLBSearch(bs));
+
+        while (s.solve()) ;
+        long sol = s.getSolver().getSolutionCount();
+        assertEquals(sol, ns);
     }
 
     @Test(groups="1s", timeOut=60000)

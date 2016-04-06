@@ -36,7 +36,11 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.chocosolver.solver.constraints.Operator.EQ;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
@@ -250,32 +254,40 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
-    public void test1d() {
-        // Z = X + Y + ...
+
+    @DataProvider(name = "1d")
+    public Object[][] data1D(){
+        List<Object[]> elt = new ArrayList<>();
         for (int seed = 2; seed < 9; seed += 1) {
-            Model ref = new Model();
-            Model model = new Model();
-            int n = seed * 2;
-            {
-                IntVar[] x = ref.intVarArray("x", n, 0, 2, false);
-                ref.sum(x, "=", n).post();
-                ref.getSolver().set(minDomLBSearch(x));
-            }
-            {
-                IntVar[] x = model.intVarArray("x", n, 0, 2, false);
-                IntVar[] y = new IntVar[seed];
-                for (int i = 0; i < seed; i++) {
-                    y[i] = model.intVar("Z", 0, 200, false);
-                    model.sum(new IntVar[]{x[i], x[i + seed]}, "=", y[i]).post();
-                }
-                model.sum(y, "=", n).post();
-
-                model.getSolver().set(minDomLBSearch(x));
-
-            }
-            check(ref, model, seed, true, true);
+            elt.add(new Object[]{seed});
         }
+        return elt.toArray(new Object[elt.size()][1]);
+    }
+
+    @Test(groups="10s", timeOut=60000, dataProvider = "1d")
+    public void test1d(int seed) {
+        // Z = X + Y + ...
+        Model ref = new Model();
+        Model model = new Model();
+        int n = seed * 2;
+        {
+            IntVar[] x = ref.intVarArray("x", n, 0, 2, false);
+            ref.sum(x, "=", n).post();
+            ref.getSolver().set(minDomLBSearch(x));
+        }
+        {
+            IntVar[] x = model.intVarArray("x", n, 0, 2, false);
+            IntVar[] y = new IntVar[seed];
+            for (int i = 0; i < seed; i++) {
+                y[i] = model.intVar("Z", 0, 200, false);
+                model.sum(new IntVar[]{x[i], x[i + seed]}, "=", y[i]).post();
+            }
+            model.sum(y, "=", n).post();
+
+            model.getSolver().set(minDomLBSearch(x));
+
+        }
+        check(ref, model, seed, true, true);
     }
 
 
