@@ -127,71 +127,6 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         this.model = model;
     }
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    /**
-     * Clones the IMeasure object (copy every measure)
-     *
-     * @return a new instance of IMeasure
-     */
-    public MeasuresRecorder duplicate() {
-        MeasuresRecorder mr = new MeasuresRecorder(model);
-        mr.hasObjective = hasObjective;
-        mr.objectiveOptimal = objectiveOptimal;
-        mr.solutionCount = solutionCount;
-        mr.timeCount = timeCount;
-        mr.readingTimeCount = readingTimeCount;
-        mr.nodeCount = nodeCount;
-        mr.backtrackCount = backtrackCount;
-        mr.failCount = failCount;
-        mr.restartCount = restartCount;
-        mr.startingTime = startingTime;
-        mr.maxDepth = maxDepth;
-        mr.depth = depth;
-        return mr;
-    }
-
-    //****************************************************************************************************************//
-    //**************************************** SETTERS ***************************************************************//
-    //****************************************************************************************************************//
-
-    @Override
-    public long getSolutionCount() {
-        return solutionCount;
-    }
-
-    /**
-     * indicates an objective variable
-     * @param ho set to <tt>true<tt/> to indicate that an objective is declared
-     */
-    public void declareObjective(boolean ho) {
-        hasObjective = ho;
-    }
-
-    /**
-     * indicates whether or not the optimum has been found and proved
-     * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
-     */
-    public void setObjectiveOptimal(boolean objectiveOptimal) {
-        this.objectiveOptimal = objectiveOptimal;
-    }
-
-    /**
-     * Reset every measure to its default value (mostly 0)
-     */
-    public final void reset() {
-        timeCount = 0;
-        nodeCount = 0;
-        backtrackCount = 0;
-        restartCount = 0;
-        failCount = 0;
-        solutionCount = 0;
-        depth = 0;
-        maxDepth = 0;
-    }
-
     //****************************************************************************************************************//
     //**************************************** GETTERS ***************************************************************//
     //****************************************************************************************************************//
@@ -213,6 +148,7 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
 
     @Override
     public float getTimeCount() {
+        updateTime();
         return timeCount / IN_SEC;
     }
 
@@ -221,6 +157,7 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
      * @return the elapsed time in nanoseconds
      */
     public long getElapsedTimeInNanoseconds() {
+        updateTime();
         return timeCount;
     }
 
@@ -278,11 +215,49 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
     }
 
     //****************************************************************************************************************//
-    //**************************************** INCREMENTERS **********************************************************//
+    //**************************************** SETTERS ***************************************************************//
     //****************************************************************************************************************//
 
     @Override
-    public void updateTime() {
+    public long getSolutionCount() {
+        return solutionCount;
+    }
+
+    /**
+     * indicates an objective variable
+     * @param ho set to <tt>true<tt/> to indicate that an objective is declared
+     */
+    public void declareObjective(boolean ho) {
+        hasObjective = ho;
+    }
+
+    /**
+     * indicates whether or not the optimum has been found and proved
+     * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
+     */
+    public void setObjectiveOptimal(boolean objectiveOptimal) {
+        this.objectiveOptimal = objectiveOptimal;
+    }
+
+    /**
+     * Reset every measure to its default value (mostly 0)
+     */
+    public final void reset() {
+        timeCount = 0;
+        nodeCount = 0;
+        backtrackCount = 0;
+        restartCount = 0;
+        failCount = 0;
+        solutionCount = 0;
+        depth = 0;
+        maxDepth = 0;
+    }
+
+    //****************************************************************************************************************//
+    //**************************************** INCREMENTERS **********************************************************//
+    //****************************************************************************************************************//
+
+    private void updateTime() {
         timeCount = System.nanoTime() - startingTime;
     }
 

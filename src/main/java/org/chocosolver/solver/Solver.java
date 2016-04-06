@@ -958,11 +958,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     @Override
-    public void updateTime() {
-        getMeasures().updateTime();
-    }
-
-    @Override
     public Solver getSolver() {
         return this;
     }

@@ -109,7 +109,6 @@ public interface IMeasures {
      * @return a summary of recorded statistics
      */
     default String toOneLineString() {
-        updateTime();
         StringBuilder st = new StringBuilder(256);
         st.append("Model[").append(getSolver().getModel().getName()).append("], ");
         st.append(String.format("%d Solutions, ", getSolutionCount()));
@@ -130,7 +129,6 @@ public interface IMeasures {
      * @return statistic values only
      */
     default Number[] toArray() {
-        updateTime();
         return new Number[]{
                 getSolutionCount(),
                 getReadingTimeCount(),
@@ -147,7 +145,6 @@ public interface IMeasures {
      * @return statistics in a CSV format
      */
     default String toCSV() {
-        updateTime();
         // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
         return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
                 getSolutionCount(),
@@ -159,11 +156,6 @@ public interface IMeasures {
                 getFailCount(),
                 getRestartCount());
     }
-
-    /**
-     * Update resolution time of the solver (may be worth calling before calling <code>getTimeCount()</code>)
-     */
-    void updateTime();
 
     /**
      * returns the solver object associated with this measures
