@@ -33,6 +33,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -70,8 +72,7 @@ public class LNSTest {
 
         Solver r = model.getSolver();
         r.set(lastConflict(domOverWDegSearch(objects)));
-//        SearchMonitorFactory.log(solver, true, false);
-        r.limitTime(10000);
+        r.limitTime(900);
         switch (lns) {
             case 0:
                 break;
@@ -95,35 +96,34 @@ public class LNSTest {
                 ));
                 break;
             case 5:
-                r.setLNS(new ExplainingCut(model, 200, 123456L));
-                break;
-            case 6:
                 r.setLNS(new SequenceNeighborhood(
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(objects, 200, 123456L)));
                 break;
         }
-//        IOutputFactory.showDecisions(solver, ()->""+solver.getEnvironment().getWorldIndex());
         model.setObjective(MAXIMIZE, power);
+        int bw = 0, bp = 0;
         while(model.solve()){
             System.out.printf("objects : ");
             Arrays.asList(objects).forEach(o -> System.out.printf("%d, ", o.getValue()));
             System.out.printf("\npower: %s\nweight : %s\n", power.getValue(), scalar.getValue());
+            bp = power.getValue();
+            bw = scalar.getValue();
         }
+        Assert.assertEquals(bp,8372);
+        Assert.assertEquals(bw,1092);
+    }
+
+    @DataProvider(name = "lns")
+    public Object[][] createData() {
+        return new Object[][] {{0},{1},{2},{3},{4},{5}};
     }
 
 
-    @Test(groups="5m", timeOut=300000)
-    public void
-    test1() {
+    @Test(groups="10s", timeOut=300000, dataProvider = "lns")
+    public void test1(int lns) {
         // opt: 8372
-        knapsack20(0);
-        knapsack20(1);
-        knapsack20(2);
-        knapsack20(3);
-        knapsack20(4);
-        knapsack20(5);
-        knapsack20(6);
+        knapsack20(lns);
     }
 
 

@@ -243,7 +243,8 @@ public class ExplainingCut implements INeighbor {
     private void addToPath(Decision dec) {
         IntDecision id = (IntDecision) dec;
         boolean tofree = false;
-        if (!id.hasNext()) {
+        if (id.getArity() > 1
+                && !id.hasNext()) {
             id = id.flip();
             tofree = true;
         }
@@ -267,7 +268,7 @@ public class ExplainingCut implements INeighbor {
             assert mModel.getSolver().getDecisionPath().size() == 1;
             // 2. apply the decisions
             mModel.getSolver().getObjectiveManager().postDynamicCut();
-            for (i = mDecisionPath.size() - 1; i >= 0; i--) {
+            for (i = mDecisionPath.size() - 1; i > 0; i--) {
                 dp.pushDecision(mDecisionPath.get(i).duplicate());
                 dp.apply();
                 mModel.getSolver().propagate();
