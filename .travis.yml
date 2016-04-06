@@ -23,7 +23,7 @@ addons:
     notification_email: choco@emn.fr
     build_command_prepend: "mvn clean"
     build_command:   "mvn install -DtestFailureIgnore=true -Dgroups=$GROUP"
-    branch_pattern: develop
+    branch_pattern: coverity_scan
 script: travis_wait mvn -e -X clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
