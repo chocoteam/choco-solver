@@ -51,7 +51,6 @@ public class TimeCounter extends ACounter {
 
     @Override
     public long currentValue() {
-        measures.updateTime();
-        return measures.getElapsedTimeInNanoseconds();
+        return measures.getTimeCountInNanoSeconds();
     }
 }

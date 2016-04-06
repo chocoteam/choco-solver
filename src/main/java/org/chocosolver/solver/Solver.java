@@ -409,7 +409,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             getMeasures().incFailCount();
             stop = true;
         }
-        mMeasures.updateTime();
         for (Criterion c : criteria) {
             if (c instanceof ICounter) {
                 ((ICounter) c).init();
@@ -423,7 +422,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * - update statistics
      */
     private void closeSearch() {
-        mMeasures.updateTime();
         kill = false;
         feasible = FALSE;
         if (mMeasures.getSolutionCount() > 0) {
@@ -900,6 +898,11 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     @Override
     public float getTimeCount() {
         return getMeasures().getTimeCount();
+    }
+
+    @Override
+    public long getTimeCountInNanoSeconds() {
+        return getMeasures().getTimeCountInNanoSeconds();
     }
 
     @Override

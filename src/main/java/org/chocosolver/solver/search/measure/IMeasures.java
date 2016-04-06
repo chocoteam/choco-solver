@@ -45,10 +45,14 @@ public interface IMeasures {
     long getTimestamp();
 
     /**
-     * @return the time count (in sec), including initial propagation time count
-     * More precise after a call to <code>updateTime()</code>
+     * @return the time count (in seconds), including initial propagation time count
      */
     float getTimeCount();
+
+    /**
+     * @return the time count (in nano seconds), including initial propagation time count
+     */
+    long getTimeCountInNanoSeconds();
 
     /**
      * @return the reading time count (in sec)

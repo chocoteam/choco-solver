@@ -152,11 +152,8 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         return timeCount / IN_SEC;
     }
 
-    /**
-     * Returns the elapsed time in nanoseconds
-     * @return the elapsed time in nanoseconds
-     */
-    public long getElapsedTimeInNanoseconds() {
+    @Override
+    public long getTimeCountInNanoSeconds() {
         updateTime();
         return timeCount;
     }
