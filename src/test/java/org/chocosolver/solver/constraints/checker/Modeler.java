@@ -472,7 +472,7 @@ public interface Modeler {
                 }
             }
             s.atLeastNValues(decvars, vars[n - 1], false).post();
-            s.atMostNVvalues(decvars, vars[n - 1], false).post();
+            s.atMostNValues(decvars, vars[n - 1], false).post();
             for (String st : (String[]) parameters) {
                 switch (st) {
                     case "at_least_AC":

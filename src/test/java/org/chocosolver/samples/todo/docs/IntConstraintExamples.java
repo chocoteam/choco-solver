@@ -283,7 +283,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         IntVar N = model.intVar("N", 1, 3, false);
-        model.atMostNVvalues(XS, N, false).post();
+        model.atMostNValues(XS, N, false).post();
         model.getSolver().showSolutions();
         while (model.solve()) ;
     }

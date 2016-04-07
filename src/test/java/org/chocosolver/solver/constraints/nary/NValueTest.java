@@ -75,7 +75,7 @@ public class NValueTest {
         Model model = new Model();
         final IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         final IntVar N = model.intVar("N", 2, 3, false);
-        model.atMostNVvalues(XS, N, false).post();
+        model.atMostNValues(XS, N, false).post();
         model.getSolver().showStatistics();
         model.getSolver().showSolutions();
         final BitSet values = new BitSet(3);

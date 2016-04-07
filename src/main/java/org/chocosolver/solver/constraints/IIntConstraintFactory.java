@@ -633,7 +633,7 @@ public interface IIntConstraintFactory {
 	 *                automatically detects disequalities and allDifferent constraints.
 	 *                Presumably useful when nValues must be minimized.
 	 */
-	default Constraint atMostNVvalues(IntVar[] vars, IntVar nValues, boolean STRONG) {
+	default Constraint atMostNValues(IntVar[] vars, IntVar nValues, boolean STRONG) {
 		TIntArrayList vals = getDomainUnion(vars);
 		if (STRONG) {
 			Gci gci = new Gci(vars, new AutoDiffDetection(vars));
@@ -1325,7 +1325,7 @@ public interface IIntConstraintFactory {
 	 * @return the conjunction of atleast_nvalue and atmost_nvalue
 	 */
 	default Constraint nValues(IntVar[] vars, IntVar nValues) {
-		return Constraint.merge("nValue",atLeastNValues(vars, nValues, false), atMostNVvalues(vars, nValues, true));
+		return Constraint.merge("nValue",atLeastNValues(vars, nValues, false), atMostNValues(vars, nValues, true));
 	}
 
 	/**
