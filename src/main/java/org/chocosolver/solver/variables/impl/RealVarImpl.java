@@ -151,7 +151,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         if (x < 0) {
             return Double.longBitsToDouble(Double.doubleToLongBits(x) - 1);
         } else if (x == 0) {
-            return Double.longBitsToDouble(1);
+            return Double.longBitsToDouble(1L);
         } else if (x < Double.POSITIVE_INFINITY) {
             return Double.longBitsToDouble(Double.doubleToLongBits(x) + 1);
         } else {
