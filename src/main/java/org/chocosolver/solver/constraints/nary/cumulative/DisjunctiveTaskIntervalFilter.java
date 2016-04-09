@@ -39,7 +39,7 @@ import org.chocosolver.util.sort.ArraySort;
 /**
  * @author Jean-Guillaume FAGES
  */
-public class DisjunctiveNRJFilter extends CumulFilter{
+public class DisjunctiveTaskIntervalFilter extends CumulFilter{
 
     //***********************************************************************************
     // VARIABLES
@@ -51,7 +51,7 @@ public class DisjunctiveNRJFilter extends CumulFilter{
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public DisjunctiveNRJFilter(int nbMaxTasks, Propagator cause) {
+    public DisjunctiveTaskIntervalFilter(int nbMaxTasks, Propagator cause) {
         super(nbMaxTasks,cause);
     }
 
@@ -61,17 +61,15 @@ public class DisjunctiveNRJFilter extends CumulFilter{
 
     @Override
     public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
-        assert capa.isInstantiatedTo(1);
+        // filtering algorithm for disjunctive constraint
+        capa.updateUpperBound(1,aCause);
         // remove tasks that do not consume any resource
         list.clear();
         for(int t:tasks){
             if(d[t].getLB()>0 && h[t].getLB()>0){
                 list.add(t);
-                assert h[t].getUB()<=1;
             }
         }
-        // only propagated on less than 30 tasks (too costly otherwise)
-        if(list.size()>=30)return;
         int[] tsks = list.toArray();
         ArraySort sort = new ArraySort(tsks.length,false,true);
         sort.sort(tsks, tsks.length, (i1, i2) -> s[i1].getLB()-s[i2].getLB());

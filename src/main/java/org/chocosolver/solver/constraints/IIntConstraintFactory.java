@@ -863,19 +863,25 @@ public interface IIntConstraintFactory {
 	 * the cumulated height of the set of tasks that overlap that point
 	 * does not exceed a given limit.
 	 *
+	 * Task duration and height should be >= 0
+	 * Discards tasks whose duration or height is equal to zero
+	 *
 	 * @param tasks    Task objects containing start, duration and end variables
 	 * @param heights  integer variables representing the resource consumption of each task
 	 * @param capacity integer variable representing the resource capacity
 	 * @return a cumulative constraint
 	 */
 	default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
-		return cumulative(tasks, heights, capacity, tasks.length > 500); // TODO improve criterion
+		return cumulative(tasks, heights, capacity, true);
 	}
 
 	/**
 	 * Creates a cumulative constraint: Enforces that at each point in time,
 	 * the cumulated height of the set of tasks that overlap that point
 	 * does not exceed a given limit.
+	 *
+	 * Task duration and height should be >= 0
+	 * Discards tasks whose duration or height is equal to zero
 	 *
 	 * @param tasks       Task objects containing start, duration and end variables
 	 * @param heights     integer variables representing the resource consumption of each task
@@ -884,25 +890,39 @@ public interface IIntConstraintFactory {
 	 * @return a cumulative constraint
 	 */
 	default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental) {
-		// Cumulative.Filter.heights is useless if all heights are already instantiated
-		boolean addHeights = false;
+		return cumulative(tasks,heights,capacity,incremental, Cumulative.Filter.DEFAULT);
+	}
+
+	/**
+	 * Creates a cumulative constraint: Enforces that at each point in time,
+	 * the cumulated height of the set of tasks that overlap that point
+	 * does not exceed a given limit.
+	 *
+	 * Task duration and height should be >= 0
+	 * Discards tasks whose duration or height is equal to zero
+	 *
+	 * @param tasks       Task objects containing start, duration and end variables
+	 * @param heights     integer variables representing the resource consumption of each task
+	 * @param capacity    integer variable representing the resource capacity
+	 * @param incremental specifies if an incremental propagation should be applied
+	 * @param filters	  specifies which filtering algorithms to apply
+	 * @return a cumulative constraint
+	 */
+	default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, Cumulative.Filter... filters) {
 		int nbUseFull = 0;
 		for (int h = 0; h < heights.length; h++) {
-			if (!heights[h].isInstantiated()) {
-				addHeights = true;
-			}
-			if (!(heights[h].isInstantiatedTo(0) || tasks[h].getDuration().isInstantiatedTo(0))) {
+			if (heights[h].getUB()>0 && tasks[h].getDuration().getUB()>0) {
 				nbUseFull++;
 			}
 		}
-		// remove tasks which have no impact on resource
+		// remove tasks that have no impact on resource consumption
 		if (nbUseFull < tasks.length) {
 			if (nbUseFull == 0) return arithm(capacity, ">=", 0);
 			Task[] T2 = new Task[nbUseFull];
 			IntVar[] H2 = new IntVar[nbUseFull];
 			int idx = 0;
 			for (int h = 0; h < heights.length; h++) {
-				if (!(heights[h].isInstantiatedTo(0) || tasks[h].getDuration().isInstantiatedTo(0))) {
+				if (heights[h].getUB()>0 && tasks[h].getDuration().getUB()>0) {
 					T2[idx] = tasks[h];
 					H2[idx] = heights[h];
 					idx++;
@@ -910,13 +930,6 @@ public interface IIntConstraintFactory {
 			}
 			tasks = T2;
 			heights = H2;
-		}
-		Cumulative.Filter[] filters = new Cumulative.Filter[]{Cumulative.Filter.TIME, Cumulative.Filter.NRJ};
-		if (addHeights) {
-			filters = ArrayUtils.append(filters, new Cumulative.Filter[]{Cumulative.Filter.HEIGHTS});
-		}
-		if(capacity.isInstantiatedTo(1)){
-			filters = ArrayUtils.append(filters, new Cumulative.Filter[]{Cumulative.Filter.DISJUNCTIVE_TASK_INTERVAL});
 		}
 		return new Cumulative(tasks, heights, capacity, incremental, filters);
 	}
@@ -967,9 +980,9 @@ public interface IIntConstraintFactory {
 			return Constraint.merge("DiffNWithCumulative",
 					diffNCons,
 					min(minX, X), max(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
-					cumulative(TX, height, diffY, true),
+					cumulative(TX, height, diffY),
 					min(minY, Y), max(maxY, EY), scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, "=", diffY),
-					cumulative(TY, width, diffX, true)
+					cumulative(TY, width, diffX)
 			);
 		}else{
 			return diffNCons;

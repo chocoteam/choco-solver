@@ -40,7 +40,6 @@ import org.chocosolver.util.sort.ArraySort;
 
 import java.util.BitSet;
 import java.util.Comparator;
-import java.util.Random;
 
 /**
  * Graph based cumulative
@@ -51,18 +50,16 @@ import java.util.Random;
  * @author Jean-Guillaume Fages
  * @since 31/01/13
  */
-public class PropGraphCumulative extends PropFullCumulative {
+public class PropGraphCumulative extends PropCumulative {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    protected final UndirectedGraph g;
-    protected ISet tasks, toCompute;
-    protected long timestamp;
-    // optim (fast mode)
-    protected final Random rd = new Random(0);
-    protected int maxrd = 10;
+    private final UndirectedGraph g;
+    private ISet tasks, toCompute;
+    private long timestamp;
+    private boolean full;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -77,13 +74,12 @@ public class PropGraphCumulative extends PropFullCumulative {
      * @param e       end			variables
      * @param h       height		variables
      * @param capa    capacity	variable
-     * @param fast    optimization parameter (reduces the amount of filtering calls, when set to true)
      * @param filters filtering algorithm to use
      */
     public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
-                               boolean fast, Cumulative.Filter... filters) {
-        super(s, d, e, h, capa, true, fast, filters);
-        this.g = new UndirectedGraph(n, SetType.BITSET, true);
+                               Cumulative.Filter... filters) {
+        super(s, d, e, h, capa, true, filters);
+        this.g = new UndirectedGraph(model, n, SetType.BITSET, true);
         this.tasks = SetFactory.makeBipartiteSet(0);
         this.toCompute = SetFactory.makeBipartiteSet(0);
     }
@@ -96,25 +92,32 @@ public class PropGraphCumulative extends PropFullCumulative {
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             super.propagate(evtmask);
-            for (int i = 0; i < n; i++) {
-                g.getNeighOf(i).clear();
-            }
-//			naiveGraphComputation();
-            sweepBasedGraphComputation();
+            graphComputation();
         } else {
-            int count = 0;
-            for (int i : toCompute) {
-                count += g.getNeighOf(i).getSize();
-            }
-            if (count >= 2 * n) {
+            if(full){
                 filter(allTasks);
-            } else {
+            }else {
+                int count = 0;
                 for (int i : toCompute) {
-                    filterAround(i);
+                    for (int j : g.getNeighOf(i)) {
+                        if (disjoint(i, j)) {
+                            g.removeEdge(i, j);
+                        }
+                    }
+                    count += g.getNeighOf(i).getSize();
+                    if(count >= 2*n)break;
+                }
+                if (count >= 2*n) {
+                    filter(allTasks);
+                } else {
+                    for (int i : toCompute) {
+                        filterAround(i);
+                    }
                 }
             }
         }
         toCompute.clear();
+        full = false;
     }
 
     @Override
@@ -122,22 +125,24 @@ public class PropGraphCumulative extends PropFullCumulative {
         if (timestamp != model.getEnvironment().getWorldIndex()) {
             timestamp = model.getEnvironment().getWorldIndex();
             toCompute.clear();
+            full = false;
         }
         if (varIdx < 4 * n) {
             int v = varIdx % n;
-            if ((!fast) || mandPartExists(v) || rd.nextInt(maxrd) == 0) {
-                if (!toCompute.contain(v)) {
-                    toCompute.add(v);
+            if(h[v].getUB()==0 || d[v].getUB()==0){
+                allTasks.remove(v);
+                for(int j:g.getNeighOf(v)){
+                    g.removeEdge(v,j);
                 }
+            }else {
+                toCompute.add(v);
+                forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
             }
         } else {
             updateMaxCapa();
-            toCompute.clear();
-            for (int i = 0; i < n; i++) {
-                toCompute.add(i);
-            }
+            full = true;
+            forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
         }
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     protected void filterAround(int taskIndex) throws ContradictionException {
@@ -145,32 +150,19 @@ public class PropGraphCumulative extends PropFullCumulative {
         tasks.add(taskIndex);
         ISet env = g.getNeighOf(taskIndex);
         for (int i : env) {
-            if (notDisjoint(taskIndex, i)) {
-                tasks.add(i);
-            }
+            tasks.add(i);
         }
         filter(tasks);
     }
 
-    protected boolean mandPartExists(int i) {
-        return s[i].getUB() < e[i].getLB();
+    private boolean disjoint(int i, int j) {
+        return s[i].getLB() >= e[j].getUB() || s[j].getLB() >= e[i].getUB();
     }
 
-    protected boolean notDisjoint(int i, int j) {
-        return s[i].getLB() < e[j].getUB() && s[j].getLB() < e[i].getUB();
-    }
-
-    private void naiveGraphComputation() {
+    private void graphComputation() {
         for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                if (notDisjoint(i, j)) {
-                    g.addEdge(i, j);
-                }
-            }
+            g.getNeighOf(i).clear();
         }
-    }
-
-    private void sweepBasedGraphComputation() {
         Event[] events = new Event[2 * n];
         ArraySort<Event> sort = new ArraySort<>(events.length, true, false);
         Comparator<Event> eventComparator = (e1, e2) -> {
@@ -192,8 +184,13 @@ public class PropGraphCumulative extends PropFullCumulative {
             Event event = events[timeIndex++];
             switch (event.type) {
                 case (START):
-                    for (int i = tprune.nextSetBit(0); i >= 0; i = tprune.nextSetBit(i + 1)) {
-                        g.addEdge(i, event.index);
+                    boolean eok = h[event.index].getUB()>0 && d[event.index].getUB()>0;
+                    if(eok) {
+                        for (int i = tprune.nextSetBit(0); i >= 0; i = tprune.nextSetBit(i + 1)) {
+                            if(h[i].getUB()>0 && d[i].getUB()>0) {
+                                g.addEdge(i, event.index);
+                            }
+                        }
                     }
                     tprune.set(event.index);
                     break;

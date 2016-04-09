@@ -81,15 +81,16 @@ public class Cumulative extends Constraint {
 		IntVar[] d = Arrays.copyOfRange(vars,n,2*n);
 		IntVar[] e = Arrays.copyOfRange(vars,2*n,3*n);
 		IntVar[] h = Arrays.copyOfRange(vars,3*n,4*n);
+		// propagators are posted twice, to achieve fixpoint
 		if(graphBased){
 			return new Propagator[]{
-					new PropGraphCumulative(s,d,e,h,capa,true, filters),
-					new PropGraphCumulative(s,d,e,h,capa,false, filters)
+					new PropGraphCumulative(s,d,e,h,capa, filters),
+					new PropGraphCumulative(s,d,e,h,capa, filters)
 			};
 		}else{
 			return new Propagator[]{
-					new PropFullCumulative(s,d,e,h,capa,true, filters),
-					new PropFullCumulative(s,d,e,h,capa,false, filters)
+					new PropCumulative(s,d,e,h,capa, filters),
+					new PropCumulative(s,d,e,h,capa, filters)
 			};
 		}
 	}
@@ -162,6 +163,16 @@ public class Cumulative extends Constraint {
 			}
 		},
 		/**
+		 * TimeTableEdgeFinding algorithm
+		 * not idempotent
+		 * not enough to ensure correctness (only an additional filtering)
+		 */
+		TTEF {
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new TTEFCumulFilter(n,cause);
+			}
+		},
+		/**
 		 * energetic reasoning to filter disjunctive constraint
 		 * Only propagated on variable subsets of size < 30
 		 * not idempotent
@@ -169,7 +180,16 @@ public class Cumulative extends Constraint {
 		 */
 		DISJUNCTIVE_TASK_INTERVAL {
 			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new DisjunctiveNRJFilter(n,cause);
+				return new DisjunctiveTaskIntervalFilter(n,cause);
+			}
+		},
+		/**
+		 * Combines above filters as a black-box
+		 * not idempotent
+		 */
+		DEFAULT {
+			public CumulFilter make(int n, Propagator<IntVar> cause){
+				return new DefaultCumulFilter(n,cause);
 			}
 		};
 
