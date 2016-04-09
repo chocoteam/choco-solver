@@ -155,8 +155,17 @@ public class Set_BitSet extends BitSet implements ISet {
 		return st.replace(", }","}");
 	}
 
+	// equals and hashcode are overwritten back to default Object behavior
+	// (this extends BitSet, which overwrites these methods)
+	// so that all ISet objects have the same behavior (i.e. compare reference, not content)
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj == this;
+	}
+
+	@Override
+	public int hashCode(){
+		return java.lang.System.identityHashCode(this);
 	}
 }

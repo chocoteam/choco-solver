@@ -523,6 +523,11 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         return ID;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Propagator && ((Propagator) o).ID == ID;
+    }
+
     /**
      * Returns the element at the specified position in this internal list of <code>V</code> objects.
      *

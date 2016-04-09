@@ -48,11 +48,6 @@ public class Node implements Cloneable {
         this.layer = layer;
     }
 
-    public boolean equals(Object n) {
-        return n instanceof Node && ((Node) n).state == state && ((Node) n).layer == layer;
-
-    }
-
     @Override
     public Node clone() throws CloneNotSupportedException {
         Node node = (Node) super.clone();
