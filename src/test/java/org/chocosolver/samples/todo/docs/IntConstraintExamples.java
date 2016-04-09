@@ -373,7 +373,7 @@ public class IntConstraintExamples {
             HE[i] = model.intVar("HE_" + i, i - 1, i + 1, true);
         }
         IntVar CA = model.intVar("CA", 1, 3, false);
-        model.cumulative(TS, HE, CA, true).post();
+        model.cumulative(TS, HE, CA).post();
         model.getSolver().showSolutions();
         while (model.solve()) ;
     }

@@ -80,7 +80,7 @@ public class CumulativeSample extends AbstractProblem{
 			end[i] = model.intOffsetView(start[i], duration[i].getValue());
 			task[i] = new Task(start[i], duration[i], end[i]);
 		}
-		model.cumulative(task, height, capa, true).post();
+		model.cumulative(task, height, capa).post();
 		model.max(makespan, end).post();
 	}
 
