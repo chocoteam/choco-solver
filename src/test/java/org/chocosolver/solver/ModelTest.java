@@ -45,7 +45,9 @@ import org.testng.annotations.Test;
 import java.text.MessageFormat;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.activityBasedSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
 import static org.chocosolver.solver.variables.IntVar.MIN_INT_BOUND;
 import static org.chocosolver.util.ESat.FALSE;
@@ -245,100 +247,22 @@ public class ModelTest {
         while (s.solve()) ;
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testP4() {
-        ParallelPortfolio pares = new ParallelPortfolio();
-        int n = 4; // number of solvers to use
-        for (int i = 0; i < n; i++) {
-            pares.addModel(knapsack());
-            pares.addModel(knapsack());
-        }
-        for(Model m:pares.getModels()){
-            m.clearObjective();
-        }
-        pares.solve();
-        pares.getBestModel().getSolver().printStatistics();
-        Assert.assertEquals(pares.getBestModel().getSolver().getSolutionCount(), 1);
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testP1() {
-        ParallelPortfolio pares = new ParallelPortfolio();
-        int n = 1; // number of solvers to use
-        for (int i = 0; i < n; i++) {
-            pares.addModel(knapsack());
-        }
-        for(Model m:pares.getModels()){
-            m.clearObjective();
-        }
-        pares.solve();
-        pares.getBestModel().getSolver().printStatistics();
-        Assert.assertEquals(pares.getBestModel().getSolver().getSolutionCount(), 1);
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testParBug() {
-        for (int iter = 0; iter < 50; iter++) {
-            ParallelPortfolio pares = new ParallelPortfolio();
-            pares.addModel(knapsack());
-            pares.addModel(knapsack());
-            pares.addModel(knapsack());
-            pares.addModel(knapsack());
-            pares.addModel(knapsack());
-            Solution sol = null;
-            while(pares.solve()){
-                sol = new Solution(pares.getBestModel()).record();
-            }
-            Model finder = pares.getBestModel();
-            System.out.println(sol);
-            Assert.assertNotNull(finder);
-            finder.getSolver().printStatistics();
-            Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
-        }
-    }
-
-    @Test(groups="1s", timeOut=10000)
-    public void testParWait() {
-        ParallelPortfolio pares = new ParallelPortfolio();
-        // good solver
-        pares.addModel(knapsack());
-        // bad solver that always restarts and never terminates, to check that the first solver is able to kill it
-        Model m2 = knapsack();
-        m2.getSolver().setRestarts(value -> true, new MonotonicRestartStrategy(0),100000);
-        pares.addModel(m2);
-
-        int nbSols = 0;
-        while(pares.solve()){
-            nbSols++;
-        }
-        Model finder = pares.getBestModel();
-        Assert.assertTrue(nbSols>0);
-        Assert.assertNotNull(finder);
-        Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
-    }
-
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testParBug2() {
-        for (int iter = 0; iter < 50; iter++) {
+        for (int iter = 0; iter < 5000; iter++) {
             Model model = knapsack();
             while(model.solve());
-            model.getSolver().printStatistics();
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testP2() {
-        for (int iter = 0; iter < 50; iter++) {
-            ParallelPortfolio pares = new ParallelPortfolio();
-            for (int i = 0; i < 20; i++) {
-                pares.addModel(knapsack());
-                pares.addModel(knapsack());
-            }
-            while(pares.solve());
-            Model finder = pares.getBestModel();
-            finder.getSolver().printStatistics();
-            Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);
+    @Test(groups="10s", timeOut=60000)
+    public void testParBug3() {
+        for (int iter = 0; iter < 5000; iter++) {
+            Model model = knapsack();
+            model.getSolver().set(randomSearch(model.retrieveIntVars(true),iter));
+            while(model.solve());
+            Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
