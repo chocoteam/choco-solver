@@ -295,7 +295,6 @@ public class TestCorrectness {
         for (int i = 0; i < 6; i++) {
             for (int n = 2; n < 25; n += 5) {
                 long seed = i;//System.currentTimeMillis();
-                System.out.println(i+" / "+n+" / "+seed);
                 CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * n + 1, 1, n, seed, true);
             }
         }
@@ -307,7 +306,6 @@ public class TestCorrectness {
         for (int i = 0; i < 6; i++) {
             for (int n = 2; n < 25; n += 5) {
                 long seed = i;//System.currentTimeMillis();
-                System.out.println(i+" / "+n+" / "+seed);
                 CorrectnessChecker.checkCorrectness(Modeler.modelTTEFCumulative, 4 * n + 1, 1, n, seed, true);
             }
         }
@@ -316,7 +314,6 @@ public class TestCorrectness {
         for (int i = 0; i < 6; i++) {
             for (int n = 2; n < 25; n += 5) {
                 long seed = i;//System.currentTimeMillis();
-                System.out.println(i+" / "+n+" / "+seed);
                 CorrectnessChecker.checkCorrectness(Modeler.modelTTEFCumulative, 4 * n + 1, 1, n, seed, false);
             }
         }
