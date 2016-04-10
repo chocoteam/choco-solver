@@ -81,8 +81,6 @@ public class DefaultCumulFilter extends CumulFilter {
 		if (tasks.getSize() < 50) {
 			if (capa.isInstantiatedTo(1)) {
 				getDisjTaskInter().filter(s, d, e, h, capa, tasks);
-			} else {
-				getTTEF().filter(s, d, e, h, capa, tasks);
 			}
 		}
 	}

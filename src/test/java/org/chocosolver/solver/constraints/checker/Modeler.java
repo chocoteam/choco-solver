@@ -34,6 +34,7 @@ import gnu.trove.map.hash.THashMap;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
 import org.chocosolver.solver.variables.BoolVar;
@@ -677,6 +678,37 @@ public interface Modeler {
         @Override
         public String name() {
             return "modelCumulative";
+        }
+    };
+
+    Modeler modelTTEFCumulative = new Modeler() {
+        @Override
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model model = new Model("Cumulative_" + n);
+            IntVar[] vars = new IntVar[n];
+            if (n % 4 != 1) {
+                throw new UnsupportedOperationException();
+            }
+            int k = n / 4;
+            IntVar[] h = new IntVar[k];
+            Task[] tasks = new Task[k];
+            for (int i = 0; i < n; i++) {
+                vars[i] = model.intVar("v_" + i, domains[i]);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            for (int i = 0; i < k; i++) {
+                tasks[i] = new Task(vars[i], vars[i + k], vars[i + 2 * k]);
+                h[i] = vars[i + 3 * k];
+            }
+            IntVar capa = vars[vars.length - 1];
+            model.cumulative(tasks, h, capa, (boolean)parameters, Cumulative.Filter.DEFAULT, Cumulative.Filter.TTEF).post();
+            model.getSolver().set(randomSearch(vars, 0));
+            return model;
+        }
+
+        @Override
+        public String name() {
+            return "modelTTEFCumulative";
         }
     };
 
