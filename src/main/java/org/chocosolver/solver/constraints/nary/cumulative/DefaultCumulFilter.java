@@ -31,11 +31,8 @@ package org.chocosolver.solver.constraints.nary.cumulative;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
-
-import java.util.Arrays;
 
 /**
  * Default filtering for cumulative
@@ -47,7 +44,7 @@ public class DefaultCumulFilter extends CumulFilter {
 	// VARIABLES
 	//***********************************************************************************
 
-	private CumulFilter time, sweep, nrj, heights, disjTaskInter;
+	private CumulFilter time, sweep, nrj, heights, disjTaskInter, ttef;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -55,11 +52,7 @@ public class DefaultCumulFilter extends CumulFilter {
 
 	public DefaultCumulFilter(int nbMaxTasks, Propagator cause) {
 		super(nbMaxTasks, cause);
-		time = Cumulative.Filter.TIME.make(nbMaxTasks,aCause);
-		sweep = Cumulative.Filter.SWEEP.make(nbMaxTasks,aCause);
 		nrj = Cumulative.Filter.NRJ.make(nbMaxTasks,aCause);
-		heights = Cumulative.Filter.HEIGHTS.make(nbMaxTasks,aCause);
-		disjTaskInter = Cumulative.Filter.DISJUNCTIVE_TASK_INTERVAL.make(nbMaxTasks,aCause);
 	}
 
 	//***********************************************************************************
@@ -70,23 +63,56 @@ public class DefaultCumulFilter extends CumulFilter {
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
 		boolean hInst = true;
-		for(int t:tasks){
-			min = Math.min(min,s[t].getLB());
-			max = Math.max(max,e[t].getUB());
+		for (int t : tasks) {
+			min = Math.min(min, s[t].getLB());
+			max = Math.max(max, e[t].getUB());
 			hInst &= h[t].isInstantiated();
 		}
-		if(max-min<tasks.getSize()*tasks.getSize()){
-			time.filter(s,d,e,h,capa,tasks);
-		}else{
-			sweep.filter(s,d,e,h,capa,tasks);
-			if(!hInst){
-				heights.filter(s,d,e,h,capa,tasks);
+		if (max - min < tasks.getSize() * tasks.getSize()) {
+			getTime().filter(s, d, e, h, capa, tasks);
+		} else {
+			getSweep().filter(s, d, e, h, capa, tasks);
+			if (!hInst) {
+				getHeights().filter(s, d, e, h, capa, tasks);
 			}
 		}
-		nrj.filter(s,d,e,h,capa,tasks);
-		// only propagated on less than 30 tasks (too costly otherwise)
-		if(capa.isInstantiatedTo(1) && tasks.getSize()<30){
-			disjTaskInter.filter(s,d,e,h,capa,tasks);
+		nrj.filter(s, d, e, h, capa, tasks);
+		// only propagated on less than 50 tasks (too costly otherwise)
+		if (tasks.getSize() < 50) {
+			if (capa.isInstantiatedTo(1)) {
+				getDisjTaskInter().filter(s, d, e, h, capa, tasks);
+			} else {
+				getTTEF().filter(s, d, e, h, capa, tasks);
+			}
 		}
+	}
+
+	//***********************************************************************************
+	// Lazy creation (saves memory)
+	//***********************************************************************************
+
+	private CumulFilter getTime() {
+		if(time==null)time = Cumulative.Filter.TIME.make(nbMaxTasks,aCause);
+		return time;
+	}
+
+	private CumulFilter getSweep() {
+		if(sweep==null)sweep = Cumulative.Filter.SWEEP.make(nbMaxTasks,aCause);
+		return sweep;
+	}
+
+	private CumulFilter getHeights() {
+		if(heights==null)heights = Cumulative.Filter.HEIGHTS.make(nbMaxTasks,aCause);
+		return heights;
+	}
+
+	private CumulFilter getTTEF() {
+		if(ttef==null)ttef = Cumulative.Filter.TTEF.make(nbMaxTasks,aCause);
+		return ttef;
+	}
+
+	private CumulFilter getDisjTaskInter() {
+		if(disjTaskInter==null)disjTaskInter = Cumulative.Filter.DISJUNCTIVE_TASK_INTERVAL.make(nbMaxTasks,aCause);
+		return disjTaskInter;
 	}
 }
