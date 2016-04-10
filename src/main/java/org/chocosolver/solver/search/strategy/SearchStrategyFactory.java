@@ -208,7 +208,7 @@ public class SearchStrategyFactory {
     public static IntStrategy randomSearch(IntVar[] vars, long seed) {
         IntValueSelector value = randomIntVal(seed);
         IntValueSelector bound = randomIntBound(seed);
-        IntValueSelector selector = (IntValueSelector) var -> {
+        IntValueSelector selector = var -> {
             if (var.hasEnumeratedDomain()) {
                 return value.selectValue(var);
             } else {
