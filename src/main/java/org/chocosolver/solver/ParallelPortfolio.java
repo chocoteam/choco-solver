@@ -193,16 +193,20 @@ public class ParallelPortfolio {
      * @throws SolverException if no model or only model has been added.
      */
     public boolean solve() {
-        solverTerminated.set(false);
-        solutionFound.set(false);
+        getSolverTerminated().set(false);
+        getSolutionFound().set(false);
         if (!isPrepared) {
             prepare();
         }
         models.parallelStream().forEach(m -> {
-            m.solve();
-            solverTerminated.set(true);
+            if(!getSolverTerminated().get()) {
+                boolean so = m.solve();
+                if(so && finder == m || !so){
+                    getSolverTerminated().set(true);
+                }
+            }
         });
-        solverTerminated.set(false);// otherwise, solver.isStopCriterionMet() always returns true
+        getSolverTerminated().set(false);// otherwise, solver.isStopCriterionMet() always returns true
         for(Model m:models){
             if(m.getResolutionPolicy()==ResolutionPolicy.MAXIMIZE){
                 assert m.getSolver().getBestSolutionValue().intValue()<=getBestModel().getSolver().getBestSolutionValue().intValue();
@@ -210,7 +214,7 @@ public class ParallelPortfolio {
                 assert m.getSolver().getBestSolutionValue().intValue()>=getBestModel().getSolver().getBestSolutionValue().intValue();
             }
         }
-        return solutionFound.get();
+        return getSolutionFound().get();
     }
 
     /**
@@ -247,35 +251,34 @@ public class ParallelPortfolio {
     private void prepare(){
         isPrepared = true;
         check();
-        models.stream().forEach(s -> s.getSolver().addStopCriterion((Criterion) () -> solverTerminated.get()));
-        // share the best known bound
-        models.stream().forEach(s -> s.getSolver().plugMonitor(
-                (IMonitorSolution) () -> {
-                    synchronized (s.getSolver().getObjectiveManager()) {
-                        solutionFound.set(true);
-                        if (s.getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
-                            finder = s;
-                        }else{
-                            int bestVal = s.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
-                            boolean bestSolver = ((IntVar)s.getObjective()).getValue() == bestVal;
-                            if(bestSolver || !solverTerminated.get()){
-                                finder = s;
-                            }
-                            switch (s.getSolver().getObjectiveManager().getPolicy()) {
-                                case MAXIMIZE:
-                                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(bestVal));
-                                    break;
-                                case MINIMIZE:
-                                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(bestVal));
-                                    break;
-                            }
-                        }
-                    }
-                }
-        ));
-        if(searchAutoConf){
-            for(int i=0;i<models.size();i++){
+        for(int i=0;i<models.size();i++){
+            Solver s = models.get(i).getSolver();
+            s.addStopCriterion((Criterion) () -> getSolverTerminated().get());
+            s.plugMonitor((IMonitorSolution) () -> {updateFromSolution(s.getModel());});
+            if(searchAutoConf){
                 configureModel(i);
+            }
+        }
+    }
+
+    private synchronized void updateFromSolution(Model m){
+        if (m.getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
+            finder = m;
+            getSolutionFound().set(true);
+        }else{
+            int bestVal = m.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
+            boolean bestSolver = ((IntVar)m.getObjective()).getValue() == bestVal;
+            if(bestSolver){
+                getSolutionFound().set(true);
+                finder = m;
+            }
+            switch (m.getSolver().getObjectiveManager().getPolicy()) {
+                case MAXIMIZE:
+                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(bestVal));
+                    break;
+                case MINIMIZE:
+                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(bestVal));
+                    break;
             }
         }
     }
@@ -379,5 +382,13 @@ public class ParallelPortfolio {
                         "real variable objective optimization problems");
             }
         }
+    }
+
+    private synchronized AtomicBoolean getSolverTerminated(){
+        return solverTerminated;
+    }
+
+    private synchronized AtomicBoolean getSolutionFound(){
+        return solutionFound;
     }
 }
