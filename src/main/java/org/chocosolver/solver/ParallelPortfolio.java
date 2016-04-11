@@ -200,8 +200,6 @@ public class ParallelPortfolio {
         }
         // TODO 1 : use forkJoinPool so that we have one thread for each model
         // (parallel streams limits to the number of cores, which is bad here)
-        // TODO 2 : fix : it seems some thread do not terminates before the main thread resumes
-        // (miss improving solutions)
         models.parallelStream().forEach(m -> {
             if(!getSolverTerminated().get()) {
                 boolean so = m.solve();

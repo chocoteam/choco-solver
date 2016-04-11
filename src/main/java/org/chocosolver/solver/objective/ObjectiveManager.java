@@ -204,13 +204,9 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
             assert objective.isInstantiated();
             N newVal = getObjUB();
             if (policy == ResolutionPolicy.MINIMIZE) {
-                if(bestProvedUB == null || newVal.doubleValue() < bestProvedUB.doubleValue()) {
-                    bestProvedUB = newVal;
-                }
+                updateBestUB(newVal);
             } else {
-                if(bestProvedLB == null || newVal.doubleValue() > bestProvedLB.doubleValue()) {
-                    bestProvedLB = newVal;
-                }
+                updateBestLB(newVal);
             }
         }
     }
@@ -258,7 +254,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
      *
      * @param lb lower bound
      */
-    public void updateBestLB(N lb) {
+    public synchronized void updateBestLB(N lb) {
         if (bestProvedLB == null) {
             // this may happen with multi-thread resolution
             // when one thread find a model before one other is being launched
@@ -274,7 +270,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
      *
      * @param ub upper bound
      */
-    public void updateBestUB(N ub) {
+    public synchronized void updateBestUB(N ub) {
         if (bestProvedUB == null) {
             // this may happen with multi-thread resolution
             // when one thread find a model before one other is being launched
