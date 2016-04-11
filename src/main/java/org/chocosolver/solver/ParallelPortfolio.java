@@ -198,20 +198,28 @@ public class ParallelPortfolio {
         if (!isPrepared) {
             prepare();
         }
+        // TODO 1 : use forkJoinPool so that we have one thread for each model
+        // (parallel streams limits to the number of cores, which is bad here)
+        // TODO 2 : fix : it seems some thread do not terminates before the main thread resumes
+        // (miss improving solutions)
         models.parallelStream().forEach(m -> {
             if(!getSolverTerminated().get()) {
                 boolean so = m.solve();
-                if(so && finder == m || !so){
+                if(so && finder == m || !so) {
                     getSolverTerminated().set(true);
                 }
             }
         });
         getSolverTerminated().set(false);// otherwise, solver.isStopCriterionMet() always returns true
-        for(Model m:models){
-            if(m.getResolutionPolicy()==ResolutionPolicy.MAXIMIZE){
-                assert m.getSolver().getBestSolutionValue().intValue()<=getBestModel().getSolver().getBestSolutionValue().intValue();
-            }else if(m.getResolutionPolicy()==ResolutionPolicy.MINIMIZE){
-                assert m.getSolver().getBestSolutionValue().intValue()>=getBestModel().getSolver().getBestSolutionValue().intValue();
+        if(models.get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION) {
+            int bestAll = getBestModel().getSolver().getBestSolutionValue().intValue();
+            for (Model m : models) {
+                int mVal = m.getSolver().getBestSolutionValue().intValue();
+                if (m.getResolutionPolicy() == ResolutionPolicy.MAXIMIZE) {
+                    assert mVal <= bestAll : mVal + " > " + bestAll;
+                } else if (m.getResolutionPolicy() == ResolutionPolicy.MINIMIZE) {
+                    assert mVal >= bestAll : mVal + " < " + bestAll;
+                }
             }
         }
         return getSolutionFound().get();
@@ -266,19 +274,24 @@ public class ParallelPortfolio {
             finder = m;
             getSolutionFound().set(true);
         }else{
+            int solverVal = ((IntVar)m.getObjective()).getValue();
             int bestVal = m.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
-            boolean bestSolver = ((IntVar)m.getObjective()).getValue() == bestVal;
-            if(bestSolver){
+            if(m.getResolutionPolicy()==ResolutionPolicy.MAXIMIZE){
+                assert solverVal<=bestVal:solverVal+">"+bestVal;
+            }else if(m.getResolutionPolicy()==ResolutionPolicy.MINIMIZE){
+                assert solverVal>=bestVal:solverVal+"<"+bestVal;
+            }
+            if(solverVal == bestVal){
                 getSolutionFound().set(true);
                 finder = m;
-            }
-            switch (m.getSolver().getObjectiveManager().getPolicy()) {
-                case MAXIMIZE:
-                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(bestVal));
-                    break;
-                case MINIMIZE:
-                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(bestVal));
-                    break;
+                switch (m.getSolver().getObjectiveManager().getPolicy()) {
+                    case MAXIMIZE:
+                        models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(bestVal));
+                        break;
+                    case MINIMIZE:
+                        models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(bestVal));
+                        break;
+                }
             }
         }
     }

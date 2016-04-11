@@ -76,7 +76,6 @@ public class PortFolioTest {
             Model finder = pares.getBestModel();
             System.out.println(sol);
             Assert.assertNotNull(finder);
-            finder.getSolver().printStatistics();
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
             System.gc();
         }
@@ -104,7 +103,7 @@ public class PortFolioTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testP2() {
         for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
@@ -119,9 +118,9 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testP3() {
-        for (int iter = 0; iter < 5000; iter++) {
+        for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio(false);
             for (int i = 0; i < 20; i++) {
@@ -136,11 +135,11 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testP3bug() {
-        for (int iter = 0; iter < 5000; iter++) {
+        for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
-            ParallelPortfolio pares = new ParallelPortfolio(true);
+            ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
                 Model m = knapsack();
                 m.getSolver().set(activityBasedSearch(m.retrieveIntVars(true)));
@@ -153,9 +152,43 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
+    public void testP3bug2() {
+        for (int iter = 0; iter < 500; iter++) {
+            System.out.println("ITERATION "+iter);
+            ParallelPortfolio pares = new ParallelPortfolio(false);
+            for (int i = 0; i < 20; i++) {
+                Model m = knapsack();
+                m.getSolver().set(inputOrderLBSearch(m.retrieveIntVars(true)));
+                pares.addModel(m);
+            }
+            while(pares.solve());
+            Model finder = pares.getBestModel();
+            Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);
+            System.gc();
+        }
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testP3bug3() {
+        for (int iter = 0; iter < 500; iter++) {
+            System.out.println("ITERATION "+iter);
+            ParallelPortfolio pares = new ParallelPortfolio();
+            for (int i = 0; i < 20; i++) {
+                Model m = knapsack();
+                m.getSolver().set(inputOrderLBSearch(m.retrieveIntVars(true)));
+                pares.addModel(m);
+            }
+            while(pares.solve());
+            Model finder = pares.getBestModel();
+            Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);
+            System.gc();
+        }
+    }
+
+    @Test(groups="10s", timeOut=60000)
     public void testP4() {
-        for (int iter = 0; iter < 5000; iter++) {
+        for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio();
             for(int w=0;w<10;w++) {
@@ -170,9 +203,9 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testP5() {
-        for (int iter = 0; iter < 5000; iter++) {
+        for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio(false);
             for (int i = 0; i < 10; i++) {
