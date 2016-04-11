@@ -160,8 +160,14 @@ public class Flatzinc extends RegParser {
     @Override
     public void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
-        for (int i = 0; i < nb_cores; i++) {
-            configureModel(i);
+        if(nb_cores == 1 && free){ // add last conflict
+            Solver solver = portfolio.getModels().get(0).getSolver();
+            solver.set(lastConflict(solver.getStrategy()));
+        }
+        if (tl_ > -1) {
+            for (int i = 0; i < nb_cores; i++) {
+                portfolio.getModels().get(i).getSolver().limitTime(tl);
+            }
         }
         listeners.forEach(ParserListener::afterConfiguringSearch);
     }
@@ -204,92 +210,5 @@ public class Flatzinc extends RegParser {
             }
         }
         return -1;
-    }
-
-    private void configureModel(int workerID) {
-
-        Model worker = portfolio.getModels().get(workerID);
-        Solver solver = worker.getSolver();
-        if (tl_ > -1) {
-            solver.limitTime(tl);
-        }
-        ResolutionPolicy policy = worker.getResolutionPolicy();
-
-        // compute decision variables
-        Variable[] varsX;
-        if (solver.getStrategy() != null && solver.getStrategy().getVariables().length > 0) {
-            varsX = solver.getStrategy().getVariables();
-        }else{
-            varsX = worker.getVars();
-        }
-        IntVar[] dvars = new IntVar[varsX.length];
-        int k = 0;
-        for (int j = 0; j < varsX.length; j++) {
-            if ((varsX[j].getTypeAndKind() & Variable.INT) > 0) {
-                dvars[k++] = (IntVar) varsX[j];
-            }
-        }
-        IntVar[] vars = Arrays.copyOf(dvars, k);
-
-        // set heuristic
-        switch (workerID) {
-            case 0:
-                // MZN Search + LC (if free)
-                if(free)solver.set(lastConflict(solver.getStrategy()));
-                break;
-            case 1:
-                // MZN Search + LC (if first thread is not free)
-                if(!free)solver.set(lastConflict(solver.getStrategy()));
-                break;
-            case 2:
-                // Choco default search
-                solver.set(intVarSearch(vars));
-                break;
-            case 3:
-                // Choco default search with restars and pglns
-                solver.set(intVarSearch(vars));
-                solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
-                // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
-                break;
-            case 4:
-                solver.set(lastConflict(activityBasedSearch(vars)));
-                solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
-                solver.setNoGoodRecordingFromRestarts();
-                break;
-            case 5:
-                solver.set(lastConflict(solver.getStrategy()));
-                solver.setCBJLearning(false,false);
-                break;
-            case 6:
-                switch (policy) {
-                    case SATISFACTION: {
-                        solver.set(lastConflict(activityBasedSearch(vars)));
-                        solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
-                        solver.setNoGoodRecordingFromRestarts();
-                    }
-                    break;
-                    default: {
-                        solver.set(lastConflict(solver.getStrategy()));
-                        // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
-                    }
-                    break;
-                }
-                break;
-            case 7:
-                switch (policy) {
-                    case SATISFACTION: {
-                        solver.set(lastConflict(activityBasedSearch(vars)));
-                        solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
-                        solver.setNoGoodRecordingFromRestarts();
-                    }
-                    break;
-                    default: {
-                        solver.set(lastConflict(solver.getStrategy()));
-                        // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
-                    }
-                    break;
-                }
-                break;
-        }
     }
 }
