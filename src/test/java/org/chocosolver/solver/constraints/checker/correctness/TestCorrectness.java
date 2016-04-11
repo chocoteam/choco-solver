@@ -288,6 +288,7 @@ public class TestCorrectness {
             }
         }
     }
+
     @Test(groups="10s", timeOut=60000)
     public void testIncrementalCumulative() {
         CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * 32 + 1, 1, 32, 1368003588936l, true);
@@ -296,25 +297,6 @@ public class TestCorrectness {
             for (int n = 2; n < 25; n += 5) {
                 long seed = i;//System.currentTimeMillis();
                 CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * n + 1, 1, n, seed, true);
-            }
-        }
-    }
-    @Test(groups="10s", timeOut=60000)
-    public void testTTEFCumulative() {
-        CorrectnessChecker.checkCorrectness(Modeler.modelTTEFCumulative, 4 * 7 + 1, 1, 7, 29, true);
-        CorrectnessChecker.checkCorrectness(Modeler.modelTTEFCumulative, 4 * 32 + 1, 1, 32, 1368003588936l, true);
-        for (int i = 0; i < 6; i++) {
-            for (int n = 2; n < 25; n += 5) {
-                long seed = i;//System.currentTimeMillis();
-                CorrectnessChecker.checkCorrectness(Modeler.modelTTEFCumulative, 4 * n + 1, 1, n, seed, true);
-            }
-        }
-        CorrectnessChecker.checkCorrectness(Modeler.modelTTEFCumulative, 4 * 32 + 1, 1, 32, 1368003588936l, false);
-        CorrectnessChecker.checkCorrectness(Modeler.modelTTEFCumulative, 4 * 7 + 1, 1, 7, 29, false);
-        for (int i = 0; i < 6; i++) {
-            for (int n = 2; n < 25; n += 5) {
-                long seed = i;//System.currentTimeMillis();
-                CorrectnessChecker.checkCorrectness(Modeler.modelTTEFCumulative, 4 * n + 1, 1, n, seed, false);
             }
         }
     }

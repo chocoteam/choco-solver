@@ -163,16 +163,6 @@ public class Cumulative extends Constraint {
 			}
 		},
 		/**
-		 * TimeTableEdgeFinding algorithm
-		 * not idempotent
-		 * not enough to ensure correctness (only an additional filtering)
-		 */
-		TTEF {
-			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new TTEFCumulFilter(n,cause);
-			}
-		},
-		/**
 		 * energetic reasoning to filter disjunctive constraint
 		 * Only propagated on variable subsets of size < 30
 		 * not idempotent

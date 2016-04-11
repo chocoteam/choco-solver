@@ -44,7 +44,7 @@ public class DefaultCumulFilter extends CumulFilter {
 	// VARIABLES
 	//***********************************************************************************
 
-	private CumulFilter time, sweep, nrj, heights, disjTaskInter, ttef;
+	private CumulFilter time, sweep, nrj, heights, disjTaskInter;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -102,11 +102,6 @@ public class DefaultCumulFilter extends CumulFilter {
 	private CumulFilter getHeights() {
 		if(heights==null)heights = Cumulative.Filter.HEIGHTS.make(nbMaxTasks,aCause);
 		return heights;
-	}
-
-	private CumulFilter getTTEF() {
-		if(ttef==null)ttef = Cumulative.Filter.TTEF.make(nbMaxTasks,aCause);
-		return ttef;
 	}
 
 	private CumulFilter getDisjTaskInter() {
