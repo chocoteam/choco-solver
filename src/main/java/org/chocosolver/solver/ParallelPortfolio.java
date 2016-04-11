@@ -42,6 +42,8 @@ import org.chocosolver.util.criteria.Criterion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
@@ -198,16 +200,22 @@ public class ParallelPortfolio {
         if (!isPrepared) {
             prepare();
         }
-        // TODO 1 : use forkJoinPool so that we have one thread for each model
-        // (parallel streams limits to the number of cores, which is bad here)
-        models.parallelStream().forEach(m -> {
-            if(!getSolverTerminated().get()) {
-                boolean so = m.solve();
-                if(so && finder == m || !so) {
-                    getSolverTerminated().set(true);
-                }
-            }
-        });
+        ForkJoinPool forkJoinPool = new ForkJoinPool(models.size());
+        try {
+            forkJoinPool.submit(() -> {
+                models.parallelStream().forEach(m -> {
+                    if (!getSolverTerminated().get()) {
+                        boolean so = m.solve();
+                        if (so && finder == m || !so) {
+                            getSolverTerminated().set(true);
+                        }
+                    }
+                });
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        forkJoinPool.shutdownNow();
         getSolverTerminated().set(false);// otherwise, solver.isStopCriterionMet() always returns true
         if(models.get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION) {
             int bestAll = getBestModel().getSolver().getBestSolutionValue().intValue();

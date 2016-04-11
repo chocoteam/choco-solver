@@ -60,7 +60,7 @@ public class PortFolioTest {
         System.gc();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testParBug() {
         for (int iter = 0; iter < 50; iter++) {
             ParallelPortfolio pares = new ParallelPortfolio();
@@ -81,7 +81,7 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="1s", timeOut=10000)
+    @Test(groups="1s", timeOut=60000)
     public void testParWait() {
         ParallelPortfolio pares = new ParallelPortfolio();
         // good solver
@@ -103,7 +103,7 @@ public class PortFolioTest {
     }
 
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testP2() {
         for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
@@ -118,7 +118,7 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testP3() {
         for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
@@ -135,7 +135,7 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testP3bug() {
         for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
@@ -152,7 +152,7 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testP3bug2() {
         for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
@@ -169,7 +169,7 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testP3bug3() {
         for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
@@ -186,7 +186,7 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testP4() {
         for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
@@ -203,7 +203,7 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="5m", timeOut=300000)
     public void testP5() {
         for (int iter = 0; iter < 500; iter++) {
             System.out.println("ITERATION "+iter);
