@@ -104,10 +104,15 @@ public class PropMin extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         int lb = vars[n].getLB();
+        int minLb = vars[0].getLB();
         for (int i = 0; i < n; i++) {
+            minLb = Math.min(minLb,vars[i].getLB());
             if (vars[i].getUB() < lb) {
                 return ESat.FALSE;
             }
+        }
+        if(minLb>vars[n].getUB()){
+            return ESat.FALSE;
         }
         for (int i = 0; i < n; i++) {
             if (vars[i].getLB() < lb) {
@@ -135,7 +140,5 @@ public class PropMin extends Propagator<IntVar> {
         }
         sb.append("})");
         return sb.toString();
-
     }
-
 }

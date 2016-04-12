@@ -1252,7 +1252,7 @@ public interface IIntConstraintFactory {
 	 * max is the maximum value of the collection of domain variables vars
 	 *
 	 * @param max  a variable
-	 * @param vars a vector of variables
+	 * @param vars a vector of variables, of size > 0
 	 */
 	default Constraint max(IntVar max, IntVar[] vars) {
 		return new Constraint("Max", new PropMax(vars, max));
@@ -1263,7 +1263,7 @@ public interface IIntConstraintFactory {
 	 * max is the maximum value of the collection of boolean variables vars
 	 *
 	 * @param max  a boolean variable
-	 * @param vars a vector of boolean variables
+	 * @param vars a vector of boolean variables, of size > 0
 	 */
 	default Constraint max(BoolVar max, BoolVar[] vars) {
 		return new Constraint("MinOverBools", new PropBoolMax(vars, max));
@@ -1285,7 +1285,7 @@ public interface IIntConstraintFactory {
 	 * min is the minimum value of the collection of domain variables vars
 	 *
 	 * @param min  a variable
-	 * @param vars a vector of variables
+	 * @param vars a vector of variables, of size > 0
 	 */
 	default Constraint min(IntVar min, IntVar[] vars) {
 		return new Constraint("Min", new PropMin(vars, min));
@@ -1296,7 +1296,7 @@ public interface IIntConstraintFactory {
 	 * min is the minimum value of the collection of boolean variables vars
 	 *
 	 * @param min  a boolean variable
-	 * @param vars a vector of boolean variables
+	 * @param vars a vector of boolean variables, of size > 0
 	 */
 	default Constraint min(BoolVar min, BoolVar[] vars) {
 		return new Constraint("MinOverBools", new PropBoolMin(vars, min));

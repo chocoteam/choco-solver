@@ -67,7 +67,8 @@ public class PropBoolMin extends Propagator<BoolVar> {
                     x2 = i;
                 }
             } else if (vars[i].getValue() == 0) {
-                if (vars[n].instantiateTo(0, this)) {
+                vars[n].instantiateTo(0, this);
+                if (vars[n].isInstantiatedTo(0)) {
                     setPassive();
                     return;
                 }
@@ -81,7 +82,8 @@ public class PropBoolMin extends Propagator<BoolVar> {
             filter();
         } else {
             if (vars[idxVarInProp].isInstantiatedTo(0)) {
-                if (vars[n].instantiateTo(0, this)) {
+                vars[n].instantiateTo(0, this);
+                if (vars[n].isInstantiatedTo(0)) {
                     setPassive();
                 }
             } else if (idxVarInProp == x1 || idxVarInProp == x2) {
@@ -102,18 +104,18 @@ public class PropBoolMin extends Propagator<BoolVar> {
 
     public void filter() throws ContradictionException {
         if (x1 == -1) {
-            if (vars[n].instantiateTo(1, this)) {
+            vars[n].instantiateTo(1, this);
+            if (vars[n].isInstantiatedTo(1)) {
                 setPassive();
                 return;
             }
-        }
-        if (x2 == -1 && vars[n].isInstantiatedTo(0)) {
-            if (vars[x1].instantiateTo(0, this)) {
+        }else if (x2 == -1 && vars[n].isInstantiatedTo(0)) {
+            vars[x1].instantiateTo(0, this);
+            if (vars[x1].isInstantiatedTo(0)) {
                 setPassive();
                 return;
             }
-        }
-        if (vars[n].isInstantiatedTo(1)) {
+        }else if (vars[n].isInstantiatedTo(1)) {
             for (int i = 0; i < n; i++) {
                 vars[i].instantiateTo(1, this);
             }
@@ -154,7 +156,5 @@ public class PropBoolMin extends Propagator<BoolVar> {
         }
         sb.append("})");
         return sb.toString();
-
     }
-
 }

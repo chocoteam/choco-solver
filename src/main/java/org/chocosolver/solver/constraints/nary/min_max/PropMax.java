@@ -104,10 +104,15 @@ public class PropMax extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         int ub = vars[n].getUB();
+        int maxUb = vars[0].getUB();
         for (int i = 0; i < n; i++) {
+            maxUb = Math.max(maxUb,vars[i].getUB());
             if (vars[i].getLB() > ub) {
                 return ESat.FALSE;
             }
+        }
+        if(maxUb<vars[n].getLB()){
+            return ESat.FALSE;
         }
         for (int i = 0; i < n; i++) {
             if (vars[i].getUB() > ub) {
@@ -135,7 +140,5 @@ public class PropMax extends Propagator<IntVar> {
         }
         sb.append("})");
         return sb.toString();
-
     }
-
 }
