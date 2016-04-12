@@ -515,30 +515,25 @@ public interface IIntConstraintFactory {
 	}
 
 	/**
-	 * Creates an allDifferent constraint holding on the subset of vars that satisfies the given condition
+	 * Creates an allDifferent constraint subject to the given condition. More precisely:
+	 *
+	 * IF <code>singleCondition</code>
+	 * 	for all X,Y in vars, condition(X) => X != Y
+	 * ELSE
+	 * 	for all X,Y in vars, condition(X) AND condition(Y) => X != Y
 	 *
 	 * @param vars      collection of variables
 	 * @param condition condition defining which variables should be constrained
-	 * @param ac        specifies is AC filtering should be established
+	 * @param singleCondition specifies how to apply filtering
 	 */
-	default Constraint allDifferentUnderCondition(IntVar[] vars, Condition condition, boolean ac) {
-		if (ac) {
+	default Constraint allDifferentUnderCondition(IntVar[] vars, Condition condition, boolean singleCondition) {
+		if (singleCondition) {
 			return new Constraint("AllDifferent" + condition,
-					new PropCondAllDiffInst(vars, condition),
+					new PropCondAllDiffInst(vars, condition, singleCondition),
 					new PropCondAllDiff_AC(vars, condition)
 			);
 		}
-		return new Constraint("AllDifferent" + condition, new PropCondAllDiffInst(vars, condition));
-	}
-
-	/**
-	 * Creates an allDifferent constraint holding on the subset of vars that satisfies the given condition
-	 *
-	 * @param vars      collection of variables
-	 * @param condition condition defining which variables should be constrained
-	 */
-	default Constraint allDifferentUnderCondition(IntVar[] vars, Condition condition) {
-		return allDifferentUnderCondition(vars, condition, false);
+		return new Constraint("AllDifferent" + condition, new PropCondAllDiffInst(vars, condition, singleCondition));
 	}
 
 	/**
@@ -548,7 +543,7 @@ public interface IIntConstraintFactory {
 	 * @param vars collection of variables
 	 */
 	default Constraint allDifferentExcept0(IntVar[] vars) {
-		return allDifferentUnderCondition(vars, Condition.EXCEPT_0);
+		return allDifferentUnderCondition(vars, Condition.EXCEPT_0, true);
 	}
 
 	/**

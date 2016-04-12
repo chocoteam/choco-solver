@@ -42,6 +42,7 @@ import org.chocosolver.util.ESat;
 public class PropCondAllDiffInst extends PropAllDiffInst {
 
 	protected Condition condition;
+	private boolean mode;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -50,13 +51,20 @@ public class PropCondAllDiffInst extends PropAllDiffInst {
     /**
      * ConditionnalAllDifferent constraint for integer variables
      * enables to control the cardinality of the matching
+	 *
+	 * IF mode
+	 * 	for all X in vars, condition(X) => X != Y, for all Y in vars
+	 * ELSE
+	 * 	for all X,Y in vars, condition(X) AND condition(Y) => X != Y
      *
      * @param variables array of integer variables
 	 * @param c a condition to define the subset of variables subject to the AllDiff cstr
+	 * @param mode defines how to apply filtering
      */
-    public PropCondAllDiffInst(IntVar[] variables, Condition c) {
+    public PropCondAllDiffInst(IntVar[] variables, Condition c, boolean mode) {
         super(variables);
 		this.condition = c;
+		this.mode = mode;
     }
 
     //***********************************************************************************
@@ -64,27 +72,20 @@ public class PropCondAllDiffInst extends PropAllDiffInst {
     //***********************************************************************************
 
 	protected void fixpoint() throws ContradictionException {
-		try {
-			while (toCheck.size() > 0) {
-				int vidx = toCheck.pop();
-				if(condition.holdOnVar(vars[vidx])){
-					int val = vars[vidx].getValue();
-					for (int i = 0; i < n; i++) {
-						if (i != vidx) {
-							if(condition.holdOnVar(vars[i])) {
-								if (vars[i].removeValue(val, this)) {
-									if (vars[i].isInstantiated()) {
-										toCheck.push(i);
-									}
-								}
+		while (toCheck.size() > 0) {
+			int vidx = toCheck.pop();
+			if(condition.holdOnVar(vars[vidx])){
+				int val = vars[vidx].getValue();
+				for (int i = 0; i < n; i++) {
+					if (i != vidx && (mode || condition.holdOnVar(vars[i]))) {
+						if (vars[i].removeValue(val, this)) {
+							if (vars[i].isInstantiated()) {
+								toCheck.push(i);
 							}
 						}
 					}
 				}
 			}
-		} catch (ContradictionException cex) {
-			toCheck.clear();
-			throw cex;
 		}
 	}
 

@@ -243,7 +243,7 @@ public class IntConstraintExamples {
         Model model = new Model();
         IntVar[] XS = model.intVarArray("XS", 5, 0, 3, false);
         model.allDifferentUnderCondition(XS,
-                x -> !x.contains(1) && !x.contains(3)).post();
+                x -> !x.contains(1) && !x.contains(3), true).post();
         model.getSolver().showSolutions();
         while (model.solve()) ;
     }
