@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
@@ -46,11 +45,7 @@ public enum Reporting {
     ;
 
     public static String onDecisions(Model model) {
-        Solver solver = model.getSolver();
-        StringBuilder sb = new StringBuilder();
-        sb.append(solver.getDecisionPath().toString());
-        sb.append("\n").append(model.getSolver().getObjectiveManager().toString());
-        return sb.toString();
+        return model.getSolver().getDecisionPath().toString() +"\n"+ model.getSolver().getObjectiveManager().toString();
     }
 
     public static String onUninstiatedVariables(Model model) {
