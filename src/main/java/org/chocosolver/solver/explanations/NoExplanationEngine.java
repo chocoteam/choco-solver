@@ -35,7 +35,6 @@ package org.chocosolver.solver.explanations;
  * <br/>
  * @author Charles Prud'homme
  * @since 22/03/2016
- * @version
  */
 public enum NoExplanationEngine implements IExplanationEngine{
     SINGLETON
