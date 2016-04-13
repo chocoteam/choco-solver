@@ -61,7 +61,7 @@ public class ParetoFront {
 		model.arithm(a, "+", b, "=", c).post();
 
 		// create an object that will store the best solutions and remove dominated ones
-		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b});
+		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b},model.retrieveIntVars(true));
 		model.getSolver().plugMonitor(po);
 
 		// optimization
