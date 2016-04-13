@@ -100,16 +100,13 @@ public class AlgoAllDiffBC {
         },;
     }
 
-    public boolean filter() throws ContradictionException {
-        boolean filter = false;
+    public void filter() throws ContradictionException {
         boolean again;
         do {
             sortIt();
             again = filterLower();
             again |= filterUpper();
-            filter |= again;
         } while (again);
-        return filter;
     }
 
     private void sortIt() {

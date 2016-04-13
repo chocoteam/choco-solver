@@ -107,13 +107,11 @@ public class PropBoolMax extends Propagator<BoolVar> {
             vars[n].instantiateTo(0, this);
             if (vars[n].isInstantiatedTo(0)) {
                 setPassive();
-                return;
             }
         }else if (x2 == -1 && vars[n].isInstantiatedTo(1)) {
             vars[x1].instantiateTo(1, this);
             if (vars[x1].isInstantiatedTo(1)) {
                 setPassive();
-                return;
             }
         }else if (vars[n].isInstantiatedTo(0)) {
             for (int i = 0; i < n; i++) {

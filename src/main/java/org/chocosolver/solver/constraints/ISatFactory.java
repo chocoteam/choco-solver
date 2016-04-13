@@ -477,14 +477,11 @@ public interface ISatFactory extends ISelf<Model> {
     }
 
     /**
-     * Make an constructive disjunction constraint
+     * Posts a constructive disjunction constraint
      *
      * @param BOOLS an array of boolean variable
-     * @return <tt>true</tt> if the disjunction has been added to the constructive disjunction store.
      */
-    default boolean addConstructiveDisjunction(BoolVar... BOOLS) {
-        PropConDis condis = _me().getConDisStore().getPropCondis();
-        condis.addDisjunction(BOOLS);
-        return true;
+    default void addConstructiveDisjunction(BoolVar... BOOLS) {
+        _me().getConDisStore().getPropCondis().addDisjunction(BOOLS);
     }
 }

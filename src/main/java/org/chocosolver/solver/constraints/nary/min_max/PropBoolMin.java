@@ -107,13 +107,11 @@ public class PropBoolMin extends Propagator<BoolVar> {
             vars[n].instantiateTo(1, this);
             if (vars[n].isInstantiatedTo(1)) {
                 setPassive();
-                return;
             }
         }else if (x2 == -1 && vars[n].isInstantiatedTo(0)) {
             vars[x1].instantiateTo(0, this);
             if (vars[x1].isInstantiatedTo(0)) {
                 setPassive();
-                return;
             }
         }else if (vars[n].isInstantiatedTo(1)) {
             for (int i = 0; i < n; i++) {
