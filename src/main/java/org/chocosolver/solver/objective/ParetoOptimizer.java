@@ -39,6 +39,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,9 +96,7 @@ public class ParetoOptimizer implements IMonitorSolution {
      */
     public ParetoOptimizer(final ResolutionPolicy policy, final IntVar[] objectives, Variable... otherVariablesToStore) {
         HashSet<Variable> vrs = new HashSet<>();
-        for(Variable v: ArrayUtils.append(otherVariablesToStore,objectives)){
-            vrs.add(v);
-        }
+        Collections.addAll(vrs, ArrayUtils.append(otherVariablesToStore, objectives));
         this.variablesToStore = vrs.toArray(new Variable[vrs.size()]);
         this.paretoFront = new LinkedList<>();
         this.objectives = objectives.clone();
