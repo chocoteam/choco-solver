@@ -40,7 +40,6 @@ public interface IPropagateFactory extends ISelf<Solver> {
 
 	/**
      * Creates a basic Propagate object to handle constraint propagation
-     * @return a basic Propagate object to handle constraint propagation
      */
     default void setStandardPropagation(){
         _me().set(new PropagateBasic());
