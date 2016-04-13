@@ -99,11 +99,6 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
      */
     boolean stop = false;
 
-    /**
-     * @param aModel
-     * @param move
-     * @param tabuListSize
-     */
     private MoveLearnBinaryTDR(Model aModel, Move move, int tabuListSize) {
         super(aModel, false, false);
         this.move = move;
