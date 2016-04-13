@@ -76,6 +76,6 @@ public class GlobalCardinality extends Constraint {
             }
             cstrs.add(model.sum(bs, "=", card[i]));
         }
-        return Constraint.merge("reformulatedGCC",cstrs.toArray(new Constraint[0]));
+        return Constraint.merge("reformulatedGCC", cstrs.toArray(new Constraint[cstrs.size()]));
     }
 }
