@@ -90,11 +90,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     private final ContradictionException exception;
 
     /**
-     * Structure which manages backtrackable objects.
-     */
-    private final IEnvironment environment;
-
-    /**
      * List of propagators.
      */
     private Propagator[] propagators;
@@ -207,7 +202,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
      */
     public TwoBucketPropagationEngine(Model model) {
         this.exception = new ContradictionException();
-        this.environment = model.getEnvironment();
         this.trigger = new PropagationTrigger(this, model);
         this.idemStrat = model.getSettings().getIdempotencyStrategy();
         this.model = model;

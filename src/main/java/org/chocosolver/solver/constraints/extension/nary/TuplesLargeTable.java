@@ -47,29 +47,30 @@ public class TuplesLargeTable extends LargeRelation {
     /**
      * the number of dimensions of the considered tuples
      */
-    protected final int n;
+    private final int n;
+
     /**
      * The consistency matrix
      */
-    protected final TIntObjectHashMap<TIntSet> tables;
+    private final TIntObjectHashMap<TIntSet> tables;
 
     /**
      * lower bound of each variable
      */
-    protected final int[] lowerbounds;
+    private final int[] lowerbounds;
 
     /**
      * upper bound of each variable
      */
-    protected final int[] upperbounds;
+    private final int[] upperbounds;
 
-    protected final boolean feasible;
+    private final boolean feasible;
 
     /**
      * in order to speed up the computation of the index of a tuple
      * in the table, blocks[i] stores the product of the size of variables j with j < i.
      */
-    protected long[] blocks;
+    private long[] blocks;
 
     public TuplesLargeTable(Tuples tuples, IntVar[] vars) {
         n = vars.length;
@@ -101,15 +102,6 @@ public class TuplesLargeTable extends LargeRelation {
         }
     }
 
-    private TuplesLargeTable(int n, TIntObjectHashMap<TIntSet> tables, int[] lowerbounds, int[] upperbounds, boolean feasible, long[] blocks) {
-        this.n = n;
-        this.tables = tables;
-        this.lowerbounds = lowerbounds;
-        this.upperbounds = upperbounds;
-        this.feasible = feasible;
-        this.blocks = blocks;
-    }
-
     public boolean checkTuple(int[] tuple) {
         long address = 0;
         for (int i = (n - 1); i >= 0; i--) {
@@ -128,7 +120,7 @@ public class TuplesLargeTable extends LargeRelation {
         return checkTuple(tuple) == feasible;
     }
 
-    void setTuple(int[] tuple) {
+    private void setTuple(int[] tuple) {
         long address = 0;
         for (int i = (n - 1); i >= 0; i--) {
             address += (tuple[i] - lowerbounds[i]) * blocks[i];

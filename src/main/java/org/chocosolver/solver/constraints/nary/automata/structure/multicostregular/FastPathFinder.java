@@ -49,30 +49,27 @@ import java.util.Arrays;
  */
 public class FastPathFinder {
 
-    StoredDirectedMultiGraph graph;
+    private StoredDirectedMultiGraph graph;
 
-    int[] sp;
-    int[] lp;
+    private int[] sp;
 
-    int nbLayer;
-    int nbR;
+    private int nbLayer;
+    private int nbR;
 
     public double[][] spfs;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
     public double[][] spft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
-    double[][] lpfs;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
-    double[][] lpft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
-    boolean[] modified = new boolean[2];
+    private double[][] lpfs;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
+    private double[][] lpft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
+    private boolean[] modified = new boolean[2];
 
-    int[][] prevSP;
-    int[][] nextSP;
-    int[][] prevLP;
-    int[][] nextLP;
-
+    private int[][] prevSP;
+    private int[][] nextSP;
+    private int[][] prevLP;
+    private int[][] nextLP;
 
     public FastPathFinder(StoredDirectedMultiGraph graph) {
         this.graph = graph;
         this.sp = new int[graph.layers.length - 1];
-        this.lp = new int[graph.layers.length - 1];
         this.nbLayer = graph.layers.length - 1;
         this.nbR = this.graph.nbR - 1;
         this.tmpU = new double[nbR];
@@ -84,8 +81,6 @@ public class FastPathFinder {
         nextSP = this.graph.GNodes.nextSPI;
         prevLP = this.graph.GNodes.prevLPI;
         nextLP = this.graph.GNodes.nextLPI;
-
-
     }
 
     private double getCost(int e, int resource, double[] u, boolean lagrange, boolean max) {
@@ -570,13 +565,5 @@ public class FastPathFinder {
         }
 
         return modified;
-    }
-
-    private static double[] addArray(double[] spf, double[] cost) {
-        double[] out = new double[spf.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = spf[i] + cost[i];
-        }
-        return out;
     }
 }

@@ -54,7 +54,7 @@ import java.util.Set;
  */
 public class StoredDirectedMultiGraph {
 
-    int[] starts;
+    private int[] starts;
     public int[] offsets;
 
     public int sourceIndex;
@@ -62,9 +62,9 @@ public class StoredDirectedMultiGraph {
     public int nbR;
 
 
-    StoredIndexedBipartiteSetWithOffset[] supports;
+    private StoredIndexedBipartiteSetWithOffset[] supports;
     public StoredIndexedBipartiteSetWithOffset[] layers;
-    FastPathFinder pf;
+    private FastPathFinder pf;
     public BitSet inStack;
     private IntVar[] z;
 
@@ -649,6 +649,4 @@ public class StoredDirectedMultiGraph {
         }
         return result;
     }
-
-
 }

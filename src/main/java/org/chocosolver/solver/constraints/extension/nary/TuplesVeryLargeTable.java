@@ -82,15 +82,6 @@ public class TuplesVeryLargeTable extends LargeRelation {
         }
     }
 
-
-    public TuplesVeryLargeTable(int n, int[] lowerbounds, int[] upperbounds, boolean feasible, TIntObjectHashMap<TIntObjectHashMap> supports) {
-        this.n = n;
-        this.lowerbounds = lowerbounds;
-        this.upperbounds = upperbounds;
-        this.feasible = feasible;
-        this.supports = supports;
-    }
-
     public boolean checkTuple(int[] tuple) {
         TIntObjectHashMap<TIntObjectHashMap> current = supports;
         int i = 0;
@@ -109,7 +100,7 @@ public class TuplesVeryLargeTable extends LargeRelation {
     }
 
     @SuppressWarnings("unchecked")
-    void setTuple(int[] tuple) {
+    private void setTuple(int[] tuple) {
         TIntObjectHashMap<TIntObjectHashMap> current = supports;
         for (int i = 0; i < tuple.length; i++) {
             TIntObjectHashMap<TIntObjectHashMap> _current = current.get(tuple[i]);
@@ -118,15 +109,6 @@ public class TuplesVeryLargeTable extends LargeRelation {
                 current.put(tuple[i], _current);
             }
             current = _current;
-        }
-    }
-
-
-    private void deepCopy(TIntObjectHashMap<TIntObjectHashMap> from, TIntObjectHashMap<TIntObjectHashMap> to) {
-        for (int k : from.keys()) {
-            TIntObjectHashMap<TIntObjectHashMap> _to = new TIntObjectHashMap<>();
-            to.put(k, _to);
-            deepCopy(from.get(k), _to);
         }
     }
 }

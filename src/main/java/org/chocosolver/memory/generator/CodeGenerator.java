@@ -177,7 +177,7 @@ public class CodeGenerator {
 
         file_name = file_name.replaceAll("\\.template", ".java");
 
-        File output_file = new File(output_directory, file_name);
+//        File output_file = new File(output_directory, file_name);
 
         // See what kind of template markers it's using, either e or k/v. No marker
         // indicates a replication-only class.

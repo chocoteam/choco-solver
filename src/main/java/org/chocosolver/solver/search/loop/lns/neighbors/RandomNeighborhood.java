@@ -60,10 +60,6 @@ public class RandomNeighborhood implements INeighbor {
      */
     protected final int[] bestSolution;
     /**
-     * Before last solution found, wrt {@link #vars}
-     */
-    private final int[] previous;
-    /**
      * For randomness
      */
     private Random rd;
@@ -74,15 +70,15 @@ public class RandomNeighborhood implements INeighbor {
     /**
      * Number of times this neighbor is called
      */
-    int nbCall;
+    protected int nbCall;
     /**
      * Next time the level should be increased
      */
-    int limit;
+    protected int limit;
     /**
      * Relaxing factor
      */
-    final int level;
+    protected final int level;
     /**
      * Indicate which variables are selected to be part of the fragment
      */
@@ -90,7 +86,7 @@ public class RandomNeighborhood implements INeighbor {
     /**
      * Reference to the model
      */
-    Model mModel;
+    protected Model mModel;
 
     /**
      * Create a neighbor for LNS which randomly selects variable to be part of a fragment
@@ -106,13 +102,11 @@ public class RandomNeighborhood implements INeighbor {
 
         this.rd = new Random(seed);
         this.bestSolution = new int[n];
-        this.previous = new int[n];
         this.fragment = new BitSet(n);
     }
 
     @Override
-    public void init() {
-    }
+    public void init() {}
 
     @Override
     public boolean isSearchComplete() {
@@ -122,7 +116,6 @@ public class RandomNeighborhood implements INeighbor {
     @Override
     public void recordSolution() {
         for (int i = 0; i < vars.length; i++) {
-            previous[i] = bestSolution[i];
             bestSolution[i] = vars[i].getValue();
         }
         nbFixedVariables = 2. * n / 3. + 1;
