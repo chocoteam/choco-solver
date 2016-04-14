@@ -131,16 +131,6 @@ public class Ibex {
     private native void add_ctr(int nb_var, String syntax, int option);
 
     /**
-     * Constraint nb_var variables to be integer variables.
-     *
-     * @param nb_var - Number of variables
-     *               /////@param mask   - Set whether a variable is integral or not.
-     *               /////                mask[i]==true <=> the ith variable is integral.
-     */
-    private native void add_int_ctr(int nb_var);
-
-
-    /**
      * Call the contractor associated to a constraint or its negation.
      * <p/>
      * We consider here the reified constraint R(b,c) : b<=>c(x_1,...,x_n).
