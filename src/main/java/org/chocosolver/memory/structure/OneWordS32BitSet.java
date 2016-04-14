@@ -174,7 +174,6 @@ public class OneWordS32BitSet implements IStateBitSet {
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
         word.set(word.get() | (1 << bitIndex)); // Restores invariants
-        //checkInvariants();
     }
 
     /**
@@ -214,7 +213,6 @@ public class OneWordS32BitSet implements IStateBitSet {
         int firstWordMask = WORD_MASK << fromIndex;
         int lastWordMask = WORD_MASK >>> -toIndex;
         word.set(word.get() | (firstWordMask & lastWordMask));
-        //checkInvariants();
     }
 
     /**
@@ -230,7 +228,6 @@ public class OneWordS32BitSet implements IStateBitSet {
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
         word.set(word.get() & ~(1 << bitIndex));
-        //checkInvariants();
     }
 
     /**
@@ -254,7 +251,6 @@ public class OneWordS32BitSet implements IStateBitSet {
         int firstWordMask = WORD_MASK << fromIndex;
         int lastWordMask = WORD_MASK >>> -toIndex;
         word.set(word.get() & ~(firstWordMask & lastWordMask));
-        //checkInvariants();
     }
 
     /**
@@ -279,10 +275,6 @@ public class OneWordS32BitSet implements IStateBitSet {
      */
     @Override
     final public boolean get(final int bitIndex) {
-        //if (bitIndex < 0)
-        //    throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
-        //checkInvariants();
         return bitIndex < 32 && ((word.get() & (1 << bitIndex)) != 0);
     }
 
@@ -563,27 +555,19 @@ public class OneWordS32BitSet implements IStateBitSet {
 
         OneWordS32BitSet set = (OneWordS32BitSet) obj;
 
-        //checkInvariants();
-        //set.checkInvariants();
-
         // Check word in use by both BitSets
         return word == set.word;
     }
 
     @Override
     public IStateBitSet copy() {
-        //if (!sizeIsSticky.get()) trimToSize();
         OneWordS32BitSet result = new OneWordS32BitSet(environment, this.size());
-        //result.sizeIsSticky.set(sizeIsSticky.get());
         result.word.set(word.get());
-        //result.checkInvariants();
         return result;
     }
 
     @Override
     public String toString() {
-        //checkInvariants();
-
         int numBits = BITS_PER_WORD;
         StringBuilder b = new StringBuilder(6 * numBits + 2);
         b.append('{');
