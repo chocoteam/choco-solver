@@ -52,11 +52,11 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     /**
      * Forbidden values
      */
-    final TIntHashSet values;
+    private final TIntHashSet values;
     /**
      * Set of values to remove (needed for domain operations)
      */
-    final IntIterableBitSet vrms;
+    private final IntIterableBitSet vrms;
 
     /**
      * A propagator which forbids <i>values</i> from <i>var</i> domain
@@ -92,11 +92,6 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
                 setPassive();
             }
         }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override

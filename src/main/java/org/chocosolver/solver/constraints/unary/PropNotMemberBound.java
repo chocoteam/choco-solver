@@ -45,11 +45,11 @@ import org.chocosolver.util.ESat;
  */
 public class PropNotMemberBound extends Propagator<IntVar> {
 
-    final int lb, ub;
+    private final int lb, ub;
 
 
     public PropNotMemberBound(IntVar var, int lb, int ub) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.lb = lb;
         this.ub = ub;
     }
@@ -60,11 +60,6 @@ public class PropNotMemberBound extends Propagator<IntVar> {
                 || vars[0].getUB() < lb || vars[0].getLB() > ub) {
             this.setPassive();
         }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override
