@@ -50,12 +50,15 @@ import org.chocosolver.solver.variables.Variable;
  */
 public final class ContradictionException extends Exception {
 
-    public ICause c = Cause.Null;
-    public Variable v = null;
+    public ICause c;
+    public Variable v;
     public String s;
 
     public ContradictionException() {
-//        super();
+//        does not call super() on purpose
+        c = Cause.Null;
+        v = null;
+        s = null;
     }
 
     /**

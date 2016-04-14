@@ -206,16 +206,6 @@ public class PropConDis extends Propagator<BoolVar> {
         }
     }
 
-    private boolean zeros(BoolVar[] disjunction) {
-        int zero = 0;
-        for (int b = 0; b < disjunction.length; b++) {
-            if (disjunction[b].isInstantiatedTo(0)) {
-                zero++;
-            }
-        }
-        return zero < disjunction.length;
-    }
-
     /**
      * Based on deductions made before, filters domain of variables.
      *
