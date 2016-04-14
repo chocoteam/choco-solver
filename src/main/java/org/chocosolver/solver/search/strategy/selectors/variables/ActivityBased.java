@@ -69,9 +69,9 @@ import static java.lang.Integer.MAX_VALUE;
 public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart, IMonitorInitialize,
         IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
 
-    static final double ONE = 1.0f;
+    private static final double ONE = 1.0f;
 
-    static final double[] distribution = new double[]{// two-sided 95%
+    private static final double[] distribution = new double[]{// two-sided 95%
             999.99d,
             12.706f, 4.303f, 3.182f, 2.776f, 2.571f, // 1...5
             2.447f, 2.365f, 2.306f, 2.262f, 2.228f,  // 6...10
@@ -117,35 +117,35 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     //////////////////////////////
     //////////////////////////////
 
-    final Model model;
-    final IntMap v2i;
-    final IntVar[] vars;
+    private final Model model;
+    private final IntMap v2i;
+    private final IntVar[] vars;
 
-    final double[] A; // activity of all variables
-    final double[] mA; // the mean -- maintained incrementally
-    final double[] sA; // the variance -- maintained incrementally -- std dev = sqrt(sA/path-1)
-    final IVal[] vAct; // activity of each value of all variables
+    private final double[] A; // activity of all variables
+    private final double[] mA; // the mean -- maintained incrementally
+    private final double[] sA; // the variance -- maintained incrementally -- std dev = sqrt(sA/path-1)
+    private final IVal[] vAct; // activity of each value of all variables
 
-    final BitSet affected; // store affected variables
+    private final BitSet affected; // store affected variables
 
-    final double g, d; // g for aging, d for interval size estimation
-    final int a; // forget parameter
+    private final double g, d; // g for aging, d for interval size estimation
+    private final int a; // forget parameter
 
     public boolean sampling; // is this still in a sampling phase
 
-    int nb_probes; // probing size
+    private int nb_probes; // probing size
 
-    int samplingIterationForced = 1; // CPRU: add this to force sampling phase
+    private int samplingIterationForced = 1; // CPRU: add this to force sampling phase
 
-    java.util.Random random; //  a random object for the sampling phase
+    private java.util.Random random; //  a random object for the sampling phase
 
-    int currentVar = -1, currentVal = -1;
+    private int currentVar = -1, currentVal = -1;
 
-    TIntList bests = new TIntArrayList();
+    private TIntList bests = new TIntArrayList();
 
-	boolean restartAfterEachFail = true;
+    private boolean restartAfterEachFail = true;
 
-    Move rfMove;
+    private Move rfMove;
 
     // enables to detect that the heuristic has been removed
     private boolean hasBeenInitiaized;

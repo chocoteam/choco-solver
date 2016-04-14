@@ -38,13 +38,13 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public class RealEvtScheduler implements EvtScheduler<RealEventType> {
 
-    final int[] DIS = new int[]{
+    private final int[] DIS = new int[]{
             0, 1, 2, 3, -1, // INCLOW
             1, 3, -1, // DECUPP
             0, 3, -1 // BOUND
     };
-    int i = 0;
-    static final int[] IDX = new int[]{-1, 0, 5, 8, -1};
+    private int i = 0;
+    private static final int[] IDX = new int[]{-1, 0, 5, 8, -1};
 
     public void init(RealEventType evt) {
         i = IDX[evt.ordinal()];
