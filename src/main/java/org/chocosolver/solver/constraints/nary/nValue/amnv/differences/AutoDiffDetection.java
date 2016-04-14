@@ -46,7 +46,8 @@ public class AutoDiffDetection implements D {
     // VARIABLES
     //***********************************************************************************
 
-    public static boolean DYNAMIC_ADDITIONS = false;
+    /** whether or not disequality constraints may be added during search **/
+    public static boolean dynamicAdditions = false;
 
     private Variable[] scope;
 
@@ -65,7 +66,7 @@ public class AutoDiffDetection implements D {
     @Override
     public boolean mustBeDifferent(int i1, int i2) {
         // automatic detection of binary disequalities and allDifferent constraints
-        if (DYNAMIC_ADDITIONS || scope[i1].getEnvironment().getWorldIndex() <= 1) {
+        if (dynamicAdditions || scope[i1].getEnvironment().getWorldIndex() <= 1) {
             for (Propagator p : scope[i1].getPropagators())
                 if (p.isActive())
                     if (p.getClass().getName().contains("PropNotEqualX_Y") || p.getClass().getName().contains("PropAllDiff"))

@@ -47,7 +47,8 @@ public class Rk implements F {
     // VARIABLES
     //***********************************************************************************
 
-    public static int DEFAULT_K = 30;
+    /** number of random iterations **/
+    public static int defaultKValue = 30;
 
     protected UndirectedGraph graph;
     protected int n, k, iter;
@@ -80,7 +81,7 @@ public class Rk implements F {
      * @param graph on which IS have to be computed
      */
     public Rk(UndirectedGraph graph) {
-        this(graph, DEFAULT_K);
+        this(graph, defaultKValue);
     }
 
     //***********************************************************************************

@@ -71,7 +71,7 @@ public class MDRk extends MD {
      * @param graph the graph
      */
     public MDRk(UndirectedGraph graph) {
-        this(graph, Rk.DEFAULT_K);
+        this(graph, Rk.defaultKValue);
     }
 
     //***********************************************************************************
