@@ -51,31 +51,31 @@ public class ArrayEventStore {
     /**
      * to store variables, in chronological order
      */
-    IntVar[] varChunks;
+    private IntVar[] varChunks;
     /**
      * to store causes, in chronological order
      */
-    ICause[] cauChunks;
+    private ICause[] cauChunks;
     /**
      * to store masks, in chronological order
      */
-    IEventType[] masChunks;
+    private IEventType[] masChunks;
     /**
      * to store first values, in chronological order
      */
-    int[] val1Chunks;
+    private int[] val1Chunks;
     /**
      * to store second values, in chronological order
      */
-    int[] val2Chunks;
+    private int[] val2Chunks;
     /**
      * to store thrid values, in chronological order
      */
-    int[] val3Chunks;
+    private int[] val3Chunks;
     /**
      * Number of event stored
      */
-    IStateInt size;
+    private IStateInt size;
 
     /**
      * Create an event store

@@ -52,9 +52,9 @@ import java.util.Arrays;
  */
 public class PropagationTrigger  {
 
-    final IPropagationEngine engine; // wrapped engine
-    final IEnvironment environment;
-    final Model model;
+    private final IPropagationEngine engine; // wrapped engine
+    private final IEnvironment environment;
+    private final Model model;
     private final boolean DEBUG, COLOR;
 
     // stores the static propagators

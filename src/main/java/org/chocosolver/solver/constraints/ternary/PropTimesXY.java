@@ -47,7 +47,7 @@ import static java.lang.Math.min;
  */
 public class PropTimesXY extends Propagator<IntVar> {
 
-    IntVar X, Y, Z;
+    private IntVar X, Y, Z;
 
     public PropTimesXY(IntVar x, IntVar y, IntVar z) {
         super(new IntVar[]{x, y}, PropagatorPriority.UNARY, false);

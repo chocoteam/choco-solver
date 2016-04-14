@@ -46,7 +46,7 @@ import static java.lang.Math.ceil;
  */
 public class PropTimesZ extends Propagator<IntVar> {
 
-    IntVar X, Y, Z;
+    private IntVar X, Y, Z;
 
     public PropTimesZ(IntVar x, IntVar y, IntVar z) {
         super(new IntVar[]{z}, PropagatorPriority.UNARY, false);

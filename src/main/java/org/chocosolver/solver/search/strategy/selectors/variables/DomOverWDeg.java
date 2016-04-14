@@ -55,27 +55,27 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
     /**
      * Failure per propagators counter
      */
-    FailPerPropagator counter;
+    private FailPerPropagator counter;
 
     /**
      * Kind of duplicate of pid2ari to limit calls of backtrackable objects
      */
-    IntMap pid2arity;
+    private IntMap pid2arity;
 
     /**
      * Temporary. Stores index of variables with the same (best) score
      */
-    TIntList bests;
+    private TIntList bests;
 
     /**
      * Randomness to break ties
      */
-    java.util.Random random;
+    private java.util.Random random;
 
     /**
      * The way value is selected for a given variable
      */
-    IntValueSelector valueSelector;
+    private IntValueSelector valueSelector;
 
     /**
      * Creates a DomOverWDeg variable selector

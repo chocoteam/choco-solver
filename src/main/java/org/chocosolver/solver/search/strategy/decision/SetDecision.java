@@ -44,15 +44,15 @@ public class SetDecision extends Decision<SetVar> {
     /**
      * The decision value
      */
-    int value;
+    private int value;
     /**
      * The assignment operator
      */
-    DecisionOperator<SetVar> operator;
+    private DecisionOperator<SetVar> operator;
     /**
      * Decision pool manager, to recycle decisions
      */
-    final PoolManager<SetDecision> poolManager;
+    private final PoolManager<SetDecision> poolManager;
 
     /**
      * Create an decision based on an {@link SetVar}

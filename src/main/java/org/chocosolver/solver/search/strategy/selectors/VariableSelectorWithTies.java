@@ -43,9 +43,9 @@ import java.util.stream.Collectors;
  */
 public class VariableSelectorWithTies<V extends Variable> implements VariableSelector<V> {
 
-    final VariableEvaluator<V>[] heuristics;
-    ArrayList<V> oldv = new ArrayList<>();
-    ArrayList<V> newv = new ArrayList<>();
+    private final VariableEvaluator<V>[] heuristics;
+    private ArrayList<V> oldv = new ArrayList<>();
+    private ArrayList<V> newv = new ArrayList<>();
 
 
     @SafeVarargs

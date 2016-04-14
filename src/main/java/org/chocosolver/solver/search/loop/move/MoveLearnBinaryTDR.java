@@ -62,42 +62,42 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
     /**
      * Internal reference to Move for simulating multiple extension.
      */
-    final Move move;
+    private final Move move;
 
     /**
      * List of "n" last conflicts.
      */
-    List<List<IntDecision>> gamma;
+    private List<List<IntDecision>> gamma;
 
     /**
      * Limited size of conflicts to store in the tabu list.
      */
-    int s;
+    private int s;
 
     /**
      * The neigbhor of the current decision path.
      */
-    IntDecision[] neighbor;
+    private IntDecision[] neighbor;
 
     /**
      * Current decision in CD.
      */
-    int current;
+    private int current;
 
     /**
      * Ordered list (decreasing weight) of decisions in k.
      */
-    TIntObjectHashMap<TIntObjectHashMap<TObjectDoubleMap<DecisionOperator>>> weights;
+    private TIntObjectHashMap<TIntObjectHashMap<TObjectDoubleMap<DecisionOperator>>> weights;
 
     /**
      * An array to maintain ordered the index of decision in the conflict.
      */
-    TreeMap<Integer, Double> L;
+    private TreeMap<Integer, Double> L;
 
     /**
      * Indicates that no neighnor has been found, and the search can then stop.
      */
-    boolean stop = false;
+    private boolean stop = false;
 
     private MoveLearnBinaryTDR(Model aModel, Move move, int tabuListSize) {
         super(aModel, false, false);

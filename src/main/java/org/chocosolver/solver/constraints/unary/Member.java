@@ -40,9 +40,9 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class Member extends Constraint {
 
-	final IntVar var;
-    final int[] values;
-    final int lb, ub;
+	private final IntVar var;
+	private final int[] values;
+	private final int lb, ub;
 
     public Member(IntVar var, int[] values) {
         super("Member",new PropMemberEnum(var, values));
@@ -68,6 +68,4 @@ public class Member extends Constraint {
 			return new NotMember(var,values);
 		}
 	}
-
-
 }

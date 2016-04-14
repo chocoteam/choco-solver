@@ -47,42 +47,42 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     /**
      * Close monitors
      */
-    List<IMonitorClose> mclos = new ArrayList<>();
+    private List<IMonitorClose> mclos = new ArrayList<>();
 
     /**
      * Contradiction monitors
      */
-    List<IMonitorContradiction> mcont = new ArrayList<>();
+    private List<IMonitorContradiction> mcont = new ArrayList<>();
 
     /**
      * Down branch monitors
      */
-    List<IMonitorDownBranch> mdbra = new ArrayList<>();
+    private List<IMonitorDownBranch> mdbra = new ArrayList<>();
 
     /**
      * Initialize monitors
      */
-    List<IMonitorInitialize> minit = new ArrayList<>();
+    private List<IMonitorInitialize> minit = new ArrayList<>();
 
     /**
      * Open node monitors
      */
-    List<IMonitorOpenNode> mopno = new ArrayList<>();
+    private List<IMonitorOpenNode> mopno = new ArrayList<>();
 
     /**
      * Restart monitors
      */
-    List<IMonitorRestart> mrest = new ArrayList<>();
+    private List<IMonitorRestart> mrest = new ArrayList<>();
 
     /**
      * Solution monitors
      */
-    List<IMonitorSolution> msolu = new ArrayList<>();
+    private List<IMonitorSolution> msolu = new ArrayList<>();
 
     /**
      * Up branch monitors
      */
-    List<IMonitorUpBranch> mubra = new ArrayList<>();
+    private List<IMonitorUpBranch> mubra = new ArrayList<>();
 
 
     @Override

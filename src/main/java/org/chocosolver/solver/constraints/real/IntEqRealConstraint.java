@@ -81,10 +81,10 @@ public class IntEqRealConstraint extends Constraint {
 
     private static class PropIntEqReal extends Propagator<Variable> {
 
-        int n;
-        IntVar[] intVars;
-        RealVar[] realVars;
-        double epsilon;
+        private int n;
+        private IntVar[] intVars;
+        private RealVar[] realVars;
+        private double epsilon;
 
         public PropIntEqReal(IntVar[] intVars, RealVar[] realVars, double epsilon) {
             super(ArrayUtils.append(intVars, realVars), PropagatorPriority.LINEAR, false);

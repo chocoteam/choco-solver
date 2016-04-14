@@ -49,11 +49,11 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 	// VARIABLES
 	//***********************************************************************************
 
-    IntVar iv;
-    SetVar sv;
+	private IntVar iv;
+	private SetVar sv;
 
-    ISetDeltaMonitor sdm;
-    IntProcedure elemRem;
+	private ISetDeltaMonitor sdm;
+	private IntProcedure elemRem;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
