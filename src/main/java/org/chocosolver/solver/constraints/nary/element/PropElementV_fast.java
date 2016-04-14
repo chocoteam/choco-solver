@@ -105,7 +105,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
         }
         var.updateBounds(min, max, this);
         if (index.isInstantiated()) {
-            equals(var, vars[2 + index.getValue() - offset]);
+            propagateEquality(var, vars[2 + index.getValue() - offset]);
         }
         if (var.isInstantiated() && index.isInstantiated()) {
             IntVar v = vars[2 + index.getValue() - offset];
@@ -115,7 +115,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
         }
     }
 
-    private void equals(IntVar a, IntVar b) throws ContradictionException {
+    private void propagateEquality(IntVar a, IntVar b) throws ContradictionException {
         int s = a.getDomainSize() + b.getDomainSize();
         a.updateBounds(b.getLB(), b.getUB(), this);
         b.updateBounds(a.getLB(), a.getUB(), this);
@@ -140,7 +140,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
             }
         }
         if (a.getDomainSize() + b.getDomainSize() != s) {
-            equals(a, b);
+            propagateEquality(a, b);
         }
     }
 
