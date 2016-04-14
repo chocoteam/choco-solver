@@ -482,9 +482,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private static final class MapVal implements IVal {
 
-        final TIntDoubleHashMap Av;
-        final TIntDoubleHashMap mAv;
-        final int os;  // offset
+        private final TIntDoubleHashMap Av;
+        private final TIntDoubleHashMap mAv;
+        private final int os;  // offset
 
         private MapVal(int os) {
             this.os = os;

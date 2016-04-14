@@ -55,6 +55,10 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
  */
 public class Constraint {
 
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
     /**
      * Status of this constraint wrt the model
      */
@@ -103,6 +107,10 @@ public class Constraint {
      */
     private String name;
 
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
+
     /**
      * Make a new constraint defined as a set of given propagators
      *
@@ -121,6 +129,10 @@ public class Constraint {
             propagator.defineIn(this);
         }
     }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     /**
      * Return an array which contains the propagators declared in <code>this</code>.

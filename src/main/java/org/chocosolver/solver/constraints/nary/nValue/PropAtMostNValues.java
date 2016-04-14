@@ -61,7 +61,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     private boolean allEnum; // all variables are enumerated
     private int[] instVals; // for K1
     private TIntArrayList dVar;
-    private int minVal, maxVal, nbInst;
+    private int minVal, nbInst;
     private BitSet valSet;
 
     //***********************************************************************************
@@ -86,7 +86,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
         mate = new int[concernedValues.size()];
         allEnum = true;
         minVal = Integer.MAX_VALUE / 10;
-        maxVal = -minVal;
+        int maxVal = -minVal;
         for (int i = 0; i < n; i++) {
             allEnum &= vars[i].hasEnumeratedDomain();
             minVal = Math.min(minVal, vars[i].getLB());

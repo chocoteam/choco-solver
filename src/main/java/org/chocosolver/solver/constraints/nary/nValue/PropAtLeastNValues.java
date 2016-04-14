@@ -53,7 +53,6 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
     private TIntArrayList concernedValues;
     private int n;
     private int[] mate;
-    private boolean allEnum; // all variables are enumerated
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -74,10 +73,6 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         concernedValues.sort();
         this.concernedValues = concernedValues;
         mate = new int[concernedValues.size()];
-        allEnum = vars[0].hasEnumeratedDomain();
-        for (int i = 1; i < n && allEnum; i++) {
-            allEnum = vars[i].hasEnumeratedDomain();
-        }
     }
 
     //***********************************************************************************
