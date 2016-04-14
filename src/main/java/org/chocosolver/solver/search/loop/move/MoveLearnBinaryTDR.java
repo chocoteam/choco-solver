@@ -116,7 +116,7 @@ public class MoveLearnBinaryTDR extends LearnExplained implements Move {
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < neighbor.length) {
             DecisionPath dp = solver.getDecisionPath();
-            assert neighbor[current++] != null;
+            assert neighbor[current] != null;
             dp.pushDecision(neighbor[current++]);
             solver.getEnvironment().worldPush();
             extend = true;
