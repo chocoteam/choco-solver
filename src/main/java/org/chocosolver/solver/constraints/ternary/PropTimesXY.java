@@ -53,7 +53,7 @@ public class PropTimesXY extends Propagator<IntVar> {
         super(new IntVar[]{x, y}, PropagatorPriority.UNARY, false);
         this.X = vars[0];
         this.Y = vars[1];
-        this.Z = vars[2];
+        this.Z = z;
     }
 
     @Override
@@ -80,11 +80,6 @@ public class PropTimesXY extends Propagator<IntVar> {
         } else if (Y.isInstantiated()) {
             instantiated(Y, X);
         }
-    }
-
-    @Override
-    public final void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     @Override
