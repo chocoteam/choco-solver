@@ -37,7 +37,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
-import org.chocosolver.solver.constraints.reification.PropConDis;
 import org.chocosolver.solver.variables.BoolVar;
 
 /**

@@ -61,16 +61,6 @@ public class OneWordS32BitSet implements IStateBitSet {
     private IStateInt word;
 
     /**
-     * Creates a new bit set. All bits are initially <code>false</code>.
-     *
-     * @param environment bactrackable environment
-     */
-    public OneWordS32BitSet(IEnvironment environment) {
-        this.environment = environment;
-        word = this.environment.makeInt(0);
-    }
-
-    /**
      * Creates a bit set whose initial size is large enough to explicitly
      * represent bits with indices in the range <code>0</code> through
      * <code>nbits-1</code>. All bits are initially <code>false</code>.
@@ -106,6 +96,7 @@ public class OneWordS32BitSet implements IStateBitSet {
         return copy;
     }
 
+    @Override
     public BitSet copyToBitSet() {
         BitSet view = new BitSet(this.size());
         for (int i = this.nextSetBit(0); i >= 0; i = this.nextSetBit(i + 1)) view.set(i, true);
@@ -135,6 +126,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @throws IndexOutOfBoundsException if the specified index is negative.
      * @since 1.4
      */
+    @Override
     public void flip(int bitIndex) {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
@@ -156,6 +148,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
+    @Override
     public void flip(int fromIndex, int toIndex) {
         checkRange(fromIndex, toIndex);
 
@@ -175,6 +168,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @throws IndexOutOfBoundsException if the specified index is negative.
      * @since JDK1.0
      */
+    @Override
     public void set(int bitIndex) {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
@@ -191,6 +185,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @throws IndexOutOfBoundsException if the specified index is negative.
      * @since 1.4
      */
+    @Override
     public void set(int bitIndex, boolean value) {
         if (value)
             set(bitIndex);
@@ -209,6 +204,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
+    @Override
     public void set(int fromIndex, int toIndex) {
         checkRange(fromIndex, toIndex);
 
@@ -222,31 +218,13 @@ public class OneWordS32BitSet implements IStateBitSet {
     }
 
     /**
-     * Sets the bits from the specified <tt>fromIndex</tt> (inclusive) to the
-     * specified <tt>toIndex</tt> (exclusive) to the specified value.
-     *
-     * @param fromIndex index of the first bit to be set.
-     * @param toIndex   index after the last bit to be set
-     * @param value     value to set the selected bits to
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    public void set(int fromIndex, int toIndex, boolean value) {
-        if (value)
-            set(fromIndex, toIndex);
-        else
-            clear(fromIndex, toIndex);
-    }
-
-    /**
      * Sets the bit specified by the index to <code>false</code>.
      *
      * @param bitIndex the index of the bit to be cleared.
      * @throws IndexOutOfBoundsException if the specified index is negative.
      * @since JDK1.0
      */
+    @Override
     public void clear(int bitIndex) {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
@@ -266,6 +244,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
+    @Override
     public void clear(int fromIndex, int toIndex) {
         checkRange(fromIndex, toIndex);
 
@@ -283,6 +262,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @since 1.4
      */
+    @Override
     public void clear() {
         word.set(0);
     }
@@ -297,29 +277,13 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @return the value of the bit with the specified index.
      * @throws IndexOutOfBoundsException if the specified index is negative.
      */
+    @Override
     final public boolean get(final int bitIndex) {
         //if (bitIndex < 0)
         //    throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
         //checkInvariants();
         return bitIndex < 32 && ((word.get() & (1 << bitIndex)) != 0);
-    }
-
-    /**
-     * Returns a new <tt>BitSet</tt> composed of bits from this <tt>BitSet</tt>
-     * from <tt>fromIndex</tt> (inclusive) to <tt>toIndex</tt> (exclusive).
-     *
-     * @param fromIndex index of the first bit to include.
-     * @param toIndex   index after the last bit to include.
-     * @return a new <tt>BitSet</tt> from a range of this <tt>BitSet</tt>.
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    @SuppressWarnings("UnusedParameters")
-    public OneWordS32BitSet get(int fromIndex, int toIndex) {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -341,6 +305,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
+    @Override
     public int nextSetBit(int fromIndex) {
         if (fromIndex < 0) {
             fromIndex = 0;
@@ -366,6 +331,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
+    @Override
     public int nextClearBit(int fromIndex) {
         // Neither spec nor implementation handle bitsets of maximal length.
         // See 4816253.
@@ -405,6 +371,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *                                   than {@code -1}
      * @since 1.7
      */
+    @Override
     public int prevSetBit(int fromIndex) {
         if (fromIndex < 0) {
             return -1;
@@ -434,6 +401,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *                                   than {@code -1}
      * @since 1.7
      */
+    @Override
     public int prevClearBit(int fromIndex) {
         if (fromIndex < 0) {
             return -1;
@@ -450,6 +418,7 @@ public class OneWordS32BitSet implements IStateBitSet {
             return -1;
     }
 
+    @Override
     public int capacity() {
         return BITS_PER_WORD;
     }
@@ -473,6 +442,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @return boolean indicating whether this <code>BitSet</code> is empty.
      * @since 1.4
      */
+    @Override
     public boolean isEmpty() {
         return word.get() == 0;
     }
@@ -485,6 +455,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *         <code>BitSet</code>.
      * @since 1.4
      */
+    @Override
     public int cardinality() {
         return Integer.bitCount(word.get());
     }
@@ -498,6 +469,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @param setI a bit set.
      */
+    @Override
     public void and(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -511,6 +483,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @param setI a bit set.
      */
+    @Override
     public void or(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -529,6 +502,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @param setI a bit set.
      */
+    @Override
     public void xor(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -541,6 +515,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *             <code>BitSet</code>.
      * @since 1.2
      */
+    @Override
     public void andNot(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -555,10 +530,12 @@ public class OneWordS32BitSet implements IStateBitSet {
      *         the specified <code>BitSet</code>.
      * @since 1.4
      */
+    @Override
     public boolean intersects(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public int hashCode() {
         int h = 1234;
         h ^= word.get();
@@ -572,10 +549,12 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @return the number of bits currently in this bit set.
      */
+    @Override
     public int size() {
         return BITS_PER_WORD;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof OneWordS32BitSet))
             return false;
@@ -591,6 +570,7 @@ public class OneWordS32BitSet implements IStateBitSet {
         return word == set.word;
     }
 
+    @Override
     public IStateBitSet copy() {
         //if (!sizeIsSticky.get()) trimToSize();
         OneWordS32BitSet result = new OneWordS32BitSet(environment, this.size());
@@ -600,6 +580,7 @@ public class OneWordS32BitSet implements IStateBitSet {
         return result;
     }
 
+    @Override
     public String toString() {
         //checkInvariants();
 

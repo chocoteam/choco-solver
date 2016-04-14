@@ -69,7 +69,6 @@ public class HeightCumulFilter extends SweepCumulFilter {
 		tprune.resetQuick();
 		int capa = capamax.getUB();
 		int currentConso = 0;
-		boolean active = false;
 		while(timeIndex<nbEvents) {
 			// see next event
 			int nextDate = events[timeIndex].date;
@@ -109,7 +108,7 @@ public class HeightCumulFilter extends SweepCumulFilter {
 					break;
 			}
 		}
-		return active;
+		return false;
 	}
 
 	protected void generateMinEvents(int nbT) {
