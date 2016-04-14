@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
-import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -85,7 +85,7 @@ public abstract class PropConditionnal extends Propagator<Variable> {
         model.postTemp(c);
         // the constraint has been added during the resolution.
         // it should be removed on backtrack -> create a new undo operation
-        model.getEnvironment().save(new Operation() {
+        model.getEnvironment().save(new IOperation() {
             @Override
             public void undo() {
                 model.unpost(c);

@@ -29,7 +29,7 @@
  */
 package org.chocosolver.memory.trailing.trail;
 
-import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.structure.IOperation;
 
 /**
  * <br/>
@@ -39,5 +39,5 @@ import org.chocosolver.memory.structure.Operation;
  */
 public interface IOperationTrail extends ITrailStorage {
 
-    void savePreviousState(Operation oldValue);
+    void savePreviousState(IOperation oldValue);
 }

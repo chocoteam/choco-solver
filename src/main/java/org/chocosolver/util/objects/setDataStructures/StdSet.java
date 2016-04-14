@@ -30,7 +30,7 @@
 package org.chocosolver.util.objects.setDataStructures;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.util.PoolManager;
 
 import java.util.Iterator;
@@ -85,10 +85,9 @@ public class StdSet implements ISet {
         if (set.add(element)) {
             ListOP op = operationPoolGC.getE();
             if (op == null) {
-                new ListOP(element, REMOVE);
-            } else {
-                op.set(element, REMOVE);
+                op = new ListOP();
             }
+            op.set(element, REMOVE);
             return true;
         }
         return false;
@@ -99,10 +98,9 @@ public class StdSet implements ISet {
         if (set.remove(element)) {
             ListOP op = operationPoolGC.getE();
             if (op == null) {
-                new ListOP(element, ADD);
-            } else {
-                op.set(element, ADD);
+                op = new ListOP();
             }
+            op.set(element, ADD);
             return true;
         }
         return false;
@@ -123,10 +121,9 @@ public class StdSet implements ISet {
         for (int i :set) {
             ListOP op = operationPoolGC.getE();
             if (op == null) {
-                new ListOP(i, ADD);
-            } else {
-                op.set(i, ADD);
+                op = new ListOP();
             }
+            op.set(i, ADD);
         }
         set.clear();
     }
@@ -140,14 +137,9 @@ public class StdSet implements ISet {
     // TRAILING OPERATIONS
     //***********************************************************************************
 
-    private class ListOP extends Operation {
+    private class ListOP implements IOperation {
         private int element;
         private boolean addOrRemove;
-
-        public ListOP(int i, boolean add) {
-            super();
-            set(i, add);
-        }
 
         @Override
         public void undo() {

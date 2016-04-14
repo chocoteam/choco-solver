@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints;
 
 
-import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
@@ -127,7 +127,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Backtrackable operations to maintain the status on backtrack.
      */
-    private Operation[] operations;
+    private IOperation[] operations;
 
     /**
      * Priority of this propagator.
@@ -189,20 +189,20 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         }
         this.vindices = new int[vars.length];
         ID = model.nextId();
-        operations = new Operation[]{
-                new Operation() {
+        operations = new IOperation[]{
+                new IOperation() {
                     @Override
                     public void undo() {
                         state = NEW;
                     }
                 },
-                new Operation() {
+                new IOperation() {
                     @Override
                     public void undo() {
                         state = REIFIED;
                     }
                 },
-                new Operation() {
+                new IOperation() {
                     @Override
                     public void undo() {
                         state = ACTIVE;

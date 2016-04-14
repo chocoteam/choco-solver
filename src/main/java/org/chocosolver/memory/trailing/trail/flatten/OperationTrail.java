@@ -29,7 +29,7 @@
  */
 package org.chocosolver.memory.trailing.trail.flatten;
 
-import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.memory.trailing.trail.IOperationTrail;
 
 /**
@@ -43,7 +43,7 @@ public class OperationTrail implements IOperationTrail {
     /**
      * Stack of values (former values that need be restored upon backtracking).
      */
-    private Operation[] valueStack;
+    private IOperation[] valueStack;
 
 
     /**
@@ -65,7 +65,7 @@ public class OperationTrail implements IOperationTrail {
      */
     public OperationTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
-        valueStack = new Operation[nUpdates];
+        valueStack = new IOperation[nUpdates];
         worldStartLevels = new int[nWorlds];
     }
 
@@ -112,7 +112,7 @@ public class OperationTrail implements IOperationTrail {
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
-    public void savePreviousState(Operation oldValue) {
+    public void savePreviousState(IOperation oldValue) {
         valueStack[currentLevel] = oldValue;
         currentLevel++;
         if (currentLevel == valueStack.length) {
@@ -123,7 +123,7 @@ public class OperationTrail implements IOperationTrail {
     private void resizeUpdateCapacity() {
         final int newCapacity = ((valueStack.length * 3) / 2);
         // First, copy the stack of former values
-        final Operation[] tmp2 = new Operation[newCapacity];
+        final IOperation[] tmp2 = new IOperation[newCapacity];
         System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
         valueStack = tmp2;
     }

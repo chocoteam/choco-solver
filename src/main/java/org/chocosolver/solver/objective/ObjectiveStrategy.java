@@ -137,9 +137,11 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
                         return decUB;
                     case MAXIMIZE:
                         return incLB;
+                    default:
+                        throw new UnsupportedOperationException("ObjectiveStrategy is not for "+resoPolicy+" ResolutionPolicy");
                 }
             default:
-                throw new UnsupportedOperationException("unknown OptimizationPolicy " + optPolicy + " or ResolutionPolicy " + resoPolicy);
+                throw new UnsupportedOperationException("unknown OptimizationPolicy " + optPolicy);
         }
     }
 

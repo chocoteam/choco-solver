@@ -31,7 +31,7 @@ package org.chocosolver.memory.trailing;
 
 
 import org.chocosolver.memory.*;
-import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.memory.trailing.trail.*;
 import org.chocosolver.memory.trailing.trail.flatten.*;
 import org.chocosolver.memory.trailing.trail.unsafe.UnsafeBoolTrail;
@@ -331,7 +331,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
     }
 
 
-    public void save(Operation oldValue) {
+    public void save(IOperation oldValue) {
         getOperationTrail().savePreviousState(oldValue);
     }
 }

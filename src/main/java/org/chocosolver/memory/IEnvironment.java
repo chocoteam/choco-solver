@@ -30,7 +30,7 @@
 package org.chocosolver.memory;
 
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
-import org.chocosolver.memory.structure.Operation;
+import org.chocosolver.memory.structure.IOperation;
 
 
 
@@ -183,7 +183,7 @@ public interface IEnvironment  {
      * Save this operation onto the stack of operations to undo on backtrack.
      * @param operation operation to undo
      */
-    void save(Operation operation);
+    void save(IOperation operation);
 
     /**
      * Return the current time stamp.

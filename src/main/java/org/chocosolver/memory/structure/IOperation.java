@@ -29,24 +29,18 @@
  */
 package org.chocosolver.memory.structure;
 
-import org.chocosolver.memory.IEnvironment;
-
-
-
 /**
+ * Generic interface used to undo modifications upon backtracking
+ *
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 11/02/11
  */
-public abstract class Operation  {
+public interface IOperation {
 
-    protected Operation(IEnvironment environment) {
-        environment.save(this);
-    }
-
-    protected Operation() {
-    }
-
-    public abstract void undo();
+	/**
+     * Method called by the environment upon backtracking, to undo this operation
+     */
+    void undo();
 }
