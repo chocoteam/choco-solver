@@ -75,49 +75,49 @@ public class PropConDis extends Propagator<BoolVar> {
     /**
      * List of known boolvars
      */
-    TIntHashSet declared;
+    private TIntHashSet declared;
 
     /**
      * List of disjunctions to deal with
      * todo: link boolvar to index in this
      */
-    List<BoolVar[]> disjunctions;
+    private List<BoolVar[]> disjunctions;
     /**
      * An internal propagation engine to try each boolean variables
      */
-    IPropagationEngine internalEngine;
+    private IPropagationEngine internalEngine;
     /**
      * Original propagation engine, set temporary off while this builds deductions
      */
-    IPropagationEngine masterEngine;
+    private IPropagationEngine masterEngine;
     /**
      * Set to <tt>true</tt> to indicate that this builds deductions
      */
-    boolean isworking;
+    private boolean isworking;
     /**
      * Set to <tt>false</tt> before the first propagation of this, <tt>true</tt> then.
      */
-    boolean firstAwake;
+    private boolean firstAwake;
     /**
      * All integer variables (INT and BOOL) extract from this model.
      */
-    IntVar[] allvars;
+    private IntVar[] allvars;
     /**
      * Store cardinality of variables before a try
      */
-    int[] cardinalities;
+    private int[] cardinalities;
     /**
      * Store the union of domain of modified variables
      */
-    TIntObjectHashMap<IntIterableRangeSet> domains;
+    private TIntObjectHashMap<IntIterableRangeSet> domains;
     /**
      * Cardinality of domains (external to limit GC)
      */
-    BitSet toUnion;
+    private BitSet toUnion;
     /**
      * To get boolean variables to set to false
      */
-    BitSet toZero;
+    private BitSet toZero;
 
     /**
      * A propagator to deal with constructive disjunction

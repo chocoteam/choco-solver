@@ -240,7 +240,11 @@ public interface IIntConstraintFactory {
 	 */
 	default Constraint distance(IntVar var1, IntVar var2, String op, int cste) {
 		assert var1.getModel() == var2.getModel();
-		return new DistanceXYC(var1, var2, Operator.get(op), cste);
+		Operator operator = Operator.get(op);
+		if (operator != Operator.EQ && operator != Operator.GT && operator != Operator.LT && operator != Operator.NQ) {
+			throw new SolverException("Unexpected operator for distance");
+		}
+		return new Constraint("DistanceXYC " + operator.name(), new PropDistanceXYC(ArrayUtils.toArray(var1, var2), operator, cste));
 	}
 
 	/**
@@ -389,7 +393,11 @@ public interface IIntConstraintFactory {
 	 * @param var3 resulting variable
 	 */
 	default Constraint distance(IntVar var1, IntVar var2, String op, IntVar var3) {
-		return new DistanceXYZ(var1, var2, Operator.get(op), var3);
+		Operator oper = Operator.get(op);
+		if (oper != Operator.EQ && oper != Operator.GT && oper != Operator.LT) {
+			throw new SolverException("Unexpected operator for distance");
+		}
+		return new Constraint("DistanceXYZ " + op, new PropDistanceXYZ(ArrayUtils.toArray(var1,var2,var3), oper));
 	}
 
 	/**

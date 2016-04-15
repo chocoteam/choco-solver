@@ -63,70 +63,70 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * limited number of backtracks for each DFS try
      */
-    BacktrackCounter dfslimit;
+    private BacktrackCounter dfslimit;
 
     /**
      * limit of bracktracks for the next DFS try.
      */
-    long Z;
+    private long Z;
 
     /**
      * as limit is globally maintained, limit += Z at each try.
      */
-    long limit;
+    private long limit;
     /**
      * maximum number of backtracks to not exceed when updating node recomputation parameters.
      */
-    long N;
+    private long N;
 
     /**
      * for node recomputation.
      */
-    long nodesRecompute;
+    private long nodesRecompute;
 
     /**
      * lower bound to limit the rate of redundantly propagated decisions.
      */
-    double a;
+    private double a;
     /**
      * upper bound to limit the rate of redundantly propagated decisions.
      */
-    double b;
+    private double b;
 
     /**
      * The current objective manager, to deal with best bounds.
      */
-    ObjectiveManager<IntVar, Integer> objectiveManager;
+    private ObjectiveManager<IntVar, Integer> objectiveManager;
 
     /**
      * Indicates if the current resolution policy is minimization.
      */
-    boolean isMinimization;
+    private boolean isMinimization;
 
     /**
      * list of open right branches.
      */
-    PriorityQueue<Open> opens;
+    private PriorityQueue<Open> opens;
 
     /**
      * Current open right branch.
      */
-    Decision[] copen;
+    private Decision[] copen;
 
     /**
      * Used to find the first unknown open right branch
      */
-    List<Decision> _unkopen;
+    private List<Decision> _unkopen;
 
     /**
      * Current decision in copen
      */
-    int current;
+    private int current;
 
     /**
      * The owner model.
      */
-    Model mModel;
+    private Model mModel;
 
     /**
      * Create a move dedicated to run an Hybrid Best-First Search[1] (HBFS) with binary decisions.

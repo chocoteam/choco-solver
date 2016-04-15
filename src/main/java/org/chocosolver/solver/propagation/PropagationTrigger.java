@@ -58,13 +58,13 @@ public class PropagationTrigger  {
     private final boolean DEBUG, COLOR;
 
     // stores the static propagators
-    ArrayList<Propagator> sta_propagators = new ArrayList<>();
+    private ArrayList<Propagator> sta_propagators = new ArrayList<>();
     // stores the dynamic propagators, ie cut
-    ArrayList<Propagator> perm_propagators = new ArrayList<>();
+    private ArrayList<Propagator> perm_propagators = new ArrayList<>();
     // stores the world of the last propagation of the cuts
-    IntList perm_world = new IntList();
+    private IntList perm_world = new IntList();
 
-    int size;
+    private int size;
 
     public PropagationTrigger(IPropagationEngine engine, Model model) {
         this.engine = engine;

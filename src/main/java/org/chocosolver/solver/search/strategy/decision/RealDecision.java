@@ -45,11 +45,11 @@ public class RealDecision extends Decision<RealVar> {
     /**
      * The decision value
      */
-    double value;
+    private double value;
     /**
      * Decision pool manager, to recycle decisions
      */
-    final PoolManager<RealDecision> poolManager;
+    private final PoolManager<RealDecision> poolManager;
 
     /**
      * Create an decision based on an {@link RealVar}

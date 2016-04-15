@@ -61,40 +61,40 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     /**
      * Reference to the model
      */
-    Model mModel;
+    private Model mModel;
     /**
      *  Stacks of 'Parent Id'  used when backtrack
      */
-    TIntStack pid_stack = new TIntArrayStack();
+    private TIntStack pid_stack = new TIntArrayStack();
     /**
      *  Stacks of 'Alternative' used when backtrack
      */
-    TIntStack alt_stack = new TIntArrayStack();
+    private TIntStack alt_stack = new TIntArrayStack();
     /**
      * Stacks of current node, to deal with jumps
      */
-    TIntStack last_stack = new TIntArrayStack();
+    private TIntStack last_stack = new TIntArrayStack();
     /**
      * Node count: different from measures.getNodeCount() as we count failure nodes as well
      */
-    int nc = 0;
+    private int nc = 0;
     /**
      * restart id
      */
-    int rid;
+    private int rid;
     /**
      * last node index sent
      */
-    int last;
+    private int last;
     /**
      * Used to communicate every node
      */
-    Connector connector = new Connector();
+    private Connector connector = new Connector();
 
     /**
      * Format for solution output
      */
-    IMessage solutionMessage = new IMessage() {
+    private IMessage solutionMessage = new IMessage() {
         @Override
         public String print() {
             StringBuilder s = new StringBuilder(32);

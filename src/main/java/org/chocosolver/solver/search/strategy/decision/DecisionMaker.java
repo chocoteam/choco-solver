@@ -47,17 +47,17 @@ public class DecisionMaker {
     /**
      * object recycling management
      */
-    PoolManager<IntDecision> intDecisionPool;
+    private PoolManager<IntDecision> intDecisionPool;
 
     /**
      * object recycling management
      */
-    PoolManager<RealDecision> realDecisionPool;
+    private PoolManager<RealDecision> realDecisionPool;
 
     /**
      * object recycling management
      */
-    PoolManager<SetDecision> setDecisionPool;
+    private PoolManager<SetDecision> setDecisionPool;
 
     /**
      * Create a decision maker, that eases decision creation.

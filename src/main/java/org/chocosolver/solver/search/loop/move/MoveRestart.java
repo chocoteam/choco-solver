@@ -53,27 +53,27 @@ public class MoveRestart implements Move {
     /**
      * the default {@link Move} to execute when no restart has to be done
      */
-    Move move;
+    private Move move;
     /**
      * How often the restart should occur
      */
-    IRestartStrategy restartStrategy;
+    private IRestartStrategy restartStrategy;
     /**
      * How to trigger a restart
      */
-    LongCriterion criterion;
+    private LongCriterion criterion;
     /**
      * Count the number of restarts
      */
-    int restartFromStrategyCount;
+    private int restartFromStrategyCount;
     /**
      * restrict the total number of restart
      */
-    int restartLimit;
+    private int restartLimit;
     /**
      * When the next restart should be triggered
      */
-    long limit;
+    private long limit;
 
     /**
      * @param move            the default {@link Move} to execute when no restart has to be done

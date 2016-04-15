@@ -50,31 +50,23 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
     /**
      * Position of X in {@link #vars}
      */
-    int x = 0;
+    private int x = 0;
     /**
      * Position of Y in {@link #vars}
      */
-    int y = 1;
+    private int y = 1;
     /**
      * Position of Z in {@link #vars}
      */
-    int z = 2;
+    private int z = 2;
     /**
      * Set to <tt>true</tt> if X, Y and Z are bounded
      */
-    boolean allbounded = false;
+    private boolean allbounded = false;
     /**
      * Temporary structure to ease filtering
      */
-    IntIterableRangeSet r1;
-    /**
-     * Temporary structure to ease filtering
-     */
-    IntIterableRangeSet r2;
-    /**
-     * Temporary structure to ease filtering
-     */
-    IntIterableRangeSet r3;
+    private IntIterableRangeSet r1, r2, r3;
 
     /**
      * Create propagator for ternary sum: X + Y =Z

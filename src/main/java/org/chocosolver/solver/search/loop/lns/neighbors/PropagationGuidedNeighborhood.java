@@ -100,11 +100,11 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     /**
      * Indicate which variables are selected in a fragment
      */
-    BitSet fragment;
+    protected BitSet fragment;
     /**
      * Reference to the model
      */
-    Model mModel;
+    protected Model mModel;
 
     /**
      * Create a propagation-guided neighbor for LNS

@@ -50,11 +50,11 @@ public class MoveBinaryDFS implements Move {
     /**
      * Search strategy to extend the search tree
      */
-    AbstractStrategy strategy;
+    protected AbstractStrategy strategy;
     /**
      * Index, in the decision path, of the decision taken just before selecting this move.
      */
-    int topDecisionPosition;
+    protected int topDecisionPosition;
 
     /**
      * Create this move without any search strategy

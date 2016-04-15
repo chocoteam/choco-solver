@@ -44,7 +44,7 @@ public class StoredIndexedBipartiteSetWithOffset extends StoredIndexedBipartiteS
     // VARIABLES
     //***********************************************************************************
 
-    int offset;
+    private int offset;
 
     //***********************************************************************************
     // CONSTRUCTOR

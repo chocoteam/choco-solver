@@ -54,37 +54,37 @@ public class PropSum extends Propagator<IntVar> {
     /**
      * The position of the last positive coefficient
      */
-    final int pos;
+    protected final int pos;
 
     /**
      * Number of variables
      */
-    final int l;
+    protected final int l;
 
     /**
      * Bound to respect
      */
-    final int b;
+    protected final int b;
 
     /**
      * Variability of each variable (ie domain amplitude)
      */
-    final int[] I;
+    protected final int[] I;
 
     /**
      * SUm of lower bounds
      */
-    int sumLB;
+    protected int sumLB;
 
     /**
      * Sum of upper bounds
      */
-    int sumUB;
+    protected int sumUB;
 
     /**
      * The operator among EQ, LE, GE and NE
      */
-    final Operator o;
+    protected final Operator o;
 
 
     /**

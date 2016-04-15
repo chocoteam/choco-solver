@@ -40,7 +40,7 @@ import org.chocosolver.util.ESat;
  */
 public class NogoodConstraint extends Constraint {
 
-    final PropNogoods nogoods;
+    private final PropNogoods nogoods;
 
     public NogoodConstraint(Model model) {
         super("NogoodConstraint", new PropNogoods(model));

@@ -51,11 +51,11 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
     /**
      * current discrepancy, maintained incrementally
      */
-    IStateInt dis;
+    protected IStateInt dis;
     /**
      * max discrepancy allowed
      */
-    int DIS;
+    protected int DIS;
 
     /**
      * Create a DFS with binary decisions

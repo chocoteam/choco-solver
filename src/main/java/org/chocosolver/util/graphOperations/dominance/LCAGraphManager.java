@@ -56,8 +56,8 @@ public class LCAGraphManager {
 	private int[] dfsNumberOfNode;
 	//
 	private int[] I, L, h, A, htmp;
-	ISet[] successors;
-	Iterator<Integer>[] iterator;
+	private ISet[] successors;
+	private Iterator<Integer>[] iterator;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
