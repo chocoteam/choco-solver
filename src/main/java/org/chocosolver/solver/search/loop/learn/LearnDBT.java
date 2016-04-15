@@ -90,7 +90,7 @@ public class LearnDBT extends LearnCBJ {
      */
     @SuppressWarnings({"unchecked", "ThrowableResultOfMethodCallIgnored"})
     @Override
-    void identifyRefutedDecision(int nworld) {
+    protected void identifyRefutedDecision(int nworld) {
         dbTstrategy.clear();
         if (nworld == 1 || mModel.getSolver().getEngine().getContradictionException().c == mModel.getSolver().getObjectiveManager()) {
             super.identifyRefutedDecision(nworld);
