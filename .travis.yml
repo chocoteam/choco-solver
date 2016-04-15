@@ -1,12 +1,11 @@
-language:
-  java
+language: java
 sudo: false
 os:
   - linux
 jdk:
 - oraclejdk8
 before_install:
-  - pip install codecov
+- pip install --user codecov
 env:
   global:
   - secure: hb7XCxuEw3VDF5goORctgcFDwg2Z/WAz1ZHKWNRZmR+M1nN6rgDmwOaJpxepLlU0r/Ku14xspE0yn0nK3P1DFNptXhruDJ1h0+mcwiHdsHOM/Vdo247pPbI9pJTD6gQpNnlgVXAI0s5lkNf3IY2jszzhapKFEMHvnPMFXw/sVzU=
@@ -23,7 +22,7 @@ addons:
     notification_email: choco@emn.fr
     build_command_prepend: "mvn clean"
     build_command:   "mvn install -DtestFailureIgnore=true -Dgroups=$GROUP"
-    branch_pattern: develop master
+    branch_pattern: develop
 script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
@@ -43,5 +42,5 @@ notifications:
     on_failure: always
     on_start: never
 after_success:
-  - codecov
+  - bash <(curl -s https://codecov.io/bash)
   - curl http://testr-1154.appspot.com/assets/testR.py | python
