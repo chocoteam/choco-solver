@@ -33,6 +33,7 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -52,39 +53,38 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     // check if none of the tuple is trivially outside
     // the domains and if yes use a fast valid check
     // by avoiding checking the bounds
-    protected ValidityChecker valcheck;
+    private ValidityChecker valcheck;
 
     /**
      * size of the scope
      */
-    protected int arity;
+    private int arity;
 
     /**
      * original lower bounds
      */
-    protected int[] offsets;
+    private int[] offsets;
 
     /**
      * Variables that are not proved to be GAC yet
      */
-    protected BitSet futureVars;
+    private BitSet futureVars;
 
     /**
      * Values that have found a support for each variable
      */
-    protected BitSet[] gacValues;
+    private BitSet[] gacValues;
 
-    protected int[] nbGacValues;
+    private int[] nbGacValues;
 
     /**
      * The backtrackable list of tuples representing the current
      * allowed tuples of the constraint
      */
-    protected IStateInt last;
-    int[] listuples;
+    private IStateInt last;
+    private int[] listuples;
 
-    IntIterableSet vrms;
-
+    private IntIterableSet vrms;
 
     private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
         super(vs, relation);
@@ -141,7 +141,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        filter();
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
 
@@ -149,7 +149,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void initializeData() {
+    private void initializeData() {
         //INITIALIZATION
         Arrays.fill(nbGacValues, 0);
         futureVars.set(0, arity);
@@ -158,7 +158,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         }
     }
 
-    public void pruningPhase() throws ContradictionException {
+    private void pruningPhase() throws ContradictionException {
         for (int i = futureVars.nextSetBit(0); i > -1; i = futureVars.nextSetBit(i + 1)) {
             IntVar v = vars[i];
             DisposableValueIterator it3 = v.getValueIterator(true);
@@ -185,7 +185,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     //* checking if a tuple is valid.
     //*
     //* @param idx : the variable changed
-    public void maintainList(/*int idx*/) {
+    private void maintainList(/*int idx*/) {
         int cidx = 0;
         int nLast = last.get();
         while (cidx <= nLast) {
@@ -215,14 +215,13 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         }
     }
 
-
     /**
      * Main propagation loop. It maintains the list of valid tuples
      * through the search
      *
      * @throws ContradictionException
      */
-    public void gacstr() throws ContradictionException {
+    private void gacstr() throws ContradictionException {
         initializeData();
         maintainList();
         pruningPhase();
@@ -231,20 +230,11 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         }
     }
 
-    public double getCartesianProduct() {
+    private double getCartesianProduct() {
         double cp = 1d;
         for (int i = 0; i < arity; i++) {
             cp *= vars[i].getDomainSize();
         }
         return cp;
     }
-
-
-    public void filter() throws ContradictionException {
-        //sort variables regarding domain sizes to speedup the check !
-        valcheck.sortvars();
-        gacstr();
-        //constAwake(false);
-    }
-
 }
