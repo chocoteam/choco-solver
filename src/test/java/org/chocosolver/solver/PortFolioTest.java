@@ -68,7 +68,6 @@ public class PortFolioTest {
             pares.addModel(knapsack());
             pares.addModel(knapsack());
             pares.addModel(knapsack());
-            pares.addModel(knapsack());
             Solution sol = null;
             while(pares.solve()){
                 sol = new Solution(pares.getBestModel()).record();
