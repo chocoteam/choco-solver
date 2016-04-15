@@ -43,6 +43,11 @@ public class CustomListener extends TestListenerAdapter {
     private int m_count = 0;
 
     @Override
+    public void onTestStart(ITestResult tr) {
+        System.out.print(String.format("\t%s.%s ..", tr.getTestClass().getName(), tr.getName()));
+    }
+
+    @Override
     public void onTestFailure(ITestResult tr) {
         log(tr, "FAILURE");
     }
@@ -58,7 +63,7 @@ public class CustomListener extends TestListenerAdapter {
     }
 
     private void log(ITestResult tr, String RESULT) {
-        System.out.print(String.format("\t%s.%s %s (%dms)\n", tr.getTestClass().getName(), tr.getName(), RESULT, tr.getEndMillis() - tr.getStartMillis()));
+        System.out.print(String.format(".. %s (%dms)\n", RESULT, tr.getEndMillis() - tr.getStartMillis()));
         if (++m_count % 40 == 0) {
             System.out.println("");
         }
