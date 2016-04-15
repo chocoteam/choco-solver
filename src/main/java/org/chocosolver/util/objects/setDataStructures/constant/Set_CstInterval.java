@@ -121,7 +121,7 @@ public class Set_CstInterval implements ISet {
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			int value = lb;
+			private int value = lb;
 			@Override
 			public void reset() {
 				value = lb;

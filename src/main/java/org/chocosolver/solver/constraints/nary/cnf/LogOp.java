@@ -259,7 +259,7 @@ public final class LogOp implements ILogical {
      *
      * @return number of children
      */
-    int getNbChildren() {
+    protected int getNbChildren() {
         return children.length;
     }
 
@@ -268,7 +268,7 @@ public final class LogOp implements ILogical {
      *
      * @return <code>true</code> if <code>this</code> contains one OR logic tree
      */
-    boolean hasOrChild() {
+    protected boolean hasOrChild() {
         for (int i = 0; i < children.length; i++) {
             if (!children[i].isLit() && ((LogOp) children[i]).is(Operator.OR)) {
                 return true;
@@ -282,7 +282,7 @@ public final class LogOp implements ILogical {
      *
      * @return <code>true</code> if <code>this</code> contains one AND logic tree
      */
-    boolean hasAndChild() {
+    protected boolean hasAndChild() {
         for (int i = 0; i < children.length; i++) {
             if (!children[i].isLit() && ((LogOp) children[i]).is(Operator.AND)) {
                 return true;

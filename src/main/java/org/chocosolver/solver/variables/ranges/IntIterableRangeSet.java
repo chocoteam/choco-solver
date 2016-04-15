@@ -380,7 +380,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      * @return the range index if the value is in the set or -<i>range point</i> - 1 otherwise
      * where <i>range point</i> corresponds to the range directly greater than the key
      */
-    int rangeOf(int x) {
+    protected int rangeOf(int x) {
         int p = Arrays.binarySearch(ELEMENTS, 0, SIZE, x);
         // if pos is positive, the value is a bound of a range
         if (p >= 0) {
@@ -406,7 +406,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      *
      * @param minCapacity the desired minimum capacity
      */
-    void grow(int minCapacity) {
+    protected void grow(int minCapacity) {
         if (minCapacity - ELEMENTS.length > 0) {
             // overflow-conscious code
             int oldCapacity = ELEMENTS.length;

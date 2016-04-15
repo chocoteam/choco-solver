@@ -162,7 +162,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        filter();
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     /**
@@ -245,8 +245,8 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     protected static class RemProc implements UnarySafeIntProcedure<Integer> {
 
-        final PropAmongGAC p;
-        int varIdx;
+        private final PropAmongGAC p;
+        private int varIdx;
 
         public RemProc(PropAmongGAC p) {
             this.p = p;

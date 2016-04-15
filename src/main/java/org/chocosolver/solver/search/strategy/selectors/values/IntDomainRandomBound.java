@@ -43,7 +43,7 @@ import java.util.Random;
  */
 public class IntDomainRandomBound implements IntValueSelector {
 
-    final Random rand;
+    private final Random rand;
 
     public IntDomainRandomBound(long seed) {
         this.rand = new Random(seed);

@@ -54,7 +54,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
     private IntVar[][] X, Y; // ref to X and Y, instead of vars
     private int[][] XLB, XUB, YLB, YUB;
     private int[] CHUNK, SORTMIN, SORTMAX, XMATE, YMATE, NODE, ROOT, RIGHTMOST, MAXX, SCC, SORTY, ARRAY, CUR;
-    boolean prune;
+    private boolean prune;
 
     protected final ArraySort sorter;
     private final IntComparator sortmincomp1 = (i, j) -> {

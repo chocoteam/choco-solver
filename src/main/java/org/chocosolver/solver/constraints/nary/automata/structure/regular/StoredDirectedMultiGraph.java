@@ -59,16 +59,16 @@ public class StoredDirectedMultiGraph {
 	private StoredIndexedBipartiteSetWithOffset[] supports;
 
 	private class Nodes {
-		int[] states;
-		int[] layers;
-		StoredIndexedBipartiteSetWithOffset[] outArcs;
-		StoredIndexedBipartiteSetWithOffset[] inArcs;
+		private int[] states;
+		private int[] layers;
+		private StoredIndexedBipartiteSetWithOffset[] outArcs;
+		private StoredIndexedBipartiteSetWithOffset[] inArcs;
 	}
 
 	private class Arcs {
-		int[] values;
-		int[] dests;
-		int[] origs;
+		private int[] values;
+		private int[] dests;
+		private int[] origs;
 	}
 
 	private Nodes GNodes;

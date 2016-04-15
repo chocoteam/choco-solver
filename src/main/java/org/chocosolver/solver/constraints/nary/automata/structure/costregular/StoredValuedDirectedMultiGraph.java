@@ -57,14 +57,14 @@ import java.util.Set;
  */
 public class StoredValuedDirectedMultiGraph {
 
-    int[] starts;
-    int[] offsets;
+    private int[] starts;
+    private int[] offsets;
 
     public int sourceIndex;
     public int tinkIndex;
 
 
-    StoredIndexedBipartiteSetWithOffset[] supports;
+    private StoredIndexedBipartiteSetWithOffset[] supports;
     public int[][] layers;
     public BitSet inStack;
     public StoredIndexedBipartiteSet inGraph;

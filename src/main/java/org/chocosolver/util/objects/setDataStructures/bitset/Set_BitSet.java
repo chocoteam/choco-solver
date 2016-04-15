@@ -65,7 +65,7 @@ public class Set_BitSet extends BitSet implements ISet {
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			int current = -1;
+			private int current = -1;
 			@Override
 			public void reset() {
 				current = -1;

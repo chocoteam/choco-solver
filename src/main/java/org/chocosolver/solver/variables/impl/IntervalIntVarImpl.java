@@ -59,7 +59,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
      * on value removal
      */
-    protected boolean reactOnRemoval = false;
+    private boolean reactOnRemoval = false;
     /**
      * Lower bound of the current domain
      */
@@ -75,7 +75,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     /**
      * To iterate over removed values
      */
-    IIntervalDelta delta = NoDelta.singleton;
+    private IIntervalDelta delta = NoDelta.singleton;
     /**
      * To iterate over values in the domain
      */

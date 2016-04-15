@@ -290,13 +290,10 @@ public class ParallelPortfolio {
             if(solverVal == bestVal){
                 getSolutionFound().set(true);
                 finder = m;
-                switch (m.getSolver().getObjectiveManager().getPolicy()) {
-                    case MAXIMIZE:
-                        models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(bestVal));
-                        break;
-                    case MINIMIZE:
-                        models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(bestVal));
-                        break;
+                if (m.getResolutionPolicy() == ResolutionPolicy.MAXIMIZE) {
+                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(bestVal));
+                }else {
+                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(bestVal));
                 }
             }
         }

@@ -71,11 +71,10 @@ public class SetFactory {
 	public static ISet makeStoredSet(SetType type, int offSet, Model model) {
 		IEnvironment environment = model.getEnvironment();
 		if (HARD_CODED) {
-			switch (type) {
-				case BIPARTITESET:
-					return new Set_Std_Swap(environment, offSet);
-				case BITSET:
-					return new Set_Std_BitSet(environment, offSet);
+			if (type == SetType.BIPARTITESET) {
+				return new Set_Std_Swap(environment, offSet);
+			}else if (type == SetType.BITSET) {
+				return new Set_Std_BitSet(environment, offSet);
 			}
 		}
 		return new StdSet(environment,makeSet(type,offSet));
@@ -102,8 +101,8 @@ public class SetFactory {
 				return makeBitSet(offSet);
 			case FIXED_ARRAY: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_ARRAY+" set");
 			case FIXED_INTERVAL: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_INTERVAL+" set");
+			default:throw new UnsupportedOperationException("Unsupported SetType "+type);
 		}
-		throw new UnsupportedOperationException("SetType");
 	}
 
 	// --- List

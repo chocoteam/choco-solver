@@ -380,7 +380,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples scalar(IntVar[] VARS, final int[] COEFFS, final String OPERATOR, IntVar SCALAR, final int SCALAR_COEFF, int CSTE) {
-        if (OPERATOR.equals("=") && CSTE == 0) {
+        if ("=".equals(OPERATOR) && CSTE == 0) {
             return scalar(VARS, COEFFS, SCALAR, SCALAR_COEFF);
         }
         final Operator op = Operator.get(OPERATOR);

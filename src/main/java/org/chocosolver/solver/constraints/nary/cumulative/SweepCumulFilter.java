@@ -225,6 +225,7 @@ public class SweepCumulFilter extends CumulFilter {
 				case(PRU):
 					tprune.add(event.index);
 					break;
+				default:throw new UnsupportedOperationException("unknown event type");
 			}
 		}
 		return active;

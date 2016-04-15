@@ -49,10 +49,8 @@ import org.chocosolver.solver.variables.IntVar;
 public class IntDomainMiddle implements IntValueSelector {
 
 	// VARIABLES
-	public final static boolean FLOOR = true;
-	@SuppressWarnings("PointlessBooleanExpression")
-	public final static boolean CEIL = !FLOOR;
-	protected final boolean roundingPolicy;
+	private final static boolean FLOOR = true;
+	private final boolean roundingPolicy;
 
 	/**Selects the middle value
 	 * @param roundingPolicy should be either FLOOR or CEIL

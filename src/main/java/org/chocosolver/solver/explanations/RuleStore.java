@@ -61,23 +61,23 @@ public class RuleStore {
     /**
      * Mask for integer variable modification
      */
-    static final int DM = 15;
+    protected static final int DM = 15;
     /**
      * Mask for integer variable bounds modification
      */
-    static final int BD = 7;
+    protected static final int BD = 7;
     /**
      * Mask for integer variable upper bound modification
      */
-    static final int UB = 5;
+    protected static final int UB = 5;
     /**
      * Mask for integer variable lower bound modification
      */
-    static final int LB = 3;
+    protected static final int LB = 3;
     /**
      * Mask for integer variable value removal
      */
-    static final int RM = 1;
+    protected static final int RM = 1;
 
     /**
      * Set of modification rules

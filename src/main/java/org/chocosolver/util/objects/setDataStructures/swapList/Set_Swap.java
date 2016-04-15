@@ -179,7 +179,7 @@ public class Set_Swap implements ISet {
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			int idx;
+			private int idx;
 			@Override
 			public void reset() {
 				idx = 0;

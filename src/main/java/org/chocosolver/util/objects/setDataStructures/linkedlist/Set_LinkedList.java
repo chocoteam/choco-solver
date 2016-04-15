@@ -167,7 +167,7 @@ public class Set_LinkedList implements ISet {
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			protected IntCell nextCell;
+			private IntCell nextCell;
 			@Override
 			public void reset() {
 				nextCell = first;
@@ -195,10 +195,10 @@ public class Set_LinkedList implements ISet {
 	// STRUCTURE
 	//***********************************************************************************
 
-	protected class IntCell  {
+	private class IntCell  {
 
-		int element;
-		IntCell next;
+		private int element;
+		private IntCell next;
 
 		public IntCell(int element, IntCell next) {
 			init(element, next);

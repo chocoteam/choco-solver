@@ -217,16 +217,16 @@ public interface IIntConstraintFactory {
 	 */
 	default Constraint arithm(IntVar var1, String op1, IntVar var2, String op2, int cste) {
 		if (var2.isInstantiated()) {
-			if (op1.equals("+")) {
+			if ("+".equals(op1)) {
 				return arithm(var1, op2, cste - var2.getValue());
-			} else if (op1.equals("-")) {
+			} else if ("-".equals(op1)) {
 				return arithm(var1, op2, cste + var2.getValue());
 			}
 		}
 		if (var1.isInstantiated()) {
-			if (op1.equals("+")) {
+			if ("+".equals(op1)) {
 				return arithm(var2, op2, cste - var1.getValue());
-			} else if (op1.equals("-")) {
+			} else if ("-".equals(op1)) {
 				return arithm(var2, Operator.getFlip(op2), var1.getValue() - cste);
 			}
 		}
@@ -376,10 +376,10 @@ public interface IIntConstraintFactory {
 						return scalar(new IntVar[]{var1, var3}, new int[]{1, -1}, op1, var2);
 					case "-":
 						return scalar(new IntVar[]{var1, var3}, new int[]{1, 1}, op1, var2);
+					default:
+						throw new SolverException("Unknown operators for arithm constraint");
 				}
-				break;
 		}
-		throw new SolverException("Unknown operators for arithm constraint");
 	}
 
 	/**
@@ -1621,7 +1621,7 @@ public interface IIntConstraintFactory {
 	 * @param sum  a variable
 	 */
 	default Constraint sum(BoolVar[] vars, String operator, IntVar sum) {
-		if (operator.equals("=")) {
+		if ("=".equals(operator)) {
 			return IntLinCombFactory.reduce(vars, Operator.EQ, sum);
 		}
 		int lb = 0;

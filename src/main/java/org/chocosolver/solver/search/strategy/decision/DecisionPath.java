@@ -64,11 +64,11 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     /**
      * Store the sizes of {@link #decisions} during search, to evaluate which decisions are part of the same level.
      */
-    IStateInt mLevel;
+    protected IStateInt mLevel;
     /**
      * Indices of level in {@link #decisions}
      */
-    int[] levels;
+    protected int[] levels;
 
 
     /**

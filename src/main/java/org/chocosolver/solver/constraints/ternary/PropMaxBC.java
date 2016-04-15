@@ -51,7 +51,7 @@ public class PropMaxBC extends Propagator<IntVar> {
     private IntVar BST, v1, v2;
 
     public PropMaxBC(IntVar X, IntVar Y, IntVar Z) {
-        super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
+        super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, false);
         this.BST = vars[0];
         this.v1 = vars[1];
         this.v2 = vars[2];
@@ -65,12 +65,6 @@ public class PropMaxBC extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         filter();
-    }
-
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
     }
 
     private void filter() throws ContradictionException {

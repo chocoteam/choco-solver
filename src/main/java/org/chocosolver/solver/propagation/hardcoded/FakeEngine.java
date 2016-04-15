@@ -75,6 +75,8 @@ class FakeEngine implements IPropagationEngine {
                 }
                 lastProp.getModel().getSolver().set(engine);
                 break;
+            default:
+            case disabled:break;
         }
     }
 }

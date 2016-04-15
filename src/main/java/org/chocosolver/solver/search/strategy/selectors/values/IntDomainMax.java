@@ -41,7 +41,6 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public final class IntDomainMax implements IntValueSelector {
 
-
     /**
      * {@inheritDoc}
      */

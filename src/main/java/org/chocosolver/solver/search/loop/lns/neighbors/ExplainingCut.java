@@ -88,7 +88,7 @@ public class ExplainingCut implements INeighbor {
     /**
      * Indicates which decisions are frozen in the current fragment
      */
-    BitSet notFrozen;
+    protected BitSet notFrozen;
     /**
      * Indicates if the cut has already been explained
      */

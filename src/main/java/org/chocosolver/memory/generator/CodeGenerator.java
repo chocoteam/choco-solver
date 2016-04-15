@@ -154,7 +154,7 @@ public class CodeGenerator {
 
             if (file.isDirectory()) {
                 // Ignore CVS directories
-                if (file.getName().equals("CVS")) continue;
+                if ("CVS".equals(file.getName())) continue;
 
                 scanForFiles(file, new File(output_directory, file.getName()));
                 continue;
@@ -404,9 +404,9 @@ public class CodeGenerator {
      * Abbreviate the type for Integer and Character
      */
     private static String abbreviate(String type) {
-        if (type.equals("Integer")) {
+        if ("Integer".equals(type)) {
             return "Int";
-        } else if (type.equals("Character")) {
+        } else if ("Character".equals(type)) {
             return "Char";
         }
         return type;

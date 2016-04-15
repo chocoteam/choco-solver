@@ -91,6 +91,7 @@ public class PropCircuit_ArboFiltering extends Propagator<IntVar> {
             case FIRST:
                 filterFromDom(0);
                 break;
+            default:
             case RD:
                 filterFromDom(rd.nextInt(n));
                 break;

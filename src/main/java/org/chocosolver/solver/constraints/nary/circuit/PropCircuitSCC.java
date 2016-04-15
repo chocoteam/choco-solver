@@ -106,6 +106,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		switch (conf){
 			case FIRST:
 				filterFromSource(0);break;
+			default:
 			case RD:
 				filterFromSource(rd.nextInt(n));break;
 			case ALL:
