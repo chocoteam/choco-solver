@@ -50,10 +50,10 @@ public class PropScale extends Propagator<IntVar> {
 
     protected static final int MAX = Integer.MAX_VALUE - 1, MIN = Integer.MIN_VALUE + 1;
 
-    final IntVar X, Z;
-    final int Y;
-    final boolean enumerated;
-    final IntIterableBitSet values;
+    private final IntVar X, Z;
+    private final int Y;
+    private final boolean enumerated;
+    private final IntIterableBitSet values;
 
     /**
      * Scale propagator : ensures x * y = z

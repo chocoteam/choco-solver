@@ -52,13 +52,13 @@ import java.util.Arrays;
  */
 public class PropLex extends Propagator<IntVar> {
 
-    public final int n;            // size of both vectors
-    public final IStateInt alpha;  // size of both vectors
-    public final IStateInt beta;
-    public boolean entailed;
-    public final IntVar[] x;
-    public final IntVar[] y;
-    public final boolean strict;
+    private final int n;            // size of both vectors
+    private final IStateInt alpha;  // size of both vectors
+    private final IStateInt beta;
+    private boolean entailed;
+    private final IntVar[] x;
+    private final IntVar[] y;
+    private final boolean strict;
 
 
     public PropLex(IntVar[] X, IntVar[] Y, boolean strict) {
@@ -115,45 +115,24 @@ public class PropLex extends Propagator<IntVar> {
     }
 
     /////////////////////
-    public boolean groundEq(IntVar x1, IntVar y1) {
+
+    private boolean groundEq(IntVar x1, IntVar y1) {
         return x1.isInstantiated() && y1.isInstantiated() && x1.getValue() == y1.getValue();
     }
 
-    public boolean leq(IntVar x1, IntVar y1) {
-        return x1.getUB() <= y1.getLB();
-    }
-
-    public boolean less(IntVar x1, IntVar y1) {
-        return x1.getUB() < y1.getLB();
-    }
-
-    public boolean greater(IntVar x1, IntVar y1) {
-        return x1.getLB() > y1.getUB();
-    }
-
-    public boolean checkLex(int i) {
+    private boolean checkLex(int i) {
         if (!strict) {
             if (i == n - 1) {
-                return leq(x[i], y[i]);
+                return x[i].getUB() <= y[i].getLB();
             } else {
-                return less(x[i], y[i]);
+                return x[i].getUB() < y[i].getLB();
             }
         } else {
-            return less(x[i], y[i]);
+            return x[i].getUB() < y[i].getLB();
         }
     }
 
-    public void ACleq(int i) throws ContradictionException {
-        x[i].updateUpperBound(y[i].getUB(), this);
-        y[i].updateLowerBound(x[i].getLB(), this);
-    }
-
-    public void ACless(int i) throws ContradictionException {
-        x[i].updateUpperBound(y[i].getUB() - 1, this);
-        y[i].updateLowerBound(x[i].getLB() + 1, this);
-    }
-
-    public void updateAlpha(int i) throws ContradictionException {
+    private void updateAlpha(int i) throws ContradictionException {
         if (i == beta.get()) {
             fails();
         }
@@ -174,7 +153,7 @@ public class PropLex extends Propagator<IntVar> {
         }
     }
 
-    public void updateBeta(int i) throws ContradictionException {
+    private void updateBeta(int i) throws ContradictionException {
         if ((i + 1) == alpha.get()) {
             fails();
         }
@@ -193,7 +172,7 @@ public class PropLex extends Propagator<IntVar> {
      *
      * @throws org.chocosolver.solver.exception.ContradictionException if initialisation encounters a contradiction
      */
-    protected void initialize() throws ContradictionException {
+    private void initialize() throws ContradictionException {
         entailed = false;
         int i = 0;
         int a, b;
@@ -240,7 +219,7 @@ public class PropLex extends Propagator<IntVar> {
         }
     }
 
-    public void gacLexLeq(int i) throws ContradictionException {
+    private void gacLexLeq(int i) throws ContradictionException {
         int a = alpha.get();
         int b = beta.get();
         //Part A
@@ -249,7 +228,8 @@ public class PropLex extends Propagator<IntVar> {
         }
         //Part B
         if (i == a && (i + 1) == b) {
-            ACless(i);
+            x[i].updateUpperBound(y[i].getUB() - 1, this);
+            y[i].updateLowerBound(x[i].getLB() + 1, this);
             if (checkLex(i)) {
                 entailed = true;
                 setPassive();
@@ -258,7 +238,8 @@ public class PropLex extends Propagator<IntVar> {
         }
         //Part C
         if (i == a && (i + 1) < b) {
-            ACleq(i);
+            x[i].updateUpperBound(y[i].getUB(), this);
+            y[i].updateLowerBound(x[i].getLB(), this);
             if (checkLex(i)) {
                 entailed = true;
                 setPassive();
@@ -270,13 +251,13 @@ public class PropLex extends Propagator<IntVar> {
         }
         //Part D
         if (a < i && i < b) {
-            if ((i == (b - 1) && x[i].getLB() == y[i].getUB()) || greater(x[i], y[i])) {
+            if ((i == (b - 1) && x[i].getLB() == y[i].getUB()) || x[i].getLB() > y[i].getUB()) {
                 updateBeta(i - 1);
             }
         }
     }
 
-
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
         sb.append("LEX <");

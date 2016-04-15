@@ -59,8 +59,8 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropNotEqualX_Y extends Propagator<IntVar> {
 
-    IntVar x;
-    IntVar y;
+    private IntVar x;
+    private IntVar y;
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_Y(IntVar x, IntVar y) {
@@ -82,23 +82,15 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (x.isInstantiated()) {
-            removeValV1();
+            if (y.removeValue(x.getValue(), this) || !y.contains(x.getValue())) {
+                this.setPassive();
+            }
         } else if (y.isInstantiated()) {
-            removeValV0();
+            if (x.removeValue(y.getValue(), this) || !x.contains(y.getValue())) {
+                this.setPassive();
+            }
         } else if (x.getUB() < (y.getLB()) || (y.getUB()) < x.getLB()) {
             setPassive();
-        }
-    }
-
-    private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue(), this) || !x.contains(y.getValue())) {
-            this.setPassive();
-        }
-    }
-
-    private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue(), this) || !y.contains(x.getValue())) {
-            this.setPassive();
         }
     }
 

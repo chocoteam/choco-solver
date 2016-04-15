@@ -59,19 +59,19 @@ import static java.lang.Math.floor;
  */
 public class PropCostRegular extends Propagator<IntVar> {
 
-    final int zIdx;
+    private final int zIdx;
 
-    final StoredValuedDirectedMultiGraph graph;
-    final ICostAutomaton cautomaton;
-    TIntStack toRemove;
+    private final StoredValuedDirectedMultiGraph graph;
+    private final ICostAutomaton cautomaton;
+    private TIntStack toRemove;
 
-    final IStateBool boundChange;
-    int lastWorld = -1;
+    private final IStateBool boundChange;
+    private int lastWorld = -1;
 
-    long lastNbOfBacktracks = -1, lastNbOfRestarts = -1;
+    private long lastNbOfBacktracks = -1, lastNbOfRestarts = -1;
 
-    protected final RemProc rem_proc;
-    protected final IIntDeltaMonitor[] idms;
+    private final RemProc rem_proc;
+    private final IIntDeltaMonitor[] idms;
 
 
     public PropCostRegular(IntVar[] variables, ICostAutomaton cautomaton, StoredValuedDirectedMultiGraph graph) {

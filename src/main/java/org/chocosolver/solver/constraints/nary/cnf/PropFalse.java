@@ -54,11 +54,6 @@ public class PropFalse extends Propagator<BoolVar> {
     }
 
     @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
         return IntEventType.all();
     }

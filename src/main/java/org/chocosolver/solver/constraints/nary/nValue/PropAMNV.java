@@ -54,9 +54,9 @@ public class PropAMNV extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    protected G graph;
-    protected F heur;
-    protected R[] rules;
+    private G graph;
+    private F heur;
+    private R[] rules;
 
     //***********************************************************************************
     // CONSTRUCTORS

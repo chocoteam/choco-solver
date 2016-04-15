@@ -48,7 +48,7 @@ import org.chocosolver.util.ESat;
  */
 public final class PropDistanceXYZ extends Propagator<IntVar> {
 
-    protected Operator operator;
+    private Operator operator;
 
     /**
      * Enforces |x0 - x1| op x2

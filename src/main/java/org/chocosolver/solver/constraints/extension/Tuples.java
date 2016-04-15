@@ -50,10 +50,10 @@ public class Tuples {
     // VARIABLES
     //***********************************************************************************
 
-    protected final boolean feasible;
+    private final boolean feasible;
     protected final List<int[]> tuples;
-    protected int arity;
-    protected int[] ranges;
+    private int arity;
+    private int[] ranges;
 
     //***********************************************************************************
     // CONSTRUCTOR

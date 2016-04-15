@@ -60,8 +60,8 @@ public class PropNoSubtour extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    int n;
-    int offset = 0; // lower bound
+    private int n;
+    private int offset = 0; // lower bound
     private IStateInt[] origin, end, size;
 
     //***********************************************************************************

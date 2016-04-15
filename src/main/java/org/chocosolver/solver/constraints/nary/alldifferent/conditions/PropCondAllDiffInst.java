@@ -41,7 +41,7 @@ import org.chocosolver.util.ESat;
  */
 public class PropCondAllDiffInst extends PropAllDiffInst {
 
-	protected Condition condition;
+	private Condition condition;
 	private boolean mode;
 
     //***********************************************************************************

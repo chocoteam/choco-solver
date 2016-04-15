@@ -74,13 +74,13 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     private IStateInt[] occs;
 
-    protected final IIntDeltaMonitor[] idms;
+    private final IIntDeltaMonitor[] idms;
 
-    protected final RemProc rem_proc;
+    private final RemProc rem_proc;
 
-    protected boolean needFilter;
+    private boolean needFilter;
 
-    protected final IntIterableSet vrms;
+    private final IntIterableSet vrms;
 
     public PropAmongGAC(IntVar[] variables, int[] values) {
         super(variables, PropagatorPriority.LINEAR, true);

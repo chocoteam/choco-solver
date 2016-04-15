@@ -47,9 +47,9 @@ import org.chocosolver.util.ESat;
  */
 public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
 
-    final IntVar x;
-    final IntVar y;
-    final int cste;
+    private final IntVar x;
+    private final IntVar y;
+    private final int cste;
 
     @SuppressWarnings({"unchecked"})
     public PropGreaterOrEqualXY_C(IntVar[] vars, int c) {

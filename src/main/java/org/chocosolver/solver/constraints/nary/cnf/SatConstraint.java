@@ -42,7 +42,7 @@ import org.chocosolver.util.ESat;
  */
 public class SatConstraint extends Constraint {
 
-	final PropSat miniSat;
+	private final PropSat miniSat;
 
 	public SatConstraint(Model model) {
 		super("SatConstraint",new PropSat(model));

@@ -51,8 +51,8 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 	// VARIABLES
 	//***********************************************************************************
 
-	protected IntVar[] X;
-	protected SetVar values;
+	private IntVar[] X;
+	private SetVar values;
 
 	//***********************************************************************************
 	// CONSTRUCTORS

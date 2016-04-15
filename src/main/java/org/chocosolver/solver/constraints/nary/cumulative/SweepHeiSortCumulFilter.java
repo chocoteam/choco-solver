@@ -48,9 +48,9 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	// VARIABLES
 	//***********************************************************************************
 
-	protected final int[] sortedTasks;
-	protected final ArraySort taskSorter;
-	protected final IntComparator comparator;
+	private final int[] sortedTasks;
+	private final ArraySort taskSorter;
+	private final IntComparator comparator;
 
 	//***********************************************************************************
 	// CONSTRUCTORS

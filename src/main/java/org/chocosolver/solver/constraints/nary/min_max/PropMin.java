@@ -45,7 +45,7 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropMin extends Propagator<IntVar> {
 
-    final int n;
+    private final int n;
 
     public PropMin(IntVar[] variables, IntVar maxVar) {
         super(ArrayUtils.append(variables, new IntVar[]{maxVar}), PropagatorPriority.LINEAR, false);
