@@ -53,7 +53,7 @@ public class ExplanationEngine implements IExplanationEngine{
     /**
      * Events generated during search
      */
-    protected final ArrayEventStore eventStore;
+    private final ArrayEventStore eventStore;
     /**
      * Active rules, to compute explanation backward
      */
@@ -69,7 +69,7 @@ public class ExplanationEngine implements IExplanationEngine{
     /**
      * To recycle explanations
      */
-    PoolManager<Explanation> explanationPool;
+    private PoolManager<Explanation> explanationPool;
 
 
     /**

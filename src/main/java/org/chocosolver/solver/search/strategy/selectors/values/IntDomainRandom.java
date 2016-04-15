@@ -46,7 +46,7 @@ import java.util.Random;
  */
 public class IntDomainRandom implements IntValueSelector {
 
-    final Random rand;
+	private final Random rand;
 
     public IntDomainRandom(long seed) {
         this.rand = new Random(seed);

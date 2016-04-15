@@ -63,15 +63,15 @@ public class MoveLNS implements Move {
     /**
      * Indicate a restart has been triggered
      */
-    boolean freshRestart;
+    private boolean freshRestart;
     /**
      * Restart counter
      */
-    ICounter counter;
+    private ICounter counter;
     /**
      * For restart strategy
      */
-    long frequency;
+    private long frequency;
 
     /**
      * Create a move which defines a Large Neighborhood Search.

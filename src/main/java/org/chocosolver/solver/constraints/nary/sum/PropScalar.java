@@ -88,7 +88,7 @@ public class PropScalar extends PropSum {
 
 
     @Override
-    void filterOnEq() throws ContradictionException {
+    protected void filterOnEq() throws ContradictionException {
         boolean anychange;
         int F = b - sumLB;
         int E = sumUB - b;
@@ -154,7 +154,7 @@ public class PropScalar extends PropSum {
     }
 
     @Override
-    void filterOnLeq() throws ContradictionException {
+    protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (F < 0) {
@@ -193,7 +193,7 @@ public class PropScalar extends PropSum {
     }
 
     @Override
-    void filterOnGeq() throws ContradictionException {
+    protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (E < 0) {
@@ -232,7 +232,7 @@ public class PropScalar extends PropSum {
     }
 
     @Override
-    void filterOnNeq() throws ContradictionException {
+    protected void filterOnNeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (F < 0 || E < 0) {

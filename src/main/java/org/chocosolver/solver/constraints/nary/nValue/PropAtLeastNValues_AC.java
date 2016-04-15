@@ -349,7 +349,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     private class DirectedRemProc implements UnaryIntProcedure<Integer> {
 
-        int idx;
+        private int idx;
 
         public void execute(int i) throws ContradictionException {
             digraph.removeArc(idx, map.get(i));

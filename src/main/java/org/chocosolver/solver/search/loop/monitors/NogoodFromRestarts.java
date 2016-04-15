@@ -58,12 +58,12 @@ public class NogoodFromRestarts implements IMonitorRestart {
     /**
      * Stores the decision path before
      */
-    ArrayDeque<Decision> decisions;
+    private ArrayDeque<Decision> decisions;
 
     /**
      * The (unique) no-good store
      */
-    final PropNogoods png;
+    private final PropNogoods png;
 
     /**
      * A constraint for the specific Nogood store designed to store ONLY positive decisions.

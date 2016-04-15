@@ -56,15 +56,15 @@ public class MoveSeq implements Move {
     /**
      * List of moves to consider
      */
-    List<Move> moves;
+    private List<Move> moves;
     /**
      * Index of the current move
      */
-    IStateInt index;
+    private IStateInt index;
     /**
      * Sequence of strategies in use
      */
-    AbstractStrategy seqStrat;
+    private AbstractStrategy seqStrat;
 
     /**
      * Create a move which sequentially apply a move. When a move can not be extended, the next one is used.

@@ -57,31 +57,30 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 21/09/12
  */
-public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart,
-        IMonitorContradiction, ICause {
+public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorContradiction, ICause {
 
-    protected final int aging; // aging parameter
-    protected double[][] Ilabel; // impact per labeling
-    protected int[] offsets; // initial lower bound of each variable
-    protected int split; // domains are divided into at most 2^s subdomains
-    protected IStateDouble searchSpaceSize;
+    private final int aging; // aging parameter
+    private double[][] Ilabel; // impact per labeling
+    private int[] offsets; // initial lower bound of each variable
+    private int split; // domains are divided into at most 2^s subdomains
+    private IStateDouble searchSpaceSize;
 
-    protected int currentVar = -1, currentVal = -1;
+    private int currentVar = -1, currentVal = -1;
 
-    IntList bests = new IntList();
+    private IntList bests = new IntList();
 
-    java.util.Random random; //  a random object to break ties
+    private java.util.Random random; //  a random object to break ties
 
-    protected int nodeImpact;
+    private int nodeImpact;
 
-    protected Model model;
+    private Model model;
 
-    protected boolean asgntFailed; // does the assignment leads to a failure
+    private boolean asgntFailed; // does the assignment leads to a failure
 
-    protected boolean learnsAndFails; // does the learning pahse leads to a failure
-    protected IntVar lAfVar; // the index of one of the variables involved into a failure during the learning phase
+    private boolean learnsAndFails; // does the learning pahse leads to a failure
+    private IntVar lAfVar; // the index of one of the variables involved into a failure during the learning phase
 
-    protected long timeLimit = Integer.MAX_VALUE; // a time limit for init()
+    private long timeLimit = Integer.MAX_VALUE; // a time limit for init()
 
     /**
      * Create an Impact-based search strategy with Node Impact strategy.
@@ -305,7 +304,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      * @param idx index of the variable
      * @return the impact of the variable idx
      */
-    protected double computeImpact(int idx) {
+    private double computeImpact(int idx) {
         IntVar var = vars[idx];
         if (var.hasEnumeratedDomain()) {
             int of = offsets[idx];
@@ -364,7 +363,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      * @param varIdx  index of the variable
      * @param valIdx  index of the value
      */
-    protected void updateImpact(double nImpact, int varIdx, int valIdx) {
+    private void updateImpact(double nImpact, int varIdx, int valIdx) {
         valIdx = Ilabel[varIdx].length > 1 ? valIdx - offsets[varIdx] : 0;
         double impact = Ilabel[varIdx][valIdx] * (aging - 1);
         impact += nImpact;
@@ -377,7 +376,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      *
      * @return search space size
      */
-    protected double searchSpaceSize() {
+    private double searchSpaceSize() {
         double size = 1;
         for (int i = 0; i < vars.length; i++) {
             size *= vars[i].getDomainSize();
@@ -389,7 +388,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         return size;
     }
 
-    protected void reevaluateImpact() {
+    private void reevaluateImpact() {
         if (nodeImpact > 0 && model.getSolver().getNodeCount() % nodeImpact == 0) {
             double before = searchSpaceSize.get();
             learnsAndFails = false;
@@ -437,16 +436,5 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 learnsAndFails = false;
             }
         }
-    }
-
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
     }
 }

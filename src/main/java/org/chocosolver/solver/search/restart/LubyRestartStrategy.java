@@ -64,7 +64,7 @@ public class LubyRestartStrategy extends AbstractRestartStrategy {
         divFactor = geometricalIntFactor - 1;
     }
 
-    static int geometricalSum(int value, int exponent) {
+    private static int geometricalSum(int value, int exponent) {
         return (MathUtils.pow(value, exponent) - 1) / (value - 1);
     }
 

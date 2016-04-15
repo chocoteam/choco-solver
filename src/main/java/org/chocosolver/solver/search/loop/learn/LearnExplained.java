@@ -50,18 +50,18 @@ public class LearnExplained implements Learn {
     /**
      * The solver to explain.
      */
-    final Model mModel;
+    protected final Model mModel;
 
     /**
      * The explanation engine, which computes and returns explanation of a state.
      */
-    final IExplanationEngine mExplainer;
+    protected final IExplanationEngine mExplainer;
 
     /**
      * Indicates if the causes need to be stored.
      * This is required, for instance, when a user explanation is required.
      */
-    final boolean saveCauses;
+    private final boolean saveCauses;
 
     /**
      * Maintains the number of solutions found, required for {@link #record(Solver)}.
@@ -71,7 +71,7 @@ public class LearnExplained implements Learn {
     /**
      * The last explanation computed.
      */
-    Explanation lastExplanation;
+    protected Explanation lastExplanation;
 
 
     /**

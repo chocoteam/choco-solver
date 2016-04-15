@@ -46,8 +46,7 @@ import org.chocosolver.util.ESat;
  */
 public class PropMemberBound extends Propagator<IntVar> {
 
-    final int lb, ub;
-
+    private final int lb, ub;
 
     public PropMemberBound(IntVar var, int lb, int ub) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
@@ -89,5 +88,4 @@ public class PropMemberBound extends Propagator<IntVar> {
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         return ruleStore.addPropagatorActivationRule(this);
     }
-
 }

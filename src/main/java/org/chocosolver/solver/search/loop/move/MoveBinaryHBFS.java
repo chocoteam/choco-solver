@@ -299,15 +299,15 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
         /**
          * List of open decisions
          */
-        List<Decision> path;
+        private List<Decision> path;
         /**
          * store the current lower bound of the decision path for minimization
          */
-        int currentBound;
+        private int currentBound;
         /**
          * 1 for minimization, -1 for maximization
          */
-        byte minimization;
+        private byte minimization;
 
         /**
          * Create an open right branch for HBFS

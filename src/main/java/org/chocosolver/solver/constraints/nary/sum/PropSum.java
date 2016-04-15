@@ -199,7 +199,7 @@ public class PropSum extends Propagator<IntVar> {
      * Apply filtering when operator is EQ
      * @throws ContradictionException if contradiction is detected
      */
-    void filterOnEq() throws ContradictionException {
+    protected void filterOnEq() throws ContradictionException {
         boolean anychange;
         int F = b - sumLB;
         int E = sumUB - b;
@@ -268,7 +268,7 @@ public class PropSum extends Propagator<IntVar> {
      * Apply filtering when operator is LE
      * @throws ContradictionException if contradiction is detected
      */
-    void filterOnLeq() throws ContradictionException {
+    protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (F < 0) {
@@ -310,7 +310,7 @@ public class PropSum extends Propagator<IntVar> {
      * Apply filtering when operator is GE
      * @throws ContradictionException if contradiction is detected
      */
-    void filterOnGeq() throws ContradictionException {
+    protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (E < 0) {
@@ -352,7 +352,7 @@ public class PropSum extends Propagator<IntVar> {
      * Apply filtering when operator is NE
      * @throws ContradictionException if contradiction is detected
      */
-    void filterOnNeq() throws ContradictionException {
+    protected void filterOnNeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (F < 0 || E < 0) {
@@ -397,7 +397,7 @@ public class PropSum extends Propagator<IntVar> {
      * @param sumUB sum of upper bounds
      * @return the entailment check
      */
-    ESat check(int sumLB, int sumUB){
+    protected ESat check(int sumLB, int sumUB){
         switch (o) {
             case NQ:
                 if (sumUB < b || sumLB > b) {
