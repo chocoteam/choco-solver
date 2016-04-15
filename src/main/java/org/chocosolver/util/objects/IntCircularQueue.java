@@ -47,18 +47,18 @@ package org.chocosolver.util.objects;
  */
 public class IntCircularQueue  {
 
-    int[] elementData;
+    private int[] elementData;
     // head points to the first logical element in the array, and
     // tail points to the element following the last.  This means
     // that the list is empty when head == tail.  It also means
     // that the elementData array has to have an extra space in it.
-    int head = 0;
-    int tail = 0;
+    private int head = 0;
+    private int tail = 0;
     // Strictly speaking, we don't need to keep a handle to size,
     // as it can be calculated programmatically, but keeping it
     // makes the algorithms faster.
-    int size = 0;
-    int capacity;
+    private int size = 0;
+    private int capacity;
 
     /**
      * Compute the powers of 2 value immedialty greater to <code>size</code>

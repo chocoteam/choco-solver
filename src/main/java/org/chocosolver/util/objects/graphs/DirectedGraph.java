@@ -44,11 +44,11 @@ public class DirectedGraph implements IGraph {
     // VARIABLES
     //***********************************************************************************
 
-    ISet[] successors;
-    ISet[] predecessors;
-    ISet nodes;
-    int n;
-    SetType type;
+    private ISet[] successors;
+    private ISet[] predecessors;
+    private ISet nodes;
+    private int n;
+    private SetType type;
 
     //***********************************************************************************
     // CONSTRUCTORS

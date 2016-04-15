@@ -109,18 +109,6 @@ public class PropReif extends Propagator<Variable> {
                 bVar.setToFalse(this);
                 reifCons.activate(1);
             }
-//			else {// in case the entailment has not the same implementation
-//				sat = falseCons.isSatisfied();
-//				if (sat == ESat.FALSE) {
-//					bVar.setToTrue(this);
-//					reifCons.activate(0);
-//					setPassive();
-//				}else if(sat == ESat.TRUE){
-//					bVar.setToFalse(this);
-//					reifCons.activate(1);
-//					setPassive();
-//				}
-//			}
         }
     }
 

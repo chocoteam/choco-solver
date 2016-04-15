@@ -43,9 +43,9 @@ import org.chocosolver.memory.IStateInt;
  */
 public class StoredSparseSet {
 
-    int[] sparse;
-    int[] dense;
-    IStateInt members;
+    private int[] sparse;
+    private int[] dense;
+    private IStateInt members;
 
 
     public StoredSparseSet(IEnvironment environment) {

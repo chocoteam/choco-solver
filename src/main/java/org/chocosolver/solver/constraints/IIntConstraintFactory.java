@@ -631,7 +631,7 @@ public interface IIntConstraintFactory {
 	default Constraint atMostNValues(IntVar[] vars, IntVar nValues, boolean STRONG) {
 		TIntArrayList vals = getDomainUnion(vars);
 		if (STRONG) {
-			Gci gci = new Gci(vars, new AutoDiffDetection(vars));
+			Gci gci = new Gci(vars);
 			R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
 			return new Constraint("AtMostNValues", new PropAtMostNValues(vars, vals, nValues),
 					new PropAMNV(vars, nValues, gci, new MDRk(gci), rules));

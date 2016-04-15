@@ -112,7 +112,7 @@ public class Task {
 
     private class TaskMonitorEnum implements IVariableMonitor<IntVar> {
 
-        IntVar S, D, E;
+        private IntVar S, D, E;
 
         public TaskMonitorEnum(IntVar S, IntVar D, IntVar E) {
             this.S = S;
@@ -179,7 +179,7 @@ public class Task {
 
     private class TaskMonitorBound implements IVariableMonitor<IntVar> {
 
-        IntVar S, D, E;
+        private IntVar S, D, E;
 
         public TaskMonitorBound(IntVar S, IntVar D, IntVar E) {
             this.S = S;

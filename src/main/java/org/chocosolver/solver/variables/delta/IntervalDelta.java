@@ -42,10 +42,10 @@ import org.chocosolver.solver.search.loop.TimeStampedObject;
 public final class IntervalDelta extends TimeStampedObject implements IIntervalDelta {
     private static final int SIZE = 32;
 
-    int[] from;
-    int[] to;
-    ICause[] causes;
-    int last;
+    private int[] from;
+    private int[] to;
+    private ICause[] causes;
+    private int last;
 
     public IntervalDelta(IEnvironment environment) {
 		super(environment);

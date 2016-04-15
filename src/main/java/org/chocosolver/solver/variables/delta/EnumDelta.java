@@ -42,9 +42,9 @@ import org.chocosolver.solver.search.loop.TimeStampedObject;
 public final class EnumDelta extends TimeStampedObject implements IEnumDelta {
     private static final int SIZE = 32;
 
-    int[] rem;
-    ICause[] causes;
-    int last;
+    private int[] rem;
+    private ICause[] causes;
+    private int last;
 
     public EnumDelta(IEnvironment environment) {
 		super(environment);

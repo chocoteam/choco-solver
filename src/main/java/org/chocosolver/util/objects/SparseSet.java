@@ -39,9 +39,9 @@ package org.chocosolver.util.objects;
  */
 public class SparseSet {
 
-    int[] sparse;
-    int[] dense;
-    int members;
+    private int[] sparse;
+    private int[] dense;
+    private int members;
 
 
     public SparseSet() {

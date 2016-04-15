@@ -38,15 +38,15 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public class IntEvtScheduler implements EvtScheduler<IntEventType> {
 
-    static final int[] DIS = new int[]{
+    private static final int[] DIS = new int[]{
             4, 5, -1, //REMOVE
             1, 2, 3, 5, -1,// INCLOW
             2, 5, -1, // DECUPP
             1, 5, -1, // BOUND
             0, 5, -1, // INSTANTIATE
     };
-    static final int[] IDX = new int[]{-1, 0, 3, 8, 11, 14};
-    int i = 0;
+    private static final int[] IDX = new int[]{-1, 0, 3, 8, 11, 14};
+    private int i = 0;
 
     public void init(IntEventType evt) {
         i = IDX[evt.ordinal()];
