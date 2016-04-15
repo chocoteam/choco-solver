@@ -46,7 +46,7 @@ public class TimeCumulFilter extends CumulFilter {
 	// VARIABLES
 	//***********************************************************************************
 
-	protected int[] time = new int[31];
+	private int[] time = new int[31];
 
 	//***********************************************************************************
 	// CONSTRUCTORS

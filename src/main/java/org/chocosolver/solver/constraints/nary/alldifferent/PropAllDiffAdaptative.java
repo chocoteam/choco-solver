@@ -52,8 +52,8 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
     // VARIABLES
     //***********************************************************************************
 
-    Random rd;
-    int calls, success;
+    private Random rd;
+    private int calls, success;
 
     //***********************************************************************************
     // CONSTRUCTORS

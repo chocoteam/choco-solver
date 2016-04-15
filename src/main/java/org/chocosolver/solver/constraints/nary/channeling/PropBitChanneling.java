@@ -51,8 +51,8 @@ import org.chocosolver.util.tools.ArrayUtils;
  * @since 23/09/2014
  */
 public class PropBitChanneling extends Propagator<IntVar> {
-    IntVar octet;
-    BoolVar[] bits;
+    private IntVar octet;
+    private BoolVar[] bits;
     private final int SIZE, MAX;
     private IStateInt KNOW_BIT;
 

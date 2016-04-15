@@ -50,22 +50,22 @@ import org.chocosolver.util.tools.ArrayUtils;
 public class PropLexChain extends Propagator<IntVar> {
 
     // the number of variables in each vector of the chain - v1 <= lexChainEq/lexChain <= v2 .....
-    public int N;
+    private int N;
 
     // total number of vector in the  lex chain constraint
-    public int M;
+    private int M;
 
     // array for holding lexicographically largest feasible  upper bound of each vector
-    public int[][] UB;
+    private int[][] UB;
 
     // array for holding lexicographically smallest  feasible  lower bound of each vector
-    public int[][] LB;
+    private int[][] LB;
 
     // If strict's value is true then  lexChain  is implemented  , if false lexChainEq
-    public boolean strict;
+    private boolean strict;
 
     // array of vectors in the lex chain constraint
-    public IntVar[][] x;
+    private IntVar[][] x;
 
     public PropLexChain(IntVar[][] variables, boolean strict) {
         super(ArrayUtils.flatten(variables), PropagatorPriority.LINEAR, true);
@@ -175,7 +175,7 @@ public class PropLexChain extends Propagator<IntVar> {
      * @param b lexicographically largest feasible  upper bound
      * @throws ContradictionException
      */
-    public void boundsLex(int[] a, IntVar[] x, int[] b) throws ContradictionException {
+    private void boundsLex(int[] a, IntVar[] x, int[] b) throws ContradictionException {
         int i = 0;
         while (i < N && a[i] == b[i]) {
             x[i].updateBounds(a[i], b[i], this);
@@ -201,7 +201,6 @@ public class PropLexChain extends Propagator<IntVar> {
         }
     }
 
-
     /**
      * computes alpha for use in computing lexicographically largest feasible upper  bound  of x in
      * {@link  PropLexChain#computeUB(IntVar[], int[], int[]) computUB}
@@ -211,7 +210,7 @@ public class PropLexChain extends Propagator<IntVar> {
      * @return an integer greater than or equal to  -1 which is used in the computation of   lexicographically smallest  feasible upper bound vector of integers of x
      * @throws ContradictionException
      */
-    public int computeAlpha(IntVar[] x, int[] b) throws ContradictionException {
+    private int computeAlpha(IntVar[] x, int[] b) throws ContradictionException {
         int i = 0;
         int alpha = -1;
         while (i < N && x[i].contains(b[i])) {
@@ -232,7 +231,6 @@ public class PropLexChain extends Propagator<IntVar> {
         return alpha;
     }
 
-
     /**
      * computes beta for use in computing lexicographically smallest feasible lower bound  of x in
      * {@link  PropLexChain#computeLB(IntVar[], int[], int[]) computeLB}
@@ -242,7 +240,7 @@ public class PropLexChain extends Propagator<IntVar> {
      * @return an integer greater than or equal to  -1  which is used in the computation of   lexicographically smallest  feasible upper bound vector of integers of x
      * @throws ContradictionException
      */
-    public int computeBeta(IntVar[] x, int[] a) throws ContradictionException {
+    private int computeBeta(IntVar[] x, int[] a) throws ContradictionException {
         int i = 0;
         int beta = -1;
         while (i < N && x[i].contains(a[i])) {
@@ -264,7 +262,6 @@ public class PropLexChain extends Propagator<IntVar> {
         return beta;
     }
 
-
     /**
      * Computes the   lexicographically largest  feasible upper bound vector of integers of x .
      * if aplha computed in  {@link  PropLexChain#computeAlpha(IntVar[], int[]) computeAlpha} is -1 then
@@ -275,7 +272,7 @@ public class PropLexChain extends Propagator<IntVar> {
      * @param u lexicographically largest  feasible upper  bound  of x
      * @throws ContradictionException
      */
-    public void computeUB(IntVar[] x, int[] b, int[] u) throws ContradictionException {
+    private void computeUB(IntVar[] x, int[] b, int[] u) throws ContradictionException {
         int alpha = computeAlpha(x, b);
         if (alpha == -1) fails();
         for (int i = 0; i < N; i++) {
@@ -302,7 +299,7 @@ public class PropLexChain extends Propagator<IntVar> {
      * @param lower lexicographically smallest feasible lower bound   of x
      * @throws ContradictionException
      */
-    public void computeLB(IntVar[] x, int[] a, int[] lower) throws ContradictionException {
+    private void computeLB(IntVar[] x, int[] a, int[] lower) throws ContradictionException {
         int beta = computeBeta(x, a);
         if (beta == -1) fails();
         for (int i = 0; i < N; i++) {

@@ -52,9 +52,9 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropSquare extends Propagator<IntVar> {
 
-    protected final RemProc rem_proc;
-    protected final IIntDeltaMonitor[] idms;
-    protected final IntIterableSet vrms;
+    private final RemProc rem_proc;
+    private final IIntDeltaMonitor[] idms;
+    private final IntIterableSet vrms;
 
     public PropSquare(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);

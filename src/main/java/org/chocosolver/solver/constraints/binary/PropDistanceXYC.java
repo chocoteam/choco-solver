@@ -51,13 +51,13 @@ import org.chocosolver.util.procedure.UnaryIntProcedure;
  */
 public class PropDistanceXYC extends Propagator<IntVar> {
 
-    protected final Operator operator;
+    private final Operator operator;
 
-    protected final int cste;
+    private final int cste;
 
-    protected final RemProc remproc;
+    private final RemProc remproc;
 
-    protected final IIntDeltaMonitor[] idms;
+    private final IIntDeltaMonitor[] idms;
 
     public PropDistanceXYC(IntVar[] vars, Operator operator, int cste) {
         super(vars, PropagatorPriority.BINARY, true);
@@ -370,8 +370,8 @@ public class PropDistanceXYC extends Propagator<IntVar> {
 
     private static class RemProc implements UnaryIntProcedure<Integer> {
 
-        int idx;
-        final PropDistanceXYC p;
+        private int idx;
+        private final PropDistanceXYC p;
 
         public RemProc(PropDistanceXYC p) {
             this.p = p;

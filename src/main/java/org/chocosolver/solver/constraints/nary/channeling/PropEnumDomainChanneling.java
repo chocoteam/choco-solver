@@ -49,10 +49,10 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropEnumDomainChanneling extends Propagator<IntVar> {
 
-    protected final int n;
-    protected final IntProcedure rem_proc;
-    protected final IIntDeltaMonitor idm;
-    protected final int offSet;
+    private final int n;
+    private final IntProcedure rem_proc;
+    private final IIntDeltaMonitor idm;
+    private final int offSet;
 
     public PropEnumDomainChanneling(BoolVar[] bvars, IntVar aVar, final int offSet) {
         super(ArrayUtils.append(bvars, new IntVar[]{aVar}), PropagatorPriority.UNARY, true);

@@ -58,13 +58,13 @@ import org.chocosolver.util.ESat;
  */
 public class PropNotEqualX_YC extends Propagator<IntVar> {
 
-    IntVar x;
-    IntVar y;
-    int cste;
+    private IntVar x;
+    private IntVar y;
+    private int cste;
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_YC(IntVar[] vars, int c) {
-        super(vars, PropagatorPriority.BINARY, true);
+        super(vars, PropagatorPriority.BINARY, false);
         this.x = vars[0];
         this.y = vars[1];
         this.cste = c;
@@ -82,34 +82,20 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (x.isInstantiated()) {
-            removeValV1();
-        } else if (y.isInstantiated()) {
-            removeValV0();
-        } else if (x.getUB() < (y.getLB() + cste) || (y.getUB() + cste) < x.getLB()) {
-            setPassive();
-        }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
         // typical case: A=[1,4], B=[1,4] (bounded domains)
         // A instantiated to 3 => nothing can be done on B
         // then B dec supp to 3 => 3 can also be removed du to A = 3.
-        propagate(0);
-    }
-
-    private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue() + this.cste, this)
-                || !x.contains(y.getValue() + cste)) {
-            this.setPassive();
-        }
-    }
-
-    private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue() - this.cste, this)
-                || !y.contains(x.getValue() - cste)) {
-            this.setPassive();
+        // this is why propagation is not incremental
+        if (x.isInstantiated()) {
+            if (y.removeValue(x.getValue() - this.cste, this) || !y.contains(x.getValue() - cste)) {
+                this.setPassive();
+            }
+        } else if (y.isInstantiated()) {
+            if (x.removeValue(y.getValue() + this.cste, this) || !x.contains(y.getValue() + cste)) {
+                this.setPassive();
+            }
+        } else if (x.getUB() < (y.getLB() + cste) || (y.getUB() + cste) < x.getLB()) {
+            setPassive();
         }
     }
 
@@ -143,5 +129,4 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
         }
         return newrules;
     }
-
 }

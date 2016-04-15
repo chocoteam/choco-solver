@@ -45,7 +45,7 @@ public class DisjunctiveTaskIntervalFilter extends CumulFilter{
     // VARIABLES
     //***********************************************************************************
 
-    TIntArrayList list = new TIntArrayList();
+    private TIntArrayList list = new TIntArrayList();
 
     //***********************************************************************************
     // CONSTRUCTOR

@@ -52,11 +52,11 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropAbsolute extends Propagator<IntVar> {
 
-    protected RemProc rem_proc;
-    protected IIntDeltaMonitor[] idms;
-    protected IntVar X, Y;
-    protected boolean bothEnumerated;
-    protected ICause cause;
+    private RemProc rem_proc;
+    private IIntDeltaMonitor[] idms;
+    private IntVar X, Y;
+    private boolean bothEnumerated;
+    private ICause cause;
 
     public PropAbsolute(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);

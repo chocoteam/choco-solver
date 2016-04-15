@@ -44,8 +44,8 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropBoolMin extends Propagator<BoolVar> {
 
-    final int n;
-    int x1, x2;
+    private final int n;
+    private int x1, x2;
 
     public PropBoolMin(BoolVar[] variables, BoolVar maxVar) {
         super(ArrayUtils.append(variables, new BoolVar[]{maxVar}), PropagatorPriority.UNARY, true);

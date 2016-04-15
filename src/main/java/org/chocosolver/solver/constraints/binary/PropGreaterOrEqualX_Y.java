@@ -48,8 +48,8 @@ import org.chocosolver.util.ESat;
  */
 public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
-    final IntVar x;
-    final IntVar y;
+    private final IntVar x;
+    private final IntVar y;
 
     @SuppressWarnings({"unchecked"})
     public PropGreaterOrEqualX_Y(IntVar[] vars) {

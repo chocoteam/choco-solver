@@ -46,7 +46,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class PropBinFC extends PropBinCSP {
 
-    protected final IntIterableSet vrms;
+    private final IntIterableSet vrms;
 
     public PropBinFC(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesTable(tuples, x, y));

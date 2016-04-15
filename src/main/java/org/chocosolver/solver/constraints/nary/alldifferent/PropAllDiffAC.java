@@ -54,7 +54,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    AlgoAllDiffAC filter;
+    protected AlgoAllDiffAC filter;
 
     //***********************************************************************************
     // CONSTRUCTORS

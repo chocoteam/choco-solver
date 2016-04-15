@@ -55,27 +55,27 @@ public class PropElement extends Propagator<IntVar> {
     /**
      * Table of values
      */
-    final int[] values;
+    private final int[] values;
 
     /**
      * To match indices in {@link #values} and {@link #index}
      */
-    final int offset;
+    private final int offset;
 
     /**
      * Index variable
      */
-    final IntVar index;
+    private final IntVar index;
 
     /**
      * Resulting variable
      */
-    final IntVar result;
+    private final IntVar result;
 
     /**
      * Set of forbidden indices
      */
-    final IntIterableSet fidx;
+    private final IntIterableSet fidx;
 
     /**
      * Create a propagator which ensures that VALUE = TABLE[INDEX-OFFSET] holds.

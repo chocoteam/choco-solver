@@ -54,9 +54,9 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class Arithmetic extends Constraint {
 
-	protected final Operator op1, op2; // operators.
-	protected final int cste;
-	protected final IntVar[] vars;
+	private final Operator op1, op2; // operators.
+	private final int cste;
+	private final IntVar[] vars;
 
 	private static boolean isOperation(Operator operator) {
 		return operator.equals(Operator.PL) || operator.equals(Operator.MN);
