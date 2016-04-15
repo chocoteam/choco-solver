@@ -5,7 +5,7 @@ jdk:
 before_install:
 - pip install --user codecov
 before_script:
-- export MAVEN_OPTS="-Xmx4096m -Xms128m -Xss64m -server"
+- export MAVEN_OPTS="-Xmx2048m -Xms128m -Xss64m -server"
 env:
   global:
   - secure: hb7XCxuEw3VDF5goORctgcFDwg2Z/WAz1ZHKWNRZmR+M1nN6rgDmwOaJpxepLlU0r/Ku14xspE0yn0nK3P1DFNptXhruDJ1h0+mcwiHdsHOM/Vdo247pPbI9pJTD6gQpNnlgVXAI0s5lkNf3IY2jszzhapKFEMHvnPMFXw/sVzU=
@@ -24,7 +24,7 @@ addons:
     build_command_prepend: "mvn clean"
     build_command:   "mvn install -DtestFailureIgnore=true -Dgroups=$GROUP"
     branch_pattern: coverity_scan
-script: travis_wait mvn -e -X clean install -DtestFailureIgnore=true -Dgroups=$GROUP
+script: travis_wait mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
   - develop
@@ -45,4 +45,4 @@ notifications:
     on_start: never
 after_script:
 - codecov
-#- curl http://testr-1154.appspot.com/assets/testR.py | python
+- curl http://testr-1154.appspot.com/assets/testR.py | python
