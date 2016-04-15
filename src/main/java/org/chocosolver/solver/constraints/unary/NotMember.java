@@ -40,9 +40,9 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class NotMember extends Constraint {
 
-	final IntVar var;
-    final int[] values;
-    final int lb, ub;
+	private final IntVar var;
+	private final int[] values;
+	private final int lb, ub;
 
     public NotMember(IntVar var, int[] values) {
         super("NotMember",new PropNotMemberEnum(var, values));

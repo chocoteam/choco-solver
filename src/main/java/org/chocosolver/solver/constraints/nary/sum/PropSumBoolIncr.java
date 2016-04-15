@@ -52,19 +52,19 @@ public class PropSumBoolIncr extends PropSumBool {
      * Sum of lower bounds maintained incrementally.
      * Main reason this version exists.
      */
-    IStateInt bLB;
+    private IStateInt bLB;
     /**
      * Sum of upper bounds maintained incrementally.
      * Main reason this version exists.
      */
-    IStateInt bUB;
+    private IStateInt bUB;
 
     /**
      * The filtering algorithm is triggered on some particular events.
      * This boolean indicates when the propagation should be executed.
      *
      */
-    boolean doFilter;
+    private boolean doFilter;
 
     /**
      * Creates a sum propagator: SUM(x_i) = sum + b, where x_i are boolean variables, maintained incrementally.

@@ -57,23 +57,23 @@ public class ParetoOptimizer implements IMonitorSolution {
     //***********************************************************************************
 
     // Set of incomparable and Pareto-best solutions
-    LinkedList<Solution> paretoFront;
+    private LinkedList<Solution> paretoFront;
 
     // Variables to store in each solution (decision variables by default)
-   	Variable[] variablesToStore;
-    Model model;
+   	private Variable[] variablesToStore;
+    private Model model;
 
     // Allow to recycle (dominated) Solution objects
-    LinkedList<Solution> pool = new LinkedList<>();
+    private LinkedList<Solution> pool = new LinkedList<>();
 
     // objective function
-    ResolutionPolicy policy;
-    IntVar[] objectives;
-    int n;
+    private ResolutionPolicy policy;
+    private IntVar[] objectives;
+    private int n;
 
     // to post dynamical constraints
-    int[] vals, lits;
-    PropSat psat;
+    private int[] vals, lits;
+    private PropSat psat;
 
     //***********************************************************************************
     // CONSTRUCTOR

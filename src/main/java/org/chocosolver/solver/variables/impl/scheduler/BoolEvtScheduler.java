@@ -38,9 +38,9 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public class BoolEvtScheduler implements EvtScheduler<IntEventType> {
 
-    static final int[] dis = new int[]{0, 1, -1, // INSTANTIATE
+    private static final int[] DIS = new int[]{0, 1, -1, // INSTANTIATE
     };
-    int i = 0;
+    private int i = 0;
 
     public void init(IntEventType evt) {
         i = 0;
@@ -53,12 +53,12 @@ public class BoolEvtScheduler implements EvtScheduler<IntEventType> {
 
     @Override
     public boolean hasNext() {
-        return dis[i] > -1;
+        return DIS[i] > -1;
     }
 
     @Override
     public int next() {
-        return dis[i++];
+        return DIS[i++];
     }
 
     @Override

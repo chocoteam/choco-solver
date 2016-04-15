@@ -55,12 +55,12 @@ public class IntList {
     /**
      * The array buffer into which the elements of the ArrayList are stored.
      */
-    int[] elements;
+    private int[] elements;
 
     /**
      * The size of the ArrayList (the number of elements it contains).
      */
-    int size;
+    private int size;
 
     /**
      * Constructs an empty list with the initial capacity of 10

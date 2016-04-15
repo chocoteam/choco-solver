@@ -54,7 +54,7 @@ public class LearnCBJ extends LearnExplained {
     /**
      * Indicates if nogoods must be extracted from explanations.
      */
-    final boolean nogoodFromConflict;
+    private final boolean nogoodFromConflict;
 
     /**
      * The nogood store, if needed.

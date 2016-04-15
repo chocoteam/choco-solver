@@ -39,11 +39,11 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class DisposableRangeBoundIterator extends DisposableRangeIterator {
 
-    int from;
-    int to;
-    boolean _next = true;
+    private int from;
+    private int to;
+    private boolean _next = true;
 
-    IntVar var;
+    private IntVar var;
 
     public DisposableRangeBoundIterator(IntVar var) {
         this.var = var;

@@ -55,15 +55,15 @@ public class IntVarValueIterator implements Iterator<Integer> {
 	/**
 	 * Variable to iterate on
 	 */
-	IntVar var;
+	private IntVar var;
     /**
      * current returned value
      */
-	int value;
+	private int value;
     /**
      * upper bound of {@link #var}
      */
-    int ub;
+	private int ub;
 
 	/**
 	 * Creates an object to iterate over an IntVar values using

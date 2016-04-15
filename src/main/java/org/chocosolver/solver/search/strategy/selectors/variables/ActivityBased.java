@@ -131,7 +131,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     private final double g, d; // g for aging, d for interval size estimation
     private final int a; // forget parameter
 
-    public boolean sampling; // is this still in a sampling phase
+    private boolean sampling; // is this still in a sampling phase
 
     private int nb_probes; // probing size
 
@@ -440,10 +440,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private static final class ArrayVal implements IVal {
 
-        final double[] Av;
-        final double[] mAv;
-        final int size;
-        final int os;  // offset
+        private final double[] Av;
+        private final double[] mAv;
+        private final int size;
+        private final int os;  // offset
 
         private ArrayVal(int size, int os) {
             this.size = size;

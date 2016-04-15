@@ -55,19 +55,19 @@ public class LearnDBT extends LearnCBJ {
     /**
      * The strategy which provides already computed decisions unrelated to the last conflict.
      */
-    final DBTstrategy dbTstrategy;
+    private final DBTstrategy dbTstrategy;
 
     /**
      * Because computing explanation can be lazy, a {@link RuleStore} is needed to continue computing partial explanations.
      * A reference to the one used by the explanation engine is thus needed.
      */
-    final RuleStore mRuleStore;
+    private final RuleStore mRuleStore;
 
     /**
      * Because computing explanation can be lazy, a {@link ArrayEventStore} is needed to continue computing partial explanations.
      * A reference to the one used by the explanation engine is thus needed.
      */
-    final ArrayEventStore mEventStore;
+    private final ArrayEventStore mEventStore;
 
     /**
      * Create a Dynamic Backtracking strategy.

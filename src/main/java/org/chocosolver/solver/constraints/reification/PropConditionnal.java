@@ -50,8 +50,8 @@ import org.chocosolver.util.ESat;
  */
 public abstract class PropConditionnal extends Propagator<Variable> {
 
-    Constraint[] condTrue;
-    Constraint[] condFalse;
+    private Constraint[] condTrue;
+    private Constraint[] condFalse;
 
     /**
      * @param vars2observe set of variables to observe, their modifications triggers the condition checking

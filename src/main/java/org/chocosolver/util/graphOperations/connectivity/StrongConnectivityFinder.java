@@ -46,9 +46,9 @@ public class StrongConnectivityFinder  {
 	private int nbSCC;
 
 	// util
-	int[] stack, p, inf, nodeOfDfsNum, dfsNumOfNode;
-	Iterator<Integer>[] iterator;
-	BitSet inStack;
+	private int[] stack, p, inf, nodeOfDfsNum, dfsNumOfNode;
+	private Iterator<Integer>[] iterator;
+	private BitSet inStack;
 
 	public StrongConnectivityFinder(DirectedGraph graph) {
 		this.graph = graph;

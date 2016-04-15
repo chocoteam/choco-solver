@@ -48,7 +48,7 @@ import org.chocosolver.util.ESat;
  */
 public class PropMaxBC extends Propagator<IntVar> {
 
-    IntVar BST, v1, v2;
+    private IntVar BST, v1, v2;
 
     public PropMaxBC(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);

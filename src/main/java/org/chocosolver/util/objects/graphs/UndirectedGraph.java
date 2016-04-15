@@ -45,10 +45,10 @@ public class UndirectedGraph implements IGraph {
     // VARIABLES
     //***********************************************************************************
 
-    ISet[] neighbors;
-    ISet nodes;
-    int n;
-    SetType type;
+    private ISet[] neighbors;
+    private ISet nodes;
+    private int n;
+    private SetType type;
 
     //***********************************************************************************
     // CONSTRUCTORS

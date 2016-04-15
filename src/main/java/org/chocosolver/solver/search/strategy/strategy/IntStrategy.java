@@ -48,15 +48,15 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
 	/**
 	 * How a variable is selected
 	 */
-    VariableSelector<IntVar> variableSelector;
+	private VariableSelector<IntVar> variableSelector;
     /**
      * How a value is selected
      */
-    IntValueSelector valueSelector;
+	private IntValueSelector valueSelector;
     /**
      * The decision operator
      */
-	DecisionOperator<IntVar> decisionOperator;
+	private DecisionOperator<IntVar> decisionOperator;
 
 	/**
 	 * Creates a search strategy which selects a variable X and a value V to perform

@@ -34,7 +34,7 @@ import org.chocosolver.solver.variables.Variable;
 
 public class GreedyBranching extends AbstractStrategy {
 
-    AbstractStrategy mainSearch;
+    private AbstractStrategy mainSearch;
 
     public GreedyBranching(AbstractStrategy mainSearch){
         super(mainSearch.getVariables());

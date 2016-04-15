@@ -39,10 +39,10 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class DisposableValueBoundIterator extends DisposableValueIterator {
 
-    int value;
-    int bound;
+    private int value;
+    private int bound;
 
-    IntVar var;
+    private IntVar var;
 
     public DisposableValueBoundIterator(IntVar var) {
         this.var = var;

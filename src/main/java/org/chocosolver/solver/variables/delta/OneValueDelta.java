@@ -41,9 +41,9 @@ import org.chocosolver.solver.search.loop.TimeStampedObject;
  */
 public final class OneValueDelta extends TimeStampedObject implements IEnumDelta {
 
-    int value;
-    ICause cause;
-    boolean set;
+    private int value;
+    private ICause cause;
+    private boolean set;
 
     public OneValueDelta(IEnvironment environment) {
         super(environment);

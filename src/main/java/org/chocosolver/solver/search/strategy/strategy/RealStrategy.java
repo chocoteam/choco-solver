@@ -48,11 +48,11 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
     /**
      * How a variable is selected
      */
-    VariableSelector<RealVar> varselector;
+    private VariableSelector<RealVar> varselector;
     /**
      * How a value is selected
      */
-    RealValueSelector valueIterator;
+    private RealValueSelector valueIterator;
 
     public RealStrategy(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
         super(scope);

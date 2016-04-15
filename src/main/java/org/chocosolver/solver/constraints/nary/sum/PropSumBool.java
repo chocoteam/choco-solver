@@ -53,7 +53,7 @@ public class PropSumBool extends PropSum {
     /**
      * The resulting variable
      */
-    final IntVar sum;
+    protected final IntVar sum;
 
     /**
      * Creates a sum propagator: SUM(x_i) = sum + b, where x_i are boolean variables.

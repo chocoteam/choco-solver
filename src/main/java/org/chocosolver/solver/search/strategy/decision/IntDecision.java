@@ -48,15 +48,15 @@ public class IntDecision extends Decision<IntVar> {
     /**
      * The decision value
      */
-    int value;
+    private int value;
     /**
      * The assignment operator
      */
-    DecisionOperator<IntVar> assignment;
+    private DecisionOperator<IntVar> assignment;
     /**
      * Decision pool manager, to recycle decisions
      */
-    final PoolManager<IntDecision> poolManager;
+    private final PoolManager<IntDecision> poolManager;
 
     /**
      * Create an decision based on an {@link IntVar}

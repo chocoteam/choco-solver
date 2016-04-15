@@ -70,13 +70,13 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     private int[] nodeSCC;
     private BitSet free;
     private UnaryIntProcedure<Integer> remProc;
-    protected final IIntDeltaMonitor[] idms;
+    private final IIntDeltaMonitor[] idms;
     private StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
     private int[] father;
     private BitSet in;
     private TIntIntHashMap map;
-    int[] fifo;
+    private int[] fifo;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -362,5 +362,4 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             return this;
         }
     }
-
 }

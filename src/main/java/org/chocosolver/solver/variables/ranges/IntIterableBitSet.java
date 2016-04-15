@@ -40,67 +40,67 @@ import java.util.BitSet;
  */
 public class IntIterableBitSet implements IntIterableSet {
 
-    public BitSet VALUES;
-    int OFFSET;
+    private BitSet values;
+    private int offset;
 
     public IntIterableBitSet() {
-        this.VALUES = new BitSet();
+        this.values = new BitSet();
     }
 
     public void setOffset(int offset) {
-        this.OFFSET = offset;
+        this.offset = offset;
     }
 
     @Override
     public int first(){
-        if(VALUES.cardinality() == 0){
+        if(values.cardinality() == 0){
             return Integer.MIN_VALUE;
         }
-        return VALUES.nextSetBit(0) + OFFSET;
+        return values.nextSetBit(0) + offset;
     }
 
 
     @Override
     public int last() {
-        if(VALUES.cardinality() == 0){
+        if(values.cardinality() == 0){
             return Integer.MAX_VALUE;
         }
-        return VALUES.previousSetBit(VALUES.size()) + OFFSET;
+        return values.previousSetBit(values.size()) + offset;
     }
 
     @Override
     public boolean add(int e) {
-        boolean add = !VALUES.get(e - OFFSET);
-        VALUES.set(e - OFFSET);
+        boolean add = !values.get(e - offset);
+        values.set(e - offset);
         return add;
     }
 
     @Override
     public boolean addAll(int... values) {
-        int card = VALUES.cardinality();
+        int card = this.values.cardinality();
         for(int i = 0; i < values.length; i++){
-            VALUES.set(values[i] - OFFSET);
+            this.values.set(values[i] - offset);
         }
-        return VALUES.cardinality() - card > 0;
+        return this.values.cardinality() - card > 0;
     }
 
     @Override
     public boolean addAll(IntIterableSet set) {
-        int card = VALUES.cardinality();
+        int card = values.cardinality();
         int v = set.first();
         while(v < Integer.MAX_VALUE){
             add(v);
             v = set.nextValue(v);
         }
-        return VALUES.cardinality() - card > 0;
+        return values.cardinality() - card > 0;
     }
 
     @Override
     public boolean retainAll(IntIterableSet set) {
         boolean modified = false;
-        for (int i = VALUES.nextSetBit(0); i >= 0; i = VALUES.nextSetBit(i + 1)) {
-            if (!set.contains(i + OFFSET)) {
-                VALUES.clear(i);
+        for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
+            if (!set.contains(i + offset)) {
+                values.clear(i);
                 modified = true;
             }
         }
@@ -109,17 +109,17 @@ public class IntIterableBitSet implements IntIterableSet {
 
     @Override
     public boolean remove(int e) {
-        boolean rem  = VALUES.get(e - OFFSET);
-        VALUES.clear(e - OFFSET);
+        boolean rem  = values.get(e - offset);
+        values.clear(e - offset);
         return rem;
     }
 
     @Override
     public boolean removeAll(IntIterableSet set) {
         boolean modified = false;
-        for (int i = VALUES.nextSetBit(0); i >= 0; i = VALUES.nextSetBit(i + 1)) {
-            if (set.contains(i + OFFSET)) {
-                VALUES.clear(i);
+        for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
+            if (set.contains(i + offset)) {
+                values.clear(i);
                 modified = true;
             }
         }
@@ -128,22 +128,22 @@ public class IntIterableBitSet implements IntIterableSet {
 
     @Override
     public void clear() {
-        VALUES.clear();
+        values.clear();
     }
 
     @Override
     public int nextValue(int aValue) {
-        int lb = VALUES.nextSetBit(0);
+        int lb = values.nextSetBit(0);
         if (lb >= 0) {
-            aValue -= OFFSET;
+            aValue -= offset;
             if (aValue < 0 || aValue < lb) {
-                return lb + OFFSET;
+                return lb + offset;
             }
             if(aValue < Integer.MAX_VALUE) {
-                aValue = VALUES.nextSetBit(aValue + 1);
+                aValue = values.nextSetBit(aValue + 1);
             }
             if (aValue > -1) {
-                return aValue + OFFSET;
+                return aValue + offset;
             }
         }
         return Integer.MAX_VALUE;
@@ -151,17 +151,17 @@ public class IntIterableBitSet implements IntIterableSet {
 
     @Override
     public int previousValue(int aValue) {
-        int ub = VALUES.previousSetBit(VALUES.length());
+        int ub = values.previousSetBit(values.length());
         if (ub >= 0) {
-            aValue -= OFFSET;
+            aValue -= offset;
             if (aValue > ub) {
-                return ub + OFFSET;
+                return ub + offset;
             }
             if (aValue > -1) {
-                aValue = VALUES.previousSetBit(aValue - 1);
+                aValue = values.previousSetBit(aValue - 1);
             }
             if (aValue > -1) {
-                return aValue + OFFSET;
+                return aValue + offset;
             }
         }
         return Integer.MIN_VALUE;
@@ -169,21 +169,21 @@ public class IntIterableBitSet implements IntIterableSet {
 
     @Override
     public boolean contains(int aValue) {
-        aValue -= OFFSET;
-        return aValue > -1 && aValue < VALUES.length() && VALUES.get(aValue);
+        aValue -= offset;
+        return aValue > -1 && aValue < values.length() && values.get(aValue);
     }
 
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append('{');
 
-        int i = VALUES.nextSetBit(0);
+        int i = values.nextSetBit(0);
         if (i != -1) {
-            b.append(i + OFFSET);
-            for (i = VALUES.nextSetBit(i + 1); i >= 0; i = VALUES.nextSetBit(i + 1)) {
-                int endOfRun = VALUES.nextClearBit(i);
+            b.append(i + offset);
+            for (i = values.nextSetBit(i + 1); i >= 0; i = values.nextSetBit(i + 1)) {
+                int endOfRun = values.nextClearBit(i);
                 do {
-                    b.append(", ").append(i + OFFSET);
+                    b.append(", ").append(i + offset);
                 }
                 while (++i < endOfRun);
             }
@@ -195,23 +195,23 @@ public class IntIterableBitSet implements IntIterableSet {
 
     public IntIterableSet duplicate() {
         IntIterableBitSet bsrm = new IntIterableBitSet();
-        bsrm.setOffset(this.OFFSET);
-        bsrm.VALUES.or(this.VALUES);
+        bsrm.setOffset(this.offset);
+        bsrm.values.or(this.values);
         return bsrm;
     }
 
     @Override
     public int size() {
-        return VALUES.cardinality();
+        return values.cardinality();
     }
 
     @Override
     public void plus(int x) {
-        this.OFFSET += x;
+        this.offset += x;
     }
 
     @Override
     public void minus(int x) {
-        this.OFFSET -= x;
+        this.offset -= x;
     }
 }

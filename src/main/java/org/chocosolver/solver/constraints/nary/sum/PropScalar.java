@@ -49,7 +49,7 @@ public class PropScalar extends PropSum {
     /**
      * The coefficients
      */
-    final int[] c;
+    private final int[] c;
 
     /**
      * Create a scalar product: SUM(x_i*c_i) o b
