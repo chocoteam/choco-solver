@@ -71,7 +71,7 @@ public final class ScaleView extends IntView {
             return IIntDeltaMonitor.Default.NONE;
 //            throw new UnsupportedOperationException();
         }
-        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
+        return new ViewDeltaMonitor(var.monitorDelta(propagator)) {
             @Override
             protected int transform(int value) {
                 return cste * value;
@@ -80,27 +80,27 @@ public final class ScaleView extends IntView {
     }
 
     @Override
-    boolean doInstantiateVar(int value) throws ContradictionException {
+    protected boolean doInstantiateVar(int value) throws ContradictionException {
         return var.instantiateTo(value / cste, this);
     }
 
     @Override
-    boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException {
+    protected boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException {
         return var.updateLowerBound(MathUtils.divCeil(value, cste), this);
     }
 
     @Override
-    boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException {
+    protected boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException {
         return var.updateUpperBound(MathUtils.divFloor(value, cste), this);
     }
 
     @Override
-    boolean doRemoveValueFromVar(int value) throws ContradictionException {
+    protected boolean doRemoveValueFromVar(int value) throws ContradictionException {
         return var.removeValue(value / cste, this);
     }
 
     @Override
-    boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException {
+    protected boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException {
         return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), this);
     }
 

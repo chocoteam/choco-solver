@@ -74,7 +74,6 @@ public class AlgoAllDiffBC {
         }
         for (int i = 0; i < n; i++) {
             Interval interval = intervals[i];
-            interval.idx = i;
             interval.var = vars[i];
             minsorted[i] = interval;
             maxsorted[i] = interval;
@@ -85,7 +84,7 @@ public class AlgoAllDiffBC {
     //****************************************************************************************************************//
     //****************************************************************************************************************//
 
-    enum SORT implements Comparator<Interval> {
+    private enum SORT implements Comparator<Interval> {
         MAX {
             @Override
             public final int compare(Interval o1, Interval o2) {
@@ -247,9 +246,8 @@ public class AlgoAllDiffBC {
     }
 
     private static class Interval  {
-        int minrank, maxrank;
-        IntVar var;
-        int idx;
-        int lb, ub;
+        private int minrank, maxrank;
+        private IntVar var;
+        private int lb, ub;
     }
 }

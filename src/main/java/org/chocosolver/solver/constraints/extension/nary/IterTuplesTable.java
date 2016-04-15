@@ -41,21 +41,21 @@ class IterTuplesTable extends TuplesList {
     /**
      * number of variables
      */
-    protected final int nbVar;
+    private final int nbVar;
     /**
      * lower bound of each variable
      */
-    protected final int[] lowerbounds;
+    private final int[] lowerbounds;
 
     /**
      * upper bound of each variable
      */
-    protected final int[] ranges;
+    private final int[] ranges;
 
     /**
      * table[i][j] gives the table of supports as an int[] for value j of variable i
      */
-    protected int[][][] table;
+    private int[][][] table;
 
     public IterTuplesTable(Tuples tuples, IntVar[] vars) {
         super(tuples, vars);

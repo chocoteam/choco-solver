@@ -46,15 +46,15 @@ class CouplesBitSetTable extends BinRelation {
      * table[0][i] gives the supports of value i of variable 0
      * table[1][i] gives the supports of value i of variable 1
      */
-    protected final BitSet[][] table;
+    private final BitSet[][] table;
 
     /**
      * first value of x, and y
      */
-    protected final int[] offsets;
+    private final int[] offsets;
 
 
-    protected final boolean feasible;
+    private final boolean feasible;
 
     /**
      * Create a tuple list for AC3bit+rm

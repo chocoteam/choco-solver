@@ -46,29 +46,29 @@ public class TuplesTable extends LargeRelation {
     /**
      * the number of dimensions of the considered tuples
      */
-    protected final int n;
+    private final int n;
     /**
      * The consistency matrix
      */
-    protected final BitSet table;
+    private final BitSet table;
 
     /**
      * lower bound of each variable
      */
-    protected final int[] lowerbounds;
+    private final int[] lowerbounds;
 
     /**
      * upper bound of each variable
      */
-    protected final int[] upperbounds;
+    private final int[] upperbounds;
 
-    protected final boolean feasible;
+    private final boolean feasible;
 
     /**
      * in order to speed up the computation of the index of a tuple
      * in the table, blocks[i] stores the product of the size of variables j with j < i.
      */
-    protected final int[] blocks;
+    private final int[] blocks;
 
     public TuplesTable(Tuples tuples, IntVar[] vars) {
         n = vars.length;
@@ -97,16 +97,6 @@ public class TuplesTable extends LargeRelation {
         }
     }
 
-    // required for duplicate method, should not be called by default
-    private TuplesTable(int n, BitSet table, int[] lowerbounds, int[] upperbounds, boolean feasible, int[] blocks) {
-        this.n = n;
-        this.table = table;
-        this.lowerbounds = lowerbounds;
-        this.upperbounds = upperbounds;
-        this.feasible = feasible;
-        this.blocks = blocks;
-    }
-
     public boolean checkTuple(int[] tuple) {
         int address = 0;
         for (int i = (n - 1); i >= 0; i--) {
@@ -122,7 +112,7 @@ public class TuplesTable extends LargeRelation {
         return checkTuple(tuple) == feasible;
     }
 
-    void setTuple(int[] tuple) {
+    private void setTuple(int[] tuple) {
         int address = 0;
         for (int i = (n - 1); i >= 0; i--) {
             address += (tuple[i] - lowerbounds[i]) * blocks[i];

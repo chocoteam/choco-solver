@@ -47,29 +47,29 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
      * supports[i][j stores the index of the tuple that currently support
      * the variable-value pair (i,j)
      */
-    protected final int[][] supports;
+    private final int[][] supports;
 
     /**
      * size of the scope of the constraint
      */
-    protected final int arity;
+    private final int arity;
 
     /**
      * original lower bounds
      */
-    protected final int[] offsets;
+    private final int[] offsets;
 
-    protected static final int NO_SUPPORT = -2;
+    private static final int NO_SUPPORT = -2;
 
     //a reference on the lists of supports per variable value pair
-    protected int[][][] tab;
+    private int[][][] tab;
 
     // check if none of the tuple is trivially outside
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
-    protected ValidityChecker valcheck;
+    private ValidityChecker valcheck;
 
-    protected final IntIterableSet vrms;
+    private final IntIterableSet vrms;
 
     private PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation) {
         super(vars, relation);
@@ -128,7 +128,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
      * initialize the residual supports of each pair to their
      * first allowed tuple
      */
-    protected void initSupports() throws ContradictionException {
+    private void initSupports() throws ContradictionException {
         for (int i = 0; i < vars.length; i++) {
             vrms.clear();
             vrms.setOffset(vars[i].getLB());
@@ -148,7 +148,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
     /**
      * set the support using multidirectionality
      */
-    protected void setSupport(final int idxSupport) {
+    private void setSupport(final int idxSupport) {
         int[] tuple = relation.getTuple(idxSupport);
         for (int i = 0; i < tuple.length; i++) {
             supports[i][tuple[i] - offsets[i]] = idxSupport;
@@ -159,7 +159,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
      * @param value with offset removed
      * @return the residual support
      */
-    protected int getSupport(final int indexVar, final int value) {
+    private int getSupport(final int indexVar, final int value) {
         return supports[indexVar][value - offsets[indexVar]];
     }
 
@@ -169,7 +169,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
      *
      * @throws ContradictionException
      */
-    protected void reviseVar(final int indexVar) throws ContradictionException {
+    private void reviseVar(final int indexVar) throws ContradictionException {
         vrms.clear();
         vrms.setOffset(vars[indexVar].getLB());
         int ub = vars[indexVar].getUB();
@@ -195,7 +195,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
      * seek a new support for the pair variable-value : (indexVar, nva)
      * start the iteration from scratch in the list
      */
-    protected int seekNextSupport(final int indexVar, final int nva) {
+    private int seekNextSupport(final int indexVar, final int nva) {
         int currentIdxSupport;
         int[] currentSupport;
         for (int i = 0; i < tab[indexVar][nva].length; i++) {
@@ -208,7 +208,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
         return NO_SUPPORT;
     }
 
-    protected void filter(int idx) throws ContradictionException {
+    private void filter(int idx) throws ContradictionException {
         //sort variables regarding domain sizes to speedup the check !
         valcheck.sortvars();
         for (int i = 0; i < arity; i++) {
@@ -217,5 +217,4 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
             }
         }
     }
-
 }

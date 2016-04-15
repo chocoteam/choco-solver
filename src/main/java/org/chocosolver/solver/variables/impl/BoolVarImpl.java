@@ -59,22 +59,22 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * The offset, that is the minimal value of the domain (stored at index 0).
      * Thus the entry at index i corresponds to x=i+offset).
      */
-    protected final int offset;
+    private final int offset;
 
     /**
      * indicate the value of the domain : false = 0, true = 1
      */
-    protected int mValue;
+    private int mValue;
 
     /**
      * A bi partite set indicating for each value whether it is present or not.
      * If the set contains the domain, the variable is not instanciated.
      */
-    protected final BasicIndexedBipartiteSet notInstanciated;
+    private final BasicIndexedBipartiteSet notInstanciated;
     /**
      * To iterate over removed values
      */
-    IEnumDelta delta = NoDelta.singleton;
+    private IEnumDelta delta = NoDelta.singleton;
     /**
      * To iterate over values in the domain
      */
@@ -91,7 +91,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
      * on value removal
      */
-    protected boolean reactOnRemoval = false;
+    private boolean reactOnRemoval = false;
 
     /**
      * Associate boolean variable expressing not(this)

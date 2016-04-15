@@ -50,22 +50,22 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
 
     // Last valid supports Last(x_i, val) = supports( (blocks(i) + val) * size )
 
-    protected IStateInt[] supports;
+    private IStateInt[] supports;
 
-    protected int[] blocks;
+    private int[] blocks;
 
     // Cardinality
-    protected int size;
+    private int size;
 
     // offsets(i) = Min(x_i)
-    protected int[] offsets;
+    private int[] offsets;
 
     // check if none of the tuple is trivially outside
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
-    protected ValidityChecker valcheck;
+    private ValidityChecker valcheck;
 
-    protected final IntIterableSet vrms;
+    private final IntIterableSet vrms;
 
     private PropLargeGAC2001(IntVar[] vs, LargeRelation relation) {
         super(vs, relation);
@@ -122,7 +122,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
 
     // updates the support for all values in the domain of variable
     // and remove unsupported values for variable
-    public void reviseVar(int indexVar, boolean fromScratch) throws ContradictionException {
+    private void reviseVar(int indexVar, boolean fromScratch) throws ContradictionException {
         int[] currentSupport;
         vrms.clear();
         vrms.setOffset(vars[indexVar].getLB());
@@ -141,7 +141,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
 
 
     // Store Last(x_i, val) = support
-    public void setSupport(int indexVar, int value, int[] support) {
+    private void setSupport(int indexVar, int value, int[] support) {
         for (int i = 0; i < vars.length; i++) {
             supports[(blocks[indexVar] + value - offsets[indexVar]) * size + i].set(support[i]);
         }
@@ -149,7 +149,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
 
 
     // Get Last(x_i, val)
-    public int[] getUBport(int indexVar, int value) {
+    private int[] getUBport(int indexVar, int value) {
         int[] resultat = new int[size];
         for (int i = 0; i < size; i++) {
             resultat[i] = supports[(blocks[indexVar] + value - offsets[indexVar]) * size + i].get();
@@ -158,7 +158,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
     }
 
     // Get Last(x_i, val)
-    public int[] lastSupport(int indexVar, int value) {
+    private int[] lastSupport(int indexVar, int value) {
         return getUBport(indexVar, value);
     }
 
@@ -166,7 +166,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
      * seek a new support for (variable, value), the smallest tuple greater than currentSupport
      * the search is made through valid tuples until and allowed one is found.
      */
-    public int[] seekNextSupport(int indexVar, int val, boolean fromscratch) {
+    private int[] seekNextSupport(int indexVar, int val, boolean fromscratch) {
         int[] currentSupport = new int[size];
         int k = 0;
         if (fromscratch) {
@@ -214,7 +214,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
      * t is a consistent tuple not valid anymore, we need to go to the first valid tuple
      * greater than t before searching among the valid tuples
      */
-    public int[] getFirstValidTupleFrom(int[] t, int indexVar) {
+    private int[] getFirstValidTupleFrom(int[] t, int indexVar) {
         int k = 0;
         while (k < vars.length) {
             if (k == indexVar) k++;
@@ -234,8 +234,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
         return null;
     }
 
-
-    public void filter(int idx) throws ContradictionException {
+    private void filter(int idx) throws ContradictionException {
         //sort variables regarding domain sizes to speedup the check !
         valcheck.sortvars();
         if (vars[idx].hasEnumeratedDomain()) {
@@ -247,5 +246,4 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
                 reviseVar(valcheck.getPosition(i), false);
         }
     }
-
 }

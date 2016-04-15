@@ -51,8 +51,8 @@ import org.chocosolver.util.tools.ArrayUtils;
 @SuppressWarnings({"UnusedDeclaration"})
 public class StrategiesSequencer extends AbstractStrategy<Variable> {
 
-    AbstractStrategy[] strategies;
-    IStateInt index;
+    private AbstractStrategy[] strategies;
+    private IStateInt index;
 
     private static Variable[] make(AbstractStrategy... strategies) {
         Variable[] vars = new Variable[0];

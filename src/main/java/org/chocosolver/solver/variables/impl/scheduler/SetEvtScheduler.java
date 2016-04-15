@@ -38,12 +38,12 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public class SetEvtScheduler implements EvtScheduler<SetEventType> {
 
-    final int[] DIS = new int[]{
+    private final int[] DIS = new int[]{
             0, 1, 2, 3, -1, // ADD_TO_KER
             1, 3, -1, // REM_FROM_ENV
     };
-    int i = 0;
-    static final int[] IDX = new int[]{-1, 0, 5};
+    private int i = 0;
+    private static final int[] IDX = new int[]{-1, 0, 5};
 
     public void init(SetEventType evt) {
         i = IDX[evt.ordinal()];

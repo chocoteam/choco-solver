@@ -241,7 +241,7 @@ public class CodeGenerator {
     }
 
 
-    static String processReplication(String content,
+    private static String processReplication(String content,
                                      Map<Integer, String> replicated_blocks) {
 
         for (Map.Entry<Integer, String> entry : replicated_blocks.entrySet()) {
@@ -451,7 +451,7 @@ public class CodeGenerator {
      * @return Null if no definition blocks are found, otherwise a map
      *         containing the blocks, keyed by their number.
      */
-    static Map<Integer, String> findReplicatedBlocks(String content_in,
+    private static Map<Integer, String> findReplicatedBlocks(String content_in,
                                                      StringBuilder content_out) throws IOException {
 
         Map<Integer, String> to_return = null;
@@ -499,14 +499,12 @@ public class CodeGenerator {
         return to_return;
     }
 
-
     private static String simplifyPath(File file) {
         String output_string = root_output_dir.toString();
 
         String file_string = file.toString();
         return file_string.substring(output_string.length() + 1);
     }
-
 
     private static void copyFile(File source, File dest) throws IOException {
         FileChannel srcChannel = new FileInputStream(source).getChannel();
@@ -519,13 +517,12 @@ public class CodeGenerator {
         dstChannel.close();
     }
 
-
     private static class WrapperInfo {
-        final String primitive;
-        final String class_name;
-        final String max_value;
-        final String min_value;
-        final String size;
+        private final String primitive;
+        private final String class_name;
+        private final String max_value;
+        private final String min_value;
+        private final String size;
 
         WrapperInfo(String primitive, String class_name, String max_value,
                     String min_value, String size) {

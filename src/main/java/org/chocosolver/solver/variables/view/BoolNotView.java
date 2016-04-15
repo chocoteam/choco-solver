@@ -261,7 +261,7 @@ public final class BoolNotView extends IntView implements BoolVar {
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
         }
-        return new ViewDeltaMonitor((IIntDeltaMonitor) var.monitorDelta(propagator), propagator) {
+        return new ViewDeltaMonitor((IIntDeltaMonitor) var.monitorDelta(propagator)) {
 
             @Override
             protected int transform(int value) {

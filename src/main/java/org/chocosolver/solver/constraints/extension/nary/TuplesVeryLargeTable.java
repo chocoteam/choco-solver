@@ -46,21 +46,21 @@ public class TuplesVeryLargeTable extends LargeRelation {
     /**
      * the number of dimensions of the considered tuples
      */
-    protected final int n;
+    private final int n;
 
     /**
      * lower bound of each variable
      */
-    protected final int[] lowerbounds;
+    private final int[] lowerbounds;
 
     /**
      * upper bound of each variable
      */
-    protected final int[] upperbounds;
+    private final int[] upperbounds;
 
-    protected final boolean feasible;
+    private final boolean feasible;
 
-    protected final TIntObjectHashMap<TIntObjectHashMap> supports;
+    private final TIntObjectHashMap<TIntObjectHashMap> supports;
 
     public TuplesVeryLargeTable(Tuples tuples, IntVar[] vars) {
         n = vars.length;

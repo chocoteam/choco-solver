@@ -48,12 +48,12 @@ public class Random<T extends Variable> implements VariableSelector<T>, Variable
     /**
      * To store index of variable to select randomly
      */
-    IntList sets;
+    private IntList sets;
 
     /**
      * Random number generator.
      */
-    java.util.Random random;
+    private java.util.Random random;
 
     /**
      * Random variable selector

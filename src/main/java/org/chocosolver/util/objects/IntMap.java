@@ -61,12 +61,12 @@ public class IntMap {
     /**
      * The array buffer into which the elements of the values are stored.
      */
-    int[] elements;
+    private int[] elements;
 
     /**
      * The number of key-value mappings contained in this map.
      */
-    int size;
+    private int size;
 
 
     public IntMap() {

@@ -44,7 +44,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class PropBinAC3 extends PropBinCSP {
 
-    protected final IntIterableSet vrms;
+    private final IntIterableSet vrms;
 
     public PropBinAC3(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));
@@ -128,5 +128,4 @@ public class PropBinAC3 extends PropBinCSP {
         v0.removeValues(vrms, this);
         itv0.dispose();
     }
-
 }

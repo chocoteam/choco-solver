@@ -47,13 +47,13 @@ import org.chocosolver.solver.variables.ranges.IntIterableSet;
  */
 public class PropBinAC2001 extends PropBinCSP {
 
-    protected IStateInt[] currentSupport0;
-    protected IStateInt[] currentSupport1;
+    private IStateInt[] currentSupport0;
+    private IStateInt[] currentSupport1;
 
-    protected int offset0;
-    protected int offset1;
+    private int offset0;
+    private int offset1;
 
-    protected final IntIterableSet vrms;
+    private final IntIterableSet vrms;
 
 
     public PropBinAC2001(IntVar x, IntVar y, Tuples tuples) {

@@ -61,27 +61,27 @@ public class PropSat extends Propagator<BoolVar> {
     /**
      * The SAT solver
      */
-    SatSolver sat_;
+    private SatSolver sat_;
 
     /**
      * Map between BoolVar and its literal
      */
-    TObjectIntHashMap<BoolVar> indices_;
+    private TObjectIntHashMap<BoolVar> indices_;
 
     /**
      * For comparison with SAT solver trail, to deal properly with backtrack
      */
-    IStateInt sat_trail_;
+    private IStateInt sat_trail_;
 
     /**
      *  List of early deduction literals
      */
-    TIntList early_deductions_;
+    private TIntList early_deductions_;
 
     /**
      * Local-like parameter, for #why() method only, lazily initialized.
      */
-    TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
+    private TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
 
     /**
      * Create a (unique) propagator for clauses recording and propagation.
@@ -228,7 +228,7 @@ public class PropSat extends Propagator<BoolVar> {
      * @param index position of the literal
      * @throws ContradictionException if inconsistency is detected
      */
-    void VariableBound(int index) throws ContradictionException {
+    private void VariableBound(int index) throws ContradictionException {
         try {
             if (sat_trail_.get() < sat_.trailMarker()) {
                 sat_.cancelUntil(sat_trail_.get());
@@ -299,7 +299,7 @@ public class PropSat extends Propagator<BoolVar> {
         sat_.touched_variables_.resetQuick();
     }
 
-    void applyEarlyDeductions() throws ContradictionException {
+    private void applyEarlyDeductions() throws ContradictionException {
         for (int i = 0; i < early_deductions_.size(); ++i) {
             int lit = early_deductions_.get(i);
             int var = var(lit);
@@ -421,5 +421,4 @@ public class PropSat extends Propagator<BoolVar> {
     private boolean _why(int l, RuleStore ruleStore) {
         return vars[var(l)].isInstantiated() && ruleStore.addFullDomainRule(vars[var(l)]);
     }
-
 }

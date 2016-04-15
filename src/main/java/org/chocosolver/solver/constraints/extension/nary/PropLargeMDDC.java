@@ -47,11 +47,11 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
  */
 public class PropLargeMDDC extends Propagator<IntVar> {
 
-    final TIntSet yes;
-    final TIntSet[] sets;
-    final StoredSparseSet no;
-    final MultivaluedDecisionDiagram MDD;
-    final int nvars;
+    private final TIntSet yes;
+    private final TIntSet[] sets;
+    private final StoredSparseSet no;
+    private final MultivaluedDecisionDiagram MDD;
+    private final int nvars;
 
     /**
      * Create a propagator maintaining GAC based on a MDD.
@@ -93,7 +93,7 @@ public class PropLargeMDDC extends Propagator<IntVar> {
     }
 
 
-    protected void mddc() throws ContradictionException {
+    private void mddc() throws ContradictionException {
         yes.clear();
         for (int i = 0; i < nvars; i++) {
             sets[i].clear();
@@ -113,7 +113,7 @@ public class PropLargeMDDC extends Propagator<IntVar> {
         }
     }
 
-    protected boolean mddcSeekSupport(int node, int layer) {
+    private boolean mddcSeekSupport(int node, int layer) {
         // If the node has already been visited
         if (yes.contains(node)) return true;
         if (no.contains(node)) return false;
@@ -142,6 +142,4 @@ public class PropLargeMDDC extends Propagator<IntVar> {
         }
         return res;
     }
-
-
 }

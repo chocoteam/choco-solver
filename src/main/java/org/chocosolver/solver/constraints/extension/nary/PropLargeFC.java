@@ -45,8 +45,8 @@ import org.chocosolver.util.ESat;
  */
 public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
-    protected final int[] currentTuple;
-    protected final IntIterableSet vrms;
+    private final int[] currentTuple;
+    private final IntIterableSet vrms;
 
     private PropLargeFC(IntVar[] vars, LargeRelation relation) {
         super(vars, relation);
@@ -98,7 +98,7 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    protected void filter() throws ContradictionException {
+    private void filter() throws ContradictionException {
         boolean stop = false;
         int nbUnassigned = 0;
         int index = -1, i = 0;
@@ -134,5 +134,4 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
             }
         }
     }
-
 }

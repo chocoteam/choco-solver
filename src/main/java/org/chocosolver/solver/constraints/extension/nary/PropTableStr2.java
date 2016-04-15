@@ -59,12 +59,12 @@ public class PropTableStr2 extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    int[][] table;
-    str2_var str2vars[];
-    ISet tuples;
-    ArrayList<str2_var> Ssup;
-    ArrayList<str2_var> Sval;
-    boolean firstProp = true;
+    private int[][] table;
+    private str2_var str2vars[];
+    private ISet tuples;
+    private ArrayList<str2_var> Ssup;
+    private ArrayList<str2_var> Sval;
+    private boolean firstProp = true;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -123,7 +123,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
     // DEDICATED METHODS
     //***********************************************************************************
 
-    boolean is_tuple_supported(int tuple_index) {
+    private boolean is_tuple_supported(int tuple_index) {
         for (str2_var v : Sval) {
             if (!v.var.contains(table[tuple_index][v.indice])) {
                 return false;
@@ -132,7 +132,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
         return true;
     }
 
-    void initialPropagate() throws ContradictionException {
+    private void initialPropagate() throws ContradictionException {
         for (str2_var vst : str2vars) {
             DisposableValueIterator vit = vst.var.getValueIterator(true);
             while (vit.hasNext()) {
@@ -148,7 +148,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
         }
     }
 
-    void Filter() throws ContradictionException {
+    private void Filter() throws ContradictionException {
         Ssup.clear();
         Sval.clear();
         for (str2_var tmp : str2vars) {
@@ -184,35 +184,35 @@ public class PropTableStr2 extends Propagator<IntVar> {
     /**
      * var class which will save local var information
      */
-    class str2_var {
+    private class str2_var {
 
-        IntVar var;
+        private IntVar var;
         /**
          * original var
          */
-        int indice;
+        private int indice;
         /**
          * index in the table
          */
-        IStateInt last_size;
+        private IStateInt last_size;
         /**
          * Numerical reversible of the last size
          */
-        BitSet GAC_Val;
+        private BitSet GAC_Val;
         /**
          * at each step, it will say if the value is GAC
          */
-        int nb_consistant;
+        private int nb_consistant;
         /**
          * count the number of consistant value
          */
-        TreeMap<Integer, Integer> index_map;
+        private TreeMap<Integer, Integer> index_map;
 
         /**
          * contains all the value of the variable
          */
 
-        str2_var(IEnvironment env, IntVar var_, int indice_, int[][] table) {
+        private str2_var(IEnvironment env, IntVar var_, int indice_, int[][] table) {
             var = var_;
             last_size = env.makeInt(0);
             indice = indice_;
@@ -227,21 +227,21 @@ public class PropTableStr2 extends Propagator<IntVar> {
             GAC_Val = new BitSet(index_map.size());
         }
 
-        void GAC_clear() {
+        private void GAC_clear() {
             GAC_Val.clear();
             nb_consistant = 0;
         }
 
-        boolean isConsistant(int value) {
+        private boolean isConsistant(int value) {
             return GAC_Val.get(index_map.get(value));
         }
 
-        void makeConsistant(int value) {
+        private void makeConsistant(int value) {
             GAC_Val.set(index_map.get(value));
             nb_consistant++;
         }
 
-        void remove_unsupported_value(ICause cause) throws ContradictionException {
+        private void remove_unsupported_value(ICause cause) throws ContradictionException {
             for (Entry<Integer, Integer> e : index_map.entrySet()) {
                 if (var.contains(e.getKey()) && !GAC_Val.get(e.getValue())) {
                     var.removeValue(e.getKey(), cause);
@@ -249,5 +249,4 @@ public class PropTableStr2 extends Propagator<IntVar> {
             }
         }
     }
-
 }

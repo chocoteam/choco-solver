@@ -53,26 +53,26 @@ import java.util.Set;
  */
 public class StoredDirectedMultiGraph {
 
-	int[] starts;
-	int[] offsets;
-	TIntStack stack = new TIntArrayStack();
-	StoredIndexedBipartiteSetWithOffset[] supports;
+	private int[] starts;
+	private int[] offsets;
+	private TIntStack stack = new TIntArrayStack();
+	private StoredIndexedBipartiteSetWithOffset[] supports;
 
-	class Nodes {
+	private class Nodes {
 		int[] states;
 		int[] layers;
 		StoredIndexedBipartiteSetWithOffset[] outArcs;
 		StoredIndexedBipartiteSetWithOffset[] inArcs;
 	}
 
-	public class Arcs {
+	private class Arcs {
 		int[] values;
 		int[] dests;
 		int[] origs;
 	}
 
-	public Nodes GNodes;
-	public Arcs GArcs;
+	private Nodes GNodes;
+	private Arcs GArcs;
 
 	public StoredDirectedMultiGraph(IEnvironment environment, DirectedMultigraph<Node, Arc> graph,
 									int[] starts, int[] offsets, int supportLength) {
@@ -167,7 +167,7 @@ public class StoredDirectedMultiGraph {
 		return supports[getIdx(i, j)];
 	}
 
-	protected void removeArc(Propagator<IntVar> propagator) throws ContradictionException {
+	private void removeArc(Propagator<IntVar> propagator) throws ContradictionException {
 		while (stack.size() > 0) {
 			int arcId = stack.pop();
 
@@ -226,7 +226,7 @@ public class StoredDirectedMultiGraph {
 		}
 	}
 
-	protected void clearSupports(StoredIndexedBipartiteSet supports, Propagator p) throws ContradictionException {
+	private void clearSupports(StoredIndexedBipartiteSet supports, Propagator p) throws ContradictionException {
 		if (supports != null) {
 			DisposableIntIterator it = supports.getIterator();
 			while (it.hasNext()) {

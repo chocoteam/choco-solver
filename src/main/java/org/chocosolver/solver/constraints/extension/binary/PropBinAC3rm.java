@@ -48,22 +48,21 @@ import java.util.Arrays;
  */
 public class PropBinAC3rm extends PropBinCSP {
 
-    protected int[] currentSupport0;
-    protected int[] currentSupport1;
+    private int[] currentSupport0;
+    private int[] currentSupport1;
 
-    protected int offset0;
-    protected int offset1;
+    private int offset0;
+    private int offset1;
 
-    protected int[] initS0; //initial number of supports of each value of x0
-    protected int[] initS1; //initial number of supports of each value of x0
-    protected int minS0;    //value with minimum number of supports for v0
-    protected int minS1;    //value with minimum number of supports for v1
+    private int[] initS0; //initial number of supports of each value of x0
+    private int[] initS1; //initial number of supports of each value of x0
+    private int minS0;    //value with minimum number of supports for v0
+    private int minS1;    //value with minimum number of supports for v1
 
-    protected int initDomSize0;
-    protected int initDomSize1;
+    private int initDomSize0;
+    private int initDomSize1;
 
-    protected final IntIterableSet vrms;
-
+    private final IntIterableSet vrms;
 
     public PropBinAC3rm(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));
@@ -99,7 +98,7 @@ public class PropBinAC3rm extends PropBinCSP {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void fastInitNbSupports(int a, int b) {
+    private void fastInitNbSupports(int a, int b) {
         DisposableValueIterator itv0 = v0.getValueIterator(true);
         int cpt1 = 0;
         while (itv0.hasNext()) {
@@ -130,19 +129,19 @@ public class PropBinAC3rm extends PropBinCSP {
         }
     }
 
-    public boolean testDeepakConditionV1(int y, int v0Size) {
+    private boolean testDeepakConditionV1(int y, int v0Size) {
         return initS1[y - offset1] <= (initDomSize0 - v0Size);
     }
 
-    public boolean testDeepakConditionV0(int x, int v1Size) {
+    private boolean testDeepakConditionV0(int x, int v1Size) {
         return initS0[x - offset0] <= (initDomSize1 - v1Size);
     }
 
-    public int getSupportV1(int y) {
+    private int getSupportV1(int y) {
         return currentSupport1[y - offset1];
     }
 
-    public int getSupportV0(int x) {
+    private int getSupportV0(int x) {
         return currentSupport0[x - offset0];
     }
 
@@ -151,7 +150,7 @@ public class PropBinAC3rm extends PropBinCSP {
      *
      * @throws ContradictionException
      */
-    public void reviseV1() throws ContradictionException {
+    private void reviseV1() throws ContradictionException {
         int v0Size = v0.getDomainSize();
         if (minS1 <= (initDomSize0 - v0Size)) {
             DisposableValueIterator itv1 = v1.getValueIterator(true);
@@ -191,7 +190,7 @@ public class PropBinAC3rm extends PropBinCSP {
      *
      * @throws ContradictionException
      */
-    public void reviseV0() throws ContradictionException {
+    private void reviseV0() throws ContradictionException {
         int v1Size = v1.getDomainSize();
         if (minS0 <= (initDomSize1 - v1Size)) {
             DisposableValueIterator itv0 = v0.getValueIterator(true);
@@ -225,18 +224,17 @@ public class PropBinAC3rm extends PropBinCSP {
         }
     }
 
-    public void storeSupportV0(int support, int x) {
+    private void storeSupportV0(int support, int x) {
         currentSupport0[x - offset0] = support;
         currentSupport1[support - offset1] = x;
     }
 
-    public void storeSupportV1(int support, int y) {
+    private void storeSupportV1(int support, int y) {
         currentSupport1[y - offset1] = support;
         currentSupport0[support - offset0] = y;
     }
 
-
-    public void initProp() throws ContradictionException {
+    private void initProp() throws ContradictionException {
         offset1 = v1.getLB();
         offset0 = v0.getLB();
         currentSupport0 = new int[v0.getUB() - v0.getLB() + 1];
@@ -313,7 +311,7 @@ public class PropBinAC3rm extends PropBinCSP {
         //propagate();
     }
 
-    public void onInstantiationOf(int idx) throws ContradictionException {
+    private void onInstantiationOf(int idx) throws ContradictionException {
         if (idx == 0) {
             int value = v0.getValue();
             DisposableValueIterator iterator = v1.getValueIterator(true);
@@ -348,5 +346,4 @@ public class PropBinAC3rm extends PropBinCSP {
             }
         }
     }
-
 }
