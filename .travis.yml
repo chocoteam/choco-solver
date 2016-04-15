@@ -1,11 +1,12 @@
-language: java
+language:
+  java
 sudo: false
 os:
   - linux
 jdk:
 - oraclejdk8
 before_install:
-- pip install --user codecov
+  - pip install codecov
 env:
   global:
   - secure: hb7XCxuEw3VDF5goORctgcFDwg2Z/WAz1ZHKWNRZmR+M1nN6rgDmwOaJpxepLlU0r/Ku14xspE0yn0nK3P1DFNptXhruDJ1h0+mcwiHdsHOM/Vdo247pPbI9pJTD6gQpNnlgVXAI0s5lkNf3IY2jszzhapKFEMHvnPMFXw/sVzU=
@@ -42,5 +43,5 @@ notifications:
     on_failure: always
     on_start: never
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - codecov
   - curl http://testr-1154.appspot.com/assets/testR.py | python
