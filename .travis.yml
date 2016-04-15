@@ -22,13 +22,12 @@ addons:
     notification_email: choco@emn.fr
     build_command_prepend: "mvn clean"
     build_command:   "mvn install -DtestFailureIgnore=true -Dgroups=$GROUP"
-    branch_pattern: coverity_scan
+    branch_pattern: develop master
 script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
   - develop
   - master
-  - coverity_scan
   - /^feature.*$/
 notifications:
   email:
