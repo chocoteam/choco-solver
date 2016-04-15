@@ -53,14 +53,12 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
         }
     }
 
-    IIntDeltaMonitor deltamonitor;
-    protected ICause propagator;
-    protected TIntArrayList values;
-    protected Filler filler;
+    private IIntDeltaMonitor deltamonitor;
+    private TIntArrayList values;
+    private Filler filler;
 
-    public ViewDeltaMonitor(IIntDeltaMonitor deltamonitor, ICause propagator) {
+    public ViewDeltaMonitor(IIntDeltaMonitor deltamonitor) {
         this.deltamonitor = deltamonitor;
-        this.propagator = propagator;
         values = new TIntArrayList(8);
         filler = new Filler();
     }

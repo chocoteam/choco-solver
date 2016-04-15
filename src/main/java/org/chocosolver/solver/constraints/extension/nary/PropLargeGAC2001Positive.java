@@ -50,24 +50,24 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
      * supports[i][j stores the index of the tuple that currently support
      * the variable-value pair (i,j)
      */
-    protected IStateInt[][] supports;
+    private IStateInt[][] supports;
 
-    protected int[] blocks;
+    private int[] blocks;
 
-    protected int arity;
+    private int arity;
 
-    protected int[] offsets;
+    private int[] offsets;
 
-    protected static final int NO_SUPPORT = -2;
+    private static final int NO_SUPPORT = -2;
 
-    protected int[][][] tab;
+    private int[][][] tab;
 
     // check if none of the tuple is trivially outside
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
-    protected ValidityChecker valcheck;
+    private ValidityChecker valcheck;
 
-    protected final IntIterableSet vrms;
+    private final IntIterableSet vrms;
 
     private PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation) {
         super(vs, relation);
@@ -139,7 +139,7 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
      *
      * @throws ContradictionException
      */
-    public void reviseVar(int indexVar) throws ContradictionException {
+    private void reviseVar(int indexVar) throws ContradictionException {
         DisposableValueIterator itv = vars[indexVar].getValueIterator(true);
         vrms.clear();
         vrms.setOffset(vars[indexVar].getLB());
@@ -167,7 +167,7 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
      * seek a new support for the pair variable-value : (indexVar, nva)
      * start the iteration from the stored support (the last one)
      */
-    public int seekNextSupport(int indexVar, int nva, int start) {
+    private int seekNextSupport(int indexVar, int nva, int start) {
         int currentIdxSupport;
         int[] currentSupport;
         for (int i = start; i < tab[indexVar][nva].length; i++) {
@@ -184,25 +184,24 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
      * @param idxSupport : the index of the support in the list of allowed tuples for
      *                   the pair variable-value (indexVar,value)
      */
-    public void setSupport(int indexVar, int value, int idxSupport) {
+    private void setSupport(int indexVar, int value, int idxSupport) {
         supports[indexVar][value - offsets[indexVar]].set(idxSupport); //- offset already included in blocks
     }
 
     /**
      * @return the stored support for the pair (indexVar,value)
      */
-    public int getUBport(int indexVar, int value) {
+    private int getUBport(int indexVar, int value) {
         return supports[indexVar][value - offsets[indexVar]].get();
     }
 
 
-    public void filter(int idx) throws ContradictionException {
+    private void filter(int idx) throws ContradictionException {
         //sort variables regarding domain sizes to speedup the check !
         valcheck.sortvars();
         for (int i = 0; i < arity; i++)
             if (idx != valcheck.getPosition(i)) reviseVar(valcheck.getPosition(i));
     }
-
 
     @Override
     public String toString() {
@@ -216,34 +215,4 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
         sb.append("})");
         return sb.toString();
     }
-
-    //<hca> implementation not efficient at all because
-    //this constraint never "check" tuples but iterate over them and check the domains.
-    //this should only be called in the restore solution
-    public boolean isSatisfied(int[] tuple) {
-        int minListIdx = -1;
-        int minSize = Integer.MAX_VALUE;
-        for (int i = 0; i < tuple.length; i++) {
-            if (tab[i][tuple[i] - offsets[i]].length < minSize) {
-                minSize = tab[i][tuple[i] - offsets[i]].length;
-                minListIdx = i;
-            }
-        }
-        int currentIdxSupport;
-        int[] currentSupport;
-        int nva = tuple[minListIdx] - relation.getRelationOffset(minListIdx);
-        for (int i = 0; i < tab[minListIdx][nva].length; i++) {
-            currentIdxSupport = tab[minListIdx][nva][i];
-            currentSupport = relation.getTuple(currentIdxSupport);
-            boolean isValid = true;
-            for (int j = 0; isValid && j < tuple.length; j++) {
-                if (tuple[j] != currentSupport[j]) {
-                    isValid = false;
-                }
-            }
-            if (isValid) return true;
-        }
-        return false;
-    }
-
 }

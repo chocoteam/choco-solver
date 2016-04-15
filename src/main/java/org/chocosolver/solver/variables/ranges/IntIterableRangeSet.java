@@ -48,7 +48,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     /**
      * Store elements
      */
-    protected int[] ELEMENTS;
+    protected  int[] ELEMENTS;
     /**
      * Used size in {@link #ELEMENTS}.
      * To get the nmber of range simply divide by 2.

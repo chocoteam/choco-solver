@@ -47,14 +47,14 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  */
 public class PropBinAC3bitrm extends PropBinCSP {
 
-    protected int offset0;
-    protected int offset1;
+    private int offset0;
+    private int offset1;
 
-    protected int minS0;    //value with minimum number of supports for v0
-    protected int minS1;    //value with minimum number of supports for v1
+    private int minS0;    //value with minimum number of supports for v0
+    private int minS1;    //value with minimum number of supports for v1
 
-    protected int initDomSize0;
-    protected int initDomSize1;
+    private int initDomSize0;
+    private int initDomSize1;
 
     public PropBinAC3bitrm(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));

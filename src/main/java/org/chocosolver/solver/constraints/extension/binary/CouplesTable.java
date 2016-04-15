@@ -39,21 +39,20 @@ class CouplesTable extends BinRelation {
     /**
      * matrix of consistency/inconsistency
      */
-    protected final BitSet table;
+    private final BitSet table;
 
     /**
      * first value of x, and y
      */
-    protected final int offset1, offset2;
+    private final int offset1, offset2;
 
 
     /**
      * size of the initial domain of x and y
      */
-    protected final int range1, range2;
+    private final int range1, range2;
 
-
-    protected final boolean feasible;
+    private final boolean feasible;
 
     public CouplesTable(Tuples tuples, IntVar var1, IntVar var2) {
         offset1 = var1.getLB();

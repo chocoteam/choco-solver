@@ -72,55 +72,55 @@ public class PropNogoods extends Propagator<IntVar> {
     /**
      * The underlying SAT solver
      */
-    SatSolver sat_;
+    private SatSolver sat_;
 
     /**
      * Binds couple (variable-value) to a unique literal
      */
-    TLongIntHashMap[] vv2lit;
+    private TLongIntHashMap[] vv2lit;
 
     /**
      * Binds variable ({@link Variable#getId()} to a unique position
      */
-    int[] var2pos;
+    private int[] var2pos;
 
     /**
      * Binds literal to variable
      */
-    int[] lit2pos;
+    private int[] lit2pos;
     /**
      * Binds literal to value.
      * A value is typically a signed int.
      * The 32^th bit is set to 0 for "= value" and to 1 for "<= value".
      */
-    long[] lit2val;
+    private long[] lit2val;
 
     /**
      * For comparison with SAT solver trail, to deal properly with backtrack
      */
-    IStateInt sat_trail_;
+    private IStateInt sat_trail_;
 
     /**
      * List of early deduction literals
      */
-    TIntList early_deductions_;
+    private TIntList early_deductions_;
 
     /**
      * Local-like parameter.
      * To reduce learnt no-goods.
      */
-    BitSet test_eq;
+    private BitSet test_eq;
 
     /**
      * Since there is no domain-clause, a fix point may not be reached by SatSolver itself.
      * Stores all modified variable to make sure a fix point is reached.
      */
-    Deque<IntVar> fp;
+    private Deque<IntVar> fp;
 
     /**
      * Local-like parameter, for #why() method only, lazily initialized.
      */
-    TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
+    private TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
 
     /**
      * Create a (unique) propagator for no-goods recording and propagation.
@@ -280,7 +280,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @param v a value
      * @return <tt>true</tt> if the value encodes '=', <tt>false</tt> if it encodes '&le;'.
      */
-    static boolean iseq(long v) {
+    private static boolean iseq(long v) {
         return (v & BITOP) == 0;
     }
 

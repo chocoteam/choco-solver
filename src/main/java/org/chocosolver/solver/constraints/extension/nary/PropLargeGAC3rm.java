@@ -48,20 +48,19 @@ import java.util.Arrays;
 public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     // Last valid supports Last(x_i, val) = supports( (blocks(i) + val) * size )
-    protected int[] supports;
+    private int[] supports;
 
-    protected int[] blocks;
+    private int[] blocks;
 
     // Cardinality
-    protected int size;
+    private int size;
 
     // offsets(i) = Min(x_i)
-    protected int[] offsets;
+    private int[] offsets;
 
-    protected DisposableValueIterator[] seekIter;
+    private DisposableValueIterator[] seekIter;
 
-    protected final IntIterableSet vrms;
-
+    private final IntIterableSet vrms;
 
     private PropLargeGAC3rm(IntVar[] vs, LargeRelation relation) {
         super(vs, relation);
@@ -125,7 +124,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
      *
      * @throws ContradictionException
      */
-    public void initializeSupports(int indexVar) throws ContradictionException {
+    private void initializeSupports(int indexVar) throws ContradictionException {
         int[] currentSupport;
         int val;
         if (vars[indexVar].hasEnumeratedDomain()) {
@@ -171,7 +170,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     // updates the support for all values in the domain of variable
     // and remove unsupported values for variable
-    public void reviseVar(int indexVar) throws ContradictionException {
+    private void reviseVar(int indexVar) throws ContradictionException {
         int[] currentSupport;
         int val;
         if (vars[indexVar].hasEnumeratedDomain()) {
@@ -222,26 +221,26 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
     }
 
     // Store Last(x_i, val) = support
-    public void setSupport(int[] support) {
+    private void setSupport(int[] support) {
         for (int i = 0; i < vars.length; i++) {
             if (vars[i].hasEnumeratedDomain())
                 setOneSupport(i, support[i], support);
         }
     }
 
-    public void setOneSupport(int indexVar, int value, int[] support) {
+    private void setOneSupport(int indexVar, int value, int[] support) {
         System.arraycopy(support, 0, supports, (blocks[indexVar] + value - offsets[indexVar]) * size, vars.length);
     }
 
 
     // Store Last(x_i, val) = support
-    public void setBoundSupport(int indexVar, int idxBound, int[] support) {
+    private void setBoundSupport(int indexVar, int idxBound, int[] support) {
         System.arraycopy(support, 0, supports, (blocks[indexVar] + idxBound) * size, vars.length);
     }
 
 
     // Get Last(x_i, val)
-    public int[] getUBport(int indexVar, int value) {
+    private int[] getUBport(int indexVar, int value) {
         int[] resultat = new int[size];
         System.arraycopy(supports, (blocks[indexVar] + value - offsets[indexVar]) * size, resultat, 0, size);
         return resultat;
@@ -250,34 +249,33 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     // return the support standing for the lower bound
     // of indexVar if idxBound = 0 or upperbound if idxBound = 1
-    public int[] getBoundSupport(int indexVar, int idxBound) {
+    private int[] getBoundSupport(int indexVar, int idxBound) {
         int[] resultat = new int[size];
         System.arraycopy(supports, (blocks[indexVar] + idxBound) * size, resultat, 0, size);
         return resultat;
     }
 
     // Get Last(x_i, val)
-    public int[] lastSupport(int indexVar, int value) {
+    private int[] lastSupport(int indexVar, int value) {
         return getUBport(indexVar, value);
     }
 
     // return the support standing for the lower bound
     // of indexVar if idxBound = 0 or upperbound if idxBound = 1
-    public int[] lastBoundSupport(int indexVar, int idxBound) {
+    private int[] lastBoundSupport(int indexVar, int idxBound) {
         return getBoundSupport(indexVar, idxBound);
     }
 
 
     // Is tuple invalid ?
-    public boolean isInvalid(int[] tuple) {
+    private boolean isInvalid(int[] tuple) {
         for (int i = 0; i < size; i++)
             if (!vars[i].contains(tuple[i])) return true;
         return false;
     }
 
-
     // seek a new support for (variable, value), the smallest tuple greater than currentSupport
-    public int[] seekNextSupport(int indexVar, int val) {
+    private int[] seekNextSupport(int indexVar, int val) {
         int[] currentSupport = new int[size];
         int k = 0;
         for (int i = 0; i < size; i++) {
@@ -290,7 +288,6 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
         if (relation.isConsistent(currentSupport)) {
             return currentSupport;
         }
-
         while (k < vars.length) {
             if (k == indexVar) k++;
             if (k < vars.length) {
@@ -308,8 +305,6 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
                 }
             }
         }
-
         return null;
     }
-
 }

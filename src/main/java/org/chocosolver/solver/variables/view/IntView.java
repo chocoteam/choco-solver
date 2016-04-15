@@ -103,7 +103,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
      * @return <tt>true</tt> if {@link #var} has been modified
      * @throws ContradictionException if modification fails
      */
-    boolean doInstantiateVar(int value) throws ContradictionException{
+    protected boolean doInstantiateVar(int value) throws ContradictionException{
         throw new UnsupportedOperationException();
     }
 
@@ -113,7 +113,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
      * @return <tt>true</tt> if {@link #var} has been modified
      * @throws ContradictionException if modification fails
      */
-    boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException{
+    protected boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException{
         throw new UnsupportedOperationException();
     }
 
@@ -123,7 +123,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
      * @return <tt>true</tt> if {@link #var} has been modified
      * @throws ContradictionException if modification fails
      */
-    boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException{
+    protected boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException{
         throw new UnsupportedOperationException();
     }
 
@@ -133,7 +133,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
      * @return <tt>true</tt> if {@link #var} has been modified
      * @throws ContradictionException if modification fails
      */
-    boolean doRemoveValueFromVar(int value) throws ContradictionException{
+    protected boolean doRemoveValueFromVar(int value) throws ContradictionException{
         throw new UnsupportedOperationException();
     }
 
@@ -144,7 +144,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
      * @return <tt>true</tt> if {@link #var} has been modified
      * @throws ContradictionException if modification fails
      */
-    boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException{
+    protected boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException{
         throw new UnsupportedOperationException();
     }
 

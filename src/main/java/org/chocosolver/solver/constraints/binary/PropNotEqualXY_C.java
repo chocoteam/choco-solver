@@ -58,9 +58,9 @@ import org.chocosolver.util.ESat;
  */
 public class PropNotEqualXY_C extends Propagator<IntVar> {
 
-    IntVar x;
-    IntVar y;
-    int cste;
+    private IntVar x;
+    private IntVar y;
+    private int cste;
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualXY_C(IntVar[] vars, int c) {

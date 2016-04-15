@@ -69,7 +69,7 @@ public class MinusView extends IntView {
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
         }
-        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
+        return new ViewDeltaMonitor(var.monitorDelta(propagator)) {
             @Override
             protected int transform(int value) {
                 return -value;
@@ -115,27 +115,27 @@ public class MinusView extends IntView {
     }
 
     @Override
-    boolean doInstantiateVar(int value) throws ContradictionException {
+    protected boolean doInstantiateVar(int value) throws ContradictionException {
         return var.instantiateTo(-value, this);
     }
 
     @Override
-    boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException {
+    protected boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException {
         return var.updateUpperBound(-value, this);
     }
 
     @Override
-    boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException {
+    protected boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException {
         return var.updateLowerBound(-value, this);
     }
 
     @Override
-    boolean doRemoveValueFromVar(int value) throws ContradictionException {
+    protected boolean doRemoveValueFromVar(int value) throws ContradictionException {
         return var.removeValue(-value, this);
     }
 
     @Override
-    boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException {
+    protected boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException {
         return var.removeInterval(-to, -from, this);
     }
 
