@@ -69,9 +69,9 @@ public interface IAutomaton extends Cloneable {
     }
 
     class Triple {
-        int a;
-        int b;
-        int c;
+        protected int a;
+        protected int b;
+        protected int c;
 
         public Triple(int a, int b, int c) {
             this.a = a;

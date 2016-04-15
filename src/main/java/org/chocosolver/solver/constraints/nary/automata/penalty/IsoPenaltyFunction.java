@@ -36,8 +36,8 @@ package org.chocosolver.solver.constraints.nary.automata.penalty;
  * Time: 11:31:07 AM
  */
 public class IsoPenaltyFunction extends AbstractPenaltyFunction {
-    int factor;
 
+    private int factor;
 
     public IsoPenaltyFunction() {
         this(1);

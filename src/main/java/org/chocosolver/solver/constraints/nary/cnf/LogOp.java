@@ -65,13 +65,13 @@ public final class LogOp implements ILogical {
         }
     }
 
-    Type type;
+    protected Type type;
 
-    Operator operator;
+    protected Operator operator;
 
-    ILogical[] children;
+    protected ILogical[] children;
 
-    BoolVar[] varsAsArray;
+    protected BoolVar[] varsAsArray;
 
     protected LogOp(Operator operator, Type type, ILogical... children) {
         this.type = type;

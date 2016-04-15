@@ -120,13 +120,13 @@ public class Model implements IModel {
     private BoolVar ONE;
 
     /** A MiniSat instance, useful to deal with clauses*/
-    SatConstraint minisat;
+    private SatConstraint minisat;
 
     /** A MiniSat instance adapted to nogood management */
-    NogoodConstraint nogoods;
+    private NogoodConstraint nogoods;
 
     /** A CondisConstraint instance adapted to constructive disjunction management */
-    ConDisConstraint condis;
+    private ConDisConstraint condis;
 
     /** An Ibex (continuous constraint model) instance */
     private Ibex ibex;

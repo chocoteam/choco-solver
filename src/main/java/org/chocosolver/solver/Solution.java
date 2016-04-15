@@ -57,17 +57,17 @@ public class Solution implements ICause {
 
     // SOLUTION
     /** Set to <tt>true</tt> when this object is empty */
-    boolean empty;
+    private boolean empty;
     /** Maps of value for integer variable (id - value) */
-    TIntIntHashMap intmap;
+    private TIntIntHashMap intmap;
     /** Maps of value for real variable (id - value) */
-    TIntObjectHashMap<double[]> realmap;
+    private TIntObjectHashMap<double[]> realmap;
     /** Maps of value for set variable (id - values) */
-    TIntObjectHashMap<int[]> setmap;
+    private TIntObjectHashMap<int[]> setmap;
 
     // INPUT
     /** Model to store */
-    Model model;
+    private Model model;
 	/** Variables to store; */
     private Variable[] varsToStore;
 

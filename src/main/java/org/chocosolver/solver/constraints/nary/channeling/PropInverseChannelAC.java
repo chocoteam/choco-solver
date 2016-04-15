@@ -54,12 +54,12 @@ import java.util.Arrays;
  */
 public class PropInverseChannelAC extends Propagator<IntVar> {
 
-    protected int minX, minY;
-    protected int n;
-    protected IntVar[] X, Y;
-    protected RemProc rem_proc;
-    protected IIntDeltaMonitor[] idms;
-    ICause cause;
+    private int minX, minY;
+    private int n;
+    private IntVar[] X, Y;
+    private RemProc rem_proc;
+    private IIntDeltaMonitor[] idms;
+    private ICause cause;
 
     public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);

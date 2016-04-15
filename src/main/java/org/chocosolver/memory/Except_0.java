@@ -40,7 +40,7 @@ package org.chocosolver.memory;
  */
 public class Except_0 implements ICondition {
 
-    IEnvironment environment;
+    private IEnvironment environment;
 
     @Override
     public void set(IEnvironment environment) {
