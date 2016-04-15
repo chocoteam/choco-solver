@@ -80,11 +80,11 @@ public class ExplainingCut implements INeighbor {
     /**
      * Indicates which decisions are related to the explanation in {@link #mDecisionPath}
      */
-    BitSet related;
+    protected BitSet related;
     /**
      * Indicates which decisions are not related to the explanation in {@link #mDecisionPath}
      */
-    BitSet unrelated;
+    protected BitSet unrelated;
     /**
      * Indicates which decisions are frozen in the current fragment
      */
@@ -92,31 +92,31 @@ public class ExplainingCut implements INeighbor {
     /**
      * Indicates if the cut has already been explained
      */
-    boolean forceCft;
+    protected boolean forceCft;
     /**
      * Indicates if the explanation contains no decision, ie optimality is proven
      */
-    boolean isTerminated;
+    private boolean isTerminated;
     /**
      * Number of decisions to fix in the fragment
      */
-    double nbFixedVariables = 0d;
+    protected double nbFixedVariables = 0d;
     /**
      * Number of times this neighbor is called
      */
-    int nbCall;
+    protected int nbCall;
     /**
      * Next time the level should be increased
      */
-    int limit;
+    private int limit;
     /**
      * Relaxing factor
      */
-    final int level;
+    private final int level;
     /**
      * Reference to the model
      */
-    Model mModel;
+    protected Model mModel;
 
     /**
      * Create a neighborhood which analyses the explanation of the cut wrt decision path to focus on decisions
@@ -223,7 +223,7 @@ public class ExplainingCut implements INeighbor {
     /**
      * Compute the initial fragment, ie set of decisions to keep.
      */
-    void clonePath() {
+    protected void clonePath() {
         mDecisionPath.clear();
         mDecisionPath.add(null); // to
         DecisionPath dp = mModel.getSolver().getDecisionPath();

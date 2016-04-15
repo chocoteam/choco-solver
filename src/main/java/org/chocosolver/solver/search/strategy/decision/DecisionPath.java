@@ -60,7 +60,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     /**
      * Current decision path.
      */
-    List<Decision> decisions;
+    private List<Decision> decisions;
     /**
      * Store the sizes of {@link #decisions} during search, to evaluate which decisions are part of the same level.
      */

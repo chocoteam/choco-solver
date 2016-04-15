@@ -102,7 +102,7 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
      * @return <tt>true</tt> if vars[vr] has changed
      * @throws ContradictionException if failure occurs
      */
-    boolean filterPlus(int vr, int v1, int v2) throws ContradictionException {
+    private boolean filterPlus(int vr, int v1, int v2) throws ContradictionException {
         int lb = vars[v1].getLB() + vars[v2].getLB();
         int ub = vars[v1].getUB() + vars[v2].getUB();
         boolean change = vars[vr].updateBounds(lb, ub, this);
@@ -123,7 +123,7 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
      * @return <tt>true</tt> if vars[vr] has changed
      * @throws ContradictionException if failure occurs
      */
-    boolean filterMinus(int vr, int v1, int v2) throws ContradictionException {
+    private boolean filterMinus(int vr, int v1, int v2) throws ContradictionException {
         int lb = vars[v1].getLB() - vars[v2].getUB();
         int ub = vars[v1].getUB() - vars[v2].getLB();
         boolean change = vars[vr].updateBounds(lb, ub, this);

@@ -43,10 +43,10 @@ import org.chocosolver.util.ESat;
 public class PropDivXYZ extends Propagator<IntVar> {
 
     // Z = X/Y
-    final IntVar X, Y, Z;
+    private final IntVar X, Y, Z;
 
     // Abs views of respectively X, Y and Z
-    final IntVar absX, absY, absZ;
+    private final IntVar absX, absY, absZ;
 
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z) {

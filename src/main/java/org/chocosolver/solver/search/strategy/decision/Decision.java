@@ -63,7 +63,7 @@ public abstract class Decision<E extends Variable> implements ICause {
     /**
      * Indicate the position of this decision in the decision path.
      */
-    int position;
+    private int position;
     /**
      * Create a <i>arity</i>-decision.
      * @param arity how many time this decision can be applied (and then refuted)

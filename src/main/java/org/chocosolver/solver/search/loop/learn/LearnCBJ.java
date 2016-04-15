@@ -86,7 +86,7 @@ public class LearnCBJ extends LearnExplained {
      *
      * @param nworld index of the world to backtrack to
      */
-    void identifyRefutedDecision(int nworld) {
+    protected void identifyRefutedDecision(int nworld) {
         DecisionPath path = mModel.getSolver().getDecisionPath();
         int last = path.size() -1 ;
         Decision dec = path.getLastDecision(); // the current decision to undo
@@ -148,7 +148,7 @@ public class LearnCBJ extends LearnExplained {
      * @param decisionPath current decision path
      * @return the number of world to backtrack to.
      */
-    int compute(DecisionPath decisionPath) {
+    private int compute(DecisionPath decisionPath) {
         assert decisionPath.size() >= lastExplanation.getDecisions().length();
         // TODO: should include levels too
         if(lastExplanation.getDecisions().cardinality()>0) {

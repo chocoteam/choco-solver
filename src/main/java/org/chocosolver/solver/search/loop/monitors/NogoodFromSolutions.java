@@ -48,9 +48,9 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class NogoodFromSolutions implements IMonitorSolution {
 
-    final PropNogoods png;
-    final protected IntVar[] decisionVars;
-    final protected TIntList ps;
+    private final PropNogoods png;
+    private final IntVar[] decisionVars;
+    private final TIntList ps;
 
     /**
      * Avoid exploring same solutions (useful with restart on solution)

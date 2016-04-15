@@ -129,7 +129,7 @@ public class PropSumBool extends PropSum {
 
     @SuppressWarnings({"NullableProblems"})
     @Override
-    void filterOnEq() throws ContradictionException {
+    protected void filterOnEq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (F < 0 || E < 0) {
@@ -175,7 +175,7 @@ public class PropSumBool extends PropSum {
 
     @SuppressWarnings({"NullableProblems"})
     @Override
-    void filterOnLeq() throws ContradictionException {
+    protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (F < 0) {
@@ -212,7 +212,7 @@ public class PropSumBool extends PropSum {
 
     @SuppressWarnings({"NullableProblems"})
     @Override
-    void filterOnGeq() throws ContradictionException {
+    protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         if (E < 0) {

@@ -50,9 +50,8 @@ import java.util.Arrays;
  */
 public class PropMemberEnum extends Propagator<IntVar> {
 
-    final TIntHashSet values;
-    protected final IntIterableSet vrms;
-
+    private final TIntHashSet values;
+    private final IntIterableSet vrms;
 
     public PropMemberEnum(IntVar var, int[] values) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
@@ -85,11 +84,6 @@ public class PropMemberEnum extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
     public ESat isEntailed() {
         int nb = 0;
         int ub = this.vars[0].getUB();
@@ -112,5 +106,4 @@ public class PropMemberEnum extends Propagator<IntVar> {
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         return ruleStore.addPropagatorActivationRule(this);
     }
-
 }
