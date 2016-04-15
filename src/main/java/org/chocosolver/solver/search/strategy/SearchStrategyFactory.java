@@ -29,7 +29,9 @@
  */
 package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
@@ -38,9 +40,11 @@ import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.ActivityBased;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
 import org.chocosolver.solver.search.strategy.strategy.*;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.*;
 import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.*;
@@ -256,5 +260,128 @@ public class SearchStrategyFactory {
      */
     public static IntStrategy minDomUBSearch(IntVar... vars) {
         return intVarSearch(minDomIntVar(), maxIntVal(), vars);
+    }
+
+    // ************************************************************************************
+    // DEFAULT STRATEGY (COMPLETE)
+    // ************************************************************************************
+
+    /**
+     * Creates a default search strategy for the given model.
+     * This heuristic is complete (handles IntVar, BoolVar, SetVar and RealVar)
+     *
+     * @param model a model requiring a default search strategy
+     */
+    public static AbstractStrategy defaultSearch(Model model){
+        Solver r = model.getSolver();
+        AbstractStrategy[] strats = new AbstractStrategy[4];
+        int nb = 0;
+
+        // 1. retrieve variables, keeping the declaration order, and put them in four groups:
+        // a. integer and boolean variables
+        List<IntVar> livars = new ArrayList<>();
+        // b. set variables
+        List<SetVar> lsvars = new ArrayList<>();
+        // c. real variables.
+        List<RealVar> lrvars = new ArrayList<>();
+        Variable[] variables = model.getVars();
+        Variable objective = null;
+        for (Variable var : variables) {
+            int type = var.getTypeAndKind();
+            if ((type & Variable.CSTE) == 0) {
+                int kind = type & Variable.KIND;
+                switch (kind) {
+                    case Variable.INT:
+                        livars.add((IntVar) var);
+                        break;
+                    case Variable.BOOL:
+                        livars.add((BoolVar) var);
+                        break;
+                    case Variable.SET:
+                        lsvars.add((SetVar) var);
+                        break;
+                    case Variable.REAL:
+                        lrvars.add((RealVar) var);
+                        break;
+                    default:
+                        // do not throw exception to allow ad hoc variable kinds
+                        break;
+                }
+            }
+        }
+        // d. extract the objective variable if any
+        if (r.getObjectiveManager().isOptimization()) {
+            objective = r.getObjectiveManager().getObjective();
+            int kind = objective.getTypeAndKind() & Variable.KIND;
+            switch (kind) {
+                case Variable.INT:
+                case Variable.BOOL:
+                    livars.remove(objective);
+                    break;
+                case Variable.SET:
+                    lsvars.remove(objective);
+                    break;
+                case Variable.REAL:
+                    lrvars.remove(objective);
+                    break;
+                default:
+                    // do not throw exception to allow ad hoc variable kinds
+                    break;
+            }
+        }
+
+        // 2. Apply
+        // INTEGER VARIABLES DEFAULT SEARCH STRATEGY
+        // a. Dom/Wdeg on integer/boolean variables
+        IntVar[] ivars = livars.toArray(new IntVar[livars.size()]);
+        if (ivars.length > 0) {
+            strats[nb++] = intVarSearch(ivars);
+        }
+
+        // SET VARIABLES DEFAULT SEARCH STRATEGY
+        // b. MinDelta + min domain
+        SetVar[] svars = lsvars.toArray(new SetVar[lsvars.size()]);
+        if (svars.length > 0) {
+            strats[nb++] = setVarSearch(svars);
+        }
+
+        // REAL VARIABLES DEFAULT SEARCH STRATEGY
+        // c. cyclic + middle
+        RealVar[] rvars = lrvars.toArray(new RealVar[lrvars.size()]);
+        if (rvars.length > 0) {
+            strats[nb++] = realVarSearch(rvars);
+        }
+
+        // d. lexico LB/UB for the objective variable
+        if (objective != null) {
+            boolean max = r.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
+            int kind = objective.getTypeAndKind() & Variable.KIND;
+            switch (kind) {
+                case Variable.INT:
+                case Variable.BOOL:
+                    if (max) {
+                        strats[nb++] = minDomUBSearch((IntVar) objective);
+                    } else {
+                        strats[nb++] = minDomLBSearch((IntVar) objective);
+                    }
+                    break;
+                case Variable.REAL:
+                    if (max) {
+                        strats[nb++] = realVarSearch(roundRobinVar(), maxRealVal(), (RealVar) objective);
+                    } else {
+                        strats[nb++] = realVarSearch(roundRobinVar(), minRealVal(), (RealVar) objective);
+                    }
+                    break;
+                default:
+                    // do not throw exception to allow ad hoc variable kinds
+                    break;
+            }
+        }
+
+        if (nb == 0) {
+            // simply to avoid null pointers in case all variables are instantiated
+            strats[nb++] = minDomLBSearch(model.ONE());
+        }
+        return lastConflict(sequencer(Arrays.copyOf(strats, nb)));
     }
 }

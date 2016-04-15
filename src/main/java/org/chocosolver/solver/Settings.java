@@ -32,8 +32,8 @@ package org.chocosolver.solver;
 import org.chocosolver.memory.Except_0;
 import org.chocosolver.memory.ICondition;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
-import org.chocosolver.solver.search.bind.DefaultSearchBinder;
-import org.chocosolver.solver.search.bind.ISearchBinder;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
@@ -179,12 +179,14 @@ public interface Settings  {
     }
 
     /**
-     * Return the search binder
-     * @return the search binder
-     * @see DefaultSearchBinder
+     * Creates a default search strategy for the input model
+     *
+     * @param model a model requiring a default search strategy
+     * @return a default search strategy for model
+     * @see SearchStrategyFactory#defaultSearch(Model)
      */
-    default ISearchBinder getSearchBinder() {
-        return new DefaultSearchBinder();
+    default AbstractStrategy makeDefaultSearch(Model model) {
+        return SearchStrategyFactory.defaultSearch(model);
     }
 
     /**

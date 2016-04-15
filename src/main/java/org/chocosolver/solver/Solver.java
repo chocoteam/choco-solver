@@ -40,8 +40,6 @@ import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.chocosolver.solver.search.bind.DefaultSearchBinder;
-import org.chocosolver.solver.search.bind.ISearchBinder;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.Learn;
@@ -62,7 +60,6 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -392,15 +389,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
+            if(mModel.getSettings().warnUser()) {
+                getErr().printf("No search strategies defined.\nSet to default ones.");
+            }
             defaultSearch = true;
-            ISearchBinder binder = mModel.getSettings().getSearchBinder();
-            binder.configureSearch(mModel);
+            set(mModel.getSettings().makeDefaultSearch(mModel));
         }
         if (completeSearch && !defaultSearch) {
             AbstractStrategy<Variable> declared = M.getStrategy();
-            DefaultSearchBinder dbinder = new DefaultSearchBinder();
-            AbstractStrategy[] complete = dbinder.getDefault(mModel);
-            mModel.getSolver().set(ArrayUtils.append(new AbstractStrategy[]{declared}, complete));
+            AbstractStrategy complete = mModel.getSettings().makeDefaultSearch(mModel);
+            set(declared, complete);
         }
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
             mModel.getEnvironment().worldPop();
@@ -480,7 +478,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         searchMonitors.beforeRestart();
         restoreRootNode();
         mModel.getEnvironment().worldPush();
-        mModel.getSolver().getMeasures().incRestartCount();
+        getMeasures().incRestartCount();
         try {
             objectivemanager.postDynamicCut();
             P.execute(this);
