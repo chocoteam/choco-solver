@@ -45,4 +45,4 @@ notifications:
     on_start: never
 after_script:
 - codecov
-- curl http://testr-1154.appspot.com/assets/testR.py | python
+#- curl http://testr-1154.appspot.com/assets/testR.py | python
