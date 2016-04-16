@@ -38,7 +38,8 @@ import org.testng.annotations.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 
 /**
  * @author Alexandre LEBRUN

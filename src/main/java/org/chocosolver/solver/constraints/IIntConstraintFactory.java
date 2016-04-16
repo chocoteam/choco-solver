@@ -70,7 +70,6 @@ import org.chocosolver.solver.constraints.nary.nValue.PropAMNV;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R;

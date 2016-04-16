@@ -40,8 +40,7 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.stream;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.testng.Assert.*;
 
 /**

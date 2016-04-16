@@ -31,7 +31,10 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.loop.lns.neighbors.*;
+import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
+import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 

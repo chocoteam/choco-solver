@@ -32,7 +32,6 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -45,7 +44,6 @@ import org.testng.annotations.Test;
 import java.text.MessageFormat;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.activityBasedSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;

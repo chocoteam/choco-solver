@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.propagation.hardcoded;
 
-import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;

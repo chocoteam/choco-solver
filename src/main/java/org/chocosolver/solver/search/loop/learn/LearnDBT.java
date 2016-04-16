@@ -30,7 +30,10 @@
 package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.explanations.*;
+import org.chocosolver.solver.explanations.ArrayEventStore;
+import org.chocosolver.solver.explanations.Explanation;
+import org.chocosolver.solver.explanations.IExplanationEngine;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;

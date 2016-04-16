@@ -30,7 +30,6 @@
 package org.chocosolver.solver.variables.view;
 
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.util.procedure.IntProcedure;
