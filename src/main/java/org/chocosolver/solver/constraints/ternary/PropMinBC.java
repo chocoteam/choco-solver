@@ -32,6 +32,7 @@ package org.chocosolver.solver.constraints.ternary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -76,7 +77,6 @@ public class PropMinBC extends Propagator<IntVar> {
             case 7: // everything is instantiated
             case 6:// Z and Y are instantiated
                 vars[0].instantiateTo(Math.min(vars[1].getValue(), vars[2].getValue()), this);
-                setPassive();
                 break;
             case 5: //  X and Z are instantiated
             {
@@ -84,7 +84,6 @@ public class PropMinBC extends Propagator<IntVar> {
                 int val2 = vars[2].getValue();
                 if (best < val2) {
                     vars[1].instantiateTo(best, this);
-                    setPassive();
                 } else if (best > val2) {
                     contradiction(vars[2], "wrong min selected");
                 } else { // X = Z
@@ -96,8 +95,9 @@ public class PropMinBC extends Propagator<IntVar> {
             {
                 int val = vars[2].getValue();
                 if (val < vars[1].getLB()) { // => X = Z
-                    vars[0].instantiateTo(val, this);
-                    setPassive();
+                    if(vars[0].instantiateTo(val, this)) {
+                        setPassive();
+                    }
                 } else {
                     _filter();
                 }
@@ -109,7 +109,6 @@ public class PropMinBC extends Propagator<IntVar> {
                 int val1 = vars[1].getValue();
                 if (best < val1) {
                     vars[2].instantiateTo(best, this);
-                    setPassive();
                 } else if (best > val1) {
                     contradiction(vars[1], "");
                 } else { // X = Y
@@ -121,8 +120,9 @@ public class PropMinBC extends Propagator<IntVar> {
             {
                 int val = vars[1].getValue();
                 if (val < vars[2].getLB()) { // => X = Y
-                    vars[0].instantiateTo(val, this);
-                    setPassive();
+                    if(vars[0].instantiateTo(val, this)) {
+                        setPassive();
+                    }
                 } else { // val in Z
                     _filter();
                 }
@@ -135,11 +135,13 @@ public class PropMinBC extends Propagator<IntVar> {
                     contradiction(vars[0], null);
                 }
                 if (vars[1].getLB() > best) {
-                    vars[2].instantiateTo(best, this);
-                    setPassive();
+                    if(vars[2].instantiateTo(best, this)) {
+                        setPassive();
+                    }
                 } else if (vars[2].getLB() > best) {
-                    vars[1].instantiateTo(best, this);
-                    setPassive();
+                    if(vars[1].instantiateTo(best, this)) {
+                        setPassive();
+                    }
                 } else {
                     if (vars[1].updateLowerBound(best, this) | vars[2].updateLowerBound(best, this)) {
                         filter(); // to ensure idempotency for "free"
@@ -151,6 +153,7 @@ public class PropMinBC extends Propagator<IntVar> {
             case 0: // otherwise
                 _filter();
                 break;
+            default: throw new SolverException("Unexpected mask "+c);
         }
     }
 
