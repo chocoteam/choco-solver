@@ -34,6 +34,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -146,6 +147,9 @@ public class IntLinCombFactory {
                     return RESULT <= 0 ? Model.TRUE() : Model.FALSE();
                 case GT:
                     return RESULT < 0 ? Model.TRUE() : Model.FALSE();
+                default:
+                    throw new SolverException("Unexpected Tuple operator " + OPERATOR
+                            + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");
             }
         }
         // 2. resize NVARS and NCOEFFS

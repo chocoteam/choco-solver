@@ -183,6 +183,10 @@ public abstract class AbstractVariable implements Variable {
             case Variable.SET:
                 this.scheduler = new SetEvtScheduler();
                 break;
+            default:
+                // do not throw exception to allow extending the solver with other variable kinds (e.g. graph)
+                // event scheduler may be managed using java reflexion
+                break;
         }
     }
 

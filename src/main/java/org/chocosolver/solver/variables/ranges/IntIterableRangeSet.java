@@ -30,6 +30,8 @@
 package org.chocosolver.solver.variables.ranges;
 
 
+import org.chocosolver.solver.exception.SolverException;
+
 import java.util.Arrays;
 
 /**
@@ -161,6 +163,7 @@ public class IntIterableRangeSet implements IntIterableSet {
                     System.arraycopy(ELEMENTS, i + 1, ELEMENTS, i - 1, SIZE - i);
                     SIZE -= 2;
                     break;
+                default: throw new SolverException("Unexpected mask "+c);
             }
             modified = true;
             CARDINALITY++;
@@ -237,6 +240,7 @@ public class IntIterableRangeSet implements IntIterableSet {
                     System.arraycopy(ELEMENTS, i + 2, ELEMENTS, i, SIZE - i - 2);
                     SIZE -= 2;
                     break;
+                default: throw new SolverException("Unexpected mask "+c);
             }
             modified = true;
             CARDINALITY--;
@@ -293,19 +297,12 @@ public class IntIterableRangeSet implements IntIterableSet {
             prev = ELEMENTS[SIZE - 1];
         } else if (p >= 0) {
             int i = (p - 1) << 1;
-            int c = ELEMENTS[i] == e ? 1 : 0;
-            c += ELEMENTS[i + 1] == e ? 2 : 0;
-            switch (c) {
-                case 0:
-                case 2:
-                    // not last element of the range
-                    prev = e - 1;
-                    break;
-                case 1:
-                case 3:
-                    if (i > 1) {
-                        prev = ELEMENTS[i - 1];
-                    }
+            if(ELEMENTS[i] == e){
+                if (i > 1) {
+                    prev = ELEMENTS[i - 1];
+                }
+            }else{
+                prev = e - 1;// not last element of the range
             }
         } else if (p < -1) {
             return ELEMENTS[((-p - 1) << 1)-1];

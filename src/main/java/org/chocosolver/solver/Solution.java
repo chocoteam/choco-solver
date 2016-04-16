@@ -129,6 +129,10 @@ public class Solution implements ICause {
                             SetVar s = (SetVar) var;
                             setmap.put(s.getId(), s.getValue().toArray());
                             break;
+                        default:
+                            // do not throw exception to allow extending the solver with other variable kinds (e.g. graph)
+                            // that should then be stored externally to this object
+                            break;
                     }
                 }else{
                     warn = true;
@@ -162,6 +166,10 @@ public class Solution implements ICause {
                     case Variable.SET:
                         SetVar s = (SetVar) var;
                         st.append(s.getName()).append("=").append(Arrays.toString(setmap.get(s.getId()))).append(", ");
+                        break;
+                    default:
+                        // do not throw exception to allow extending the solver with other variable kinds (e.g. graph)
+                        // that should then be stored externally to this object
                         break;
                 }
             }

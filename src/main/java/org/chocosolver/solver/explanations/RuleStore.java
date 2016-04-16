@@ -235,8 +235,8 @@ public class RuleStore {
                             return cRules.getVmRemval(vid).contains(i1);
                     }
                 }
+            default:throw new SolverException("Unknown event");
         }
-        throw new SolverException("Unknown event");
     }
 
 

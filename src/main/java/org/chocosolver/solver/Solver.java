@@ -338,6 +338,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                     action = repair;
                     stop = solution = true;
                     break;
+                default: throw new SolverException("Invalid Solver loop action "+action);
             }
         }
         return solution;

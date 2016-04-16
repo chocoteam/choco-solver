@@ -176,6 +176,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
                 case INSTANTIATE:
                     newrules |= ruleStore.addFullDomainRule(y);
                     break;
+                default: break;// nothing to do
             }
         } else if (var.equals(y)) {
             IntEventType ievt = (IntEventType) evt;
@@ -192,6 +193,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
                 case INSTANTIATE:
                     newrules |= ruleStore.addFullDomainRule(x);
                     break;
+                default: break;// nothing to do
             }
         } else {
             newrules |= super.why(ruleStore, var, evt, value);
