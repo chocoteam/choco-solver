@@ -204,7 +204,7 @@ public class ExplainingCut implements INeighbor {
     /**
      * Increase the relaxing limit
      */
-    void increaseLimit() {
+    protected void increaseLimit() {
         long ank = (long) (1.2 * StatisticUtils.binomialCoefficients(related.cardinality(), (int) nbFixedVariables - 1));
         int step = (int) Math.min(ank, level);
         limit = nbCall + step;
