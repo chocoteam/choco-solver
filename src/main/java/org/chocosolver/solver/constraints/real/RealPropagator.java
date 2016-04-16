@@ -104,6 +104,7 @@ public class RealPropagator extends Propagator<RealVar> {
             case Ibex.FAIL:
                  // "Ibex failed"
                 fails();
+                break;
             case Ibex.CONTRACT:
                 for (int i = 0; i < vars.length; i++) {
                     vars[i].updateBounds(domains[2 * i], domains[2 * i + 1], this);
@@ -115,8 +116,8 @@ public class RealPropagator extends Propagator<RealVar> {
                 }
                 setPassive();
                 break;
-            case Ibex.NOT_SIGNIFICANT:
-            default:
+            case Ibex.NOT_SIGNIFICANT: break;
+            default: break;
         }
     }
 

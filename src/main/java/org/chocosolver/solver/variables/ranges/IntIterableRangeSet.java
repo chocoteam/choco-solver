@@ -272,19 +272,12 @@ public class IntIterableRangeSet implements IntIterableSet {
             next = ELEMENTS[0];
         } else if (p >= 0) {
             int i = (p - 1) << 1;
-            int c = ELEMENTS[i] == e ? 1 : 0;
-            c += ELEMENTS[i + 1] == e ? 2 : 0;
-            switch (c) {
-                case 0:
-                case 1:
-                    // not last element of the range
-                    next = e + 1;
-                    break;
-                case 2:
-                case 3:
-                    if (i + 2 < SIZE) {
-                        next = ELEMENTS[i + 2];
-                    }
+            if(ELEMENTS[i+1] != e){
+                next = e + 1; // not last element of the range
+            }else{
+                if (i + 2 < SIZE) {
+                    next = ELEMENTS[i + 2];
+                }
             }
         } else if (p > -((SIZE >> 1) + 1)) {
             return ELEMENTS[(-p - 1) << 1];

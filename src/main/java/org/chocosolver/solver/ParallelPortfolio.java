@@ -373,6 +373,7 @@ public class ParallelPortfolio {
                 if(policy!=ResolutionPolicy.SATISFACTION){
                     solver.setLNS(INeighborFactory.blackBox(ivars), new FailCounter(solver.getModel(), 1000));
                 }
+                break;
         }
         // complete with set default search
         if(ks>0) {

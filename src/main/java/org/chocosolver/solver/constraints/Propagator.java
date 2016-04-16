@@ -630,17 +630,9 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         StringBuilder st = new StringBuilder();
         st.append(getClass().getSimpleName()).append("(");
         int i = 0;
-        switch (vars.length) {
-            case 0:
-                break;
-            default:
-            case 3:
-                st.append(vars[i++].getName()).append(", ");
-            case 2:
-                st.append(vars[i++].getName()).append(", ");
-            case 1:
-                st.append(vars[i++].getName());
-        }
+        if(vars.length>=3)st.append(vars[i++].getName()).append(", ");
+        if(vars.length>=2)st.append(vars[i++].getName()).append(", ");
+        if(vars.length>=1)st.append(vars[i++].getName());
         if (i < vars.length) {
             if (vars.length > 4) {
                 st.append(", ...");

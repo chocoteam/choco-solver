@@ -274,6 +274,7 @@ public class MultivaluedDecisionDiagram  {
                 default: // a non terminal node
                     nbChild++;
                     mdd[node + i] = nodeChild[i] = detectIsomorphism(mdd[node + i], layer + 1);
+                    break;
             }
         }
         boolean known = false;
