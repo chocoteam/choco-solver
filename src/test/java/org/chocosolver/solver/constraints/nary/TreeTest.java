@@ -68,7 +68,6 @@ public class TreeTest {
 			).post();
 		}
 		model.getSolver().set(randomSearch(VS, 0));
-		model.getSolver().showShortStatistics();
 		return model;
 	}
 }
