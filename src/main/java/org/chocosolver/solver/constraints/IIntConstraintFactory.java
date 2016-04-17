@@ -47,7 +47,7 @@ import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
-import org.chocosolver.solver.constraints.nary.among.PropAmongGAC_GoodImpl;
+import org.chocosolver.solver.constraints.nary.among.PropAmongGAC;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -570,7 +570,7 @@ public interface IIntConstraintFactory {
 	default Constraint among(IntVar nbVar, IntVar[] vars, int[] values) {
 		int[] vls = new TIntHashSet(values).toArray(); // remove double occurrences
 		Arrays.sort(vls);                              // sort
-		return new Constraint("Among", new PropAmongGAC_GoodImpl(ArrayUtils.append(vars, new IntVar[]{nbVar}), vls));
+		return new Constraint("Among", new PropAmongGAC(ArrayUtils.append(vars, new IntVar[]{nbVar}), vls));
 	}
 
 	/**

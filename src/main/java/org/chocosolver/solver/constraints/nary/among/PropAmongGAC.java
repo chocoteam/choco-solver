@@ -31,78 +31,68 @@ package org.chocosolver.solver.constraints.nary.among;
 
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.procedure.UnarySafeIntProcedure;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
 
 /**
+ * Incremental propagator for Among Constraint:
+ * Counts the number of decision variables which take a value in the input value set
  * GCCAT:
  * NVAR is the number of variables of the collection VARIABLES that take their value in VALUES.
  * <br/><a href="http://www.emn.fr/x-info/sdemasse/gccat/Camong.html">gccat among</a>
  * <br/>
- * Propagator :
- * C. Bessiere, E. Hebrard, B. Hnich, Z. Kiziltan, T. Walsh,
- * Among, common and disjoint Constraints
- * CP-2005
- * <br/>
  *
- * @author Charles Prud'homme
- * @since 31/01/12
+ * @author Jean-Guillaume Fages
+ * @since 8/02/14
  */
 public class PropAmongGAC extends Propagator<IntVar> {
 
-    private final int[] values;
-    private final int nb_vars;
-    private final IStateBitSet both;
-    private final IStateInt LB;
-    private final IStateInt UB;
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-    private TIntHashSet setValues;
+    private final int nb_vars;        // number of decision variables (excludes the cardinality variable)
+    private final int[] values;        // value set (array)
+    private TIntHashSet setValues;    // value set (set)
+    private ISet poss;                // variable set possibly assigned to a value in the value set
+    private IStateInt nbSure;        // number of variables that are assigned to such value for sure
 
-    private IStateInt[] occs;
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
-    private final IIntDeltaMonitor[] idms;
-
-    private final RemProc rem_proc;
-
-    private boolean needFilter;
-
-    private final IntIterableSet vrms;
-
+    /**
+     * Creates a propagator for Among:
+     * Counts the number of decision variables which take a value in the input value set
+     *
+     * @param variables {decision variables, cardinality variable}
+     * @param values    input value set
+     */
     public PropAmongGAC(IntVar[] variables, int[] values) {
         super(variables, PropagatorPriority.LINEAR, true);
         nb_vars = variables.length - 1;
-        this.idms = new IIntDeltaMonitor[vars.length];
-        for (int i = 0; i < vars.length; i++) {
-            idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
-        }
         IEnvironment environment = model.getEnvironment();
-        both = environment.makeBitSet(nb_vars);
-        LB = environment.makeInt(0);
-        UB = environment.makeInt(0);
         this.setValues = new TIntHashSet(values);
         this.values = setValues.toArray();
         Arrays.sort(this.values);
-        this.occs = new IStateInt[nb_vars];
-        for (int i = 0; i < nb_vars; i++) {
-            occs[i] = environment.makeInt(0);
-        }
-        rem_proc = new RemProc(this);
-        vrms = new IntIterableBitSet();
+		poss = SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
+		nbSure = environment.makeInt(0);
     }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     @Override
     public int getPropagationConditions(int idx) {
@@ -115,170 +105,168 @@ public class PropAmongGAC extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
-            int lb = 0;
-            int ub = nb_vars;
+            poss.clear();
+            int nbMandForSure = 0;
             for (int i = 0; i < nb_vars; i++) {
                 IntVar var = vars[i];
                 int nb = 0;
-                for (int j = 0; j < values.length; j++) {
-                    nb += (var.contains(values[j]) ? 1 : 0);
+                for (int j : values) {
+                    if (var.contains(j)) {
+                        nb++;
+                    }
                 }
-                occs[i].set(nb);
                 if (nb == var.getDomainSize()) {
-                    lb++;
-                } else if (nb == 0) {
-                    ub--;
+                    nbMandForSure++;
                 } else if (nb > 0) {
-                    both.set(i, true);
+                    poss.add(i);
                 }
             }
-            LB.set(lb);
-            UB.set(ub);
-            for (int i = 0; i < idms.length; i++) {
-                idms[i].unfreeze();
-            }
+            nbSure.set(nbMandForSure);
         }
         filter();
     }
 
-    protected void filter() throws ContradictionException {
-        int lb = LB.get();
-        int ub = UB.get();
-        vars[nb_vars].updateBounds(lb, ub, this);
-
-        int min = Math.max(vars[nb_vars].getLB(), lb);
-        int max = Math.min(vars[nb_vars].getUB(), ub);
-
-        if (max < min) fails();
-
-        if (lb == min && lb == max) {
-            removeOnlyValues();
-        }
-
-        if (ub == min && ub == max) {
-            removeButValues();
-        }
-    }
-
     @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
+    public void propagate(int vidx, int evtmask) throws ContradictionException {
+        if (vidx != nb_vars && poss.contain(vidx)) {
+            IntVar var = vars[vidx];
+            int nb = 0;
+            for (int j : values) {
+                if (var.contains(j)) {
+                    nb++;
+                }
+            }
+            if (nb == var.getDomainSize()) {
+                nbSure.add(1);
+                poss.remove(vidx);
+                vars[nb_vars].updateLowerBound(nbSure.get(), this);
+            } else if (nb == 0) {
+                poss.remove(vidx);
+                vars[nb_vars].updateUpperBound(poss.getSize() + nbSure.get(), this);
+            }
+        }
         forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
-    /**
-     * Remove from {@code v} every values contained in {@code values}.
-     *
-     * @throws ContradictionException if contradiction occurs.
-     */
-    private void removeOnlyValues() throws ContradictionException {
-        for (int i = both.nextSetBit(0); i >= 0; i = both.nextSetBit(i + 1)) {
+    private void filter() throws ContradictionException {
+        int lb = nbSure.get();
+        int ub = poss.getSize() + lb;
+        vars[nb_vars].updateBounds(lb, ub, this);
+        if (vars[nb_vars].isInstantiated() && lb < ub) {
+            if (vars[nb_vars].getValue() == lb) {
+                backPropRemPoss();
+            } else if (vars[nb_vars].getValue() == ub) {
+                backPropForcePoss();
+            }
+        }
+    }
+
+    private void backPropRemPoss() throws ContradictionException {
+        for (int i : poss) {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int value : values) {
-                    if (v.removeValue(value, this)) {
-                        occs[i].add(-1);
+                    v.removeValue(value, this);
+                }
+                poss.remove(i);
+            } else {
+                int newLB = v.getLB();
+                int newUB = v.getUB();
+                for (int val = v.getLB(); val <= newUB; val = v.nextValue(val)) {
+                    if (setValues.contains(val)) {
+                        newLB = val + 1;
+                    } else {
+                        break;
                     }
                 }
-            } else {
-                int lb = v.getLB();
-                int ub = v.getUB();
-                int k1 = 0;
-                int k2 = values.length - 1;
-                // values is sorted
-                // so first, find the first value inside dom(v)
-                while (k1 < k2 && values[k1] < lb) {
-                    k1++;
+                for (int val = newUB; val >= newLB; val = v.previousValue(val)) {
+                    if (setValues.contains(val)) {
+                        newUB = val - 1;
+                    } else {
+                        break;
+                    }
                 }
-                // and bottom-up shaving
-                while (k1 <= k2 && v.removeValue(values[k1], this)) {
-                    occs[i].add(-1);
-                    k1++;
-                }
-                // then find the last value inside dom(v)
-                while (k2 > k1 && values[k2] > ub) {
-                    k2--;
-                }
-                // and top bottom shaving
-                while (k2 >= k1 && v.removeValue(values[k2], this)) {
-                    occs[i].add(-1);
-                    k2--;
+                v.updateBounds(newLB, newUB, this);
+                if (newLB > values[values.length - 1] || newUB < values[0]) {
+                    poss.remove(i);
                 }
             }
         }
     }
 
-    /**
-     * Remove from {@code v} each value but {@code values}.
-     *
-     * @throws ContradictionException if contradiction occurs.
-     */
-    private void removeButValues() throws ContradictionException {
-        for (int i = both.nextSetBit(0); i >= 0; i = both.nextSetBit(i + 1)) {
+    private void backPropForcePoss() throws ContradictionException {
+        for (int i : poss) {
             IntVar v = vars[i];
-            DisposableValueIterator it = v.getValueIterator(true);
-            vrms.clear();
-            vrms.setOffset(v.getLB());
-            while (it.hasNext()) {
-                int value = it.next();
-                if (!setValues.contains(value)) {
-                    vrms.add(value);
+            if (v.hasEnumeratedDomain()) {
+                for (int val = v.getLB(); val <= v.getUB(); val = v.nextValue(val)) {
+                    if (!setValues.contains(val)) {
+                        v.removeValue(val, this);
+                    }
+                }
+                poss.remove(i);
+                nbSure.add(1);
+            } else {
+                v.updateBounds(values[0], values[values.length - 1], this);
+                int newLB = v.getLB();
+                int newUB = v.getUB();
+                for (int val = v.getLB(); val <= newUB; val = v.nextValue(val)) {
+                    if (!setValues.contains(val)) {
+                        newLB = val + 1;
+                    } else {
+                        break;
+                    }
+                }
+                for (int val = newUB; val >= newLB; val = v.previousValue(val)) {
+                    if (!setValues.contains(val)) {
+                        newUB = val - 1;
+                    } else {
+                        break;
+                    }
+                }
+                v.updateBounds(newLB, newUB, this);
+                if (v.isInstantiated()) {
+                    poss.remove(i);
+                    nbSure.add(1);
                 }
             }
-            v.removeValues(vrms, this);
-            it.dispose();
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            int nb = 0;
-            for (int i = 0; i < nb_vars; i++) {
-                if (setValues.contains(vars[i].getValue())) {
-                    nb++;
+        int min = 0;
+        int max = 0;
+        int nbInst = vars[nb_vars].isInstantiated() ? 1 : 0;
+        for (int i = 0; i < nb_vars; i++) {
+            IntVar var = vars[i];
+            if (var.isInstantiated()) {
+                nbInst++;
+                if (setValues.contains(var.getValue())) {
+                    min++;
+                    max++;
+                }
+            } else {
+                int nb = 0;
+                for (int j : values) {
+                    if (var.contains(j)) {
+                        nb++;
+                    }
+                }
+                if (nb == var.getDomainSize()) {
+                    min++;
+                    max++;
+                } else if (nb > 0) {
+                    max++;
                 }
             }
-            return ESat.eval(vars[nb_vars].getValue() == nb);
+        }
+        if (min > vars[nb_vars].getUB() || max < vars[nb_vars].getLB()) {
+            return ESat.FALSE;
+        }
+        if (nbInst == nb_vars + 1) {
+            return ESat.TRUE;
         }
         return ESat.UNDEFINED;
-    }
-
-    protected static class RemProc implements UnarySafeIntProcedure<Integer> {
-
-        private final PropAmongGAC p;
-        private int varIdx;
-
-        public RemProc(PropAmongGAC p) {
-            this.p = p;
-        }
-
-        @Override
-        public UnarySafeIntProcedure set(Integer integer) {
-            varIdx = integer;
-            return this;
-        }
-
-        @Override
-        public void execute(int val) {
-            if (p.both.get(varIdx)) {
-                if (p.setValues.contains(val)) {
-                    p.occs[varIdx].add(-1);
-                }
-                IntVar var = p.vars[varIdx];
-                int nb = p.occs[varIdx].get();
-                if (nb == var.getDomainSize()) {  //Can only be instantiated to a value in the group
-                    p.LB.add(1);
-                    p.both.set(varIdx, false);
-//                    p.filter();
-                    p.needFilter = true;
-                } else if (nb == 0) { //No value in the group
-                    p.UB.add(-1);
-                    p.both.set(varIdx, false);
-//                    p.filter();
-                    p.needFilter = true;
-                }
-            }
-        }
     }
 
     @Override
@@ -295,5 +283,4 @@ public class PropAmongGAC extends Propagator<IntVar> {
         sb.append(vars[nb_vars].toString()).append(")");
         return sb.toString();
     }
-
 }
