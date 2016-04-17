@@ -71,10 +71,10 @@ public class AlphaDominatorsFinder extends AbstractLengauerTarjanDominatorsFinde
     }
 
     //***********************************************************************************
-    // LINK-EVAL
+    // link-eval
     //***********************************************************************************
 
-    protected void LINK(int v, int w) {
+    protected void link(int v, int w) {
         int s = w;
         while (semi[label[w]] < semi[label[child[s]]]) {
             if (size[s] + size[child[child[s]]] >= 2 * size[child[s]]) {
@@ -99,11 +99,11 @@ public class AlphaDominatorsFinder extends AbstractLengauerTarjanDominatorsFinde
         }
     }
 
-    protected int EVAL(int v) {
+    protected int eval(int v) {
         if (ancestor[v] == -1) {
             return label[v];
         } else {
-            COMPRESS(v);
+            compress(v);
             if (semi[label[ancestor[v]]] >= semi[label[v]]) {
                 return label[v];
             } else {
@@ -113,7 +113,7 @@ public class AlphaDominatorsFinder extends AbstractLengauerTarjanDominatorsFinde
 
     }
 
-    protected void COMPRESS(int v) {
+    protected void compress(int v) {
         int k = v;
         list.clear();
         while (ancestor[ancestor[k]] != -1) {

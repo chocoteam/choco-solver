@@ -37,6 +37,10 @@ import java.util.Iterator;
 
 public class StrongConnectivityFinder  {
 
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
+
 	// input
 	private DirectedGraph graph;
 	private BitSet restriction;
@@ -49,6 +53,10 @@ public class StrongConnectivityFinder  {
 	private int[] stack, p, inf, nodeOfDfsNum, dfsNumOfNode;
 	private Iterator<Integer>[] iterator;
 	private BitSet inStack;
+
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
 
 	public StrongConnectivityFinder(DirectedGraph graph) {
 		this.graph = graph;
@@ -67,6 +75,10 @@ public class StrongConnectivityFinder  {
 		nbSCC = 0;
 		iterator = new Iterator[n];
 	}
+
+	//***********************************************************************************
+	// ALGORITHM
+	//***********************************************************************************
 
 	public void findAllSCC() {
 		ISet nodes = graph.getNodes();
@@ -179,6 +191,10 @@ public class StrongConnectivityFinder  {
 		nextNode[y] = sccFirstNode[nbSCC];
 		sccFirstNode[nbSCC] = y;
 	}
+
+	//***********************************************************************************
+	// ACCESSORS
+	//***********************************************************************************
 
 	public int getNbSCC() {
 		return nbSCC;

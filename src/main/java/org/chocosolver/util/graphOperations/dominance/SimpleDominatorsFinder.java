@@ -51,24 +51,24 @@ public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFind
     }
 
     //***********************************************************************************
-    // LINK-EVAL
+    // link-eval
     //***********************************************************************************
 
-    protected void LINK(int v, int w) {
+    protected void link(int v, int w) {
         ancestor[w] = v;
     }
 
-    protected int EVAL(int v) {
+    protected int eval(int v) {
         if (ancestor[v] == -1) {
             return v;
         } else {
-            COMPRESS(v);
+            compress(v);
             return label[v];
         }
 
     }
 
-    protected void COMPRESS(int v) {
+    protected void compress(int v) {
         int k = v;
         list.clear();
         while (ancestor[ancestor[k]] != -1) {

@@ -178,7 +178,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 			w = vertex[i];
 			prds = preds[w];
 			for (int v : prds) {
-				u = EVAL(v);
+				u = eval(v);
 				if (semi[u] < semi[w]) {
 					semi[w] = semi[u];
 				}
@@ -188,12 +188,12 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 			} else {
 				dom[w] = parent[w];
 			}
-			LINK(parent[w], w);
+			link(parent[w], w);
 			int oldBI = parent[w];
 			int v = bucket[oldBI];
 			while (v != -1) {
 				bucket[oldBI] = -1;
-				u = EVAL(v);
+				u = eval(v);
 				if (semi[u] < semi[v]) {
 					dom[v] = u;
 				} else {
@@ -224,14 +224,14 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	}
 
 	//***********************************************************************************
-	// LINK-EVAL
+	// link-eval
 	//***********************************************************************************
 
-	protected abstract void LINK(int v, int w);
+	protected abstract void link(int v, int w);
 
-	protected abstract int EVAL(int v);
+	protected abstract int eval(int v);
 
-	protected abstract void COMPRESS(int v);
+	protected abstract void compress(int v);
 
 	//***********************************************************************************
 	// ACCESSORS
@@ -304,12 +304,6 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	}
 
 	//***********************************************************************************
-	// ARC-DOMINATOR
+	// ARC-DOMINATOR //(x,y) existe && x domine y && y domines tous ses autres predecesseurs (sauf x donc)
 	//***********************************************************************************
-
-	@SuppressWarnings("UnusedParameters")
-	public boolean isArcDominator(int x, int y) {
-		//(x,y) existe && x domine y && y domines tous ses autres predecesseurs (sauf x donc)
-		throw new UnsupportedOperationException("method not implemented yet");
-	}
 }
