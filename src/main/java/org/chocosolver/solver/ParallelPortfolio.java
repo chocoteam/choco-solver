@@ -217,7 +217,7 @@ public class ParallelPortfolio {
         }
         forkJoinPool.shutdownNow();
         getSolverTerminated().set(false);// otherwise, solver.isStopCriterionMet() always returns true
-        if(models.get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION) {
+        if(getSolutionFound().get() && models.get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION) {
             int bestAll = getBestModel().getSolver().getBestSolutionValue().intValue();
             for (Model m : models) {
                 int mVal = m.getSolver().getBestSolutionValue().intValue();
