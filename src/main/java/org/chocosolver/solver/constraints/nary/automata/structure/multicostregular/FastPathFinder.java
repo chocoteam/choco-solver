@@ -62,6 +62,9 @@ public class FastPathFinder {
     private double[][] lpft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
     private boolean[] modified = new boolean[2];
 
+    // prevSP is a shortcut to graph.GNodes.prevSPI 
+    private int[][] prevSP,nextSP,prevLP,nextLP;
+
     public FastPathFinder(StoredDirectedMultiGraph graph) {
         this.graph = graph;
         this.sp = new int[graph.layers.length - 1];
@@ -72,6 +75,10 @@ public class FastPathFinder {
         spft = this.graph.GNodes.spftI;
         lpfs = this.graph.GNodes.lpfsI;
         lpft = this.graph.GNodes.lpftI;
+        prevSP = this.graph.GNodes.prevSPI;
+        nextSP = this.graph.GNodes.nextSPI;
+        prevLP = this.graph.GNodes.prevLPI;
+        nextLP = this.graph.GNodes.nextLPI;
     }
 
     private double getCost(int e, int resource, double[] u, boolean lagrange, boolean max) {
@@ -475,10 +482,12 @@ public class FastPathFinder {
                         for (int d = 0; d < nbr; d++) {
                             if (spfs[dest][d] > cost[d] + spfs[orig][d]) {
                                 spfs[dest][d] = cost[d] + spfs[orig][d];
+                                prevSP[dest][d] = e;
                                 update = true;
                             }
                             if (lpfs[dest][d] < lpfs[orig][d] + cost[d]) {
                                 lpfs[dest][d] = lpfs[orig][d] + cost[d];
+                                prevLP[dest][d] = e;
                                 update = true;
                             }
                         }
@@ -519,6 +528,7 @@ public class FastPathFinder {
                                 break;
                             } else if (spft[orig][d] > spft[dest][d] + cost[d]) {
                                 spft[orig][d] = spft[dest][d] + cost[d];
+                                nextSP[orig][d] = e;
                                 update = true;
                             }
 
@@ -528,15 +538,14 @@ public class FastPathFinder {
                                 break;
                             } else if (lpft[orig][d] < lpft[dest][d] + cost[d]) {
                                 lpft[orig][d] = lpft[dest][d] + cost[d];
+                                nextLP[orig][d] = e;
                                 update = true;
                             }
-
                         }
 
                     }
                 }
                 //  out.dispose();
-
             }
             //  origIter.dispose();
             if (!update) propagator.fails();
