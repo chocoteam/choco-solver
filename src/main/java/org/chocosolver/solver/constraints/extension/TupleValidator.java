@@ -38,12 +38,12 @@ package org.chocosolver.solver.constraints.extension;
  */
 public interface TupleValidator {
 
+	TupleValidator TRUE = values -> true;
+
     /**
      * Valid a tuple
      * @param values tuple to valid
      * @return a boolean
      */
     boolean valid(int... values);
-
-	TupleValidator TRUE = values -> true;
 }

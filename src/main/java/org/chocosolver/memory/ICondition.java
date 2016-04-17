@@ -40,14 +40,12 @@ package org.chocosolver.memory;
  */
 public interface ICondition  {
 
+    /** False condition, never satisfied */
+    ICondition FALSE = () -> false;
+
     boolean satisfied();
 
     default void set(IEnvironment environment) {
 
     }
-
-    /**
-     * False condition, never satisfied
-     */
-    ICondition FALSE = () -> false;
 }

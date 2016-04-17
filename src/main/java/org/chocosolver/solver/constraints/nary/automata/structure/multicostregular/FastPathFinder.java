@@ -49,21 +49,26 @@ import java.util.Arrays;
  */
 public class FastPathFinder {
 
+    //***********************************************************************************
+   	// VARIABLES
+   	//***********************************************************************************
+
     private StoredDirectedMultiGraph graph;
-
     private int[] sp;
-
     private int nbLayer;
     private int nbR;
-
     public double[][] spfs;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
     public double[][] spft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
     private double[][] lpfs;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
     private double[][] lpft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
     private boolean[] modified = new boolean[2];
-
-    // prevSP is a shortcut to graph.GNodes.prevSPI 
+    // prevSP is a shortcut to graph.GNodes.prevSPI
     private int[][] prevSP,nextSP,prevLP,nextLP;
+    private double[] tmpU;
+
+    //***********************************************************************************
+   	// CONSTRUCTOR
+   	//***********************************************************************************
 
     public FastPathFinder(StoredDirectedMultiGraph graph) {
         this.graph = graph;
@@ -81,6 +86,10 @@ public class FastPathFinder {
         nextLP = this.graph.GNodes.nextLPI;
     }
 
+    //***********************************************************************************
+   	// METHODS
+   	//***********************************************************************************
+
     private double getCost(int e, int resource, double[] u, boolean lagrange, boolean max) {
         double cost;
         if (!lagrange)
@@ -97,8 +106,6 @@ public class FastPathFinder {
         return cost;
     }
 
-    private double[] tmpU;
-
     private double[] simplifyLagrangian(double[] u) {
         for (int k = 1; k <= nbR; k++)
             tmpU[k - 1] = u[k - 1] - u[k - 1 + nbR];
@@ -112,7 +119,6 @@ public class FastPathFinder {
         }
         return true;
     }
-
 
     public void computeLongestPath(TIntStack removed, double lb, double[] u, boolean lagrange, boolean max,
                                    int resource, PropMultiCostRegular propagator) throws ContradictionException {
@@ -226,7 +232,6 @@ public class FastPathFinder {
         return sp;
     }
 
-
     public void computeShortestPath(TIntStack removed, double ub, double[] u, boolean lagrange, boolean max,
                                     int resource, PropMultiCostRegular propagator) throws ContradictionException {
 
@@ -334,7 +339,6 @@ public class FastPathFinder {
         } while (graph.GNodes.nextSP[current] != Integer.MIN_VALUE);
         return sp;
     }
-
 
     public void computeShortestAndLongestPath(IStateIntVector removed, int lb, int ub, double[] u, boolean lagrange,
                                               boolean max, int resource, PropMultiCostRegular propagator)

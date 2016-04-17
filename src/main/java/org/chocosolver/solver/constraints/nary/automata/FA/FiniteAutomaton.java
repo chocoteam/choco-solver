@@ -51,10 +51,21 @@ import java.util.*;
  */
 public class FiniteAutomaton implements IAutomaton {
 
-    protected int min = Character.MIN_VALUE, max = Character.MAX_VALUE;
+    //***********************************************************************************
+   	// VARIABLES
+   	//***********************************************************************************
 
-    protected final static TIntIntHashMap charFromIntMap = new TIntIntHashMap(16, .5f, -1, -1);
-    protected final static TIntIntHashMap intFromCharMap = new TIntIntHashMap(16, .5f, -1, -1);
+    private Automaton representedBy;
+    private TObjectIntHashMap<State> stateToIndex;
+    private ArrayList<State> states;
+    private TIntHashSet alphabet;
+    private int nbStates;
+    private HashSet<State> nexts = new HashSet<>();
+    private int min = Character.MIN_VALUE;
+    private int max = Character.MAX_VALUE;
+
+    private final static TIntIntHashMap charFromIntMap = new TIntIntHashMap(16, .5f, -1, -1);
+    private final static TIntIntHashMap intFromCharMap = new TIntIntHashMap(16, .5f, -1, -1);
 
     static {
         int delta = 0;
@@ -68,28 +79,9 @@ public class FiniteAutomaton implements IAutomaton {
 
     }
 
-    public static int getIntFromChar(char c) {
-        return intFromCharMap.get(c);
-    }
-
-    public static char getCharFromInt(int i) {
-        int c = charFromIntMap.get(i);
-        if (c > -1) {
-            return (char) charFromIntMap.get(i);
-        } else {
-            throw new SolverException("Unknown value \"" + i + "\". Note that only integers in [" +
-                    (int) Character.MIN_VALUE + "," + (int) (Character.MAX_VALUE) + "] are allowed by FiniteAutomaton.");
-        }
-    }
-
-
-    protected Automaton representedBy;
-
-    protected TObjectIntHashMap<State> stateToIndex;
-    protected ArrayList<State> states;
-    protected TIntHashSet alphabet;
-    protected int nbStates;
-
+    //***********************************************************************************
+   	// CONSTRUCTORS
+   	//***********************************************************************************
 
     public FiniteAutomaton() {
         this.representedBy = new Automaton();
@@ -135,34 +127,28 @@ public class FiniteAutomaton implements IAutomaton {
         perfectCopy(other);
     }
 
-    private void perfectCopy(FiniteAutomaton other) {
-        this.representedBy = new Automaton();
-        this.states = new ArrayList<>();
-        this.stateToIndex = new TObjectIntHashMap<>();
-        this.alphabet = new TIntHashSet();
-        this.nbStates = other.nbStates;
-        for (int i = 0; i < other.nbStates; i++) {
-            State s = new State();
-            this.states.add(s);
-            this.stateToIndex.put(s, i);
-            if (!other.isNotFinal(i))
-                s.setAccept(true);
-            if (other.getInitialState() == i)
-                this.representedBy.setInitialState(s);
-        }
-        List<int[]> transitions = other.getTransitions();
-        for (int[] t : transitions) {
-            this.addTransition(t[0], t[1], t[2]);
-        }
-
-    }
-
     private FiniteAutomaton(Automaton a, TIntHashSet alphabet) {
         this();
         fill(a, alphabet);
-
     }
 
+    //***********************************************************************************
+   	// STATIC METHODS
+   	//***********************************************************************************
+
+    public static int getIntFromChar(char c) {
+        return intFromCharMap.get(c);
+    }
+
+    public static char getCharFromInt(int i) {
+        int c = charFromIntMap.get(i);
+        if (c > -1) {
+            return (char) charFromIntMap.get(i);
+        } else {
+            throw new SolverException("Unknown value \"" + i + "\". Note that only integers in [" +
+                    (int) Character.MIN_VALUE + "," + (int) (Character.MAX_VALUE) + "] are allowed by FiniteAutomaton.");
+        }
+    }
 
     public static int max(TIntHashSet hs) {
         int max = Integer.MIN_VALUE;
@@ -183,6 +169,10 @@ public class FiniteAutomaton implements IAutomaton {
         }
         return min;
     }
+
+    //***********************************************************************************
+   	// API METHODS
+   	//***********************************************************************************
 
     public void fill(Automaton a, TIntHashSet alphabet) {
 
@@ -237,7 +227,6 @@ public class FiniteAutomaton implements IAutomaton {
         nbStates++;
         return idx;
     }
-
 
     public void removeSymbolFromAutomaton(int symbol) {
         char c = getCharFromInt(symbol);
@@ -304,14 +293,6 @@ public class FiniteAutomaton implements IAutomaton {
         transitions.addAll(nTrans);
     }
 
-    private void checkState(int... state) throws StateNotInAutomatonException {
-        int sz = states.size();
-        for (int s : state)
-            if (s >= sz) {
-                throw new StateNotInAutomatonException(s);
-            }
-    }
-
     public int delta(int source, int symbol) throws NonDeterministicOperationException {
         if (!representedBy.isDeterministic()) {
             throw new NonDeterministicOperationException();
@@ -330,8 +311,6 @@ public class FiniteAutomaton implements IAutomaton {
 
     }
 
-    private HashSet<State> nexts = new HashSet<>();
-
     public void delta(int source, int symbol, TIntHashSet states) {
         try {
             checkState(source);
@@ -345,43 +324,6 @@ public class FiniteAutomaton implements IAutomaton {
             states.add(stateToIndex.get(to));
         }
     }
-
-
-    /*public TIntArrayList getOutSymbols(int source) {
-        try {
-            checkState(source);
-        } catch (StateNotInAutomatonException e) {
-//            LOGGER.warn("Unable to get outgoing transition, state not in automaton : " + e);
-        }
-        TIntHashSet set = new TIntHashSet();
-        State s = states.get(source);
-        for (Transition t : s.getTransitions()) {
-            for (char c = t.getMin(); c <= t.getMax(); c++) {
-                set.add(getIntFromChar(c));
-            }
-        }
-        return new TIntArrayList(set.toArray());
-
-    }*/
-
-    /*private TIntHashSet tmpSet = new TIntHashSet();
-
-    public int[] getOutSymbolsArray(int source) {
-        try {
-            checkState(source);
-        } catch (StateNotInAutomatonException e) {
-//            LOGGER.warn("Unable to get outgoing transition, state not in automaton : " + e);
-        }
-        tmpSet.clear();
-        State s = states.get(source);
-        for (Transition t : s.getTransitions()) {
-            for (char c = t.getMin(); c <= t.getMax(); c++) {
-                tmpSet.add(getIntFromChar(c));
-            }
-        }
-        return tmpSet.toArray();
-
-    }*/
 
     public void addToAlphabet(int a) {
         alphabet.add(a);
@@ -473,25 +415,6 @@ public class FiniteAutomaton implements IAutomaton {
         syncStates();
     }
 
-    private void syncStates() {
-        this.alphabet.clear();
-        this.states.clear();
-        this.stateToIndex.clear();
-        int idx = 0;
-        for (State s : representedBy.getStates()) {
-            states.add(s);
-            stateToIndex.put(s, idx++);
-            for (Transition t : s.getTransitions()) {
-                char m = (char) Math.max(min, t.getMin());
-                char M = (char) Math.min(max, t.getMax());
-                for (char c = m; c <= M; c++) {
-                    alphabet.add(getIntFromChar(c));
-                }
-            }
-        }
-        nbStates = states.size();
-    }
-
     public void reduce() {
         this.representedBy.reduce();
         syncStates();
@@ -529,7 +452,6 @@ public class FiniteAutomaton implements IAutomaton {
     public FiniteAutomaton complement() {
         return complement(alphabet);
     }
-
 
     public FiniteAutomaton concatenate(FiniteAutomaton otherI) {
         Automaton conc = this.representedBy.concatenate(otherI.representedBy);
@@ -571,7 +493,6 @@ public class FiniteAutomaton implements IAutomaton {
         return finals;
     }
 
-
     public void toDotty(String f) {
         String s = this.toDot();
         try {
@@ -607,22 +528,6 @@ public class FiniteAutomaton implements IAutomaton {
         return b.append("}\n").toString();
     }
 
-    private void appendDot(Transition t, StringBuilder b) {
-        int destIdx = stateToIndex.get(t.getDest());
-
-        b.append(" -> ").append(destIdx).append(" [label=\"");
-        b.append("{");
-        b.append(getIntFromChar(t.getMin()));
-        if (t.getMin() != t.getMax()) {
-            for (char c = (char) (t.getMin() + 1); c <= t.getMax(); c++) {
-                b.append(",");
-                b.append(getIntFromChar(c));
-            }
-        }
-        b.append("}");
-        b.append("\"]\n");
-    }
-
     public TIntHashSet getAlphabet() {
         return alphabet;
     }
@@ -643,7 +548,6 @@ public class FiniteAutomaton implements IAutomaton {
         }
         return transitions;
     }
-
 
     public List<int[]> getTransitions(int state) {
         List<int[]> transitions = new ArrayList<>();
@@ -726,9 +630,77 @@ public class FiniteAutomaton implements IAutomaton {
         return auto;
     }
 
-
     @Override
     public String toString() {
         return representedBy.toString();
+    }
+
+    //***********************************************************************************
+   	// PRIVATE METHODS
+   	//***********************************************************************************
+
+    private void perfectCopy(FiniteAutomaton other) {
+        this.representedBy = new Automaton();
+        this.states = new ArrayList<>();
+        this.stateToIndex = new TObjectIntHashMap<>();
+        this.alphabet = new TIntHashSet();
+        this.nbStates = other.nbStates;
+        for (int i = 0; i < other.nbStates; i++) {
+            State s = new State();
+            this.states.add(s);
+            this.stateToIndex.put(s, i);
+            if (!other.isNotFinal(i))
+                s.setAccept(true);
+            if (other.getInitialState() == i)
+                this.representedBy.setInitialState(s);
+        }
+        List<int[]> transitions = other.getTransitions();
+        for (int[] t : transitions) {
+            this.addTransition(t[0], t[1], t[2]);
+        }
+
+    }
+
+    private void checkState(int... state) throws StateNotInAutomatonException {
+        int sz = states.size();
+        for (int s : state)
+            if (s >= sz) {
+                throw new StateNotInAutomatonException(s);
+            }
+    }
+
+    private void syncStates() {
+        this.alphabet.clear();
+        this.states.clear();
+        this.stateToIndex.clear();
+        int idx = 0;
+        for (State s : representedBy.getStates()) {
+            states.add(s);
+            stateToIndex.put(s, idx++);
+            for (Transition t : s.getTransitions()) {
+                char m = (char) Math.max(min, t.getMin());
+                char M = (char) Math.min(max, t.getMax());
+                for (char c = m; c <= M; c++) {
+                    alphabet.add(getIntFromChar(c));
+                }
+            }
+        }
+        nbStates = states.size();
+    }
+
+    private void appendDot(Transition t, StringBuilder b) {
+        int destIdx = stateToIndex.get(t.getDest());
+
+        b.append(" -> ").append(destIdx).append(" [label=\"");
+        b.append("{");
+        b.append(getIntFromChar(t.getMin()));
+        if (t.getMin() != t.getMax()) {
+            for (char c = (char) (t.getMin() + 1); c <= t.getMax(); c++) {
+                b.append(",");
+                b.append(getIntFromChar(c));
+            }
+        }
+        b.append("}");
+        b.append("\"]\n");
     }
 }
