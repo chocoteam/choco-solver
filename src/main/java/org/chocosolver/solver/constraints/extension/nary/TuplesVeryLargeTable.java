@@ -48,30 +48,13 @@ public class TuplesVeryLargeTable extends LargeRelation {
      */
     private final int n;
 
-    /**
-     * lower bound of each variable
-     */
-    private final int[] lowerbounds;
-
-    /**
-     * upper bound of each variable
-     */
-    private final int[] upperbounds;
-
     private final boolean feasible;
 
     private final TIntObjectHashMap<TIntObjectHashMap> supports;
 
     public TuplesVeryLargeTable(Tuples tuples, IntVar[] vars) {
         n = vars.length;
-        lowerbounds = new int[n];
-        upperbounds = new int[n];
         feasible = tuples.isFeasible();
-
-        for (int i = 0; i < n; i++) {
-            lowerbounds[i] = vars[i].getLB();
-            upperbounds[i] = vars[i].getUB();
-        }
         supports = new TIntObjectHashMap<>();
         int nt = tuples.nbTuples();
         for (int i = 0; i < nt; i++) {

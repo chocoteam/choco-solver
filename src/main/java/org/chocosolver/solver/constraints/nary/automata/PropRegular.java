@@ -62,14 +62,12 @@ public class PropRegular extends Propagator<IntVar> {
     private StoredDirectedMultiGraph graph;
     private final IAutomaton automaton;
     private static int num;
-    private int _num;
 
     private final RemProc rem_proc;
     private final IIntDeltaMonitor[] idms;
 
     public PropRegular(IntVar[] variables, IAutomaton automaton) {
         super(variables, PropagatorPriority.LINEAR, true);
-        _num = num++;
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

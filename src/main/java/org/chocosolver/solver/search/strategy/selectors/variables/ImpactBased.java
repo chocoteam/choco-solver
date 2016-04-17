@@ -77,7 +77,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     private boolean asgntFailed; // does the assignment leads to a failure
 
     private boolean learnsAndFails; // does the learning pahse leads to a failure
-    private IntVar lAfVar; // the index of one of the variables involved into a failure during the learning phase
 
     private long timeLimit = Integer.MAX_VALUE; // a time limit for init()
 
@@ -346,7 +345,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 model.getSolver().getEngine().propagate();
             } catch (ContradictionException ex) {
                 learnsAndFails = true;
-                lAfVar = v;
                 model.getSolver().getEngine().flush();
             }
             return 1.0d;

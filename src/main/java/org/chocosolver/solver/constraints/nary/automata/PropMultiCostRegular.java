@@ -111,20 +111,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     public final TObjectIntHashMap<IntVar> map;
 
     /**
-     * The last computed Shortest Path
-     */
-    private int[] lastSp;
-    private double lastSpValue;
-
-
-    /**
-     * The last computed Longest Path
-     */
-    private int[] lastLp;
-    private double lastLpValue;
-
-
-    /**
      * Decision variables
      */
     private final IntVar[] vs;
@@ -135,11 +121,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * Cost variables
      */
     private final IntVar[] z;
-
-/**
- * Integral costs : c[i][j][k][s] is the cost over dimension k of x_i = j on state s
- */
-//protected final int[][][][] costs;
 
     /**
      * The finite automaton which defines the regular language the variable sequence must belong
@@ -185,11 +166,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     private final TIntStack[] toUpdateLeft;
     private final TIntStack[] toUpdateRight;
-
-    /**
-     * Buffer to check whether an arc needs to be removed.
-     */
-    private final TIntHashSet removed = new TIntHashSet();
 
     private int lastWorld = -1;
     private long lastNbOfBacktracks = -1;
@@ -570,9 +546,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             k++;
 
         } while (modif && nbNSig2 < MAXNONIMPROVEITER && k < MAXBOUNDITER);
-        this.lastLp = P;
-        this.lastLpValue = lp + coeff;
-
     }
 
 
@@ -660,8 +633,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             }
             k++;
         } while (modif && nbNSig2 < MAXNONIMPROVEITER && k < MAXBOUNDITER);
-        this.lastSp = bestPath;
-        this.lastSpValue = bestVal;
     }
 
 

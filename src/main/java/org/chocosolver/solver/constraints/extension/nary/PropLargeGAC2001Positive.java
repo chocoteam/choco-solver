@@ -52,8 +52,6 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
      */
     private IStateInt[][] supports;
 
-    private int[] blocks;
-
     private int arity;
 
     private int[] offsets;
@@ -72,7 +70,6 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
     private PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation) {
         super(vs, relation);
         this.arity = vs.length;
-        this.blocks = new int[arity];
         this.offsets = new int[arity];
         this.supports = new IStateInt[arity][];
 
