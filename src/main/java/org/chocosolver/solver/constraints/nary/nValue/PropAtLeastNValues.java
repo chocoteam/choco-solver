@@ -92,18 +92,15 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             for (int v = 0; v < n; v++) {
                 if (vars[v].contains(value)) {
                     possible = true;
-                    if (mate[i] == -1) {
-                        mate[i] = v;
-                    } else {
-                        mate[i] = -2;
-                        if (mandatory) {
-                            break;
-                        }
-                    }
                     if (vars[v].isInstantiated()) {
                         mandatory = true;
-                        if (mate[i] == -2) {
-                            break;
+                        mate[i] = -2;
+                        break;
+                    }else{
+                        if (mate[i] == -1) {
+                            mate[i] = v;
+                        } else {
+                            mate[i] = -2;
                         }
                     }
                 }
@@ -118,15 +115,20 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         // filtering cardinality variable
         vars[n].updateUpperBound(countMax, this);
         // filtering decision variables
-        if (count != countMax && countMax == vars[n].getLB()) {
+        boolean again = false;
+        if (count < countMax && countMax == vars[n].getLB()) {
             for (int i = concernedValues.size() - 1; i >= 0; i--) {
                 if (mate[i] >= 0) {
-                    vars[mate[i]].instantiateTo(concernedValues.get(i), this);
+                    if(vars[mate[i]].instantiateTo(concernedValues.get(i), this)){
+                        again = true;
+                    }
                 }
             }
         }
         if (count >= vars[n].getUB()) {
             setPassive();
+        }else if(again){
+            propagate(0);// fix point is required as not all possible values add a mate
         }
     }
 
@@ -138,7 +140,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
     public ESat isEntailed() {
         int countMin = 0;
         int countMax = 0;
-        for (int i = 0; i < concernedValues.size(); i++) {
+        for (int i = concernedValues.size() - 1; i >= 0; i--) {
             boolean possible = false;
             boolean mandatory = false;
             for (int v = 0; v < n; v++) {
