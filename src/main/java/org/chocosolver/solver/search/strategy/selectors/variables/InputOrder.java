@@ -29,12 +29,14 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.Variable;
 
 /**
  * <b>Input order</b> variable selector.
- * It chooses variables in order they appears in the <code>constructor</code> (instantiated variables are ignored).
+ * It chooses variables in order they appears (instantiated variables are ignored).
  * <br/>
  *
  * @author Charles Prud'homme
@@ -42,15 +44,26 @@ import org.chocosolver.solver.variables.Variable;
  */
 public class InputOrder<V extends Variable> implements VariableSelector<V> {
 
+    private IStateInt lastIdx; // index of the last non-instantiated variable
+
+	/**
+     * <b>Input order</b> variable selector.
+     * It chooses variables in order they appears (instantiated variables are ignored).
+     * @param model reference to the model (does not define the variable scope)
+     */
+    public InputOrder(Model model){
+        lastIdx = model.getEnvironment().makeInt(0);
+    }
+
     @Override
     public V getVariable(V[] variables) {
-        int small_idx = -1;
-        for (int idx = 0; idx < variables.length; idx++) {
+        for (int idx = lastIdx.get(); idx < variables.length; idx++) {
             if (!variables[idx].isInstantiated()) {
-                small_idx = idx;
-                break;
+                lastIdx.set(idx);
+                return variables[idx];
             }
         }
-        return small_idx > -1 ? variables[small_idx] : null;
+        lastIdx.set(variables.length);
+        return null;
     }
 }

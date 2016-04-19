@@ -237,7 +237,7 @@ public class StrategyTest {
         IntVar v1 = model.intVar("v1", new int[]{1, 5});
         IntVar v2 = model.intVar("v2", new int[]{3, 4});
         IntVar[] vs = new IntVar[]{v1, v2};
-        VariableSelector<IntVar> eval = new InputOrder<>();
+        VariableSelector<IntVar> eval = new InputOrder<>(model);
         IntVar va = eval.getVariable(vs);
         Assert.assertEquals(v1, va);
     }

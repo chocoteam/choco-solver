@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.strategy.selectors;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -50,8 +51,8 @@ public class VarSelectorFactory {
      * Selects the first free (non-instantiated) variable
      * @return a variable selector choosing always the first non-instantiated variable
      */
-    public static <V extends Variable> VariableSelector<V> inputOrderVar() {
-        return new InputOrder<>();
+    public static <V extends Variable> VariableSelector<V> inputOrderVar(Model model) {
+        return new InputOrder<>(model);
     }
 
     /**

@@ -232,7 +232,7 @@ public class SearchStrategyFactory {
      * @return int strategy based on value assignments
      */
     public static IntStrategy inputOrderLBSearch(IntVar... vars) {
-        return intVarSearch(inputOrderVar(), minIntVal(), vars);
+        return intVarSearch(inputOrderVar(vars[0].getModel()), minIntVal(), vars);
     }
 
     /**
@@ -241,7 +241,7 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy inputOrderUBSearch(IntVar... vars) {
-        return intVarSearch(inputOrderVar(), maxIntVal(), vars);
+        return intVarSearch(inputOrderVar(vars[0].getModel()), maxIntVal(), vars);
     }
 
     /**

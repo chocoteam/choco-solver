@@ -195,7 +195,7 @@ public class ProblemMaker {
         model.scalar(vars, new int[]{16, 56, 496, 686, 2401, 8, 28, 98, 343, 4, 14, 49, 2, 7, 1}, "=", 16510).post();
         model.scalar(vars, new int[]{194481, 55566, 15876, 4536, 1296, 9261, 2646, 756, 216, 441, 126, 36, 21, 6, 1}, "=", 12012).post();
 
-        model.getSolver().set(new IntStrategy(vars, new InputOrder<>(), new IntDomainMiddle(true)));
+        model.getSolver().set(new IntStrategy(vars, new InputOrder<>(model), new IntDomainMiddle(true)));
 
         return model;
     }

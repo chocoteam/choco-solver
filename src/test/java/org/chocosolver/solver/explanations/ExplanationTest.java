@@ -397,7 +397,7 @@ public class ExplanationTest {
         vs[4] = model.intVar("B", -5, -2);
         model.arithm(vs[0], "+", vs[4],"=", 0).post();
         model.getSolver().set(SearchStrategyFactory.intVarSearch(
-                inputOrderVar(),
+                inputOrderVar(model),
                 midIntVal(dop != DecisionOperator.int_reverse_split),
                 dop,
                 vs[var])
