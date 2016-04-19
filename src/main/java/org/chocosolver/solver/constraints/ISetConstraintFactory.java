@@ -502,13 +502,33 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that the value of <i>intVar</i> is in <i>set</i>
 	 */
 	default Constraint member(final IntVar intVar, final SetVar set) {
-		return new Constraint("SetMember",
-				intVar.hasEnumeratedDomain() ?
-						new PropIntEnumMemberSet(set, intVar) :
-						new PropIntBoundedMemberSet(set, intVar)) {
+		if(intVar.isInstantiated()){
+			return member(intVar.getValue(),set);
+		}else {
+			return new Constraint("SetMember",
+					intVar.hasEnumeratedDomain() ?
+							new PropIntEnumMemberSet(set, intVar) :
+							new PropIntBoundedMemberSet(set, intVar)) {
+				@Override
+				public Constraint makeOpposite() {
+					return notMember(intVar, set);
+				}
+			};
+		}
+	}
+
+	/**
+	 * Creates a member constraint stating that the constant <i>cst</i> is in <i>set</i>
+	 *
+	 * @param cst an integer
+	 * @param set a set variable
+	 * @return a constraint ensuring that <i>cst</i> is in <i>set</i>
+	 */
+	default Constraint member(final int cst, final SetVar set) {
+		return new Constraint("SetMember",new PropIntCstMemberSet(set, cst)) {
 			@Override
 			public Constraint makeOpposite() {
-				return notMember(intVar, set);
+				return notMember(cst, set);
 			}
 		};
 	}
@@ -521,18 +541,38 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that the value of <i>intVar</i> is not in <i>set</i>
 	 */
 	default Constraint notMember(final IntVar intVar, final SetVar set) {
-		IntVar integer = intVar;
-		if (!intVar.hasEnumeratedDomain()) {
-			Model s = intVar.getModel();
-			integer = s.intVar("enumViewOf(" + intVar.getName() + ")", intVar.getLB(), intVar.getUB(), false);
-			s.arithm(integer, "=", intVar).post();
+		if(intVar.isInstantiated()){
+			return notMember(intVar.getValue(),set);
+		}else {
+			IntVar integer = intVar;
+			if (!intVar.hasEnumeratedDomain()) {
+				Model s = intVar.getModel();
+				integer = s.intVar("enumViewOf(" + intVar.getName() + ")", intVar.getLB(), intVar.getUB(), false);
+				s.arithm(integer, "=", intVar).post();
+			}
+			return new Constraint("SetNotMember",
+					new PropNotMemberIntSet(integer, set),
+					new PropNotMemberSetInt(integer, set)) {
+				@Override
+				public Constraint makeOpposite() {
+					return member(intVar, set);
+				}
+			};
 		}
-		return new Constraint("SetNotMember",
-				new PropNotMemberIntSet(integer, set),
-				new PropNotMemberSetInt(integer, set)) {
+	}
+
+	/**
+	 * Creates a member constraint stating that the constant <i>cst</i> is not in <i>set</i>
+	 *
+	 * @param cst an integer
+	 * @param set a set variable
+	 * @return a constraint ensuring that <i>cst</i> is not in <i>set</i>
+	 */
+	default Constraint notMember(final int cst, final SetVar set) {
+		return new Constraint("SetNotMember",new PropIntCstNotMemberSet(set, cst)) {
 			@Override
 			public Constraint makeOpposite() {
-				return member(intVar, set);
+				return member(cst, set);
 			}
 		};
 	}

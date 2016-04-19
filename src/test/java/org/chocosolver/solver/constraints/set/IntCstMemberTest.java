@@ -38,103 +38,53 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 /**
- * @author Alexandre LEBRUN
+ * @author Jean-Guillaume FAGES
  */
-public class NotMemberTest {
-
+public class IntCstMemberTest {
 
     @Test(groups = "1s", timeOut=60000)
     public void testNominal() {
         Model model = new Model();
 
-        IntVar var = model.intVar(0, 5);
-        SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 6});
-
-        model.notMember(var, setVar).post();
-
-        checkSolutions(model, setVar, var);
-    }
-
-    @Test(groups = "1s", timeOut=60000)
-    public void testFixedValue() {
-        Model model = new Model();
-
         IntVar var = model.intVar(10);
         SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
-        model.notMember(var, setVar).post();
+        model.member(var, setVar).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
-        checkSolutions(model, setVar, var);
+        checkSolutions(model, setVar, var.getValue());
     }
 
     @Test(groups = "1s", timeOut=60000)
-    public void testFixedValueWrong() {
-        Model model = new Model();
-
-        IntVar var = model.intVar(10);
-        SetVar setVar = model.setVar(new int[]{10}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
-        model.notMember(var, setVar).post();
-
-        assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
-    }
-
-    @Test(groups = "1s", timeOut=60000)
-    public void testFixedValueSure() {
+    public void testFalse() {
         Model model = new Model();
 
         IntVar var = model.intVar(12);
-        SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
-        model.notMember(var, setVar).post();
-
-        assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
-        checkSolutions(model, setVar, var);
-    }
-
-    @Test(groups = "1s", timeOut=60000)
-    public void trivialFalse() {
-        Model model = new Model();
-
-        IntVar var = model.intVar(1, 3);
-        SetVar setVar = model.setVar(new int[]{1, 2, 3}, new int[]{1, 2, 3, 4, 5, 6});
-        model.notMember(var, setVar).post();
+        SetVar setVar = model.setVar(new int[]{10}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        model.member(var, setVar).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
         assertFalse(model.solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
-    public void testTrivialTrue() {
+    public void testTrue() {
         Model model = new Model();
 
-        IntVar var = model.intVar(1);
-        // different domains
-        SetVar setVar = model.setVar(new int[]{}, new int[]{4, 5, 6, 7, 8, 9});
-        model.notMember(var, setVar).post();
+        int var = 10;
+        SetVar setVar = model.setVar(new int[]{10}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        model.member(var, setVar).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
         checkSolutions(model, setVar, var);
     }
 
-    @Test(groups = "1s", timeOut=60000)
-    public void emptySet() {
-        Model model = new Model();
-
-        IntVar var = model.intVar(1, 10);
-        SetVar setVar = model.setVar(new int[]{});
-        model.notMember(var, setVar).post();
-
-       checkSolutions(model, setVar, var);
-    }
-
-    private void checkSolutions(Model model, SetVar setVar, IntVar var) {
-        boolean solutionFound = false;
+    private int checkSolutions(Model model, SetVar set, int value) {
+        int nbSol = 0;
         while(model.solve()) {
-            solutionFound = true;
-            assertFalse(setVar.getValue().contain(var.getValue()));
+            nbSol++;
+            assertTrue(set.getValue().contain(value));
         }
-        assertTrue(solutionFound);
+        assertTrue(nbSol > 0);
+        return nbSol;
     }
-
-
 }
