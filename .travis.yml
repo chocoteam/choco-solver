@@ -32,7 +32,7 @@ notifications:
     on_success: change
     on_failure: always
     on_start: never
-script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
+script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP ; fi
 addons:
   coverity_scan:
     project:
@@ -41,7 +41,7 @@ addons:
     notification_email: choco@emn.fr
     build_command_prepend: "mvn clean"
     build_command:   "mvn -DskipTests=true compile"
-    branch_pattern: develop
+    branch_pattern: coverity_scan
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 #  - curl http://testr-1154.appspot.com/assets/testR.py | python
