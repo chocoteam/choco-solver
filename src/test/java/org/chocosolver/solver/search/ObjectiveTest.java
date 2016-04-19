@@ -263,7 +263,6 @@ public class ObjectiveTest {
         model.setObjective(MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
         oman.setCutComputer(n -> n - 10);
-        model.getSolver().showSolutions();
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.solve()) {
@@ -286,7 +285,6 @@ public class ObjectiveTest {
         model.setObjective(MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
         oman.setCutComputer(n -> n - ends[0]);
-        model.getSolver().showSolutions();
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.solve()) {
@@ -307,7 +305,6 @@ public class ObjectiveTest {
         model.setObjective(MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
         oman.setCutComputer(walkingIntVarCutComputer());
-        model.getSolver().showSolutions();
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.solve()) {

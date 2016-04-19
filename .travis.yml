@@ -15,15 +15,6 @@ env:
   matrix:
   - GROUP=1s
   - GROUP=10s
-addons:
-  coverity_scan:
-    project:
-      name: "chocoteam/choco-solver"
-    notification_email: choco@emn.fr
-    build_command_prepend: "mvn clean"
-    build_command:   "mvn install -DtestFailureIgnore=true -Dgroups=$GROUP"
-    branch_pattern: develop
-script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 branches:
   only:
   - develop
@@ -41,6 +32,16 @@ notifications:
     on_success: change
     on_failure: always
     on_start: never
+script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
+addons:
+  coverity_scan:
+    project:
+      name: "chocoteam/choco-solver"
+      description: "Build submitted via Travis CI"
+    notification_email: choco@emn.fr
+    build_command_prepend: "mvn clean"
+    build_command:   "mvn -DskipTests=true compile"
+    branch_pattern: develop
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - curl http://testr-1154.appspot.com/assets/testR.py | python
+#  - curl http://testr-1154.appspot.com/assets/testR.py | python

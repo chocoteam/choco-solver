@@ -37,8 +37,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-
 import static java.lang.Math.ceil;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
@@ -104,9 +102,6 @@ public class LNSTest {
         model.setObjective(MAXIMIZE, power);
         int bw = 0, bp = 0;
         while(model.solve()){
-            System.out.printf("objects : ");
-            Arrays.asList(objects).forEach(o -> System.out.printf("%d, ", o.getValue()));
-            System.out.printf("\npower: %s\nweight : %s\n", power.getValue(), scalar.getValue());
             bp = power.getValue();
             bw = scalar.getValue();
         }
