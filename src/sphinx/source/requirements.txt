@@ -31,4 +31,4 @@ tornado==4.3
 Unidecode==0.4.19
 watchdog==0.8.3
 wheel==0.24.0
-sphinxcontrib-bibtex==0.3.4a1
+sphinxcontrib-bibtex==0.3.3
