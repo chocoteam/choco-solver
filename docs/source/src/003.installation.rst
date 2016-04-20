@@ -1,0 +1,83 @@
+==========================
+Installation et pré-requis
+==========================
+
+:date: 2016-04-20 11:28
+:tags: choco, constraint, solver, java
+:category: Choco
+:author: Charles Prud'homme
+
+Pré-requis
+==========
+
+Je ne vais pas m'attarder sur un troll, sachez juste que pour moi être
+développeur Django c'est peu compatible avec démarrer son ordinateur
+sous Windows.
+
+Débrouillez-vous comme vous le souhaitez, (Dual-boot, VM, ..) mais
+démarrer sous un système unix (OS X, Ubuntu, ...)
+
+Installer Django
+================
+
+Pour commencer on va installer les dépendances ::
+
+    $ easy_install pip
+    $ pip install MySQL-python PIL Django
+
+Automatiquement, pip va vous installer la dernière version de Django
+et les dépendances.
+
+Vous pouvez prendre la bonne habitude d'utiliser les virtualenv.
+
+Si MySQL-python vous dit qu'il manque mysql_config, installez `libmysqlclient-dev` ::
+
+    $ sudo apt-get install libmysqlclient-dev
+
+Si PIL vous mets que vous n'avez aucun support, installez certaines dépendances ::
+
+    sudo apt-get install libjpeg8 libjpeg8-dev
+    sudo apt-get install zlib1g-dev
+    sudo apt-get install libfreetype6 libfreetype6-dev
+
+Si vous êtes sous x64 ajoutez ::
+
+    sudo ln -s /usr/lib/*/libjpeg.so /usr/lib
+    sudo ln -s /usr/lib/*/libz.so /usr/lib
+    sudo ln -s /usr/lib/*/libfreetype.so /usr/lib
+
+Vérification de l'installation
+==============================
+
+.. code-block:: pycon
+
+    $ python
+    >>> import django
+    >>> print django.VERSION
+    (1, 4, 0, 'final', 0)
+    >>> import Image
+    >>> print Image.VERSION
+    1.1.7
+    >>> import MySQLdb
+    >>> print MySQLdb.__version__
+    1.2.3
+
+Lancer son premier projet django
+================================
+
+Lancer un projet django ::
+
+    $ django-admin.py startproject tuto_django
+    $ cd tuto_django
+    $ python manage.py runserver
+
+Ensuite cliquez ici : http://127.0.0.1:8000/
+
+Installer PhpMyAdmin
+====================
+
+Pour la suite, il va vous falloir une base de données MySQL.
+
+Vous pouvez installer `phpmyadmin` pour gérer cette partie ::
+
+    $ sudo apt-get install phpmyadmin mysql-server apache2
