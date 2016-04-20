@@ -576,7 +576,7 @@ public interface IVariableFactory extends ISelf<Model> {
     default SetVar setVar(int[] value) {
         String name = CSTE_NAME+"{";
         for(int i=0;i<value.length;i++){
-            name+=value[i]+i<value.length-1?", ":"";
+            name+=value[i]+(i<value.length-1?", ":"");
         }name += "}";
         return setVar(name, value);
     }

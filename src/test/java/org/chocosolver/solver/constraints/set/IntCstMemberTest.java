@@ -27,70 +27,64 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.selectors.values;
+package org.chocosolver.solver.constraints.set;
 
-import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.ESat;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.*;
 
 /**
- * Selects the value in the variable domain closest to the mean of its current bounds.
- * <br/>
- * It computes the middle value of the domain. Then it checks if the mean is contained in the domain.
- * If not, the closest value to the middle is chosen. It uses a policy to define whether the mean value should
- * be floored or ceiled
- * <br/>
- *
- * BEWARE: should not be used with assignment decisions over bounded variables (because the decision negation
- * would result in no inference)
- *
- * @author Charles Prud'homme, Jean-Guillaume Fages
- * @since 2 juil. 2010
+ * @author Jean-Guillaume FAGES
  */
-public class IntDomainMiddle implements IntValueSelector {
+public class IntCstMemberTest {
 
-	// VARIABLES
-	public final static boolean FLOOR = true;
-	private final boolean roundingPolicy;
+    @Test(groups = "1s", timeOut=60000)
+    public void testNominal() {
+        Model model = new Model();
 
-	/**Selects the middle value
-	 * @param roundingPolicy should be either FLOOR or !FLOOR (ceil)
-	 */
-	public IntDomainMiddle(boolean roundingPolicy){
-		this.roundingPolicy = roundingPolicy;
-	}
+        IntVar var = model.intVar(10);
+        SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        model.member(var, setVar).post();
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("PointlessBooleanExpression")
-	@Override
-    public int selectValue(IntVar var) {
-		int low = var.getLB();
-		int upp = var.getUB();
-		double mean = (double)(low + upp) / 2;
-		int value;
-		if(roundingPolicy==FLOOR){
-			value = (int) Math.floor(mean);
-		}else{
-			value = (int) Math.ceil(mean);
-		}
-		if (var.hasEnumeratedDomain()) {
-            if (!var.contains(value)) {
-				double a = var.previousValue(value);
-				double b = var.nextValue(value);
-				if(mean-a < b-mean){
-					return (int) a;
-				}else if(mean-a > b-mean){
-					return (int) b;
-				}else{ //tie break
-					if(roundingPolicy==FLOOR){
-						return (int) a;
-					}else{
-						return (int) b;
-					}
-				}
-            }
+        assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
+        checkSolutions(model, setVar, var.getValue());
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testFalse() {
+        Model model = new Model();
+
+        IntVar var = model.intVar(12);
+        SetVar setVar = model.setVar(new int[]{10}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        model.member(var, setVar).post();
+
+        assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
+        assertFalse(model.solve());
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testTrue() {
+        Model model = new Model();
+
+        int var = 10;
+        SetVar setVar = model.setVar(new int[]{10}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        model.member(var, setVar).post();
+
+        assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
+        checkSolutions(model, setVar, var);
+    }
+
+    private int checkSolutions(Model model, SetVar set, int value) {
+        int nbSol = 0;
+        while(model.solve()) {
+            nbSol++;
+            assertTrue(set.getValue().contain(value));
         }
-		return value;
+        assertTrue(nbSol > 0);
+        return nbSol;
     }
 }

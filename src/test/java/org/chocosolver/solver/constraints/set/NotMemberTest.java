@@ -63,6 +63,31 @@ public class NotMemberTest {
         SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
         model.notMember(var, setVar).post();
 
+        assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
+        checkSolutions(model, setVar, var);
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testFixedValueWrong() {
+        Model model = new Model();
+
+        IntVar var = model.intVar(10);
+        SetVar setVar = model.setVar(new int[]{10}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        model.notMember(var, setVar).post();
+
+        assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
+        assertFalse(model.solve());
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testFixedValueSure() {
+        Model model = new Model();
+
+        IntVar var = model.intVar(12);
+        SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        model.notMember(var, setVar).post();
+
+        assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
         checkSolutions(model, setVar, var);
     }
 
