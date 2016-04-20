@@ -2,8 +2,6 @@ language: java
 sudo: false
 jdk:
 - oraclejdk8
-before_install:
-- pip install --user codecov
 before_script:
 - export MAVEN_OPTS="-Xmx4096m -Xms128m -Xss64m -server"
 env:
@@ -32,5 +30,5 @@ notifications:
     on_failure: always
     on_start: never
 after_success:
-- codecov
+- bash <(curl -s https://codecov.io/bash)
 - curl http://testr-1154.appspot.com/assets/testR.py | python
