@@ -88,6 +88,13 @@ Following are code snippets to add on your website to help us promoting Choco3.
 [![Choco3](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
 ```
 
+And thank you for giving back to choco-solver.
+Please meet our team of cho-coders : 
+
+- [@jgFages](https://github.com/jgFages) (Jean-Guillaume Fages)
+- [@cprudhom](https://github.com/cprudhom) (Charles Prud'homme)
+
+
 
 <a name="dow"></a>
 ## Download and installation ##
