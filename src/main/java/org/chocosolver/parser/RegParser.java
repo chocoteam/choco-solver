@@ -118,19 +118,18 @@ public abstract class RegParser implements IParser {
      * @param m a Model
      */
     protected static void makeComplementarySearch(Model m) {
-        //TODO deal with no strategy
         Solver solver = m.getSolver();
-        IntVar[] ovars = new IntVar[m.getNbVars()];
-        THashSet<Variable> dvars = new THashSet<>();
         if(solver.getStrategy() != null) {
+            IntVar[] ovars = new IntVar[m.getNbVars()];
+            THashSet<Variable> dvars = new THashSet<>();
             dvars.addAll(Arrays.asList(solver.getStrategy().getVariables()));
             int k = 0;
-            for (int i = 0; i < m.getNbVars(); i++) {
-                Variable ivar = m.getVar(i);
-                if (!dvars.contains(ivar) && (ivar.getTypeAndKind() & Variable.INT) != 0) {
-                    ovars[k++] = (IntVar) ivar;
+            for (IntVar iv:m.retrieveIntVars(true)) {
+                if (!dvars.contains(iv)) {
+                    ovars[k++] = iv;
                 }
             }
+            // do not enumerate on the complementary search (greedy assignment)
             solver.set(solver.getStrategy(), greedySearch(inputOrderLBSearch(Arrays.copyOf(ovars, k))));
         }
     }

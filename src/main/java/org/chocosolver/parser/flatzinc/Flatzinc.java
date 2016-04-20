@@ -38,6 +38,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 
@@ -152,8 +153,6 @@ public class Flatzinc extends RegParser {
         parser.setBuildParseTree(false);
         parser.setTrimParseTree(false);
         parser.flatzinc_model(target, data, all, free);
-        // make complementary search
-        makeComplementarySearch(target);
     }
 
 
@@ -167,6 +166,7 @@ public class Flatzinc extends RegParser {
         if (tl_ > -1) {
             for (int i = 0; i < nb_cores; i++) {
                 portfolio.getModels().get(i).getSolver().limitTime(tl);
+                makeComplementarySearch(portfolio.getModels().get(i));
             }
         }
         listeners.forEach(ParserListener::afterConfiguringSearch);
