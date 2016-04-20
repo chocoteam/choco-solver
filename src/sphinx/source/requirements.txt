@@ -11,7 +11,6 @@ jsonschema == 2.5.1
 keyring == 9.0
 lxml == 3.6.0
 ndg_httpsclient == 0.4.0
-nt == 0.0.0
 org == 1.0.0
 pyasn1 == 0.1.9
 pytest == 2.9.1
