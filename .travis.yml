@@ -24,7 +24,7 @@ notifications:
   email:
     recipients:
     - choco@emn.fr
-    on_success: always
+    on_success: change
     on_failure: always
   webhooks:
     urls:
