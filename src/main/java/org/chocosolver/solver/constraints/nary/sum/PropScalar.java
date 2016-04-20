@@ -242,7 +242,7 @@ public class PropScalar extends PropSum {
         int w = -1;
         int sum = 0;
         for (int i = 0; i < l; i++) {
-            if (!vars[i].isInstantiated()) {
+            if (vars[i].isInstantiated()) {
                 sum += vars[i].getValue() * c[i];
             } else if (w == -1) {
                 w = i;
@@ -252,8 +252,8 @@ public class PropScalar extends PropSum {
             if (sum == b) {
                 this.fails();
             }
-        } else {
-            vars[w].removeValue(w < pos ? b - sum : b + sum, this);
+        } else if(c[w]!=0 && (b - sum)%c[w]==0){
+            vars[w].removeValue((b - sum)/c[w], this);
         }
     }
 
