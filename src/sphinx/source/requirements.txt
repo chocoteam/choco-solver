@@ -7,7 +7,6 @@ ed25519ll == 0.6
 Genshi == 0.7
 protobuf == 3.0.0b2.post2
 ipaddr == 2.1.11
-java == 0.0.1
 jsonschema == 2.5.1
 keyring == 9.0
 lxml == 3.6.0
