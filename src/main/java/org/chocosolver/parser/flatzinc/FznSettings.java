@@ -27,7 +27,6 @@
 package org.chocosolver.parser.flatzinc;
 
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.search.bind.ISearchBinder;
 
 /**
  * Basic settings for Fzn
@@ -60,11 +59,6 @@ public class FznSettings implements Settings {
      */
     public boolean adhocReification() {
         return true;
-    }
-
-    @Override
-    public ISearchBinder getSearchBinder() {
-        return new FznSearchBinder();
     }
 
     @Override
