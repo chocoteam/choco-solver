@@ -1,3 +1,4 @@
+alabaster == 0.7.7
 Cython == 0.24
 pyOpenSSL == 16.0.0
 backports.functools_lru_cache == 1.2.1

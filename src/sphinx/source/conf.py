@@ -29,6 +29,7 @@ import sys, os, alabaster
 # ones.
 extensions = [
     'sphinxcontrib.bibtex',
+    'sphinx.ext.mathjax',
     'alabaster'
 ]
 
