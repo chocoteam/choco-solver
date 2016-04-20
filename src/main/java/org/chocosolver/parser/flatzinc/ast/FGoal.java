@@ -129,7 +129,7 @@ public class FGoal {
             }
             case set_search: {
                 SetVar[] scope = exps[0].toSetVarArray(solver);
-                return SetSearch.build(scope, vchoice, assignment);
+                return SetSearch.build(scope, vchoice, assignment, solver);
             }
             default:
                 System.err.println("Unknown search annotation " + e.toString());

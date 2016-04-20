@@ -52,17 +52,17 @@ public class IntSearch {
     }
 
     public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Model solver) {
-        VariableSelector<IntVar> varsel = variableSelector(varChoice);
+        VariableSelector<IntVar> varsel = variableSelector(varChoice, solver);
         if (varsel == null) { // free search
             return new ActivityBased(solver, variables, 0.999d, 0.02d, 8, 1, seed);
         }
         return valueSelector(variables, varsel, assignment);
     }
 
-    private static VariableSelector<IntVar> variableSelector(VarChoice varChoice) {
+    private static VariableSelector<IntVar> variableSelector(VarChoice varChoice, Model solver) {
         switch (varChoice) {
             case input_order:
-                return new InputOrder<>();
+                return new InputOrder<>(solver);
             case first_fail:
                 return new FirstFail();
             case anti_first_fail:
@@ -111,7 +111,7 @@ public class IntSearch {
                 assgnt = DecisionOperator.int_split;
                 break;
             case indomain_reverse_split:
-                valSelector = new IntDomainMiddle(IntDomainMiddle.CEIL);
+                valSelector = new IntDomainMiddle(!IntDomainMiddle.FLOOR);
                 assgnt = DecisionOperator.int_reverse_split;
                 break;
             default:

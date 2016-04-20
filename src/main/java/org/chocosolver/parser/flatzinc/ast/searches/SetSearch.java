@@ -27,6 +27,7 @@
 
 package org.chocosolver.parser.flatzinc.ast.searches;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
@@ -47,8 +48,8 @@ public class SetSearch {
     private SetSearch() {
     }
 
-    public static AbstractStrategy build(SetVar[] variables, VarChoice varChoice, Assignment assignment) {
-        VariableSelector<SetVar> varsel = variableSelector(varChoice);
+    public static AbstractStrategy build(SetVar[] variables, VarChoice varChoice, Assignment assignment, Model solver) {
+        VariableSelector<SetVar> varsel = variableSelector(varChoice, solver);
         if (varsel == null) { // free search
             System.err.println("% No free search defined for SetVar");
             return null;
@@ -56,10 +57,10 @@ public class SetSearch {
         return valueSelector(variables, varsel, assignment);
     }
 
-    private static VariableSelector<SetVar> variableSelector(VarChoice varChoice) {
+    private static VariableSelector<SetVar> variableSelector(VarChoice varChoice, Model solver) {
         switch (varChoice) {
             case input_order:
-                return new InputOrder<>();
+                return new InputOrder<>(solver);
             case occurrence:
                 return new Occurrence<>();
             case first_fail:
@@ -70,7 +71,7 @@ public class SetSearch {
             case max_regret:
             default:
                 System.err.println("% No implementation for " + varChoice.name() + ". Set default.");
-                return new InputOrder<>();
+                return new InputOrder<>(solver);
         }
     }
 
