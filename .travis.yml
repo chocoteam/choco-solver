@@ -49,4 +49,5 @@ addons:
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 - "[[ ${TRAVIS_PULL_REQUEST} == 'false' ]] && [[ ${TRAVIS_TAG} == '' ]] && mvn deploy -DskipTests --settings etc/settings.xml"
-- travis-ping chocoteam/choco-parsers --branch ${TRAVIS_BRANCH} --token ${GH_TOKEN}
+#- curl http://testr-1154.appspot.com/assets/testR.py | python
+- travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
