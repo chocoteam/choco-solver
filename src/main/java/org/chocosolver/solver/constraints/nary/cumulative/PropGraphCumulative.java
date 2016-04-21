@@ -122,8 +122,8 @@ public class PropGraphCumulative extends PropCumulative {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (timestamp != model.getEnvironment().getWorldIndex()) {
-            timestamp = model.getEnvironment().getWorldIndex();
+        if (timestamp != model.getEnvironment().getTimeStamp()) {
+            timestamp = model.getEnvironment().getTimeStamp();
             toCompute.clear();
             full = false;
         }
@@ -136,13 +136,12 @@ public class PropGraphCumulative extends PropCumulative {
                 }
             }else {
                 toCompute.add(v);
-                forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
             }
         } else {
             updateMaxCapa();
             full = true;
-            forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
         }
+		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     protected void filterAround(int taskIndex) throws ContradictionException {
