@@ -45,4 +45,4 @@ addons:
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 #  - curl http://testr-1154.appspot.com/assets/testR.py | python
-  - travis-ping chocoteam/choco-parsers --branch ${TRAVIS_BRANCH} --token ${TRAVIS_TOKEN}
+  - travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
