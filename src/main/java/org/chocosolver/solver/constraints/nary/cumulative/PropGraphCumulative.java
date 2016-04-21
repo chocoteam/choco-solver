@@ -59,7 +59,7 @@ public class PropGraphCumulative extends PropCumulative {
     private final UndirectedGraph g;
     private ISet tasks, toCompute;
     private long timestamp;
-    private boolean full;
+    private boolean full, fast;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -74,14 +74,16 @@ public class PropGraphCumulative extends PropCumulative {
      * @param e       end			variables
      * @param h       height		variables
      * @param capa    capacity	variable
+	 * @param fast    reduces the number of propagation (less filtering)
      * @param filters filtering algorithm to use
      */
-    public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
+    public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast,
                                Cumulative.Filter... filters) {
         super(s, d, e, h, capa, true, filters);
         this.g = new UndirectedGraph(model, n, SetType.BITSET, true);
         this.tasks = SetFactory.makeBipartiteSet(0);
         this.toCompute = SetFactory.makeBipartiteSet(0);
+		this.fast = fast;
     }
 
     //***********************************************************************************
@@ -134,7 +136,7 @@ public class PropGraphCumulative extends PropCumulative {
                 for(int j:g.getNeighOf(v)){
                     g.removeEdge(v,j);
                 }
-            }else {
+            }else if(s[v].getUB()<e[v].getLB() || !fast){
                 toCompute.add(v);
             }
         } else {

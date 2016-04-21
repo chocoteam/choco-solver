@@ -84,8 +84,8 @@ public class Cumulative extends Constraint {
 		// propagators are posted twice, to achieve fixpoint
 		if(graphBased){
 			return new Propagator[]{
-					new PropGraphCumulative(s,d,e,h,capa, filters),
-					new PropGraphCumulative(s,d,e,h,capa, filters)
+					new PropGraphCumulative(s,d,e,h,capa,false, filters),
+					new PropGraphCumulative(s,d,e,h,capa,true, filters)
 			};
 		}else{
 			return new Propagator[]{
