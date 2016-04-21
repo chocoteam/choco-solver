@@ -6,9 +6,9 @@
 .. .. warning::
   This is a work-in-progress documentation. If you have any questions, suggestions or requests, please send an email to choco3-support@mines-nantes.fr.
 
-==============================
-Choco User Guide documentation
-==============================
+=====================================
+Choco Solver User Guide documentation
+=====================================
 
 .. toctree::
    :maxdepth: 5

@@ -245,7 +245,7 @@ latex_use_parts = False
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'choco3userguide', u'Choco3 Documentation',
+    ('index', 'chocosolveruserguide', u'Choco Solver Documentation',
      [u'Charles Prud\'homme, Jean-Guillaume Fages, Xavier Lorca'], 1)
 ]
 
@@ -259,8 +259,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Choco3', u'Choco3 Documentation',
-   u'Jean-Guillaume Fages, Xavier Lorca, Charles Prud\'homme', 'Choco3', 'One line description of project.',
+  ('index', 'Choco Solver', u'Choco Solver Documentation',
+   u'Jean-Guillaume Fages, Xavier Lorca, Charles Prud\'homme', 'Choco Solver', 'One line description of project.',
    'Miscellaneous'),
 ]
 
