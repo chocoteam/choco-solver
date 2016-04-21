@@ -1,20 +1,24 @@
 language: java
 sudo: false
 os:
-  - linux
+- linux
 jdk:
 - oraclejdk8
 env:
   global:
+  # TEST R
   - secure: hb7XCxuEw3VDF5goORctgcFDwg2Z/WAz1ZHKWNRZmR+M1nN6rgDmwOaJpxepLlU0r/Ku14xspE0yn0nK3P1DFNptXhruDJ1h0+mcwiHdsHOM/Vdo247pPbI9pJTD6gQpNnlgVXAI0s5lkNf3IY2jszzhapKFEMHvnPMFXw/sVzU=
   - secure: LQcrlV3dVHoI2gKGOcDUdLzk32L83SuIK7mN3zNoaWmIh60Q5G1LLsoeEuR0VueY22aNnoOGTI0KmQsTD4JlpebjxWMYpH9SdHTCsge60/fhcv2GhuJwBVD70+Vex7lOKbpuFRQM+JWuyHh8EjWBkjTNYWae1XGzUYBhaJBpgJQ=
    # COVERITY_SCAN_TOKEN
   - secure: SOqRgXwXEaxXYP+zY1C7qIhm09n1Cds4c1yc9TPzokftl8pZKZIbY0bkNl4/HAbDgX0pibrja6nxQ9A1BOuAiCB3mSK7qBPxccq6tvFBhuy2IMxIYFw0tFuP3Cr+NULeYERlLs8wG0oayR8NbdQfYZgFh5+Jzzna133C+X+c/pE=
+  # OSS SONATYPE
+  - secure: k32Pw9b8d9a14nZdSzAY1PZg7jQzThdedzBO9UcPZlv0S/of4FffOb2/nzCjlN50s2dVo5f31S7EP377Wwp8PPTG7irYCaCgqfCjLzz4EulZaQxIefeMCINpKih2qVx8f/ledNmLmJQZlfcyLtuZPTCMc6lO60lIGT8PeKrjpuU=
+  - secure: BMHqOg5IJRltCjTCnQXQtZuCRobAY4t9KbSU/fNRfonJTFRcVuBqjyUwHkgthb130OVbq4SiXmIRmAWvaEZmTmK7kq/3iCKqXo5xpaMP0j8hwW5DTjfAWZLoHTObqtjAjndgJLkD9IUVveSSFKnLHz6L4l1nM9NQrMYtPvw9Aco=
   matrix:
   - GROUP=1s
   - GROUP=10s
 install:
-  - npm install travis-ping
+- npm install travis-ping
 branches:
   only:
   - develop
@@ -43,6 +47,6 @@ addons:
     build_command:   "mvn -DskipTests=true compile"
     branch_pattern: coverity_scan
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
-#  - curl http://testr-1154.appspot.com/assets/testR.py | python
-  - travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
+- bash <(curl -s https://codecov.io/bash)
+- [[ ${TRAVIS_PULL_REQUEST} == 'false' ]] && [[ ${TRAVIS_TAG} == '' ]] && mvn deploy -DskipTests --settings etc/settings.xml
+- travis-ping chocoteam/choco-parsers --branch ${TRAVIS_BRANCH} --token ${GH_TOKEN}
