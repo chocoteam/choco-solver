@@ -13,6 +13,8 @@ env:
   matrix:
   - GROUP=1s
   - GROUP=10s
+install:
+  - npm install travis-ping
 branches:
   only:
   - develop
@@ -43,3 +45,4 @@ addons:
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 #  - curl http://testr-1154.appspot.com/assets/testR.py | python
+  - travis-ping chocoteam/choco-parsers --branch ${TRAVIS_BRANCH} --token ${GITHUB_TOKEN}

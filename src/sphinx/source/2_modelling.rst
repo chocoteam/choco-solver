@@ -39,7 +39,7 @@ An integer variable an unknown whose value should be an integer. Therefore, the 
 To create an integer variable, the ``Model`` should be used: ::
 
  // Create a constant variable equal to 42
- IntVar v0 = model.intVar("v0", 3);
+ IntVar v0 = model.intVar("v0", 42);
  // Create a variable taking its value in [1, 3] (the value is 1, 2 or 3)
  IntVar v1 = model.intVar("v1", 1, 3);
  // Create a variable taking its value in {1, 3} (the value is 1 or 3)
