@@ -245,6 +245,15 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         // run propagation on the specific event
                         lastProp.propagate(v, mask);
                     }
+                    // now we can check whether a delayed propagation has been scheduled
+                    if(scheduled[aid]>0){
+                        if (DEBUG) {
+                            IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
+                        }
+                        mask = scheduled[aid];
+                        scheduled[aid] = 0;
+                        lastProp.propagate(mask);
+                    }
                 } else if (lastProp.isActive()) { // need to be checked due to views
                     //assert lastProp.isActive() : "propagator is not active:" + lastProp;
                     if (DEBUG) {
@@ -348,12 +357,8 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
-        if (pendingEvt[p2i.get(propagator.getId())] == 0) {
-            if (DEBUG) {
-                IPropagationEngine.Trace.printPropagation(null, propagator, COLOR);
-            }
-            propagator.propagate(type.getMask());
-        }
+        assert scheduled[p2i.get(propagator.getId())] == 0 || scheduled[p2i.get(propagator.getId())] == type.getMask();
+        scheduled[p2i.get(propagator.getId())] = (short) type.getMask();
     }
 
     @Override
