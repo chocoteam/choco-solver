@@ -130,7 +130,9 @@ public abstract class RegParser implements IParser {
                 }
             }
             // do not enumerate on the complementary search (greedy assignment)
-            solver.set(solver.getStrategy(), greedySearch(inputOrderLBSearch(Arrays.copyOf(ovars, k))));
+            if(k>0) {
+                solver.set(solver.getStrategy(), greedySearch(inputOrderLBSearch(Arrays.copyOf(ovars, k))));
+            }
         }
     }
 
