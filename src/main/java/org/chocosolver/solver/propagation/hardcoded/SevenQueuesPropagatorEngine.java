@@ -102,7 +102,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     /**
      * Mapping between propagator ID and its absolute index
      */
-    private IntMap p2i; //
+    private IntMap p2i;
     /**
      * One bit per queue: true if the queue is not empty.
      */
@@ -115,6 +115,10 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      * Per propagator: set of (variable) events to propagate
      */
     private IntCircularQueue[] eventsets;
+    /**
+     * PropagatorEventType's mask for delayed propagation
+     */
+    private int delayedPropagationType;
     /**
      * Set to <tt>true</tt> once {@link #initialize()} has been called.
      */
@@ -229,6 +233,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 scheduled[aid] = 0;
+                delayedPropagationType = 0;
                 if (lastProp.reactToFineEvent()) {
                     evtset = eventsets[aid];
                     while (evtset.size() > 0) {
@@ -246,13 +251,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         lastProp.propagate(v, mask);
                     }
                     // now we can check whether a delayed propagation has been scheduled
-                    if(scheduled[aid]>0){
+                    if(delayedPropagationType > 0){
                         if (DEBUG) {
                             IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
                         }
-                        mask = scheduled[aid];
-                        scheduled[aid] = 0;
-                        lastProp.propagate(mask);
+                        lastProp.propagate(delayedPropagationType);
                     }
                 } else if (lastProp.isActive()) { // need to be checked due to views
                     //assert lastProp.isActive() : "propagator is not active:" + lastProp;
@@ -357,8 +360,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
-        assert scheduled[p2i.get(propagator.getId())] == 0 || scheduled[p2i.get(propagator.getId())] == type.getMask();
-        scheduled[p2i.get(propagator.getId())] = (short) type.getMask();
+        assert propagator == lastProp;
+        assert delayedPropagationType == 0 || delayedPropagationType == type.getMask();
+        delayedPropagationType = type.getMask();
     }
 
     @Override
