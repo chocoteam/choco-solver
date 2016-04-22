@@ -783,10 +783,11 @@ public class Model implements IModel {
      *
      * Default configuration:
      * - SATISFACTION : Computes a feasible solution. Use while(solve()) to enumerate all solutions.
-     * - OPTIMISATION : If an objective has been defined, searches an optimal solution
-     * (and prove optimality by closing the search space). Then restores the best solution found after solving.
+     * - OPTIMISATION : Computes a feasible solution, wrt to the objective defined. Use while(solve()) to find the optimal solution.
+     * Indeed, each new solution found improves the objective.
+     * If no new solution is found and no stop criterion encountered,the last one is guaranteed to be the optimal one.
      * @return if at least one new solution has been found.
-     * @see {@link Solver#solve()}
+     * @see Solver#solve()
      */
     public boolean solve(){
         return getSolver().solve();
