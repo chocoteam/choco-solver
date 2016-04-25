@@ -12,8 +12,8 @@ env:
    # COVERITY_SCAN_TOKEN
   - secure: SOqRgXwXEaxXYP+zY1C7qIhm09n1Cds4c1yc9TPzokftl8pZKZIbY0bkNl4/HAbDgX0pibrja6nxQ9A1BOuAiCB3mSK7qBPxccq6tvFBhuy2IMxIYFw0tFuP3Cr+NULeYERlLs8wG0oayR8NbdQfYZgFh5+Jzzna133C+X+c/pE=
   # OSS SONATYPE
-  - secure: k32Pw9b8d9a14nZdSzAY1PZg7jQzThdedzBO9UcPZlv0S/of4FffOb2/nzCjlN50s2dVo5f31S7EP377Wwp8PPTG7irYCaCgqfCjLzz4EulZaQxIefeMCINpKih2qVx8f/ledNmLmJQZlfcyLtuZPTCMc6lO60lIGT8PeKrjpuU=
-  - secure: BMHqOg5IJRltCjTCnQXQtZuCRobAY4t9KbSU/fNRfonJTFRcVuBqjyUwHkgthb130OVbq4SiXmIRmAWvaEZmTmK7kq/3iCKqXo5xpaMP0j8hwW5DTjfAWZLoHTObqtjAjndgJLkD9IUVveSSFKnLHz6L4l1nM9NQrMYtPvw9Aco=
+  - secure: Vh8pphEPAn9q4SvsgN4hldOC3FS0RyTuSpF1b4XhieI8lULNqhXqzH1p/g3yEvh2sbLFWxvBnlAmnFsj3JR7rc+AUewIL2Gse2PYfGlun092nhMGLrOAdbcLHxnauO2WDrdfPzjsTrrXk2DlZZxuUAmdovYFkBswxscezB330P8=
+  - secure: UrR8M82bbiqdQEzj6DsK9MXhKN2jVjZQSl9UzBIAqvsxKn2VXlaYlkRJc7AwyfJKHIrriqNtZLrFZFc9maqfj8EDtGaN/Jj2oQ0kAtssHAWDid0oOaWJJn6zoGHKyf02NkO28SjXb99tvC2NE5bpWyIISlEyOKqM2mHJu/14e5M=
   matrix:
   - GROUP=1s
   - GROUP=10s
@@ -48,6 +48,6 @@ addons:
     branch_pattern: coverity_scan
 after_success:
 - bash <(curl -s https://codecov.io/bash)
-- "[[ ${TRAVIS_PULL_REQUEST} == 'false' ]] && [[ ${TRAVIS_TAG} == '' ]] && mvn deploy -DskipTests --settings etc/settings.xml"
+- "[[ ${TRAVIS_PULL_REQUEST} == 'false' ]] && [[ ${TRAVIS_TAG} == '' ]] && mvn deploy -DskipTests -s etc/settings.xml || mvn clean verify -s etc/settings.xml"
 #- curl http://testr-1154.appspot.com/assets/testR.py | python
 - travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
