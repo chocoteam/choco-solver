@@ -35,8 +35,11 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
@@ -48,6 +51,15 @@ import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.rando
  * @since 17/07/12
  */
 public abstract class AbstractBinaryTest {
+
+    @DataProvider(name = "params")
+    public Object[][] data1D(){
+        // indicates whether to use explanations or not
+        List<Object[]> elt = new ArrayList<>();
+        elt.add(new Object[]{true});
+        elt.add(new Object[]{false});
+        return elt.toArray(new Object[elt.size()][1]);
+    }
 
     protected long brutForceTest(int[][] domains, boolean bounded) {
         long nbSol = 0;
@@ -91,8 +103,8 @@ public abstract class AbstractBinaryTest {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Test(groups="10s", timeOut=60000)
-    public void test1() {
+    @Test(groups="10s", timeOut=60000, dataProvider = "params")
+    public void test1(boolean exp) {
         boolean bounded; // true if domains are bounded, false if they are enumerated
         Random rand = new Random(0);
         for (int k = 0; k < 20000; k++) {
@@ -114,6 +126,9 @@ public abstract class AbstractBinaryTest {
             long base = brutForceTest(domains, bounded);
             Model s = modeler(domains, bounded, seed);
 //            SearchMonitorFactory.log(s, false, false);
+            if(exp){
+                s.getSolver().setCBJLearning(false, false);
+            }
             try {
                 while (s.solve()) ;
             } catch (AssertionError ae) {

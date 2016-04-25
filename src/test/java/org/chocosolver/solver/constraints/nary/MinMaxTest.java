@@ -48,19 +48,23 @@ import static org.testng.Assert.*;
  */
 public class MinMaxTest {
 
-    @DataProvider(name = "minMax")
+    @DataProvider(name = "params")
     public Object[][] data1D(){
+        // first boolean indicates whether it is minimization or maximization
+        // second boolean indicates whether to use explanations or not
         List<Object[]> elt = new ArrayList<>();
-        elt.add(new Object[]{true});
-        elt.add(new Object[]{false});
+        elt.add(new Object[]{true,true});
+        elt.add(new Object[]{false, true});
+        elt.add(new Object[]{true,false});
+        elt.add(new Object[]{false, false});
         return elt.toArray(new Object[elt.size()][1]);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "minMax")
-    public void testNominal(boolean min) throws ContradictionException{
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testNominal(boolean min, boolean exp) throws ContradictionException{
         Model model = new Model();
         IntVar[] vars = model.intVarArray(3, -2, 3);
         IntVar mMvar = model.intVar(-3, 2);
@@ -68,6 +72,9 @@ public class MinMaxTest {
             model.min(mMvar,vars).post();
         }else{
             model.max(mMvar,vars).post();
+        }
+        if(exp){
+            model.getSolver().setCBJLearning(false,false);
         }
         int nbSol = checkSolutions(vars, mMvar, min);
 
@@ -87,8 +94,8 @@ public class MinMaxTest {
         assertEquals(nbSol, nbSol2);
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "minMax")
-    public void testBools(boolean min) throws ContradictionException{
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testBools(boolean min, boolean exp) throws ContradictionException{
         int n1 = 0;
         {
             Model model = new Model();
@@ -98,6 +105,9 @@ public class MinMaxTest {
                 model.min(mMvar, vars).post();
             } else {
                 model.max(mMvar, vars).post();
+            }
+            if(exp){
+                model.getSolver().setCBJLearning(false,false);
             }
             n1 = checkSolutions(vars, mMvar, min);
         }
@@ -118,8 +128,8 @@ public class MinMaxTest {
         assertEquals(n1, n2);
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "minMax")
-    public void testBoolsGG(boolean min) throws ContradictionException{
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testBoolsGG(boolean min, boolean exp) throws ContradictionException{
         {
             Model m = new Model();
             IntVar[] vars = new BoolVar[2];
@@ -135,6 +145,9 @@ public class MinMaxTest {
                 m.arithm(vars[0],">",0).post();
                 m.arithm(mMvar,">",0).post();
                 m.max(mMvar, vars).post();
+            }
+            if(exp){
+                m.getSolver().setCBJLearning(false,false);
             }
             try {
                 m.getSolver().propagate();
@@ -170,8 +183,8 @@ public class MinMaxTest {
         }
     }
 
-    @Test(groups = "1s", timeOut=60000, dataProvider = "minMax")
-    public void testNoSolution(boolean min) {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testNoSolution(boolean min, boolean exp) {
         Model model = new Model();
         IntVar[] vars = model.intVarArray(5, 0, 5);
         IntVar mM = model.intVar(26, 30);
@@ -180,12 +193,15 @@ public class MinMaxTest {
         }else{
             model.max(mM,vars).post();
         }
+        if(exp){
+            model.getSolver().setCBJLearning(false,false);
+        }
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
         assertFalse(model.solve());
     }
 
-    @Test(groups = "1s", timeOut=60000, dataProvider = "minMax")
-    public void testNoSolution2(boolean min) {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testNoSolution2(boolean min, boolean exp) {
         Model model = new Model();
         IntVar[] vars = model.intVarArray(5, 0, 5);
         IntVar mM = model.intVar(-26, -3);
@@ -194,12 +210,15 @@ public class MinMaxTest {
         }else{
             model.max(mM,vars).post();
         }
+        if(exp){
+            model.getSolver().setCBJLearning(false,false);
+        }
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
         assertFalse(model.solve());
     }
 
-    @Test(groups = "1s", timeOut=60000, dataProvider = "minMax")
-    public void testZero(boolean min) {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testZero(boolean min, boolean exp) {
         Model model = new Model();
         IntVar[] vars = new IntVar[]{
                 model.intVar(-5, -1),
@@ -213,12 +232,15 @@ public class MinMaxTest {
         }else{
             model.max(mM,vars).post();
         }
+        if(exp){
+            model.getSolver().setCBJLearning(false,false);
+        }
         checkSolutions(vars, mM, min);
     }
 
 
-    @Test(groups = "1s", timeOut=60000, dataProvider = "minMax")
-    public void testSameVariableSolution(boolean min) {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testSameVariableSolution(boolean min, boolean exp) {
         Model model = new Model();
         IntVar mM = model.intVar(1, 5);
         IntVar ref = model.intVar(1, 5);
@@ -228,11 +250,14 @@ public class MinMaxTest {
         }else{
             model.max(mM,vars).post();
         }
+        if(exp){
+            model.getSolver().setCBJLearning(false,false);
+        }
         checkSolutions(vars, mM, min);
     }
 
-    @Test(groups = "1s", timeOut=60000, dataProvider = "minMax")
-    public void testSameVariableNoSolution(boolean min) {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testSameVariableNoSolution(boolean min, boolean exp) {
         Model model = new Model();
         IntVar mM = model.intVar(0);
         IntVar ref = model.intVar(1, 5);
@@ -242,12 +267,15 @@ public class MinMaxTest {
         }else{
             model.max(mM,vars).post();
         }
+        if(exp){
+            model.getSolver().setCBJLearning(false,false);
+        }
         assertFalse(model.solve());
     }
 
 
-    @Test(groups = "1s", timeOut=60000, dataProvider = "minMax", expectedExceptions = AssertionError.class)
-    public void testZeroElements(boolean min) {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params", expectedExceptions = AssertionError.class)
+    public void testZeroElements(boolean min, boolean exp) {
         Model model = new Model();
         IntVar mM = model.intVar(-1,1);
         IntVar[] vars = new IntVar[0];
@@ -255,6 +283,9 @@ public class MinMaxTest {
             model.min(mM,vars).post();
         }else{
             model.max(mM,vars).post();
+        }
+        if(exp){
+            model.getSolver().setCBJLearning(false,false);
         }
         assertEquals(checkSolutions(vars, mM, min), 1);
     }

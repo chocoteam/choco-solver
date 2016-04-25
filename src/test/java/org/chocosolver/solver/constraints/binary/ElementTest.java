@@ -34,8 +34,11 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static java.lang.System.currentTimeMillis;
@@ -53,6 +56,15 @@ import static org.testng.Assert.assertEquals;
  */
 public class ElementTest {
 
+    @DataProvider(name = "params")
+    public Object[][] data1D(){
+        // indicates whether to use explanations or not
+        List<Object[]> elt = new ArrayList<>();
+        elt.add(new Object[]{true});
+        elt.add(new Object[]{false});
+        return elt.toArray(new Object[elt.size()][1]);
+    }
+
     private static void model(Model s, IntVar index, int[] values, IntVar var,
                               int offset, int nbSol) {
 
@@ -67,29 +79,38 @@ public class ElementTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
-    public void test1() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void test1(boolean exp) {
         Model s = new Model();
+        if(exp){
+            s.getSolver().setCBJLearning(false,false);
+        }
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = s.intVar("v_0", -3, 10, false);
         IntVar var = s.intVar("v_1", -20, 20, false);
         model(s, index, values, var, 0, 5);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test2() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void test2(boolean exp) {
         Model s = new Model();
+        if(exp){
+            s.getSolver().setCBJLearning(false,false);
+        }
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = s.intVar("v_0", 2, 10, false);
         IntVar var = s.intVar("v_1", -20, 20, false);
         model(s, index, values, var, 0, 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test3() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void test3(boolean exp) {
         for (int j = 0; j < 100; j++) {
             Random r = new Random(j);
             Model s = new Model();
+            if(exp){
+                s.getSolver().setCBJLearning(false,false);
+            }
             IntVar index = s.intVar("v_0", 23, 25, false);
             IntVar val = s.intVar("v_1", 0, 1, true);
             int[] values = new int[24];
@@ -100,19 +121,24 @@ public class ElementTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test4() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void test4(boolean exp) {
         Model s = new Model();
+        if(exp){
+            s.getSolver().setCBJLearning(false,false);
+        }
         int[] values = new int[]{0, 0, 1};
         IntVar index = s.intVar("v_0", 1, 3, false);
         IntVar var = s.intVar("v_1", 0, 1, false);
         model(s, index, values, var, 1, 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test5() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void test5(boolean exp) {
         Model s = new Model();
-        s.getSolver().setCBJLearning(false, false);
+        if(exp){
+            s.getSolver().setCBJLearning(false,false);
+        }
 
         Random r = new Random(125);
         int[] values = new int[10];
@@ -137,7 +163,7 @@ public class ElementTest {
         assertEquals(s.getSolver().getSolutionCount(), 58, "nb sol");
     }
 
-    public void nasty(int seed, int nbvars, int nbsols) {
+    public void nasty(int seed, int nbvars, int nbsols, boolean exp) {
 
         Random r = new Random(seed);
         int[] values = new int[nbvars];
@@ -161,6 +187,9 @@ public class ElementTest {
             ref.element(varsr[i], values, indicesr[i], 0).post();
             ref.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3).post();
         }
+        if(exp){
+            ref.getSolver().setCBJLearning(false,false);
+        }
 
         while (ref.solve()) ;
 
@@ -168,78 +197,93 @@ public class ElementTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
-    public void testBUG() {
-        nasty(153, 15, 192);
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testBUG(boolean exp) {
+        nasty(153, 15, 192, exp);
     }
 
 
-    @Test(groups="1s", timeOut=60000)
-    public void testInc1() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testInc1(boolean exp) {
         for (int i = 0; i < 20; i++) {
             Model model = new Model();
             IntVar I = model.intVar("I", 0, 5, false);
             IntVar R = model.intVar("R", 0, 10, false);
             model.element(R, new int[]{0, 2, 4, 6, 7}, I).post();
             model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
+            if(exp){
+                model.getSolver().setCBJLearning(false,false);
+            }
             while (model.solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 5);
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testDec1() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testDec1(boolean exp) {
         for (int i = 0; i < 20; i++) {
             Model model = new Model();
             IntVar I = model.intVar("I", 0, 5, false);
             IntVar R = model.intVar("R", 0, 10, false);
             model.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
             model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
+            if(exp){
+                model.getSolver().setCBJLearning(false,false);
+            }
             while (model.solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 5);
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testReg1() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testReg1(boolean exp) {
         for (int i = 0; i < 20; i++) {
             Model model = new Model();
             IntVar I = model.intVar("I", 0, 13, false);
             IntVar R = model.intVar("R", 0, 21, false);
             model.element(R, new int[]{1, 6, 20, 4, 15, 13, 9, 3, 19, 12, 17, 7, 17, 5}, I).post();
             model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
+            if(exp){
+                model.getSolver().setCBJLearning(false,false);
+            }
             while (model.solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 14);
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testTAR1(){
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testTAR1(boolean exp) {
         for (int i = 1; i < 20; i++) {
             Model model = new Model();
             IntVar I = model.intVar("I", 0, 3, true);
             IntVar R = model.intVar("R", -1, 0, false);
             model.element(R, new int[]{-1, -1, -1, 0, -1}, I, -1).post();
             model.getSolver().set(randomSearch(new IntVar[]{I, R}, i));
+            if(exp){
+                model.getSolver().setCBJLearning(false,false);
+            }
             while (model.solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 4);
         }
     }
-    @Test
-    public void testModelOrMin() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testModelOrMin(boolean exp) {
         Model s = new Model();
         IntVar val = s.intVar("v", 0, 9, true);
         // b=> val={5,6,7,8}[2]
         Constraint el = detect(val, new int[]{5, 6, 7, 8}, s.intVar(2), 0);
         s.or(el.reify()).post();
+        if(exp){
+            s.getSolver().setCBJLearning(false,false);
+        }
         // s.post(el);// works instead of previous post
         while (s.solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 1L);
     }
 
 
-    @Test
-    public void testModelOrFull() {
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    public void testModelOrFull(boolean exp) {
         Model s = new Model();
         BoolVar b = s.boolVar("b");
         IntVar val = s.intVar("v", 0, 9, true);
@@ -249,6 +293,9 @@ public class ElementTest {
         // !b=> val=2
         Constraint affect = s.arithm(val, "=", 2);
         s.or(b, affect.reify()).post();
+        if(exp){
+            s.getSolver().setCBJLearning(false,false);
+        }
         while (s.solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 2L);
     }
