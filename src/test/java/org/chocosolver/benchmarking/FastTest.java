@@ -51,6 +51,21 @@ public class FastTest {
 
     @Test(groups = "2012,close<1m,mzn", timeOut = 120000, dataProvider = "close<1m")
     public void testFast(String name, int nbsol, int bval, int nbnod, boolean complet) throws InterruptedException, IOException, URISyntaxException {
+        execute(name,nbsol,bval,nbnod,complet,false);
+    }
+
+    @Test(groups = "2012,close<1m,mzn,cbj", timeOut = 180000, dataProvider = "close<1m")
+    public void testFastCBJ(String name, int nbsol, int bval, int nbnod, boolean complet) throws InterruptedException, IOException, URISyntaxException {
+        System.out.println("solving with explanation");
+        execute(name,nbsol,bval,nbnod,complet,true);
+    }
+
+    @Test(groups = "2012,close<1m,mzn,cbj", timeOut = 120000)
+    public void failTest() throws InterruptedException, IOException, URISyntaxException {
+        execute(pre2012 + "radiation+radiation+m06_15_15.fzn", 1, 711, 307742, true, true);
+    }
+
+    private void execute(String name, int nbsol, int bval, int nbnod, boolean complet, boolean exp) throws InterruptedException, IOException, URISyntaxException {
         ClassLoader cl = this.getClass().getClassLoader();
         String file = cl.getResource(name).getFile();
         String[] args = new String[]{
@@ -67,12 +82,19 @@ public class FastTest {
         fzn.createSolver();
         fzn.parseInputFile();
         fzn.configureSearch();
+        if(exp) {
+            fzn.getModel().getSolver().setCBJLearning(false, false);
+        }
         fzn.solve();
 
         Assert.assertEquals(fzn.getModel().getSolver().isStopCriterionMet(), !complet, "Unexpected completeness information");
         if(complet){
             Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), nbsol, "Unexpected number of solutions");
-            Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nbnod, "Unexpected number of nodes");
+            if(exp){
+                Assert.assertTrue(fzn.getModel().getSolver().getNodeCount() <= nbnod, "Unexpected number of nodes");
+            }else{
+                Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nbnod, "Unexpected number of nodes");
+            }
             if (fzn.getModel().getObjective() != null) {
                 Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bval, "Unexpected best solution");
             }
@@ -82,7 +104,6 @@ public class FastTest {
             Assert.assertTrue(fzn.getModel().getSolver().getSolutionCount() <  (nbsol*1.0 - i), "Unexpected number of solutions");
         }
     }
-
 
     public static final String pre2012 = "benchmarking" + File.separator + "2012" + File.separator;
 
