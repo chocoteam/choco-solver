@@ -448,6 +448,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         // if a resolution has already been done
         if (rootWorldIndex > -1) {
             mModel.getEnvironment().worldPopUntil(rootWorldIndex);
+            engine.flush();
             dpath.synchronize();
             feasible = ESat.UNDEFINED;
             action = initialize;

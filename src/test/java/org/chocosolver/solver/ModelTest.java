@@ -396,4 +396,40 @@ public class ModelTest {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(8);
         s.solve(); //  should not throw exception
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testFindSolution(){
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
+        for(int i = 0; i < 2; i++) {
+            Assert.assertNotNull(m.findSolution());
+        }
+        Assert.assertNull(m.findSolution());
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testFindAllSolutions(){
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
+        Assert.assertEquals(m.findAllSolutions().size(), 2);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testFindOptiamalSolution(){
+        Model m = ProblemMaker.makeGolombRuler(10);
+        Assert.assertNotNull(m.findOptimalSolution((IntVar) m.getHook("objective"), false));
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testFindAllOptimalSolutions(){
+        Model m = ProblemMaker.makeGolombRuler(6);
+        Assert.assertEquals(m.findAllOptimalSolutions((IntVar) m.getHook("objective"), false).size(), 4);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testFind(){
+        Model m = ProblemMaker.makeGolombRuler(6);
+        IntVar[] ticks= (IntVar[]) m.getHook("ticks");
+        m.clearObjective();
+        m.getSolver().showSolutions();
+        Assert.assertEquals(m.findParetoFront(ticks, false).size(), 8);
+    }
 }
