@@ -39,7 +39,7 @@ public class FznSettings implements Settings {
      * Set to true to print constraint creation during parsing
      */
     public boolean printConstraint() {
-        return true;
+        return false;
     }
 
     /**
