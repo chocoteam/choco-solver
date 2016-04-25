@@ -39,7 +39,8 @@ import org.chocosolver.solver.variables.IViewFactory;
  * Interface to ease modeling
  * Enables to make variables, views and constraints
  *
- * @author Jean-Guillaume FAGES (www.cosling.com)
+ * @author Jean-Guillaume FAGES
+ * @since 4.0.0
  */
 public interface IModel extends IVariableFactory, IViewFactory, IConstraintFactory, ISatFactory, IReificationFactory {
 

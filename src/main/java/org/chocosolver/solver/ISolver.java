@@ -38,7 +38,8 @@ import org.chocosolver.solver.search.loop.propagate.IPropagateFactory;
  * Interface to ease modeling
  * Enables to make variables, views and constraints
  *
- * @author Jean-Guillaume FAGES (www.cosling.com)
+ * @author Jean-Guillaume FAGES
+ * @since 4.0.0
  */
 public interface ISolver extends IPropagateFactory, ILearnFactory, IMoveFactory, ISearchMonitorFactory {
 

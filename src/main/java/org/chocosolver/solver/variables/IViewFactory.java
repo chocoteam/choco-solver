@@ -41,7 +41,7 @@ import static java.lang.Math.max;
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
- * @author Jean-Guillaume FAGES (www.cosling.com)
+ * @author Jean-Guillaume FAGES
  */
 public interface IViewFactory extends ISelf<Model> {
 

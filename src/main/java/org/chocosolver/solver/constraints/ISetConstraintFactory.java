@@ -41,7 +41,8 @@ import org.chocosolver.util.tools.ArrayUtils;
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
- * @author Jean-Guillaume FAGES (www.cosling.com)
+ * @author Jean-Guillaume FAGES
+ * @since 4.0.0
  */
 public interface ISetConstraintFactory {
 

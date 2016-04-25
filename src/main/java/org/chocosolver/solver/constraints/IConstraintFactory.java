@@ -34,7 +34,7 @@ package org.chocosolver.solver.constraints;
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
- * @author Jean-Guillaume FAGES (www.cosling.com)
+ * @author Jean-Guillaume FAGES
  */
 public interface IConstraintFactory extends IIntConstraintFactory, IRealConstraintFactory, ISetConstraintFactory {
 

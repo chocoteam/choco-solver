@@ -37,7 +37,8 @@ import org.chocosolver.solver.variables.RealVar;
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
- * @author Jean-Guillaume FAGES (www.cosling.com)
+ * @author Jean-Guillaume FAGES
+ * @since 4.0.0
  */
 public interface IRealConstraintFactory {
 

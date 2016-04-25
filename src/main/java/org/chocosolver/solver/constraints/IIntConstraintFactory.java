@@ -98,7 +98,9 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
- * @author Jean-Guillaume FAGES (www.cosling.com)
+ * @author Jean-Guillaume FAGES
+ * @author Charles Prud'homme
+ * @since 4.0.0
  */
 public interface IIntConstraintFactory {
 

@@ -42,10 +42,16 @@ import org.chocosolver.util.tools.StringUtils;
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
- * @author Jean-Guillaume FAGES (www.cosling.com)
+ * @author Jean-Guillaume FAGES
+ * @author Charles Prud'homme
+ * @since 4.0.0
  */
+@SuppressWarnings("unused")
 public interface IVariableFactory extends ISelf<Model> {
 
+    /**
+     * Default prefix for constants
+     */
     String CSTE_NAME = "cste -- ";
 
     //*************************************************************************************
