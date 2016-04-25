@@ -428,7 +428,7 @@ public class Model implements IModel {
      * This map is mutable.
      * @return the map of hooks.
      */
-    public Map<String, Object> getHooks(){
+    protected Map<String, Object> getHooks(){
         return hooks;
     }
 
