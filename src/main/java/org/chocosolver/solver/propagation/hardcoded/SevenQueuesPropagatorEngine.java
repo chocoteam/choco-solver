@@ -295,6 +295,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             }
             notEmpty = notEmpty & ~(1 << i);
         }
+        lastProp = null;
     }
 
     private void flush(int aid) {

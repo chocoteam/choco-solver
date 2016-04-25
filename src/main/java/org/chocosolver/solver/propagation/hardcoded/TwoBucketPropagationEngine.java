@@ -402,6 +402,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             }
             notEmpty = notEmpty & ~(1 << i);
         }
+        lastProp = null;
     }
 
     private void flushFine() {

@@ -48,6 +48,6 @@ addons:
     branch_pattern: coverity_scan
 after_success:
 - bash <(curl -s https://codecov.io/bash)
-- "[[ ${TRAVIS_PULL_REQUEST} == 'false' ]] && [[ ${TRAVIS_TAG} == '' ]] && mvn deploy -DskipTests -s etc/settings.xml || mvn clean verify -s etc/settings.xml"
+- "[[ ${TRAVIS_PULL_REQUEST} == 'false' ]] && [[ ${TRAVIS_TAG} == '' ]] && mvn deploy -DskipTests -s etc/settings.xml || mvn clean verify -DskipTests -s etc/settings.xml"
 #- curl http://testr-1154.appspot.com/assets/testR.py | python
 - travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
