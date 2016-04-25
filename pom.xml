@@ -36,7 +36,7 @@
     <name>A FlatZinc parser for Choco3</name>
 
     <url>https://github.com/chocoteam/choco-parsers</url>
-    <description>A Graphical User Interface to plug on Choco 3.
+    <description>Provide parsers from FlatZinc and XCSP to Choco-solver.
     </description>
     <licenses>
         <license>
