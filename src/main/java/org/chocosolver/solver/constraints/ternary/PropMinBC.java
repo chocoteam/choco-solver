@@ -236,7 +236,7 @@ public class PropMinBC extends Propagator<IntVar> {
                     }
                 }
                 if (IntEventType.isDecupp(evt.getMask())) {
-                    newrules |= ruleStore.addUpperBoundRule(vars[0]);
+                    newrules |= ruleStore.addLowerBoundRule(vars[0]);
                     newrules |= ruleStore.addLowerBoundRule(vars[i]);
                 }
             }

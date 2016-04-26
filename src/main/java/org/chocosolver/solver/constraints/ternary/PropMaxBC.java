@@ -236,7 +236,7 @@ public class PropMaxBC extends Propagator<IntVar> {
                     }
                 }
                 if (IntEventType.isDecupp(evt.getMask())) {
-                    newrules |= ruleStore.addLowerBoundRule(vars[0]);
+                    newrules |= ruleStore.addUpperBoundRule(vars[0]);
                     newrules |= ruleStore.addUpperBoundRule(vars[i]);
                 }
             }

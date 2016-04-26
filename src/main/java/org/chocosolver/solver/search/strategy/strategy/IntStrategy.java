@@ -52,7 +52,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
     /**
      * How a value is selected
      */
-	private IntValueSelector valueSelector;
+	protected IntValueSelector valueSelector;
     /**
      * The decision operator
      */
