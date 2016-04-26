@@ -1,0 +1,116 @@
+================
+Objects in Choco
+================
+
+:date: 2016-04-21 14:06
+:tags: choco, constraint, solver, java
+:category: Choco
+:author: Charles Prud'homme
+
+The content of this section is extracted from the Javadoc and the Choco's User Guide.
+Here, we **briefly** described the main aspects of the most commonly used objects.
+This does not aim to be complete: it covers the basic information.
+
+
+The `Model`
+===========
+
+.. code-block:: java
+
+    Model model = new Model("My model");
+
+As said before, the `Model` is a key component of the library.
+It has to be the first instruction stated, since it provides
+the methods that help to model to problem.
+
+A good habit is to declare a model with a name, otherwise
+a random one will be assigned by default.
+
+We designed the model in such a way that you can reach almost everything from it.
+
+For example, it stores its variables and constraints.
+Variables and constraints of a model can be retrieved thanks to API :
+
+.. code-block:: java
+
+    model.retrieveIntVars(false);
+    model.getCstrs();
+
+
+.. note::
+
+    We strongly encourage you to attach the Javadoc (provides either on the website or on Maven Central Repository) to the library.
+
+
+The `Variables`
+===============
+
+A variable is an *unknown*, mathematically speaking.
+In a solution of a given problem (considering that at least one exists, which may be the case),
+each variable is assigned to a *value* selected within its domain.
+The notion of *value* differs from one type of variable to the other.
+
+.. note::
+
+    A variable can be declared in only one model at a time.
+
+
+Integer variable
+++++++++++++++++
+
+An integer variable, `IntVar` should be assigned to an integer.
+There are many ways to declare an `IntVar`
+
+.. code-block:: java
+
+    // A variable with a unique value in its domain, in other words, a constant
+    IntVar two = model.intVar("TWO", 2);
+    // Any value in [1..4] can be assigned to this variable
+    IntVar x = model.intVar("X", 1, 4);
+    // Only the values 1, 3 and 4 can be assigned to this variable
+    IntVar y = model.intVar("X", new int[]{1, 3, 4});
+
+.. important::
+
+    Declaring a variable with an *infinite* domain, like :
+
+    .. code-block:: java
+
+        model.intVar("X", Integer.MIN_VALUE, Integer.MAX_VALUE)
+
+    is clearly a bad idea.
+
+    Too large domains may lead to underflow or overflow issues and most of the time
+    and, even if Choco will finally compute the right bounds by itself, you certainly want to save space and time
+    by directly declaring relevant bounds.
+
+The domain of an integer variable in Choco can either be *bounded* or *enumerated*.
+In a bounded domain, only current bounds are stored in memory.
+This saves memory (only two integers are needed) but it restricts its usage:
+there is no possibility to make holes in it.
+
+On the contrary, with an enumerated domain, all possible values are explicitly stored in memory.
+This consumes more memory (one integer and a bitset -- many longs -- are needed) but it allows
+making holes in it.
+
+.. admonition:: **Modelling**: Bounded or Enumerated?
+
+    The memory consumption should not be the only criterion to consider when one needs to choose
+    between one representation and the other.
+    Indeed, the *filtering* strength of the model, through constraints, has to be considered too.
+    For instance, some constraints can only deduce bound updates, in that case bounded domain fit the need.
+    Other constraints can make holes in variables' domain, in that case enumerated domain are relevant.
+
+    If you don't know what to do, the simple following can be applied:
+
+        + domain's cardinality greater than 262144 should be bounded
+        + domain's cardinality smaller than 32768 can be enumerated without loss of efficiency
+        + in any case, empirical evaluation is a good habit.
+
+
+The `Constraints`
+=================
+
+.. note::
+
+    A constraint can be posted in only one model at a time.

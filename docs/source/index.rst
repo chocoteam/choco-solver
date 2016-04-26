@@ -15,8 +15,7 @@ Introduction
 
    src/001.introduction
    src/002.history
-   src/003.technical
-   src/004.installation
+   src/003.installation
 
 Constraint-Programming
 ======================
@@ -34,10 +33,7 @@ Overview
    :maxdepth: 1
 
    src/201.firstexample
-   src/202.model
-   src/203.variables
-   src/204.constraints
-   src/205.solver
+   src/202.objects
 
 Tutorial: Alignment of DNA sequences
 ====================================

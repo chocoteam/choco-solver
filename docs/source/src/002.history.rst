@@ -36,6 +36,11 @@ This version won seven medals in four entries in the `MiniZinc Challenge <http:/
 More recently, Jean-Guillaume and I wanted to review the API and the last version was born.
 
 
+The philosophy of "Choco"
++++++++++++++++++++++++++
+
+
+
 Why "Choco" ?
 +++++++++++++
 
@@ -53,6 +58,20 @@ Why using a constraint programming solver ?
 
 And why Choco ?
 +++++++++++++++
+
+- three types of variables: integer, boolean and set,
+- more than 70 constraints : the most useful and state-of-the-art implementations,
+- PLM framework allows configurable searches and most wide-spread search strategies,
+- deal with satisfaction and optimization (mono and multi) problems, multi-thread resolution,
+
+But also:
+
+- explanations supported,
+- a MiniZinc and XCSP3 instance parser,
+- graph variables/constraints available,
+- and gentle binding to Ibex: real variables and constraints supported
+
+If that doesn't sound like something familiar to you, let's give a try !
 
 
 Yeah, but still ?
