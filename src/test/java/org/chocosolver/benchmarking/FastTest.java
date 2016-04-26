@@ -65,6 +65,11 @@ public class FastTest {
         execute(pre2012 + "radiation+radiation+m06_15_15.fzn", 1, 711, 307742, true, true);
     }
 
+    @Test(groups = "2012,close<1m,mzn,cbj", timeOut = 120000)
+    public void failMSPSPTest() throws InterruptedException, IOException, URISyntaxException {
+        execute(pre2012 + "mspsp+mspsp+hard_01.fzn", 8, 35, 0, false, true);
+    }
+
     private void execute(String name, int nbsol, int bval, int nbnod, boolean complet, boolean exp) throws InterruptedException, IOException, URISyntaxException {
         ClassLoader cl = this.getClass().getClassLoader();
         String file = cl.getResource(name).getFile();
