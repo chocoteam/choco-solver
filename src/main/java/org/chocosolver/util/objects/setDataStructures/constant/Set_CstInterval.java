@@ -75,12 +75,20 @@ public class Set_CstInterval implements ISet {
 
 	@Override
 	public boolean add(int element) {
-		throw new UnsupportedOperationException("It is forbidden to add an element to a constant set (Set_CstInterval)");
+		if(contain(element)){
+			return false;
+		}else {
+			throw new UnsupportedOperationException("It is forbidden to add an element to a constant set (Set_CstInterval)");
+		}
 	}
 
 	@Override
 	public boolean remove(int element) {
-		throw new UnsupportedOperationException("It is forbidden to remove an element from a constant set (Set_CstInterval)");
+		if(contain(element)) {
+			throw new UnsupportedOperationException("It is forbidden to remove an element from a constant set (Set_CstInterval)");
+		}else{
+			return false;
+		}
 	}
 
 	@Override
@@ -95,7 +103,9 @@ public class Set_CstInterval implements ISet {
 
 	@Override
 	public void clear() {
-		throw new UnsupportedOperationException("It is forbidden to remove an element from a constant set (Set_CstInterval)");
+		if(!isEmpty()) {
+			throw new UnsupportedOperationException("It is forbidden to remove an element from a constant set (Set_CstInterval)");
+		}
 	}
 
 	@Override
