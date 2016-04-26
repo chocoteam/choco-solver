@@ -39,130 +39,137 @@ import org.chocosolver.solver.Solver;
  */
 public interface IMeasures {
 
-    /**
-     * @return the current world unique id
-     */
-    long getTimestamp();
+	/**
+	 * @return the current world unique id
+	 */
+	long getTimestamp();
+
+	/**
+	 * @return the time count (in seconds), including initial propagation time count
+	 */
+	float getTimeCount();
+
+	/**
+	 * @return the time count (in nano seconds), including initial propagation time count
+	 */
+	long getTimeCountInNanoSeconds();
+
+	/**
+	 * @return the reading time count (in sec)
+	 */
+	float getReadingTimeCount();
+
+	/**
+	 * @return the node count
+	 */
+	long getNodeCount();
+
+	/**
+	 * @return the backtrack count
+	 */
+	long getBackTrackCount();
+
+	/**
+	 * @return the fail count
+	 */
+	long getFailCount();
+
+	/**
+	 * @return the restart count
+	 */
+	long getRestartCount();
+
+	/**
+	 * @return the solution count of the measure
+	 */
+	long getSolutionCount();
+
+	/**
+	 * @return the maximum depth of the search tree
+	 */
+	long getMaxDepth();
+
+	/**
+	 * @return the current depth in the search tree
+	 */
+	long getCurrentDepth();
+
+	/**
+	 * @return true iff the problem has an objective variable (i.e. optimization problem)
+	 */
+	boolean hasObjective();
+
+	/**
+	 * @return true iff the optimum has been found and proved
+	 */
+	boolean isObjectiveOptimal();
+
+	/**
+	 * @return the objective value of the best solution found (can be Integer or Double)
+	 */
+	Number getBestSolutionValue();
+
+	/**
+	 * @return a summary of recorded statistics
+	 */
+	default String toOneLineString() {
+		StringBuilder st = new StringBuilder(256);
+		st.append("Model[").append(getSolver().getModel().getName()).append("], ");
+		st.append(String.format("%d Solutions, ", getSolutionCount()));
+		if (hasObjective()) {
+			st.append(getSolver().getObjectiveManager()).append(", ");
+		}
+		st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
+				getTimeCount(),
+				getNodeCount(),
+				getNodeCount() / getTimeCount(),
+				getBackTrackCount(),
+				getFailCount(),
+				getRestartCount()));
+		return st.toString();
+	}
+
+	/**
+	 * @return statistic values only
+	 */
+	default Number[] toArray() {
+		return new Number[]{
+					getSolutionCount(),
+					getReadingTimeCount(),
+					getTimeCount(),
+					hasObjective() ? getBestSolutionValue() : 0,
+							getNodeCount(),
+							getBackTrackCount(),
+							getFailCount(),
+							getRestartCount()
+		};
+	}
+
+	/**
+	 * @return statistics in a CSV format
+	 */
+	default String toCSV() {
+		// solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
+		return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
+				getSolutionCount(),
+				getReadingTimeCount(),
+				getTimeCount(),
+				hasObjective() ? getBestSolutionValue().doubleValue() : 0,
+						getNodeCount(),
+						getBackTrackCount(),
+						getFailCount(),
+						getRestartCount());
+	}
+
+	/**
+	 * returns the solver object associated with this measures
+	 */
+	Solver getSolver();
 
     /**
-     * @return the time count (in seconds), including initial propagation time count
-     */
-    float getTimeCount();
-
-    /**
-     * @return the time count (in nano seconds), including initial propagation time count
-     */
-    long getTimeCountInNanoSeconds();
-
-    /**
-     * @return the reading time count (in sec)
-     */
-    float getReadingTimeCount();
-
-    /**
-     * @return the node count
-     */
-    long getNodeCount();
-
-    /**
-     * @return the backtrack count
-     */
-    long getBackTrackCount();
-
-    /**
-     * @return the fail count
-     */
-    long getFailCount();
-
-    /**
-     * @return the restart count
-     */
-    long getRestartCount();
-
-    /**
-     * @return the solution count of the measure
-     */
-    long getSolutionCount();
-
-    /**
-     * @return the maximum depth of the search tree
-     */
-    long getMaxDepth();
-
-    /**
-     * @return the current depth in the search tree
-     */
-    long getCurrentDepth();
-
-    /**
-     * @return true iff the problem has an objective variable (i.e. optimization problem)
-     */
-    boolean hasObjective();
-
-    /**
-     * @return true iff the optimum has been found and proved
-     */
-    boolean isObjectiveOptimal();
-
-    /**
-     * @return the objective value of the best solution found (can be Integer or Double)
-     */
-    Number getBestSolutionValue();
-
-    /**
-     * @return a summary of recorded statistics
-     */
-    default String toOneLineString() {
-        StringBuilder st = new StringBuilder(256);
-        st.append("Model[").append(getSolver().getModel().getName()).append("], ");
-        st.append(String.format("%d Solutions, ", getSolutionCount()));
-        if (hasObjective()) {
-            st.append(getSolver().getObjectiveManager()).append(", ");
-        }
-        st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
-                getTimeCount(),
-                getNodeCount(),
-                getNodeCount() / getTimeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount()));
-        return st.toString();
-    }
-
-    /**
-     * @return statistic values only
-     */
-    default Number[] toArray() {
-        return new Number[]{
-                getSolutionCount(),
-                getReadingTimeCount(),
-                getTimeCount(),
-                hasObjective() ? getBestSolutionValue() : 0,
-                getNodeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount()
-        };
-    }
-
-    /**
-     * @return statistics in a CSV format
-     */
-    default String toCSV() {
-        // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
-        return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
-                getSolutionCount(),
-                getReadingTimeCount(),
-                getTimeCount(),
-                hasObjective() ? getBestSolutionValue().doubleValue() : 0,
-                getNodeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount());
-    }
-
-    /**
-     * returns the solver object associated with this measures
-     */
-    Solver getSolver();
+	 * copy the values
+	 * 
+	 * @return a new {@link IMeasures} with same values.
+	 */
+	IMeasures copyMeasures();
 }

@@ -355,7 +355,12 @@ public interface IResolutionHelper extends ISelf<Model> {
 	}
 
 	/**
-	 * Iterate over the solutions, calling a consumer for each with the {@link IMeasures} corresponding.
+	 * explore the model, calling a {@link BiConsumer} for each {@link Solution} with its corresponding {@link IMeasures}.
+	 * <p>
+	 * The {@link Solution} and the {@link IMeasures} provided to the Biconsumer are always the same reference, consider
+	 * either extracting values from them or copy them. See {@link IMeasures#copyMeasures()} and
+	 * {@link Solution#copySolution()}
+	 * </p>
 	 * <p>
 	 * The consumer and the criterions should not be linked ; instead use {@link ACounter} sub-classes.
 	 * </p>
@@ -369,11 +374,9 @@ public interface IResolutionHelper extends ISelf<Model> {
 		if (stop != null) {
 			_me().getSolver().addStopCriterion(stop);
 		}
+		Solution s = new Solution(_me());
 		while (_me().solve()) {
-			Solution s = new Solution(_me()).record();
-			IMeasures m = _me().getSolver().getMeasures();
-			// FIXME should clone the IMeasures instead of using it directly
-			cons.accept(s, m);
+			cons.accept(s.record(), _me().getSolver().getMeasures());
 		}
 		if (stop != null) {
 			_me().getSolver().removeStopCriterion(stop);
