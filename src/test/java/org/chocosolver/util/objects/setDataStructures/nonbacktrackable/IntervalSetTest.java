@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 /**
  * @author Alexandre LEBRUN
@@ -63,10 +64,16 @@ public class IntervalSetTest {
         }
     }
 
+    @Test(groups = "1s", timeOut=60000)
+    public void testAddFalse() {
+        ISet set = create();
+        assertFalse(set.add(6));
+    }
+
     @Test(groups = "1s", timeOut=60000, expectedExceptions = UnsupportedOperationException.class)
     public void testAdd() {
         ISet set = create();
-        set.add(6);
+        set.add(10);
     }
 
     @Test(groups = "1s", timeOut=60000, expectedExceptions = UnsupportedOperationException.class)
