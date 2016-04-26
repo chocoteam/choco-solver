@@ -87,7 +87,6 @@ public class Solution implements ICause {
 		this.varsToStore = varsToStore;
 		empty = true;
 		this.model = model;
-		assert varsToStore != null;
 	}
 
 	//***********************************************************************************
