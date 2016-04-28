@@ -45,8 +45,17 @@ public interface IIntDeltaMonitor extends IDeltaMonitor {
 
     void forEachRemVal(IntProcedure proc) throws ContradictionException;
 
+	/**
+     * @return a rough estimation of the number of removed values 
+     */
+    int sizeApproximation();
+
     enum Default implements IIntDeltaMonitor {
         NONE() {
+            @Override
+           	public int sizeApproximation(){
+           		return 0;
+           	}
             @Override
             public void freeze() {}
 

@@ -101,4 +101,9 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
     public String toString() {
         return String.format("(%d,%d) => (%d,%d) :: %d", first, last, frozenFirst, frozenLast, delta.size());
     }
+
+	@Override
+	public int sizeApproximation(){
+		return frozenLast-frozenFirst;
+	}
 }
