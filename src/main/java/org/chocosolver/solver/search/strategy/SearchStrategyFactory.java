@@ -261,7 +261,7 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy minDomLBSearch(IntVar... vars) {
-        return intVarSearch(minDomIntVar(), minIntVal(), vars);
+        return intVarSearch(minDomIntVar(vars[0].getModel()), minIntVal(), vars);
     }
 
     /**
@@ -270,7 +270,7 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy minDomUBSearch(IntVar... vars) {
-        return intVarSearch(minDomIntVar(), maxIntVal(), vars);
+        return intVarSearch(minDomIntVar(vars[0].getModel()), maxIntVal(), vars);
     }
 
     // ************************************************************************************
