@@ -1264,7 +1264,11 @@ public interface IIntConstraintFactory {
 	 * @param vars a vector of variables, of size > 0
 	 */
 	default Constraint max(IntVar max, IntVar[] vars) {
-		return new Constraint("Max", new PropMax(vars, max));
+        if(vars.length == 2){
+            return max(max, vars[0], vars[1]);
+        }else {
+            return new Constraint("Max", new PropMax(vars, max));
+        }
 	}
 
 	/**
@@ -1297,7 +1301,11 @@ public interface IIntConstraintFactory {
 	 * @param vars a vector of variables, of size > 0
 	 */
 	default Constraint min(IntVar min, IntVar[] vars) {
-		return new Constraint("Min", new PropMin(vars, min));
+		if(vars.length == 2) {
+            return min(min, vars[0], vars[1]);
+        }else{
+            return new Constraint("Min", new PropMin(vars, min));
+        }
 	}
 
 	/**

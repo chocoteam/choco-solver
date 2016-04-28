@@ -31,7 +31,7 @@ package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -53,7 +53,7 @@ public class FullyRandom extends IntStrategy {
     java.util.Random rnd;
 
     public FullyRandom(IntVar[] scope, long seed) {
-        super(scope, new Random<>(seed), new IntDomainRandomBound(seed));
+        super(scope, new Random<>(seed), new IntDomainRandom(seed));
         this.rnd = new java.util.Random(seed);
     }
 
