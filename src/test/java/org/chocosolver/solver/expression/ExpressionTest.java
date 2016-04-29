@@ -62,8 +62,8 @@ public class ExpressionTest {
                 ex.extension().post();
                 break;
         }
-        System.out.printf("%s\n", model);;
-        Assert.assertEquals(model.findAllSolutions().count(), nbsol);
+        System.out.printf("%s\n", model);
+        Assert.assertEquals(model.streamSolutions().count(), nbsol);
     }
 
 
