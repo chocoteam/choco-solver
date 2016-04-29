@@ -27,12 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 21/06/12
- * Time: 19:07
- */
 
 package org.chocosolver.solver.constraints.nary;
 
@@ -44,12 +38,16 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.sort.ArraySort;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 
 /**
- * !redundant propagator!
+ * Propagator for the Knapsack constraint
+ * based on Dantzig-Wolfe relaxation
+ *
+ * @author Jean-Guillaume Fages
  */
 public class PropKnapsack extends Propagator<IntVar> {
 
@@ -77,23 +75,11 @@ public class PropKnapsack extends Propagator<IntVar> {
         this.order = new int[n];
         this.ratio = new double[n];
         for (int i = 0; i < n; i++) {
-            ratio[i] = (double) (energy[i]) / (double) (weight[i]);
-        }// sort (could be improved)
-        BitSet in = new BitSet(n);
-        double best = -1;
-        int index = 0;
-        for (int i = 0; i < n; i++) {
-            int item = -1;
-            for (int o = in.nextClearBit(0); o < n; o = in.nextClearBit(o + 1)) {
-                if (item == -1 || ratio[o] > best) {
-                    best = ratio[o];
-                    item = o;
-                }
-            }
-            in.set(item);
-            assert item!=-1;
-            order[index++] = item;
+            ratio[i] = weight[i] == 0?Double.MAX_VALUE : ((double) (energy[i]) / (double) (weight[i]));
         }
+        this.order = ArrayUtils.zeroToN(n);
+        ArraySort sorter = new ArraySort(n,false,true);
+        sorter.sort(order, n, (i1, i2) -> {return Double.compare(ratio[i2],ratio[i1]);});
     }
 
     //***********************************************************************************
@@ -107,34 +93,32 @@ public class PropKnapsack extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        double camax = capacity.getUB();
-        double pomin = 0;
+        int remainingCapacity = capacity.getUB();
+		int maxPower = 0;
         for (int i = 0; i < n; i++) {
-            camax -= weigth[i] * vars[i].getLB();
-            pomin += energy[i] * vars[i].getLB();
+            remainingCapacity -= weigth[i] * vars[i].getLB();
+            maxPower += energy[i] * vars[i].getLB();
         }
-        power.updateLowerBound((int) pomin, this);
-        if (camax == 0) {
-            power.updateUpperBound((int) pomin, this);
-        } else if (camax < 0) {
-            contradiction(capacity, "");
+        power.updateLowerBound(maxPower, this);
+        if (remainingCapacity < 0) {
+            fails();
         } else {
             int idx;
             for (int i = 0; i < n; i++) {
-                assert camax >= 0;
+                assert remainingCapacity >= 0;
                 idx = order[i];
-                int delta = weigth[idx] * (vars[idx].getUB() - vars[idx].getLB());
-                if (delta > 0) {
-                    if (delta <= camax) {
-                        pomin += energy[idx] * (vars[idx].getUB() - vars[idx].getLB());
-                        camax -= delta;
-                        if (camax == 0) {
-                            power.updateUpperBound((int) pomin, this);
+                if (vars[idx].getUB() - vars[idx].getLB() > 0) {
+					int delta = weigth[idx] * (vars[idx].getUB() - vars[idx].getLB());
+                    if (delta <= remainingCapacity) {
+                        maxPower += energy[idx] * (vars[idx].getUB() - vars[idx].getLB());
+                        remainingCapacity -= delta;
+                        if (remainingCapacity == 0) {
+                            power.updateUpperBound(maxPower, this);
                             return;
                         }
                     } else {
-                        pomin += Math.ceil(camax * ratio[idx]);
-                        power.updateUpperBound((int) pomin, this);
+                        int deltaPow = (int) Math.ceil((double)remainingCapacity * ratio[idx]);
+                        power.updateUpperBound(maxPower + deltaPow, this);
                         return;
                     }
                 }
