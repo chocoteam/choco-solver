@@ -255,15 +255,14 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
-            // as the graph was build on initial domain, this is allowed (specific case)
-            for (int i = 0; i < idms.length; i++) {
-                idms[i].freeze();
-                idms[i].forEachRemVal(rem_proc.set(i));
-                idms[i].unfreeze();
-            }
             initialize();
         }
         filter();
+		if (PropagatorEventType.isFullPropagation(evtmask)) {
+			for (int i = 0; i < idms.length; i++) {
+				idms[i].unfreeze();
+			}
+		}
     }
 
     @Override

@@ -103,6 +103,16 @@ public class MultiCostRegularTest {
         return model;
     }
 
+    @Test(groups="10s", timeOut=60000)
+    public void test0() {
+		// used to fail when freeze/foreach/unfreeze was done during initial propagation (before graph initialization)
+        for (int i = 0; i < 2000; i++) {
+            Model model = make(7, i);
+			IntVar[] vars = model.retrieveIntVars(false);
+			model.arithm(vars[0],"=",0).post();
+            while (model.solve()) ;
+        }
+    }
 
     @Test(groups="10s", timeOut=60000)
     public void test1() {
