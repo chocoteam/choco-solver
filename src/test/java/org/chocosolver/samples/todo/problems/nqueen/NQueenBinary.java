@@ -34,6 +34,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.HashSet;
+import java.util.stream.IntStream;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 
@@ -50,27 +51,25 @@ public class NQueenBinary extends AbstractNQueen {
     @Override
     public void buildModel() {
         model = new Model("NQueen");
-        set = new HashSet<>();
-        vars = new IntVar[n];
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = model.intVar("Q_" + i, 1, n, false);
-        }
-
-
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                Constraint neq = model.arithm(vars[i], "!=", vars[j]);
-                neq.post();
-                set.add(neq);
-                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
-                model.arithm(vars[i], "!=", vars[j], "+", k).post();
-            }
-        }
+        vars = model.intVarArray("Q", n, 1, n);
+        IntStream.range(0, n-1).forEach(i ->
+                IntStream.range(i+1, n).forEach(j ->{
+                    IntVar k = model.intVar(j - i);
+                    vars[i].ne(vars[j]).post();
+                    vars[i].ne(vars[j].sub(k)).post();
+                    vars[i].ne(vars[j].add(k)).post();
+                })
+        );
+        model.solve();
     }
+
+
 
     @Override
     public void configureSearch() {
+        System.out.printf("%s\n", model);
+        model.getSolver().showDecisions();
+        model.getSolver().showSolutions();
         model.getSolver().set(minDomLBSearch(vars));
 //        SearchMonitorFactory.log(solver, true, false);
     }
