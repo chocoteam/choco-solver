@@ -117,8 +117,8 @@ public class VarSelectorFactory {
      * Only for integer variables
      * @return a variable selector choosing the variable with the smallest domain
      */
-    public static VariableSelector<IntVar> minDomIntVar(){
-        return new FirstFail();
+    public static VariableSelector<IntVar> minDomIntVar(Model model){
+        return new FirstFail(model);
     }
 
     /**

@@ -33,10 +33,13 @@ package org.chocosolver.solver.search.measure;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 
+import java.lang.reflect.Field;
+
 /**
  * Object which stores resolution information to get statistics
  *
  * @author Charles Prud'Homme
+ * @since 3.0.0
  */
 public final class MeasuresRecorder implements IMeasures, Cloneable {
 
@@ -119,7 +122,7 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
     //***********************************************************************************
 
     /**
-     * Create a measures recorder observing a <code>solver</code>
+     * Create a measures recorder observing a {@code solver}
      * @param model the solver to observe
      */
     public MeasuresRecorder(Model model) {
@@ -149,7 +152,7 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
     @Override
     public float getTimeCount() {
         updateTime();
-        return timeCount / IN_SEC;
+        return timeCount / MeasuresRecorder.IN_SEC;
     }
 
     @Override
@@ -160,7 +163,7 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
 
     @Override
     public float getReadingTimeCount() {
-        return readingTimeCount / IN_SEC;
+        return readingTimeCount / MeasuresRecorder.IN_SEC;
     }
 
     /**
@@ -168,7 +171,7 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
      * @param time time needed to read the model
      */
     public void setReadingTimeCount(long time) {
-        this.readingTimeCount = time;
+        readingTimeCount = time;
     }
 
     @Override
@@ -300,14 +303,14 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
     /**
      * Increments current depth
      */
-    public void incDepth(){
+    public void incDepth() {
         depth++;
     }
 
     /**
      * Decrements current depth
      */
-    public void decDepth(){
+    public void decDepth() {
         depth--;
     }
 
@@ -316,6 +319,28 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
      */
     public void startStopwatch() {
         startingTime = System.nanoTime();
+    }
+
+    @Override
+    public IMeasures copyMeasures() {
+        MeasuresRecorder ret = new MeasuresRecorder(model);
+        for (Field f : this.getClass().getDeclaredFields()) {
+            // XXX
+            if (!f.isAccessible()) {
+                f.setAccessible(true);
+            }
+            if (f.getType().isPrimitive()) {
+                try {
+                    f.set(ret, f.get(this));
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    // XXX
+                    e.printStackTrace();
+                }
+            } else {
+                // TODO what if the type is not primitive ?
+            }
+        }
+        return ret;
     }
 
     //****************************************************************************************************************//
@@ -330,7 +355,7 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         } else if (model.getSolver().hasEndedUnexpectedly()) {
             st.append("- Incomplete search - Unexpected interruption.\n");
         } else {
-            if(model.getSolver().isSearchCompleted()) {
+            if (model.getSolver().isSearchCompleted()) {
                 st.append("- Complete search - ");
             }
             if (solutionCount == 0) {

@@ -32,6 +32,7 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
+import org.chocosolver.solver.expression.arithmetic.ArExpression;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -50,7 +51,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends ICause, Variable, Iterable<Integer>{
+public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpression {
 
     /**
      * Provide a minimum value for integer variable lower bound.
@@ -480,4 +481,14 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>{
         return value;
     }
 
+
+    @Override
+    default IntVar intVar(){
+        return this;
+    }
+
+    @Override
+    default boolean isExpressionLeaf() {
+        return true;
+    }
 }

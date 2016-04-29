@@ -344,4 +344,14 @@ public final class MathUtils {
         return (int)r;
     }
 
+    /**
+     * @param x long to cast
+     * @return the closest int value when safe casting a long into an int
+     */
+    public static int safeCast(long x){
+        if(x > Integer.MAX_VALUE)return Integer.MAX_VALUE;
+        if(x < Integer.MIN_VALUE)return Integer.MIN_VALUE;
+        return (int) x;
+    }
+
 }

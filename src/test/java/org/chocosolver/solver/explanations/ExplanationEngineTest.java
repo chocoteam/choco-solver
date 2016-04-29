@@ -602,7 +602,7 @@ public class ExplanationEngineTest {
         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
         Solver r = model.getSolver();
-        r.set(intVarSearch(minDomIntVar(), midIntVal(true), vars));
+        r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), vars));
 
         configure(model, a);
         model.getSolver().showShortStatistics();

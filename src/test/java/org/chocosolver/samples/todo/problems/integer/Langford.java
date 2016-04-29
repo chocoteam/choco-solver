@@ -76,14 +76,10 @@ public class Langford extends AbstractProblem {
         position = model.intVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
-                model.arithm(
-                        model.intOffsetView(position[i + j * n], i + 2),
-                        "=",
-                        position[i + (j + 1) * n]
-                ).post();
+                position[i + j * n].sub(i+2).eq(position[i + (j + 1) * n]).post();
             }
         }
-        model.arithm(position[0], "<", position[n * k - 1]).post();
+        position[0].lt(position[n * k - 1]).post();
         model.allDifferent(position, "AC").post();
     }
 

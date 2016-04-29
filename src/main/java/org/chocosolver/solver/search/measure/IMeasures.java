@@ -162,7 +162,14 @@ public interface IMeasures {
     }
 
     /**
-     * returns the solver object associated with this measures
+     * @return the solver object associated with this measures
      */
     Solver getSolver();
+
+    /**
+     * copy the values
+     *
+     * @return a new IMeasures with same values.
+     */
+    IMeasures copyMeasures();
 }
