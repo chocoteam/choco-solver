@@ -100,13 +100,9 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a {@link Solution} if and only if a solution has been found, <tt>null</tt> otherwise.
      */
     default Solution findSolution(Criterion... stop) {
-        if (stop != null) {
-            _me().getSolver().addStopCriterion(stop);
-        }
+        _me().getSolver().addStopCriterion(stop);
         boolean found = _me().solve();
-        if (stop != null) {
-            _me().getSolver().removeStopCriterion(stop);
-        }
+        _me().getSolver().removeStopCriterion(stop);
         if (found) {
             return new Solution(_me()).record();
         } else {
@@ -148,16 +144,12 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a list that contained the found solutions.
      */
     default List<Solution> findAllSolutions(Criterion... stop) {
-        if (stop != null) {
-            _me().getSolver().addStopCriterion(stop);
-        }
+        _me().getSolver().addStopCriterion(stop);
         List<Solution> solutions = new ArrayList<>();
         while (_me().solve()) {
             solutions.add(new Solution(_me()).record());
         }
-        if (stop != null) {
-            _me().getSolver().removeStopCriterion(stop);
-        }
+        _me().getSolver().removeStopCriterion(stop);
         return solutions;
     }
 
@@ -188,13 +180,11 @@ public interface IResolutionHelper extends ISelf<Model> {
      * }
      * </pre>
      *
-     * @param stop optional criterions to stop the search before finding all/best solution
+     * @param stop optional criterion to stop the search before finding all/best solution
      * @return a list that contained the found solutions.
      */
     default Stream<Solution> streamSolutions(Criterion... stop) {
-        if (stop != null) {
-            _me().getSolver().addStopCriterion(stop);
-        }
+        _me().getSolver().addStopCriterion(stop);
         Spliterator<Solution> it = new Spliterator<Solution>() {
 
             @Override
@@ -203,9 +193,7 @@ public interface IResolutionHelper extends ISelf<Model> {
                     action.accept(new Solution(_me()).record());
                     return true;
                 }
-                if (stop != null) {
-                    _me().getSolver().removeStopCriterion(stop);
-                }
+                _me().getSolver().removeStopCriterion(stop);
                 return false;
             }
 
@@ -240,8 +228,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      * </ul>
      * <li>If this method returns a {@link Solution}:</li>
      * <ul>
-     * <li>either the resolution stops eagerly du to a stop criterion and the solution is the best found so far but there
-     * is no guarantee that it is the optimal one,</li>
+     * <li>either the resolution stops eagerly du to a stop criterion and the solution is the <b>best</b> found so far but not
+     * necessarily the optimal one,</li>
      * <li>or it is the optimal one.</li>
      * </ul>
      * </ul>
@@ -272,22 +260,19 @@ public interface IResolutionHelper extends ISelf<Model> {
      */
     default Solution findOptimalSolution(IntVar objective, boolean maximize, Criterion... stop) {
         _me().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
-        if (stop != null) {
-            _me().getSolver().addStopCriterion(stop);
-        }
+        _me().getSolver().addStopCriterion(stop);
         Solution s = new Solution(_me());
         while (_me().solve()) {
             s.record();
         }
-        if (stop != null) {
-            _me().getSolver().removeStopCriterion(stop);
-        }
+        _me().getSolver().removeStopCriterion(stop);
         return _me().getSolver().isFeasible() == ESat.TRUE ? s : null;
     }
 
     /**
      * Attempt to find the solution that optimizes the mono-objective problem defined by
      * a unique objective variable and an optimization criteria, then finds and stores all optimal solution.
+     * Searching for all optimal solutions is only triggered if the first search is complete.
      * This method works as follow:
      * <ol>
      * <li>It finds and prove the optimum</li>
@@ -310,12 +295,13 @@ public interface IResolutionHelper extends ISelf<Model> {
      * <li>or all optimal solutions have been found.</li>
      * </ul>
      * </ul>
-     * <p>
-     * This method run the following instructions:
+     *
+     * This method runs the following instructions:
      * <pre>
      *     {@code
-     *     _me().findOptimalSolution(objective, maximize);
-     *     if (model.getSolver().getMeasures().getSolutionCount() > 0) {
+     *     _me().findOptimalSolution(objective, maximize, stop);
+     *     if (!_me().getSolver().isStopCriterionMet()  &&
+     *          model.getSolver().getMeasures().getSolutionCount() > 0) {
      *         int opt = _model.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
      *         model.getSolver().reset();
      *         model.clearObjective();
@@ -334,14 +320,18 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a list that contained the solutions found.
      */
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
+        _me().getSolver().addStopCriterion(stop);
         _me().findOptimalSolution(objective, maximize);
-        if (_me().getSolver().getMeasures().getSolutionCount() > 0) {
+        if (!_me().getSolver().isStopCriterionMet()
+                && _me().getSolver().getSolutionCount() > 0) {
+            _me().getSolver().removeStopCriterion(stop);
             int opt = _me().getSolver().getObjectiveManager().getBestSolutionValue().intValue();
             _me().getSolver().reset();
             _me().clearObjective();
             _me().arithm(objective, "=", opt).post();
-            return findAllSolutions();
+            return findAllSolutions(stop);
         } else {
+            _me().getSolver().removeStopCriterion(stop);
             return Collections.emptyList();
         }
     }
@@ -387,17 +377,22 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @param objective the variable to optimize
      * @param maximize  set to <tt>true</tt> to solve a maximization problem, set to <tt>false</tt> to solve a minimization
      *                  problem.
+     * @param stop      optional criterion to stop the search before finding all/best solution
      * @return a list that contained the solutions found.
      */
-    default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize) {
+    default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
+        _me().getSolver().addStopCriterion(stop);
         _me().findOptimalSolution(objective, maximize);
-        if (_me().getSolver().getMeasures().getSolutionCount() > 0) {
+        if (!_me().getSolver().isStopCriterionMet()
+                && _me().getSolver().getSolutionCount() > 0) {
+            _me().getSolver().removeStopCriterion(stop);
             int opt = _me().getSolver().getObjectiveManager().getBestSolutionValue().intValue();
             _me().getSolver().reset();
             _me().clearObjective();
             _me().arithm(objective, "=", opt).post();
-            return streamSolutions();
+            return streamSolutions(stop);
         } else {
+            _me().getSolver().removeStopCriterion(stop);
             return Stream.empty();
         }
     }
@@ -421,7 +416,7 @@ public interface IResolutionHelper extends ISelf<Model> {
      * <p>
      * <pre>
      * {@code
-     * 	ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE,
+     * ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE,
      * 			objectives);
      * 	while (_me().solve()) {
      * 		pareto.onSolution();
@@ -437,16 +432,12 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a list that contained the solutions found.
      */
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
-        if (stop != null) {
-            _me().getSolver().addStopCriterion(stop);
-        }
+        _me().getSolver().addStopCriterion(stop);
         ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objectives);
         while (_me().solve()) {
             pareto.onSolution();
         }
-        if (stop != null) {
-            _me().getSolver().removeStopCriterion(stop);
-        }
+        _me().getSolver().removeStopCriterion(stop);
         return pareto.getParetoFront();
     }
 
@@ -465,16 +456,12 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @param stop optional criterions to stop the search before finding all/best solution
      */
     default void eachSolutionWithMeasure(BiConsumer<Solution, IMeasures> cons, Criterion... stop) {
-        if (stop != null) {
-            _me().getSolver().addStopCriterion(stop);
-        }
+        _me().getSolver().addStopCriterion(stop);
         Solution s = new Solution(_me());
         while (_me().solve()) {
             cons.accept(s.record(), _me().getSolver().getMeasures());
         }
-        if (stop != null) {
-            _me().getSolver().removeStopCriterion(stop);
-        }
+        _me().getSolver().removeStopCriterion(stop);
     }
 
 

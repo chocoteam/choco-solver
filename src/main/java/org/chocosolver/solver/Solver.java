@@ -821,7 +821,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @see #removeAllStopCriteria()
      */
     public void addStopCriterion(Criterion... criterion) {
-        Collections.addAll(criteria, criterion);
+        if(criterion!=null) {
+            Collections.addAll(criteria, criterion);
+        }
     }
 
     /**
@@ -829,8 +831,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @param criterion criterion to remove
      */
     public void removeStopCriterion(Criterion... criterion) {
-        for (Criterion c : criterion) {
-            criteria.remove(c);
+        if(criterion!=null) {
+            for (Criterion c : criterion) {
+                criteria.remove(c);
+            }
         }
     }
 
