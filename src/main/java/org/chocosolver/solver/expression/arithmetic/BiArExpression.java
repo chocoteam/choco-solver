@@ -30,7 +30,9 @@
 package org.chocosolver.solver.expression.arithmetic;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.MathUtils;
 import org.chocosolver.util.tools.StringUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
@@ -121,8 +123,13 @@ public class BiArExpression implements ArExpression {
                     me = model.intVar(StringUtils.randomName("mod_exp_"), bounds[0], bounds[1]);
                     model.mod(v1, v2, me).post();
                     break;
-//                case POW: // todo
-//                    break;
+                case POW: // todo as intension constraint
+                    bounds = VariableUtils.boundsForPow(v1, v2);
+                    me = model.intVar(StringUtils.randomName("pow_exp_"), bounds[0], bounds[1]);
+                    model.table(new IntVar[]{v1, v2, me},
+                            TuplesFactory.generateTuples(vs -> vs[2] == MathUtils.pow(vs[0], vs[1]),
+                            true, v1, v2, me)).post();
+                    break;
                 case MIN:
                     bounds = VariableUtils.boundsForMinimum(v1, v2);
                     me = model.intVar(StringUtils.randomName("min_exp_"), bounds[0], bounds[1]);

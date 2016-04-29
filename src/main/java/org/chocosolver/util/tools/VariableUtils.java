@@ -131,6 +131,20 @@ public class VariableUtils {
     }
 
     /**
+     * @param x a variable
+     * @param y a variable
+     * @return computes the bounds for "x ^ y"
+     */
+    public static int[] boundsForPow(IntVar x, IntVar y) {
+        return bound(
+                MathUtils.pow(x.getLB(), y.getLB()),
+                MathUtils.pow(x.getLB(), y.getUB()),
+                MathUtils.pow(x.getUB(), y.getLB()),
+                MathUtils.pow(x.getUB(), y.getUB())
+        );
+    }
+
+    /**
      * @param vars array of variables
      * @return computes the bounds for the minimum among <i>vars</i>
      */

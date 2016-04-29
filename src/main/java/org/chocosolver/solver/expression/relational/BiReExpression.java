@@ -36,7 +36,6 @@ import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.arithmetic.ArExpression;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -111,7 +110,7 @@ public class BiReExpression implements ReExpression {
         IntVar[] uvars = avars.stream().sorted().toArray(IntVar[]::new);
         Map<IntVar, Integer> map = IntStream.range(0, uvars.length).boxed().collect(Collectors.toMap(i -> uvars[i], i -> i));
         Tuples tuples = TuplesFactory.generateTuples(values -> eval(values, map), true, uvars);
-        System.out.printf("%d -> %d\n", VariableUtils.domainCardinality(uvars), tuples.nbTuples());
+//        System.out.printf("%d -> %d\n", VariableUtils.domainCardinality(uvars), tuples.nbTuples());
         return e1.getModel().table(uvars, tuples);
     }
 
