@@ -89,7 +89,7 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
         Solver r = model.getSolver();
 		r.limitTime(limit);
 		r.set(intVarSearch(
-				minDomIntVar(),
+				minDomIntVar(r.getModel()),
                 var -> {
                     int ub = var.getUB();
                     int size = succ.length + 1;
