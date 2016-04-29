@@ -1646,12 +1646,14 @@ public interface IIntConstraintFactory {
 	 * @param tuples    the relation between the variables (list of allowed/forbidden tuples)
 	 */
 	default Constraint table(IntVar[] vars, Tuples tuples) {
-		return table(vars,tuples,tuples.isFeasible()?"GACSTR+":"GAC3rm");
+		return table(vars,tuples,tuples.isFeasible()?"CT+":"GAC3rm");
 	}
 
 	/**
 	 * Creates a table constraint, with the specified algorithm defined algo
 	 * <p>
+	 * - <b>CT+</b>: Compact-Table algorithm (AC),
+	 * <br/>
 	 * - <b>GAC2001</b>: Arc Consistency version 2001 for tuples,
 	 * <br/>
 	 * - <b>GAC2001+</b>: Arc Consistency version 2001 for allowed tuples,
@@ -1670,7 +1672,7 @@ public interface IIntConstraintFactory {
 	 *
 	 * @param vars      variables forming the tuples
 	 * @param tuples    the relation between the variables (list of allowed/forbidden tuples)
-	 * @param algo to choose among {"GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
+	 * @param algo to choose among {"TC+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
 	 */
 	default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
 		if (vars.length == 2) {
@@ -1681,6 +1683,8 @@ public interface IIntConstraintFactory {
 		}
 		Propagator p;
 		switch (algo) {
+			case "CT+": p = new PropCompactTable(vars, tuples);
+				break;
 			case "MDD+": p = new PropLargeMDDC(new MultivaluedDecisionDiagram(vars, tuples), vars);
 				break;
 			case "FC": p = new PropLargeFC(vars, tuples);

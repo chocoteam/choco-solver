@@ -59,7 +59,7 @@ import static org.testng.Assert.assertEquals;
 
 public class TableTest {
 
-    private static String[] ALGOS = {"FC", "MDD+", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+"};
+    private static String[] ALGOS = {"CT+", "FC", "MDD+", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+"};
     private static String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
 
     @Test(groups="1s", timeOut=60000)

@@ -90,5 +90,10 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
         }
     }
 
+    @Override
+   	public int sizeApproximation(){
+   		return deltamonitor.sizeApproximation();
+   	}
+
     protected abstract int transform(int value);
 }
