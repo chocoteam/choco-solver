@@ -30,6 +30,8 @@
 package org.chocosolver.solver.search.measure;
 
 
+import java.lang.reflect.Field;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 
@@ -40,326 +42,348 @@ import org.chocosolver.solver.Solver;
  */
 public final class MeasuresRecorder implements IMeasures, Cloneable {
 
-    //***********************************************************************************
-    // VARIABLE
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLE
+	//***********************************************************************************
 
-    /**
-     * To transform time from nanoseconds to seconds
-     */
-    private static final float IN_SEC = 1000 * 1000 * 1000f;
+	/**
+	 * To transform time from nanoseconds to seconds
+	 */
+	private static final float IN_SEC = 1000 * 1000 * 1000f;
 
-    /**
-     * Indicates if an objective is declared (<tt>false</tt> means satisfaction problem).
-     */
-    private boolean hasObjective;
+	/**
+	 * Indicates if an objective is declared (<tt>false</tt> means satisfaction problem).
+	 */
+	private boolean hasObjective;
 
-    /**
-     * Indicates if the optimal value has been proven for the objective (set to <tt>true</tt>).
-     */
-    private boolean objectiveOptimal;
+	/**
+	 * Indicates if the optimal value has been proven for the objective (set to <tt>true</tt>).
+	 */
+	private boolean objectiveOptimal;
 
-    /**
-     * Counts the number of solutions found so far.
-     */
-    private long solutionCount;
+	/**
+	 * Counts the number of solutions found so far.
+	 */
+	private long solutionCount;
 
-    /**
-     * Counts the time spent so far, starting from solver construction call.
-     */
-    private long timeCount;
+	/**
+	 * Counts the time spent so far, starting from solver construction call.
+	 */
+	private long timeCount;
 
-    /**
-     * Counts the time spent into reading the model
-     */
-    private long readingTimeCount;
+	/**
+	 * Counts the time spent into reading the model
+	 */
+	private long readingTimeCount;
 
-    /**
-     * Counts the number of nodes opened so far.
-     */
-    private long nodeCount;
+	/**
+	 * Counts the number of nodes opened so far.
+	 */
+	private long nodeCount;
 
-    /**
-     * Counts the number of backtracks done so far.
-     */
-    private long backtrackCount;
+	/**
+	 * Counts the number of backtracks done so far.
+	 */
+	private long backtrackCount;
 
-    /**
-     * Counts the number of failures encountered so far.
-     */
-    private long failCount;
+	/**
+	 * Counts the number of failures encountered so far.
+	 */
+	private long failCount;
 
-    /**
-     * Counts the number of restarts done so far.
-     */
-    private long restartCount;
+	/**
+	 * Counts the number of restarts done so far.
+	 */
+	private long restartCount;
 
-    /**
-     * Stores the overall maximum depth
-     */
-    private long maxDepth;
+	/**
+	 * Stores the overall maximum depth
+	 */
+	private long maxDepth;
 
-    /**
-     * Stores the current depth
-     */
-    private long depth;
+	/**
+	 * Stores the current depth
+	 */
+	private long depth;
 
-    /**
-     * When the clock watch starts
-     */
-    private long startingTime;
+	/**
+	 * When the clock watch starts
+	 */
+	private long startingTime;
 
-    /**
-     * The solver to measure
-     */
-    private Model model;
+	/**
+	 * The solver to measure
+	 */
+	private Model model;
 
-    //***********************************************************************************
-    // CONSTRUCTOR
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
 
-    /**
-     * Create a measures recorder observing a <code>solver</code>
-     * @param model the solver to observe
-     */
-    public MeasuresRecorder(Model model) {
-        super();
-        this.model = model;
-    }
+	/**
+	 * Create a measures recorder observing a <code>solver</code>
+	 * @param model the solver to observe
+	 */
+	public MeasuresRecorder(Model model) {
+		super();
+		this.model = model;
+	}
 
-    //****************************************************************************************************************//
-    //**************************************** GETTERS ***************************************************************//
-    //****************************************************************************************************************//
+	//****************************************************************************************************************//
+	//**************************************** GETTERS ***************************************************************//
+	//****************************************************************************************************************//
 
-    @Override
-    public long getBackTrackCount() {
-        return backtrackCount;
-    }
+	@Override
+	public long getBackTrackCount() {
+		return backtrackCount;
+	}
 
-    @Override
-    public long getFailCount() {
-        return failCount;
-    }
+	@Override
+	public long getFailCount() {
+		return failCount;
+	}
 
-    @Override
-    public long getNodeCount() {
-        return nodeCount;
-    }
+	@Override
+	public long getNodeCount() {
+		return nodeCount;
+	}
 
-    @Override
-    public float getTimeCount() {
-        updateTime();
-        return timeCount / IN_SEC;
-    }
+	@Override
+	public float getTimeCount() {
+		updateTime();
+		return timeCount / MeasuresRecorder.IN_SEC;
+	}
 
-    @Override
-    public long getTimeCountInNanoSeconds() {
-        updateTime();
-        return timeCount;
-    }
+	@Override
+	public long getTimeCountInNanoSeconds() {
+		updateTime();
+		return timeCount;
+	}
 
-    @Override
-    public float getReadingTimeCount() {
-        return readingTimeCount / IN_SEC;
-    }
+	@Override
+	public float getReadingTimeCount() {
+		return readingTimeCount / MeasuresRecorder.IN_SEC;
+	}
 
-    /**
-     * set the reading time count
-     * @param time time needed to read the model
-     */
-    public void setReadingTimeCount(long time) {
-        this.readingTimeCount = time;
-    }
+	/**
+	 * set the reading time count
+	 * @param time time needed to read the model
+	 */
+	public void setReadingTimeCount(long time) {
+		readingTimeCount = time;
+	}
 
-    @Override
-    public long getRestartCount() {
-        return restartCount;
-    }
+	@Override
+	public long getRestartCount() {
+		return restartCount;
+	}
 
-    @Override
-    public long getMaxDepth() {
-        return maxDepth;
-    }
+	@Override
+	public long getMaxDepth() {
+		return maxDepth;
+	}
 
-    @Override
-    public long getCurrentDepth() {
-        return depth;
-    }
+	@Override
+	public long getCurrentDepth() {
+		return depth;
+	}
 
-    @Override
-    public boolean isObjectiveOptimal() {
-        return objectiveOptimal;
-    }
+	@Override
+	public boolean isObjectiveOptimal() {
+		return objectiveOptimal;
+	}
 
-    @Override
-    public boolean hasObjective() {
-        return hasObjective;
-    }
+	@Override
+	public boolean hasObjective() {
+		return hasObjective;
+	}
 
-    @Override
-    public Number getBestSolutionValue() {
-        return model.getSolver().getObjectiveManager().getBestSolutionValue();
-    }
+	@Override
+	public Number getBestSolutionValue() {
+		return model.getSolver().getObjectiveManager().getBestSolutionValue();
+	}
 
-    @Override
-    public long getTimestamp() {
-        return nodeCount + backtrackCount;
-    }
+	@Override
+	public long getTimestamp() {
+		return nodeCount + backtrackCount;
+	}
 
-    @Override
-    public Solver getSolver() {
-        return model.getSolver();
-    }
+	@Override
+	public Solver getSolver() {
+		return model.getSolver();
+	}
 
-    //****************************************************************************************************************//
-    //**************************************** SETTERS ***************************************************************//
-    //****************************************************************************************************************//
+	//****************************************************************************************************************//
+	//**************************************** SETTERS ***************************************************************//
+	//****************************************************************************************************************//
 
-    @Override
-    public long getSolutionCount() {
-        return solutionCount;
-    }
+	@Override
+	public long getSolutionCount() {
+		return solutionCount;
+	}
 
-    /**
-     * indicates an objective variable
-     * @param ho set to <tt>true<tt/> to indicate that an objective is declared
-     */
-    public void declareObjective(boolean ho) {
-        hasObjective = ho;
-    }
+	/**
+	 * indicates an objective variable
+	 * @param ho set to <tt>true<tt/> to indicate that an objective is declared
+	 */
+	public void declareObjective(boolean ho) {
+		hasObjective = ho;
+	}
 
-    /**
-     * indicates whether or not the optimum has been found and proved
-     * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
-     */
-    public void setObjectiveOptimal(boolean objectiveOptimal) {
-        this.objectiveOptimal = objectiveOptimal;
-    }
+	/**
+	 * indicates whether or not the optimum has been found and proved
+	 * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
+	 */
+	public void setObjectiveOptimal(boolean objectiveOptimal) {
+		this.objectiveOptimal = objectiveOptimal;
+	}
 
-    /**
-     * Reset every measure to its default value (mostly 0)
-     */
-    public final void reset() {
-        timeCount = 0;
-        nodeCount = 0;
-        backtrackCount = 0;
-        restartCount = 0;
-        failCount = 0;
-        solutionCount = 0;
-        depth = 0;
-        maxDepth = 0;
-    }
+	/**
+	 * Reset every measure to its default value (mostly 0)
+	 */
+	public final void reset() {
+		timeCount = 0;
+		nodeCount = 0;
+		backtrackCount = 0;
+		restartCount = 0;
+		failCount = 0;
+		solutionCount = 0;
+		depth = 0;
+		maxDepth = 0;
+	}
 
-    //****************************************************************************************************************//
-    //**************************************** INCREMENTERS **********************************************************//
-    //****************************************************************************************************************//
+	//****************************************************************************************************************//
+	//**************************************** INCREMENTERS **********************************************************//
+	//****************************************************************************************************************//
 
-    private void updateTime() {
-        timeCount = System.nanoTime() - startingTime;
-    }
+	private void updateTime() {
+		timeCount = System.nanoTime() - startingTime;
+	}
 
-    /**
-     * increment node counter
-     */
-    public void incNodeCount() {
-        nodeCount++;
-        if (depth > maxDepth) {
-            maxDepth = depth;
-        }
-    }
+	/**
+	 * increment node counter
+	 */
+	public void incNodeCount() {
+		nodeCount++;
+		if (depth > maxDepth) {
+			maxDepth = depth;
+		}
+	}
 
-    /**
-     * increment backtrack counter
-     */
-    public void incBackTrackCount() {
-        backtrackCount++;
-    }
+	/**
+	 * increment backtrack counter
+	 */
+	public void incBackTrackCount() {
+		backtrackCount++;
+	}
 
-    /**
-     * increment fail counter
-     */
-    public void incFailCount() {
-        failCount++;
-    }
+	/**
+	 * increment fail counter
+	 */
+	public void incFailCount() {
+		failCount++;
+	}
 
-    /**
-     * increment restart counter
-     */
-    public void incRestartCount() {
-        restartCount++;
-    }
+	/**
+	 * increment restart counter
+	 */
+	public void incRestartCount() {
+		restartCount++;
+	}
 
-    /**
-     * increment solution counter
-     */
-    public void incSolutionCount() {
-        solutionCount++;
-        updateTime();
-    }
+	/**
+	 * increment solution counter
+	 */
+	public void incSolutionCount() {
+		solutionCount++;
+		updateTime();
+	}
 
-    /**
-     * Increments current depth
-     */
-    public void incDepth(){
-        depth++;
-    }
+	/**
+	 * Increments current depth
+	 */
+	public void incDepth(){
+		depth++;
+	}
 
-    /**
-     * Decrements current depth
-     */
-    public void decDepth(){
-        depth--;
-    }
+	/**
+	 * Decrements current depth
+	 */
+	public void decDepth(){
+		depth--;
+	}
 
-    /**
-     * Start the stopwatch, to compute resolution time
-     */
-    public void startStopwatch() {
-        startingTime = System.nanoTime();
-    }
+	/**
+	 * Start the stopwatch, to compute resolution time
+	 */
+	public void startStopwatch() {
+		startingTime = System.nanoTime();
+	}
 
-    //****************************************************************************************************************//
+	@Override
+	public IMeasures copyMeasures() {
+		MeasuresRecorder ret = new MeasuresRecorder(model);
+		for (Field f : this.getClass().getDeclaredFields()) {
+			// XXX
+			if (!f.isAccessible()) {
+				f.setAccessible(true);
+			}
+			if (f.getType().isPrimitive()) {
+				try {
+					f.set(ret, f.get(this));
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					// XXX
+					e.printStackTrace();
+				}
+			} else {
+				// TODO what if the type is not primitive ?
+			}
+		}
+		return ret;
+	}
 
-    @Override
-    public String toString() {
-        updateTime();
-        StringBuilder st = new StringBuilder(256);
+	//****************************************************************************************************************//
+
+	@Override
+	public String toString() {
+		updateTime();
+		StringBuilder st = new StringBuilder(256);
 //        st.append("- Search statistics\n");
-        if (model.getSolver().isStopCriterionMet()) {
-            st.append("- Incomplete search - Limit reached.\n");
-        } else if (model.getSolver().hasEndedUnexpectedly()) {
-            st.append("- Incomplete search - Unexpected interruption.\n");
-        } else {
-            if(model.getSolver().isSearchCompleted()) {
-                st.append("- Complete search - ");
-            }
-            if (solutionCount == 0) {
-                st.append("No solution.");
-            } else if (solutionCount == 1) {
-                st.append("1 solution found.");
-            } else {
-                st.append(String.format("%,d solution(s) found.", solutionCount));
-            }
-            st.append('\n');
-        }
-        st.append("\tModel[").append(model.getName()).append("]\n");
-        st.append(String.format("\tSolutions: %,d\n", solutionCount));
-        if (hasObjective()) {
-            st.append("\t").append(model.getSolver().getObjectiveManager()).append(",\n");
-        }
-        st.append(String.format("\tBuilding time : %,.3fs" +
-                        "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                        "Restarts: %,d\n\tVariables: %,d\n\tConstraints: %,d",
-                getReadingTimeCount(),
-                getTimeCount(),
-                getNodeCount(),
-                getNodeCount() / getTimeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount(),
-                model.getNbVars(),
-                model.getNbCstrs()
-        ));
-        return st.toString();
-    }
+		if (model.getSolver().isStopCriterionMet()) {
+			st.append("- Incomplete search - Limit reached.\n");
+		} else if (model.getSolver().hasEndedUnexpectedly()) {
+			st.append("- Incomplete search - Unexpected interruption.\n");
+		} else {
+			if(model.getSolver().isSearchCompleted()) {
+				st.append("- Complete search - ");
+			}
+			if (solutionCount == 0) {
+				st.append("No solution.");
+			} else if (solutionCount == 1) {
+				st.append("1 solution found.");
+			} else {
+				st.append(String.format("%,d solution(s) found.", solutionCount));
+			}
+			st.append('\n');
+		}
+		st.append("\tModel[").append(model.getName()).append("]\n");
+		st.append(String.format("\tSolutions: %,d\n", solutionCount));
+		if (hasObjective()) {
+			st.append("\t").append(model.getSolver().getObjectiveManager()).append(",\n");
+		}
+		st.append(String.format("\tBuilding time : %,.3fs" +
+				"\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+				"Restarts: %,d\n\tVariables: %,d\n\tConstraints: %,d",
+				getReadingTimeCount(),
+				getTimeCount(),
+				getNodeCount(),
+				getNodeCount() / getTimeCount(),
+				getBackTrackCount(),
+				getFailCount(),
+				getRestartCount(),
+				model.getNbVars(),
+				model.getNbCstrs()
+				));
+		return st.toString();
+	}
 }
