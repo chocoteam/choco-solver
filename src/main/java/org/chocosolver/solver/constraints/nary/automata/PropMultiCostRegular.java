@@ -258,10 +258,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             initialize();
         }
         filter();
-		if (PropagatorEventType.isFullPropagation(evtmask)) {
-			for (int i = 0; i < idms.length; i++) {
-				idms[i].unfreeze();
-			}
+		// added by JG: the propagator should be idempotent so it should not iterate over its own removals
+		for (int i = 0; i < idms.length; i++) {
+			idms[i].unfreeze();
 		}
     }
 
