@@ -31,7 +31,6 @@ package org.chocosolver.samples.todo.problems.nqueen;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.variables.IntVar;
 
 import java.util.HashSet;
 import java.util.stream.IntStream;
@@ -54,10 +53,9 @@ public class NQueenBinary extends AbstractNQueen {
         vars = model.intVarArray("Q", n, 1, n);
         IntStream.range(0, n-1).forEach(i ->
                 IntStream.range(i+1, n).forEach(j ->{
-                    IntVar k = model.intVar(j - i);
                     vars[i].ne(vars[j]).post();
-                    vars[i].ne(vars[j].sub(k)).post();
-                    vars[i].ne(vars[j].add(k)).post();
+                    vars[i].ne(vars[j].sub(j - i)).post();
+                    vars[i].ne(vars[j].add(j - i)).post();
                 })
         );
         model.solve();
