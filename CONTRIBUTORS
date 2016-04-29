@@ -2,15 +2,16 @@
  (and who have contributed) code to choco-solver project
  repository.
  The AUTHORS file lists the copyright holders; this file
- lists people in alphabetical order. 
+ lists people in alphabetical order of last name. 
  Contributors must sign the CLA to grant
  the AUTHORS copyright within the terms of the BSD-4 license.
 -->
-Jean-Guillaume Fages <jg.fages@gmail.com>,
+Jean-Guillaume  Fages <jg.fages@gmail.com>,
 Fabien Hermenier <fabien.hermenier@unice.fr>,
 Narendra Jussien <njussien@gmail.com>,
 Guillaume Lelouet <guillaume.lelouet@gmail.com>,
 Xavier Lorca <xavier.lorca@gmail.com>,
 Charles Prud'homme <cprudhom@gmail.com>,
 Mohamed Wahbi <mohamed.wahbi@insight-centre.org>,
+Dmitrij Zherebyatev <zherebjatjew@gmail.com>,
 
