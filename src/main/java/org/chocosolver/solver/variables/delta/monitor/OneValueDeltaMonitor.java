@@ -84,4 +84,9 @@ public class OneValueDeltaMonitor extends TimeStampedObject implements IIntDelta
 		if (used && propagator != delta.getCause(0))
 			proc.execute(delta.get(0));
     }
+
+    @Override
+   	public int sizeApproximation(){
+   		return used && propagator != delta.getCause(0)?1:0;
+   	}
 }
