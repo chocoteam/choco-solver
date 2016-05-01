@@ -40,7 +40,7 @@ Model model = new Model("my first problem");
 IntVar x = model.intVar("X", 0, 5);
 IntVar y = model.intVar("Y", 0, 5);
 // 3. Create and post constraints by using constraint factories
-x.add(y).lt(5).decompose().post();
+x.add(y).lt(5).post();
 // 4. Define the search strategy
 model.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(x, y));
 // 5. Launch the resolution process
