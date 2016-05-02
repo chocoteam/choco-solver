@@ -6,6 +6,34 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco 
 NEXT MILESTONE
 -------------------
 
+### Solver:
+
+- `ParallelResolution` replaces `SMF.prepareForParallelResolution(List<Solver>)` (depreacted); it offers more services 
+like getting a solver which a solution -- or the best one (#362)
+- reduce memory footprint : `Solution.record(Solver)` (#370) and `Random` search strategy
+- add impl of `IntIterableSet`: `IntIterableRangeSet`, (and a factory `IntIterableSetFactory` to be completed in the future)
+- method `retrieveIntVars` in `Solver` must specify whether or not to include BoolVar in the result
+
+### Variables
+- add new methods in IntVar to get next/previous value out of a domain
+
+### Constraint
+
+- Use MDD as a table constraint (#366)
+- Can use ints in the right hand side of sum and scalar constraints instead of an IntVar
+- Deprecate constraint signatures to force specifying an operator for sum and scalar (#371)
+- add constructive disjunction (see `SatFactory`) (#367)
+- add ternary sum (X + Y = Z) achieving AC
+
+### Propagation:
+
+- Move pending event counter from `Propagator` to `SevenQueuePropagationEngine` (required for #367)
+
+#### Bug fixes: 
+
+\#361, #364, #365, #368, #369, #370, #379, #380
+
+Fix array out of bound exception in `PropLargeMDDC`.
 
 3.3.3 - 22 Dec 2015
 -------------------

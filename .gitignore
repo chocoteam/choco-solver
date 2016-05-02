@@ -76,7 +76,7 @@ crashlytics-build.properties
 *.pydevproject
 .metadata
 .gradle
-bin/
+# bin/
 tmp/
 *.tmp
 *.bak
@@ -85,6 +85,8 @@ tmp/
 local.properties
 .settings/
 .loadpath
+.project
+.classpath
 
 # External tool builders
 .externalToolBuilders/

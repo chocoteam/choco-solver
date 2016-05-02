@@ -1,6 +1,13 @@
 ![logo](http://choco-solver.org/sites/default/files/ChocoLogo-160x135.png)
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco3?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/chocoteam/choco3.svg?branch=master)](https://travis-ci.org/chocoteam/choco3) [![codecov.io](https://codecov.io/github/chocoteam/choco3/coverage.svg?branch=master)](https://codecov.io/github/chocoteam/choco3?branch=master)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
+[![Documentation Status](https://readthedocs.org/projects/choco-solver/badge/?version=latest)](http://choco-solver.readthedocs.org/en/latest/?badge=latest)
+
+[![Build Status](https://travis-ci.org/chocoteam/choco-solver.svg?branch=develop)](https://travis-ci.org/chocoteam/choco-solver) 
+[![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=develop)](https://codecov.io/github/chocoteam/choco-solver?branch=develop)
+[![Coverity](https://scan.coverity.com/projects/8383/badge.svg)](https://scan.coverity.com/projects/choco-solver) 
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/b0ab28bdd7fd4da095ad72c2c46bce57)](https://www.codacy.com/app/cprudhom/choco-solver)
 
 * [Documentation, Support and Issues](#doc)
 * [Contributing](#con)
@@ -33,11 +40,11 @@ Solver solver = new Solver("my first problem");
 IntVar x = VariableFactory.bounded("X", 0, 5, solver);
 IntVar y = VariableFactory.bounded("Y", 0, 5, solver);
 // 3. Create and post constraints by using constraint factories
-solver.post(IntConstraintFactory.arithm(x, "+", y, "<", 5));
+solver.post(solver.arithm(x, "+", y, "<", 5));
 // 4. Define the search strategy
-solver.set(IntStrategyFactory.lexico_LB(new IntVar[]{x, y}));
+solver.set(ISF.lexico_LB(new IntVar[]{x, y}));
 // 5. Launch the resolution process
-solver.findSolution();
+solver.solve();
 //6. Print search statistics
 Chatterbox.printStatistics(solver);
 ```
@@ -82,6 +89,13 @@ Following are code snippets to add on your website to help us promoting Choco3.
 [![Choco3](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
 ```
 
+And thank you for giving back to choco-solver.
+Please meet our team of cho-coders : 
+
+- [@jgFages](https://github.com/jgFages) (Jean-Guillaume Fages)
+- [@cprudhom](https://github.com/cprudhom) (Charles Prud'homme)
+
+
 
 <a name="dow"></a>
 ## Download and installation ##
@@ -115,6 +129,18 @@ So you only have to edit your `pom.xml` to declare the following library depende
    <artifactId>choco-solver</artifactId>
    <version>3.3.3</version>
 </dependency>
+```
+
+Note that if you want to test snapshot release, you should update your `pom.xml` with :
+
+```xml
+<repository>
+    <id>sonatype</id>
+    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    <snapshots>
+        <enabled>true</enabled>
+    </snapshots>
+</repository>
 ```
 
 ### As a stand-alone application ###
