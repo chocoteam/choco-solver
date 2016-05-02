@@ -131,22 +131,20 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
+        if(index.getUB()<offset || index.getLB()>=offset+values.length){
+            return ESat.FALSE;
+        }
         if (isCompletelyInstantiated()) {
             return ESat.eval(result.contains(values[index.getValue() - offset]));
-        } else if (result.isInstantiated() && index.hasEnumeratedDomain()) { // if RESULT
-            int res = result.getLB();
-            int ub = index.getUB();
-            int i = index.getLB();
-            int val = values[i - offset];
-            while (i <= ub && val == res) {
-                val = values[i - offset];
-                i = index.nextValue(i);
+        } else {
+            for(int i:index){
+                if(i>=offset && i<values.length + offset && result.contains(values[i-offset])){
+                    return ESat.UNDEFINED;
+                }
             }
-            return ESat.eval(i == Integer.MAX_VALUE);
+            return ESat.FALSE;
         }
-        return ESat.UNDEFINED;
     }
-
 
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
