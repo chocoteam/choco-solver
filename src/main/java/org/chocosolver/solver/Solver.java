@@ -279,8 +279,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         boolean solution = false;
         kill = true;
         boolean left = true;
-        while (!stop) {
-            if (isStopCriterionMet()) {
+        while(!stop){
+            if (isStopCriterionMet() || Thread.currentThread().isInterrupted()) {
                 stop = true;
             }
             switch (action) {
