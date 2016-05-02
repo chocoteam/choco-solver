@@ -64,7 +64,7 @@ public class IntSearch {
             case input_order:
                 return new InputOrder<>(solver);
             case first_fail:
-                return new FirstFail();
+                return new FirstFail(solver);
             case anti_first_fail:
                 return new AntiFirstFail();
             case smallest:
