@@ -286,6 +286,20 @@ public interface IResolutionHelper extends ISelf<Model> {
 		return _me().getSolver().isFeasible() == ESat.TRUE ? s : null;
 	}
 
+	/**
+	 * find an optimal solution with sequential objectives. The solution find the optimal value for the first objectif,
+	 * then the optimal value for second objective with that value, and so forth.
+	 *
+	 * @param objectives
+	 *          the list of objectives to find the optimal. A solution o1..on is optimal if lexicographically better than
+	 *          any other correct solution s1..sn
+	 * @param maximize
+	 *          to maximize the objective, false to minimize.
+	 * @param stop
+	 *          stop criterions are added before search and removed after search.
+	 * @return A solution with the optimal objectives value, null if no solution exists or search was stopped before a
+	 *         solution could be found. If null, check if a criterion was met to find out was caused the null.
+	 */
 	default Solution findOptimalSolution(IntVar[] objectives, boolean maximize, Criterion... stop) {
 		if (objectives == null || objectives.length == 0) {
 			return findSolution(stop);
