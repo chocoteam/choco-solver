@@ -34,19 +34,19 @@ Contact: choco@mines-nantes.fr
 ### Overview
 
 ```java
-// 1. Create a Solver
-Solver solver = new Solver("my first problem");
-// 2. Create variables through the variable factory
-IntVar x = VariableFactory.bounded("X", 0, 5, solver);
-IntVar y = VariableFactory.bounded("Y", 0, 5, solver);
+// 1. Create a Model
+Model model = new Model("my first problem");
+// 2. Create variables
+IntVar x = model.intVar("X", 0, 5);
+IntVar y = model.intVar("Y", 0, 5);
 // 3. Create and post constraints by using constraint factories
-solver.post(solver.arithm(x, "+", y, "<", 5));
+x.add(y).lt(5).post();
 // 4. Define the search strategy
-solver.set(ISF.lexico_LB(new IntVar[]{x, y}));
+model.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(x, y));
 // 5. Launch the resolution process
-solver.solve();
-//6. Print search statistics
-Chatterbox.printStatistics(solver);
+model.getSolver().solve();
+// 6. Print search statistics
+model.getSolver().printStatistics();
 ```
 
 <a name="doc"></a>
