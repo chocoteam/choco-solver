@@ -324,6 +324,9 @@ public interface IResolutionHelper extends ISelf<Model> {
 			tempLexCstrt = maximize ? _me().lexLess(bestFound, objectives) : _me().lexLess(objectives, bestFound);
 			tempLexCstrt.post();
 		}
+		if (tempLexCstrt != null) {
+			_me().unpost(tempLexCstrt);
+		}
 		_me().getSolver().removeStopCriterion(stop);
 		return sol;
 	}
