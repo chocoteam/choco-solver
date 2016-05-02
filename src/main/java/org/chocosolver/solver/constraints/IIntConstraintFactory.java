@@ -245,6 +245,13 @@ public interface IIntConstraintFactory {
 		if (operator != Operator.EQ && operator != Operator.GT && operator != Operator.LT && operator != Operator.NQ) {
 			throw new SolverException("Unexpected operator for distance");
 		}
+		if (cste < 0) {
+			switch (operator) {
+				case EQ:
+				case LT:
+				default: throw new SolverException("Invalid PropDistanceXYC operator "+operator);
+			}
+		}
 		return new Constraint("DistanceXYC " + operator.name(), new PropDistanceXYC(ArrayUtils.toArray(var1, var2), operator, cste));
 	}
 

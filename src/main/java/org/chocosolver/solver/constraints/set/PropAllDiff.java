@@ -101,7 +101,7 @@ public class PropAllDiff extends Propagator<SetVar> {
                             }
                         if (nbSameInKer == s) {
                             if (sei == s) { // check diff
-                                contradiction(vars[i], "");
+                                fails(); // TODO: could be more precise, for explanation purpose
                             } else if (sei == s + 1 && ski < sei) { // force other (if same elements in ker)
                                 for (int j: vars[i].getUB())
                                     vars[i].force(j, this);

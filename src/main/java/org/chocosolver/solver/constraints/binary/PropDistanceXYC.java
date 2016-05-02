@@ -88,10 +88,6 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         //cste < 0, and |vars[0]-vars[1]| always >= 0
         if (cste < 0) {
             switch (operator) {
-                case EQ:
-                case LT:
-                    this.contradiction(null, "< or = to 0");
-                    break;
                 case NQ:
                 case GT:
                     this.setPassive();

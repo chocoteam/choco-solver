@@ -215,8 +215,8 @@ public class PropFastGCC extends Propagator<IntVar> {
                 int val = vars[var].getValue();
                 if (map.containsKey(val)) {
                     int index = map.get(val);
-                    if (!(possibles[index].contain(var) || mandatories[index].contain(var))) {
-                        contradiction(vars[var], "");
+                    if ((!possibles[index].contain(var) && !mandatories[index].contain(var))) {
+                        fails(); // TODO: could be more precise, for explanation purpose
                     }
                 }
             }

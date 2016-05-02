@@ -85,7 +85,7 @@ public class PropMinBC extends Propagator<IntVar> {
                 if (best < val2) {
                     vars[1].instantiateTo(best, this);
                 } else if (best > val2) {
-                    contradiction(vars[2], "wrong min selected");
+                    fails(); // TODO: could be more precise, for explanation purpose
                 } else { // X = Z
                     vars[1].updateLowerBound(best, this);
                 }
@@ -110,7 +110,7 @@ public class PropMinBC extends Propagator<IntVar> {
                 if (best < val1) {
                     vars[2].instantiateTo(best, this);
                 } else if (best > val1) {
-                    contradiction(vars[1], "");
+                    fails(); // TODO: could be more precise, for explanation purpose
                 } else { // X = Y
                     vars[2].updateLowerBound(best, this);
                 }
@@ -132,7 +132,7 @@ public class PropMinBC extends Propagator<IntVar> {
             {
                 int best = vars[0].getValue();
                 if (!vars[1].contains(best) && !vars[2].contains(best)) {
-                    contradiction(vars[0], null);
+                    fails(); // TODO: could be more precise, for explanation purpose
                 }
                 if (vars[1].getLB() > best) {
                     if(vars[2].instantiateTo(best, this)) {

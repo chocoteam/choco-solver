@@ -165,13 +165,13 @@ public class PropTimesZ extends Propagator<IntVar> {
     private void instantiated(IntVar X, IntVar Y) throws ContradictionException {
         if (X.isInstantiated() && Y.isInstantiated()) {
             if (X.getValue() * Y.getValue() != Z.getValue()) {
-                contradiction(Z, "");                             // checker
+                fails(); // TODO: could be more precise, for explanation purpose
             }
         } else if (X.isInstantiated()) {
             if (X.getValue() != 0) {
                 double a = (double) Z.getValue() / (double) X.getValue();
                 if (Math.abs(a - Math.round(a)) > 0.001) {
-                    contradiction(Z, "");                        // not integer
+                    fails(); // TODO: could be more precise, for explanation purpose
                 }
                 Y.instantiateTo((int) Math.round(a), this);        // fix v1
                 setPassive();

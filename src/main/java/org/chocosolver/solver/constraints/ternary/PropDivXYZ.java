@@ -126,7 +126,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     hasChanged |= updateAbsX();
                     hasChanged |= updateAbsZ();
                     if (vz != 0 && vx == 0) {
-                        this.contradiction(X, "");
+                        fails(); // TODO: could be more precise, for explanation purpose
                     }
                     hasChanged |= updateAbsY();
                     break;
@@ -147,7 +147,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     vz = Z.getValue();
                     int val = vx / vy;
                     if ((vz != val)) {
-                        contradiction(Z, "");
+                        fails(); // TODO: could be more precise, for explanation purpose
                     } else {
                         return;
                     }
@@ -249,7 +249,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
             return true;
         } else {
             if (v.getLB() > ub || v.getUB() < lb) {
-                contradiction(v, ""); // v is excluded from [lb;ub]
+                fails(); // TODO: could be more precise, for explanation purpose
             } else {
                 v.updateBounds(lb, ub, this);
                 setPassive();
@@ -278,7 +278,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                 return true;
             } else {
                 if (v.getLB() >= lb && v.getUB() <= ub) {
-                    contradiction(v, ""); // v is included in [lb;ub]
+                    fails(); // TODO: could be more precise, for explanation purpose
                 } else {
                     if (v.getLB() >= lb) {
                         v.updateLowerBound(ub + 1, this);
