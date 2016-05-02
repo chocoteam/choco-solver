@@ -176,6 +176,16 @@ public class ElementTest {
 		assertEquals(ESat.FALSE, c.isSatisfied());
 	}
 
+	@Test(groups="1s", timeOut=60000)
+	public void testProp8() {
+		Model s = new Model();
+		int[] values = new int[]{1, 2, 1, 1};
+		IntVar index = s.intVar(new int[]{0,2,3});
+		IntVar var = s.intVar(new int[]{1});
+		Constraint c = s.element(var, values, index);
+		assertEquals(ESat.TRUE, c.isSatisfied());
+	}
+
 	@Test(groups="1s", timeOut=60000, dataProvider = "params")
 	public void test2(boolean exp) {
 		Model s = new Model();
