@@ -66,7 +66,7 @@ public class IntSearch {
             case first_fail:
                 return new FirstFail(solver);
             case anti_first_fail:
-                return new AntiFirstFail();
+                return new AntiFirstFail(solver);
             case smallest:
                 return new Smallest();
             case largest:

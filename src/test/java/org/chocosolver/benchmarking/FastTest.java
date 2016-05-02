@@ -106,7 +106,7 @@ public class FastTest {
         }else{
             double i = nbsol * .05;
             Assert.assertTrue(fzn.getModel().getSolver().getSolutionCount() >  (nbsol*1.0 - i), "Unexpected number of solutions");
-            Assert.assertTrue(fzn.getModel().getSolver().getSolutionCount() <  (nbsol*1.0 - i), "Unexpected number of solutions");
+            Assert.assertTrue(fzn.getModel().getSolver().getSolutionCount() <  (nbsol*1.0 + i), "Unexpected number of solutions");
         }
     }
 
