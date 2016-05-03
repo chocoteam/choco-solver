@@ -33,6 +33,8 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.measure.IMeasures;
@@ -56,6 +58,7 @@ import java.util.stream.StreamSupport;
  *
  * @author Jean-Guillaum Fages
  * @author Charles Prud'homme
+ * @author Guillaume Lelouet
  * @since 25/04/2016.
  */
 public interface IResolutionHelper extends ISelf<Model> {
@@ -439,6 +442,69 @@ public interface IResolutionHelper extends ISelf<Model> {
         }
         _me().getSolver().removeStopCriterion(stop);
         return pareto.getParetoFront();
+    }
+
+    /**
+     * Attempts optimize the value of the <i>objectives</i> variable w.r.t. to an optimization criteria.
+     * Finds and stores the optimal solution, if any.
+     * Moreover, the objective variables are ordered wrt to their significance.
+     * The first objective variable is more significant or equally significant to the second one,
+     * which in turn is more significant or equally significant to the third one, etc.
+     * On an optimal solution of a maximization problem, the first variable is maximized, then the second one is maximized, etc.
+     *
+     * Note that if a stop criteria stops the search eagerly, no optimal solution may have been found.
+     * In that case, the best solution, if at least one has been found, is returned.
+     *
+     * @param objectives
+     *          the list of objectives to find the optimal. A solution o1..on is optimal if lexicographically better than
+     *          any other correct solution s1..sn
+     * @param maximize
+     *          to maximize the objective, false to minimize.
+     *  @param strict
+     *          are objectives strictly lexicographically ordered (<i>true</i>), or equalities are allowed
+     * @param stop
+     *          stop criterion are added before search and removed after search.
+     * @return A solution with the optimal objectives value, null if no solution exists or search was stopped before a
+     *         solution could be found. If null, check if a criterion was met to find out was caused the null.
+     */
+    default Solution findLexOptimalSolution(IntVar[] objectives, boolean maximize, boolean strict, Criterion... stop) {
+        if (objectives == null || objectives.length == 0) {
+            return findSolution(stop);
+        }
+        _me().getSolver().addStopCriterion(stop);
+        Solution sol = null;
+        Constraint clint = null;
+        PropLexInt plint = null;
+        // 1. copy objective variables and transform it if necessary
+        IntVar[] mobj = new IntVar[objectives.length];
+        for (int i = 0; i < objectives.length; i++) {
+            mobj[i] = maximize ? _me().intMinusView(objectives[i]) : objectives[i];
+        }
+        // 2. try to find a first solution
+        while (_me().solve()) {
+            if (sol == null) {
+                sol = new Solution(_me());
+            }
+            sol.record();
+            // 3. extract values of each objective
+            int[] bestFound = new int[objectives.length];
+            for (int vIdx = 0; vIdx < objectives.length; vIdx++) {
+                bestFound[vIdx] = sol.getIntVal(objectives[vIdx]) * (maximize ? -1 : 1);
+            }
+            // 4. either update the constraint, or declare it if first solution
+            if (plint != null) {
+                plint.updateIntVector(bestFound);
+            } else {
+                plint = new PropLexInt(mobj, bestFound, strict);
+                clint = new Constraint("lex objectives", plint);
+                clint.post();
+            }
+        }
+        if (clint != null) {
+            _me().unpost(clint);
+        }
+        _me().getSolver().removeStopCriterion(stop);
+        return sol;
     }
 
     /**
