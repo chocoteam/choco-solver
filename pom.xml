@@ -235,6 +235,7 @@
                             <goal>antlr4</goal>
                         </goals>
                         <configuration>
+                            <listener>false</listener>
                             <outputDirectory>src/main/java</outputDirectory>
                         </configuration>
                     </execution>

@@ -28,22 +28,23 @@ package org.chocosolver.parser.flatzinc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNDeserializer;
-import org.antlr.v4.runtime.atn.ParserATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
-import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.chocosolver.parser.flatzinc.ast.*;
 import org.chocosolver.parser.flatzinc.ast.declaration.*;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
+import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Flatzinc4Parser extends Parser {
@@ -147,14 +148,6 @@ public class Flatzinc4Parser extends Parser {
 			this.freeSearch = freeSearch;
 		}
 		@Override public int getRuleIndex() { return RULE_flatzinc_model; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterFlatzinc_model(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitFlatzinc_model(this);
-		}
 	}
 
 	public final Flatzinc_modelContext flatzinc_model(Model aModel,Datas datas,boolean allSolutions,boolean freeSearch) throws RecognitionException {
@@ -259,14 +252,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_par_type; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterPar_type(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitPar_type(this);
-		}
 	}
 
 	public final Par_typeContext par_type() throws RecognitionException {
@@ -347,14 +332,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_par_type_u; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterPar_type_u(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitPar_type_u(this);
-		}
 	}
 
 	public final Par_type_uContext par_type_u() throws RecognitionException {
@@ -442,14 +419,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_var_type; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterVar_type(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitVar_type(this);
-		}
 	}
 
 	public final Var_typeContext var_type() throws RecognitionException {
@@ -543,14 +512,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_var_type_u; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterVar_type_u(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitVar_type_u(this);
-		}
 	}
 
 	public final Var_type_uContext var_type_u() throws RecognitionException {
@@ -706,14 +667,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_index_set; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterIndex_set(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitIndex_set(this);
-		}
 	}
 
 	public final Index_setContext index_set() throws RecognitionException {
@@ -796,14 +749,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitExpr(this);
-		}
 	}
 
 	public final ExprContext expr() throws RecognitionException {
@@ -987,14 +932,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_id_expr; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterId_expr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitId_expr(this);
-		}
 	}
 
 	public final Id_exprContext id_expr() throws RecognitionException {
@@ -1089,14 +1026,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_param_decl; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterParam_decl(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitParam_decl(this);
-		}
 	}
 
 	public final Param_declContext param_decl() throws RecognitionException {
@@ -1151,14 +1080,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_var_decl; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterVar_decl(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitVar_decl(this);
-		}
 	}
 
 	public final Var_declContext var_decl() throws RecognitionException {
@@ -1224,14 +1145,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_constraint; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterConstraint(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitConstraint(this);
-		}
 	}
 
 	public final ConstraintContext constraint() throws RecognitionException {
@@ -1300,14 +1213,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_solve_goal; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterSolve_goal(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitSolve_goal(this);
-		}
 	}
 
 	public final Solve_goalContext solve_goal() throws RecognitionException {
@@ -1350,14 +1255,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_resolution; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterResolution(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitResolution(this);
-		}
 	}
 
 	public final ResolutionContext resolution() throws RecognitionException {
@@ -1430,14 +1327,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_annotations; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterAnnotations(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitAnnotations(this);
-		}
 	}
 
 	public final AnnotationsContext annotations() throws RecognitionException {
@@ -1499,14 +1388,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_annotation; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterAnnotation(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitAnnotation(this);
-		}
 	}
 
 	public final AnnotationContext annotation() throws RecognitionException {
@@ -1570,14 +1451,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_bool_const; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterBool_const(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitBool_const(this);
-		}
 	}
 
 	public final Bool_constContext bool_const() throws RecognitionException {
@@ -1636,14 +1509,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_pred_decl; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterPred_decl(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitPred_decl(this);
-		}
 	}
 
 	public final Pred_declContext pred_decl() throws RecognitionException {
@@ -1699,14 +1564,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_pred_param; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterPred_param(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitPred_param(this);
-		}
 	}
 
 	public final Pred_paramContext pred_param() throws RecognitionException {
@@ -1742,14 +1599,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_pred_param_type; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterPred_param_type(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitPred_param_type(this);
-		}
 	}
 
 	public final Pred_param_typeContext pred_param_type() throws RecognitionException {
@@ -1817,14 +1666,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_par_pred_param_type; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterPar_pred_param_type(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitPar_pred_param_type(this);
-		}
 	}
 
 	public final Par_pred_param_typeContext par_pred_param_type() throws RecognitionException {
@@ -2093,14 +1934,6 @@ public class Flatzinc4Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_var_pred_param_type; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).enterVar_pred_param_type(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof Flatzinc4ParserListener ) ((Flatzinc4ParserListener)listener).exitVar_pred_param_type(this);
-		}
 	}
 
 	public final Var_pred_param_typeContext var_pred_param_type() throws RecognitionException {
