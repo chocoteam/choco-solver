@@ -204,7 +204,9 @@ public class PropSat extends Propagator<BoolVar> {
         if (initialized) {
             throw new SolverException("Clauses store already initialized");
         }
-        addVariable(add_var.toArray(new BoolVar[add_var.size()]));
+        if(add_var.size()>0) {
+            addVariable(add_var.toArray(new BoolVar[add_var.size()]));
+        }
         add_var.clear();
         this.initialized = true;
     }

@@ -324,7 +324,9 @@ public class PropNogoods extends Propagator<IntVar> {
         if (initialized) {
             throw new SolverException("Nogoods store already initialized");
         }
-        addVariable(add_var.toArray(new IntVar[add_var.size()]));
+        if(add_var.size()>0) {
+            addVariable(add_var.toArray(new IntVar[add_var.size()]));
+        }
         add_var.clear();
         this.initialized = true;
     }
