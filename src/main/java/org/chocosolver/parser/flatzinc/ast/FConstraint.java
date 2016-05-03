@@ -29,14 +29,13 @@ package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.parser.flatzinc.FznSettings;
-import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
+import org.chocosolver.parser.flatzinc.ast.propagators.*;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
@@ -49,13 +48,11 @@ import org.chocosolver.solver.constraints.nary.geost.geometricPrim.GeostObject;
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.ShiftedBox;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.*;
-import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.StringUtils;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,12 +79,6 @@ public enum FConstraint {
                 switch (as.length) {
                     case 0:
                         break;
-//                    case 1:
-//                        solver.post(model.arithm(as[0], "=", r));
-//                        break;
-//                    case 2:
-//                        model.arithm(as[0], "+", as[1], ">", 1).reifyWith(r);
-//                        break;
                     default:
                         if (r.isInstantiatedTo(0)) {
                             model.addClausesBoolAndArrayEqualFalse(as);
@@ -120,12 +111,6 @@ public enum FConstraint {
             switch (as.length) {
                 case 0:
                     break;
-                                    /*case 1:
-                                        solver.post(model.arithm(as[0], "=", r));
-                                        break;
-                                    case 2:
-                                        model.arithm(as[0], "+", as[1], ">", 0).reifyWith(r);
-                                        break;*/
                 default:
                     if (r.isInstantiatedTo(1)) {
                         model.addClausesBoolOrArrayEqualTrue(as);
@@ -241,19 +226,7 @@ public enum FConstraint {
             BoolVar a = exps.get(0).boolVarValue(model);
             BoolVar b = exps.get(1).boolVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
-            // Adding clause seems more efficient than other alternatives
-            if (((FznSettings) model.getSettings()).enableClause()) {
-                model.addClausesBoolIsEqVar(a, b, r);
-            } else if (model.getSettings().enableTableSubstitution()) {
-                Tuples t = new Tuples(true);
-                t.add(1, 1, 1);
-                t.add(0, 0, 1);
-                t.add(1, 0, 0);
-                t.add(0, 1, 0);
-                model.table(new BoolVar[]{a, b, r}, t, "default").post();
-            } else {
-                model.arithm(a, "=", b).reifyWith(r);
-            }
+            model.addClausesBoolIsEqVar(a, b, r);
 
         }
     },
@@ -274,39 +247,12 @@ public enum FConstraint {
     bool_le_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new IBuilder() {
-                @Override
-                public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-                    BoolVar a = exps.get(0).boolVarValue(model);
-                    BoolVar b = exps.get(1).boolVarValue(model);
-                    BoolVar r = exps.get(2).boolVarValue(model);
-                    if (((FznSettings) model.getSettings()).enableClause()) {
-                        model.addClausesBoolIsLeVar(a, b, r);
-                    } else {
-                        if (((FznSettings) model.getSettings()).adhocReification()) {
-                            new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
-                                @Override
-                                public void propagate(int evtmask) throws ContradictionException {
-                                    if (vars[0].contains(0) || vars[1].contains(1)) {
-                                        vars[2].setToTrue(this);
-                                    }
-                                    if (vars[2].getUB() == 0) {
-                                        vars[0].setToTrue(this);
-                                        vars[1].setToFalse(this);
-                                    }
-                                }
 
-                                @Override
-                                public ESat isEntailed() {
-                                    throw new UnsupportedOperationException("isEntailed not implemented ");
-                                }
-                            }).post();
-                        } else {
-                            model.arithm(a, "<=", b).reifyWith(r);
-                        }
-                    }
-                }
-            }.build(model, id, exps, annotations, datas);
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            model.addClausesBoolIsLeVar(a, b, r);
+
         }
     },
     bool_lin_eq {
@@ -330,39 +276,8 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             IntVar c = exps.get(2).intVarValue(model);
             if (bs.length > 0) {
-                if (c.isInstantiated()) {
-                    if (bs.length == 1) {
-                        if (as[0] == -1) {
-                            model.arithm(bs[0], ">=", -c.getValue()).post();
-                            return;
-                        }
-                        if (as[0] == 1) {
-                            model.arithm(bs[0], "<=", c.getValue()).post();
-                            return;
-                        }
-                    }
-                    if (bs.length == 2) {
-                        if (as[0] == -1 && as[1] == 1) {
-                            model.arithm(bs[1], "<=", bs[0], "+", c.getValue()).post();
-                            return;
-                        }
-                        if (as[0] == 1 && as[1] == -1) {
-                            model.arithm(bs[0], "<=", bs[1], "+", c.getValue()).post();
-                            return;
-                        }
-                    }
-                }
-                if (((FznSettings) model.getSettings()).enableDecompositionOfLinearCombination()) {
-                    int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
-                    IntVar scal = model.intVar(StringUtils.randomName(), tmp[0], tmp[1], true);
-                    model.scalar(bs, as, "=", scal).post();
-                    model.arithm(scal, "<=", c).post();
-                } else {
-                    model.scalar(bs, as, "<=", c).post();
-                }
+                model.scalar(bs, as, "<=", c).post();
             }
-
-
         }
     },
     bool_lt {
@@ -371,50 +286,17 @@ public enum FConstraint {
 
             BoolVar a = exps.get(0).boolVarValue(model);
             BoolVar b = exps.get(1).boolVarValue(model);
-            if (((FznSettings) model.getSettings()).enableClause()) {
-                model.addClausesBoolLt(a, b);
-            } else {
-                model.arithm(a, "<", b).post();
-            }
+            model.addClausesBoolLt(a, b);
 
         }
     },
     bool_lt_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new IBuilder() {
-                @Override
-                public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-                    BoolVar a = exps.get(0).boolVarValue(model);
-                    BoolVar b = exps.get(1).boolVarValue(model);
-                    BoolVar r = exps.get(2).boolVarValue(model);
-                    if (((FznSettings) model.getSettings()).enableClause()) {
-                        model.addClausesBoolIsLtVar(a, b, r);
-                    } else {
-                        if (((FznSettings) model.getSettings()).adhocReification()) {
-                            new Constraint("reifBool(a<b,r)", new Propagator<BoolVar>(new BoolVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
-                                @Override
-                                public void propagate(int evtmask) throws ContradictionException {
-                                    if (!(vars[0].contains(0)) && (vars[1].contains(1))) {
-                                        vars[2].setToFalse(this);
-                                    }
-                                    if (vars[2].getLB() == 1) {
-                                        vars[0].setToFalse(this);
-                                        vars[1].setToTrue(this);
-                                    }
-                                }
-
-                                @Override
-                                public ESat isEntailed() {
-                                    throw new UnsupportedOperationException("isEntailed not implemented ");
-                                }
-                            }).post();
-                        } else {
-                            model.arithm(a, "<", b).reifyWith(r);
-                        }
-                    }
-                }
-            }.build(model, id, exps, annotations, datas);
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            model.addClausesBoolIsLtVar(a, b, r);
         }
     },
     bool_not {
@@ -423,11 +305,7 @@ public enum FConstraint {
 
             BoolVar a = exps.get(0).boolVarValue(model);
             BoolVar b = exps.get(1).boolVarValue(model);
-            if (((FznSettings) model.getSettings()).enableClause()) {
-                model.addClausesBoolNot(a, b);
-            } else {
-                model.arithm(a, "!=", b).post();
-            }
+            model.addClausesBoolNot(a, b);
 
         }
     },
@@ -480,8 +358,7 @@ public enum FConstraint {
 
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
-            if (((FznSettings) model.getSettings()).enableClause()
-                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+            if (((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolEq((BoolVar) a, (BoolVar) b);
             } else {
                 model.arithm(a, "=", b).post();
@@ -492,170 +369,33 @@ public enum FConstraint {
     int_eq_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new IBuilder() {
-                @Override
-                public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-                    IntVar a = exps.get(0).intVarValue(model);
-                    IntVar b = exps.get(1).intVarValue(model);
-                    final BoolVar r = exps.get(2).boolVarValue(model);
-                    // this constraint is not poster, hence not returned, because it is reified
-                    if (((FznSettings) model.getSettings()).enableClause()
-                            && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
-                        model.addClausesBoolIsEqVar((BoolVar) a, (BoolVar) b, r);
-                    } else {
-                        if (((FznSettings) model.getSettings()).adhocReification()) {
-                            if (a.isInstantiated() || b.isInstantiated()) {
-                                IntVar x;
-                                int c;
-                                if (a.isInstantiated()) {
-                                    x = b;
-                                    c = a.getValue();
-                                } else {
-                                    x = a;
-                                    c = b.getValue();
-                                }
-                                final IntVar var = x;
-                                final int cste = c;
-                                new Constraint("reif(a=cste,r)", new Propagator<IntVar>(new IntVar[]{x, r}, PropagatorPriority.BINARY, false) {
-                                    @Override
-                                    public void propagate(int evtmask) throws ContradictionException {
-                                        if (r.getLB() == 1) {
-                                            var.instantiateTo(cste, this);
-                                            setPassive();
-                                        } else {
-                                            if (r.getUB() == 0) {
-                                                if (var.removeValue(cste, this) || !var.contains(cste)) {
-                                                    setPassive();
-                                                }
-                                            } else {
-                                                if (var.isInstantiatedTo(cste)) {
-                                                    r.setToTrue(this);
-                                                    setPassive();
-                                                } else if (!var.contains(cste)) {
-                                                    r.setToFalse(this);
-                                                    setPassive();
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public ESat isEntailed() {
-                                        //                            throw new UnsupportedOperationException("isEntailed not implemented ");
-                                        return ESat.TRUE;
-                                    }
-
-                                    @Override
-                                    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                        if (var == vars[1]) {
-                                            if (vars[1].isInstantiatedTo(1)) {
-                                                nrules |= ruleStore.addFullDomainRule(vars[0]);
-                                            } else {
-                                                nrules |= ruleStore.addRemovalRule(vars[0], cste);
-                                            }
-                                        } else {
-                                            nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                        }
-                                        return nrules;
-                                    }
-                                }).post();
-                            } else {
-                                new Constraint("reif(a=b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
-                                    @Override
-                                    public void propagate(int evtmask) throws ContradictionException {
-                                        if (r.getLB() == 1) {
-                                            if (vars[0].isInstantiated()) {
-                                                setPassive();
-                                                vars[1].instantiateTo(vars[0].getValue(), this);
-                                            } else if (vars[1].isInstantiated()) {
-                                                setPassive();
-                                                vars[0].instantiateTo(vars[1].getValue(), this);
-                                            }
-                                        } else if (r.getUB() == 0) {
-                                            if (vars[0].isInstantiated()) {
-                                                if (vars[1].removeValue(vars[0].getValue(), this)) {
-                                                    setPassive();
-                                                }
-                                            } else if (vars[1].isInstantiated()) {
-                                                if (vars[0].removeValue(vars[1].getValue(), this)) {
-                                                    setPassive();
-                                                }
-                                            }
-                                        } else {
-                                            if (vars[0].isInstantiated()) {
-                                                if (vars[1].isInstantiated()) {
-                                                    if (vars[0].getValue() == vars[1].getValue()) {
-                                                        r.setToTrue(this);
-                                                    } else {
-                                                        r.setToFalse(this);
-                                                    }
-                                                    setPassive();
-                                                } else {
-                                                    if (!vars[1].contains(vars[0].getValue())) {
-                                                        setPassive();
-                                                        r.setToFalse(this);
-                                                    }
-                                                }
-                                            } else {
-                                                if (vars[1].isInstantiated()) {
-                                                    if (!vars[0].contains(vars[1].getValue())) {
-                                                        setPassive();
-                                                        r.setToFalse(this);
-                                                    }
-                                                } else {
-                                                    if (vars[0].getLB() > vars[1].getUB()
-                                                            || vars[1].getLB() > vars[0].getUB()) {
-                                                        setPassive();
-                                                        r.setToFalse(this);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public ESat isEntailed() {
-                                        return ESat.TRUE;//throw new UnsupportedOperationException("isEntailed not implemented ");
-                                    }
-
-                                    @Override
-                                    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                        if (var == vars[2]) {
-                                            if (vars[2].isInstantiatedTo(1)) {
-                                                nrules |= ruleStore.addFullDomainRule(vars[0]);
-                                                nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                            } else {
-                                                if (vars[0].isInstantiated()) {
-                                                    nrules |= ruleStore.addRemovalRule(vars[1], vars[0].getValue());
-                                                } else {
-                                                    nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                                }
-                                                if (vars[1].isInstantiated()) {
-                                                    nrules |= ruleStore.addRemovalRule(vars[0], vars[1].getValue());
-                                                } else {
-                                                    nrules |= ruleStore.addFullDomainRule(vars[0]);
-                                                }
-                                            }
-                                        } else {
-                                            if (var == vars[0]) {
-                                                nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                            } else if (var == vars[1]) {
-                                                nrules |= ruleStore.addFullDomainRule(vars[0]);
-                                            }
-                                            nrules |= ruleStore.addFullDomainRule(vars[2]);
-                                        }
-                                        return nrules;
-                                    }
-                                }).post();
-                            }
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            final BoolVar r = exps.get(2).boolVarValue(model);
+            // this constraint is not poster, hence not returned, because it is reified
+            if (((FznSettings) model.getSettings()).enableClause()
+                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+                model.addClausesBoolIsEqVar((BoolVar) a, (BoolVar) b, r);
+            } else {
+                if (((FznSettings) model.getSettings()).adhocReification()) {
+                    if (a.isInstantiated() || b.isInstantiated()) {
+                        IntVar x;
+                        int c;
+                        if (a.isInstantiated()) {
+                            x = b;
+                            c = a.getValue();
                         } else {
-                            model.arithm(a, "=", b).reifyWith(r);
+                            x = a;
+                            c = b.getValue();
                         }
+                        new Constraint("reif(a=cste,r)", new PropXeqCReif(x, c, r)).post();
+                    } else {
+                        new Constraint("reif(a=b,r)", new PropXeqYReif(a, b, r)).post();
                     }
+                } else {
+                    model.arithm(a, "=", b).reifyWith(r);
                 }
-            }.build(model, id, exps, annotations, datas);
+            }
         }
     },
     int_le {
@@ -664,8 +404,7 @@ public enum FConstraint {
 
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
-            if (((FznSettings) model.getSettings()).enableClause()
-                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+            if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolLe((BoolVar) a, (BoolVar) b);
             } else {
                 model.arithm(a, "<=", b).post();
@@ -676,189 +415,34 @@ public enum FConstraint {
     int_le_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new IBuilder() {
-                @Override
-                public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-                    IntVar a = exps.get(0).intVarValue(model);
-                    IntVar b = exps.get(1).intVarValue(model);
-                    final BoolVar r = exps.get(2).boolVarValue(model);
-                    // this constraint is not poster, hence not returned, because it is reified
-                    if (((FznSettings) model.getSettings()).enableClause()
-                            && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
-                        model.addClausesBoolIsLeVar((BoolVar) a, (BoolVar) b, r);
-                    } else {
-                        if (((FznSettings) model.getSettings()).adhocReification()) {
-                            if (a.isInstantiated() || b.isInstantiated()) {
-                                final IntVar var;
-                                final int cste;
-                                if (a.isInstantiated()) {
-                                    var = b;
-                                    cste = a.getValue();
-                                    new Constraint("reif(a>=cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
-                                        @Override
-                                        public void propagate(int evtmask) throws ContradictionException {
-                                            if (r.getLB() == 1) {
-                                                setPassive();
-                                                var.updateLowerBound(cste, this);
-                                            } else {
-                                                if (r.getUB() == 0) {
-                                                    if (var.updateUpperBound(cste - 1, this)) {
-                                                        setPassive();
-                                                    }
-                                                } else {
-                                                    if (var.getLB() >= cste) {
-                                                        setPassive();
-                                                        r.setToTrue(this);
-                                                    } else if (var.getUB() < cste) {
-                                                        setPassive();
-                                                        r.setToFalse(this);
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        @Override
-                                        public ESat isEntailed() {
-                                            //                                throw new UnsupportedOperationException("isEntailed not implemented ");
-                                            return ESat.TRUE;
-                                        }
-
-                                        @Override
-                                        public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                            boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                            if (var == vars[1]) { // r
-                                                if (vars[1].isInstantiatedTo(1)) {
-                                                    nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                                                } else {
-                                                    nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                                                }
-                                            } else { //
-                                                nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                            }
-                                            return nrules;
-                                        }
-
-                                    }).post();
-                                } else {
-                                    var = a;
-                                    cste = b.getValue();
-                                    new Constraint("reif(a<=cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
-                                        @Override
-                                        public void propagate(int evtmask) throws ContradictionException {
-                                            if (r.getLB() == 1) {
-                                                setPassive();
-                                                var.updateUpperBound(cste, this);
-                                            } else {
-                                                if (r.getUB() == 0) {
-                                                    if (var.updateLowerBound(cste + 1, this)) {
-                                                        setPassive();
-                                                    }
-                                                } else {
-                                                    if (var.getUB() <= cste) {
-                                                        setPassive();
-                                                        r.setToTrue(this);
-                                                    } else if (var.getLB() > cste) {
-                                                        setPassive();
-                                                        r.setToFalse(this);
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        @Override
-                                        public ESat isEntailed() {
-                                            //                                throw new UnsupportedOperationException("isEntailed not implemented ");
-                                            return ESat.TRUE;
-                                        }
-
-                                        @Override
-                                        public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                            boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                            if (var == vars[1]) {
-                                                if (vars[1].isInstantiatedTo(1)) {
-                                                    nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                                                } else {
-                                                    nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                                                }
-                                            } else {
-                                                nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                            }
-                                            return nrules;
-                                        }
-                                    }).post();
-                                }
-                            } else {
-                                new Constraint("reif(a<=b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
-                                    @Override
-                                    public void propagate(int evtmask) throws ContradictionException {
-                                        if (r.getLB() == 1) {
-                                            vars[0].updateUpperBound(vars[1].getUB(), this);
-                                            vars[1].updateLowerBound(vars[0].getLB(), this);
-                                            if (vars[0].getUB() <= vars[1].getLB()) {
-                                                this.setPassive();
-                                            }
-                                        } else {
-                                            if (r.getUB() == 0) {
-                                                vars[0].updateLowerBound(vars[1].getLB() + 1, this);
-                                                vars[1].updateUpperBound(vars[0].getUB() - 1, this);
-                                                if (vars[0].getLB() > vars[1].getUB()) {
-                                                    setPassive();
-                                                }
-                                            } else {
-                                                if (vars[0].getUB() <= vars[1].getLB()) {
-                                                    setPassive();
-                                                    r.setToTrue(this);
-                                                } else if (vars[0].getLB() > vars[1].getUB()) {
-                                                    setPassive();
-                                                    r.setToFalse(this);
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public ESat isEntailed() {
-                                        throw new UnsupportedOperationException("isEntailed not implemented ");
-                                    }
-
-                                    @Override
-                                    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                        if (var == vars[2]) {
-                                            if (vars[2].isInstantiatedTo(1)) {
-                                                nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                                                nrules |= ruleStore.addLowerBoundRule(vars[1]);
-                                            } else {
-                                                nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                                                nrules |= ruleStore.addUpperBoundRule(vars[1]);
-                                            }
-                                        } else {
-                                            if (var == vars[0]) {
-                                                if (evt == IntEventType.DECUPP) {
-                                                    nrules |= ruleStore.addUpperBoundRule(vars[1]);
-                                                } else {
-                                                    nrules |= ruleStore.addLowerBoundRule(vars[1]);
-                                                }
-                                            } else if (var == vars[1]) {
-                                                if (evt == IntEventType.DECUPP) {
-                                                    nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                                                } else {
-                                                    nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                                                }
-                                            }
-                                            nrules |= ruleStore.addFullDomainRule(vars[2]);
-                                        }
-                                        return nrules;
-                                    }
-
-                                }).post();
-                            }
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            final BoolVar r = exps.get(2).boolVarValue(model);
+            // this constraint is not poster, hence not returned, because it is reified
+            if (((FznSettings) model.getSettings()).enableClause()
+                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+                model.addClausesBoolIsLeVar((BoolVar) a, (BoolVar) b, r);
+            } else {
+                if (((FznSettings) model.getSettings()).adhocReification()) {
+                    if (a.isInstantiated() || b.isInstantiated()) {
+                        final IntVar var;
+                        final int cste;
+                        if (a.isInstantiated()) {
+                            var = b;
+                            cste = a.getValue();
+                            new Constraint("reif(a>=cste,r)", new PropXleCReif(var, cste, r)).post();
                         } else {
-                            model.arithm(a, "<=", b).reifyWith(r);
+                            var = a;
+                            cste = b.getValue();
+                            new Constraint("reif(a>=cste,r)", new PropXgeCReif(var, cste, r)).post();
                         }
+                    } else {
+                        new Constraint("reif(a<=b,r)", new PropXleYReif(a, b, r)).post();
                     }
+                } else {
+                    model.arithm(a, "<=", b).reifyWith(r);
                 }
-            }.build(model, id, exps, annotations, datas);
+            }
         }
     },
     int_lin_eq {
@@ -877,7 +461,40 @@ public enum FConstraint {
     int_lin_eq_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinEqReifBuilder().build(model, id, exps, annotations, datas);
+            int[] as = exps.get(0).toIntArray();
+            IntVar[] bs = exps.get(1).toIntVarArray(model);
+            IntVar c = exps.get(2).intVarValue(model);
+            BoolVar r = exps.get(3).boolVarValue(model);
+
+            if (bs.length > 0) {
+                if (((FznSettings) model.getSettings()).adhocReification()) {
+                    // detect boolSumEq bool reified
+                    int n = bs.length;
+                    boolean boolSum = c.isBool();
+                    for (int i = 0; i < n; i++) {
+                        boolSum &= bs[i].isBool();
+                        boolSum &= as[i] == 1;
+                    }
+                    if (boolSum && c.isInstantiatedTo(0)) {
+                        BoolVar[] bbs = new BoolVar[n + 1];
+                        for (int i = 0; i < n; i++) {
+                            bbs[i] = (BoolVar) bs[i];
+                        }
+                        bbs[bs.length] = r;
+                        new Constraint("BoolSumLeq0Reif", new PropBoolSumEq0Reif(bbs)).post();
+                        return;
+                    }
+                }
+                if (((FznSettings) model.getSettings()).enableDecompositionOfLinearCombination()) {
+                    int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
+                    IntVar scal = model.intVar(StringUtils.randomName(), tmp[0], tmp[1], true);
+                    Constraint cstr = model.scalar(bs, as, "=", scal);
+                    model.arithm(scal, "=", c).reifyWith(r);
+                    cstr.post();
+                } else {
+                    model.scalar(bs, as, "=", c).reifyWith(r);
+                }
+            }
         }
     },
     int_lin_le {
@@ -888,24 +505,53 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             IntVar c = exps.get(2).intVarValue(model);
             if (bs.length > 0) {
-                if (c.isInstantiated()) {
+                model.scalar(bs, as, "<=", c).post();
+            }
+        }
+    },
+    int_lin_le_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            IntVar[] bs = exps.get(1).toIntVarArray(model);
+            IntVar c = exps.get(2).intVarValue(model);
+            BoolVar r = exps.get(3).boolVarValue(model);
+            if (bs.length > 0) {
+                if (((FznSettings) model.getSettings()).adhocReification() && c.isInstantiatedTo(0)) {
+                    // detect boolSumLeq 0 reified
+                    int n = bs.length;
+                    boolean boolSum = c.isBool();
+                    for (int i = 0; i < n; i++) {
+                        boolSum &= bs[i].isBool();
+                        boolSum &= as[i] == 1;
+                    }
+                    if (boolSum) {
+                        BoolVar[] bbs = new BoolVar[n + 1];
+                        for (int i = 0; i < n; i++) {
+                            bbs[i] = (BoolVar) bs[i];
+                        }
+                        bbs[bs.length] = r;
+                        new Constraint("BoolSumLeq0Reif", new PropBoolSumLe0Reif(bbs)).post();
+                        return;
+                    }
+                } else if (c.isInstantiated()) {
                     if (bs.length == 1) {
                         if (as[0] == -1) {
-                            model.arithm(bs[0], ">=", -c.getValue()).post();
+                            model.arithm(bs[0], ">=", -c.getValue()).reifyWith(r);
                             return;
                         }
                         if (as[0] == 1) {
-                            model.arithm(bs[0], "<=", c.getValue()).post();
+                            model.arithm(bs[0], "<=", c.getValue()).reifyWith(r);
                             return;
                         }
                     }
                     if (bs.length == 2) {
                         if (as[0] == -1 && as[1] == 1) {
-                            model.arithm(bs[1], "<=", bs[0], "+", c.getValue()).post();
+                            model.arithm(bs[1], "<=", bs[0], "+", c.getValue()).reifyWith(r);
                             return;
                         }
                         if (as[0] == 1 && as[1] == -1) {
-                            model.arithm(bs[0], "<=", bs[1], "+", c.getValue()).post();
+                            model.arithm(bs[0], "<=", bs[1], "+", c.getValue()).reifyWith(r);
                             return;
                         }
                     }
@@ -913,20 +559,13 @@ public enum FConstraint {
                 if (((FznSettings) model.getSettings()).enableDecompositionOfLinearCombination()) {
                     int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
                     IntVar scal = model.intVar(StringUtils.randomName(), tmp[0], tmp[1], true);
-                    model.scalar(bs, as, "=", scal).post();
-                    model.arithm(scal, "<=", c).post();
+                    Constraint cstr = model.scalar(bs, as, "=", scal);
+                    model.arithm(scal, "<=", c).reifyWith(r);
+                    cstr.post();
                 } else {
-                    model.scalar(bs, as, "<=", c).post();
+                    model.scalar(bs, as, "<=", c).reifyWith(r);
                 }
             }
-
-
-        }
-    },
-    int_lin_le_reif {
-        @Override
-        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinLeReifBuilder().build(model, id, exps, annotations, datas);
         }
     },
     int_lin_ne {
@@ -936,16 +575,8 @@ public enum FConstraint {
             int[] as = exps.get(0).toIntArray();
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             IntVar c = exps.get(2).intVarValue(model);
-
             if (bs.length > 0) {
-                if (((FznSettings) model.getSettings()).enableDecompositionOfLinearCombination()) {
-                    int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
-                    IntVar scal = model.intVar(StringUtils.randomName(), tmp[0], tmp[1], true);
-                    model.scalar(bs, as, "=", scal).post();
-                    model.arithm(scal, "!=", c).post();
-                } else {
-                    model.scalar(bs, as, "!=", c).post();
-                }
+                model.scalar(bs, as, "!=", c).post();
             }
 
         }
@@ -958,17 +589,8 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             IntVar c = exps.get(2).intVarValue(model);
             BoolVar r = exps.get(3).boolVarValue(model);
-
             if (bs.length > 0) {
-                if (((FznSettings) model.getSettings()).enableDecompositionOfLinearCombination()) {
-                    int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
-                    IntVar scal = model.intVar(StringUtils.randomName(), tmp[0], tmp[1], true);
-                    Constraint cstr = model.scalar(bs, as, "=", scal);
-                    model.arithm(scal, "!=", c).reifyWith(r);
-                    cstr.post();
-                } else {
-                    model.scalar(bs, as, "!=", c).reifyWith(r);
-                }
+                model.scalar(bs, as, "!=", c).reifyWith(r);
             }
 
         }
@@ -979,8 +601,7 @@ public enum FConstraint {
 
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
-            if (((FznSettings) model.getSettings()).enableClause()
-                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+            if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolLt((BoolVar) a, (BoolVar) b);
             } else {
                 model.arithm(a, "<", b).post();
@@ -991,181 +612,31 @@ public enum FConstraint {
     int_lt_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new IBuilder() {
-                @Override
-                public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-                    IntVar a = exps.get(0).intVarValue(model);
-                    IntVar b = exps.get(1).intVarValue(model);
-                    final BoolVar r = exps.get(2).boolVarValue(model);
-                    // this constraint is not poster, hence not returned, because it is reified
-                    if (((FznSettings) model.getSettings()).enableClause()
-                            && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
-                        model.addClausesBoolIsLtVar((BoolVar) a, (BoolVar) b, r);
-
-                    } else if (((FznSettings) model.getSettings()).adhocReification()) {
-                        if (a.isInstantiated() || b.isInstantiated()) {
-                            final IntVar var;
-                            final int cste;
-                            if (a.isInstantiated()) {
-                                var = b;
-                                cste = a.getValue();
-                                new Constraint("reif(b>cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
-                                    @Override
-                                    public void propagate(int evtmask) throws ContradictionException {
-                                        if (r.getLB() == 1) {
-                                            setPassive();
-                                            var.updateLowerBound(cste + 1, this);
-                                        } else if (r.getUB() == 0) {
-                                            if (var.updateUpperBound(cste, this)) {
-                                                setPassive();
-                                            }
-                                        } else {
-                                            if (var.getLB() > cste) {
-                                                setPassive();
-                                                r.setToTrue(this);
-                                            } else if (var.getUB() <= cste) {
-                                                setPassive();
-                                                r.setToFalse(this);
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public ESat isEntailed() {
-                                        //                            throw new UnsupportedOperationException("isEntailed not implemented ");
-                                        return ESat.TRUE;
-                                    }
-
-                                    @Override
-                                    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                        if (var == vars[1]) { // r
-                                            if (vars[1].isInstantiatedTo(1)) {
-                                                nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                                            } else {
-                                                nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                                            }
-                                        } else { //
-                                            nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                        }
-                                        return nrules;
-                                    }
-                                }).post();
-                            } else {
-                                var = a;
-                                cste = b.getValue();
-                                new Constraint("reif(a<cste,r)", new Propagator<IntVar>(new IntVar[]{var, r}, PropagatorPriority.BINARY, false) {
-                                    @Override
-                                    public void propagate(int evtmask) throws ContradictionException {
-                                        if (r.getLB() == 1) {
-                                            setPassive();
-                                            var.updateUpperBound(cste - 1, this);
-                                        } else if (r.getUB() == 0) {
-                                            if (var.updateLowerBound(cste, this)) {
-                                                setPassive();
-                                            }
-                                        } else {
-                                            if (var.getUB() < cste) {
-                                                setPassive();
-                                                r.setToTrue(this);
-                                            } else if (var.getLB() >= cste) {
-                                                setPassive();
-                                                r.setToFalse(this);
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public ESat isEntailed() {
-                                        throw new UnsupportedOperationException("isEntailed not implemented ");
-                                    }
-
-                                    @Override
-                                    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                        if (var == vars[1]) { // r
-                                            if (vars[1].isInstantiatedTo(1)) {
-                                                nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                                            } else {
-                                                nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                                            }
-                                        } else { //
-                                            nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                        }
-                                        return nrules;
-                                    }
-                                }).post();
-                            }
-                        } else {
-                            new Constraint("reif(a<b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
-                                @Override
-                                public void propagate(int evtmask) throws ContradictionException {
-                                    if (r.getLB() == 1) {
-                                        vars[0].updateUpperBound(vars[1].getUB() - 1, this);
-                                        vars[1].updateLowerBound(vars[0].getLB() + 1, this);
-                                        if (vars[0].getUB() < vars[1].getLB()) {
-                                            this.setPassive();
-                                        }
-                                    } else if (r.getUB() == 0) {
-                                        vars[0].updateLowerBound(vars[1].getLB(), this);
-                                        vars[1].updateUpperBound(vars[0].getUB(), this);
-                                        if (vars[0].getLB() >= vars[1].getUB()) {
-                                            setPassive();
-                                        }
-                                    } else {
-                                        if (vars[0].getUB() < vars[1].getLB()) {
-                                            setPassive();
-                                            r.setToTrue(this);
-                                        } else if (vars[0].getLB() >= vars[1].getUB()) {
-                                            setPassive();
-                                            r.setToFalse(this);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public ESat isEntailed() {
-                                    //                        throw new UnsupportedOperationException("isEntailed not implemented ");
-                                    return ESat.TRUE;
-                                }
-
-                                @Override
-                                public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                    boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                    if (var == vars[2]) {
-                                        if (vars[2].isInstantiatedTo(1)) {
-                                            nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                                            nrules |= ruleStore.addLowerBoundRule(vars[1]);
-                                        } else {
-                                            nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                                            nrules |= ruleStore.addUpperBoundRule(vars[1]);
-                                        }
-                                    } else {
-                                        if (var == vars[0]) {
-                                            if (evt == IntEventType.DECUPP) {
-                                                nrules |= ruleStore.addUpperBoundRule(vars[1]);
-                                            } else {
-                                                nrules |= ruleStore.addLowerBoundRule(vars[1]);
-                                            }
-                                        } else if (var == vars[1]) {
-                                            if (evt == IntEventType.DECUPP) {
-                                                nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                                            } else {
-                                                nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                                            }
-                                        }
-                                        nrules |= ruleStore.addFullDomainRule(vars[2]);
-                                    }
-                                    return nrules;
-                                }
-
-                            }).post();
-                        }
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            final BoolVar r = exps.get(2).boolVarValue(model);
+            // this constraint is not poster, hence not returned, because it is reified
+            if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+                model.addClausesBoolIsLtVar((BoolVar) a, (BoolVar) b, r);
+            } else if (((FznSettings) model.getSettings()).adhocReification()) {
+                if (a.isInstantiated() || b.isInstantiated()) {
+                    final IntVar var;
+                    final int cste;
+                    if (a.isInstantiated()) {
+                        var = b;
+                        cste = a.getValue();
+                        new Constraint("reif(b>cste,r)", new PropXgtCReif(var, cste, r)).post();
                     } else {
-                        model.arithm(a, "<", b).reifyWith(r);
+                        var = a;
+                        cste = b.getValue();
+                        new Constraint("reif(a<cste,r)", new PropXltCReif(var, cste, r)).post();
                     }
+                } else {
+                    new Constraint("reif(a<b,r)", new PropXltYReif(a, b, r)).post();
                 }
-            }.build(model, id, exps, annotations, datas);
+            } else {
+                model.arithm(a, "<", b).reifyWith(r);
+            }
         }
     },
     int_max {
@@ -1219,169 +690,35 @@ public enum FConstraint {
     int_ne_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new IBuilder() {
-                @Override
-                public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-                    IntVar a = exps.get(0).intVarValue(model);
-                    IntVar b = exps.get(1).intVarValue(model);
-                    final BoolVar r = exps.get(2).boolVarValue(model);
-                    // this constraint is not poster, hence not returned, because it is reified
-                    if (((FznSettings) model.getSettings()).enableClause()
-                            && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
-                        model.addClausesBoolIsNeqVar((BoolVar) a, (BoolVar) b, r);
-                    } else {
-                        if (((FznSettings) model.getSettings()).adhocReification()) {
-                            if (a.isInstantiated() || b.isInstantiated()) {
-                                IntVar x;
-                                int c;
-                                if (a.isInstantiated()) {
-                                    x = b;
-                                    c = a.getValue();
-                                } else {
-                                    x = a;
-                                    c = b.getValue();
-                                }
-                                final IntVar var = x;
-                                final int cste = c;
-                                new Constraint("reif(a!=cste,r)", new Propagator<IntVar>(new IntVar[]{x, r}, PropagatorPriority.BINARY, false) {
-                                    @Override
-                                    public void propagate(int evtmask) throws ContradictionException {
-                                        if (r.getLB() == 1) {
-                                            if (var.removeValue(cste, this)) {
-                                                setPassive();
-                                            }
-                                        } else {
-                                            if (r.getUB() == 0) {
-                                                if (var.instantiateTo(cste, this)) {
-                                                    setPassive();
-                                                }
-                                            } else {
-                                                if (!var.contains(cste)) {
-                                                    setPassive();
-                                                    r.setToTrue(this);
-                                                } else if (var.isInstantiatedTo(cste)) {
-                                                    setPassive();
-                                                    r.setToFalse(this);
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public ESat isEntailed() {
-                                        return ESat.TRUE;
-                                        //throw new UnsupportedOperationException("isEntailed not implemented ");
-                                    }
-
-                                    @Override
-                                    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                        if (var == vars[1]) {
-                                            if (vars[1].isInstantiatedTo(1)) {
-                                                nrules |= ruleStore.addRemovalRule(vars[0], cste);
-                                            } else {
-                                                nrules |= ruleStore.addFullDomainRule(vars[0]);
-                                            }
-                                        } else {
-                                            nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                        }
-                                        return nrules;
-                                    }
-
-                                }).post();
-                            } else {
-                                new Constraint("reif(a!=b,r)", new Propagator<IntVar>(new IntVar[]{a, b, r}, PropagatorPriority.TERNARY, false) {
-                                    @Override
-                                    public void propagate(int evtmask) throws ContradictionException {
-                                        if (r.getLB() == 1) {
-                                            if (vars[0].isInstantiated()) {
-                                                if (vars[1].removeValue(vars[0].getValue(), this)) {
-                                                    setPassive();
-                                                }
-                                            } else if (vars[1].isInstantiated()) {
-                                                if (vars[0].removeValue(vars[1].getValue(), this)) {
-                                                    setPassive();
-                                                }
-                                            }
-                                        } else {
-                                            if (r.getUB() == 0) {
-                                                if (vars[0].isInstantiated()) {
-                                                    setPassive();
-                                                    vars[1].instantiateTo(vars[0].getValue(), this);
-                                                } else if (vars[1].isInstantiated()) {
-                                                    setPassive();
-                                                    vars[0].instantiateTo(vars[1].getValue(), this);
-                                                }
-                                            } else {
-                                                if (vars[0].isInstantiated()) {
-                                                    if (vars[1].isInstantiated()) {
-                                                        if (vars[0].getValue() != vars[1].getValue()) {
-                                                            r.setToTrue(this);
-                                                        } else {
-                                                            r.setToFalse(this);
-                                                        }
-                                                        setPassive();
-                                                    } else {
-                                                        if (!vars[1].contains(vars[0].getValue())) {
-                                                            r.setToTrue(this);
-                                                            setPassive();
-                                                        }
-                                                    }
-                                                } else {
-                                                    if (vars[1].isInstantiated()) {
-                                                        if (!vars[0].contains(vars[1].getValue())) {
-                                                            r.setToTrue(this);
-                                                            setPassive();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public ESat isEntailed() {
-                                        throw new UnsupportedOperationException("isEntailed not implemented ");
-                                    }
-
-                                    @Override
-                                    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                                        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-                                        if (var == vars[2]) {
-                                            if (vars[2].isInstantiatedTo(0)) {
-                                                nrules |= ruleStore.addFullDomainRule(vars[0]);
-                                                nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                            } else {
-                                                if (vars[0].isInstantiated()) {
-                                                    nrules |= ruleStore.addRemovalRule(vars[1], vars[0].getValue());
-                                                } else {
-                                                    nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                                }
-                                                if (vars[1].isInstantiated()) {
-                                                    nrules |= ruleStore.addRemovalRule(vars[0], vars[1].getValue());
-                                                } else {
-                                                    nrules |= ruleStore.addFullDomainRule(vars[0]);
-                                                }
-                                            }
-                                        } else {
-                                            if (var == vars[0]) {
-                                                nrules |= ruleStore.addFullDomainRule(vars[1]);
-                                            } else if (var == vars[1]) {
-                                                nrules |= ruleStore.addFullDomainRule(vars[0]);
-                                            }
-                                            nrules |= ruleStore.addFullDomainRule(vars[2]);
-                                        }
-                                        return nrules;
-                                    }
-
-                                }).post();
-                            }
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            final BoolVar r = exps.get(2).boolVarValue(model);
+            // this constraint is not poster, hence not returned, because it is reified
+            if (((FznSettings) model.getSettings()).enableClause()
+                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+                model.addClausesBoolIsNeqVar((BoolVar) a, (BoolVar) b, r);
+            } else {
+                if (((FznSettings) model.getSettings()).adhocReification()) {
+                    if (a.isInstantiated() || b.isInstantiated()) {
+                        IntVar x;
+                        int c;
+                        if (a.isInstantiated()) {
+                            x = b;
+                            c = a.getValue();
                         } else {
-                            model.arithm(a, "!=", b).reifyWith(r);
+                            x = a;
+                            c = b.getValue();
                         }
+                        final IntVar var = x;
+                        final int cste = c;
+                        new Constraint("reif(a!=cste,r)", new PropXneCReif(var, cste, r)).post();
+                    } else {
+                        new Constraint("reif(a!=b,r)", new PropXneYReif(a, b, r)).post();
                     }
+                } else {
+                    model.arithm(a, "!=", b).reifyWith(r);
                 }
-            }.build(model, id, exps, annotations, datas);
+            }
         }
     },
     int_plus {
@@ -1718,91 +1055,87 @@ public enum FConstraint {
     knapsackChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new IBuilder() {
+
+            int[] w = exps.get(0).toIntArray();
+            int[] p = exps.get(1).toIntArray();
+            IntVar[] x = exps.get(2).toIntVarArray(model);
+            IntVar W = exps.get(3).intVarValue(model);
+            IntVar P = exps.get(4).intVarValue(model);
+
+            model.scalar(x, w, "=", W).post();
+            model.scalar(x, p, "=", P).post();
+            new Constraint("knapsack", new Propagator<IntVar>(ArrayUtils.append(x, new IntVar[]{W, P})) {
+
+                private int[] order;
+                private double[] ratio;
+
                 @Override
-                public void build(Model model, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-                    int[] w = exps.get(0).toIntArray();
-                    int[] p = exps.get(1).toIntArray();
-                    IntVar[] x = exps.get(2).toIntVarArray(model);
-                    IntVar W = exps.get(3).intVarValue(model);
-                    IntVar P = exps.get(4).intVarValue(model);
-
-                    model.scalar(x, w, "=", W).post();
-                    model.scalar(x, p, "=", P).post();
-                    new Constraint("knapsack", new Propagator<IntVar>(ArrayUtils.append(x, new IntVar[]{W, P})) {
-
-                        private int[] order;
-                        private double[] ratio;
-
-                        @Override
-                        public void propagate(int evtmask) throws ContradictionException {
-                            // initial sort
-                            if (order == null) {
-                                order = new int[w.length];
-                                ratio = new double[w.length];
-                                for (int i = 0; i < w.length; i++) {
-                                    ratio[i] = (double) (p[i]) / (double) (w[i]);
-                                }
-                                BitSet in = new BitSet(w.length);
-                                double best = -1;
-                                int index = 0;
-                                for (int i = 0; i < w.length; i++) {
-                                    int item = -1;
-                                    for (int o = in.nextClearBit(0); o < w.length; o = in.nextClearBit(o + 1)) {
-                                        if (item == -1 || w[i] == 0 || ratio[o] > best) {
-                                            best = ratio[o];
-                                            item = o;
-                                        }
-                                    }
-                                    in.set(item);
-                                    if (item == -1) {
-                                        throw new UnsupportedOperationException();
-                                    } else {
-                                        order[index++] = item;
-                                    }
+                public void propagate(int evtmask) throws ContradictionException {
+                    // initial sort
+                    if (order == null) {
+                        order = new int[w.length];
+                        ratio = new double[w.length];
+                        for (int i = 0; i < w.length; i++) {
+                            ratio[i] = (double) (p[i]) / (double) (w[i]);
+                        }
+                        BitSet in = new BitSet(w.length);
+                        double best = -1;
+                        int index = 0;
+                        for (int i = 0; i < w.length; i++) {
+                            int item = -1;
+                            for (int o = in.nextClearBit(0); o < w.length; o = in.nextClearBit(o + 1)) {
+                                if (item == -1 || w[i] == 0 || ratio[o] > best) {
+                                    best = ratio[o];
+                                    item = o;
                                 }
                             }
-                            // filtering algorithm
-                            int pomin = 0;
-                            int pomax = 0;
-                            int cmin = 0;
-                            int cmax = 0;
-                            for (int i = 0; i < w.length; i++) {
-                                pomin += p[i] * vars[i].getLB();
-                                pomax += p[i] * vars[i].getUB();
-                                cmin += w[i] * vars[i].getLB();
-                                cmax += w[i] * vars[i].getUB();
-                            }
-                            P.updateLowerBound(pomin, this);
-                            P.updateUpperBound(pomax, this);
-                            W.updateLowerBound(cmin, this);
-                            W.updateUpperBound(cmax, this);
-
-                            {
-                                cmax = Math.min(cmax, W.getUB());
-                                for (int idx : order) {
-                                    if (vars[idx].getUB() > vars[idx].getLB()) {
-                                        int deltaW = w[idx] * (vars[idx].getUB() - vars[idx].getLB());
-                                        if (cmin + deltaW <= cmax) {
-                                            pomin += p[idx] * (vars[idx].getUB() - vars[idx].getLB());
-                                            cmin += deltaW;
-                                        } else {
-                                            pomin += Math.ceil((cmax - cmin) * ratio[idx]);
-                                            break;
-                                        }
-                                    }
-                                }
-                                P.updateUpperBound(pomin, this);
+                            in.set(item);
+                            if (item == -1) {
+                                throw new UnsupportedOperationException();
+                            } else {
+                                order[index++] = item;
                             }
                         }
+                    }
+                    // filtering algorithm
+                    int pomin = 0;
+                    int pomax = 0;
+                    int cmin = 0;
+                    int cmax = 0;
+                    for (int i = 0; i < w.length; i++) {
+                        pomin += p[i] * vars[i].getLB();
+                        pomax += p[i] * vars[i].getUB();
+                        cmin += w[i] * vars[i].getLB();
+                        cmax += w[i] * vars[i].getUB();
+                    }
+                    P.updateLowerBound(pomin, this);
+                    P.updateUpperBound(pomax, this);
+                    W.updateLowerBound(cmin, this);
+                    W.updateUpperBound(cmax, this);
 
-                        @Override
-                        public ESat isEntailed() {
-                            return ESat.TRUE;
+                    {
+                        cmax = Math.min(cmax, W.getUB());
+                        for (int idx : order) {
+                            if (vars[idx].getUB() > vars[idx].getLB()) {
+                                int deltaW = w[idx] * (vars[idx].getUB() - vars[idx].getLB());
+                                if (cmin + deltaW <= cmax) {
+                                    pomin += p[idx] * (vars[idx].getUB() - vars[idx].getLB());
+                                    cmin += deltaW;
+                                } else {
+                                    pomin += Math.ceil((cmax - cmin) * ratio[idx]);
+                                    break;
+                                }
+                            }
                         }
-                    }).post();
+                        P.updateUpperBound(pomin, this);
+                    }
                 }
-            }.build(model, id, exps, annotations, datas);
+
+                @Override
+                public ESat isEntailed() {
+                    return ESat.TRUE;
+                }
+            }).post();
         }
     },
     lex2Choco {
@@ -1885,7 +1218,21 @@ public enum FConstraint {
     memberVarReifChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            new org.chocosolver.parser.flatzinc.ast.constraints.global.MemberVarReifBuilder().build(model, id, exps, annotations, datas);
+            IntVar[] xs = exps.get(0).toIntVarArray(model);
+            IntVar y = exps.get(1).intVarValue(model);
+            BoolVar b = exps.get(2).boolVarValue(model);
+
+            ArrayList<BoolVar> eqs = new ArrayList<>();
+            for (IntVar x : xs) {
+                if (VariableUtils.intersect(x, y)) {
+                    eqs.add(model.arithm(x, "=", y).reify());
+                }
+            }
+            if (eqs.size() == 0) {
+                model.arithm(b, "=", 0).post();
+            } else {
+                model.or(eqs.toArray(new BoolVar[eqs.size()])).reifyWith(b);
+            }
         }
     },
     minimumChoco {
