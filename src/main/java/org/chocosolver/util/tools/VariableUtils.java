@@ -180,4 +180,25 @@ public class VariableUtils {
         return Arrays.stream(vars).mapToInt(IntVar::getDomainSize).asLongStream().reduce(1, (a, b) -> a * b);
     }
 
+    /**
+     * @param x an int variable
+     * @param y another int variable
+     * @return true if the two domains intersect
+     */
+    public static boolean intersect(IntVar x , IntVar y) {
+        if (x.getLB() > y.getUB() || y.getLB() > x.getUB()) {
+            return false;
+        }
+        if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+            int ub = x.getUB();
+            for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
+                if (y.contains(val)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
 }

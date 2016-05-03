@@ -360,7 +360,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * - initialize the Move and the search strategy
      */
     private void initialize() {
-
+        // for fast construction of "external" constraint, they are initialized once for all
+        if(mModel.minisat != null){
+            mModel.minisat.getPropSat().initialize();
+        }
+        if(mModel.nogoods != null){
+            mModel.nogoods.getPropNogoods().initialize();
+        }
+        if(mModel.condis != null){
+            mModel.condis.getPropCondis().initialize();
+        }
         // note jg : new (used to be in model)
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(mModel));

@@ -38,6 +38,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -123,6 +124,16 @@ public class PropNogoods extends Propagator<IntVar> {
     private TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
 
     /**
+     * Store new added variables when {@link #initialized} is <i>false</i>
+     */
+    private ArrayList<IntVar> add_var;
+
+    /**
+     * Indicates if this is initialized or not
+     */
+    private boolean initialized = false;
+
+    /**
      * Create a (unique) propagator for no-goods recording and propagation.
      *
      * @param model the model that declares the propagator
@@ -145,6 +156,7 @@ public class PropNogoods extends Propagator<IntVar> {
         sat_trail_ = model.getEnvironment().makeInt();
         test_eq = new BitSet();
         fp = new ArrayDeque<>();
+        add_var = new ArrayList<>(16);
     }
 
     @Override
@@ -306,6 +318,18 @@ public class PropNogoods extends Propagator<IntVar> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Initializes this propagator
+     */
+    public void initialize(){
+        if (initialized) {
+            throw new SolverException("Nogoods store already initialized");
+        }
+        addVariable(add_var.toArray(new IntVar[add_var.size()]));
+        add_var.clear();
+        this.initialized = true;
+    }
+
+    /**
      * Creates or returns if already existing, the literal corresponding to :
      * <p>
      * <code>ivar</code> (<code>eq</code>?"=":"<=") <code>value</code>
@@ -341,7 +365,11 @@ public class PropNogoods extends Propagator<IntVar> {
 
         int pos;
         if ((pos = var2pos[vid]) == NO_ENTRY) {
-            addVariable(ivar);
+            if(initialized) {
+                addVariable(ivar);
+            }else {
+                add_var.add(ivar);
+            }
             pos = vars.length - 1;
             var2pos[vid] = pos;
         }
