@@ -268,7 +268,8 @@ constraint
     }
 	    CONSTRAINT IDENTIFIER LP e=expr {exps.add($e.exp);} (CM e=expr{exps.add($e.exp);})* RP anns=annotations SC
     {
-    FConstraint.make_constraint(mModel, datas, $IDENTIFIER.text, exps, $anns.anns);
+    String name = $IDENTIFIER.text;
+    FConstraint.valueOf(name).build(mModel, datas, name, exps, $anns.anns);
     }
 	;
 

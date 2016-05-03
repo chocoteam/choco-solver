@@ -27,19 +27,11 @@
 
 package org.chocosolver.parser.flatzinc.ast;
 
-import gnu.trove.map.hash.THashMap;
-import org.chocosolver.parser.flatzinc.FZNException;
-import org.chocosolver.parser.flatzinc.FznSettings;
-import org.chocosolver.parser.flatzinc.ast.constraints.IBuilder;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.Properties;
 
 /*
 * User : CPRUDHOM
@@ -49,80 +41,554 @@ import java.util.Properties;
 *
 * Constraint builder from flatzinc-like object.
 */
-public final class FConstraint {
+public enum FConstraint {
 
-    private static final String ERROR_MSG = "Cant load manager by reflection: ";
-
-    static Properties properties = new Properties();
-
-    private static THashMap<String, IBuilder> builders = new THashMap<>();
-
-    private static IBuilder builder;
-
-    private static String last = "";
-
-    static {
-        InputStream is = FConstraint.class.getResourceAsStream("/fzn_manager.properties");
-        try {
-            properties.load(is);
-        } catch (IOException e) {
-            throw new FZNException("Could not open fzn_manager.properties");
+    array_bool_and {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.ArrayBoolAndBuilder().build(model, id, exps, annotations, datas);
         }
-    }
-
-    private enum Annotation {
-        name
-    }
-
-    public static void make_constraint(Model aModel, Datas datas,
-                                       String id, List<Expression> exps, List<EAnnotation> annotations) {
-        if (!last.equals(id)) {
-            if (builders.containsKey(id)) {
-                builder = builders.get(id);
-            } else {
-                String name = properties.getProperty(id);
-                if (name == null) {
-                    throw new FZNException("Unknown constraint: " + id);
-                }
-                builder = (IBuilder) loadManager(name);
-                if (((FznSettings) aModel.getSettings()).printConstraint())
-                    System.out.printf("%% %s\n", name);
-                builders.put(id, builder);
-            }
-            last = id;
+    },
+    array_bool_element {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.ArrayElementBuilder().build(model, id, exps, annotations, datas);
         }
-        builder.build(aModel, id, exps, annotations, datas);
-        //readAnnotations(datas, annotations, c);
-    }
-
-
-    private static Object loadManager(String name) {
-        try {
-            return Class.forName(name).newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            throw new FZNException(ERROR_MSG + name);
+    },
+    array_bool_or {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.ArrayBoolOrBuilder().build(model, id, exps, annotations, datas);
         }
-    }
-
-    public static void readAnnotations(Datas datas, List<EAnnotation> annotations, Constraint[] cstr) {
-        for (int i = 0; i < annotations.size(); i++) {
-            EAnnotation eanno = annotations.get(i);
-            try {
-                Annotation varanno = Annotation.valueOf(eanno.id.value);
-                switch (varanno) {
-                    case name:
-                        String name = eanno.exps.get(0).toString();
-                        if (name.startsWith("\"") && name.endsWith("\"")) {
-                            name = name.substring(1, name.length() - 1);
-                        }
-                        datas.register(name, cstr);
-                        break;
-                    default:
-                        //                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
-                }
-            } catch (IllegalArgumentException ignored) {
-                //                        LOGGER.warn("% Unknown annotation :" + eanno.toString());
-            }
+    },
+    array_bool_xor {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.ArrayBoolXorBuilder().build(model, id, exps, annotations, datas);
         }
-    }
+    },
+    array_int_element {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.ArrayElementBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    array_var_bool_element {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.ArrayVarElementBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    array_var_int_element {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.ArrayVarElementBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool2int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.Bool2IntBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_and {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolAndBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_clause {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolClauseBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_eq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolEqBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_eq_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolEqReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_le {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolLeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_le_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolLeReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_lin_eq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinEqBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_lin_le {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinLeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_lt {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolLtBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_lt_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolLtReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_not {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolNotBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_or {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolOrBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bool_xor {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.BoolXorBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_abs {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntAbsBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_div {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntDivBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_eq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntEqBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_eq_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntEqReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_le {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_le_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLeReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_lin_eq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinEqBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_lin_eq_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinEqReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_lin_le {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinLeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_lin_le_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinLeReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_lin_ne {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinNeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_lin_ne_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLinNeReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_lt {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLtBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_lt_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntLtReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_max {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntMaxBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_min {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntMinBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_mod {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntModBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_ne {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntNeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_ne_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntNeReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_plus {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntPlusBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    int_times {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.IntTimesBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    alldifferentChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.AllDifferentBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    alldifferentBut0Choco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.AllDifferentBut0Builder().build(model, id, exps, annotations, datas);
+        }
+    },
+    amongChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.AmongBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    atleastChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.AtLeastBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    atmostChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.AtMostBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bin_packingChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.BinPackingBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bin_packing_capaChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.BinPackingCapaBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    bin_packing_loadChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.BinPackingLoadBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    circuitChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.CircuitBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    count_eqchoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.CountEqBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    cumulativeChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.CumulativeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    diffnChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.DiffNBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    distributeChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.DistributeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    exactlyChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.ExactlyBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    geostChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.GeostBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    globalCardinalityChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.GlobalCardinalityBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    globalCardinalityLowUpChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.GlobalCardinalityLowUpBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    inverseChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.InverseBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    knapsackChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.KnapsackBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    lex2Choco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.Lex2Builder().build(model, id, exps, annotations, datas);
+        }
+    },
+    lex_lessChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.LexLessBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    maximumChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.MaximumBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    memberChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.MemberBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    memberVarChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.MemberVarBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    memberReifChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.MemberReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    memberVarReifChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.MemberVarReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    minimumChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.MinimumBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    nvalueChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.NValueBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    regularChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.RegularBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    sortChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.SortBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    subcircuitChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.SubcircuitBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    tableChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.TableBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    value_precede_chain_intChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.ValuePrecedeChainInt().build(model, id, exps, annotations, datas);
+        }
+    },
+    count_eq_reif_choco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.global.CountEqReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_card {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetCardBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_diff {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetDiffBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_eq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetEqBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_eq_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetEqReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_in {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetInBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_in_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetInReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_intersect {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetIntersectBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_le {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetLeqBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_lt {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetLtBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_ne {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetNeBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_ne_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetNeReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_subset {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetSubsetBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_subset_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetSubsetReifBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_symdiff {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetSymdiffBuilder().build(model, id, exps, annotations, datas);
+        }
+    },
+    set_union {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            new org.chocosolver.parser.flatzinc.ast.constraints.SetUnionBuilder().build(model, id, exps, annotations, datas);
+        }
+    };
+
+    public abstract void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations);
 }
