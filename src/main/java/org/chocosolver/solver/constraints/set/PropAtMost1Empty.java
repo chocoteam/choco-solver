@@ -87,14 +87,14 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
     public void propagate(int v, int mask) throws ContradictionException {
         if (vars[v].getUB().getSize() == 0) {
             if (emptySetIndex.get() != -1) {
-                contradiction(vars[v], "");
+                fails(); // TODO: could be more precise, for explanation purpose
             } else {
                 emptySetIndex.set(v);
                 for (int i = 0; i < vars.length; i++) {
                     int s = vars[i].getUB().getSize();
                     if (i != v && s != vars[i].getLB().getSize()) {
                         if (s == 0) {
-                            contradiction(vars[i], "");
+                            fails(); // TODO: could be more precise, for explanation purpose
                         } else if (s == 1) {
                             vars[i].force(vars[i].getUB().iterator().next(), this);
                         }

@@ -279,8 +279,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         boolean solution = false;
         kill = true;
         boolean left = true;
-        while (!stop) {
-            if (isStopCriterionMet()) {
+        while(!stop){
+            if (isStopCriterionMet() || Thread.currentThread().isInterrupted()) {
                 stop = true;
             }
             switch (action) {
@@ -821,7 +821,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @see #removeAllStopCriteria()
      */
     public void addStopCriterion(Criterion... criterion) {
-        Collections.addAll(criteria, criterion);
+        if(criterion!=null) {
+            Collections.addAll(criteria, criterion);
+        }
     }
 
     /**
@@ -829,8 +831,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @param criterion criterion to remove
      */
     public void removeStopCriterion(Criterion... criterion) {
-        for (Criterion c : criterion) {
-            criteria.remove(c);
+        if(criterion!=null) {
+            for (Criterion c : criterion) {
+                criteria.remove(c);
+            }
         }
     }
 

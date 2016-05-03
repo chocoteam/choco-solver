@@ -107,7 +107,7 @@ public class PropDiffN extends Propagator<IntVar> {
                     if (mayOverlap(i, j)) {
                         overlappingBoxes.addEdge(i, j);
                         if (boxInstantiated(i) && boxInstantiated(j)) {
-                            contradiction(vars[i], "");
+                            fails(); // TODO: could be more precise, for explanation purpose
                         }
                     }
                 }
@@ -147,7 +147,7 @@ public class PropDiffN extends Propagator<IntVar> {
             yM = Math.max(yM, vars[j + n].getUB() + vars[j + 3 * n].getUB());
             am += vars[j + 2 * n].getLB() * vars[j + 3 * n].getLB();
             if (am > (xM - xm) * (yM - ym)) {
-                contradiction(vars[i], "");
+                fails(); // TODO: could be more precise, for explanation purpose
             }
         }
         // mandatory part based filtering

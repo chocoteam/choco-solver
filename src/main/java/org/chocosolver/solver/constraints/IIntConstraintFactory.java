@@ -245,6 +245,13 @@ public interface IIntConstraintFactory {
 		if (operator != Operator.EQ && operator != Operator.GT && operator != Operator.LT && operator != Operator.NQ) {
 			throw new SolverException("Unexpected operator for distance");
 		}
+		if (cste < 0) {
+			switch (operator) {
+				case EQ:
+				case LT:
+				default: throw new SolverException("Invalid PropDistanceXYC operator "+operator);
+			}
+		}
 		return new Constraint("DistanceXYC " + operator.name(), new PropDistanceXYC(ArrayUtils.toArray(var1, var2), operator, cste));
 	}
 
@@ -1167,11 +1174,11 @@ public interface IIntConstraintFactory {
 	 *     model.post(solver.arithm(weightSum, "<=", limit);
 	 * </pre>
 	 *
-	 * @param occurrences  number of occurrences of an item
-	 * @param weightSum capacity of the knapsack
-	 * @param energySum variable to maximize
-	 * @param weight       weight of each item
-	 * @param energy       energy of each item
+	 * @param occurrences  number of occurrences of every item
+	 * @param weightSum load of the knapsack
+	 * @param energySum profit of the knapsack
+	 * @param weight       weight of each item (must be >=0)
+	 * @param energy       energy of each item (must be >=0)
 	 */
 	default Constraint knapsack(IntVar[] occurrences, IntVar weightSum, IntVar energySum,
 								int[] weight, int[] energy) {

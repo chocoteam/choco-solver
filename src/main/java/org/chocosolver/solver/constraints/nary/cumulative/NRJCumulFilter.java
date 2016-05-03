@@ -106,7 +106,7 @@ public class NRJCumulFilter extends CumulFilter{
 				if(xMax>xMin){
 					capa.updateLowerBound((int)Math.ceil(surface/(xMax-xMin)-0.01),aCause);
 				}if(surface>(xMax-xMin)*camax){
-					aCause.contradiction(capa,"");
+					aCause.fails(); // TODO: could be more precise, for explanation purpose
 				}
 			}
 		}

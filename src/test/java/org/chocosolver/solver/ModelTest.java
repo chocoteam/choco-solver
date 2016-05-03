@@ -409,7 +409,14 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutions() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
-        Assert.assertEquals(m.findAllSolutions().count(), 2);
+        m.findAllSolutions();
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllSolutions2() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
+        Assert.assertEquals(m.streamSolutions().count(), 2);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -421,7 +428,14 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllOptimalSolutions() {
         Model m = ProblemMaker.makeGolombRuler(6);
-        Assert.assertEquals(m.findAllOptimalSolutions((IntVar) m.getHook("objective"), false).count(), 4);
+        m.findAllOptimalSolutions((IntVar) m.getHook("objective"), false);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllOptimalSolutions2() {
+        Model m = ProblemMaker.makeGolombRuler(6);
+        Assert.assertEquals(m.streamOptimalSolutions((IntVar) m.getHook("objective"), false).count(), 4);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -434,7 +448,7 @@ public class ModelTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
-    public void testFindAllSolutions2() {
+    public void testFindAllSolutions3() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
         m.eachSolutionWithMeasure((solution, measures) -> {
             System.out.printf("Found solution: %s%n with the following measures:%n%s%n",

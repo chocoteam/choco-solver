@@ -58,7 +58,7 @@ public class PropNotEmpty extends Propagator<SetVar> {
 	public void propagate(int evtmask) throws ContradictionException {
 		int e = vars[0].getUB().getSize();
 		if(e==0){
-			contradiction(vars[0],"");
+			fails(); // TODO: could be more precise, for explanation purpose
 		}else if(e==1){
 			vars[0].force(vars[0].getUB().iterator().next(), this);
 		}

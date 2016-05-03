@@ -115,6 +115,7 @@ public class VarSelectorFactory {
     /**
      * Selects the non instantiated variable with the smallest domain
      * Only for integer variables
+     * @param model model in which this selector is added
      * @return a variable selector choosing the variable with the smallest domain
      */
     public static VariableSelector<IntVar> minDomIntVar(Model model){
@@ -124,10 +125,11 @@ public class VarSelectorFactory {
     /**
      * Selects the non instantiated variable with the largest domain
      * Only for integer variables
+     * @param model model in which this selector is added
      * @return a variable selector choosing the variable with the largest domain
      */
-    public static VariableSelector<IntVar> maxDomIntVar(){
-        return new AntiFirstFail();
+    public static VariableSelector<IntVar> maxDomIntVar(Model model){
+        return new AntiFirstFail(model);
     }
 
     /**

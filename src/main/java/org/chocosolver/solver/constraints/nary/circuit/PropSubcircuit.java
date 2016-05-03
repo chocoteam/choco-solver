@@ -124,10 +124,10 @@ public class PropSubcircuit extends Propagator<IntVar> {
         int last = end[val].get();  // last in [0, n-1]
         int start = origin[var].get(); // start in [0, n-1]
         if (origin[val].get() != val) {
-            contradiction(vars[var], "");
+            fails(); // TODO: could be more precise, for explanation purpose
         }
         if (end[var].get() != var) {
-            contradiction(vars[var], "");
+            fails(); // TODO: could be more precise, for explanation purpose
         }
         if (val == start) {
             length.instantiateTo(size[start].get(), this);

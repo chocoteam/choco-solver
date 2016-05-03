@@ -180,7 +180,7 @@ public class StrategyTest {
         IntVar v1 = model.intVar("v1", 1, 5, false);
         IntVar v2 = model.intVar("v2", 3, 4, false);
         IntVar[] vs = new IntVar[]{v1, v2};
-        VariableSelector<IntVar> eval = new AntiFirstFail();
+        VariableSelector<IntVar> eval = new AntiFirstFail(model);
         IntVar va = eval.getVariable(vs);
         Assert.assertEquals(v1, va);
     }
@@ -273,7 +273,7 @@ public class StrategyTest {
     public void testAntiFirstFail2() {
         Model model = new Model();
         IntVar v1 = model.intVar("v1", 1, 5, false);
-        VariableEvaluator<IntVar> eval = new AntiFirstFail();
+        VariableEvaluator<IntVar> eval = new AntiFirstFail(model);
         double va = eval.evaluate(v1);
         Assert.assertEquals(-5.0, va);
     }

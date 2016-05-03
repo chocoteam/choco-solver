@@ -94,7 +94,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
             max = MAX;
             return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
         } else if (c == 0 && d == 0 && (a > 0 || b < 0)) // case 2
-            this.contradiction(var, "");
+            fails(); // TODO: could be more precise, for explanation purpose
         else if (c < 0 && d > 0 && (a > 0 || b < 0)) { // case 3
             max = Math.max(Math.abs(a), Math.abs(b));
             min = -max;
@@ -110,7 +110,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
             float high = Math.max(Math.max(ac, ad), Math.max(bc, bd));
             min = (int) Math.round(Math.ceil(low));
             max = (int) Math.round(Math.floor(high));
-            if (min > max) this.contradiction(var, "");
+            if (min > max) this.fails(); // TODO: could be more precise, for explanation purpose
             return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
         }
         return false;
