@@ -45,7 +45,7 @@ public class PreprocessFZN {
 			String line = br.readLine();
 			HashMap<String,String> b2i = new HashMap();
 			while(line!=null){
-				if(line.contains("constraint bool2int")){
+				if(line.contains("constraint ool2int")){
 					line = line.replace('(','#');
 					line = line.replace(')','#');
 					String cur = line.split("#")[1];
