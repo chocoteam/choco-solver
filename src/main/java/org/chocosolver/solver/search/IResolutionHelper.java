@@ -447,7 +447,7 @@ public interface IResolutionHelper extends ISelf<Model> {
     /**
      * Attempts optimize the value of the <i>objectives</i> variable w.r.t. to an optimization criteria.
      * Finds and stores the optimal solution, if any.
-     * Moreover, the objective variables are ordered wrt to their significance.
+     * Moreover, the objective variables are ordered wrt their significance.
      * The first objective variable is more significant or equally significant to the second one,
      * which in turn is more significant or equally significant to the third one, etc.
      * On an optimal solution of a maximization problem, the first variable is maximized, then the second one is maximized, etc.

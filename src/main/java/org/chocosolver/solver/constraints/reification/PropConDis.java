@@ -168,14 +168,13 @@ public class PropConDis extends Propagator<BoolVar> {
      * Initializes this propagator
      */
     public void initialize(){
-        if (initialized) {
-            throw new SolverException("Disjunctions store already initialized");
+        if (!initialized) {
+            if (add_var.size() > 0) {
+                addVariable(add_var.toArray(new BoolVar[add_var.size()]));
+            }
+            add_var.clear();
+            this.initialized = true;
         }
-        if(add_var.size()>0) {
-            addVariable(add_var.toArray(new BoolVar[add_var.size()]));
-        }
-        add_var.clear();
-        this.initialized = true;
     }
 
 
@@ -186,6 +185,7 @@ public class PropConDis extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        assert initialized:"PropConDis is not initialized";
         try {
             if (!isworking) {
                 isworking = true;

@@ -98,6 +98,7 @@ public class SetCstrsTest {
 		s.addClausesBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
 		s.getSolver().showStatistics();
 		s.getSolver().showSolutions();
+		s.getMinisat().getPropSat().initialize();
 		try {
 			s.getSolver().propagate();
 		} catch (ContradictionException e) {

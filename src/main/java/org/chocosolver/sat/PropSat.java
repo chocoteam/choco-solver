@@ -38,7 +38,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -118,6 +117,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        assert initialized:"PropSat is not initialized";
         if (!sat_.ok_) fails();
         sat_.cancelUntil(0);
         storeEarlyDeductions();
@@ -200,15 +200,14 @@ public class PropSat extends Propagator<BoolVar> {
     /**
      * Initializes this propagator
      */
-    public void initialize(){
-        if (initialized) {
-            throw new SolverException("Clauses store already initialized");
+    public void initialize() {
+        if (!initialized) {
+            if (add_var.size() > 0) {
+                addVariable(add_var.toArray(new BoolVar[add_var.size()]));
+            }
+            add_var.clear();
+            this.initialized = true;
         }
-        if(add_var.size()>0) {
-            addVariable(add_var.toArray(new BoolVar[add_var.size()]));
-        }
-        add_var.clear();
-        this.initialized = true;
     }
 
     /**
@@ -225,7 +224,7 @@ public class PropSat extends Propagator<BoolVar> {
         int var = indices_.get(expr);
         if (var == -1) {
             var = sat_.newVariable();
-            assert (vars.length == var);
+            assert (vars.length + add_var.size() == var);
             if(initialized) {
                 addVariable(expr);
             }else {

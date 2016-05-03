@@ -38,7 +38,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -161,6 +160,7 @@ public class PropNogoods extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        assert initialized:"PropNogoods is not initialized";
         if (!sat_.ok_) fails();
         fp.clear();
         sat_.cancelUntil(0); // to deal with learnt clauses, only called on coarse grain propagation
@@ -320,15 +320,14 @@ public class PropNogoods extends Propagator<IntVar> {
     /**
      * Initializes this propagator
      */
-    public void initialize(){
-        if (initialized) {
-            throw new SolverException("Nogoods store already initialized");
+    public void initialize() {
+        if (!initialized) {
+            if (add_var.size() > 0) {
+                addVariable(add_var.toArray(new IntVar[add_var.size()]));
+            }
+            add_var.clear();
+            this.initialized = true;
         }
-        if(add_var.size()>0) {
-            addVariable(add_var.toArray(new IntVar[add_var.size()]));
-        }
-        add_var.clear();
-        this.initialized = true;
     }
 
     /**
@@ -369,10 +368,11 @@ public class PropNogoods extends Propagator<IntVar> {
         if ((pos = var2pos[vid]) == NO_ENTRY) {
             if(initialized) {
                 addVariable(ivar);
+                pos = vars.length - 1;
             }else {
                 add_var.add(ivar);
+                pos = add_var.size() - 1;
             }
-            pos = vars.length - 1;
             var2pos[vid] = pos;
         }
         long lvalue = eq ? value : leq(value);
