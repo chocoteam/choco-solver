@@ -67,6 +67,7 @@ import java.util.List;
 *
 * Constraint builder from flatzinc-like object.
 */
+@SuppressWarnings("Duplicates")
 public enum FConstraint {
 
     array_bool_and {
@@ -1408,7 +1409,7 @@ public enum FConstraint {
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
-            model.allEqual(new SetVar[]{a, b}).reifyWith(r);
+            model.allEqual(a, b).reifyWith(r);
 
         }
     },
@@ -1484,7 +1485,7 @@ public enum FConstraint {
             SetVar c = model.setVar(StringUtils.randomName(), new int[]{}, env);
             IntVar min = model.intVar(StringUtils.randomName(), env[0], env[env.length - 1]);
 
-            BoolVar _b1 = model.subsetEq(new SetVar[]{a, b}).reify();
+            BoolVar _b1 = model.subsetEq(a, b).reify();
 
             model.post(model.partition(new SetVar[]{ab, b}, a),
                     model.partition(new SetVar[]{ba, a}, b),
