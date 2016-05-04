@@ -107,14 +107,11 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Print (succint) features of the solver given in argument
      */
     default void printFeatures() {
-        Attribute.printSuccint(_me());
-    }
-
-    /**
-     * Print all features of the solver given in argument
-     */
-    default void printAllFeatures() {
-        Attribute.printAll(_me());
+        _me().getOut().printf("- Model[%s] features:\n", _me().getModel().getName());
+        _me().getOut().printf("\tVariables : %d\n", _me().getModel().getNbVars());
+        _me().getOut().printf("\tConstraints : %d\n", _me().getModel().getNbCstrs());
+        _me().getOut().printf("\tDefault search strategy : %s\n", _me().getModel().getSolver().isDefaultSearchUsed() ? "yes" : "no");
+        _me().getOut().printf("\tCompleted search strategy : %s\n", _me().isSearchCompleted() ? "yes" : "no");
     }
 
     /**

@@ -33,8 +33,6 @@ package org.chocosolver.solver.search.measure;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 
-import java.lang.reflect.Field;
-
 /**
  * Object which stores resolution information to get statistics
  *
@@ -324,22 +322,18 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
     @Override
     public IMeasures copyMeasures() {
         MeasuresRecorder ret = new MeasuresRecorder(model);
-        for (Field f : this.getClass().getDeclaredFields()) {
-            // XXX
-            if (!f.isAccessible()) {
-                f.setAccessible(true);
-            }
-            if (f.getType().isPrimitive()) {
-                try {
-                    f.set(ret, f.get(this));
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    // XXX
-                    e.printStackTrace();
-                }
-            } else {
-                // TODO what if the type is not primitive ?
-            }
-        }
+        ret.timeCount = this.timeCount;
+        ret.nodeCount = this.nodeCount;
+        ret.backtrackCount = this.backtrackCount;
+        ret.restartCount = this.restartCount;
+        ret.failCount = this.failCount;
+        ret.solutionCount = this.solutionCount;
+        ret.depth = this.depth;
+        ret.maxDepth = this.maxDepth;
+        ret.hasObjective = this.hasObjective;
+        ret.objectiveOptimal = this.objectiveOptimal;
+        ret.readingTimeCount = this.readingTimeCount;
+        ret.startingTime = this.startingTime;
         return ret;
     }
 
