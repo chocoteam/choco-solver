@@ -53,6 +53,8 @@ import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
+import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
+import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
 import org.chocosolver.solver.constraints.nary.channeling.*;
 import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
@@ -670,25 +672,17 @@ public interface IIntConstraintFactory {
 	 *                  (which counts from 1 to n instead of from 0 to n-1)
 	 */
 	default Constraint binPacking(IntVar[] itemBin, int[] itemSize, IntVar[] binLoad, int offset) {
-		int nbBins = binLoad.length;
-		int nbItems = itemBin.length;
-		Model s = itemBin[0].getModel();
-		BoolVar[][] xbi = s.boolVarMatrix("xbi", nbBins, nbItems);
+		Model model = itemBin[0].getModel();
+		// redundant filtering
 		int sum = 0;
 		for (int is : itemSize) {
 			sum += is;
 		}
-		IntVar sumView = s.intVar(sum);
-		// constraints
-		Constraint[] bpcons = new Constraint[nbItems + nbBins + 1];
-		for (int i = 0; i < nbItems; i++) {
-			bpcons[i] = boolsIntChanneling(ArrayUtils.getColumn(xbi, i), itemBin[i], offset);
-		}
-		for (int b = 0; b < nbBins; b++) {
-			bpcons[nbItems + b] = scalar(xbi[b], itemSize, "=", binLoad[b]);
-		}
-		bpcons[nbItems + nbBins] = sum(binLoad, "=", sumView);
-		return Constraint.merge("BinPacking",bpcons);
+		return Constraint.merge("BinPacking", new Constraint("BinPacking",
+				new PropItemToLoad(itemBin,itemSize,binLoad, offset),
+				new PropLoadToItem(itemBin,itemSize,binLoad, offset)),
+				model.sum(binLoad, "=", sum)
+		);
 	}
 
 	/**
