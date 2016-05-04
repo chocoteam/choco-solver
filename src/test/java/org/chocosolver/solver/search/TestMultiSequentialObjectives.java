@@ -51,32 +51,13 @@ public class TestMultiSequentialObjectives {
 		m.arithm(a, "<", b).post();
 		m.arithm(b, "<", c).post();// a<b<c
         m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b, c));
-		Solution s = m.findLexOptimalSolution(vals, true, true);
+		Solution s = m.findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
 		Assert.assertEquals(s.getIntVal(a).intValue(), 32);
 		Assert.assertEquals(s.getIntVal(b).intValue(), 33);
 		Assert.assertEquals(s.getIntVal(c).intValue(), 34);
 	}
 
-	/**
-	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
-	 * best solution is 32,33,34
-	 */
-	@Test
-	public void simpleLexTest2(){
-		Model m = new Model();
-		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
-		IntVar[] vals = new IntVar[] { a, b, c };
-		m.sum(vals, "<", 100).post();// a+b+c<100
-		m.arithm(a, "<=", b).post();
-		m.arithm(b, "<=", c).post();// a<b<c
-        m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b, c));
-		Solution s = m.findLexOptimalSolution(vals, true, false);
-		Assert.assertNotNull(s);
-		Assert.assertEquals(s.getIntVal(a).intValue(), 33);
-		Assert.assertEquals(s.getIntVal(b).intValue(), 33);
-		Assert.assertEquals(s.getIntVal(c).intValue(), 33);
-	}
 
     /**
      * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
@@ -91,31 +72,11 @@ public class TestMultiSequentialObjectives {
         m.arithm(a, "<", b).post();
         m.arithm(b, "<", c).post();// a<b<c
         m.getSolver().set(SearchStrategyFactory.inputOrderUBSearch(a, b, c));
-        Solution s = m.findLexOptimalSolution(vals, false, true);
+        Solution s = m.findLexOptimalSolution(vals, false);
         Assert.assertNotNull(s);
         Assert.assertEquals(s.getIntVal(a).intValue(), 0);
         Assert.assertEquals(s.getIntVal(b).intValue(), 1);
         Assert.assertEquals(s.getIntVal(c).intValue(), 2);
-    }
-
-    /**
-     * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
-     * best solution is 32,33,34
-     */
-    @Test
-    public void simpleLexTest4(){
-        Model m = new Model();
-        IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
-        IntVar[] vals = new IntVar[] { a, b, c };
-        m.sum(vals, "<", 100).post();// a+b+c<100
-        m.arithm(a, "<=", b).post();
-        m.arithm(b, "<=", c).post();// a<b<c
-        m.getSolver().set(SearchStrategyFactory.inputOrderUBSearch(a, b, c));
-        Solution s = m.findLexOptimalSolution(vals, false, false);
-        Assert.assertNotNull(s);
-        Assert.assertEquals(s.getIntVal(a).intValue(), 0);
-        Assert.assertEquals(s.getIntVal(b).intValue(), 0);
-        Assert.assertEquals(s.getIntVal(c).intValue(), 0);
     }
 
 }

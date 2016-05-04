@@ -460,14 +460,12 @@ public interface IResolutionHelper extends ISelf<Model> {
      *          any other correct solution s1..sn
      * @param maximize
      *          to maximize the objective, false to minimize.
-     *  @param strict
-     *          are objectives strictly lexicographically ordered (<i>true</i>), or equalities are allowed
-     * @param stop
+     *  @param stop
      *          stop criterion are added before search and removed after search.
      * @return A solution with the optimal objectives value, null if no solution exists or search was stopped before a
      *         solution could be found. If null, check if a criterion was met to find out was caused the null.
      */
-    default Solution findLexOptimalSolution(IntVar[] objectives, boolean maximize, boolean strict, Criterion... stop) {
+    default Solution findLexOptimalSolution(IntVar[] objectives, boolean maximize, Criterion... stop) {
         if (objectives == null || objectives.length == 0) {
             return findSolution(stop);
         }
@@ -495,7 +493,7 @@ public interface IResolutionHelper extends ISelf<Model> {
             if (plint != null) {
                 plint.updateIntVector(bestFound);
             } else {
-                plint = new PropLexInt(mobj, bestFound, strict);
+                plint = new PropLexInt(mobj, bestFound, true);
                 clint = new Constraint("lex objectives", plint);
                 clint.post();
             }
