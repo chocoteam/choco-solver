@@ -138,7 +138,7 @@ public class ClauseTest {
         BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1]);
         model.addClauses(tree);
-
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             bvars[1].instantiateTo(0, Cause.Null);
@@ -155,7 +155,7 @@ public class ClauseTest {
         BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1]);
         model.addClauses(tree);
-
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             bvars[1].instantiateTo(1, Cause.Null);
@@ -172,7 +172,7 @@ public class ClauseTest {
         BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not());
         model.addClauses(tree);
-
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             bvars[0].instantiateTo(0, Cause.Null);
@@ -189,7 +189,7 @@ public class ClauseTest {
         BoolVar[] bvars = model.boolVarArray("b", 2);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not());
         model.addClauses(tree);
-
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             bvars[1].instantiateTo(1, Cause.Null);
@@ -206,7 +206,7 @@ public class ClauseTest {
         BoolVar[] bvars = model.boolVarArray("b", 3);
         LogOp tree = LogOp.or(bvars[0], bvars[1].not(), bvars[2].not());
         model.addClauses(tree);
-
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             bvars[0].instantiateTo(0, Cause.Null);
@@ -268,6 +268,7 @@ public class ClauseTest {
                         LogOp.and(bvars[1], bvars[2]),
                         bvars[0]);
                 model.addClauses(tree);
+                model.getMinisat().getPropSat().initialize();
                 try {
                     model.getSolver().propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);
@@ -304,7 +305,7 @@ public class ClauseTest {
         bs[0] = s.boolVar("b0");
         s.addClauseFalse(bs[0]);
         PropSat sat = s.getMinisat().getPropSat();
-
+        sat.initialize();
         e.worldPush();
         s.getSolver().propagate();
         for (int i = 1; i < n; i++) {

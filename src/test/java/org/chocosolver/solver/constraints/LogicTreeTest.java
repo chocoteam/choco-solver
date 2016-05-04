@@ -300,6 +300,7 @@ public class LogicTreeTest {
                 LogOp.and(b1.not(), b2.not())
         );
         model.addClauses(l);
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);
@@ -322,6 +323,7 @@ public class LogicTreeTest {
 
         LogOp l = LogOp.or(b1.not(), b2.not());
         model.addClauses(l);
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);
@@ -344,6 +346,7 @@ public class LogicTreeTest {
         model.arithm(a,">",0).reifyWith(b2);
 
         model.addClauses(new BoolVar[0], new BoolVar[]{b1, b2});
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);

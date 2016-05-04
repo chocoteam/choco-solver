@@ -84,6 +84,16 @@ public class PropSat extends Propagator<BoolVar> {
     private TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
 
     /**
+     * Store new added variables when {@link #initialized} is <i>false</i>
+     */
+    private ArrayList<BoolVar> add_var;
+
+    /**
+     * Indicates if this is initialized or not
+     */
+    private boolean initialized = false;
+
+    /**
      * Create a (unique) propagator for clauses recording and propagation.
      *
      * @param model the solver that declares the propagator
@@ -97,6 +107,7 @@ public class PropSat extends Propagator<BoolVar> {
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = model.getEnvironment().makeInt();
+        add_var = new ArrayList<>(16);
     }
 
     @Override
@@ -106,6 +117,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        assert initialized:"PropSat is not initialized";
         if (!sat_.ok_) fails();
         sat_.cancelUntil(0);
         storeEarlyDeductions();
@@ -186,6 +198,19 @@ public class PropSat extends Propagator<BoolVar> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Initializes this propagator
+     */
+    public void initialize() {
+        if (!initialized) {
+            if (add_var.size() > 0) {
+                addVariable(add_var.toArray(new BoolVar[add_var.size()]));
+            }
+            add_var.clear();
+            this.initialized = true;
+        }
+    }
+
+    /**
      * Creates, or returns if already existing, the literal corresponding to :
      * <p>
      * <code>expr</code> is <tt>true</tt>
@@ -199,8 +224,12 @@ public class PropSat extends Propagator<BoolVar> {
         int var = indices_.get(expr);
         if (var == -1) {
             var = sat_.newVariable();
-            assert (vars.length == var);
-            addVariable(expr);
+            assert (vars.length + add_var.size() == var);
+            if(initialized) {
+                addVariable(expr);
+            }else {
+                add_var.add(expr);
+            }
             indices_.put(expr, var);
         }
         return var;

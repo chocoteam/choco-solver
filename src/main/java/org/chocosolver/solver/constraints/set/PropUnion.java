@@ -87,7 +87,7 @@ public class PropUnion extends Propagator<SetVar> {
                 }
             }
             if (mate == -1) {
-                contradiction(vars[k], "");
+                fails(); // TODO: could be more precise, for explanation purpose
             } else if (mate != -2) {
                 vars[mate].force(element, this);
             }
@@ -147,7 +147,7 @@ public class PropUnion extends Propagator<SetVar> {
                         }
                     }
                     if (mate == -1) {
-                        contradiction(vars[k], "");
+                        fails(); // TODO: could be more precise, for explanation purpose
                     } else if (mate != -2) {
                         vars[mate].force(j, this);
                     }

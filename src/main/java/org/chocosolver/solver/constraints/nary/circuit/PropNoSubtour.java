@@ -128,14 +128,14 @@ public class PropNoSubtour extends Propagator<IntVar> {
         int last = end[val].get(); // last in [0,n-1]
         int start = origin[var].get(); // start in [0,n-1]
         if (origin[val].get() != val) {
-            contradiction(vars[var], "");
+            fails(); // TODO: could be more precise, for explanation purpose
         }
         if (end[var].get() != var) {
-            contradiction(vars[var], "");
+            fails(); // TODO: could be more precise, for explanation purpose
         }
         if (val == start) {
             if (size[start].get() != n) {
-                contradiction(vars[var], "");
+                fails(); // TODO: could be more precise, for explanation purpose
             }
         } else {
             size[start].add(size[val].get());

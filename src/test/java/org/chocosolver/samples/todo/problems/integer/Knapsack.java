@@ -84,7 +84,7 @@ public class Knapsack extends AbstractProblem {
         for (int i = 0, j = 3; i < no; i++) {
             energies[i] = data.data[j++];
             volumes[i] = data.data[j++];
-            nbOmax[i] = (int) Math.ceil(capacites[1] / volumes[i]);
+            nbOmax[i] = volumes[i]==0?42:(int) Math.ceil(capacites[1] / volumes[i]);
         }
     }
 
@@ -141,6 +141,8 @@ public class Knapsack extends AbstractProblem {
 
     ////////////////////////////////////////// DATA ////////////////////////////////////////////////////////////////////
     enum Data {
+		k0(new int[]{0, 550, 10,
+          100, 0, 49, 25, 54, 0, 12, 41, 78, 94, 30, 75, 65, 40, 31, 59, 90, 95, 50, 99}),
         k10(new int[]{500, 550, 10,
                 100, 79, 49, 25, 54, 99, 12, 41, 78, 94, 30, 75, 65, 40, 31, 59, 90, 95, 50, 99}),
         k20(new int[]{1000, 1100, 20,

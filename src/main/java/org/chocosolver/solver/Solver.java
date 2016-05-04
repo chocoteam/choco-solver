@@ -279,8 +279,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         boolean solution = false;
         kill = true;
         boolean left = true;
-        while (!stop) {
-            if (isStopCriterionMet()) {
+        while(!stop){
+            if (isStopCriterionMet() || Thread.currentThread().isInterrupted()) {
                 stop = true;
             }
             switch (action) {
@@ -360,7 +360,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * - initialize the Move and the search strategy
      */
     private void initialize() {
-
+        // for fast construction of "external" constraint, they are initialized once for all
+        if(mModel.minisat != null){
+            mModel.minisat.getPropSat().initialize();
+        }
+        if(mModel.nogoods != null){
+            mModel.nogoods.getPropNogoods().initialize();
+        }
+        if(mModel.condis != null){
+            mModel.condis.getPropCondis().initialize();
+        }
         // note jg : new (used to be in model)
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(PropagationEngineFactory.DEFAULT.make(mModel));
@@ -821,7 +830,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @see #removeAllStopCriteria()
      */
     public void addStopCriterion(Criterion... criterion) {
-        Collections.addAll(criteria, criterion);
+        if(criterion!=null) {
+            Collections.addAll(criteria, criterion);
+        }
     }
 
     /**
@@ -829,8 +840,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @param criterion criterion to remove
      */
     public void removeStopCriterion(Criterion... criterion) {
-        for (Criterion c : criterion) {
-            criteria.remove(c);
+        if(criterion!=null) {
+            for (Criterion c : criterion) {
+                criteria.remove(c);
+            }
         }
     }
 

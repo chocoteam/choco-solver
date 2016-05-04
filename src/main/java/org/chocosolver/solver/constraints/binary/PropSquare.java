@@ -226,7 +226,7 @@ public class PropSquare extends Propagator<IntVar> {
         if (vars[0].hasEnumeratedDomain()) {
             int ub = vars[1].getUB();
             vrms.clear();
-            vrms.setOffset(vars[0].getLB());
+            vrms.setOffset(vars[1].getLB());
             for (int value = vars[1].getLB(); value <= ub; value = vars[1].nextValue(value)) {
                 if (!vars[0].contains(sqr(value))) {
                     vrms.add(value);

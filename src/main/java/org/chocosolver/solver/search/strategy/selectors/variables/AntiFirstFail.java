@@ -29,6 +29,8 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
+import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.IntVar;
@@ -43,12 +45,30 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class AntiFirstFail implements VariableSelector<IntVar>,VariableEvaluator<IntVar> {
 
+    private IStateInt lastIdx; // index of the last non-instantiated variable
+
+    /**
+     * <b>First fail</b> variable selector.
+     * @param model reference to the model (does not define the variable scope)
+     */
+    public AntiFirstFail(Model model){
+        lastIdx = model.getEnvironment().makeInt(0);
+    }
+
     @Override
     public IntVar getVariable(IntVar[] variables) {
         int large_idx = -1;
         int large_dsize = Integer.MIN_VALUE;
-        for (int idx = 0; idx < variables.length; idx++) {
+        boolean got = false;
+        for (int idx = lastIdx.get(); idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
+
+            if (!got && !variables[idx].isInstantiated()) {
+                //got is just to call 'set' at most once
+                lastIdx.set(idx);
+                got = true;
+            }
+
             if (dsize > 1 && dsize > large_dsize) {
                 large_dsize = dsize;
                 large_idx = idx;
