@@ -38,9 +38,12 @@ import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,6 +102,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      *     }
      * </pre>
      *
+     * Note that only decision variables (specified in the search heuristic) will be stored
+     *
      * @param stop optional criterion to stop the search before finding all/best solution
      * @return a {@link Solution} if and only if a solution has been found, <tt>null</tt> otherwise.
      */
@@ -143,6 +148,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      *     }
      * </pre>
      *
+     * Note that only decision variables (specified in the search heuristic) will be stored
+     *
      * @param stop optional criterions to stop the search before finding all/best solution
      * @return a list that contained the found solutions.
      */
@@ -182,6 +189,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      * 	return solutions;
      * }
      * </pre>
+     *
+     * Note that only decision variables (specified in the search heuristic) will be stored
      *
      * @param stop optional criterion to stop the search before finding all/best solution
      * @return a list that contained the found solutions.
@@ -250,6 +259,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      *     }
      * </pre>
      *
+     * Note that only the objective and decision variables (specified in the search heuristic) will be stored
+     *
      * @param objective integer variable to optimize
      * @param maximize  set to <tt>true</tt> to solve a maximization problem, set to <tt>false</tt> to solve a minimization
      *                  problem.
@@ -264,6 +275,10 @@ public interface IResolutionHelper extends ISelf<Model> {
     default Solution findOptimalSolution(IntVar objective, boolean maximize, Criterion... stop) {
         _me().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
         _me().getSolver().addStopCriterion(stop);
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
         Solution s = new Solution(_me());
         while (_me().solve()) {
             s.record();
@@ -316,6 +331,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      *     }
      * </pre>
      *
+     * Note that only objective and decision variables (specified in the search heuristic) will be stored
+     *
      * @param objective the variable to optimize
      * @param maximize  set to <tt>true</tt> to solve a maximization problem,
      *                  set to <tt>false</tt> to solve a minimization problem.
@@ -324,6 +341,10 @@ public interface IResolutionHelper extends ISelf<Model> {
      */
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().getSolver().addStopCriterion(stop);
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
         _me().findOptimalSolution(objective, maximize);
         if (!_me().getSolver().isStopCriterionMet()
                 && _me().getSolver().getSolutionCount() > 0) {
@@ -376,6 +397,9 @@ public interface IResolutionHelper extends ISelf<Model> {
      *     }
      *     }
      * </pre>
+	 *
+	 * Note that only the decision variables (specified in the search heuristic) will be stored
+	 * This means the objective has to be declared in the search heuristic
      *
      * @param objective the variable to optimize
      * @param maximize  set to <tt>true</tt> to solve a maximization problem, set to <tt>false</tt> to solve a minimization
@@ -385,6 +409,10 @@ public interface IResolutionHelper extends ISelf<Model> {
      */
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().getSolver().addStopCriterion(stop);
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
         _me().findOptimalSolution(objective, maximize);
         if (!_me().getSolver().isStopCriterionMet()
                 && _me().getSolver().getSolutionCount() > 0) {
@@ -427,6 +455,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      * 	return pareto.getParetoFront();
      * }
      * </pre>
+	 *
+	 * Note that only objective and decision variables (specified in the search heuristic) will be stored
      *
      * @param objectives the array of variables to optimize
      * @param maximize   set to <tt>true</tt> to solve a maximization problem, set to <tt>false</tt> to solve a minimization
@@ -436,6 +466,10 @@ public interface IResolutionHelper extends ISelf<Model> {
      */
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
         _me().getSolver().addStopCriterion(stop);
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
         ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objectives);
         while (_me().solve()) {
             pareto.onSolution();
@@ -454,23 +488,27 @@ public interface IResolutionHelper extends ISelf<Model> {
      *
      * Note that if a stop criteria stops the search eagerly, no optimal solution may have been found.
      * In that case, the best solution, if at least one has been found, is returned.
+	 *
+	 * Note that only objective and decision variables (specified in the search heuristic) will be stored
      *
      * @param objectives
      *          the list of objectives to find the optimal. A solution o1..on is optimal if lexicographically better than
      *          any other correct solution s1..sn
      * @param maximize
      *          to maximize the objective, false to minimize.
-     *  @param strict
-     *          are objectives strictly lexicographically ordered (<i>true</i>), or equalities are allowed
-     * @param stop
+     *  @param stop
      *          stop criterion are added before search and removed after search.
      * @return A solution with the optimal objectives value, null if no solution exists or search was stopped before a
      *         solution could be found. If null, check if a criterion was met to find out was caused the null.
      */
-    default Solution findLexOptimalSolution(IntVar[] objectives, boolean maximize, boolean strict, Criterion... stop) {
+    default Solution findLexOptimalSolution(IntVar[] objectives, boolean maximize, Criterion... stop) {
         if (objectives == null || objectives.length == 0) {
             return findSolution(stop);
         }
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
         _me().getSolver().addStopCriterion(stop);
         Solution sol = null;
         Constraint clint = null;
@@ -495,7 +533,7 @@ public interface IResolutionHelper extends ISelf<Model> {
             if (plint != null) {
                 plint.updateIntVector(bestFound);
             } else {
-                plint = new PropLexInt(mobj, bestFound, strict);
+                plint = new PropLexInt(mobj, bestFound, true);
                 clint = new Constraint("lex objectives", plint);
                 clint.post();
             }
@@ -517,6 +555,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      * <p>
      * The consumer and the criterion should not be linked ; instead use {@link ACounter} sub-classes.
      * </p>
+	 *
+	 * Note that only decision variables (specified in the search heuristic) will be stored
      *
      * @param cons the consumer of solution and measure couples
      * @param stop optional criterions to stop the search before finding all/best solution
@@ -529,6 +569,4 @@ public interface IResolutionHelper extends ISelf<Model> {
         }
         _me().getSolver().removeStopCriterion(stop);
     }
-
-
 }

@@ -40,6 +40,7 @@ import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.Learn;
@@ -174,8 +175,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     private List<Criterion> criteria;
 
-    /** Indicates if the search loops unexpectedly ends (set to <tt>true</tt> in that case). */
-    private boolean kill;
+    /**
+     * Current state of the solver
+     */
+    private SearchState state;
 
     /** Indicates if the default search loop is in use (set to <tt>true</tt> in that case). */
     private boolean defaultSearch = false;
@@ -227,7 +230,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         action = initialize;
         mMeasures = new MeasuresRecorder(mModel);
         criteria = new ArrayList<>();
-        kill = true;
+        state = SearchState.NEW;
         searchMonitors = new SearchMonitorList();
         set(new MoveBinaryDFS());
         setStandardPropagation();
@@ -254,7 +257,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         if (getModel().getObjective() == null && !satPb) {
             throw new SolverException("No objective variable has been defined whereas policy implies optimization");
         }
-        kill = true;
         stop = !canBeRepaired;
         if (action == initialize) {
             searchMonitors.beforeInitialize();
@@ -277,11 +279,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     private boolean searchLoop() {
         boolean solution = false;
-        kill = true;
+        state = SearchState.RUNNING;
         boolean left = true;
         while(!stop){
-            if (isStopCriterionMet() || Thread.currentThread().isInterrupted()) {
-                stop = true;
+            stop = isStopCriterionMet();
+            if (stop || Thread.currentThread().isInterrupted()) {
+                if(stop){
+                    state = SearchState.STOPPED;
+                }else{
+                    state = SearchState.KILLED;
+                }
             }
             switch (action) {
                 case initialize:
@@ -433,7 +440,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * - update statistics
      */
     private void closeSearch() {
-        kill = false;
+        state = SearchState.TERMINATED;
         feasible = FALSE;
         if (mMeasures.getSolutionCount() > 0) {
             feasible = TRUE;
@@ -601,7 +608,14 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @return <tt>true</tt> if the search loops ends unexpectedly (externally killed, for instance).
      */
     public boolean hasEndedUnexpectedly() {
-        return kill;
+        return state == SearchState.KILLED;
+    }
+
+    /**
+     * @return the state of this search. This method is designed for use in monitoring of the system state, not for synchronization control.
+     */
+    public SearchState getState(){
+        return state;
     }
 
     /**
@@ -620,13 +634,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public int getSearchWorldIndex() {
         return searchWorldIndex;
-    }
-
-    /**
-     * @return <tt>true</tt> if the resolution already began, <tt>false</tt> otherwise
-     */
-    public boolean hasResolutionBegun() {
-        return action != initialize;
     }
 
     /**

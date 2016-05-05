@@ -27,53 +27,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/**
- * @author Jean-Guillaume Fages
- * @since 21/03/14
- * Created by IntelliJ IDEA.
- */
-package org.chocosolver.samples;
+package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solution;
-import org.chocosolver.solver.objective.ParetoOptimizer;
-import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import java.util.List;
+import org.chocosolver.solver.Settings;
+import org.testng.annotations.DataProvider;
 
 /**
- * Trivial multi-objective optimization computing pareto solutions
- *
- * @author Jimmy Liang, Jean-Guillaume Fages
+ * @author Alexandre LEBRUN
  */
-public class ParetoFront {
+public class TestData {
 
-	@Test(groups = "1s", timeOut = 60000)
-	public void testPareto(){
-		// simple model
-		Model model = new Model();
-		IntVar a = model.intVar("a", 0, 2, false);
-		IntVar b = model.intVar("b", 0, 2, false);
-		IntVar c = model.intVar("c", 0, 2, false);
-		model.arithm(a, "+", b, "=", c).post();
 
-		// create an object that will store the best solutions and remove dominated ones
-		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b});
-		model.getSolver().plugMonitor(po);
+    private final static Settings buildSettings(final boolean withViews) {
+        return new Settings() {
+            @Override
+            public boolean enableViews() {
+                return withViews;
+            }
+        };
+    }
 
-		// optimization
-		while(model.solve());
+    @DataProvider(name = "boundsAndViews")
+    public static Object[][] boundsAndViews() {
+        Settings withViews = buildSettings(true);
+        Settings withoutViews = buildSettings(false);
+        return new Object[][]{
+                new Object[]{true, withViews},
+                new Object[]{true, withoutViews},
+                new Object[]{false, withViews},
+                new Object[]{false, withoutViews}
+        };
+    }
 
-		// retrieve the pareto front
-		List<Solution> paretoFront = po.getParetoFront();
-		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
-		Assert.assertEquals(3, paretoFront.size());
-		for(Solution s:paretoFront){
-			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
-			Assert.assertEquals(2,(int)s.getIntVal(c));
-		}
-	}
+
 }

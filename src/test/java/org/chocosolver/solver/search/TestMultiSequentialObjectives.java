@@ -33,8 +33,11 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 
 public class TestMultiSequentialObjectives {
 
@@ -51,7 +54,7 @@ public class TestMultiSequentialObjectives {
 		m.arithm(a, "<", b).post();
 		m.arithm(b, "<", c).post();// a<b<c
         m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b, c));
-		Solution s = m.findLexOptimalSolution(vals, true, true);
+		Solution s = m.findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
 		Assert.assertEquals(s.getIntVal(a).intValue(), 32);
 		Assert.assertEquals(s.getIntVal(b).intValue(), 33);
@@ -59,8 +62,8 @@ public class TestMultiSequentialObjectives {
 	}
 
 	/**
-	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
-	 * best solution is 32,33,34
+	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100 and a+b=c<br />
+	 * best solution is 24,25,49
 	 */
 	@Test
 	public void simpleLexTest2(){
@@ -68,15 +71,17 @@ public class TestMultiSequentialObjectives {
 		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
 		IntVar[] vals = new IntVar[] { a, b, c };
 		m.sum(vals, "<", 100).post();// a+b+c<100
-		m.arithm(a, "<=", b).post();
-		m.arithm(b, "<=", c).post();// a<b<c
-        m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b, c));
-		Solution s = m.findLexOptimalSolution(vals, true, false);
+		m.arithm(a, "<", b).post();
+		m.arithm(b, "<", c).post();// a<b<c
+		m.arithm(a,"+",b,"=",c).post();
+        m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b));
+		Solution s = m.findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
-		Assert.assertEquals(s.getIntVal(a).intValue(), 33);
-		Assert.assertEquals(s.getIntVal(b).intValue(), 33);
-		Assert.assertEquals(s.getIntVal(c).intValue(), 33);
+		Assert.assertEquals(s.getIntVal(a).intValue(), 24);
+		Assert.assertEquals(s.getIntVal(b).intValue(), 25);
+		Assert.assertEquals(s.getIntVal(c).intValue(), 49);
 	}
+
 
     /**
      * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
@@ -91,31 +96,28 @@ public class TestMultiSequentialObjectives {
         m.arithm(a, "<", b).post();
         m.arithm(b, "<", c).post();// a<b<c
         m.getSolver().set(SearchStrategyFactory.inputOrderUBSearch(a, b, c));
-        Solution s = m.findLexOptimalSolution(vals, false, true);
+        Solution s = m.findLexOptimalSolution(vals, false);
         Assert.assertNotNull(s);
         Assert.assertEquals(s.getIntVal(a).intValue(), 0);
         Assert.assertEquals(s.getIntVal(b).intValue(), 1);
         Assert.assertEquals(s.getIntVal(c).intValue(), 2);
     }
 
-    /**
-     * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
-     * best solution is 32,33,34
-     */
-    @Test
-    public void simpleLexTest4(){
-        Model m = new Model();
-        IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
-        IntVar[] vals = new IntVar[] { a, b, c };
-        m.sum(vals, "<", 100).post();// a+b+c<100
-        m.arithm(a, "<=", b).post();
-        m.arithm(b, "<=", c).post();// a<b<c
-        m.getSolver().set(SearchStrategyFactory.inputOrderUBSearch(a, b, c));
-        Solution s = m.findLexOptimalSolution(vals, false, false);
-        Assert.assertNotNull(s);
-        Assert.assertEquals(s.getIntVal(a).intValue(), 0);
-        Assert.assertEquals(s.getIntVal(b).intValue(), 0);
-        Assert.assertEquals(s.getIntVal(c).intValue(), 0);
-    }
+	@Test
+	public void simpleLexTest4(){
+		Model m = new Model();
+		SetVar sv = m.setVar(new int[]{}, new int[]{0,1,2,3,4,5});
+		int[] size = new int[]{8,6,3,3,3};
+		IntVar card = m.intVar(0,5);
+		IntVar load = m.intVar(0,10);
+		m.cardinality(sv,card).post();
+		m.sum(sv,size,0,load,true).post();
+        m.getSolver().set(SearchStrategyFactory.setVarSearch(sv),inputOrderLBSearch(card,load));
+		Solution s = m.findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
+		Assert.assertNotNull(s);
+		System.out.println(s);
+		Assert.assertTrue(s.getIntVal(load)==9);
+		Assert.assertTrue(s.getIntVal(card)==2);
+	}
 
 }

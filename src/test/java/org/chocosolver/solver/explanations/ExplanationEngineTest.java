@@ -724,6 +724,7 @@ public class ExplanationEngineTest {
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Solver r = model.getSolver();
         Explanation ex = null;
+        model.getMinisat().getPropSat().initialize();
         try {
             r.propagate();
             IntStrategy is = inputOrderLBSearch(bs);
@@ -750,6 +751,7 @@ public class ExplanationEngineTest {
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;
         Solver r = model.getSolver();
+        model.getMinisat().getPropSat().initialize();
         try {
             r.propagate();
             IntStrategy is = inputOrderLBSearch(bs);
@@ -778,6 +780,7 @@ public class ExplanationEngineTest {
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;
         Solver r = model.getSolver();
+        model.getMinisat().getPropSat().initialize();
         try {
             r.propagate();
             IntStrategy is = inputOrderLBSearch(bs);
@@ -807,6 +810,7 @@ public class ExplanationEngineTest {
         ExplanationEngine ee = new ExplanationEngine(model, true, false);
         Explanation ex = null;
         Solver r = model.getSolver();
+        model.getMinisat().getPropSat().initialize();
         try {
             r.propagate();
             IntStrategy is = inputOrderUBSearch(bs);

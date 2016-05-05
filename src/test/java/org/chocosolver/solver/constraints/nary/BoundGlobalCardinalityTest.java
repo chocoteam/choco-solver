@@ -49,7 +49,7 @@ import static org.testng.Assert.assertTrue;
  * @author Charles Prud'homme
  * @since 16/06/11
  */
-public class BoundGlobalCardinlityTest {
+public class BoundGlobalCardinalityTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test0() throws ContradictionException {

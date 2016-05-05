@@ -63,6 +63,7 @@ public class PropConDisTest {
         BoolVar b1 = s.arithm(a, "=", 9).reify();
         BoolVar b2 = s.arithm(a, "=", 10).reify();
         s.addConstructiveDisjunction(b1, b2);
+        s.getConDisStore().getPropCondis().initialize();
         s.getSolver().propagate();
         assertEquals(a.getDomainSize(), 2);
         assertEquals(a.getLB(), 9);
@@ -80,6 +81,7 @@ public class PropConDisTest {
         Constraint c2 = s.arithm(Y, "-", X, "<=", -9);
 
         s.addConstructiveDisjunction(c1.reify(), c2.reify());
+        s.getConDisStore().getPropCondis().initialize();
         s.getSolver().propagate();
         assertEquals(X.getDomainSize(), 4);
         assertEquals(Y.getDomainSize(), 4);

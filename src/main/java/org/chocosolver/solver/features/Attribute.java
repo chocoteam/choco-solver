@@ -27,35 +27,66 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.trace;
+package org.chocosolver.solver.features;
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 
 /**
- * List of attributes that can be extracted from a Model.
- * Created by cprudhom on 16/03/15.
- * Project: choco.
+ * <p>
+ * Project: choco-solver.
+ *
  * @author Charles Prud'homme
+ * @since 04/05/2016.
  */
-public enum Attribute {
+public enum Attribute implements IAttribute{
+
+    /**
+     * Number of variables declared
+     */
+    NV {
+        @Override
+        public double evaluate(Model model) {
+            return model.getNbVars();
+        }
+
+        @Override
+        public String description() {
+            return "Number of variables declared";
+        }
+    },
+
+    /**
+     * Number of constraints posted
+     */
+    NC {
+        @Override
+        public double evaluate(Model model) {
+            return model.getNbCstrs();
+        }
+
+        @Override
+        public String description() {
+            return "Number of constraints declared";
+        }
+    },
 
     /**
      * Normalized mean constraints per variable
      */
     NMCPV {
         @Override
-        public double evaluate(Solver solver) {
+        public double evaluate(Model model) {
             double m = 0.0;
             int n = 0;
-            for (Variable var : solver.getModel().getVars()) {
+            for (Variable var : model.getVars()) {
                 m += (var.getNbProps() - m) / (++n);
             }
             int p = 0;
-            for (Constraint c : solver.getModel().getCstrs()) {
+            for (Constraint c : model.getCstrs()) {
                 p += c.getPropagators().length;
             }
             return m / p;
@@ -71,10 +102,10 @@ public enum Attribute {
      */
     NMUCAA {
         @Override
-        public double evaluate(Solver solver) {
+        public double evaluate(Model model) {
             double u = 0.0, a = 0.0;
 
-            for (Constraint c : solver.getModel().getCstrs()) {
+            for (Constraint c : model.getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     a++;
                     if (p.getNbVars() == 1) {
@@ -95,10 +126,10 @@ public enum Attribute {
      */
     NMBCAA {
         @Override
-        public double evaluate(Solver solver) {
+        public double evaluate(Model model) {
             double u = 0.0, a = 0.0;
 
-            for (Constraint c : solver.getModel().getCstrs()) {
+            for (Constraint c : model.getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     a++;
                     if (p.getNbVars() == 2) {
@@ -119,10 +150,10 @@ public enum Attribute {
      */
     NMTCAA {
         @Override
-        public double evaluate(Solver solver) {
+        public double evaluate(Model model) {
             double u = 0.0, a = 0.0;
 
-            for (Constraint c : solver.getModel().getCstrs()) {
+            for (Constraint c : model.getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     a++;
                     if (p.getNbVars() == 3) {
@@ -143,10 +174,10 @@ public enum Attribute {
      */
     NMNCAA {
         @Override
-        public double evaluate(Solver solver) {
+        public double evaluate(Model model) {
             double u = 0.0, a = 0.0;
 
-            for (Constraint c : solver.getModel().getCstrs()) {
+            for (Constraint c : model.getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     a++;
                     if (p.getNbVars() > 3) {
@@ -167,15 +198,15 @@ public enum Attribute {
      */
     NMVPC {
         @Override
-        public double evaluate(Solver solver) {
+        public double evaluate(Model model) {
             double m = 0.0;
             int n = 0;
-            for (Constraint c : solver.getModel().getCstrs()) {
+            for (Constraint c : model.getCstrs()) {
                 for (Propagator p : c.getPropagators()) {
                     m += (p.getNbVars() - m) / (++n);
                 }
             }
-            return m / solver.getModel().getNbVars();
+            return m / model.getNbVars();
         }
 
         @Override
@@ -188,10 +219,10 @@ public enum Attribute {
      */
     NMDV {
         @Override
-        public double evaluate(Solver solver) {
-            AbstractStrategy strat = solver.getStrategy();
+        public double evaluate(Model model) {
+            AbstractStrategy strat = model.getSolver().getStrategy();
             if (strat != null) {
-                return strat.getVariables().length * 1.0 / solver.getModel().getVars().length;
+                return strat.getVariables().length * 1.0 / model.getVars().length;
             } else return 1.0;
 
         }
@@ -204,38 +235,12 @@ public enum Attribute {
 
 
     /**
-     * Method to evaluate a specific attribute over a model
-     * @param solver to evaluate
-     * @return the value of the attribute
+     * @return the set of basic attributes
      */
-    public abstract double evaluate(Solver solver);
-
-    /**
-     * @return a short description of the attribute
-     */
-    public abstract String description();
-
-    /**
-     * Print all declared attributes and their values
-     * @param solver solver to evaluate
-     */
-    public static void printAll(Solver solver) {
-        printSuccint(solver);
-        for (Attribute a : Attribute.values()) {
-            solver.getOut().printf("\t%s : %.3f\n", a.description(), a.evaluate(solver));
-        }
-    }
-
-    /**
-     * Print basic features of a model
-     * @param solver to evaluate
-     */
-    public static void printSuccint(Solver solver) {
-        solver.getOut().printf("- Model[%s] features:\n", solver.getModel().getName());
-        solver.getOut().printf("\tVariables : %d\n", solver.getModel().getNbVars());
-        solver.getOut().printf("\tConstraints : %d\n", solver.getModel().getNbCstrs());
-        solver.getOut().printf("\tDefault search strategy : %s\n", solver.getModel().getSolver().isDefaultSearchUsed()?"yes":"no");
-        solver.getOut().printf("\tCompleted search strategy : %s\n", solver.isSearchCompleted()?"yes":"no");
+    public Attribute[] basicAttributes(){
+        return new Attribute[]{
+                NV, NC
+        };
     }
 
 }

@@ -27,69 +27,67 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.exception;
+package org.chocosolver.solver.features;
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.variables.Variable;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+import org.chocosolver.solver.Model;
+
+import java.util.Arrays;
 
 /**
- * A specific <code>Exception</code> to deal with contradiction.
- * <p/>
- * A contradiction appears when at least one <code>Variable</code> object is not coherent
- * regarding all or part of <code>Constraint</code> network.
- * Empty domain, instantiation to an out-of-domain value, etc. throws contradiction.
- * <p/>
- * For performance consideration, a <code>ContradictionException</code> is created every time a contradiction
- * occurs. A unique object is build and set with specific case information.
+ * <p>
+ * Project: choco-solver.
  *
- * @author Xavier Lorca
  * @author Charles Prud'homme
- * @version 0.01, june 2010
- * @since 0.01
+ * @author Arnaud Malapert
+ * @since 04/05/2016.
  */
-public final class ContradictionException extends Exception {
-
-    public ICause c;
-    public Variable v;
-    public String s;
-
-    public ContradictionException() {
-//        does not call super() on purpose
-        c = Cause.Null;
-        v = null;
-        s = null;
-    }
+public class Features implements IFeatures {
 
     /**
-     * Throws the unique <code>ContradictionException</code> filled with the specified parameters.
-     *
-     * @param c the constraint at the origin of the contradiction
-     * @param v the variable concerned by the contradiction
-     * @param s the message to print
-     * @return ContradictionException the filled exception
+     * For serialization purpose
      */
-    public ContradictionException set(ICause c, Variable v, String s) {
-        assert c != null;
-        this.c = c;
-        this.v = v;
-        this.s = s;
-        return this;
-    }
+    private static final long serialVersionUID = 1323411473753839215L;
+    /**
+     * Name of the model from which the features are extracted
+     */
+    private final String modelName;
 
     /**
-     * {@inheritDoc}
+     * List of attributes extracted on creation
      */
+    private final TObjectDoubleHashMap<Attribute> values;
+
+    /**
+     * Make a "snapshot" of a model's features
+     * @param model model to extract features from
+     * @param attrs list of attribute to extract
+     */
+    public Features(Model model, Attribute... attrs) {
+        this.modelName = model.getName();
+        values = new TObjectDoubleHashMap<>(15, 05f);
+        Arrays.stream(attrs).forEach(a -> values.put(a, a.evaluate(model)));
+    }
+
+
     @Override
-    public String toString() {
-        return "CONTRADICTION (" + (c == null ? "" : c.toString() + ", ") + v + ") : " + s;
+    public String getModelName() {
+        return modelName;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public synchronized Throwable fillInStackTrace() {
-        return this;
+    public int getNbVars() {
+        return (int) getValue(Attribute.NV);
     }
+
+    @Override
+    public int getNbCstrs() {
+        return (int) getValue(Attribute.NC);
+    }
+
+    @Override
+    public double getValue(Attribute attribute) {
+        return values.get(attribute);
+    }
+
 }
