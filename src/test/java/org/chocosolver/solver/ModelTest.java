@@ -426,6 +426,15 @@ public class ModelTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
+    public void testFindOptimalSolutionWithSearch() {
+        Model m = ProblemMaker.makeGolombRuler(7);
+        m.getSolver().set(inputOrderLBSearch((IntVar[]) m.getHook("ticks")));
+        Solution s = m.findOptimalSolution((IntVar) m.getHook("objective"), false);
+        Assert.assertNotNull(s);
+        Assert.assertTrue(s.getIntVal((IntVar) m.getHook("objective"))==25);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
     public void testFindAllOptimalSolutions() {
         Model m = ProblemMaker.makeGolombRuler(6);
         m.findAllOptimalSolutions((IntVar) m.getHook("objective"), false);

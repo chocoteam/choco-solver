@@ -265,7 +265,7 @@ public interface IResolutionHelper extends ISelf<Model> {
     default Solution findOptimalSolution(IntVar objective, boolean maximize, Criterion... stop) {
         _me().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
         _me().getSolver().addStopCriterion(stop);
-        Solution s = new Solution(_me());
+        Solution s = new Solution(_me(),ArrayUtils.append(_me().getSolver().getStrategy().getVariables(),new IntVar[]{objective}));
         while (_me().solve()) {
             s.record();
         }
