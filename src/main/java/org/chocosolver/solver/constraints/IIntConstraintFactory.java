@@ -1655,7 +1655,15 @@ public interface IIntConstraintFactory {
 	 * @param tuples    the relation between the variables (list of allowed/forbidden tuples)
 	 */
 	default Constraint table(IntVar[] vars, Tuples tuples) {
-		return table(vars,tuples,tuples.isFeasible()?"CT+":"GAC3rm");
+		String algo = "GAC3rm";
+		if(tuples.isFeasible()){
+			if(tuples.nbTuples()>500){
+				algo = "CT+";
+			}else{
+				algo = "GACSTR+";
+			}
+		}
+		return table(vars,tuples,algo);
 	}
 
 	/**
