@@ -33,8 +33,11 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
 
 public class TestMultiSequentialObjectives {
 
@@ -99,5 +102,22 @@ public class TestMultiSequentialObjectives {
         Assert.assertEquals(s.getIntVal(b).intValue(), 1);
         Assert.assertEquals(s.getIntVal(c).intValue(), 2);
     }
+
+	@Test
+	public void simpleLexTest4(){
+		Model m = new Model();
+		SetVar sv = m.setVar(new int[]{}, new int[]{0,1,2,3,4,5});
+		int[] size = new int[]{8,6,3,3,3};
+		IntVar card = m.intVar(0,5);
+		IntVar load = m.intVar(0,10);
+		m.cardinality(sv,card).post();
+		m.sum(sv,size,0,load,true).post();
+        m.getSolver().set(SearchStrategyFactory.setVarSearch(sv),inputOrderLBSearch(card,load));
+		Solution s = m.findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
+		Assert.assertNotNull(s);
+		System.out.println(s);
+		Assert.assertTrue(s.getIntVal(load)==9);
+		Assert.assertTrue(s.getIntVal(card)==2);
+	}
 
 }
