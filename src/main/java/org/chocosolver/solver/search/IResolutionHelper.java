@@ -41,6 +41,7 @@ import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -481,7 +482,7 @@ public interface IResolutionHelper extends ISelf<Model> {
         // 2. try to find a first solution
         while (_me().solve()) {
             if (sol == null) {
-                sol = new Solution(_me());
+                sol = new Solution(_me(), ArrayUtils.append(_me().getSolver().getStrategy().getVariables(),objectives));
             }
             sol.record();
             // 3. extract values of each objective

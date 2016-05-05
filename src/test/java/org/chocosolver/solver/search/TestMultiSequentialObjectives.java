@@ -58,6 +58,27 @@ public class TestMultiSequentialObjectives {
 		Assert.assertEquals(s.getIntVal(c).intValue(), 34);
 	}
 
+	/**
+	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100 and a+b=c<br />
+	 * best solution is 24,25,49
+	 */
+	@Test
+	public void simpleLexTest2(){
+		Model m = new Model();
+		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
+		IntVar[] vals = new IntVar[] { a, b, c };
+		m.sum(vals, "<", 100).post();// a+b+c<100
+		m.arithm(a, "<", b).post();
+		m.arithm(b, "<", c).post();// a<b<c
+		m.arithm(a,"+",b,"=",c).post();
+        m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b));
+		Solution s = m.findLexOptimalSolution(vals, true);
+		Assert.assertNotNull(s);
+		Assert.assertEquals(s.getIntVal(a).intValue(), 24);
+		Assert.assertEquals(s.getIntVal(b).intValue(), 25);
+		Assert.assertEquals(s.getIntVal(c).intValue(), 49);
+	}
+
 
     /**
      * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
