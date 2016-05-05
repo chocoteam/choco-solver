@@ -402,35 +402,35 @@ public class ModelTest {
     public void testFindSolution() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
         for (int i = 0; i < 2; i++) {
-            Assert.assertNotNull(m.findSolution());
+            Assert.assertNotNull(m.getSolver().findSolution());
         }
-        Assert.assertNull(m.findSolution());
+        Assert.assertNull(m.getSolver().findSolution());
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutions() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
-        m.findAllSolutions();
+        m.getSolver().findAllSolutions();
         Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutions2() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
-        Assert.assertEquals(m.streamSolutions().count(), 2);
+        Assert.assertEquals(m.getSolver().streamSolutions().count(), 2);
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testFindOptimalSolution() {
         Model m = ProblemMaker.makeGolombRuler(10);
-        Assert.assertNotNull(m.findOptimalSolution((IntVar) m.getHook("objective"), false));
+        Assert.assertNotNull(m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false));
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testFindOptimalSolutionWithSearch() {
         Model m = ProblemMaker.makeGolombRuler(7);
         m.getSolver().set(inputOrderLBSearch((IntVar[]) m.getHook("ticks")));
-        Solution s = m.findOptimalSolution((IntVar) m.getHook("objective"), false);
+        Solution s = m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false);
         Assert.assertNotNull(s);
         Assert.assertTrue(s.getIntVal((IntVar) m.getHook("objective"))==25);
     }
@@ -438,14 +438,14 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllOptimalSolutions() {
         Model m = ProblemMaker.makeGolombRuler(6);
-        m.findAllOptimalSolutions((IntVar) m.getHook("objective"), false);
+        m.getSolver().findAllOptimalSolutions((IntVar) m.getHook("objective"), false);
         Assert.assertEquals(m.getSolver().getSolutionCount(), 4);
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllOptimalSolutions2() {
         Model m = ProblemMaker.makeGolombRuler(6);
-        Assert.assertEquals(m.streamOptimalSolutions((IntVar) m.getHook("objective"), false).count(), 4);
+        Assert.assertEquals(m.getSolver().streamOptimalSolutions((IntVar) m.getHook("objective"), false).count(), 4);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -454,7 +454,7 @@ public class ModelTest {
         IntVar[] ticks = (IntVar[]) m.getHook("ticks");
         m.clearObjective();
         m.getSolver().showSolutions();
-		List<Solution> front = m.findParetoFront(ticks, false);
+		List<Solution> front = m.getSolver().findParetoFront(ticks, false);
 		for(Solution s:front){
 			System.out.println(s.getIntVal(ticks[0]));
 		}
@@ -464,7 +464,7 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutions3() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
-        m.eachSolutionWithMeasure((solution, measures) -> {
+        m.getSolver().eachSolutionWithMeasure((solution, measures) -> {
             System.out.printf("Found solution: %s%n with the following measures:%n%s%n",
                     solution.toString(),
                     measures.toOneLineString());

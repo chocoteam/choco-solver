@@ -29,10 +29,7 @@
  */
 package org.chocosolver.solver.search;
 
-import org.chocosolver.solver.ISelf;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
 import org.chocosolver.solver.objective.ParetoOptimizer;
@@ -43,7 +40,6 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +60,7 @@ import java.util.stream.StreamSupport;
  * @author Guillaume Lelouet
  * @since 25/04/2016.
  */
-public interface IResolutionHelper extends ISelf<Model> {
+public interface IResolutionHelper extends ISelf<Solver> {
 
     /**
      * Attempts to find a solution of the declared problem.
@@ -108,11 +104,11 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a {@link Solution} if and only if a solution has been found, <tt>null</tt> otherwise.
      */
     default Solution findSolution(Criterion... stop) {
-        _me().getSolver().addStopCriterion(stop);
+        _me().addStopCriterion(stop);
         boolean found = _me().solve();
-        _me().getSolver().removeStopCriterion(stop);
+        _me().removeStopCriterion(stop);
         if (found) {
-            return new Solution(_me()).record();
+            return new Solution(_me().getModel()).record();
         } else {
             return null;
         }
@@ -154,12 +150,12 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a list that contained the found solutions.
      */
     default List<Solution> findAllSolutions(Criterion... stop) {
-        _me().getSolver().addStopCriterion(stop);
+        _me().addStopCriterion(stop);
         List<Solution> solutions = new ArrayList<>();
         while (_me().solve()) {
-            solutions.add(new Solution(_me()).record());
+            solutions.add(new Solution(_me().getModel()).record());
         }
-        _me().getSolver().removeStopCriterion(stop);
+        _me().removeStopCriterion(stop);
         return solutions;
     }
 
@@ -196,16 +192,16 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a list that contained the found solutions.
      */
     default Stream<Solution> streamSolutions(Criterion... stop) {
-        _me().getSolver().addStopCriterion(stop);
+        _me().addStopCriterion(stop);
         Spliterator<Solution> it = new Spliterator<Solution>() {
 
             @Override
             public boolean tryAdvance(Consumer<? super Solution> action) {
                 if (_me().solve()) {
-                    action.accept(new Solution(_me()).record());
+                    action.accept(new Solution(_me().getModel()).record());
                     return true;
                 }
-                _me().getSolver().removeStopCriterion(stop);
+                _me().removeStopCriterion(stop);
                 return false;
             }
 
@@ -273,18 +269,18 @@ public interface IResolutionHelper extends ISelf<Model> {
      * </ul>
      */
     default Solution findOptimalSolution(IntVar objective, boolean maximize, Criterion... stop) {
-        _me().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
-        _me().getSolver().addStopCriterion(stop);
-		if(_me().getSolver().getStrategy()!=null) {
+        _me().getModel().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
+        _me().addStopCriterion(stop);
+		if(_me().getStrategy()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
-			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+			_me().set(_me().getStrategy(), objSearch);
 		}
-        Solution s = new Solution(_me());
+        Solution s = new Solution(_me().getModel());
         while (_me().solve()) {
             s.record();
         }
-        _me().getSolver().removeStopCriterion(stop);
-        return _me().getSolver().isFeasible() == ESat.TRUE ? s : null;
+        _me().removeStopCriterion(stop);
+        return _me().isFeasible() == ESat.TRUE ? s : null;
     }
 
     /**
@@ -318,7 +314,7 @@ public interface IResolutionHelper extends ISelf<Model> {
      * <pre>
      *     {@code
      *     _me().findOptimalSolution(objective, maximize, stop);
-     *     if (!_me().getSolver().isStopCriterionMet()  &&
+     *     if (!_me().isStopCriterionMet()  &&
      *          model.getSolver().getMeasures().getSolutionCount() > 0) {
      *         int opt = _model.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
      *         model.getSolver().reset();
@@ -340,22 +336,22 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a list that contained the solutions found.
      */
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
-        _me().getSolver().addStopCriterion(stop);
-		if(_me().getSolver().getStrategy()!=null) {
+        _me().addStopCriterion(stop);
+		if(_me().getStrategy()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
-			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+			_me().set(_me().getStrategy(), objSearch);
 		}
         _me().findOptimalSolution(objective, maximize);
-        if (!_me().getSolver().isStopCriterionMet()
-                && _me().getSolver().getSolutionCount() > 0) {
-            _me().getSolver().removeStopCriterion(stop);
-            int opt = _me().getSolver().getObjectiveManager().getBestSolutionValue().intValue();
-            _me().getSolver().reset();
-            _me().clearObjective();
-            _me().arithm(objective, "=", opt).post();
+        if (!_me().isStopCriterionMet()
+                && _me().getSolutionCount() > 0) {
+            _me().removeStopCriterion(stop);
+            int opt = _me().getObjectiveManager().getBestSolutionValue().intValue();
+            _me().reset();
+            _me().getModel().clearObjective();
+            _me().getModel().arithm(objective, "=", opt).post();
             return findAllSolutions(stop);
         } else {
-            _me().getSolver().removeStopCriterion(stop);
+            _me().removeStopCriterion(stop);
             return Collections.emptyList();
         }
     }
@@ -408,22 +404,22 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a list that contained the solutions found.
      */
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
-        _me().getSolver().addStopCriterion(stop);
-		if(_me().getSolver().getStrategy()!=null) {
+        _me().addStopCriterion(stop);
+		if(_me().getStrategy()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
-			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+			_me().set(_me().getStrategy(), objSearch);
 		}
         _me().findOptimalSolution(objective, maximize);
-        if (!_me().getSolver().isStopCriterionMet()
-                && _me().getSolver().getSolutionCount() > 0) {
-            _me().getSolver().removeStopCriterion(stop);
-            int opt = _me().getSolver().getObjectiveManager().getBestSolutionValue().intValue();
-            _me().getSolver().reset();
-            _me().clearObjective();
-            _me().arithm(objective, "=", opt).post();
+        if (!_me().isStopCriterionMet()
+                && _me().getSolutionCount() > 0) {
+            _me().removeStopCriterion(stop);
+            int opt = _me().getObjectiveManager().getBestSolutionValue().intValue();
+            _me().reset();
+            _me().getModel().clearObjective();
+            _me().getModel().arithm(objective, "=", opt).post();
             return streamSolutions(stop);
         } else {
-            _me().getSolver().removeStopCriterion(stop);
+            _me().removeStopCriterion(stop);
             return Stream.empty();
         }
     }
@@ -465,16 +461,16 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @return a list that contained the solutions found.
      */
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
-        _me().getSolver().addStopCriterion(stop);
-		if(_me().getSolver().getStrategy()!=null) {
+        _me().addStopCriterion(stop);
+		if(_me().getStrategy()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
-			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+			_me().set(_me().getStrategy(), objSearch);
 		}
         ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objectives);
         while (_me().solve()) {
             pareto.onSolution();
         }
-        _me().getSolver().removeStopCriterion(stop);
+        _me().removeStopCriterion(stop);
         return pareto.getParetoFront();
     }
 
@@ -505,23 +501,23 @@ public interface IResolutionHelper extends ISelf<Model> {
         if (objectives == null || objectives.length == 0) {
             return findSolution(stop);
         }
-		if(_me().getSolver().getStrategy()!=null) {
+		if(_me().getStrategy()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
-			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+			_me().set(_me().getStrategy(), objSearch);
 		}
-        _me().getSolver().addStopCriterion(stop);
+        _me().addStopCriterion(stop);
         Solution sol = null;
         Constraint clint = null;
         PropLexInt plint = null;
         // 1. copy objective variables and transform it if necessary
         IntVar[] mobj = new IntVar[objectives.length];
         for (int i = 0; i < objectives.length; i++) {
-            mobj[i] = maximize ? _me().intMinusView(objectives[i]) : objectives[i];
+            mobj[i] = maximize ? _me().getModel().intMinusView(objectives[i]) : objectives[i];
         }
         // 2. try to find a first solution
         while (_me().solve()) {
             if (sol == null) {
-                sol = new Solution(_me());
+                sol = new Solution(_me().getModel());
             }
             sol.record();
             // 3. extract values of each objective
@@ -539,9 +535,9 @@ public interface IResolutionHelper extends ISelf<Model> {
             }
         }
         if (clint != null) {
-            _me().unpost(clint);
+            _me().getModel().unpost(clint);
         }
-        _me().getSolver().removeStopCriterion(stop);
+        _me().removeStopCriterion(stop);
         return sol;
     }
 
@@ -562,11 +558,11 @@ public interface IResolutionHelper extends ISelf<Model> {
      * @param stop optional criterions to stop the search before finding all/best solution
      */
     default void eachSolutionWithMeasure(BiConsumer<Solution, IMeasures> cons, Criterion... stop) {
-        _me().getSolver().addStopCriterion(stop);
-        Solution s = new Solution(_me());
+        _me().addStopCriterion(stop);
+        Solution s = new Solution(_me().getModel());
         while (_me().solve()) {
-            cons.accept(s.record(), _me().getSolver().getMeasures());
+            cons.accept(s.record(), _me().getMeasures());
         }
-        _me().getSolver().removeStopCriterion(stop);
+        _me().removeStopCriterion(stop);
     }
 }
