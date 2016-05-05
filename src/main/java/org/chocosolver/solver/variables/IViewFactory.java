@@ -88,7 +88,7 @@ public interface IViewFactory extends ISelf<Model> {
         if (cste == 0) {
             return var;
         }
-        String name = "(" + var.getName() + "+" + cste + ")";
+        String name = "(" + var.getName() + (cste >= 0 ? "+":"-") + Math.abs(cste) + ")";
         if(var.isInstantiated()) {
             return _me().intVar(name, var.getValue() + cste);
         }

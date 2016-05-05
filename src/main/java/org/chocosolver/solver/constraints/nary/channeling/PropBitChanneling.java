@@ -152,10 +152,23 @@ public class PropBitChanneling extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
+        if(octet.getUB() < 0 || getValueFromBits() > octet.getUB() || getMaxValueFromBits() < octet.getLB()) {
+            return ESat.FALSE;
+        }
         if (isCompletelyInstantiated()) {
             return ESat.eval(octet.getValue() == getValueFromBits());
         }
         return ESat.UNDEFINED;
+    }
+
+    private int getMaxValueFromBits() {
+        int word = 0;
+        for (int i = 0; i < SIZE; i++) {
+            if(bits[i].contains(1)) {
+                word |= (1 << i);
+            }
+        }
+        return word;
     }
 
     /**

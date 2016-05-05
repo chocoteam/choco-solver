@@ -687,7 +687,7 @@ public interface IIntConstraintFactory {
 
 	/**
 	 * Creates an channeling constraint between an integer variable and a set of boolean variables.
-	 * Maps the boolean assignments variables bVars with the standard assignment variable var.
+	 * Maps the boolean assignments variables bVars with the standard assignment variable var. <br>
 	 * var = i <-> bVars[i-offset] = 1
 	 *
 	 * @param bVars  array of boolean variables
