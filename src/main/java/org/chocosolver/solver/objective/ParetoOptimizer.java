@@ -59,8 +59,6 @@ public class ParetoOptimizer implements IMonitorSolution {
     // Set of incomparable and Pareto-best solutions
     private LinkedList<Solution> paretoFront;
 
-    // Variables to store in each solution (decision variables by default)
-   	private Variable[] variablesToStore;
     private Model model;
 
     // Allow to recycle (dominated) Solution objects
@@ -89,15 +87,13 @@ public class ParetoOptimizer implements IMonitorSolution {
      *     while(model.solve());
      *     List<Solution> paretoFront = paretoRecorder.getParetoFront();
      *
+     * The Solutions store decision variables (those declared in the search strategy)
+	 * BEWARE: requires the objectives to be declared in the search strategy
+     *
      * @param policy    optimization policy : either MINIMIZE or MAXIMIZE
      * @param objectives    objective variables (must all be optimized in the same direction)
-     * @param otherVariablesToStore variables, other than objectives, to store in every solution
-     *                              (stores objective variables only by default)
      */
-    public ParetoOptimizer(final ResolutionPolicy policy, final IntVar[] objectives, Variable... otherVariablesToStore) {
-        HashSet<Variable> vrs = new HashSet<>();
-        Collections.addAll(vrs, ArrayUtils.append(otherVariablesToStore, objectives));
-        this.variablesToStore = vrs.toArray(new Variable[vrs.size()]);
+    public ParetoOptimizer(final ResolutionPolicy policy, final IntVar[] objectives) {
         this.paretoFront = new LinkedList<>();
         this.objectives = objectives.clone();
         this.policy = policy;
@@ -126,7 +122,7 @@ public class ParetoOptimizer implements IMonitorSolution {
         }
         // store current solution
         if(pool.isEmpty()){
-            paretoFront.add(new Solution(model,variablesToStore).record());
+            paretoFront.add(new Solution(model).record());
         }else{
             Solution solution = pool.remove();
 

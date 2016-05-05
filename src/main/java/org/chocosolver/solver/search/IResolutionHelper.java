@@ -275,7 +275,11 @@ public interface IResolutionHelper extends ISelf<Model> {
     default Solution findOptimalSolution(IntVar objective, boolean maximize, Criterion... stop) {
         _me().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
         _me().getSolver().addStopCriterion(stop);
-        Solution s = new Solution(_me(),ArrayUtils.append(_me().getSolver().getStrategy().getVariables(),new IntVar[]{objective}));
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
+        Solution s = new Solution(_me());
         while (_me().solve()) {
             s.record();
         }
@@ -337,8 +341,10 @@ public interface IResolutionHelper extends ISelf<Model> {
      */
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().getSolver().addStopCriterion(stop);
-		IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
-		_me().getSolver().set(_me().getSolver().getStrategy(),objSearch);
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
         _me().findOptimalSolution(objective, maximize);
         if (!_me().getSolver().isStopCriterionMet()
                 && _me().getSolver().getSolutionCount() > 0) {
@@ -392,7 +398,8 @@ public interface IResolutionHelper extends ISelf<Model> {
      *     }
      * </pre>
 	 *
-	 * Note that only objective and decision variables (specified in the search heuristic) will be stored
+	 * Note that only the decision variables (specified in the search heuristic) will be stored
+	 * This means the objective has to be declared in the search heuristic
      *
      * @param objective the variable to optimize
      * @param maximize  set to <tt>true</tt> to solve a maximization problem, set to <tt>false</tt> to solve a minimization
@@ -402,8 +409,10 @@ public interface IResolutionHelper extends ISelf<Model> {
      */
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().getSolver().addStopCriterion(stop);
-		IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
-		_me().getSolver().set(_me().getSolver().getStrategy(),objSearch);
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
         _me().findOptimalSolution(objective, maximize);
         if (!_me().getSolver().isStopCriterionMet()
                 && _me().getSolver().getSolutionCount() > 0) {
@@ -457,8 +466,11 @@ public interface IResolutionHelper extends ISelf<Model> {
      */
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
         _me().getSolver().addStopCriterion(stop);
-        ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE,
-				objectives, _me().getSolver().getStrategy().getVariables());
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
+        ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objectives);
         while (_me().solve()) {
             pareto.onSolution();
         }
@@ -493,6 +505,10 @@ public interface IResolutionHelper extends ISelf<Model> {
         if (objectives == null || objectives.length == 0) {
             return findSolution(stop);
         }
+		if(_me().getSolver().getStrategy()!=null) {
+			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
+			_me().getSolver().set(_me().getSolver().getStrategy(), objSearch);
+		}
         _me().getSolver().addStopCriterion(stop);
         Solution sol = null;
         Constraint clint = null;
@@ -505,7 +521,7 @@ public interface IResolutionHelper extends ISelf<Model> {
         // 2. try to find a first solution
         while (_me().solve()) {
             if (sol == null) {
-                sol = new Solution(_me(), ArrayUtils.append(_me().getSolver().getStrategy().getVariables(),objectives));
+                sol = new Solution(_me());
             }
             sol.record();
             // 3. extract values of each objective
@@ -553,6 +569,4 @@ public interface IResolutionHelper extends ISelf<Model> {
         }
         _me().getSolver().removeStopCriterion(stop);
     }
-
-
 }

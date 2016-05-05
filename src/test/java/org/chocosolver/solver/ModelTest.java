@@ -42,6 +42,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
@@ -453,7 +454,11 @@ public class ModelTest {
         IntVar[] ticks = (IntVar[]) m.getHook("ticks");
         m.clearObjective();
         m.getSolver().showSolutions();
-        Assert.assertEquals(m.findParetoFront(ticks, false).size(), 8);
+		List<Solution> front = m.findParetoFront(ticks, false);
+		for(Solution s:front){
+			System.out.println(s.getIntVal(ticks[0]));
+		}
+        Assert.assertEquals(front.size(), 8);
     }
 
     @Test(groups = "1s", timeOut = 60000)
