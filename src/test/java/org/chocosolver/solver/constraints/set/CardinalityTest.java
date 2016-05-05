@@ -50,7 +50,7 @@ public class CardinalityTest {
         model.cardinality(setVar, 4).post();
 
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             assertEquals(setVar.getValue().getSize(), 4);
         }
@@ -66,7 +66,7 @@ public class CardinalityTest {
         model.cardinality(setVar, intVar).post();
 
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             assertEquals(setVar.getValue().getSize(), intVar.getValue());
         }
@@ -81,9 +81,9 @@ public class CardinalityTest {
         SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5});
         model.cardinality(setVar, 0).post();
 
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
         assertTrue(setVar.getValue().isEmpty());
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -94,7 +94,7 @@ public class CardinalityTest {
         model.cardinality(setVar, intVar).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)

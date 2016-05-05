@@ -76,7 +76,7 @@ public class TableTest {
             Constraint tableConstraint = model.table(vars, tuples, a);
             tableConstraint.post();
 
-            model.solve();
+            model.getSolver().solve();
         }
     }
 
@@ -99,7 +99,7 @@ public class TableTest {
             IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
             allEquals(model, vars, -1);
             long nbs = 0;
-            while (model.solve()) {
+            while (model.getSolver().solve()) {
                 nbs++;
             }
             long nbn = model.getSolver().getNodeCount();
@@ -112,7 +112,7 @@ public class TableTest {
                     Solver r = tsolver.getSolver();
                     r.set(randomSearch(tvars, s));
                     long nbSolutions = 0;
-                    while (tsolver.solve()) {
+                    while (tsolver.getSolver().solve()) {
                         nbSolutions++;
                     }
                     assertEquals(nbSolutions, nbs);
@@ -140,7 +140,7 @@ public class TableTest {
             IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
             allDifferent(model, vars, -1);
             long nbs = 0;
-            while (model.solve()) {
+            while (model.getSolver().solve()) {
                 nbs++;
             }
             long nbn = model.getSolver().getNodeCount();
@@ -153,7 +153,7 @@ public class TableTest {
                     Solver r = tsolver.getSolver();
                     r.set(randomSearch(tvars, s));
                     long nbSolutions = 0;
-                    while (tsolver.solve()) {
+                    while (tsolver.getSolver().solve()) {
                         nbSolutions++;
                     }
                     assertEquals(nbSolutions, nbs);
@@ -198,7 +198,7 @@ public class TableTest {
         model.sum(reified, "=", sum).post();
         model.setObjective(MINIMIZE, sum);
         Solution sol = new Solution(model);
-        while(model.solve()){
+        while(model.getSolver().solve()){
             sol.record();
         }
         if (model.getSolver().getSolutionCount() > 0) {
@@ -231,7 +231,7 @@ public class TableTest {
             t.add(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
             t.add(1, 1, 2, 1, 1, 1, 1, 1, 1, 1);
             model.table(vars, t, s).post();
-            model.solve();
+            model.getSolver().solve();
         }
     }
 
@@ -243,7 +243,7 @@ public class TableTest {
         tuples.add(0, 0, 0);
         tuples.add(1, 1, 1);
         model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
@@ -255,7 +255,7 @@ public class TableTest {
         tuples.add(0, 1, 2);
         tuples.add(2, 1, 0);
         model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
@@ -273,7 +273,7 @@ public class TableTest {
                 model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
                 model.getSolver().set(randomSearch(vars, seed));
                 long nbs = 0;
-                while (model.solve()) {
+                while (model.getSolver().solve()) {
                     nbs++;
                 }
                 long nbn = model.getSolver().getNodeCount();
@@ -284,7 +284,7 @@ public class TableTest {
                         model.table(tvars, tuples, ALGOS[a]).post();
                         tsolver.getSolver().set(randomSearch(tvars, s));
                         long nbSolutions = 0;
-                        while (tsolver.solve()) {
+                        while (tsolver.getSolver().solve()) {
                             nbSolutions++;
                         }
                         assertEquals(nbSolutions, nbs);
@@ -419,7 +419,7 @@ public class TableTest {
             z = model.intVar("z", 0, 1, false);
             Tuples ts = scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
             model.table(new IntVar[]{x, z, z, y}, ts, a).post();
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(1, model.getSolver().getSolutionCount());
         }
     }

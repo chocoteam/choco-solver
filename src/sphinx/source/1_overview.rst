@@ -229,7 +229,7 @@ Simple example showing how to use Choco Solver ::
             model.arithm(x, "+", y, "<", 5).post(); // x + y < 5
             model.times(x,y,4).post();              // x * y = 4
             // 4. Solve the problem
-            model.solve();
+            model.getSolver().solve();
             // 5. Print the solution
             System.out.println(x); // Prints X = 2
             System.out.println(y); // Prints Y = 2

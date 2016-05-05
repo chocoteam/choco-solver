@@ -192,7 +192,7 @@ public class BACP extends AbstractProblem {
 
     @Override
     public void solve() {
-        while(model.solve()){
+        while(model.getSolver().solve()){
             System.out.println("New solution found : "+objective);
         }
     }

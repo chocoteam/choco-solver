@@ -98,17 +98,17 @@ public class ModelTest {
         for (int i : is) {
             switch (i) {
                 case ONE:
-                    s.solve();
+                    s.getSolver().solve();
                     break;
                 case NEXT:
-                    s.solve();
+                    s.getSolver().solve();
                     break;
                 case ALL:
-                    while (s.solve()) ;
+                    while (s.getSolver().solve()) ;
                     break;
                 case OPT:
                     s.setObjective(MAXIMIZE, (IntVar) s.getVar(0));
-                    s.solve();
+                    s.getSolver().solve();
                     break;
                 default:
                     fail("unknonw case");
@@ -235,7 +235,7 @@ public class ModelTest {
         Model model = new Model();
         BoolVar b = model.boolVar("b");
         model.arithm(b, "=", 2).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().isFeasible(), FALSE);
     }
 
@@ -243,14 +243,14 @@ public class ModelTest {
     public void testJL1() {
         Model s = new Model();
         s.arithm(s.ONE(), "!=", s.ZERO()).post();
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
     }
 
     @Test(groups = "10s", timeOut = 60000)
     public void testParBug2() {
         for (int iter = 0; iter < 5000; iter++) {
             Model model = knapsack();
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
@@ -260,7 +260,7 @@ public class ModelTest {
         for (int iter = 0; iter < 5000; iter++) {
             Model model = knapsack();
             model.getSolver().set(randomSearch(model.retrieveIntVars(true), iter));
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
@@ -270,14 +270,14 @@ public class ModelTest {
         Model s = new Model();
         IntVar i = s.intVar("i", -5, 5, false);
         s.setObjective(MAXIMIZE, i);
-        s.solve();
+        s.getSolver().solve();
         assertEquals(s.getSolver().getSolutionCount(), 1);
         assertEquals(i.getValue(), 5);
 
         s.getSolver().getEngine().flush();
         s.getSolver().reset();
         s.clearObjective();
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 11);
     }
 
@@ -291,19 +291,19 @@ public class ModelTest {
         IMonitorSolution sm2 = () -> d[0]++;
         model.getSolver().plugMonitor(sm1);
         model.getSolver().plugMonitor(sm2);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2, c[0]);
         assertEquals(2, d[0]);
         // unplug
         model.getSolver().unplugMonitor(sm1);
         model.getSolver().reset();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2, c[0]);
         assertEquals(4, d[0]);
         // plug
         model.getSolver().unplugAllSearchMonitors();
         model.getSolver().reset();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2, c[0]);
         assertEquals(4, d[0]);
     }
@@ -316,17 +316,17 @@ public class ModelTest {
         Criterion c2 = () -> model.getSolver().getSolutionCount() == 1;
         model.getSolver().addStopCriterion(c1);
         model.getSolver().addStopCriterion(c2);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(0, model.getSolver().getSolutionCount());
         // unplug
         model.getSolver().removeStopCriterion(c1);
         model.getSolver().reset();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(1, model.getSolver().getSolutionCount());
         // plug
         model.getSolver().removeAllStopCriteria();
         model.getSolver().reset();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2, model.getSolver().getSolutionCount());
     }
 
@@ -339,7 +339,7 @@ public class ModelTest {
         model.arithm(w[0], "!=", w[1]).post();
         model.getSolver().set(inputOrderLBSearch(v));
         model.getSolver().makeCompleteStrategy(true);
-        model.solve();
+        model.getSolver().solve();
         assertEquals(model.getSolver().isSatisfied(), TRUE);
     }
 
@@ -362,9 +362,9 @@ public class ModelTest {
         IntVar[] v = model.boolVarArray("v", 2);
         model.arithm(v[0], "!=", v[1]).post();
         model.setObjective(MAXIMIZE, v[0]);
-        model.solve();
+        model.getSolver().solve();
         assertTrue(v[0].isInstantiated());
-        model.solve();
+        model.getSolver().solve();
         assertTrue(v[0].isInstantiatedTo(1));
     }
 
@@ -395,7 +395,7 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testNextSolution() {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(8);
-        s.solve(); //  should not throw exception
+        s.getSolver().solve(); //  should not throw exception
     }
 
     @Test(groups = "1s", timeOut = 60000)

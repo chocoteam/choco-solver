@@ -136,8 +136,8 @@ public class ViewSumXYTest {
 //                SearchMonitorFactory.log(solver, true, true);
                 model.getSolver().set(randomSearch(xs, seed));
             }
-            while (ref.solve()) ;
-            while (model.solve()) ;
+            while (ref.getSolver().solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount(), "seed:" + seed);
 
         }
@@ -167,8 +167,8 @@ public class ViewSumXYTest {
 //                SearchMonitorFactory.log(solver, true, true);
                 model.getSolver().set(randomSearch(xs, seed));
             }
-            while (ref.solve()) ;
-            while (model.solve()) ;
+            while (ref.getSolver().solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount(), "seed:" + seed);
 
         }

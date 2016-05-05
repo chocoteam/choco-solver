@@ -101,7 +101,7 @@ public class LNSTest {
         }
         model.setObjective(MAXIMIZE, power);
         int bw = 0, bp = 0;
-        while(model.solve()){
+        while(model.getSolver().solve()){
             bp = power.getValue();
             bw = scalar.getValue();
         }

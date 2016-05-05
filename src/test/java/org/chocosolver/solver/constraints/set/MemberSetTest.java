@@ -92,7 +92,7 @@ public class MemberSetTest {
                     model.member(i, s).post();
                     //IOutputFactory.showSolutions(solver);
                     long nbSolutions = 0;
-                    while (model.solve()) {
+                    while (model.getSolver().solve()) {
                         nbSolutions++;
                     }
                     assertEquals(nbSolutions, sizeInterseaction(doms[0], doms[1]), Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));
@@ -124,7 +124,7 @@ public class MemberSetTest {
                     model.member(i, s).post();
                     //IOutputFactory.showSolutions(solver);
                     long nbSolutions = 0;
-                    while (model.solve()) {
+                    while (model.getSolver().solve()) {
                         nbSolutions++;
                     }
                     assertEquals(nbSolutions, sizeInterseaction(doms[0], doms[1]), Arrays.toString(doms[0]) + " - " + Arrays.toString(doms[1]));

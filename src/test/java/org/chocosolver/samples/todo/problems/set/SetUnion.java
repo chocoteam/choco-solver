@@ -78,6 +78,6 @@ public class SetUnion extends AbstractProblem {
 
     @Override
     public void solve() {
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 }

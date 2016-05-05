@@ -137,7 +137,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <pre>
      *     {@code
      *     List<Solution> solutions = new ArrayList<>();
-     *     while (model.solve()){
+     *     while (model.getSolver().solve()){
      *          solutions.add(new Solution(model).record());
      *     }
      *     return solutions;
@@ -179,7 +179,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <pre>
      * {@code
      * 	List<Solution> solutions = new ArrayList<>();
-     * 	while (model.solve()) {
+     * 	while (model.getSolver().solve()) {
      * 		solutions.add(new Solution(model).record());
      *    }
      * 	return solutions;
@@ -248,7 +248,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      *     {@code
      *     model.setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
      *     Solution s = new Solution(model);
-     *     while (model.solve()) {
+     *     while (model.getSolver().solve()) {
      *          s.record();
      *     }
      *     return model.getSolver().isFeasible() == ESat.TRUE ? s : null;

@@ -130,7 +130,7 @@ public abstract class AbstractBinaryTest {
                 s.getSolver().setCBJLearning(false, false);
             }
             try {
-                while (s.solve()) ;
+                while (s.getSolver().solve()) ;
             } catch (AssertionError ae) {
                 System.err.printf("seed: %d\n", seed);
                 throw ae;

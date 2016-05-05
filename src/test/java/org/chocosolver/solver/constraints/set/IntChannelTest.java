@@ -75,12 +75,12 @@ public class IntChannelTest {
         model.setsIntsChanneling(setVars, intVars).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
 
         model.getEnvironment().worldPop();
         setVars = model.setVarArray(5, new int[]{}, new int[]{5});
         model.setsIntsChanneling(setVars, intVars).post();
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
@@ -90,7 +90,7 @@ public class IntChannelTest {
 
     private void checkSolutions(Model model, SetVar[] setVars, IntVar[] intVars, int offset) {
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
             for (int i = 0; i < setVars.length; i++) {
                 for (Integer value : setVars[i].getValue()) {

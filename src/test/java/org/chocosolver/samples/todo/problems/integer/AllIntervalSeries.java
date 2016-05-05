@@ -97,7 +97,7 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
         System.out.println(String.format("All interval series(%s)", m));
         StringBuilder st = new StringBuilder();
         st.append("\t");

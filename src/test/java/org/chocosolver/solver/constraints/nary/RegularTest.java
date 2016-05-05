@@ -78,7 +78,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 59049);
     }
 
@@ -120,7 +120,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 25980);
     }
 
@@ -150,7 +150,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 531441);
 //        assertEquals(124927,s.getNodeCount());
 
@@ -181,7 +181,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1594323);
     }
 
@@ -198,7 +198,7 @@ public class RegularTest {
         model.regular(vars, auto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4371696);
     }
 
@@ -216,7 +216,7 @@ public class RegularTest {
         model.getSolver().set(inputOrderLBSearch(vars));
 
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 162);
     }
 
@@ -227,7 +227,7 @@ public class RegularTest {
         model.regular(CS, new FiniteAutomaton("<-9>1*")).post();
         model.getSolver().showSolutions();
         List<Solution> solutions = new ArrayList<>();
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             solutions.add(new Solution(model).record());
         }
 
@@ -245,7 +245,7 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
         model.regular(CS, new FiniteAutomaton("[12]*")).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -254,7 +254,7 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
         model.regular(CS, new FiniteAutomaton("[^12]*", 0, 3)).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -265,7 +265,7 @@ public class RegularTest {
         model.regular(CS, new FiniteAutomaton("3?.3?", 0, 3)).post();
         model.getSolver().showSolutions();
         model.getSolver().showDecisions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
     }
 
@@ -274,7 +274,7 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
         model.regular(CS, new FiniteAutomaton(".*", 0, 3)).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 16);
     }
 
@@ -285,7 +285,7 @@ public class RegularTest {
         model.regular(CS, new FiniteAutomaton("1{2}")).post();
         model.getSolver().showSolutions();
         model.getSolver().showDecisions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
@@ -296,7 +296,7 @@ public class RegularTest {
         model.regular(CS, new FiniteAutomaton("0{2,3}1*")).post();
         model.getSolver().showSolutions();
         model.getSolver().showDecisions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
@@ -314,7 +314,7 @@ public class RegularTest {
         });
         model.getSolver().set(inputOrderLBSearch(CS));
 //        IOutputFactory.showDecisions(solver);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 84);
     }
 
@@ -325,7 +325,7 @@ public class RegularTest {
         IntVar[] CS = model.intVarArray("CS", 3, new int[]{43, 59, 117});
         model.regular(CS, new FiniteAutomaton("<43><59><117>")).post();
         model.getSolver().set(inputOrderLBSearch(CS));
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
 
     }

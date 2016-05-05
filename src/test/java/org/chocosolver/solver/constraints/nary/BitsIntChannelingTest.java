@@ -64,9 +64,9 @@ public class BitsIntChannelingTest {
         };
         IntVar intVar = model.intVar(0, 100);
         model.bitsIntChanneling(bits, intVar).post();
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
         assertEquals(intVar.getValue(), 10);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -90,7 +90,7 @@ public class BitsIntChannelingTest {
         BoolVar[] bits = model.boolVarArray(7);
         IntVar intVar = model.intVar(128, 500);
         model.bitsIntChanneling(bits, intVar).post();
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -107,7 +107,7 @@ public class BitsIntChannelingTest {
         };
         IntVar intVar = model.intVar(0, 99);
         model.bitsIntChanneling(bits, intVar).post();
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -116,9 +116,9 @@ public class BitsIntChannelingTest {
         BoolVar[] bits = new BoolVar[0];
         IntVar intVar = model.intVar(0, 100);
         model.bitsIntChanneling(bits, intVar).post();
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
         assertEquals(intVar.getValue(), 0);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -128,7 +128,7 @@ public class BitsIntChannelingTest {
         IntVar var = model.intVar(-5, -1);
         model.bitsIntChanneling(bits, var).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -143,7 +143,7 @@ public class BitsIntChannelingTest {
 
     private void checkSolutions(Model model, BoolVar[] bits, IntVar var) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             int exp = 1;
             int number = 0;

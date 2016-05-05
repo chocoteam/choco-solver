@@ -70,15 +70,15 @@ public class ElementTest {
         index = model.intVar(0, sets.length - 1);
         model.element(index, sets, element).post();
 
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
         assertEquals(index.getValue(), 2);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
     private int checkSolutions() {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             for (Integer val : sets[index.getValue()].getValue()) {
                 assertTrue(element.getValue().contain(val));

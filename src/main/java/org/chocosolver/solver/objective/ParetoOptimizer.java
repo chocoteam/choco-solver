@@ -84,7 +84,7 @@ public class ParetoOptimizer implements IMonitorSolution {
      * This object must be used as follows:
      *
    	 *     model.getSolver().plugMonitor(paretoRecorder);
-     *     while(model.solve());
+     *     while(model.getSolver().solve());
      *     List<Solution> paretoFront = paretoRecorder.getParetoFront();
      *
      * The Solutions store decision variables (those declared in the search strategy)

@@ -79,7 +79,7 @@ public class SortTest {
             } while (solver.solve());
         }*/
         long nbSolutions = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSolutions++;
         }
         assertEquals(nbSolutions, 182);

@@ -55,7 +55,7 @@ public class IntConstraintExamples2 {
         tuples.add(0, 1);
         model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -66,7 +66,7 @@ public class IntConstraintExamples2 {
         BoolVar[] lqs = model.boolVarArray("lq", 3);
         model.clausesIntChanneling(iv, eqs, lqs).post();
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -75,7 +75,7 @@ public class IntConstraintExamples2 {
         IntVar[] X = model.intVarArray("X", 3, 1, 3, false);
         model.intValuePrecedeChain(X, 1, 2).post();
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -84,6 +84,6 @@ public class IntConstraintExamples2 {
         IntVar[] X = model.intVarArray("X", 3, 1, 3, false);
         model.intValuePrecedeChain(X, new int[]{2, 3, 1}).post();
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 }

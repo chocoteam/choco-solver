@@ -80,6 +80,6 @@ public class ModTest extends AbstractTernaryTest {
 		s.mod(dividend, divisor, remainder).getOpposite().post();
 		Solver r = s.getSolver();
 		r.set(inputOrderLBSearch(dividend, divisor, remainder));
-		s.solve();
+		s.getSolver().solve();
 	}
 }

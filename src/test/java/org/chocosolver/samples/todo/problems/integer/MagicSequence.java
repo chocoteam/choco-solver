@@ -85,7 +85,7 @@ public class MagicSequence extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         if (model.getSolver().isFeasible() == ESat.TRUE) {
             int num_solutions = 0;
@@ -95,7 +95,7 @@ public class MagicSequence extends AbstractProblem {
                 }
                 System.out.println();
                 num_solutions++;
-            } while (model.solve() == Boolean.TRUE);
+            } while (model.getSolver().solve() == Boolean.TRUE);
             System.out.println("It was " + num_solutions + " solutions.");
         } else {
             System.out.println("No solution.");

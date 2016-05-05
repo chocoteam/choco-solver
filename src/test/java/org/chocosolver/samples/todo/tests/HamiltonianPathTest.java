@@ -105,7 +105,7 @@ public class HamiltonianPathTest {
 			model.getSolver().set(new ConstructorIntHeur(succ, offset));
 		}
 		model.getSolver().limitTime(TIME_LIMIT);
-		model.solve();
+		model.getSolver().solve();
 		IMeasures mes = model.getSolver().getMeasures();
 		// the problem has at least one solution
 		assertTrue(mes.getSolutionCount() == 1 || model.getSolver().isStopCriterionMet(),

@@ -98,7 +98,7 @@ public class AmongTest {
             model.getSolver().set(randomSearch(allvars,i));
             model.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 9);
         }
     }
@@ -116,7 +116,7 @@ public class AmongTest {
             model.among(occ, vars, values).post();
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 9);
         }
     }
@@ -137,7 +137,7 @@ public class AmongTest {
         } catch (ContradictionException e) {
             fail();
         }
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     public long randomOcc(long nbsol, int seed, boolean enumvar, int nbtest, boolean gac) {
@@ -178,7 +178,7 @@ public class AmongTest {
             model.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]).post();
 
             model.getSolver().set(randomSearch(vars,seed));
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getSolver().getSolutionCount();
             } else {
@@ -232,7 +232,7 @@ public class AmongTest {
 
 
             model.getSolver().set(randomSearch(vars,seed));
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getSolver().getSolutionCount();
             } else {

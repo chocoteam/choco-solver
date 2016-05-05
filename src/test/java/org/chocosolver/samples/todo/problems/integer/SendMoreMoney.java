@@ -106,7 +106,7 @@ public class SendMoreMoney extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
         System.out.println("SEND + MORE = MONEY ");
         StringBuilder st = new StringBuilder();
         st.append("\t");

@@ -94,14 +94,14 @@ public class AtMost1EmptyTest {
         model.post(atMost1EmptySet(vars));
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
 
     private void checkSolutions(Model model, SetVar[] vars) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             boolean atMostOne = Arrays.stream(vars)
                     .map(SetVar::getValue)

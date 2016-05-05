@@ -331,7 +331,7 @@ For instance, to interrupt search after 10 seconds: ::
 
     Solver s = model.getSolver();
     s.limitTime("10s");
-    model.solve();
+    model.getSolver().solve();
 
 Custom search limits
 --------------------

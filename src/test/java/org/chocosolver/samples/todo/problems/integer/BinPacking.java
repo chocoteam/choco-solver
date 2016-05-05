@@ -88,7 +88,7 @@ public class BinPacking extends AbstractProblem{
 		switch (mode) {
 			case 0:// to check
 				model.arithm(minLoad, "=", 17).post();
-				while(model.solve()){
+				while(model.getSolver().solve()){
                     solutions.add(new Solution(model).record());
 					nbOpt ++;
 				}
@@ -100,12 +100,12 @@ public class BinPacking extends AbstractProblem{
 			case 1:// one step approach (could be slow)
 				// non-strict optimization
 				model.setObjective(MAXIMIZE, minLoad);
-				while (model.solve());
+				while (model.getSolver().solve());
 				break;
 			case 2:// two step approach (find and prove optimum, then enumerate)
 				model.setObjective(MAXIMIZE, minLoad);
 				int opt = -1;
-				while(model.solve()){
+				while(model.getSolver().solve()){
 					System.out.println("better solution found : "+minLoad);
 					opt = minLoad.getValue();
 				}
@@ -113,7 +113,7 @@ public class BinPacking extends AbstractProblem{
 					model.getSolver().reset();
 					model.arithm(minLoad, "=", opt).post();
 					model.clearObjective();
-					while(model.solve()){
+					while(model.getSolver().solve()){
 						nbOpt ++;
 					}
 					System.out.println("There are "+nbOpt+" optima");

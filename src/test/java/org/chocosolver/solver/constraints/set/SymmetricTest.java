@@ -69,7 +69,7 @@ public class SymmetricTest {
 
     private int checkSolutions(Model model, SetVar[] vars) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             for (int i = 0; i < vars.length; i++) {
                 for (Integer value : vars[i].getValue()) {

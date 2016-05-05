@@ -334,7 +334,7 @@ public class StableMarriage extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
         if (model.getSolver().isFeasible() == ESat.TRUE) {
             int num_sols = 0;
             do {
@@ -352,7 +352,7 @@ public class StableMarriage extends AbstractProblem {
 
                 num_sols++;
 
-            } while (model.solve() == Boolean.TRUE);
+            } while (model.getSolver().solve() == Boolean.TRUE);
 
             System.out.println("It was " + num_sols + " solutions.");
 

@@ -75,7 +75,7 @@ public class ElementTest {
 
 		Solver r = s.getSolver();
 		r.set(randomSearch(allvars, currentTimeMillis()));
-		while (s.solve()) ;
+		while (s.getSolver().solve()) ;
 		assertEquals(r.getMeasures().getSolutionCount(), nbSol, "nb sol");
 	}
 
@@ -103,7 +103,7 @@ public class ElementTest {
 		IntVar index = s.intVar("v_0", -3, 10, false);
 		IntVar var = s.intVar("v_1", -20, 20, false);
 		BoolVar b = s.element(var, values, index).reify();
-		while (s.solve()) ;
+		while (s.getSolver().solve()) ;
 	}
 
 	@Test(groups="1s", timeOut=60000)
@@ -254,7 +254,7 @@ public class ElementTest {
 			s.arithm(vars[i], ">", vars[i + 1]).post();
 		}
 
-		while (s.solve()) ;
+		while (s.getSolver().solve()) ;
 		assertEquals(s.getSolver().getSolutionCount(), 58, "nb sol");
 	}
 
@@ -286,7 +286,7 @@ public class ElementTest {
 			ref.getSolver().setCBJLearning(false,false);
 		}
 
-		while (ref.solve()) ;
+		while (ref.getSolver().solve()) ;
 
 		assertEquals(ref.getSolver().getSolutionCount(), nbsols);
 	}
@@ -309,7 +309,7 @@ public class ElementTest {
 			if(exp){
 				model.getSolver().setCBJLearning(false,false);
 			}
-			while (model.solve()) ;
+			while (model.getSolver().solve()) ;
 			assertEquals(model.getSolver().getSolutionCount(), 5);
 		}
 	}
@@ -325,7 +325,7 @@ public class ElementTest {
 			if(exp){
 				model.getSolver().setCBJLearning(false,false);
 			}
-			while (model.solve()) ;
+			while (model.getSolver().solve()) ;
 			assertEquals(model.getSolver().getSolutionCount(), 5);
 		}
 	}
@@ -341,7 +341,7 @@ public class ElementTest {
 			if(exp){
 				model.getSolver().setCBJLearning(false,false);
 			}
-			while (model.solve()) ;
+			while (model.getSolver().solve()) ;
 			assertEquals(model.getSolver().getSolutionCount(), 14);
 		}
 	}
@@ -357,7 +357,7 @@ public class ElementTest {
 			if(exp){
 				model.getSolver().setCBJLearning(false,false);
 			}
-			while (model.solve()) ;
+			while (model.getSolver().solve()) ;
 			assertEquals(model.getSolver().getSolutionCount(), 4);
 		}
 	}
@@ -372,7 +372,7 @@ public class ElementTest {
 			s.getSolver().setCBJLearning(false,false);
 		}
 		// s.post(el);// works instead of previous post
-		while (s.solve()) ;
+		while (s.getSolver().solve()) ;
 		assertEquals(s.getSolver().getSolutionCount(), 1L);
 	}
 
@@ -391,7 +391,7 @@ public class ElementTest {
 		if(exp){
 			s.getSolver().setCBJLearning(false,false);
 		}
-		while (s.solve()) ;
+		while (s.getSolver().solve()) ;
 		assertEquals(s.getSolver().getSolutionCount(), 2L);
 	}
 

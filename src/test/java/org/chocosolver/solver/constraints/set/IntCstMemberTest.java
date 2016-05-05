@@ -63,7 +63,7 @@ public class IntCstMemberTest {
         model.member(var, setVar).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -80,7 +80,7 @@ public class IntCstMemberTest {
 
     private int checkSolutions(Model model, SetVar set, int value) {
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             assertTrue(set.getValue().contain(value));
         }

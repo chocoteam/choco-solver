@@ -595,9 +595,9 @@ Solution computation
 Finding one solution
 --------------------
 
-A call to ``model.solve()`` launches a resolution which stops on the first solution found, if any: ::
+A call to ``model.getSolver().solve()`` launches a resolution which stops on the first solution found, if any: ::
 
-    if(model.solve()){
+    if(model.getSolver().solve()){
         // do something, e.g. print out variable values
     }else if(model.getSolver().hasReachedLimit()){
         System.out.println("The could not find a solution
@@ -606,7 +606,7 @@ A call to ``model.solve()`` launches a resolution which stops on the first solut
         System.out.println("The solver has proved the problem has no solution");
     }
 
-If ``model.solve()`` returns ``true``, then a solution has been found and each variable is instantiated to a value.
+If ``model.getSolver().solve()`` returns ``true``, then a solution has been found and each variable is instantiated to a value.
 Otherwise, two cases must be considered:
 
 - A limit has been declared and reached (``model.getSolver().hasReachedLimit()`` returns true).
@@ -620,7 +620,7 @@ Enumerating all solutions
 
 You can enumerate all solutions of a problem with a simple while loop as follows: ::
 
-    while(model.solve()){
+    while(model.getSolver().solve()){
         // do something, e.g. print out variable values
     }
 
@@ -652,7 +652,7 @@ To solve an optimization problem, you must specify which variable to optimize an
    // to maximize X
    model.setObjectives(ResolutionPolicy.MAXIMIZE, X);
    // or model.setObjectives(ResolutionPolicy.MINIMIZE, X); to minimize X
-   while(model.solve()){
+   while(model.getSolver().solve()){
        // an improving solution has been found
    }
    // the last solution found was optimal (if search completed)
@@ -680,7 +680,7 @@ For instance, one may want to indicate that the value of the objective variable 
         // Specify objective
         model.setObjectives(ResolutionPolicy.MAXIMIZE, OBJ);
         // Compute optimum
-        model.solve();
+        model.getSolver().solve();
 
 Multi-objective optimization
 ----------------------------
@@ -703,7 +703,7 @@ Here is a simple example on how to use the `ParetoOptimizer` to optimize two var
 		model.getSolver().plugMonitor(po);
 
 		// optimization
-		while(model.solve());
+		while(model.getSolver().solve());
 
 		// retrieve the pareto front
 		List<Solution> paretoFront = po.getParetoFront();

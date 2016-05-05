@@ -68,7 +68,7 @@ public class InverseChannelingTest {
         model.inverseChanneling(intVars1, intVars2).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
@@ -95,7 +95,7 @@ public class InverseChannelingTest {
 
     private int checkSolutions(Model model, IntVar[] intVars1, IntVar[] intVars2) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             for (int i = 0; i < intVars1.length; i++) {
                 assertEquals(intVars2[intVars1[i].getValue()].getValue(), i);

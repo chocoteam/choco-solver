@@ -68,7 +68,7 @@ public class BoolsIntChannelingTest {
         IntVar intVar = makeVariable(model, 0, 3, bounded);
         model.boolsIntChanneling(boolVars, intVar, 0).post();
 
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
@@ -82,7 +82,7 @@ public class BoolsIntChannelingTest {
         IntVar intVar = makeVariable(model, 0, 4, bounded);
         model.boolsIntChanneling(boolVars, intVar, 0).post();
 
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
@@ -119,7 +119,7 @@ public class BoolsIntChannelingTest {
         // 3 is deleted from the domain
         IntVar intVar = makeVariable(model, 0, 3, bounded);
         model.boolsIntChanneling(boolVars, intVar, 0).post();
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
@@ -131,7 +131,7 @@ public class BoolsIntChannelingTest {
         model.boolsIntChanneling(boolVars, var, 0).post();
         // no matching between indexes and domain
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
@@ -142,7 +142,7 @@ public class BoolsIntChannelingTest {
         IntVar intVar = makeVariable(model, 0, 100, bounded);
         model.boolsIntChanneling(boolVars, intVar, 0).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     private IntVar makeVariable(Model model, int lb, int ub, boolean bounded) {
@@ -157,7 +157,7 @@ public class BoolsIntChannelingTest {
 
     private int checkSolutions(Model model, BoolVar[] boolVars, IntVar intVar) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             for (int i = 0; i < boolVars.length; i++) {
                 if(boolVars[i].getValue() == 1) {

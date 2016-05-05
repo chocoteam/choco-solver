@@ -69,7 +69,7 @@ public class BottleneckTest {
 
             model.getSolver().set(minDomLBSearch(allvars));
             model.setObjective(MAXIMIZE, sum);
-            while(model.solve());
+            while(model.getSolver().solve());
         }
     }
 
@@ -97,7 +97,7 @@ public class BottleneckTest {
             // Heuristic val
             model.getSolver().set(minDomLBSearch(allvars));
 
-            model.solve();
+            model.getSolver().solve();
         }
 
 

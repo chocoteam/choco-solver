@@ -126,7 +126,7 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
     }
 
     public static void main(String[] args) {

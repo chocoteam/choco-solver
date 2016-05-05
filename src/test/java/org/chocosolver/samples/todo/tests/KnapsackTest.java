@@ -79,7 +79,7 @@ public class KnapsackTest {
             // end of trick
             s.setObjective(MAXIMIZE, power);
         }
-        while(s.solve());
+        while(s.getSolver().solve());
         times.add(s.getSolver().getTimeCount());
     }
 

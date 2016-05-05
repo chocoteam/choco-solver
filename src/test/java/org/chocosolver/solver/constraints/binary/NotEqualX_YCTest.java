@@ -59,7 +59,7 @@ public class NotEqualX_YCTest {
         s.arithm(vars[0], "!=", vars[1]).post();
 
         s.getSolver().set(inputOrderLBSearch(vars));
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 6, "nb sol incorrect");
 
@@ -78,7 +78,7 @@ public class NotEqualX_YCTest {
         s.arithm(vars[0], "!=", vars[1]).post();
         s.getSolver().set(inputOrderLBSearch(vars));
 //        ChocoLogging.toSolution();
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 6, "nb sol incorrect");
     }

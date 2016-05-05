@@ -68,7 +68,7 @@ public class ExplainedOCProblem extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
         model.getSolver().printStatistics();
     }
 

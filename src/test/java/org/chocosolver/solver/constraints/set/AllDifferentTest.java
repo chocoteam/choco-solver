@@ -86,7 +86,7 @@ public class AllDifferentTest {
 
     private int checkSolution(Model model, SetVar... vars) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             for (SetVar var : vars) {
                 for (SetVar innerVar : vars) {
