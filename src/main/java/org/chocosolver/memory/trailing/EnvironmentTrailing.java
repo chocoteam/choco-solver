@@ -40,7 +40,6 @@ import org.chocosolver.memory.trailing.trail.unsafe.UnsafeIntTrail;
 import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
 
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.Map;
 
 /**
