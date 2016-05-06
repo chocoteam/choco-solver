@@ -67,7 +67,7 @@ public class T_flatzinc_model extends GrammarTest {
             Assert.fail();
         }
         fp.flatzinc_model(mSolver, datas, false, false);
-        mSolver.solve();
+        mSolver.getSolver().solve();
     }
 
     @Test(groups = "1s")

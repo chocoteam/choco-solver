@@ -56,7 +56,7 @@ public class FlatzincModelTest {
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model solver = fzn.getModel();
 
-        solver.solve();
+        solver.getSolver().solve();
         Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
     }
 
@@ -72,7 +72,7 @@ public class FlatzincModelTest {
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model solver = fzn.getModel();
 
-        solver.solve();
+        solver.getSolver().solve();
         Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
     }
 
@@ -90,7 +90,7 @@ public class FlatzincModelTest {
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model solver = fzn.getModel();
 
-        solver.solve();
+        solver.getSolver().solve();
         Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
     }
 
@@ -110,7 +110,7 @@ public class FlatzincModelTest {
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model solver = fzn.getModel();
 
-        solver.solve();
+        solver.getSolver().solve();
         Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
     }
 
