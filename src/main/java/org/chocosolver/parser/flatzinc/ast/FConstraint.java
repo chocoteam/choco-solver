@@ -37,6 +37,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.nary.PropCompactTable;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.geost.Constants;
@@ -1332,11 +1333,10 @@ public enum FConstraint {
                 tuples.add(couple);
             }
             if (x.length == 2) {
-                model.table(x[0], x[1], tuples, "AC3bit+rm").post();
+                model.table(x[0], x[1], tuples).post();
             } else {
-                model.table(x, tuples, "GACSTR+").post();
+                model.table(x, tuples).post();
             }
-
         }
     },
     value_precede_chain_intChoco {
