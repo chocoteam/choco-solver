@@ -112,11 +112,14 @@ public class PropCostRegular extends Propagator<IntVar> {
             for (int i = 0; i < idms.length; i++) {
                 idms[i].freeze();
                 idms[i].forEachRemVal(rem_proc.set(i));
-                idms[i].unfreeze();
             }
             initialize();
         }
         filter();
+		// added by JG: the propagator should be idempotent so it should not iterate over its own removals
+		for (int i = 0; i < idms.length; i++) {
+			idms[i].unfreeze();
+		}
     }
 
     @Override

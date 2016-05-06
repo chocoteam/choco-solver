@@ -89,7 +89,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9280);
     }
 
@@ -130,7 +130,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, auto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9280);
     }
 
@@ -179,7 +179,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 229376);
     }
 
@@ -231,7 +231,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, cauto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 229376);
     }
 
@@ -271,7 +271,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 67584);
 //        assertEquals(124927,s.getNodeCount());
 
@@ -314,7 +314,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, auto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 67584);
 
 //        assertEquals(124927, s.getNodeCount());
@@ -353,7 +353,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 149456);
     }
 
@@ -393,7 +393,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, auto).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 149456);
     }
 
@@ -423,7 +423,7 @@ public class CostRegularTest {
         model.costRegular(vars, cost, makeSingleResource(auto, c2, cost.getLB(), cost.getUB())).post();
         model.getSolver().set(inputOrderLBSearch(vars));
 
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 64008);
     }
 
@@ -440,7 +440,7 @@ public class CostRegularTest {
         model.post(model.arithm(vars[1],"=",1));
         model.getSolver().showDecisions();
         model.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(vars));
-        model.solve();
+        model.getSolver().solve();
         Assert.assertTrue(cost.isInstantiated());
     }
 

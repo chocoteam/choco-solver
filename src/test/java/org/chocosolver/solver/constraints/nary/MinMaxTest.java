@@ -88,7 +88,7 @@ public class MinMaxTest {
         }
         int nbSol2 = 0;
         model.getSolver().set(inputOrderLBSearch(vars),inputOrderLBSearch(mMvar));
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol2++;
         }
         assertEquals(nbSol, nbSol2);
@@ -197,7 +197,7 @@ public class MinMaxTest {
             model.getSolver().setCBJLearning(false,false);
         }
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "params")
@@ -214,7 +214,7 @@ public class MinMaxTest {
             model.getSolver().setCBJLearning(false,false);
         }
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "params")
@@ -270,7 +270,7 @@ public class MinMaxTest {
         if(exp){
             model.getSolver().setCBJLearning(false,false);
         }
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
@@ -293,7 +293,7 @@ public class MinMaxTest {
     private int checkSolutions(IntVar[] intVars, IntVar sum, boolean minOrMax) {
         Model model = sum.getModel();
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             int min = Integer.MAX_VALUE;
             int max = Integer.MIN_VALUE;

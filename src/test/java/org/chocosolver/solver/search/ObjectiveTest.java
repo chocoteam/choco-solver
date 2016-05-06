@@ -99,7 +99,7 @@ public class ObjectiveTest {
     private void one(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
-            model.solve();
+            model.getSolver().solve();
             Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
             Assert.assertEquals(model.getSolver().getNodeCount(), 2);
         }
@@ -109,7 +109,7 @@ public class ObjectiveTest {
     private void all(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 11);
             assertEquals(model.getSolver().getNodeCount(), 21);
         }
@@ -119,7 +119,7 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
             model.setObjective(MINIMIZE, iv);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getBestSolutionValue(), 0);
             assertEquals(model.getSolver().getNodeCount(), 2);
         }
@@ -129,7 +129,7 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
             model.setObjective(MAXIMIZE, iv);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getBestSolutionValue(), 10);
             assertEquals(model.getSolver().getNodeCount(), 21);
         }
@@ -143,7 +143,7 @@ public class ObjectiveTest {
 
         model.setObjective(MINIMIZE, iv);
         int value = 11;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             value = iv.getValue();
         }
         assertEquals(value, 2);
@@ -152,7 +152,7 @@ public class ObjectiveTest {
 
         value = 11;
         model.setObjective(MINIMIZE, iv);
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             value = iv.getValue();
         }
         assertEquals(value, 2);
@@ -183,16 +183,16 @@ public class ObjectiveTest {
 
                     }
                 }).post();
-        model.solve();
+        model.getSolver().solve();
         assertEquals(iv.getValue(), 2);
 
         model.getSolver().reset();
         model.getSolver().plugMonitor((IMonitorSolution) () -> model.arithm(iv, ">=", 6).post());
-        model.solve();
+        model.getSolver().solve();
         assertEquals(iv.getValue(), 2);
 
         model.getSolver().reset();
-        model.solve();
+        model.getSolver().solve();
         assertEquals(iv.getValue(), 6);
     }
 
@@ -203,12 +203,12 @@ public class ObjectiveTest {
         BoolVar v = model.arithm(iv, "<=", 2).reify();
 
         model.setObjective(MINIMIZE, v);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
         model.getSolver().reset();
 
         model.setObjective(MINIMIZE, v);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
 
@@ -226,7 +226,7 @@ public class ObjectiveTest {
             r.set(new SevenQueuesPropagatorEngine(model));
         }
         r.getMeasures().setReadingTimeCount(nanoTime());
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         r.reset();
@@ -234,11 +234,11 @@ public class ObjectiveTest {
         model.arithm(b1, "=", bestvalue).post();
         r.set(inputOrderLBSearch(new BoolVar[]{b1, b2}));
         int count = 0;
-        if (model.solve()) {
+        if (model.getSolver().solve()) {
             do {
                 count++;
 //                System.out.println(b1 + " " + b2);
-            } while (model.solve());
+            } while (model.getSolver().solve());
         }
         assertEquals(count, 2);
     }
@@ -251,7 +251,7 @@ public class ObjectiveTest {
         model.setObjective(MAXIMIZE, a);
         r.set(new ObjectiveStrategy(a, OptimizationPolicy.TOP_DOWN), minDomLBSearch(a));
         r.setNoGoodRecordingFromSolutions(a);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         Assert.assertEquals(model.getSolver().isStopCriterionMet(), false);
     }
 
@@ -265,7 +265,7 @@ public class ObjectiveTest {
         oman.setCutComputer(n -> n - 10);
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
-            while (model.solve()) {
+            while (model.getSolver().solve()) {
                 best = objective.getValue();
             }
             model.getSolver().reset();
@@ -287,7 +287,7 @@ public class ObjectiveTest {
         oman.setCutComputer(n -> n - ends[0]);
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
-            while (model.solve()) {
+            while (model.getSolver().solve()) {
                 best = objective.getValue();
             }
             model.getSolver().reset();
@@ -307,7 +307,7 @@ public class ObjectiveTest {
         oman.setCutComputer(walkingIntVarCutComputer());
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
-            while (model.solve()) {
+            while (model.getSolver().solve()) {
                 best = objective.getValue();
             }
         }

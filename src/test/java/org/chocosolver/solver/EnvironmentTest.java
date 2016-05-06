@@ -68,6 +68,6 @@ public class EnvironmentTest {
 		model.allDifferent(vectors, "BC").post();
 		Solver r = model.getSolver();
 		r.set(domOverWDegSearch(append(vectors, vars)));
-		model.solve();
+		model.getSolver().solve();
 	}
 }

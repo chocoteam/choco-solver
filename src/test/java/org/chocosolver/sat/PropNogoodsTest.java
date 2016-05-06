@@ -69,6 +69,7 @@ public class PropNogoodsTest {
         lits[3] = PNG.Literal(vars[1], 0, false);
         lits[4] = PNG.Literal(vars[2], 0, true);
         lits[5] = PNG.Literal(vars[2], 0, false);
+        PNG.initialize();
         TIntList list = new TIntArrayList();
         list.add(SatSolver.negated(lits[0]));
         list.add(lits[1]);

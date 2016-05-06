@@ -35,6 +35,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.variables.BoolVar;
@@ -120,6 +121,16 @@ public class PropConDis extends Propagator<BoolVar> {
     private BitSet toZero;
 
     /**
+     * Store new added variables when {@link #initialized} is <i>false</i>
+     */
+    private ArrayList<BoolVar> add_var;
+
+    /**
+     * Indicates if this is initialized or not
+     */
+    private boolean initialized = false;
+
+    /**
      * A propagator to deal with constructive disjunction
      * @param model a model
      */
@@ -131,6 +142,7 @@ public class PropConDis extends Propagator<BoolVar> {
         toZero = new BitSet();
         declared = new TIntHashSet();
         disjunctions = new ArrayList<>();
+        add_var = new ArrayList<>(16);
     }
 
     /**
@@ -141,11 +153,28 @@ public class PropConDis extends Propagator<BoolVar> {
     public void addDisjunction(BoolVar... bvars) {
         for (BoolVar bv : bvars) {
             if (!declared.contains(bv.getId())) {
-                this.addVariable(bv);
+                if(initialized) {
+                    addVariable(bv);
+                }else {
+                    add_var.add(bv);
+                }
                 declared.add(bv.getId());
             }
         }
         disjunctions.add(bvars);
+    }
+
+    /**
+     * Initializes this propagator
+     */
+    public void initialize(){
+        if (!initialized) {
+            if (add_var.size() > 0) {
+                addVariable(add_var.toArray(new BoolVar[add_var.size()]));
+            }
+            add_var.clear();
+            this.initialized = true;
+        }
     }
 
 
@@ -156,6 +185,7 @@ public class PropConDis extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        assert initialized:"PropConDis is not initialized";
         try {
             if (!isworking) {
                 isworking = true;

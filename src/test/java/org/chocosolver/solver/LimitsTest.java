@@ -50,7 +50,7 @@ public class LimitsTest {
         Model s = makeNQueenWithBinaryConstraints(12);
         long tl = 500;
         s.getSolver().limitTime(tl);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         int tc = (int) (s.getSolver().getTimeCount() * 1000);
         assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
     }
@@ -60,7 +60,7 @@ public class LimitsTest {
         Model s = makeNQueenWithBinaryConstraints(12);
         long nl = 50;
         s.getSolver().limitNode(nl);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         long nc = s.getSolver().getNodeCount();
         assertEquals(nc, nl);
     }
@@ -70,7 +70,7 @@ public class LimitsTest {
         for(long bl=10;bl<200;bl+=7) {
             Model s = makeNQueenWithBinaryConstraints(12);
             s.getSolver().limitBacktrack(bl);
-            while (s.solve()) ;
+            while (s.getSolver().solve()) ;
             long bc = s.getSolver().getBackTrackCount();
             assertTrue(bc <= bl + s.getSolver().getNodeCount());
         }
@@ -81,7 +81,7 @@ public class LimitsTest {
         Model s = makeNQueenWithBinaryConstraints(12);
         long fl = 50;
         s.getSolver().limitFail(fl);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         long fc = s.getSolver().getFailCount();
         assertEquals(fc, fl);
     }
@@ -91,7 +91,7 @@ public class LimitsTest {
         Model s = makeNQueenWithBinaryConstraints(12);
         long sl = 50;
         s.getSolver().limitSolution(sl);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         long sc = s.getSolver().getSolutionCount();
         assertEquals(sc, sl);
     }

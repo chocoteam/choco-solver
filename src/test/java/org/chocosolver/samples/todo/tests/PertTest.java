@@ -100,14 +100,14 @@ public class PertTest {
         sol = modeler();
         values()[0].make(sol);
         sol.setObjective(MINIMIZE, objective);
-        while(sol.solve());
+        while(sol.getSolver().solve());
         long nbsol = sol.getSolver().getSolutionCount();
         long node = sol.getSolver().getNodeCount();
         for (int t = 1; t < values().length; t++) {
             sol = modeler();
             values()[t].make(sol);
             sol.setObjective(MINIMIZE, objective);
-            while(sol.solve());
+            while(sol.getSolver().solve());
             assertEquals(sol.getSolver().getSolutionCount(), nbsol);
             assertEquals(sol.getSolver().getNodeCount(), node);
         }

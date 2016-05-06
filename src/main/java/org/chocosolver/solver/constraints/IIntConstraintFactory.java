@@ -53,6 +53,8 @@ import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
+import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
+import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
 import org.chocosolver.solver.constraints.nary.channeling.*;
 import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
@@ -245,6 +247,13 @@ public interface IIntConstraintFactory {
 		if (operator != Operator.EQ && operator != Operator.GT && operator != Operator.LT && operator != Operator.NQ) {
 			throw new SolverException("Unexpected operator for distance");
 		}
+		if (cste < 0) {
+			switch (operator) {
+				case EQ:
+				case LT:
+				default: throw new SolverException("Invalid PropDistanceXYC operator "+operator);
+			}
+		}
 		return new Constraint("DistanceXYC " + operator.name(), new PropDistanceXYC(ArrayUtils.toArray(var1, var2), operator, cste));
 	}
 
@@ -288,7 +297,7 @@ public interface IIntConstraintFactory {
 	 * @param var2   second variable
 	 */
 	default Constraint table(IntVar var1, IntVar var2, Tuples tuples) {
-		return table(var1,var2,tuples,"AC3rm");
+		return table(var1,var2,tuples,"AC3bit+rm");
 	}
 
 	/**
@@ -663,30 +672,22 @@ public interface IIntConstraintFactory {
 	 *                  (which counts from 1 to n instead of from 0 to n-1)
 	 */
 	default Constraint binPacking(IntVar[] itemBin, int[] itemSize, IntVar[] binLoad, int offset) {
-		int nbBins = binLoad.length;
-		int nbItems = itemBin.length;
-		Model s = itemBin[0].getModel();
-		BoolVar[][] xbi = s.boolVarMatrix("xbi", nbBins, nbItems);
+		Model model = itemBin[0].getModel();
+		// redundant filtering
 		int sum = 0;
 		for (int is : itemSize) {
 			sum += is;
 		}
-		IntVar sumView = s.intVar(sum);
-		// constraints
-		Constraint[] bpcons = new Constraint[nbItems + nbBins + 1];
-		for (int i = 0; i < nbItems; i++) {
-			bpcons[i] = boolsIntChanneling(ArrayUtils.getColumn(xbi, i), itemBin[i], offset);
-		}
-		for (int b = 0; b < nbBins; b++) {
-			bpcons[nbItems + b] = scalar(xbi[b], itemSize, "=", binLoad[b]);
-		}
-		bpcons[nbItems + nbBins] = sum(binLoad, "=", sumView);
-		return Constraint.merge("BinPacking",bpcons);
+		return Constraint.merge("BinPacking", new Constraint("BinPacking",
+				new PropItemToLoad(itemBin,itemSize,binLoad, offset),
+				new PropLoadToItem(itemBin,itemSize,binLoad, offset)),
+				model.sum(binLoad, "=", sum)
+		);
 	}
 
 	/**
 	 * Creates an channeling constraint between an integer variable and a set of boolean variables.
-	 * Maps the boolean assignments variables bVars with the standard assignment variable var.
+	 * Maps the boolean assignments variables bVars with the standard assignment variable var. <br>
 	 * var = i <-> bVars[i-offset] = 1
 	 *
 	 * @param bVars  array of boolean variables
@@ -1167,11 +1168,11 @@ public interface IIntConstraintFactory {
 	 *     model.post(solver.arithm(weightSum, "<=", limit);
 	 * </pre>
 	 *
-	 * @param occurrences  number of occurrences of an item
-	 * @param weightSum capacity of the knapsack
-	 * @param energySum variable to maximize
-	 * @param weight       weight of each item
-	 * @param energy       energy of each item
+	 * @param occurrences  number of occurrences of every item
+	 * @param weightSum load of the knapsack
+	 * @param energySum profit of the knapsack
+	 * @param weight       weight of each item (must be >=0)
+	 * @param energy       energy of each item (must be >=0)
 	 */
 	default Constraint knapsack(IntVar[] occurrences, IntVar weightSum, IntVar energySum,
 								int[] weight, int[] energy) {
@@ -1264,7 +1265,11 @@ public interface IIntConstraintFactory {
 	 * @param vars a vector of variables, of size > 0
 	 */
 	default Constraint max(IntVar max, IntVar[] vars) {
-		return new Constraint("Max", new PropMax(vars, max));
+        if(vars.length == 2){
+            return max(max, vars[0], vars[1]);
+        }else {
+            return new Constraint("Max", new PropMax(vars, max));
+        }
 	}
 
 	/**
@@ -1297,7 +1302,11 @@ public interface IIntConstraintFactory {
 	 * @param vars a vector of variables, of size > 0
 	 */
 	default Constraint min(IntVar min, IntVar[] vars) {
-		return new Constraint("Min", new PropMin(vars, min));
+		if(vars.length == 2) {
+            return min(min, vars[0], vars[1]);
+        }else{
+            return new Constraint("Min", new PropMin(vars, min));
+        }
 	}
 
 	/**
@@ -1646,7 +1655,15 @@ public interface IIntConstraintFactory {
 	 * @param tuples    the relation between the variables (list of allowed/forbidden tuples)
 	 */
 	default Constraint table(IntVar[] vars, Tuples tuples) {
-		return table(vars,tuples,tuples.isFeasible()?"CT+":"GAC3rm");
+		String algo = "GAC3rm";
+		if(tuples.isFeasible()){
+			if(tuples.nbTuples()>500){
+				algo = "CT+";
+			}else{
+				algo = "GACSTR+";
+			}
+		}
+		return table(vars,tuples,algo);
 	}
 
 	/**

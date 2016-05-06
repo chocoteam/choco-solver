@@ -281,7 +281,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             if (n2 < n + vars[n].getLB()) {
-                contradiction(vars[n], "");
+                fails(); // TODO: could be more precise, for explanation purpose
             }
             buildDigraph();
         }

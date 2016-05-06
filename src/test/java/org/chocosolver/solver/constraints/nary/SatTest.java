@@ -58,7 +58,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         model.addClausesBoolEq(b1, b2);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
@@ -69,7 +69,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         model.addClausesBoolNot(b1, b2);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
@@ -80,7 +80,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         model.addClausesBoolLe(b1, b2);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 3);
     }
 
@@ -93,7 +93,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
         model.addClausesBoolIsEqVar(b1, b2, r);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -105,7 +105,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
         model.addClausesBoolAndEqVar(b1, b2, r);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -117,7 +117,7 @@ public class SatTest {
         b2 = model.boolVar("b2");
         r = model.boolVar("r");
         model.addClausesBoolOrEqVar(b1, b2, r);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -128,7 +128,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
         model.addClausesBoolLt(b1, b2);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
@@ -141,7 +141,7 @@ public class SatTest {
         r = model.boolVar("r");
         model.addClausesBoolIsLeVar(b1, b2, r);
 //        SMF.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -154,7 +154,7 @@ public class SatTest {
         r = model.boolVar("r");
         model.addClausesBoolIsLtVar(b1, b2, r);
 //        SMF.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -166,7 +166,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         model.addClauseTrue(b1);
         //        SMF.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
         assertEquals(b1.getBooleanValue(), TRUE);
     }
@@ -178,7 +178,7 @@ public class SatTest {
         b1 = model.boolVar("b1");
         model.addClauseFalse(b1);
         //        SMF.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
         assertEquals(b1.getBooleanValue(), FALSE);
     }
@@ -192,7 +192,7 @@ public class SatTest {
         model.addClauseFalse(bs[1]);
         model.addClauseFalse(bs[2]);
         //        SMF.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 0);
     }
 
@@ -216,7 +216,7 @@ public class SatTest {
 
         model.setObjective(MAXIMIZE, var);
         Solution solution = new Solution(model);
-        while(model.solve()){
+        while(model.getSolver().solve()){
             solution.record();
         }
         assertEquals(solution.getIntVal(var).intValue(), 2);

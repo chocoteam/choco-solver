@@ -132,7 +132,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         System.out.println(String.format("Ortho latin square(%s)", m));
         StringBuilder st = new StringBuilder();

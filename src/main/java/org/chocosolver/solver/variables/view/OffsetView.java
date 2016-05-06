@@ -160,7 +160,7 @@ public final class OffsetView extends IntView {
 
     @Override
     public String toString() {
-        return "(" + this.var.toString() + " + " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
+        return "(" + var.toString() + (cste >= 0 ? " + ":" - ") + Math.abs(cste) + ") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override

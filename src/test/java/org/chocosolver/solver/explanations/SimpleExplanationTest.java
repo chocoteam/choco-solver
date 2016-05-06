@@ -65,7 +65,7 @@ public class SimpleExplanationTest {
         // configure Solver
         s.getSolver().set(inputOrderLBSearch(vars));
         // solve
-        s.solve();
+        s.getSolver().solve();
         long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 1, "nb sol incorrect");
     }

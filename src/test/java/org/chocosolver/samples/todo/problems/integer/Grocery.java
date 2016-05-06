@@ -95,7 +95,7 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         System.out.println("Grocery");
         StringBuilder st = new StringBuilder();
@@ -144,11 +144,11 @@ public class Grocery extends AbstractProblem {
         public void propagate(int evtmask) throws ContradictionException {
             long min = (long) (vars[0].getLB()) * (long) (vars[1].getLB());
             if (min > target) {
-                contradiction(vars[0], "");
+                fails(); // TODO: could be more precise, for explanation purpose
             }
             long max = (long) (vars[0].getUB()) * (long) (vars[1].getUB());
             if (max > 0 && max < target) {
-                contradiction(vars[0], "");
+                fails(); // TODO: could be more precise, for explanation purpose
             }
         }
 

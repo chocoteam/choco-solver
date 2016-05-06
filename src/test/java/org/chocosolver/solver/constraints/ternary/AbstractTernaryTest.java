@@ -115,7 +115,7 @@ public abstract class AbstractTernaryTest {
             Model s = modeler(domains, bounded, seed);
 //            SearchMonitorFactory.log(s, false, false);
             try {
-                while (s.solve()) ;
+                while (s.getSolver().solve()) ;
             } catch (AssertionError ae) {
                 System.err.printf("seed: %d\n", seed);
                 throw ae;

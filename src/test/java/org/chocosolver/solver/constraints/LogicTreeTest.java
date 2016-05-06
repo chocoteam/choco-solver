@@ -231,7 +231,7 @@ public class LogicTreeTest {
                 rows[0].not(),
                 model.arithm(rows[1], "+", rows[2], "<=", 1));
         //SearchMonitorFactory.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         long nbSol = model.getSolver().getSolutionCount();
 
         for (int seed = 0; seed < 2000; seed++) {
@@ -245,7 +245,7 @@ public class LogicTreeTest {
             sCNF.getSolver().set(randomSearch(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);
-            while (sCNF.solve()) ;
+            while (sCNF.getSolver().solve()) ;
             assertEquals(sCNF.getSolver().getSolutionCount(), nbSol);
         }
     }
@@ -300,6 +300,7 @@ public class LogicTreeTest {
                 LogOp.and(b1.not(), b2.not())
         );
         model.addClauses(l);
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);
@@ -322,6 +323,7 @@ public class LogicTreeTest {
 
         LogOp l = LogOp.or(b1.not(), b2.not());
         model.addClauses(l);
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);
@@ -344,6 +346,7 @@ public class LogicTreeTest {
         model.arithm(a,">",0).reifyWith(b2);
 
         model.addClauses(new BoolVar[0], new BoolVar[]{b1, b2});
+        model.getMinisat().getPropSat().initialize();
         try {
             model.getSolver().propagate();
             b1.instantiateTo(1, Cause.Null);

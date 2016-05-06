@@ -65,7 +65,7 @@ public class MinElementTest {
 
         assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
         }
         assertEquals(nbSol, var.getDomainSize());
@@ -81,7 +81,7 @@ public class MinElementTest {
         model.min(setVar, var, true).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -93,7 +93,7 @@ public class MinElementTest {
         model.min(setVar, var, true).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -105,7 +105,7 @@ public class MinElementTest {
         model.min(setVar, var, true).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -123,7 +123,7 @@ public class MinElementTest {
 
     private void checkSolutions(Model model, SetVar setVar, IntVar var) {
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
             assertEquals(var.getValue(), computeMin(setVar));
         }

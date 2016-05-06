@@ -136,7 +136,7 @@ public class BIBD extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
         System.out.println(String.format("BIBD(%d,%d,%d,%d,%d)", v, b, r, k, l));
         StringBuilder st = new StringBuilder();
         if (model.getSolver().isFeasible() == ESat.TRUE) {

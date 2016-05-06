@@ -103,13 +103,23 @@ public class MultiCostRegularTest {
         return model;
     }
 
+    @Test(groups="10s", timeOut=60000)
+    public void test0() {
+		// used to fail when freeze/foreach/unfreeze was done during initial propagation (before graph initialization)
+        for (int i = 0; i < 2000; i++) {
+            Model model = make(7, i);
+			IntVar[] vars = model.retrieveIntVars(false);
+			model.arithm(vars[0],"=",0).post();
+            while (model.getSolver().solve()) ;
+        }
+    }
 
     @Test(groups="10s", timeOut=60000)
     public void test1() {
         long seed = 0;
         for (int i = 0; i < 2000; i++) {
             Model model = make(5, i + seed);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 4, "seed:" + (seed + i));
         }
     }
@@ -119,7 +129,7 @@ public class MultiCostRegularTest {
         long seed = 0;
         for (int i = 0; i < 2000; i++) {
             Model model = make(7, i);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 6, "seed:" + (seed + i));
         }
     }
@@ -129,7 +139,7 @@ public class MultiCostRegularTest {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
             Model model = make(14, i);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 141, "seed:" + (seed + i));
         }
     }
@@ -139,7 +149,7 @@ public class MultiCostRegularTest {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 2000; i++) {
             Model model = make(21, i);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 85, "seed:" + (seed + i));
         }
     }

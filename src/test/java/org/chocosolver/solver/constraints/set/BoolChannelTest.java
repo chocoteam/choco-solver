@@ -103,7 +103,7 @@ public class BoolChannelTest {
 
         model.setBoolsChanneling(boolVars, setVar).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     private void checkSolutions(Model model, SetVar setVar, BoolVar[] boolVars) {
@@ -112,7 +112,7 @@ public class BoolChannelTest {
 
     private void checkSolutions(Model model, SetVar setVar, BoolVar[] boolVars, int offset) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             for (Integer value : setVar.getValue()) {
                 assertEquals(boolVars[value - offset].getBooleanValue(), ESat.TRUE);

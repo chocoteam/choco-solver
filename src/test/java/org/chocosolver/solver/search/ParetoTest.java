@@ -96,11 +96,11 @@ public class ParetoTest {
         // --- Monitor
         s.getSolver().plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
         // --- Search
-        s.getSolver().set(SearchStrategyFactory.domOverWDegSearch(occurrences));
+        s.getSolver().set(SearchStrategyFactory.domOverWDegSearch(occurrences), SearchStrategyFactory.inputOrderLBSearch(totalProfit_1,totalProfit_2));
         // --- solve
         ParetoOptimizer pareto = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{totalProfit_1,totalProfit_2});
         s.getSolver().plugMonitor(pareto);
-        while(s.solve());
+        while(s.getSolver().solve());
         System.out.println("Pareto Front:");
         for(Solution sol:pareto.getParetoFront()){
             System.out.println(sol.getIntVal(totalProfit_1)+" // "+sol.getIntVal(totalProfit_2));

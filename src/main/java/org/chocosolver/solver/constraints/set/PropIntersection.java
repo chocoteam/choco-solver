@@ -91,7 +91,7 @@ public class PropIntersection extends Propagator<SetVar> {
                     break;
                 }
             if (mate == -1) {
-                contradiction(vars[k], "");
+                fails(); // TODO: could be more precise, for explanation purpose
             } else if (mate != -2) {
                 vars[mate].remove(element, this);
             }

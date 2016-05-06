@@ -102,7 +102,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         StringBuilder st = new StringBuilder(String.format("Sudoku -- %s\n", data.name()));
         st.append("\t");

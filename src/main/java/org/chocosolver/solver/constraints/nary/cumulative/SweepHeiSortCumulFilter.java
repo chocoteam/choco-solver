@@ -115,7 +115,7 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 							// filter min start to next event
 							slb[index]=nextDate;
 							if(nextDate> sub[index]) {// early fail detection
-								aCause.contradiction(capamax,"");
+								aCause.fails(); // TODO: could be more precise, for explanation purpose
 							}
 							active = true;// perform fix point
 						}

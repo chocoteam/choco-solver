@@ -61,7 +61,7 @@ public class SuspiciousTest {
     public void testBacktrack() {
         Model s = makeNQueenWithBinaryConstraints(12);
         s.getSolver().limitBacktrack(50);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         long bc = s.getSolver().getBackTrackCount();
         assertEquals(bc, 52);
     }
@@ -99,7 +99,7 @@ public class SuspiciousTest {
             }
         });
         model.getSolver().limitNode(200);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         long sc = model.getSolver().getSolutionCount();
         assertEquals(sc, 54);
     }

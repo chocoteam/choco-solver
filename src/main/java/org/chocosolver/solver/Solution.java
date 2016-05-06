@@ -68,7 +68,7 @@ public class Solution implements ICause {
     // INPUT
     /** Model to store */
     private Model model;
-	/** Variables to store; */
+    /** Variables to store; */
     private Variable[] varsToStore;
 
     //***********************************************************************************
@@ -86,7 +86,6 @@ public class Solution implements ICause {
         this.varsToStore = varsToStore;
         empty = true;
         this.model = model;
-        assert varsToStore != null;
     }
 
     //***********************************************************************************
@@ -101,31 +100,43 @@ public class Solution implements ICause {
     public Solution record() {
         empty = false;
         boolean warn = false;
-        if(varsToStore.length == 0) {
+        if (varsToStore.length == 0) {
             varsToStore = model.getSolver().getStrategy().getVariables();
         }
-        assert varsToStore.length>0;
-        if(intmap != null) intmap.clear();
-        if(realmap != null)realmap.clear();
-        if(setmap != null) setmap.clear();
-        for (Variable var:varsToStore) {
+        assert varsToStore.length > 0;
+        if (intmap != null) {
+            intmap.clear();
+        }
+        if (realmap != null) {
+            realmap.clear();
+        }
+        if (setmap != null) {
+            setmap.clear();
+        }
+        for (Variable var : varsToStore) {
             if ((var.getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
                 int kind = var.getTypeAndKind() & Variable.KIND;
                 if (var.isInstantiated()) {
                     switch (kind) {
                         case Variable.INT:
                         case Variable.BOOL:
-                            if(intmap == null) intmap = new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
+                            if (intmap == null) {
+                                intmap = new TIntIntHashMap(16, .5f, Solution.NO_ENTRY, Solution.NO_ENTRY);
+                            }
                             IntVar v = (IntVar) var;
                             intmap.put(v.getId(), v.getValue());
                             break;
                         case Variable.REAL:
-                            if(realmap == null) realmap = new TIntObjectHashMap<>(16, 05f, NO_ENTRY);
+                            if (realmap == null) {
+                                realmap = new TIntObjectHashMap<>(16, 05f, Solution.NO_ENTRY);
+                            }
                             RealVar r = (RealVar) var;
                             realmap.put(r.getId(), new double[]{r.getLB(), r.getUB()});
                             break;
                         case Variable.SET:
-                            if(setmap == null) setmap = new TIntObjectHashMap<>(16, 05f, NO_ENTRY);
+                            if (setmap == null) {
+                                setmap = new TIntObjectHashMap<>(16, 05f, Solution.NO_ENTRY);
+                            }
                             SetVar s = (SetVar) var;
                             setmap.put(s.getId(), s.getValue().toArray());
                             break;
@@ -134,7 +145,7 @@ public class Solution implements ICause {
                             // that should then be stored externally to this object
                             break;
                     }
-                }else{
+                } else {
                     warn = true;
                 }
             }
@@ -147,9 +158,11 @@ public class Solution implements ICause {
 
     @Override
     public String toString() {
-        if(empty)return "Empty solution. No solution recorded yet";
+        if (empty) {
+            return "Empty solution. No solution recorded yet";
+        }
         StringBuilder st = new StringBuilder("Solution: ");
-        for (Variable var:varsToStore) {
+        for (Variable var : varsToStore) {
             if ((var.getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
                 int kind = var.getTypeAndKind() & Variable.KIND;
                 switch (kind) {
@@ -175,6 +188,15 @@ public class Solution implements ICause {
             }
         }
         return st.toString();
+    }
+
+    public Solution copySolution() {
+        Solution ret = new Solution(model, varsToStore);
+        ret.empty = empty;
+        ret.intmap = new TIntIntHashMap(intmap);
+        ret.realmap = new TIntObjectHashMap<>(realmap);
+        ret.setmap = new TIntObjectHashMap<>(setmap);
+        return ret;
     }
 
     /**

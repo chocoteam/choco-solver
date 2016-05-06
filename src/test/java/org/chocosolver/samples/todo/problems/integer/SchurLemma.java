@@ -92,7 +92,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         System.out.println(String.format("Schur's lemma (%d,%d)", n, k));
         StringBuilder st = new StringBuilder();

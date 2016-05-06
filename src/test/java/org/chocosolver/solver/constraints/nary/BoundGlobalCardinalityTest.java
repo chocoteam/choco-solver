@@ -49,7 +49,7 @@ import static org.testng.Assert.assertTrue;
  * @author Charles Prud'homme
  * @since 16/06/11
  */
-public class BoundGlobalCardinlityTest {
+public class BoundGlobalCardinalityTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test0() throws ContradictionException {
@@ -72,7 +72,7 @@ public class BoundGlobalCardinlityTest {
         vars[5].instantiateTo(0, Null);
 
         model.getSolver().set(inputOrderLBSearch(append(vars, card)));
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertTrue(model.getSolver().getSolutionCount() > 0);
     }
 
@@ -107,8 +107,8 @@ public class BoundGlobalCardinlityTest {
                 ref.getSolver().set(inputOrderLBSearch(append(vars, cards)));
             }
 //            SearchMonitorFactory.log(solver, false, true);
-            while (model.solve()) ;
-            while (ref.solve()) ;
+            while (model.getSolver().solve()) ;
+            while (ref.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
 
         }
@@ -144,8 +144,8 @@ public class BoundGlobalCardinlityTest {
                 ref.getSolver().set(inputOrderLBSearch(vars));
             }
 //            SearchMonitorFactory.log(solver, false, true);
-            while (model.solve()) ;
-            while (ref.solve()) ;
+            while (model.getSolver().solve()) ;
+            while (ref.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
 
         }

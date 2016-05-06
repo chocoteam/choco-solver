@@ -113,7 +113,7 @@ public class SantaClaude extends AbstractProblem {
             out.println(format("Total cost: %d euros", total_cost.getValue()));
             out.println(format("Average: [%.3f,%.3f] euros", average.getLB(), average.getUB()));
         });
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         model.getIbex().release();
     }
 

@@ -71,7 +71,7 @@ public class SumOfElementsTest {
         model.post(sum(setVar, sum, true));
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
@@ -83,7 +83,7 @@ public class SumOfElementsTest {
         model.post(sum(setVar, intVar, true));
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     /* *******************************************
@@ -104,7 +104,7 @@ public class SumOfElementsTest {
 
     private void checkSolutions(Model model, SetVar var, IntVar sum) {
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             int computedSum = 0;
             for (Integer value : var.getValue()) {

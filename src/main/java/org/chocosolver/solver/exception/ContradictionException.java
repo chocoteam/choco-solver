@@ -80,6 +80,7 @@ public final class ContradictionException extends Exception {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         return "CONTRADICTION (" + (c == null ? "" : c.toString() + ", ") + v + ") : " + s;
     }
@@ -87,6 +88,7 @@ public final class ContradictionException extends Exception {
     /**
      * {@inheritDoc}
      */
+    @Override
     public synchronized Throwable fillInStackTrace() {
         return this;
     }

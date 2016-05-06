@@ -475,14 +475,10 @@ public final class PropKeysorting extends Propagator<IntVar> {
      */
     private void prune() throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            if (
-                    !DvarLexFixMin(X[i], XLB[i])
-                            || !DvarLexFixMax(X[i], XUB[i])
-                            || !DvarLexFixMin(Y[i], YLB[i])
-                            || !DvarLexFixMax(Y[i], YUB[i])
-                    ) {
-                this.contradiction(null, "");
-            }
+            DvarLexFixMin(X[i], XLB[i]);
+            DvarLexFixMax(X[i], XUB[i]);
+            DvarLexFixMin(Y[i], YLB[i]);
+            DvarLexFixMax(Y[i], YUB[i]);
         }
         for (int d = 0; d <= m; d++) {
             int j = 0, x;
@@ -568,12 +564,12 @@ public final class PropKeysorting extends Propagator<IntVar> {
     /**
      * Maintain T <=_lex V, where T is an integer tuple and V a dvar tuple.
      */
-    private boolean DvarLexFixMin(IntVar[] V, int[] T) throws ContradictionException {
+    private void DvarLexFixMin(IntVar[] V, int[] T) throws ContradictionException {
         int i, q = 0;
         for (i = 0; i <= k; i++) {
             q = i;
             if (V[i].getLB() > T[i]) {
-                return true;
+                return;
             } else if (V[i].getUB() > T[i]) {
                 prune |= V[q].updateLowerBound(T[q], this);
                 break;
@@ -584,23 +580,22 @@ public final class PropKeysorting extends Propagator<IntVar> {
         for (i++; i <= k; i++) {
             if (V[i].getUB() < T[i]) {
                 prune |= V[q].updateLowerBound(T[q] + 1, this);
-                return true;
+                return;
             } else if (V[i].getUB() > T[i]) {
-                return true;
+                return;
             }
         }
-        return true;
     }
 
     /**
      * Maintain V <=_lex T, where T is an integer tuple and V a dvar tuple
      */
-    private boolean DvarLexFixMax(IntVar[] V, int[] T) throws ContradictionException {
+    private void DvarLexFixMax(IntVar[] V, int[] T) throws ContradictionException {
         int i, q = 0;
         for (i = 0; i <= k; i++) {
             q = i;
             if (V[i].getUB() < T[i]) {
-                return true;
+                return;
             } else if (V[i].getLB() < T[i]) {
                 prune |= V[q].updateUpperBound(T[q], this);
                 break;
@@ -612,10 +607,9 @@ public final class PropKeysorting extends Propagator<IntVar> {
             if (V[i].getLB() > T[i]) {
                 prune |= V[q].updateUpperBound(T[q] - 1, this);
             } else if (V[i].getLB() < T[i]) {
-                return true;
+                return;
             }
         }
-        return true;
     }
 
 

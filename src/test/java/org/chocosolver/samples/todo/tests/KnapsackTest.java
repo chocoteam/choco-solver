@@ -79,7 +79,7 @@ public class KnapsackTest {
             // end of trick
             s.setObjective(MAXIMIZE, power);
         }
-        while(s.solve());
+        while(s.getSolver().solve());
         times.add(s.getSolver().getTimeCount());
     }
 
@@ -109,6 +109,17 @@ public class KnapsackTest {
             Model s = ks.modelIt("k10", 10);
             ks.solveIt(s, true);
             Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 1078, "obj val");
+        }
+    }
+
+    @Test(groups={"1s"})
+    public void testALL0() throws IOException {
+        times.clear();
+        KnapsackTest ks = new KnapsackTest();
+        for (int i = 0; i < 1; i++) {
+            Model s = ks.modelIt("k0", 10);
+            ks.solveIt(s, true);
+            Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 7546, "obj val");
         }
     }
 

@@ -76,7 +76,7 @@ public class NotMemberTest {
         model.notMember(var, setVar).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -100,7 +100,7 @@ public class NotMemberTest {
         model.notMember(var, setVar).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -129,7 +129,7 @@ public class NotMemberTest {
 
     private void checkSolutions(Model model, SetVar setVar, IntVar var) {
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
             assertFalse(setVar.getValue().contain(var.getValue()));
         }

@@ -42,6 +42,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
@@ -75,7 +76,7 @@ public class ModelTest {
     }
 
     public static Model knapsack() {
-        Model model = new Model("ModelT-"+nextModelNum());
+        Model model = new Model("ModelT-" + nextModelNum());
         IntVar power = model.intVar("v_" + n, 0, 9999, true);
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -97,17 +98,17 @@ public class ModelTest {
         for (int i : is) {
             switch (i) {
                 case ONE:
-                    s.solve();
+                    s.getSolver().solve();
                     break;
                 case NEXT:
-                    s.solve();
+                    s.getSolver().solve();
                     break;
                 case ALL:
-                    while (s.solve()) ;
+                    while (s.getSolver().solve()) ;
                     break;
                 case OPT:
                     s.setObjective(MAXIMIZE, (IntVar) s.getVar(0));
-                    s.solve();
+                    s.getSolver().solve();
                     break;
                 default:
                     fail("unknonw case");
@@ -116,7 +117,7 @@ public class ModelTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRight() {
         boolean alive = true;
         int cas = 0;
@@ -186,12 +187,12 @@ public class ModelTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testFH1() {
         Model model = new Model();
         BoolVar b = model.boolVar("b");
         IntVar i = model.intVar("i", MIN_INT_BOUND, MAX_INT_BOUND, true);
-        SetVar s = model.setVar("s", new int[]{}, new int[]{2,3});
+        SetVar s = model.setVar("s", new int[]{}, new int[]{2, 3});
         RealVar r = model.realVar("r", 1.0, 2.2, 0.01);
 
         BoolVar[] bvars = model.retrieveBoolVars();
@@ -209,7 +210,7 @@ public class ModelTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRetrieveInt() {
         Model model = new Model();
         BoolVar b = model.boolVar("b");
@@ -220,7 +221,7 @@ public class ModelTest {
         Assert.assertEquals(2, is2.length);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRetrieveBool() {
         Model model = new Model();
         BoolVar b = model.boolVar("b");
@@ -229,58 +230,58 @@ public class ModelTest {
         Assert.assertEquals(1, bs.length);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testFH2() {
         Model model = new Model();
         BoolVar b = model.boolVar("b");
         model.arithm(b, "=", 2).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().isFeasible(), FALSE);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL1() {
         Model s = new Model();
         s.arithm(s.ONE(), "!=", s.ZERO()).post();
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testParBug2() {
         for (int iter = 0; iter < 5000; iter++) {
             Model model = knapsack();
-            while(model.solve());
+            while (model.getSolver().solve()) ;
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testParBug3() {
         for (int iter = 0; iter < 5000; iter++) {
             Model model = knapsack();
-            model.getSolver().set(randomSearch(model.retrieveIntVars(true),iter));
-            while(model.solve());
+            model.getSolver().set(randomSearch(model.retrieveIntVars(true), iter));
+            while (model.getSolver().solve()) ;
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL300() {
         Model s = new Model();
         IntVar i = s.intVar("i", -5, 5, false);
         s.setObjective(MAXIMIZE, i);
-        s.solve();
+        s.getSolver().solve();
         assertEquals(s.getSolver().getSolutionCount(), 1);
         assertEquals(i.getValue(), 5);
 
         s.getSolver().getEngine().flush();
         s.getSolver().reset();
         s.clearObjective();
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 11);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testMonitors() {
         Model model = new Model();
         IntVar v = model.boolVar("b");
@@ -290,24 +291,24 @@ public class ModelTest {
         IMonitorSolution sm2 = () -> d[0]++;
         model.getSolver().plugMonitor(sm1);
         model.getSolver().plugMonitor(sm2);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2, c[0]);
         assertEquals(2, d[0]);
         // unplug
         model.getSolver().unplugMonitor(sm1);
         model.getSolver().reset();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2, c[0]);
         assertEquals(4, d[0]);
         // plug
         model.getSolver().unplugAllSearchMonitors();
         model.getSolver().reset();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2, c[0]);
         assertEquals(4, d[0]);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testCriteria() {
         Model model = new Model();
         IntVar v = model.boolVar("b");
@@ -315,21 +316,21 @@ public class ModelTest {
         Criterion c2 = () -> model.getSolver().getSolutionCount() == 1;
         model.getSolver().addStopCriterion(c1);
         model.getSolver().addStopCriterion(c2);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(0, model.getSolver().getSolutionCount());
         // unplug
         model.getSolver().removeStopCriterion(c1);
         model.getSolver().reset();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(1, model.getSolver().getSolutionCount());
         // plug
         model.getSolver().removeAllStopCriteria();
         model.getSolver().reset();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2, model.getSolver().getSolutionCount());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testCompSearch() {
         Model model = new Model();
         IntVar[] v = model.boolVarArray("v", 2);
@@ -338,12 +339,12 @@ public class ModelTest {
         model.arithm(w[0], "!=", w[1]).post();
         model.getSolver().set(inputOrderLBSearch(v));
         model.getSolver().makeCompleteStrategy(true);
-        model.solve();
+        model.getSolver().solve();
         assertEquals(model.getSolver().isSatisfied(), TRUE);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testAssociates(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testAssociates() {
         Model s = new Model();
         BoolVar v = s.boolVar("V");
         Assert.assertEquals(s.getNbVars(), 1);
@@ -355,20 +356,20 @@ public class ModelTest {
         Assert.assertEquals(s.getNbVars(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRestore() throws ContradictionException {
         Model model = new Model();
         IntVar[] v = model.boolVarArray("v", 2);
         model.arithm(v[0], "!=", v[1]).post();
         model.setObjective(MAXIMIZE, v[0]);
-        model.solve();
+        model.getSolver().solve();
         assertTrue(v[0].isInstantiated());
-        model.solve();
+        model.getSolver().solve();
         assertTrue(v[0].isInstantiatedTo(1));
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testHook(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testHook() {
         Model model = new Model();
         String toto = "TOTO";
         String titi = "TITI";
@@ -383,53 +384,91 @@ public class ModelTest {
         Assert.assertEquals(model.getHooks().size(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testName(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testName() {
         Model model = new Model();
         Assert.assertTrue(model.getName().startsWith("Model-"));
         model.setName("Revlos");
         Assert.assertEquals(model.getName(), "Revlos");
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testNextSolution(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNextSolution() {
         Model s = ProblemMaker.makeNQueenWithBinaryConstraints(8);
-        s.solve(); //  should not throw exception
+        s.getSolver().solve(); //  should not throw exception
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testFindSolution(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindSolution() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
-        for(int i = 0; i < 2; i++) {
-            Assert.assertNotNull(m.findSolution());
+        for (int i = 0; i < 2; i++) {
+            Assert.assertNotNull(m.getSolver().findSolution());
         }
-        Assert.assertNull(m.findSolution());
+        Assert.assertNull(m.getSolver().findSolution());
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testFindAllSolutions(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllSolutions() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
-        Assert.assertEquals(m.findAllSolutions().size(), 2);
+        m.getSolver().findAllSolutions();
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testFindOptiamalSolution(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllSolutions2() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
+        Assert.assertEquals(m.getSolver().streamSolutions().count(), 2);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindOptimalSolution() {
         Model m = ProblemMaker.makeGolombRuler(10);
-        Assert.assertNotNull(m.findOptimalSolution((IntVar) m.getHook("objective"), false));
+        Assert.assertNotNull(m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false));
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testFindAllOptimalSolutions(){
-        Model m = ProblemMaker.makeGolombRuler(6);
-        Assert.assertEquals(m.findAllOptimalSolutions((IntVar) m.getHook("objective"), false).size(), 4);
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindOptimalSolutionWithSearch() {
+        Model m = ProblemMaker.makeGolombRuler(7);
+        m.getSolver().set(inputOrderLBSearch((IntVar[]) m.getHook("ticks")));
+        Solution s = m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false);
+        Assert.assertNotNull(s);
+        Assert.assertTrue(s.getIntVal((IntVar) m.getHook("objective"))==25);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testFind(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllOptimalSolutions() {
         Model m = ProblemMaker.makeGolombRuler(6);
-        IntVar[] ticks= (IntVar[]) m.getHook("ticks");
+        m.getSolver().findAllOptimalSolutions((IntVar) m.getHook("objective"), false);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllOptimalSolutions2() {
+        Model m = ProblemMaker.makeGolombRuler(6);
+        Assert.assertEquals(m.getSolver().streamOptimalSolutions((IntVar) m.getHook("objective"), false).count(), 4);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFind() {
+        Model m = ProblemMaker.makeGolombRuler(6);
+        IntVar[] ticks = (IntVar[]) m.getHook("ticks");
         m.clearObjective();
         m.getSolver().showSolutions();
-        Assert.assertEquals(m.findParetoFront(ticks, false).size(), 8);
+		List<Solution> front = m.getSolver().findParetoFront(ticks, false);
+		for(Solution s:front){
+			System.out.println(s.getIntVal(ticks[0]));
+		}
+        Assert.assertEquals(front.size(), 8);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllSolutions3() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
+        m.getSolver().eachSolutionWithMeasure((solution, measures) -> {
+            System.out.printf("Found solution: %s%n with the following measures:%n%s%n",
+                    solution.toString(),
+                    measures.toOneLineString());
+        });
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
     }
 }

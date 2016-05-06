@@ -97,7 +97,7 @@ public class SetPartition extends AbstractProblem {
 	public void solve() {
 		// find the optimum
 		model.setObjective(MINIMIZE, sum);
-		while(model.solve()){
+		while(model.getSolver().solve()){
 			System.out.println("new solution found");
 			System.out.println(x);
 			System.out.println(y);

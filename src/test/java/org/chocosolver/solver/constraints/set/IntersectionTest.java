@@ -88,13 +88,13 @@ public class IntersectionTest {
         model.intersection(setVars, intersect).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
     private void checkSolutions(Model model, SetVar[] setVars, SetVar intersect) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             ISet computed = SetFactory.makeBipartiteSet(0);
             for (SetVar setVar : setVars) {

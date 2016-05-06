@@ -87,7 +87,7 @@ public class CycleLtTest {
             for (int i = 0; i < nbIt; i++) {
                 Model rand = modeler(n);
                 values()[j].make(rand);
-                while (rand.solve()) ;
+                while (rand.getSolver().solve()) ;
                 st.append(pad(format("%d ", rand.getSolver().getNodeCount()), -7, " "));
                 st.append(pad(format("%d ", rand.getSolver().getBackTrackCount()), -7, " "));
                 st.setLength(0);

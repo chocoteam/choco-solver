@@ -104,7 +104,7 @@ public class PropTimesXY extends Propagator<IntVar> {
         } else if (Z.isInstantiated()) {
             double a = (double) Z.getValue() / (double) X.getValue();
             if (Math.abs(a - Math.round(a)) > 0.001) {
-                contradiction(Z, "");                        // not integer
+                fails(); // TODO: could be more precise, for explanation purpose
             }
             Y.instantiateTo((int) Math.round(a), this);        // fix Y
             setPassive();

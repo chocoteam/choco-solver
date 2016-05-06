@@ -50,7 +50,7 @@ public class InverseTest {
         model.inverseSet(setVars, inverseSetVars, 0, 0).post();
 
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
             checkSolution(setVars, inverseSetVars);
         }
@@ -66,7 +66,7 @@ public class InverseTest {
         model.inverseSet(setVars, inverseSetVars, 0, 0).post();
 
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             checkSolution(setVars, inverseSetVars);
         }
@@ -82,7 +82,7 @@ public class InverseTest {
         model.inverseSet(setVars, inverseSetVars, 0, 0).post();
 
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             checkSolution(setVars, inverseSetVars);
         }
@@ -99,12 +99,12 @@ public class InverseTest {
 
         model.inverseSet(setVars, inverseSetVars, 0, 0).post();
 
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
 
         assertEquals(inverseSetVars[0].getValue().toArray(), new int[]{0, 1});
         assertEquals(inverseSetVars[1].getValue().toArray(), new int[]{0});
 
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     private void checkSolution(SetVar[] setVars, SetVar[] inverseSetVars) {

@@ -67,7 +67,7 @@ public class NValueTest {
                 throw new UnsupportedOperationException();
             }
         });
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
 	@Test(groups="1s", timeOut=60000)
@@ -94,6 +94,6 @@ public class NValueTest {
                 throw new UnsupportedOperationException();
             }
         });
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 }

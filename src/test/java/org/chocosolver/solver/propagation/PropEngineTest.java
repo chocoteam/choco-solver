@@ -70,7 +70,7 @@ public class PropEngineTest {
         model.arithm(x, ">=", y).post();
         model.arithm(x, "<=", 2).post();
 
-        model.solve();
+        model.getSolver().solve();
     }
 
     @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
@@ -79,7 +79,7 @@ public class PropEngineTest {
         IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
         Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
         model.post(CSTR, CSTR);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -88,11 +88,11 @@ public class PropEngineTest {
         IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
         Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
         model.post(CSTR);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 3);
         model.getSolver().reset();
         model.unpost(CSTR);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 
@@ -102,12 +102,12 @@ public class PropEngineTest {
         IntVar[] VARS = model.intVarArray("X", 2, 0, 2, false);
         Constraint CSTR = model.arithm(VARS[0], "+", VARS[1], "=", 2);
         model.post(CSTR);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 3);
         model.getSolver().reset();
         model.getSolver().set(NoPropagationEngine.SINGLETON);
         model.unpost(CSTR);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 
@@ -142,7 +142,7 @@ public class PropEngineTest {
     public void test3() {
         Model model = makeNQueenWithBinaryConstraints(8);
         model.getSolver().set(new SevenQueuesPropagatorEngine(model));
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 92);
     }
 
@@ -150,7 +150,7 @@ public class PropEngineTest {
     public void test4() {
         Model model = makeNQueenWithBinaryConstraints(8);
         model.getSolver().set(new TwoBucketPropagationEngine(model));
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 92);
     }
 
@@ -160,7 +160,7 @@ public class PropEngineTest {
         model.getSolver().set(new SevenQueuesPropagatorEngine(model));
         model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
         int obj = Integer.MAX_VALUE;
-        while(model.solve()){
+        while(model.getSolver().solve()){
             obj = ((IntVar)(model.getObjective())).getValue();
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
@@ -173,7 +173,7 @@ public class PropEngineTest {
         model.getSolver().set(new TwoBucketPropagationEngine(model));
         model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
         int obj = Integer.MAX_VALUE;
-        while(model.solve()){
+        while(model.getSolver().solve()){
             obj = ((IntVar)(model.getObjective())).getValue();
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
@@ -214,7 +214,7 @@ public class PropEngineTest {
                 }
             }).post();
             model.getSolver().set(randomSearch(X, 0));
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 9);
         }
     }

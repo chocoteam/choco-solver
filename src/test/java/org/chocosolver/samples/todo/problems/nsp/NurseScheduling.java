@@ -159,7 +159,7 @@ public class NurseScheduling {
         model.getSolver().limitTime(180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
         model.getSolver().set(strategy.getGoal(model, vars));
-        if (Boolean.TRUE == model.solve()) {
+        if (Boolean.TRUE == model.getSolver().solve()) {
             m.printSolution(model);
             NSChecker checker = new NSChecker(data);
             if (checker.checkSolution(m.getSolution(model)))
@@ -187,7 +187,7 @@ public class NurseScheduling {
         model.getSolver().set(strategy.getGoal(model, vars));
 
         System.out.printf("%s\n", model.toString());
-        if (Boolean.TRUE == model.solve()) {
+        if (Boolean.TRUE == model.getSolver().solve()) {
             NSChecker checker = new NSChecker(data);
             if (checker.checkSolution(m.getSolution(model)))
                 System.out.println("Solution checked.");
@@ -203,7 +203,7 @@ public class NurseScheduling {
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
         model.getSolver().set(strategy.getGoal(model, vars));
         String solved = "0";
-        if (Boolean.TRUE == model.solve()) {
+        if (Boolean.TRUE == model.getSolver().solve()) {
             m.printSolution(model);
             NSChecker checker = new NSChecker(data);
             if (checker.checkSolution(m.getSolution(model)))

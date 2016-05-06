@@ -123,6 +123,16 @@ public class PropNogoods extends Propagator<IntVar> {
     private TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
 
     /**
+     * Store new added variables when {@link #initialized} is <i>false</i>
+     */
+    private ArrayList<IntVar> add_var;
+
+    /**
+     * Indicates if this is initialized or not
+     */
+    private boolean initialized = false;
+
+    /**
      * Create a (unique) propagator for no-goods recording and propagation.
      *
      * @param model the model that declares the propagator
@@ -145,10 +155,12 @@ public class PropNogoods extends Propagator<IntVar> {
         sat_trail_ = model.getEnvironment().makeInt();
         test_eq = new BitSet();
         fp = new ArrayDeque<>();
+        add_var = new ArrayList<>(16);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        assert initialized:"PropNogoods is not initialized";
         if (!sat_.ok_) fails();
         fp.clear();
         sat_.cancelUntil(0); // to deal with learnt clauses, only called on coarse grain propagation
@@ -306,6 +318,19 @@ public class PropNogoods extends Propagator<IntVar> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Initializes this propagator
+     */
+    public void initialize() {
+        if (!initialized) {
+            if (add_var.size() > 0) {
+                addVariable(add_var.toArray(new IntVar[add_var.size()]));
+            }
+            add_var.clear();
+            this.initialized = true;
+        }
+    }
+
+    /**
      * Creates or returns if already existing, the literal corresponding to :
      * <p>
      * <code>ivar</code> (<code>eq</code>?"=":"<=") <code>value</code>
@@ -341,8 +366,13 @@ public class PropNogoods extends Propagator<IntVar> {
 
         int pos;
         if ((pos = var2pos[vid]) == NO_ENTRY) {
-            addVariable(ivar);
-            pos = vars.length - 1;
+            if(initialized) {
+                addVariable(ivar);
+                pos = vars.length - 1;
+            }else {
+                add_var.add(ivar);
+                pos = add_var.size() - 1;
+            }
             var2pos[vid] = pos;
         }
         long lvalue = eq ? value : leq(value);

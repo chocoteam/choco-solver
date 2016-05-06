@@ -59,11 +59,11 @@ public class ViewsTest {
 
     public static void check(Model ref, Model model, long seed, boolean strict, boolean solveAll) {
         if (solveAll) {
-            while (ref.solve()) ;
-            while (model.solve()) ;
+            while (ref.getSolver().solve()) ;
+            while (model.getSolver().solve()) ;
         } else {
-            ref.solve();
-            model.solve();
+            ref.getSolver().solve();
+            model.getSolver().solve();
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(),
                 ref.getSolver().getSolutionCount(), "solutions (" + seed + ")");
@@ -547,7 +547,7 @@ public class ViewsTest {
         SetVar v1 = model.setVar("{0,1}", new int[]{0, 1});
         SetVar v2 = model.setVar("v2", new int[]{}, new int[]{0, 1, 2, 3});
         model.subsetEq(new SetVar[]{v1, v2}).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -558,7 +558,7 @@ public class ViewsTest {
                 model.intVar("int", -3, 3, false),
                 "=",
                 model.intMinusView(model.boolVar("bool"))).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
@@ -573,7 +573,7 @@ public class ViewsTest {
         s.member(s.ONE(), set).post();
         Solver r = s.getSolver();
         r.set(minDomUBSearch(bool));
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 1);
     }
 
@@ -813,12 +813,12 @@ public class ViewsTest {
         int nbSols=0;
         do {
             t = System.currentTimeMillis();
-            bc = models[0].solve();
+            bc = models[0].getSolver().solve();
             time[0] += System.currentTimeMillis() - t;
             if(bc) nbSols++;
             for(int k=1;k<models.length;k++) {
                 t = System.currentTimeMillis();
-                Assert.assertEquals(bc, models[k].solve());
+                Assert.assertEquals(bc, models[k].getSolver().solve());
                 time[k] += System.currentTimeMillis() - t;
                 Assert.assertEquals(
                         models[k].getSolver().getBackTrackCount(),

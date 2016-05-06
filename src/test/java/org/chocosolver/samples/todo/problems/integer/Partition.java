@@ -138,7 +138,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         StringBuilder st = new StringBuilder();
         if (ESat.TRUE == model.getSolver().isFeasible()) {

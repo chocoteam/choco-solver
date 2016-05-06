@@ -93,14 +93,14 @@ public class NQueenTest {
     @Test(groups="5m", timeOut=300000)
     public void testBinary() {
         Model s = modeler(new NQueenBinary(), size);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testLinBinary() {
         Model s = modeler(new NQueenLinearBinary(), size);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertIt(s);
         //s.solve();
     }
@@ -108,21 +108,21 @@ public class NQueenTest {
     @Test(groups="5m", timeOut=300000)
     public void testGlobalBinary() {
         Model s = modeler(new NQueenBinaryGlobal(), size);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testGlobal() throws ContradictionException {
         Model s = modeler(new NQueenGlobal(), size);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
     public void testDualBinary() {
         Model s = modeler(new NQueenDualBinary(), size);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
@@ -130,7 +130,7 @@ public class NQueenTest {
     @Test(groups="5m", timeOut=300000)
     public void testDualGlobal() {
         Model s = modeler(new NQueenDualGlobal(), size);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
@@ -139,13 +139,13 @@ public class NQueenTest {
         Model sol;
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
-            while (sol.solve()) ;
+            while (sol.getSolver().solve()) ;
             long nbsol = sol.getSolver().getSolutionCount();
             long node = sol.getSolver().getNodeCount();
             for (int t = 0; t < values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 values()[t].make(sol);
-                while (sol.solve()) ;
+                while (sol.getSolver().solve()) ;
                 assertEquals(sol.getSolver().getSolutionCount(), nbsol);
                 assertEquals(sol.getSolver().getNodeCount(), node);
             }
@@ -157,14 +157,14 @@ public class NQueenTest {
         Model sol;
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
-            while (sol.solve()) ;
+            while (sol.getSolver().solve()) ;
             long nbsol = sol.getSolver().getSolutionCount();
             long node = sol.getSolver().getNodeCount();
             for (int t = 0; t < values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 // default group
                 values()[t].make(sol);
-                while (sol.solve()) ;
+                while (sol.getSolver().solve()) ;
                 assertEquals(sol.getSolver().getSolutionCount(), nbsol);
                 assertEquals(sol.getSolver().getNodeCount(), node);
             }
