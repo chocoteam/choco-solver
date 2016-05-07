@@ -45,7 +45,7 @@ public class TestMultiSequentialObjectives {
 	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
 	 * best solution is 32,33,34
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest1(){
 		Model m = new Model();
 		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -65,7 +65,7 @@ public class TestMultiSequentialObjectives {
 	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100 and a+b=c<br />
 	 * best solution is 24,25,49
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest2(){
 		Model m = new Model();
 		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -87,7 +87,7 @@ public class TestMultiSequentialObjectives {
      * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
      * best solution is 32,33,34
      */
-    @Test
+	@Test(groups="1s", timeOut=60000)
     public void simpleLexTest3(){
         Model m = new Model();
         IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -103,7 +103,7 @@ public class TestMultiSequentialObjectives {
         Assert.assertEquals(s.getIntVal(c).intValue(), 2);
     }
 
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest4(){
 		Model m = new Model();
 		SetVar sv = m.setVar(new int[]{}, new int[]{0,1,2,3,4,5});
