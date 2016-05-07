@@ -39,7 +39,7 @@ Choco Solver has also many `extensions <http://choco-solver.org/?q=extensions>`_
 including a FlatZinc parser to solve minizinc instances and a graph module to better solve graph problems such as the TSP.
 An overview of the features of Choco |version| may also be found in the presentation made in the
 `"CP Solvers: Modeling, Applications, Integration, and Standardization" <http://www.choco-solver.org/sites/materials/cpsol2013_talk.pdf>`_ workshop of CP2013.
-The source code of choco-solver-|version| is hosted on `GitHub <https://github.com/chocoteam/choco3>`_.
+The source code of choco-solver-|version| is hosted on `GitHub <https://github.com/chocoteam/choco-solver>`_.
 
 History
 =======
@@ -47,7 +47,8 @@ History
 The first version of Choco dates from the early 2000s.
 A few years later, Choco 2 has encountered a great success in both the academic and the industrial world.
 For maintenance issue, Choco has been completely rewritten in 2011, leading to Choco 3.
-The first beta version of Choco 3 has been released in 2012.
+The first beta version of Choco 3 has been released in 2012 and it has shown significant performance improvement.
+Choco 4 comes with a simpler modeling API.
 The latest version is Choco |release|.
 
 Main contributors
@@ -89,10 +90,10 @@ A reference to this manual, or more generally to Choco |version|, is made like t
 
 .. code-block:: none
 
-    @manual{choco3,
+    @manual{chocoSolver,
       author        = {Charles Prud'homme and Jean-Guillaume Fages and Xavier Lorca},
-      title         = {Choco3 Documentation},
-      year          = {2014},
+      title         = {Choco Solver Documentation},
+      year          = {2016},
       organization  = {TASC, INRIA Rennes, LINA CNRS UMR 6241, COSLING S.A.S.},
       timestamp     = {Tue, 9 Feb 2016},
       url           = {http://www.choco-solver.org },
@@ -177,7 +178,7 @@ Compiling sources
 =================
 
 As a Maven-based project, Choco Solver can be installed in a few instructions.
-Once you have downloaded the source (from the zip file or `GitHub <https://github.com/chocoteam/choco3>`_, simply run the following command:
+Once you have downloaded the source (from the zip file or `GitHub <https://github.com/chocoteam/choco-solver>`_, simply run the following command:
 
 .. code-block:: bash
 
@@ -241,4 +242,4 @@ Simple example showing how to use Choco Solver ::
 Change history
 **************
 
-Changes to the library are logged into the `CHANGES.md <https://github.com/chocoteam/choco3/blob/master/CHANGES.md>`_ file.
+Changes to the library are logged into the `CHANGES.md <https://github.com/chocoteam/choco-solver/blob/master/CHANGES.md>`_ file.
