@@ -602,11 +602,12 @@ public interface IVariableFactory extends ISelf<Model> {
     /**
      * Creates a constant set variable, equal to <i>value</i>
      * @param name name of the variable
-     * @param value value of the set variable, e.g. {0,4,9}
+     * @param values value of the set variable, e.g. {0,4,9}
      * @return a constant SetVar of domain {<i>value</i>}
      */
-    default SetVar setVar(String name, int[] value) {
-        return new SetVarImpl(name, value, _me());
+    default SetVar setVar(String name, int... values) {
+    	if(values==null) values = new int[]{};
+      return new SetVarImpl(name, values, _me());
     }
 
     // ARRAY

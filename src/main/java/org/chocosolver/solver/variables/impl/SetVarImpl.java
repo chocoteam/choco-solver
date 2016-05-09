@@ -152,7 +152,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	public void setCard(IntVar card) {
 		if(cardinality==null){
 			cardinality=card;
-			new Constraint("SetCard", new PropCardinality(this, cardinality)).post();
+			new Constraint("SetCard", new PropCardinality(this, card)).post();
 		} else {
 			model.arithm(cardinality, "=", card).post();
 		}
