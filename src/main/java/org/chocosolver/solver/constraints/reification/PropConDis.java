@@ -32,10 +32,10 @@ package org.chocosolver.solver.constraints.reification;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.variables.BoolVar;
@@ -148,17 +148,15 @@ public class PropConDis extends Propagator<BoolVar> {
     /**
      * Add a new disjunctions to the list of disjunctions
      *
-     * @param bvars boolvars in disjunction
+     * @param cstrs constraints in disjunction
      */
-    public void addDisjunction(BoolVar... bvars) {
-        for (BoolVar bv : bvars) {
-            if (!declared.contains(bv.getId())) {
-                if(initialized) {
-                    addVariable(bv);
-                }else {
-                    add_var.add(bv);
-                }
-                declared.add(bv.getId());
+    public void addDisjunction(Constraint... cstrs) {
+        BoolVar[] bvars = new BoolVar[cstrs.length];
+        for(int i  = 0; i < cstrs.length; i++){
+            bvars[i] = cstrs[i].reify();
+            if (!declared.contains(bvars[i].getId())) {
+                this.addVariable(bvars[i]);
+                declared.add(bvars[i].getId());
             }
         }
         disjunctions.add(bvars);

@@ -36,6 +36,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Random;
@@ -56,55 +58,60 @@ import static org.testng.Assert.assertTrue;
  */
 public class PropConDisTest {
 
-    @Test(groups="1s", timeOut=60000)
-    public void testCD1() throws ContradictionException {
-        Model s = new Model();
-        IntVar a = s.intVar("A", 0, 10, false);
-        BoolVar b1 = s.arithm(a, "=", 9).reify();
-        BoolVar b2 = s.arithm(a, "=", 10).reify();
-        s.addConstructiveDisjunction(b1, b2);
-        s.getConDisStore().getPropCondis().initialize();
-        s.getSolver().propagate();
-        assertEquals(a.getDomainSize(), 2);
-        assertEquals(a.getLB(), 9);
-        assertEquals(a.getUB(), 10);
-        while (s.getSolver().solve()) ;
-        assertEquals(s.getSolver().getSolutionCount(), 2);
+    @DataProvider(name="localornot")
+    public Object[][] provider(){
+        return new Object[][]{{true}, {false}};
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testCD2() throws ContradictionException {
-        Model s = new Model();
-        IntVar X = s.intVar("X", 0, 10, false);
-        IntVar Y = s.intVar("Y", 0, 10, false);
-        Constraint c1 = s.arithm(X, "-", Y, "<=", -9);
-        Constraint c2 = s.arithm(Y, "-", X, "<=", -9);
+    @Test(groups="1s", timeOut=60000, dataProvider = "localornot")
+    public void testCD1(boolean local) throws ContradictionException {
+        Model m = new Model();
+        IntVar a = m.intVar("A", 0, 10, false);
+        Constraint c1 = m.arithm(a, "=", 9);
+        Constraint c2 = m.arithm(a, "=", 10);
+        m.addConstructiveDisjunction(local, c1, c2);
+        m.getConDisStore().getPropCondis().initialize();
+        m.getSolver().propagate();
+        Assert.assertEquals(a.getDomainSize(), 2);
+        Assert.assertEquals(a.getLB(), 9);
+        Assert.assertEquals(a.getUB(), 10);
+        while(m.getSolver().solve());
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
+    }
 
-        s.addConstructiveDisjunction(c1.reify(), c2.reify());
-        s.getConDisStore().getPropCondis().initialize();
-        s.getSolver().propagate();
-        assertEquals(X.getDomainSize(), 4);
-        assertEquals(Y.getDomainSize(), 4);
-        assertTrue(X.contains(0));
-        assertTrue(X.contains(1));
-        assertTrue(X.contains(9));
-        assertTrue(X.contains(10));
-        assertTrue(Y.contains(0));
-        assertTrue(Y.contains(1));
-        assertTrue(Y.contains(9));
-        assertTrue(Y.contains(10));
-        while (s.getSolver().solve()) ;
-        assertEquals(s.getSolver().getSolutionCount(), 6);
+    @Test(groups="1s", timeOut=60000, dataProvider = "localornot")
+    public void testCD2(boolean local) throws ContradictionException {
+        Model m = new Model();
+        IntVar X = m.intVar("X", 0, 10, false);
+        IntVar Y = m.intVar("Y", 0, 10, false);
+        Constraint c1 = m.arithm(X, "-", Y, "<=", -9);
+        Constraint c2 = m.arithm(Y, "-", X, "<=", -9);
+
+        m.addConstructiveDisjunction(local, c1,c2);
+        m.getConDisStore().getPropCondis().initialize();
+        m.getSolver().propagate();
+        Assert.assertEquals(X.getDomainSize(), 4);
+        Assert.assertEquals(Y.getDomainSize(), 4);
+        Assert.assertTrue(X.contains(0));
+        Assert.assertTrue(X.contains(1));
+        Assert.assertTrue(X.contains(9));
+        Assert.assertTrue(X.contains(10));
+        Assert.assertTrue(Y.contains(0));
+        Assert.assertTrue(Y.contains(1));
+        Assert.assertTrue(Y.contains(9));
+        Assert.assertTrue(Y.contains(10));
+        while(m.getSolver().solve());
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 6);
     }
 
 
-    @Test(groups="5m", timeOut=300000)
-    public void test3() {
+    @Test(groups="5m", timeOut=300000, dataProvider = "localornot")
+    public void test3(boolean local) {
         Random rnd = new Random();
         for (int n = 1; n < 20; n += 1) {
             out.printf("Size: %d\n", n);
-            Model or = modelPb(n, n, rnd, false, true);
-            Model cd = modelPb(n, n, rnd, true, true);
+            Model or = modelPb(n, n, rnd, false, true, local);
+            Model cd = modelPb(n, n, rnd, true, true, local);
             or.getSolver().set(inputOrderLBSearch((IntVar[]) or.getHook("decvars")));
             cd.getSolver().set(inputOrderLBSearch((IntVar[]) cd.getHook("decvars")));
             Solution sor = new Solution(or);
@@ -122,17 +129,17 @@ public class PropConDisTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
-    public void test4() {
+    @Test(groups="5m", timeOut=3000000, dataProvider = "localornot")
+    public void test4(boolean local) {
         Random rnd = new Random();
         for (int n = 1; n < 4; n += 1) {
             System.out.printf("Size: %d\n", n);
             for (int seed = 0; seed < 5; seed += 1) {
                 out.printf("Size: %d (%d)\n", n, seed);
-                Model or = modelPb(n, seed, rnd, false, false);
+                Model or = modelPb(n, seed, rnd, false, false, local);
                 or.getSolver().set(randomSearch((IntVar[]) or.getHook("decvars"), 0));
                 while (or.getSolver().solve()) ;
-                Model cd = modelPb(n, seed, rnd, true, false);
+                Model cd = modelPb(n, seed, rnd, true, false, local);
                 cd.getSolver().set(randomSearch((IntVar[]) cd.getHook("decvars"), 0));
                 while (cd.getSolver().solve()) ;
                 assertEquals(cd.getSolver().getSolutionCount(), or.getSolver().getSolutionCount(), "wrong nb of solutions");
@@ -141,7 +148,7 @@ public class PropConDisTest {
         }
     }
 
-    private Model modelPb(int size, long seed, Random rnd, boolean cd, boolean optimize) {
+    private Model modelPb(int size, long seed, Random rnd, boolean cd, boolean optimize, boolean local) {
         rnd.setSeed(seed);
         int[] os = new int[size * 2];
         int[] ls = new int[size * 2];
@@ -158,17 +165,21 @@ public class PropConDisTest {
             model.sum(new IntVar[]{OS[i], LS[i]}, "<", OS[i + 1]).post();
         }
         for (int i = 0; i < size; i++) {
-            BoolVar[] disjunction = new BoolVar[os.length];
+            Constraint[] disjunction = new Constraint[os.length];
             for (int j = 0; j < os.length; j++) {
                 disjunction[j] = model.and(
                         model.arithm(OS[i], ">", os[j]),
                         model.arithm(OS[i], "+", LS[i], "<", os[j] + ls[j])
-                ).reify();
+                );
             }
             if (cd) {
-                model.addConstructiveDisjunction(disjunction);
+                model.addConstructiveDisjunction(local, disjunction);
             } else {
-                model.addClausesBoolOrArrayEqualTrue(disjunction);
+                BoolVar[] bvars = new BoolVar[os.length];
+                for(int j = 0 ; j < os.length; j++){
+                    bvars[j] = disjunction[j].reify();
+                }
+                model.addClausesBoolOrArrayEqualTrue(bvars);
             }
         }
         IntVar horizon = model.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);

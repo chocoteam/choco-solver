@@ -40,8 +40,8 @@ import java.util.BitSet;
  */
 public class IntIterableBitSet implements IntIterableSet {
 
-    private BitSet values;
-    private int offset;
+    public BitSet values;
+    int offset;
 
     public IntIterableBitSet() {
         this.values = new BitSet();
@@ -129,6 +129,15 @@ public class IntIterableBitSet implements IntIterableSet {
     @Override
     public void clear() {
         values.clear();
+    }
+
+    @Override
+    public boolean removeBetween(int f, int t) {
+        f -= offset;
+        t -= offset;
+        int card = values.cardinality();
+        values.clear(f, t);
+        return values.cardinality() - card != 0;
     }
 
     @Override

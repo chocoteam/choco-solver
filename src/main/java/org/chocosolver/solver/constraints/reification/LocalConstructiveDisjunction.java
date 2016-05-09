@@ -29,54 +29,60 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.Arrays;
 
 /**
- * Constraint representing the negation of a given constraint
- * does not filter but fails if the given constraint is satisfied
- * Can be used within any constraint
- * <p/>
- * Should not be called by the user
  *
- * @author Jean-Guillaume Fages
- * @since 15/05/2013
+ * <p>
+ * Project: choco.
+ * @author Charles Prud'homme
+ * @since 25/02/2016.
  */
-public class PropOpposite extends Propagator<Variable> {
+public class LocalConstructiveDisjunction extends Constraint {
+    /**
+     * Make a new constraint defined as a set of given propagators
+     *
+     * @param constraints set of constraints in disjunction
+     */
+    public LocalConstructiveDisjunction(Constraint... constraints) {
+        super("LocalConstructiveDisjunction", createProps(constraints));
+    }
 
-    // constraint to negate
-    Constraint original;
-
-    public PropOpposite(Constraint original, Variable[] vars) {
-        super(vars, PropagatorPriority.LINEAR, false);
-        this.original = original;
+    private static Propagator[] createProps(Constraint... constraints) {
+        Propagator[][] propagators = new Propagator[constraints.length][];
+        TIntObjectHashMap<IntVar> map1 = new TIntObjectHashMap<>();
+        for (int i = 0; i < constraints.length; i++) {
+            propagators[i] = constraints[i].getPropagators().clone();
+            for (int j = 0; j < propagators[i].length; j++) {
+                Propagator<IntVar> prop = propagators[i][j];
+                prop.setReifiedSilent();
+                for (int k = 0; k < prop.getNbVars(); k++) {
+                    map1.put(prop.getVar(k).getId(), prop.getVar(k));
+                }
+            }
+        }
+        int[] keys = map1.keys();
+        Arrays.sort(keys);
+        IntVar[] allvars = new IntVar[keys.length];
+        int k = 0;
+        for (int i = 0; i < keys.length; i++) {
+            allvars[k++] = map1.get(keys[i]);
+        }
+        IntVar[] vars = Arrays.copyOf(allvars, k);
+        assert vars.length > 0;
+        return ArrayUtils.append(new Propagator[]{new PropLocalConDis(vars, propagators)},
+                ArrayUtils.flatten(propagators));
     }
 
     @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        ESat op = original.isSatisfied();
-        if (op == ESat.TRUE) {
-            fails();
-        }
-        if (op == ESat.FALSE) {
-            setPassive();
-        }
+    public ESat isSatisfied() {
+        return propagators[0].isEntailed();
     }
-
-    @Override
-    public ESat isEntailed() {
-        ESat op = original.isSatisfied();
-        if (op == ESat.TRUE) {
-            return ESat.FALSE;
-        }
-        if (op == ESat.FALSE) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
-
 }

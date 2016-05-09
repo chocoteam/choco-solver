@@ -27,56 +27,57 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.constraints.reification;
+package org.chocosolver.solver.constraints.nary.allen;
 
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
 /**
- * Constraint representing the negation of a given constraint
- * does not filter but fails if the given constraint is satisfied
- * Can be used within any constraint
- * <p/>
- * Should not be called by the user
  *
- * @author Jean-Guillaume Fages
- * @since 15/05/2013
+ * <p>
+ * Project: choco.
+ * @author Charles Prud'homme
+ * @since 05/02/2016.
  */
-public class PropOpposite extends Propagator<Variable> {
+public class PropAllenGAC extends Propagator<IntVar> {
 
-    // constraint to negate
-    Constraint original;
+    /**
+     * Fitlering algorithm, ensuring GAC
+     */
+    protected final AllenRelation ar;
 
-    public PropOpposite(Constraint original, Variable[] vars) {
-        super(vars, PropagatorPriority.LINEAR, false);
-        this.original = original;
+    /**
+     * Set up this Allen relation filtering algorithm.
+     *
+     * @param Rel   integer variable (domain should not exceed [1,13])
+     * @param Oi    origin of the first interval
+     * @param Li    length of the first interval
+     * @param Oj    origin of the second interval
+     * @param Lj    length of th second interval
+     * @param absinst use abstract instruction mode
+     */
+    public PropAllenGAC(IntVar Rel, IntVar Oi, IntVar Li, IntVar Oj, IntVar Lj, boolean absinst) {
+        super(new IntVar[]{Rel, Oi, Li, Oj, Lj}, PropagatorPriority.LINEAR, false);
+        if(absinst){
+            ar = new AllenRelationMats(Rel, Oi, Li, Oj, Lj, this);
+        }else{
+            ar = new AllenRelationMe(Rel, Oi, Li, Oj, Lj, this);
+        }
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        ESat op = original.isSatisfied();
-        if (op == ESat.TRUE) {
-            fails();
-        }
-        if (op == ESat.FALSE) {
-            setPassive();
-        }
+        ar.filter();
     }
 
     @Override
     public ESat isEntailed() {
-        ESat op = original.isSatisfied();
-        if (op == ESat.TRUE) {
-            return ESat.FALSE;
-        }
-        if (op == ESat.FALSE) {
-            return ESat.TRUE;
+        if(isCompletelyInstantiated()){
+            return ESat.eval(ar.check());
         }
         return ESat.UNDEFINED;
     }
-
 }
