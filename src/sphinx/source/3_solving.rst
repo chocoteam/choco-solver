@@ -211,8 +211,14 @@ By default, a solution only records decision variables, that is, variables decla
 
 Let ``X`` be the set of decision variables and ``Y`` another variable set that you need to store.
 To record other variables (e.g. an objective variables) you have two options:
-- Declare them in the search strategy using a complementary strategy : ``solver.set(strategy(X),strategy(Y))``.
-- Specify which variables to store in the solution constructor : ``Solution solution = new Solution(model(), ArrayUtils.append(X,Y));``
+
+- Declare them in the search strategy using a complementary strategy ::
+
+    solver.set(strategy(X),strategy(Y)).
+
+- Specify which variables to store in the solution constructor ::
+
+    Solution solution = new Solution(model(), ArrayUtils.append(X,Y));
 
 You can record the last solution found as follows : ::
 
@@ -470,7 +476,7 @@ The default search strategy splits variables according to their type and defines
 #. real variables :code:`realVarSearch(rvars)`
 #. objective variable, if any: lower bound or upper bound, depending on the `ResolutionPolicy`
 
-Note that `ISF.lastConflict(solver)` is also plugged-in.
+Note that `lastConflict` is also plugged-in.
 
 Specifying a search strategy
 ============================
@@ -686,7 +692,9 @@ immediately followed by coefficient ``grow``:math:`^k`.
 
 You can design your own restart strategies using: ::
 
-    solver.setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit)
+    solver.setRestarts( LongCriterion restartCriterion,
+                        IRestartStrategy restartStrategy,
+                        int restartsLimit);
 
 
 *****
