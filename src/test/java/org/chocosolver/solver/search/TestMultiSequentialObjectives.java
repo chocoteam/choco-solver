@@ -108,16 +108,16 @@ public class TestMultiSequentialObjectives {
 		Model m = new Model();
 		SetVar sv = m.setVar(new int[]{}, new int[]{0,1,2,3,4,5});
 		int[] size = new int[]{8,6,3,3,3};
-		IntVar card = m.intVar(0,5);
-		IntVar load = m.intVar(0,10);
+		IntVar card = m.intVar("load", 0,5);
+		IntVar load = m.intVar("card", 0,10);
 		m.cardinality(sv,card).post();
 		m.sum(sv,size,0,load,true).post();
         m.getSolver().set(SearchStrategyFactory.setVarSearch(sv),inputOrderLBSearch(card,load));
 		Solution s = m.getSolver().findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
 		Assert.assertNotNull(s);
 		System.out.println(s);
-		Assert.assertTrue(s.getIntVal(load)==9);
-		Assert.assertTrue(s.getIntVal(card)==2);
+		Assert.assertEquals(s.getIntVal(load).intValue(), 9);
+		Assert.assertEquals(s.getIntVal(card).intValue(), 2);
 	}
 
 }
