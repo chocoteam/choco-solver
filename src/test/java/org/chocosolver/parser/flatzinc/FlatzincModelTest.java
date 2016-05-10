@@ -28,7 +28,6 @@
 package org.chocosolver.parser.flatzinc;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -54,10 +53,10 @@ public class FlatzincModelTest {
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
-        Model solver = fzn.getModel();
+        Model model = fzn.getModel();
 
-        solver.getSolver().solve();
-        Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups = "1s")
@@ -70,10 +69,10 @@ public class FlatzincModelTest {
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
-        Model solver = fzn.getModel();
+        Model model = fzn.getModel();
 
-        solver.getSolver().solve();
-        Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups = "1s")
@@ -88,10 +87,10 @@ public class FlatzincModelTest {
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
-        Model solver = fzn.getModel();
+        Model model = fzn.getModel();
 
-        solver.getSolver().solve();
-        Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
     @Test(groups = "1s")
@@ -108,10 +107,10 @@ public class FlatzincModelTest {
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
-        Model solver = fzn.getModel();
+        Model model = fzn.getModel();
 
-        solver.getSolver().solve();
-        Assert.assertEquals(solver.getSolver().getSolutionCount(), 1);
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
 }
