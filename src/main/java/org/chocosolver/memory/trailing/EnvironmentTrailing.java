@@ -39,6 +39,9 @@ import org.chocosolver.memory.trailing.trail.unsafe.UnsafeDoubleTrail;
 import org.chocosolver.memory.trailing.trail.unsafe.UnsafeIntTrail;
 import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 /**
  * The root class for managing memory and sessions.
  * <p/>
@@ -47,6 +50,12 @@ import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
  */
 public final class EnvironmentTrailing extends AbstractEnvironment {
 
+    /**
+     * The supported queues.
+     */
+    public enum TrailType {INT, BOOL, LONG, DOUBLE, INT_VECTOR, OPERATION, DOUBLE_VECTOR};
+
+    private Map<TrailType, Integer> defaultSizes;
 
     /**
      * The maximum numbers of worlds that a
@@ -88,6 +97,23 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
         super(Type.FLAT);
         trails = new ITrailStorage[0];
         trailSize = 0;
+
+        //Set the default values
+        defaultSizes = new EnumMap<>(TrailType.class);
+        for (TrailType t : TrailType.values()) {
+            defaultSizes.put(t, MaxHist);
+        }
+
+    }
+
+    /**
+     * Set the size of the initial trail for a given trail type.
+     * This must be called before creating any storable value of that type.
+     * @param t the trailing type to customize
+     * @param s the default size
+     */
+    public void setDefaultHistorySize(TrailType t, int s) {
+        defaultSizes.put(t, s);
     }
 
     /**
@@ -220,13 +246,14 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     public IStoredIntTrail getIntTrail() {
         if (intTrail == null) {
+            int s = defaultSizes.get(TrailType.INT);
             switch (type) {
                 default:
                 case FLAT:
-                    intTrail = new StoredIntTrail(MaxHist, maxWorld);
+                    intTrail = new StoredIntTrail(s, maxWorld);
                     break;
                 case UNSAFE:
-                    intTrail = new UnsafeIntTrail(MaxHist, maxWorld);
+                    intTrail = new UnsafeIntTrail(s, maxWorld);
                     break;
             }
             increaseTrail();
@@ -237,13 +264,14 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     public IStoredLongTrail getLongTrail() {
         if (longTrail == null) {
+            int s = defaultSizes.get(TrailType.LONG);
             switch (type) {
                 default:
                 case FLAT:
-                    longTrail = new StoredLongTrail(MaxHist, maxWorld);
+                    longTrail = new StoredLongTrail(s, maxWorld);
                     break;
                 case UNSAFE:
-                    longTrail = new UnsafeLongTrail(MaxHist, maxWorld);
+                    longTrail = new UnsafeLongTrail(s, maxWorld);
                     break;
             }
 
@@ -255,13 +283,14 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     public IStoredBoolTrail getBoolTrail() {
         if (boolTrail == null) {
+            int s = defaultSizes.get(TrailType.BOOL);
             switch (type) {
                 default:
                 case FLAT:
-                    boolTrail = new StoredBoolTrail(MaxHist, maxWorld);
+                    boolTrail = new StoredBoolTrail(s, maxWorld);
                     break;
                 case UNSAFE:
-                    boolTrail = new UnsafeBoolTrail(MaxHist, maxWorld);
+                    boolTrail = new UnsafeBoolTrail(s, maxWorld);
                     break;
             }
 
@@ -273,13 +302,14 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     public IStoredDoubleTrail getDoubleTrail() {
         if (doubleTrail == null) {
+            int s = defaultSizes.get(TrailType.DOUBLE);
             switch (type) {
                 default:
                 case FLAT:
-                    doubleTrail = new StoredDoubleTrail(MaxHist, maxWorld);
+                    doubleTrail = new StoredDoubleTrail(s, maxWorld);
                     break;
                 case UNSAFE:
-                    doubleTrail = new UnsafeDoubleTrail(MaxHist, maxWorld);
+                    doubleTrail = new UnsafeDoubleTrail(s, maxWorld);
                     break;
             }
             increaseTrail();
@@ -290,7 +320,8 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     public IOperationTrail getOperationTrail() {
         if (operationTrail == null) {
-            operationTrail = new OperationTrail(MaxHist, maxWorld);
+            int s = defaultSizes.get(TrailType.OPERATION);
+            operationTrail = new OperationTrail(s, maxWorld);
             increaseTrail();
             trails[trailSize++] = operationTrail;
         }
@@ -304,7 +335,8 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     public StoredIntVectorTrail getIntVectorTrail() {
         if (intVectorTrail == null) {
-            intVectorTrail = new StoredIntVectorTrail(this, MaxHist, maxWorld);
+            int s = defaultSizes.get(TrailType.INT_VECTOR);
+            intVectorTrail = new StoredIntVectorTrail(this, s, maxWorld);
             increaseTrail();
             trails[trailSize++] = intVectorTrail;
         }
@@ -313,7 +345,8 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     public StoredDoubleVectorTrail getDoubleVectorTrail() {
         if (doubleVectorTrail == null) {
-            doubleVectorTrail = new StoredDoubleVectorTrail(this, MaxHist, maxWorld);
+            int s = defaultSizes.get(TrailType.DOUBLE_VECTOR);
+            doubleVectorTrail = new StoredDoubleVectorTrail(this, s, maxWorld);
             increaseTrail();
             trails[trailSize++] = doubleVectorTrail;
         }
