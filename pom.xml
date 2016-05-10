@@ -286,8 +286,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- UNCOMMENT TO GENERATE CLASSES FOR MEMORY PACKAGE
-            <plugin>
+             <!--UNCOMMENT TO GENERATE CLASSES FOR MEMORY PACKAGE-->
+            <!--<plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.2.1</version>
@@ -307,8 +307,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            -->
+            </plugin>-->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>

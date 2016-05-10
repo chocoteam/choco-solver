@@ -221,7 +221,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param aModel the target model
      */
-    public Solver(Model aModel) {
+    protected Solver(Model aModel) {
         mModel = aModel;
         engine = NoPropagationEngine.SINGLETON;
         explainer = NoExplanationEngine.SINGLETON;

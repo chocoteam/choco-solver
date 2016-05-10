@@ -69,12 +69,12 @@ public class PropCondAllDiffTest {
         Model model = new Model();
         IntVar[] vars = model.intVarArray(5, 0, 4);
         model.allDifferentUnderCondition(vars, Condition.TRUE, false).post();
-        while(model.solve());
+        while(model.getSolver().solve());
 
         Model model2 = new Model();
         IntVar[] vars2 = model2.intVarArray(5, 0, 4);
         model2.allDifferent(vars2).post();
-        while(model2.solve());
+        while(model2.getSolver().solve());
 
         assertEquals(model.getSolver().getSolutionCount(), model2.getSolver().getSolutionCount());
     }
@@ -89,7 +89,7 @@ public class PropCondAllDiffTest {
         Map<IntVar, Boolean> mustBeDiff = mustBeDiff(vars, 3);
         model.allDifferentUnderCondition(vars,mustBeDiff::get,false).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
-        this.solveAndCheck(vars, model);
+        this.solveAndCheck(vars);
     }
 
     /**
@@ -103,7 +103,7 @@ public class PropCondAllDiffTest {
 
         model.allDifferentUnderCondition(vars, mustBeDiff::get, false).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
-        this.solveAndCheck(vars, model);
+        this.solveAndCheck(vars);
     }
 
     /**
@@ -117,7 +117,7 @@ public class PropCondAllDiffTest {
 
         model.allDifferentUnderCondition(vars, mustBeDiff::get, false).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
-        this.solveAndCheck(vars, model);
+        this.solveAndCheck(vars);
     }
 
     /**
@@ -132,7 +132,7 @@ public class PropCondAllDiffTest {
         model.allDifferentUnderCondition(vars, mustBeDiff::get, false).post();
 
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
         }
         assertTrue(solutionFound);
@@ -149,7 +149,7 @@ public class PropCondAllDiffTest {
         model.allDifferentUnderCondition(vars, v -> false, false).post();
 
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
         }
         assertTrue(solutionFound);
@@ -163,7 +163,7 @@ public class PropCondAllDiffTest {
 
         model.allDifferentUnderCondition(vars, mustBeDiff::get, false).post();
 
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -178,7 +178,7 @@ public class PropCondAllDiffTest {
 
         model.allDifferentUnderCondition(vars, Condition.EXCEPT_0, false).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
-        this.solveAndCheck(vars, model);
+        this.solveAndCheck(vars);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -189,7 +189,7 @@ public class PropCondAllDiffTest {
 
         model.allDifferentUnderCondition(vars, mustBeDiff::get, false).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
-        this.solveAndCheck(vars, model);
+        this.solveAndCheck(vars);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -206,7 +206,7 @@ public class PropCondAllDiffTest {
 
         model.allDifferentUnderCondition(vars, mustBeDiff::get, false).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
-        solveAndCheck(vars, model);
+        solveAndCheck(vars);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -242,7 +242,7 @@ public class PropCondAllDiffTest {
         model.allDifferentUnderCondition(vars, mustBeDiff::get, false).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
 
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -252,7 +252,7 @@ public class PropCondAllDiffTest {
 
         model.allDifferentUnderCondition(vars, v -> v.getLB() > 1, false).post();
         boolean solutionFound = false;
-        if (model.solve()) {
+        if (model.getSolver().solve()) {
             solutionFound = true;
         }
         assertTrue(solutionFound);
@@ -270,11 +270,10 @@ public class PropCondAllDiffTest {
     /**
      * The first three variables of the array must be different for each solution
      * @param vars variables to check
-     * @param model model permitting to reach the {@link Model#solve()} method
      */
-    private void solveAndCheck(IntVar[] vars, Model model) {
+    private void solveAndCheck(IntVar[] vars) {
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(vars[0].getModel().getSolver().solve()) {
             solutionFound = true;
             assertNotEquals(vars[0].getValue(), vars[1].getValue());
             assertNotEquals(vars[1].getValue(), vars[2].getValue());

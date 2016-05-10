@@ -100,7 +100,7 @@ public class ParetoTest {
         // --- solve
         ParetoOptimizer pareto = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{totalProfit_1,totalProfit_2});
         s.getSolver().plugMonitor(pareto);
-        while(s.solve());
+        while(s.getSolver().solve());
         System.out.println("Pareto Front:");
         for(Solution sol:pareto.getParetoFront()){
             System.out.println(sol.getIntVal(totalProfit_1)+" // "+sol.getIntVal(totalProfit_2));

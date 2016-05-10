@@ -29,6 +29,7 @@
  */
 package org.chocosolver.memory.trailing.trail;
 
+import org.chocosolver.memory.IStorage;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.memory.trailing.StoredDoubleVector;
 
@@ -36,7 +37,7 @@ import org.chocosolver.memory.trailing.StoredDoubleVector;
 /**
  * Implements a trail with the history of all the stored search vectors.
  */
-public class StoredDoubleVectorTrail implements ITrailStorage {
+public class StoredDoubleVectorTrail implements IStorage {
 
     /**
      * The current environment.

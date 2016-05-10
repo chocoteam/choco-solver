@@ -65,7 +65,7 @@ public class ParetoFront {
 		model.getSolver().plugMonitor(po);
 
 		// optimization
-		while(model.solve());
+		while(model.getSolver().solve());
 
 		// retrieve the pareto front
 		List<Solution> paretoFront = po.getParetoFront();

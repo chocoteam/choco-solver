@@ -65,7 +65,7 @@ public class SumTest {
         sum = model.intVar(15, 20);
         model.scalar(vars, coeffs, "=", sum).post();
         int nbSol2 = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol2++;
         }
         assertEquals(nbSol, nbSol2);
@@ -78,7 +78,7 @@ public class SumTest {
         model.sum(vars, "=", sum).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -111,7 +111,7 @@ public class SumTest {
         IntVar[] vars = new IntVar[]{ref, ref};
         model.sum(vars, "=", 9).post();
 
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
@@ -130,7 +130,7 @@ public class SumTest {
         IntVar sum = model.intVar(101);
         model.sum(vars, "=", sum).post();
 
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -149,7 +149,7 @@ public class SumTest {
         model.sum(vars, "<", sum).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -159,7 +159,7 @@ public class SumTest {
         model.sum(vars, ">", sum).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
@@ -170,7 +170,7 @@ public class SumTest {
     private int checkSolutions(String operator, IntVar[] intVars, IntVar sum) {
         Model model = sum.getModel();
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             int computed = stream(intVars)
                     .mapToInt(IntVar::getValue)

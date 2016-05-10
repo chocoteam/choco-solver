@@ -75,13 +75,13 @@ public class UnionTest {
         model.union(setVars, union).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
     private int checkSolutions(Model model, SetVar[] setVars, SetVar union) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             ISet computed = SetFactory.makeLinkedList();
             for (SetVar setVar : setVars) {

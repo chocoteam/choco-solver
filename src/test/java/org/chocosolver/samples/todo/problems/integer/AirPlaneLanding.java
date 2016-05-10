@@ -46,6 +46,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import static java.lang.Math.max;
+import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
@@ -184,8 +185,8 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void solve() {
-        while(model.solve()){
-            System.out.println("New solution found : "+objective);
+        while (model.getSolver().solve()) {
+            out.println("New solution found : " + objective);
             prettyOut();
         }
     }

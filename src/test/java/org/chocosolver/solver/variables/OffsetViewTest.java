@@ -61,7 +61,7 @@ public class OffsetViewTest {
         s.arithm(Y, "!=", 4).post();
 
         s.getSolver().set(inputOrderLBSearch(vars));
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 2);
     }
 
@@ -78,7 +78,7 @@ public class OffsetViewTest {
         s.arithm(Y, "!=", -2).post();
 
         s.getSolver().set(inputOrderLBSearch(vars));
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 4);
     }
 
@@ -124,8 +124,8 @@ public class OffsetViewTest {
 
             Model sb = bijective(low, upp, coeff);
             Model sc = contraint(low, upp, coeff);
-            while (sb.solve()) ;
-            while (sc.solve()) ;
+            while (sb.getSolver().solve()) ;
+            while (sc.getSolver().solve()) ;
             assertEquals(sc.getSolver().getSolutionCount(), sb.getSolver().getSolutionCount());
             assertEquals(sc.getSolver().getNodeCount(), sb.getSolver().getNodeCount());
 
@@ -136,8 +136,8 @@ public class OffsetViewTest {
     public void testRandom2() {
         Model sb = bijective(1, 1999, 3);
         Model sc = contraint(1, 1999, 3);
-        while (sb.solve()) ;
-        while (sc.solve()) ;
+        while (sb.getSolver().solve()) ;
+        while (sc.getSolver().solve()) ;
         assertEquals(sc.getSolver().getSolutionCount(), sb.getSolver().getSolutionCount());
         assertEquals(sc.getSolver().getNodeCount(), sb.getSolver().getNodeCount());
 
@@ -149,8 +149,8 @@ public class OffsetViewTest {
         for (int i = 1; i < 10; i++) {
             Model sb = bijective(1, N, 3);
             Model sc = contraint(1, N, 3);
-            while (sb.solve()) ;
-            while (sc.solve()) ;
+            while (sb.getSolver().solve()) ;
+            while (sc.getSolver().solve()) ;
             assertEquals(sc.getSolver().getSolutionCount(), sb.getSolver().getSolutionCount());
             assertEquals(sc.getSolver().getNodeCount(), sb.getSolver().getNodeCount());
         }

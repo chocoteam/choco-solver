@@ -95,7 +95,7 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         System.out.println("Grocery");
         StringBuilder st = new StringBuilder();

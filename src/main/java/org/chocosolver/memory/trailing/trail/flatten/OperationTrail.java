@@ -39,6 +39,10 @@ import org.chocosolver.memory.trailing.trail.IOperationTrail;
  */
 public class OperationTrail implements IOperationTrail {
 
+    /**
+     * Load factor
+     */
+    private final double loadfactor;
 
     /**
      * Stack of values (former values that need be restored upon backtracking).
@@ -62,11 +66,13 @@ public class OperationTrail implements IOperationTrail {
      *
      * @param nUpdates maximal number of updates that will be stored
      * @param nWorlds  maximal number of worlds that will be stored
+     * @param loadfactor load factor for structures
      */
-    public OperationTrail(int nUpdates, int nWorlds) {
+    public OperationTrail(int nUpdates, int nWorlds, double loadfactor) {
         currentLevel = 0;
         valueStack = new IOperation[nUpdates];
         worldStartLevels = new int[nWorlds];
+        this.loadfactor = loadfactor;
     }
 
 
@@ -77,6 +83,9 @@ public class OperationTrail implements IOperationTrail {
      */
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
+        if (worldIndex == worldStartLevels.length - 1) {
+            resizeWorldCapacity((int) (worldStartLevels.length * loadfactor));
+        }
     }
 
 
@@ -121,14 +130,14 @@ public class OperationTrail implements IOperationTrail {
     }
 
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((valueStack.length * 3) / 2);
+        final int newCapacity = (int) (valueStack.length * loadfactor);
         // First, copy the stack of former values
         final IOperation[] tmp2 = new IOperation[newCapacity];
         System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
         valueStack = tmp2;
     }
 
-    public void resizeWorldCapacity(int newWorldCapacity) {
+    private void resizeWorldCapacity(int newWorldCapacity) {
         final int[] tmp = new int[newWorldCapacity];
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
         worldStartLevels = tmp;

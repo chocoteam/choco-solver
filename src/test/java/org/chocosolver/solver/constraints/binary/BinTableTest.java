@@ -103,7 +103,7 @@ public class BinTableTest {
             if(exp){
                 s.getSolver().setCBJLearning(false, false);
             }
-            while (s.solve()) ;
+            while (s.getSolver().solve()) ;
             assertEquals(5, s.getSolver().getSolutionCount());
         }
         tearDown();
@@ -121,7 +121,7 @@ public class BinTableTest {
             if(exp){
                 s.getSolver().setCBJLearning(false, false);
             }
-            while (s.solve()) ;
+            while (s.getSolver().solve()) ;
             assertEquals((16 - 5), s.getSolver().getSolutionCount());
         }
         tearDown();
@@ -143,7 +143,7 @@ public class BinTableTest {
         IntVar v2 = model.intVar("v2", -10, 10, false);
         absolute(v1, v2, -1).post();
         long nbs = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbs++;
         }
         long nbn = model.getSolver().getNodeCount();
@@ -158,7 +158,7 @@ public class BinTableTest {
                     model.getSolver().setCBJLearning(false, false);
                 }
                 long nbSolutions = 0;
-                while (tsolver.solve()) {
+                while (tsolver.getSolver().solve()) {
                     nbSolutions++;
                 }
                 assertEquals(nbSolutions, nbs);
@@ -182,7 +182,7 @@ public class BinTableTest {
         IntVar v2 = model.intVar("v2", -10, 10, false);
         arithmLT(v1, v2, -1).post();
         long nbs = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbs++;
         }
         long nbn = model.getSolver().getNodeCount();
@@ -197,7 +197,7 @@ public class BinTableTest {
                     model.getSolver().setCBJLearning(false, false);
                 }
                 long nbSolutions = 0;
-                while (tsolver.solve()) {
+                while (tsolver.getSolver().solve()) {
                     nbSolutions++;
                 }
                 assertEquals(nbSolutions, nbs);
@@ -221,7 +221,7 @@ public class BinTableTest {
         IntVar v2 = model.intVar("v2", -10, 10, false);
         arithmNQ(v1, v2, -1).post();
         long nbs = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbs++;
         }
         long nbn = model.getSolver().getNodeCount();
@@ -236,7 +236,7 @@ public class BinTableTest {
                     model.getSolver().setCBJLearning(false, false);
                 }
                 long nbSolutions = 0;
-                while (tsolver.solve()) {
+                while (tsolver.getSolver().solve()) {
                     nbSolutions++;
                 }
                 assertEquals(nbSolutions, nbs);
@@ -264,7 +264,7 @@ public class BinTableTest {
                     model.getSolver().setCBJLearning(false, false);
                 }
                 long nbSolutions = 0;
-                while (model.solve()) {
+                while (model.getSolver().solve()) {
                     nbSolutions++;
                 }
                 assertEquals(nbSolutions, 3);
@@ -291,7 +291,7 @@ public class BinTableTest {
                     model.getSolver().setCBJLearning(false, false);
                 }
                 long nbSolutions = 0;
-                while (model.solve()) {
+                while (model.getSolver().solve()) {
                     nbSolutions++;
                 }
                 assertEquals(nbSolutions, 3);

@@ -63,7 +63,7 @@ public class DivTest extends AbstractTernaryTest {
         IntVar i = model.intVar("i", 0, 2, false);
         model.div(i, model.ONE(), model.ZERO()).getOpposite().post();
 //        SMF.log(solver, true, false);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="10s", timeOut=60000)
@@ -82,7 +82,7 @@ public class DivTest extends AbstractTernaryTest {
                     throw new Error(s.toString());
                 }
             });
-            while (s.solve()) ;
+            while (s.getSolver().solve()) ;
         }
     }
 }

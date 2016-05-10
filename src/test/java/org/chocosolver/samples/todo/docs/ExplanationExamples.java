@@ -53,7 +53,7 @@ public class ExplanationExamples {
         model.getSolver().set(inputOrderLBSearch(bvars));
         model.getSolver().setCBJLearning(false, false);
         model.getSolver().showStatistics();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -68,6 +68,6 @@ public class ExplanationExamples {
         model.getSolver().set(inputOrderLBSearch(pigeon));
         model.getSolver().setCBJLearning(false, false);
         model.getSolver().showStatistics();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 }

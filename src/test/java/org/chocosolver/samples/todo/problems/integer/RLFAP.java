@@ -171,7 +171,7 @@ public class RLFAP extends AbstractProblem {
         if (opt) {
             model.setObjective(MAXIMIZE, nb0);
         }
-        while(model.solve()){
+        while(model.getSolver().solve()){
             System.out.println(nb0);
             prettyOut();
         }

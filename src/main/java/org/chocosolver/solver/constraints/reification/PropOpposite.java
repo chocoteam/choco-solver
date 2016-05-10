@@ -49,7 +49,7 @@ import org.chocosolver.util.ESat;
 public class PropOpposite extends Propagator<Variable> {
 
     // constraint to negate
-    private Constraint original;
+    Constraint original;
 
     public PropOpposite(Constraint original, Variable[] vars) {
         super(vars, PropagatorPriority.LINEAR, false);

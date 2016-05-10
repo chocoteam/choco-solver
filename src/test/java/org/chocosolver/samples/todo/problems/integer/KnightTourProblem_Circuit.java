@@ -108,6 +108,6 @@ public class KnightTourProblem_Circuit extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
     }
 }

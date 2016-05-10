@@ -138,8 +138,8 @@ public class ViewMinusTest {
                 model.sum(xs, "=", 0).post();
                 model.getSolver().set(randomSearch(xs, seed));
             }
-            while (ref.solve()) ;
-            while (model.solve()) ;
+            while (ref.getSolver().solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
 
         }
@@ -166,8 +166,8 @@ public class ViewMinusTest {
                 model.sum(xs, "=", 0).post();
                 model.getSolver().set(randomSearch(xs, seed));
             }
-            while (ref.solve()) ;
-            while (model.solve()) ;
+            while (ref.getSolver().solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount());
 
         }
@@ -259,7 +259,7 @@ public class ViewMinusTest {
         System.out.println(model.toString());
         model.getSolver().propagate();
         System.out.println(model.toString());
-        while(model.solve());
+        while(model.getSolver().solve());
         Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 }

@@ -83,7 +83,7 @@ public class CorrectnessChecker {
 
                             Model test = modeler.model(nbVar, _domains, null, parameters);
                             try {
-                                if (test.solve()) {
+                                if (test.getSolver().solve()) {
                                     System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
                                             ds, ide, h, rvars[d], val, loop, seed));
                                     System.out.println(String.format("REF:\n%s\n", ref));

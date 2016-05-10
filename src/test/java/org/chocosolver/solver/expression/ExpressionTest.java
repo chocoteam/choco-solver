@@ -63,7 +63,7 @@ public class ExpressionTest {
                 break;
         }
         System.out.printf("%s\n", model);
-        Assert.assertEquals(model.streamSolutions().count(), nbsol);
+        Assert.assertEquals(model.getSolver().streamSolutions().count(), nbsol);
     }
 
 

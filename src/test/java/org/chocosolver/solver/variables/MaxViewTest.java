@@ -87,8 +87,8 @@ public class MaxViewTest {
 //                SearchMonitorFactory.log(solver, true, true);
                 model.getSolver().set(randomSearch(xs, seed));
             }
-            while (ref.solve()) ;
-            while (model.solve()) ;
+            while (ref.getSolver().solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount(), "SOLUTIONS (" + seed + ")");
             assertTrue(model.getSolver().getNodeCount() <= ref.getSolver().getNodeCount(), "NODES (" + seed + ")");
         }
@@ -120,8 +120,8 @@ public class MaxViewTest {
 //                SearchMonitorFactory.log(solver, true, true);
                 model.getSolver().set(randomSearch(xs, seed));
             }
-            while (ref.solve()) ;
-            while (model.solve()) ;
+            while (ref.getSolver().solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), ref.getSolver().getSolutionCount(), "SOLUTIONS (" + seed + ")");
             // BEWARE: MAX does not ensure AC, unlike reformulation; so nb of nodes can be different...
 //            Assert.assertTrue(solver.getNodeCount() <= ref.getResolver().getMeasures().getNodeCount(), "NODES (" + seed + "): "

@@ -128,7 +128,7 @@ public class SMPTSP extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		while (model.solve()){
+		while (model.getSolver().solve()){
             solutions.add(new Solution(model).record());
         }
 

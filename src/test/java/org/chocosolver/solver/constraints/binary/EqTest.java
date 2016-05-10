@@ -67,7 +67,7 @@ public class EqTest {
         if(exp){
             s.getSolver().setCBJLearning(false,false);
         }
-        assertTrue(s.solve());
+        assertTrue(s.getSolver().solve());
         assertEquals(TRUE, s.getSolver().isSatisfied());
     }
 
@@ -81,7 +81,7 @@ public class EqTest {
         if(exp){
             s.getSolver().setCBJLearning(false,false);
         }
-        assertTrue(s.solve());
+        assertTrue(s.getSolver().solve());
         assertEquals(TRUE, s.getSolver().isSatisfied());
     }
 
@@ -94,7 +94,7 @@ public class EqTest {
         if(exp){
             s.getSolver().setCBJLearning(false,false);
         }
-        assertTrue(s.solve());
+        assertTrue(s.getSolver().solve());
         assertEquals(TRUE, s.getSolver().isSatisfied());
     }
 }

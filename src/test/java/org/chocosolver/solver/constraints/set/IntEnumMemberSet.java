@@ -71,7 +71,7 @@ public class IntEnumMemberSet {
         model.member(member, set).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -82,7 +82,7 @@ public class IntEnumMemberSet {
         model.member(member, set).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -96,7 +96,7 @@ public class IntEnumMemberSet {
 
     private int checkSolutions(Model model, SetVar set, IntVar member) {
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             assertTrue(set.getValue().contain(member.getValue()));
         }

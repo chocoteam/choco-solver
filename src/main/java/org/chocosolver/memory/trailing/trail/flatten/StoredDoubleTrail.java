@@ -35,6 +35,10 @@ import org.chocosolver.memory.trailing.trail.IStoredDoubleTrail;
 
 public class StoredDoubleTrail implements IStoredDoubleTrail {
 
+    /**
+     * Load factor
+     */
+    private final double loadfactor;
 
     /**
      * Stack of backtrackable search variables.
@@ -72,13 +76,15 @@ public class StoredDoubleTrail implements IStoredDoubleTrail {
      *
      * @param nUpdates maximal number of updates that will be stored
      * @param nWorlds  maximal number of worlds that will be stored
+     * @param loadfactor load factor for structures
      */
-    public StoredDoubleTrail(int nUpdates, int nWorlds) {
+    public StoredDoubleTrail(int nUpdates, int nWorlds, double loadfactor) {
         currentLevel = 0;
         variableStack = new StoredDouble[nUpdates];
         valueStack = new double[nUpdates];
         stampStack = new int[nUpdates];
         worldStartLevels = new int[nWorlds];
+        this.loadfactor = loadfactor;
     }
 
 
@@ -90,6 +96,9 @@ public class StoredDoubleTrail implements IStoredDoubleTrail {
     @Override
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
+        if (worldIndex == worldStartLevels.length - 1) {
+            resizeWorldCapacity((int) (worldStartLevels.length * loadfactor));
+        }
     }
 
 
@@ -193,7 +202,7 @@ public class StoredDoubleTrail implements IStoredDoubleTrail {
 
 
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((variableStack.length * 3) / 2);
+        final int newCapacity = (int) (variableStack.length * loadfactor);
         // first, copy the stack of variables
         final StoredDouble[] tmp1 = new StoredDouble[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
@@ -208,8 +217,7 @@ public class StoredDoubleTrail implements IStoredDoubleTrail {
         stampStack = tmp3;
     }
 
-    @Override
-    public void resizeWorldCapacity(int newWorldCapacity) {
+    private void resizeWorldCapacity(int newWorldCapacity) {
         final int[] tmp = new int[newWorldCapacity];
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
         worldStartLevels = tmp;

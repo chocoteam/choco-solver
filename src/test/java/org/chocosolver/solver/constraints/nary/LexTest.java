@@ -68,7 +68,7 @@ public class LexTest {
             }
             model.lexLessEq(vs1, vs2).post();
             model.getSolver().set(randomSearch(append(vs1, vs2), seed));
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             int kpn = (int) pow(k + 1, n1 / 2);
             assertEquals(model.getSolver().getSolutionCount(), (kpn * (kpn + 1) / 2));
         }
@@ -89,7 +89,7 @@ public class LexTest {
             model.lexLess(vs1, vs2).post();
             model.getSolver().set(randomSearch(append(vs1, vs2), seed));
 
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 3240);
         }
     }
@@ -137,7 +137,7 @@ public class LexTest {
             fail();
         }
 //        SearchMonitorFactory.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(6, model.getSolver().getSolutionCount());
     }
 
@@ -161,7 +161,7 @@ public class LexTest {
         }
         assertEquals(5, a[0].getUB());
 //        SearchMonitorFactory.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
@@ -185,7 +185,7 @@ public class LexTest {
             fail();
         }
         assertEquals(-2, a[0].getUB());
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
@@ -235,7 +235,7 @@ public class LexTest {
             model.getSolver().propagate();
         } catch (ContradictionException ignored) {
         }
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 216);
     }
 
@@ -262,7 +262,7 @@ public class LexTest {
         }
         assertEquals(-1, b[0].getLB());
 //        SearchMonitorFactory.log(solver, true, false);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 30);
     }
 }

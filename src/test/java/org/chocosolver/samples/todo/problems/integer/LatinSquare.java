@@ -83,7 +83,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         StringBuilder st = new StringBuilder();
         String line = "+";

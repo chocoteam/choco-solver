@@ -110,7 +110,7 @@ public class Nonogram extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
         System.out.println(String.format("Nonogram -- %s", data.name()));
         StringBuilder st = new StringBuilder();
         for (int i = 0; i < vars.length; i++) {

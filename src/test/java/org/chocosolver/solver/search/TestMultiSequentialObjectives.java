@@ -45,7 +45,7 @@ public class TestMultiSequentialObjectives {
 	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
 	 * best solution is 32,33,34
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest1(){
 		Model m = new Model();
 		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -54,7 +54,7 @@ public class TestMultiSequentialObjectives {
 		m.arithm(a, "<", b).post();
 		m.arithm(b, "<", c).post();// a<b<c
         m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b, c));
-		Solution s = m.findLexOptimalSolution(vals, true);
+		Solution s = m.getSolver().findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
 		Assert.assertEquals(s.getIntVal(a).intValue(), 32);
 		Assert.assertEquals(s.getIntVal(b).intValue(), 33);
@@ -65,7 +65,7 @@ public class TestMultiSequentialObjectives {
 	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100 and a+b=c<br />
 	 * best solution is 24,25,49
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest2(){
 		Model m = new Model();
 		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -75,7 +75,7 @@ public class TestMultiSequentialObjectives {
 		m.arithm(b, "<", c).post();// a<b<c
 		m.arithm(a,"+",b,"=",c).post();
         m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b));
-		Solution s = m.findLexOptimalSolution(vals, true);
+		Solution s = m.getSolver().findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
 		Assert.assertEquals(s.getIntVal(a).intValue(), 24);
 		Assert.assertEquals(s.getIntVal(b).intValue(), 25);
@@ -87,7 +87,7 @@ public class TestMultiSequentialObjectives {
      * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
      * best solution is 32,33,34
      */
-    @Test
+	@Test(groups="1s", timeOut=60000)
     public void simpleLexTest3(){
         Model m = new Model();
         IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -96,14 +96,14 @@ public class TestMultiSequentialObjectives {
         m.arithm(a, "<", b).post();
         m.arithm(b, "<", c).post();// a<b<c
         m.getSolver().set(SearchStrategyFactory.inputOrderUBSearch(a, b, c));
-        Solution s = m.findLexOptimalSolution(vals, false);
+        Solution s = m.getSolver().findLexOptimalSolution(vals, false);
         Assert.assertNotNull(s);
         Assert.assertEquals(s.getIntVal(a).intValue(), 0);
         Assert.assertEquals(s.getIntVal(b).intValue(), 1);
         Assert.assertEquals(s.getIntVal(c).intValue(), 2);
     }
 
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest4(){
 		Model m = new Model();
 		SetVar sv = m.setVar(new int[]{}, new int[]{0,1,2,3,4,5});
@@ -113,7 +113,7 @@ public class TestMultiSequentialObjectives {
 		m.cardinality(sv,card).post();
 		m.sum(sv,size,0,load,true).post();
         m.getSolver().set(SearchStrategyFactory.setVarSearch(sv),inputOrderLBSearch(card,load));
-		Solution s = m.findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
+		Solution s = m.getSolver().findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
 		Assert.assertNotNull(s);
 		System.out.println(s);
 		Assert.assertTrue(s.getIntVal(load)==9);

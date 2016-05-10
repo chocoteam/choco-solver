@@ -205,7 +205,7 @@ public class ParallelPortfolio {
             forkJoinPool.submit(() -> {
                 models.parallelStream().forEach(m -> {
                     if (!getSolverTerminated().get()) {
-                        boolean so = m.solve();
+                        boolean so = m.getSolver().solve();
                         if (so && finder == m || !so) {
                             getSolverTerminated().set(true);
                         }

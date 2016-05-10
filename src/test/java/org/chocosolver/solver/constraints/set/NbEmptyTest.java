@@ -54,7 +54,7 @@ public class NbEmptyTest {
         model.nbEmpty(new SetVar[]{set1, set2}, 1).post();
 
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
             assertFalse(set1.getLB().isEmpty());
             assertTrue(set2.getLB().isEmpty());
@@ -72,7 +72,7 @@ public class NbEmptyTest {
 
         model.nbEmpty(vars, 2).post();
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
             long nbEmpty = asList(vars)
                     .stream()
@@ -91,7 +91,7 @@ public class NbEmptyTest {
         model.nbEmpty(sets, intVar).post();
 
         boolean solutionFound = false;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             solutionFound = true;
             long nbEmpty = asList(sets)
                     .stream()
@@ -114,7 +114,7 @@ public class NbEmptyTest {
 
         model.nbEmpty(vars, 0).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -125,7 +125,7 @@ public class NbEmptyTest {
 
         model.nbEmpty(vars, 1).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -136,6 +136,6 @@ public class NbEmptyTest {
 
         model.nbEmpty(vars, 6).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 }

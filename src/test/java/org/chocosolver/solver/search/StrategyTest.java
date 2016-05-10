@@ -147,7 +147,7 @@ public class StrategyTest {
         IntVar x = model.intVar("x", 1, 2, false);
         IntVar[] v = {x};
         model.getSolver().set(SearchStrategyFactory.greedySearch(SearchStrategyFactory.inputOrderLBSearch(v)));
-        model.solve();
+        model.getSolver().solve();
         Assert.assertTrue(x.getValue() == 1);
     }
 
@@ -158,7 +158,7 @@ public class StrategyTest {
         SetVar y = model.setVar("y", new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
         model.allDifferent(x).post();
         model.member(x[0], y).post();
-        model.solve();
+        model.getSolver().solve();
         AbstractStrategy strat = model.getSolver().getStrategy();
         assertTrue(strat instanceof LastConflict);
     }
@@ -341,7 +341,7 @@ public class StrategyTest {
         Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), int_split, X));
         model.getSolver().showDecisions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 
@@ -352,7 +352,7 @@ public class StrategyTest {
         Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(false), int_reverse_split, X));
         model.getSolver().showDecisions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 
@@ -364,7 +364,7 @@ public class StrategyTest {
         Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), int_split, X));
         model.getSolver().showDecisions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 
@@ -375,7 +375,7 @@ public class StrategyTest {
         Solver r = model.getSolver();
         r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(false), int_reverse_split, X));
         model.getSolver().showDecisions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
     }
 }

@@ -69,7 +69,7 @@ public class LexChainTest {
         Constraint c = s.lexChainLessEq(ar1, ar2);
         c.post();
         //SearchMonitorFactory.log(s, true, true);
-        while (s.solve()) {
+        while (s.getSolver().solve()) {
             assertEquals(TRUE, c.isSatisfied());
         }
     }
@@ -131,8 +131,8 @@ public class LexChainTest {
             Model refor = reformulate(n, m, k, seed, false);
             Model lex = lex(n, m, k, seed, false);
 
-            while (refor.solve()) ;
-            while (lex.solve()) ;
+            while (refor.getSolver().solve()) ;
+            while (lex.getSolver().solve()) ;
 
             assertEquals(refor.getSolver().getSolutionCount(), lex.getSolver().getSolutionCount(), format("seed:%d", seed));
         }
@@ -150,8 +150,8 @@ public class LexChainTest {
             Model refor = reformulate(n, m, k, seed, true);
             Model lex = lex(n, m, k, seed, true);
 
-            while (refor.solve()) ;
-            while (lex.solve()) ;
+            while (refor.getSolver().solve()) ;
+            while (lex.getSolver().solve()) ;
 
             assertEquals(refor.getSolver().getSolutionCount(), lex.getSolver().getSolutionCount(), format("seed:%d", seed));
         }
@@ -162,8 +162,8 @@ public class LexChainTest {
         int n = 3, m = 2, k = 2, seed = 47;
         Model refor = reformulate(n, m, k, seed, true);
         Model lex = lex(n, m, k, seed, true);
-        while (refor.solve()) ;
-        while (lex.solve()) ;
+        while (refor.getSolver().solve()) ;
+        while (lex.getSolver().solve()) ;
         assertEquals(refor.getSolver().getSolutionCount(), lex.getSolver().getSolutionCount(), format("seed:%d", seed));
     }
 

@@ -77,12 +77,12 @@ public class AllDisjointTest {
         model.allDisjoint(setVars).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     private void checkSolutions(Model model, SetVar[] setVars) {
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             ISet set = SetFactory.makeBipartiteSet(0);
             for (SetVar setVar : setVars) {

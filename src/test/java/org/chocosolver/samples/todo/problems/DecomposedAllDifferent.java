@@ -135,7 +135,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void solve() {
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     public static void main(String[] args) {
