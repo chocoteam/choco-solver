@@ -29,6 +29,7 @@
  */
 package org.chocosolver.memory.trailing.trail;
 
+import org.chocosolver.memory.IStorage;
 import org.chocosolver.memory.trailing.Stored#E#;
 
 /**
@@ -37,7 +38,7 @@ import org.chocosolver.memory.trailing.Stored#E#;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public interface IStored#E#Trail extends ITrailStorage {
+public interface IStored#E#Trail extends IStorage {
 
     void savePreviousState(Stored#E# v, #e# oldValue, int oldStamp);
 

@@ -34,13 +34,6 @@ import org.chocosolver.memory.*;
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.memory.trailing.trail.*;
 import org.chocosolver.memory.trailing.trail.flatten.*;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeBoolTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeDoubleTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeIntTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
-
-import java.util.EnumMap;
-import java.util.Map;
 
 /**
  * The root class for managing memory and sessions.
@@ -50,24 +43,26 @@ import java.util.Map;
  */
 public final class EnvironmentTrailing extends AbstractEnvironment {
 
-    /**
-     * The supported queues.
-     */
-    public enum TrailType {INT, BOOL, LONG, DOUBLE, INT_VECTOR, OPERATION, DOUBLE_VECTOR};
-
-    private Map<TrailType, Integer> defaultSizes;
+    public enum Type {
+        FLAT, UNSAFE, CHUNCK
+    }
 
     /**
      * The maximum numbers of worlds that a
      * {@link org.chocosolver.memory.IStorage} can handle.
      */
-    private int maxWorld = 100; //1000;
+    public static final int NBWORLDS = 1000;
 
     /**
      * The maximum numbers of updates that a
      * {@link org.chocosolver.memory.IStorage} can handle.
      */
-    private static final int MaxHist = 5000;
+    public static final int NBUPATES = 1024 * 4;
+
+    /**
+     * The load factor to update {@link org.chocosolver.memory.IStorage}.
+     */
+    public static final double LOADFACTOR = 1.5;
 
     //Contains all the {@link IStorage} trails for
     // storing different kinds of data.
@@ -77,7 +72,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
     private IStoredLongTrail longTrail;
     private IStoredDoubleTrail doubleTrail;
     private IOperationTrail operationTrail;
-
     private StoredIntVectorTrail intVectorTrail;
     private StoredDoubleVectorTrail doubleVectorTrail;
 
@@ -85,36 +79,8 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      * Contains all the {@link org.chocosolver.memory.IStorage} trails for
      * storing different kinds of data.
      */
-    private ITrailStorage[] trails;
-    private int trailSize;
-
-    /**
-     * Constructs a new <code>IEnvironment</code> with
-     * the default stack sizes : 50000 and 1000.
-     */
-
-    public EnvironmentTrailing() {
-        super(Type.FLAT);
-        trails = new ITrailStorage[0];
-        trailSize = 0;
-
-        //Set the default values
-        defaultSizes = new EnumMap<>(TrailType.class);
-        for (TrailType t : TrailType.values()) {
-            defaultSizes.put(t, MaxHist);
-        }
-
-    }
-
-    /**
-     * Set the size of the initial trail for a given trail type.
-     * This must be called before creating any storable value of that type.
-     * @param t the trailing type to customize
-     * @param s the default size
-     */
-    public void setDefaultHistorySize(TrailType t, int s) {
-        defaultSizes.put(t, s);
-    }
+    private IStorage[] trails = new IStorage[0];
+    private int trailSize = 0;
 
     /**
      * {@inheritDoc}
@@ -128,9 +94,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
             trails[i].worldPush(wi);
         }
         currentWorld++;
-        if (wi == maxWorld - 1) {
-            resizeWorldCapacity(maxWorld * 3 / 2);
-        }
     }
 
 
@@ -239,91 +202,88 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
 
     private void increaseTrail() {// TODO check resizing
-        ITrailStorage[] tmp = trails;
-        trails = new ITrailStorage[tmp.length + 1];
+        IStorage[] tmp = trails;
+        trails = new IStorage[tmp.length + 1];
         System.arraycopy(tmp, 0, trails, 0, tmp.length);
+    }
+
+    public void setIntTrail(IStoredIntTrail itrail){
+        if(intTrail == null) {
+            increaseTrail();
+            trails[trailSize++] = intTrail = itrail;
+        }else{
+            throw new UnsupportedOperationException("A trail has already been declared.");
+        }
     }
 
     public IStoredIntTrail getIntTrail() {
         if (intTrail == null) {
-            int s = defaultSizes.get(TrailType.INT);
-            switch (type) {
-                default:
-                case FLAT:
-                    intTrail = new StoredIntTrail(s, maxWorld);
-                    break;
-                case UNSAFE:
-                    intTrail = new UnsafeIntTrail(s, maxWorld);
-                    break;
-            }
-            increaseTrail();
-            trails[trailSize++] = intTrail;
+            setIntTrail(new StoredIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
         }
         return intTrail;
     }
 
+
+    public void setLongTrail(IStoredLongTrail ltrail){
+        if(longTrail == null) {
+            increaseTrail();
+            trails[trailSize++] = longTrail = ltrail;
+        }else{
+            throw new UnsupportedOperationException("A trail has already been declared.");
+        }
+    }
+
     public IStoredLongTrail getLongTrail() {
         if (longTrail == null) {
-            int s = defaultSizes.get(TrailType.LONG);
-            switch (type) {
-                default:
-                case FLAT:
-                    longTrail = new StoredLongTrail(s, maxWorld);
-                    break;
-                case UNSAFE:
-                    longTrail = new UnsafeLongTrail(s, maxWorld);
-                    break;
-            }
-
-            increaseTrail();
-            trails[trailSize++] = longTrail;
+            setLongTrail(new StoredLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
         }
         return longTrail;
     }
 
+    public void setBoolTrail(IStoredBoolTrail btrail){
+        if(boolTrail == null) {
+            increaseTrail();
+            trails[trailSize++] = boolTrail = btrail;
+        }else{
+            throw new UnsupportedOperationException("A trail has already been declared.");
+        }
+    }
+
     public IStoredBoolTrail getBoolTrail() {
         if (boolTrail == null) {
-            int s = defaultSizes.get(TrailType.BOOL);
-            switch (type) {
-                default:
-                case FLAT:
-                    boolTrail = new StoredBoolTrail(s, maxWorld);
-                    break;
-                case UNSAFE:
-                    boolTrail = new UnsafeBoolTrail(s, maxWorld);
-                    break;
-            }
-
-            increaseTrail();
-            trails[trailSize++] = boolTrail;
+            setBoolTrail(new StoredBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
         }
         return boolTrail;
     }
 
+    public void setDoubleTrail(IStoredDoubleTrail dtrail){
+        if(doubleTrail == null) {
+            increaseTrail();
+            trails[trailSize++] = doubleTrail = dtrail;
+        }else{
+            throw new UnsupportedOperationException("A trail has already been declared.");
+        }
+    }
+
     public IStoredDoubleTrail getDoubleTrail() {
         if (doubleTrail == null) {
-            int s = defaultSizes.get(TrailType.DOUBLE);
-            switch (type) {
-                default:
-                case FLAT:
-                    doubleTrail = new StoredDoubleTrail(s, maxWorld);
-                    break;
-                case UNSAFE:
-                    doubleTrail = new UnsafeDoubleTrail(s, maxWorld);
-                    break;
-            }
-            increaseTrail();
-            trails[trailSize++] = doubleTrail;
+            setDoubleTrail(new StoredDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
         }
         return doubleTrail;
     }
 
+    public void setOperationTrail(IOperationTrail otrail){
+        if(operationTrail == null) {
+            increaseTrail();
+            trails[trailSize++] = operationTrail = otrail;
+        }else{
+            throw new UnsupportedOperationException("A trail has already been declared.");
+        }
+    }
+
     public IOperationTrail getOperationTrail() {
         if (operationTrail == null) {
-            int s = defaultSizes.get(TrailType.OPERATION);
-            operationTrail = new OperationTrail(s, maxWorld);
-            increaseTrail();
-            trails[trailSize++] = operationTrail;
+            setOperationTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
         }
         return operationTrail;
     }
@@ -335,32 +295,21 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     public StoredIntVectorTrail getIntVectorTrail() {
         if (intVectorTrail == null) {
-            int s = defaultSizes.get(TrailType.INT_VECTOR);
-            intVectorTrail = new StoredIntVectorTrail(this, s, maxWorld);
             increaseTrail();
-            trails[trailSize++] = intVectorTrail;
+            trails[trailSize++] = intVectorTrail = new StoredIntVectorTrail(this, NBUPATES, NBWORLDS);
         }
         return intVectorTrail;
     }
 
     public StoredDoubleVectorTrail getDoubleVectorTrail() {
         if (doubleVectorTrail == null) {
-            int s = defaultSizes.get(TrailType.DOUBLE_VECTOR);
-            doubleVectorTrail = new StoredDoubleVectorTrail(this, s, maxWorld);
             increaseTrail();
-            trails[trailSize++] = doubleVectorTrail;
+            trails[trailSize++] = doubleVectorTrail = new StoredDoubleVectorTrail(this, NBUPATES, NBWORLDS);
         }
         return doubleVectorTrail;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void resizeWorldCapacity(final int newWorldCapacity) {
-        for (final ITrailStorage trail : trails) {
-            trail.resizeWorldCapacity(newWorldCapacity);
-        }
-        maxWorld = newWorldCapacity;
-    }
 
 
     public void save(IOperation oldValue) {

@@ -63,7 +63,6 @@ public abstract class IStateBool  {
      * Modifies the value and stores if needed the former value on the
      * trailing stack.
      */
-
     public abstract void set(boolean y);
 
     /**
@@ -72,7 +71,6 @@ public abstract class IStateBool  {
      * @param y      the new value
      * @param wstamp the stamp of the world in which the update is performed
      */
-
     public void _set(final boolean y, final int wstamp) {
         currentValue = y;
         timeStamp = wstamp;
