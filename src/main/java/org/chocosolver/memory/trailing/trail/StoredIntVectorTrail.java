@@ -29,6 +29,7 @@
  */
 package org.chocosolver.memory.trailing.trail;
 
+import org.chocosolver.memory.IStorage;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.memory.trailing.StoredIntVector;
 
@@ -36,7 +37,7 @@ import org.chocosolver.memory.trailing.StoredIntVector;
 /**
  * Implements a trail with the history of all the stored search vectors.
  */
-public class StoredIntVectorTrail implements ITrailStorage {
+public class StoredIntVectorTrail implements IStorage {
 
     /**
      * The current environment.

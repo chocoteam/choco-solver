@@ -27,17 +27,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.memory.trailing.trail.flatten;
+package org.chocosolver.memory.trailing.trail.chunck;
 
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.memory.trailing.trail.IOperationTrail;
 
+
 /**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 feb. 2011
+ * Implementing storage of historical values for backtrackable integers.
+ *
+ * @see org.chocosolver.memory.IStorage
  */
-public class OperationTrail implements IOperationTrail {
+public final class OperationChunckTrail implements IOperationTrail {
+
+    private static final int CHUNK_SIZE = 1024 * 1024;
 
     /**
      * Load factor
@@ -45,33 +48,41 @@ public class OperationTrail implements IOperationTrail {
     private final double loadfactor;
 
     /**
-     * Stack of values (former values that need be restored upon backtracking).
+     * Stack of backtrackable search variables.
      */
-    private IOperation[] valueStack;
+    private IOperation[][] operationStack;
 
 
     /**
      * Points the level of the last entry.
      */
-    private int currentLevel;
+    private int curChunk;
+
+    private int nextTop;
 
 
     /**
      * A stack of pointers (for each start of a world).
      */
-    private int[] worldStartLevels;
+    private int[] chunks;
+    private int[] tops;
+
 
     /**
      * Constructs a trail with predefined size.
      *
-     * @param nUpdates maximal number of updates that will be stored
      * @param nWorlds  maximal number of worlds that will be stored
      * @param loadfactor load factor for structures
      */
-    public OperationTrail(int nUpdates, int nWorlds, double loadfactor) {
-        currentLevel = 0;
-        valueStack = new IOperation[nUpdates];
-        worldStartLevels = new int[nWorlds];
+
+    public OperationChunckTrail(int nWorlds, double loadfactor) {
+        curChunk = nextTop = 0;
+
+        operationStack = new IOperation[1][];
+        operationStack[0] = new IOperation[CHUNK_SIZE];
+
+        chunks = new int[nWorlds];
+        tops = new int[nWorlds];
         this.loadfactor = loadfactor;
     }
 
@@ -81,10 +92,12 @@ public class OperationTrail implements IOperationTrail {
      *
      * @param worldIndex current world index
      */
+
     public void worldPush(int worldIndex) {
-        worldStartLevels[worldIndex] = currentLevel;
-        if (worldIndex == worldStartLevels.length - 1) {
-            resizeWorldCapacity((int) (worldStartLevels.length * loadfactor));
+        chunks[worldIndex] = curChunk;
+        tops[worldIndex] = nextTop;
+        if (worldIndex == tops.length - 1) {
+            resizeWorldCapacity((int) (tops.length * loadfactor));
         }
     }
 
@@ -94,52 +107,73 @@ public class OperationTrail implements IOperationTrail {
      *
      * @param worldIndex current world index
      */
+
     public void worldPop(int worldIndex) {
-        final int wsl = worldStartLevels[worldIndex];
-        while (currentLevel > wsl) {
-            currentLevel--;
-            valueStack[currentLevel].undo();
+        final int c = chunks[worldIndex];
+        final int t = tops[worldIndex];
+        IOperation[] cvar;
+        for (int cc = curChunk; cc >= c; cc--) {
+            cvar = operationStack[cc];
+            int tt = (cc == curChunk ? nextTop : CHUNK_SIZE) - 1;
+            int to = (cc == c ? t : 0);
+            for (; tt >= to; tt--) {
+                cvar[tt].undo();
+            }
         }
+        curChunk = c;
+        nextTop = t;
     }
 
 
     /**
      * Returns the current size of the stack.
      */
+
     public int getSize() {
-        return currentLevel;
+        return curChunk * CHUNK_SIZE + nextTop;
     }
 
 
     /**
      * Comits a world: merging it with the previous one.
      */
+
     public void worldCommit(int worldIndex) {
+        throw new UnsupportedOperationException();
     }
 
     /**
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
-    public void savePreviousState(IOperation oldValue) {
-        valueStack[currentLevel] = oldValue;
-        currentLevel++;
-        if (currentLevel == valueStack.length) {
-            resizeUpdateCapacity();
+    public void savePreviousState(IOperation operation) {
+        operationStack[curChunk][nextTop] = operation;
+        nextTop++;
+        if (nextTop == CHUNK_SIZE) {
+            curChunk++;
+            int l = operationStack.length;
+            if (curChunk == l) {
+                increase(l);
+            }
+            nextTop = 0;
         }
     }
 
-    private void resizeUpdateCapacity() {
-        final int newCapacity = (int) (valueStack.length * loadfactor);
-        // First, copy the stack of former values
-        final IOperation[] tmp2 = new IOperation[newCapacity];
-        System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
-        valueStack = tmp2;
+    private void increase(int l) {
+        IOperation[][] varBigger = new IOperation[l + 1][];
+        System.arraycopy(operationStack, 0, varBigger, 0, l);
+        varBigger[l] = new IOperation[CHUNK_SIZE];
+        operationStack = varBigger;
     }
 
     private void resizeWorldCapacity(int newWorldCapacity) {
-        final int[] tmp = new int[newWorldCapacity];
-        System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
-        worldStartLevels = tmp;
+        int[] tmp = new int[newWorldCapacity];
+        System.arraycopy(chunks, 0, tmp, 0, chunks.length);
+        chunks = tmp;
+
+        tmp = new int[newWorldCapacity];
+        System.arraycopy(tops, 0, tmp, 0, tops.length);
+        tops = tmp;
     }
 }
+
