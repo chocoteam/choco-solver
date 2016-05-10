@@ -444,7 +444,7 @@ public class IntIterableRangeSetTest {
         t1.ELEMENTS = new int[t1.SIZE];
         int k = 0;
         for(int j = 0; j < t1.SIZE; j+=2){
-            k = t1.ELEMENTS[j] = k + 1 + rnd.nextInt(g);
+            k = t1.ELEMENTS[j] = k + 2 + rnd.nextInt(g);
             k = t1.ELEMENTS[j + 1] = k + rnd.nextInt(g);
             t1.CARDINALITY += t1.ELEMENTS[j + 1] - t1.ELEMENTS[j] + 1;
         }
@@ -502,5 +502,181 @@ public class IntIterableRangeSetTest {
             }
         }
         return t;
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testIntersect() {
+        Random rnd = new Random();
+        for(int i = 0; i < 2000; i++){
+            rnd.setSeed(i);
+            IntIterableRangeSet t1 = makeItv(rnd, 50);
+            IntIterableRangeSet t2 = makeItv(rnd, 50);
+            IntIterableRangeSet s1 = intersect1(t1, t2);
+            IntIterableRangeSet s2 = IntIterableSetUtils.intersection(t1, t2);
+            Assert.assertEquals(s2.SIZE, s1.SIZE);
+            Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
+            Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
+        }
+    }
+
+    public static IntIterableRangeSet intersect1(IntIterableRangeSet set1, IntIterableRangeSet set2){
+        IntIterableRangeSet t;
+        if (set1.size() < set2.size()) {
+            t = (IntIterableRangeSet) set1.duplicate();
+            t.retainAll(set2);
+        } else {
+            t = (IntIterableRangeSet) set2.duplicate();
+            t.retainAll(set1);
+        }
+        return t;
+    }
+
+
+    @Test(groups="10s", timeOut=60000)
+    public void testIntersect2() {
+        Random rnd = new Random();
+        for(int i = 0; i < 2000; i++){
+            rnd.setSeed(i);
+            System.out.printf("%d\n", i);
+            IntIterableRangeSet t1 = makeItv(rnd, 50);
+            IntIterableRangeSet t2 = makeItv(rnd, 50);
+            IntIterableRangeSet s1 = intersect1(t1, t2);
+            IntIterableSetUtils.intersectionOf(t1, t2);
+            Assert.assertEquals(t1.SIZE, s1.SIZE);
+            Assert.assertEquals(t1.CARDINALITY, s1.CARDINALITY);
+            Assert.assertEquals(Arrays.copyOf(t1.ELEMENTS, t1.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
+        }
+    }
+
+
+    @Test(groups="10s", timeOut=60000)
+    public void testUnion() {
+        Random rnd = new Random();
+        for(int i = 0; i < 2000; i++){
+            System.out.printf("seed: %d\n", i);
+            rnd.setSeed(i);
+            IntIterableRangeSet t1 = makeItv(rnd, 50);
+            IntIterableRangeSet t2 = makeItv(rnd, 50);
+            IntIterableRangeSet s1 = union1(t1, t2);
+            IntIterableRangeSet s2 = IntIterableSetUtils.union(t1, t2);
+            Assert.assertEquals(s2.SIZE, s1.SIZE);
+            Assert.assertEquals(s2.CARDINALITY, s1.CARDINALITY);
+            Assert.assertEquals(Arrays.copyOf(s2.ELEMENTS, s2.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
+        }
+    }
+
+    public static IntIterableRangeSet union1(IntIterableRangeSet set1, IntIterableRangeSet set2){
+        IntIterableRangeSet t;
+        if (set1.size() < set2.size()) {
+            t = (IntIterableRangeSet) set1.duplicate();
+            t.addAll(set2);
+        } else {
+            t = (IntIterableRangeSet) set2.duplicate();
+            t.addAll(set1);
+        }
+        return t;
+    }
+
+
+    @Test(groups="10s", timeOut=60000)
+    public void testUnion2() {
+        Random rnd = new Random();
+        for(int i = 0; i < 2000; i++){
+            rnd.setSeed(i);
+            System.out.printf("%d\n", i);
+            IntIterableRangeSet t1 = makeItv(rnd, 50);
+            IntIterableRangeSet t2 = makeItv(rnd, 50);
+            IntIterableRangeSet s1 = union1(t1, t2);
+            IntIterableSetUtils.unionOf(t1, t2);
+            Assert.assertEquals(t1.SIZE, s1.SIZE);
+            Assert.assertEquals(t1.CARDINALITY, s1.CARDINALITY);
+            Assert.assertEquals(Arrays.copyOf(t1.ELEMENTS, t1.SIZE), Arrays.copyOf(s1.ELEMENTS, s1.SIZE));
+        }
+    }
+
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRemoveBetween1(){
+        IntIterableRangeSet is = new IntIterableRangeSet();
+        is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32,32, 35, 40};
+        is.SIZE = 12;
+        is.CARDINALITY = 26;
+        Assert.assertTrue(is.removeBetween(35,40));
+        Assert.assertEquals(is.CARDINALITY, 20);
+        Assert.assertEquals(is.SIZE, 10);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32, 32});
+        Assert.assertTrue(is.removeBetween(1,5));
+        Assert.assertEquals(is.CARDINALITY, 15);
+        Assert.assertEquals(is.SIZE, 8);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{10, 15, 20, 20, 25, 30, 32, 32});
+        Assert.assertTrue(is.removeBetween(29,30));
+        Assert.assertEquals(is.CARDINALITY, 13);
+        Assert.assertEquals(is.SIZE, 8);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{10, 15, 20, 20, 25, 28, 32, 32});
+        Assert.assertTrue(is.removeBetween(10,12));
+        Assert.assertEquals(is.CARDINALITY, 10);
+        Assert.assertEquals(is.SIZE, 8);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{13, 15, 20, 20, 25, 28, 32, 32});
+        Assert.assertTrue(is.removeBetween(26,27));
+        Assert.assertEquals(is.CARDINALITY, 8);
+        Assert.assertEquals(is.SIZE, 10);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{13, 15, 20, 20, 25, 25, 28, 28, 32, 32});
+        Assert.assertTrue(is.removeBetween(20,20));
+        Assert.assertEquals(is.CARDINALITY, 7);
+        Assert.assertEquals(is.SIZE, 8);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{13, 15, 25, 25, 28, 28, 32, 32});
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRemoveBetween2() {
+        IntIterableRangeSet is = new IntIterableRangeSet();
+        is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32,32, 35, 40};
+        is.SIZE = 12;
+        is.CARDINALITY = 26;
+        Assert.assertTrue(is.removeBetween(34,41));
+        Assert.assertEquals(is.CARDINALITY, 20);
+        Assert.assertEquals(is.SIZE, 10);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32, 32});
+        Assert.assertTrue(is.removeBetween(0,6));
+        Assert.assertEquals(is.CARDINALITY, 15);
+        Assert.assertEquals(is.SIZE, 8);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{10, 15, 20, 20, 25, 30, 32, 32});
+        Assert.assertTrue(is.removeBetween(29,31));
+        Assert.assertEquals(is.CARDINALITY, 13);
+        Assert.assertEquals(is.SIZE, 8);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{10, 15, 20, 20, 25, 28, 32, 32});
+        Assert.assertTrue(is.removeBetween(9,12));
+        Assert.assertEquals(is.CARDINALITY, 10);
+        Assert.assertEquals(is.SIZE, 8);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{13, 15, 20, 20, 25, 28, 32, 32});
+        Assert.assertTrue(is.removeBetween(19,21));
+        Assert.assertEquals(is.CARDINALITY, 9);
+        Assert.assertEquals(is.SIZE, 6);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{13, 15, 25, 28, 32, 32});
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRemoveBetween3() {
+        IntIterableRangeSet is = new IntIterableRangeSet();
+        is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32,32, 35, 40};
+        is.SIZE = 12;
+        is.CARDINALITY = 26;
+        Assert.assertTrue(is.removeBetween(26,38));
+        Assert.assertEquals(is.CARDINALITY, 16);
+        Assert.assertEquals(is.SIZE, 10);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{1, 5, 10, 15, 20, 20, 25, 25, 39, 40});
+
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRemoveBetween4() {
+        IntIterableRangeSet is = new IntIterableRangeSet();
+        is.ELEMENTS = new int[]{0,1,4,4,7,7,11,12,15,15};
+        is.SIZE = 10;
+        is.CARDINALITY = 7;
+        Assert.assertTrue(is.removeBetween(0,5));
+        Assert.assertEquals(is.CARDINALITY, 4);
+        Assert.assertEquals(is.SIZE, 6);
+        Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{7,7,11,12,15,15});
     }
 }
