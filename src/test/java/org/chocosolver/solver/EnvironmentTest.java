@@ -37,7 +37,10 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
+import org.chocosolver.memory.trailing.trail.chunck.StoredIntChunckTrail;
+import org.chocosolver.memory.trailing.trail.flatten.StoredDoubleTrail;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
@@ -75,33 +78,13 @@ public class EnvironmentTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testBuilder(){
-		EnvironmentBuilder eb = new EnvironmentBuilder();
-		eb
-				.setTypeForIntTrail(EnvironmentTrailing.Type.CHUNCK)
-				.setNbUpdatesForIntTrail(10)
-				.setNbWorldsForIntTrail(15)
-				.setLoadFactorForIntTrail(2.0)
-
-				.setTypeForLongTrail(EnvironmentTrailing.Type.UNSAFE)
-				.setNbUpdatesForLongTrail(10)
-				.setNbWorldsForLongTrail(15)
-				.setLoadFactorForLongTrail(2.1)
-
-				.setTypeForBoolTrail(EnvironmentTrailing.Type.FLAT)
-				.setNbUpdatesForBoolTrail(10)
-				.setNbWorldsForBoolTrail(15)
-				.setLoadFactorForBoolTrail(2.0)
-
-				.setTypeForDoubleTrail(EnvironmentTrailing.Type.CHUNCK)
-				.setNbUpdatesForDoubleTrail(10)
-				.setNbWorldsForDoubleTrail(15)
-				.setLoadFactorForDoubleTrail(2.0)
-
-				.setTypeForOperationTrail(EnvironmentTrailing.Type.CHUNCK)
-				.setNbUpdatesForOperationTrail(10)
-				.setNbWorldsForOperationTrail(15)
-				.setLoadFactorForOperationTrail(2.0)
-
+		StoredIntChunckTrail it = new StoredIntChunckTrail(1000, 3);
+		EnvironmentTrailing eb = new EnvironmentBuilder()
+				.setTrail(it)
 				.build();
+
+		Assert.assertEquals(eb.getIntTrail(), it);
+		Assert.assertTrue(eb.getDoubleTrail() instanceof StoredDoubleTrail);
+
 	}
 }
