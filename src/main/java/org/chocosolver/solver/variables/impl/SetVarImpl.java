@@ -32,7 +32,10 @@ package org.chocosolver.solver.variables.impl;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.set.PropCardinality;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.SetDelta;
 import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
@@ -58,6 +61,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     protected final ISet lb, ub, lbReadOnly, ubReadOnly;
     protected SetDelta delta;
     protected boolean reactOnModification;
+    protected IntVar cardinality = null;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -129,6 +133,29 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	@Override
 	public ISet getUB() {
 		return ubReadOnly;
+	}
+	
+	@Override
+	public IntVar getCard() {
+		if(cardinality==null){
+			int ubc =  ub.getSize(), lbc = lb.getSize();
+			if(ubc==lbc) cardinality = model.intVar(ubc);
+			else{
+				cardinality = model.intVar(name+".card", lbc, ubc);
+				new Constraint("SetCard", new PropCardinality(this, cardinality)).post();
+			}
+		}
+		return cardinality;
+	}
+	
+	@Override
+	public void setCard(IntVar card) {
+		if(cardinality==null){
+			cardinality=card;
+			new Constraint("SetCard", new PropCardinality(this, card)).post();
+		} else {
+			model.arithm(cardinality, "=", card).post();
+		}
 	}
 
 	@Override

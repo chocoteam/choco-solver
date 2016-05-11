@@ -76,6 +76,26 @@ public interface SetVar extends Variable {
 	 * @return the lower bound of this SetVar.
 	 */
 	ISet getUB();
+	
+	/**
+	 * get the constrained cardinality variable of this set.
+	 * <ul>
+	 * 	<li>if no variable already has this role, creates a new variable, store and constraint it.</li>
+	 * 	<li>if a variable already has this role, return it.</li>
+	 * </ul>
+	 * @return a variable constrained to this set cardinality. Successive calls should return the same value
+	 */
+	IntVar getCard();
+	
+	/**
+	 * ensure a variable is equal to the cardinality of this set.
+	 * <ul>
+	 * 	<li>If not call has been already performed to this set cardinality, post a constraint on the number of variables</li>
+	 *  <li>if this set already has a variable constrained to the cardinality, post an equality</li>
+	 * </ul>
+	 * @param card a variable of the same model.
+	 */
+	void setCard(IntVar card);
 
     /**
      * Adds element to the lower bound, i.e. every solution must include <code>element</code>
