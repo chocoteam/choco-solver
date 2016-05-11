@@ -90,7 +90,7 @@ public class SetPartition extends AbstractProblem {
 		// forbid empty sets
 		model.nbEmpty(new SetVar[]{x, y, z, universe}, model.intVar(0)).post();
 		// restricts the sum of elements in universe
-		model.sum(universe, sum, true).post();
+		model.sum(universe, sum).post();
 	}
 
 	@Override

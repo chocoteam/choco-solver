@@ -53,141 +53,131 @@ import org.chocosolver.util.ESat;
  */
 public class PropSumOfElements extends Propagator<Variable> {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private IntVar sum;
-    private SetVar set;
-    private int offSet;
-    private int[] weights;
-    private final boolean notEmpty;
+	private IntVar sum;
+	private SetVar set;
+	private int offSet;
+	private int[] weights;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
 
-    /**
-     * Sums weights given by a set of indexes
-     * SUM(weights[i-offset] | i in indexes) = sum
-     *
-     * @param indexes a set variable
-     * @param weights array of int
-     * @param offset int
-     * @param sum integer variable
-     * @param notEmpty true : the set variable cannot be empty
-     *                 false : the set may be empty (if so, the SUM constraint is not applied)
-     */
-    public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum, boolean notEmpty) {
-        super(new Variable[]{indexes, sum}, PropagatorPriority.BINARY, true);
-        this.sum = (IntVar) vars[1];
-        this.set = (SetVar) vars[0];
-        this.weights = weights;
-        this.offSet = offset;
-        this.notEmpty = notEmpty;
-    }
+	/**
+	 * Sums elements given by a set variable:
+	 *
+	 * if(weights !=null){
+	 *     SUM(weights[i-offset] | i in setVar) = sum
+	 *     (also ensures indexes is a subset of [offset, offset+weights.length-1])
+	 * }else{
+	 *     SUM(i | i in setVar) = sum
+	 * }
+	 *
+	 * @param setVar a set variable
+	 * @param weights array of int (can be null to sum the indexes)
+	 * @param offset offset to access array cells (0 in Java, 1 in MiniZinc)
+	 * @param sum integer variable representing the sum over the set
+	 */
+	public PropSumOfElements(SetVar setVar, int[] weights, int offset, IntVar sum) {
+		super(new Variable[]{setVar, sum}, PropagatorPriority.BINARY, false);
+		this.sum = (IntVar) vars[1];
+		this.set = (SetVar) vars[0];
+		this.weights = weights;
+		this.offSet = offset;
+	}
 
-    /**
-     * Sums elements of a set
-     * SUM(i | i in setVar) = sum
-     *
-     * @param setVar a set variable
-     * @param sum a integer variable
-     * @param notEmpty true : the set variable cannot be empty
-     *                 false : the set may be empty (if so, the SUM constraint is not applied)
-     */
-    public PropSumOfElements(SetVar setVar, IntVar sum, boolean notEmpty) {
-        this(setVar, null, 0, sum, notEmpty);
-    }
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		if (vIdx == 0) return SetEventType.all();
+		else return IntEventType.boundAndInst();
+	}
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vIdx == 0) return SetEventType.all();
-        else return IntEventType.boundAndInst();
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		int lbSum = 0;
+		int ubPosSum = 0;
+		int ubNegSum = 0;
+		for (int j : set.getUB()) {
+			if(outOfScope(j)){
+				set.remove(j,this);
+			}else {
+				if (set.getLB().contain(j)) {
+					lbSum += get(j);
+				} else if (get(j) >= 0) {
+					ubPosSum += get(j);
+				} else {
+					ubNegSum += get(j);
+				}
+			}
+		}
+		int min = lbSum+ubNegSum;
+		int max = lbSum+ubPosSum;
+		sum.updateBounds(min, max, this);
+		boolean again = false;
+		// filter set
+		int lb = sum.getLB();
+		int ub = sum.getUB();
+		for (int j : set.getUB()) {
+			if (!set.getLB().contain(j)) {
+				if(min + get(j) > ub || max + get(j) < lb){
+					if (set.remove(j, this)) {
+						again = true;
+					}
+				}
+				if(max - get(j) < lb || min - get(j) > ub) {
+					if (set.force(j, this)) {
+						again = true;
+					}
+				}
+			}
+		}
+		if (again) {
+			propagate(0, 0);
+		}
+	}
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        if (weights != null) {
-            for (int j : set.getUB()) {
-                if (j < offSet || j >= weights.length + offSet) {
-                    set.remove(j, this);
-                }
-            }
-        }
-        propagate(0, 0);
-    }
+	private boolean outOfScope(int j){
+		return weights!=null && (j<offSet || j>=offSet+weights.length);
+	}
 
-    @Override
-    public void propagate(int i, int mask) throws ContradictionException {
-        int sK = 0;
-        int sE = 0;
-        for (int j : set.getLB()) {
-            sK += get(j);
-        }
-        for (int j : set.getUB()) {
-            sE += get(j);
-        }
-        if (notEmpty || set.getLB().getSize() > 0) {
-            sum.updateBounds(sK, sE, this);
-        }
-        boolean again = false;
-        // filter set
-        int lb = sum.getLB();
-        int ub = sum.getUB();
-        for (int j : set.getUB()) {
-            if (!set.getLB().contain(j)) {
-                if (sE - get(j) < lb) {
-                    if (set.force(j, this)) {
-                        again = true;
-                    }
-                } else if (sK + get(j) > ub) {
-                    if (set.remove(j, this)) {
-                        again = true;
-                    }
-                }
-            }
-        }
-        if (again) {
-            propagate(0, 0);
-        }
-    }
+	private int get(int j) {
+		return (weights == null) ? j : weights[j - offSet];
+	}
 
-    @Override
-    public ESat isEntailed() {
-        if (set.getUB().getSize() == 0) {
-            if (notEmpty) {
-                return ESat.FALSE;
-            } else {
-                return ESat.TRUE;
-            }
-        }
-        int sK = 0;
-        int sE = 0;
-        for (int j : set.getLB()) {
-            sK += get(j);
-        }
-        for (int j : set.getUB()) {
-            sE += get(j);
-        }
-        // filter set
-        int lb = sum.getLB();
-        int ub = sum.getUB();
-        if ((lb > sE || ub < sK) && (notEmpty || set.getLB().getSize() > 0)) {
-            return ESat.FALSE;
-        }
-        if (isCompletelyInstantiated()) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
-
-    private int get(int j) {
-        return (weights == null) ? j : weights[j - offSet];
-    }
-
+	@Override
+	public ESat isEntailed() {
+		int lbSum = 0;
+		int ubPosSum = 0;
+		int ubNegSum = 0;
+		for (int j : set.getUB()) {
+			if(set.getLB().contain(j)){
+				if(outOfScope(j)){
+					return ESat.FALSE;
+				}
+				lbSum += get(j);
+			}else if(!outOfScope(j)) {
+				if (get(j) >= 0) {
+					ubPosSum += get(j);
+				} else {
+					ubNegSum += get(j);
+				}
+			}
+		}
+		int min = lbSum+ubNegSum;
+		int max = lbSum+ubPosSum;
+		if(sum.getLB()>max || sum.getUB()<min){
+			return ESat.FALSE;
+		}
+		if (isCompletelyInstantiated()) {
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
+	}
 }
