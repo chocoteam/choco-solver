@@ -2,11 +2,6 @@
 A first example
 ===============
 
-:date: 2016-04-20 17:12
-:tags: choco, constraint, solver, java
-:category: Choco
-:author: Charles Prud'homme
-
 
 Modelling the eight queens puzzle
 =================================
@@ -27,25 +22,32 @@ There are many ways to model this problem with Choco, we will start with a basic
 
 .. code-block:: java
     :linenos:
-    :emphasize-lines: 2,3,6-8,11
+    :emphasize-lines: 2,3,5,9-11,14
 
     int n = 8;
     Model model = new Model(n + "-queens problem");
-    IntVar[] vars = vars = model.intVarArray("Q", n, 1, n);
-    IntStream.range(0, n-1).forEach(i ->
-            IntStream.range(i+1, n).forEach(j ->{
-                model.arithm(vars[i], "!=",vars[j]).post();
-                model.arithm(vars[i], "!=", vars[j], "-", j - i).post();
-                model.arithm(vars[i], "!=", vars[j], "+", j - i)).post();
-            })
-    );
+    IntVar[] vars = new IntVar[n];
+    for(int q = 0; q < n; q++){
+        vars[q] = model.intVar("Q_"+q, 1, n);
+    }
+    for(int i  = 0; i < n-1; i++){
+        for(int j = i + 1; j < n; j++){
+            model.arithm(vars[i], "!=",vars[j]).post();
+            model.arithm(vars[i], "!=", vars[j], "-", j - i).post();
+            model.arithm(vars[i], "!=", vars[j], "+", j - i).post();
+        }
+    }
     Solution solution = model.getSolver().findSolution();
     if(solution != null){
         System.out.println(solution.toString());
     }
 
 If you copy/paste the this code and execute it, it prints
-the value that each variable takes in the solution on the console.
+the value that each variable takes in the solution on the console ::
+
+    Solution: Q_0=7, Q_1=4, Q_2=2, Q_3=5, Q_4=8, Q_5=1, Q_6=3, Q_7=6,
+
+
 Now, let's discuss the code.
 
 
@@ -81,14 +83,14 @@ Now, we have to ensure that, on any solution, no two queens share the same colum
 
 First, the columns conditions: if the queen *i* is on column *k*, then any other queens cannot take the value *k*.
 So, for each pair of queens, the two related variables cannot be assigned to the same value.
-This is expressed by the *constraint* on line 10.
+This is expressed by the *constraint* on line 9.
 To activate the constraint, it has to be *posted*.
 
 Second, the diagonals: we have to consider the two orthogonal diagonals.
 If the queen *i* is on column *k*, then, the queen *i+1* cannot be assigned to *k+1*.
 More generally, the queen *i+m* cannot be assigned to *k+m*.
 The same goes with the other diagonal.
-This is declared on line 11 and 12.
+This is declared on line 10 and 11.
 
 Solving the problem
 +++++++++++++++++++
@@ -96,7 +98,7 @@ Solving the problem
 Once the problem has been described into a model using variables and constraints,
 its satisfaction can be evaluated, by trying to *solve* it.
 
-This is achieved on line 15 by calling the `getSolver().findSolution()` method from the model.
+This is achieved on line 14 by calling the `getSolver().findSolution()` method from the model.
 If a solution exists, it is printed on the console
 
 

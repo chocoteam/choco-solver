@@ -2,11 +2,6 @@
 Installation
 ============
 
-:date: 2016-04-20 11:28
-:tags: choco, constraint, solver, java
-:category: Choco
-:author: Charles Prud'homme
-
 Requirements
 ============
 

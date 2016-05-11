@@ -2,11 +2,6 @@
 Objects in Choco
 ================
 
-:date: 2016-04-21 14:06
-:tags: choco, constraint, solver, java
-:category: Choco
-:author: Charles Prud'homme
-
 The content of this section is extracted from the Javadoc and the Choco's User Guide.
 Here, we **briefly** described the main aspects of the most commonly used objects.
 This does not aim at being complete: it covers the basic information.
@@ -244,8 +239,8 @@ A look at the Javadoc gives a big picture of the ones available.
 In this tutorial, we will have a look at the most commonly used ones.
 
 
-The Solver
-==========
+The `Solver`
+============
 
 The `Model` serves at describing the problem with variables and constraints.
 The resolution is managed by the `Solver`.

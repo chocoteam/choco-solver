@@ -2,11 +2,6 @@
 Choco, a constraint programming java library
 ============================================
 
-:date: 2016-04-20 09:35
-:tags: choco, constraint, solver, java
-:category: Choco
-:author: Charles Prud'homme
-
 What is Choco ?
 ===============
 

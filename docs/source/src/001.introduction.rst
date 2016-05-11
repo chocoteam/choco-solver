@@ -2,9 +2,6 @@
 Introduction to choco-tuto
 ==========================
 
-:date: 2016-04-19 17:52
-:tags: choco, constraint, solver, java
-:category: Choco
 :author: Charles Prud'homme
 
 Presentation
