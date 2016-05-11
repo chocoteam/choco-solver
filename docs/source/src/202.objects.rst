@@ -96,7 +96,7 @@ On the contrary, with an enumerated domain, all possible values are explicitly s
 This consumes more memory (one integer and a bitset -- many longs -- are needed) but it allows
 making holes in it.
 
-.. tip:: **Modelling**: Bounded or Enumerated?
+.. admonition:: **Modelling**: Bounded or Enumerated?
 
     The memory consumption should not be the only criterion to consider when one needs to choose
     between one representation and the other.
@@ -156,16 +156,123 @@ when the distance between the two bounds is less than or equal to the precision.
 
 .. note::
 
-    Using `RealVar` requires to install `Ibex <http://www.ibex-lib.org>`_ before.
+    Using `RealVar` requires to install `Ibex <http://www.ibx-lib.org>`_ before.
     Indeed, Choco relies on Ibex to deal with continuous constraints.
 
 
 The `Constraints`
 =================
 
+A constraint is a relation between one or more variables of a model.
+It defines conditions over these variables that must respected in a solution.
+A constraint has a semantic (*e.g.*, "greater than" or "all different")
+and is equipped with *filtering algorithms* that ensure conditions induced by the semantic hold.
 
+A filtering algorithm, or *propagator*, removes from variables' domain values that cannot appear in any solution.
+A propagator has a *filtering strength* and a time complexity to achieve it.
+The filtering strength, or *level of consistency*, determines how accurate a propagator is when values to removed are detected,
+
+Posting a constraint
+++++++++++++++++++++
+
+For a constraint to be integrated in a model, a call to `post()` is required :
+
+.. code-block:: java
+
+    // x and y must be different in any solutions
+    model.arithm(x, "!=", y).post();
+    // or, in a more verbose way
+    model.post(model.arithm(x, "<", z));
 
 .. note::
 
     A constraint can be posted in only one model at a time.
     Indeed, a reference to the declaring model is maintained in it.
+
+Once posted, a constraint is known from a model and will be integrated in the filtering loop.
+
+.. note::
+
+    Posting a constraint does not remove any values from its variables' domain.
+    Indeed, Choco runs the *initial propagation* only when a resolution is called.
+
+The only reason why a constraint is not posted a model is to *reify* it.
+
+Reifying a constraint
++++++++++++++++++++++
+
+Alternatively, a constraint can be reified with a `BoolVar` :
+
+.. code-block:: java
+
+    // the constraint is reified ith `b`
+    BoolVar r1 = model.arithm(x, "!=", y).reify();
+    // equivalent to:
+    BoolVar r2 = model.boolVar("r2");
+    model.arithm(x, "<", z).reifyWith(r2);
+
+The `BoolVar` that reifies a constraint represents whether or not a constraint is satisfied.
+If the constraint is satisfied, the boolean variable is set to `true`, `false` otherwise.
+If the boolean variable is set to `true` the constraint should be satisfied, unsatisfied otherwise.
+
+Reifying constraints is helpful to express conditions like: `(x = y) xor (x > 15)` :
+
+.. code-block:: java
+
+    BoolVar c1 = model.arithm(x, "=", y).reify();
+    BoolVar c2 = model.arithm(x, ">", 15).reify();
+    model.arithm(c1, "+", c2, "=", 1).post();
+
+
+.. warning::
+
+    A reified constraint **should not** be posted.
+    Indeed, posting it will declare it as a *hard* constraint, to be satisfied,
+    reifying it will declare it as a *soft* constraint, that can be unsatisfied.
+    Both state cannot co-exist simultaneously: hard state dominates soft one.
+
+
+.. caution::
+
+    A constraint that is neither posted or reified **is not considered at all** in the resolution.
+    Make sure all constraints are either posted or reified.
+
+
+There are more than 80 constraints in Choco, and anyone can create its own constraint easily.
+Native constraints are provided by the model, as seen before.
+A look at the Javadoc gives a big picture of the ones available.
+In this tutorial, we will have a look at the most commonly used ones.
+
+
+The Solver
+==========
+
+The `Model` serves at describing the problem with variables and constraints.
+The resolution is managed by the `Solver`.
+
+.. code-block:: java
+
+    Model model = new Model("My problem");
+    // variables declaration
+    // constraints declaration
+    Solver solver = model.getSolver();
+    Solution solution = solver.findSolution();
+
+Having access to the `Solver` is needed to tune the resolution and launch it.
+It provides methods to configure *search strategies*, to define resolution goals
+(*i.e.*, finding one solution, all solutions or optimal solutions) and getting resolution
+statistics.
+
+Instead of listing all resolution features, we will some of them in the following.
+
+
+Modelling and Solving
+=====================
+
+Carefully selecting variables and constraints to describe a problem in a model is a tough task to do.
+Indeed, some knowledge of the available constraints (or their reformulations), their filtering strength and complexity,
+is needed to take advantage of Constraint Programming. This has to be both taught and experimented.
+Same goes with the resolution tuning. Using Choco has a black-box solver results in good performance on average.
+But, injecting problem expertise in the search process is a key component of success.
+Choco offers a large range of features to let you good chances to master your problem.
+

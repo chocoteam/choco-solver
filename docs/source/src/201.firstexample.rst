@@ -34,18 +34,19 @@ There are many ways to model this problem with Choco, we will start with a basic
     IntVar[] vars = vars = model.intVarArray("Q", n, 1, n);
     IntStream.range(0, n-1).forEach(i ->
             IntStream.range(i+1, n).forEach(j ->{
-                vars[i].ne(vars[j]).post();
-                vars[i].ne(vars[j].sub(j - i)).post();
-                vars[i].ne(vars[j].add(j - i)).post();
+                model.arithm(vars[i], "!=",vars[j]).post();
+                model.arithm(vars[i], "!=", vars[j], "-", j - i).post();
+                model.arithm(vars[i], "!=", vars[j], "+", j - i)).post();
             })
     );
-    Solution solution = model.findSolution();
+    Solution solution = model.getSolver().findSolution();
     if(solution != null){
         System.out.println(solution.toString());
     }
 
-If you copy/paste the this code and execute it, it prints the solution on the console.
-Now, we will discuss the code.
+If you copy/paste the this code and execute it, it prints
+the value that each variable takes in the solution on the console.
+Now, let's discuss the code.
 
 
 The model
@@ -95,8 +96,8 @@ Solving the problem
 Once the problem has been described into a model using variables and constraints,
 its satisfaction can be evaluated, by trying to *solve* it.
 
-This is achieved on line 15 by calling the `solve()` method of the model.
-If a solution exists, "There is a solution." is printed in the console.
+This is achieved on line 15 by calling the `getSolver().findSolution()` method from the model.
+If a solution exists, it is printed on the console
 
 
 What to do next ?

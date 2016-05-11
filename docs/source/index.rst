@@ -11,7 +11,7 @@ Introduction
 ============
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    src/001.introduction
    src/002.history
@@ -21,7 +21,7 @@ Constraint-Programming
 ======================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    src/101.shortintroduction
 
@@ -30,7 +30,7 @@ Overview
 ========
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    src/201.firstexample
    src/202.objects
@@ -39,7 +39,7 @@ Tutorial: Alignment of DNA sequences
 ====================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    src/301.description
    src/302.mathmodel
