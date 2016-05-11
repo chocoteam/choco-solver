@@ -163,7 +163,7 @@ public class SocialGolfer extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         System.out.println(String.format("Social golfer(%d,%d,%d)", g, s, w));
         StringBuilder st = new StringBuilder();

@@ -83,7 +83,7 @@ public class ELNSTest {
         r.limitFail(500);
         r.showSolutions();
         model.setObjective(MINIMIZE, obj);
-        while(model.solve());
+        while(model.getSolver().solve());
     }
 
 

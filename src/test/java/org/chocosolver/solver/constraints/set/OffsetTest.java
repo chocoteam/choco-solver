@@ -78,7 +78,7 @@ public class OffsetTest {
         SetVar offsetted = model.setVar(new int[]{0, 2, 3});
         model.offSet(setVar, offsetted, 0).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -99,7 +99,7 @@ public class OffsetTest {
         model.offSet(setVar, offsetted, -1).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -110,12 +110,12 @@ public class OffsetTest {
         model.offSet(setVar, offsetted, 1).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     private void checkSolutions(Model model, SetVar set, SetVar offseted, int offset) {
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             assertEquals(set.getValue().getSize(), offseted.getValue().getSize());
             for (Integer value : set.getValue()) {

@@ -158,16 +158,16 @@ public class CumulativeTest {
 		model.getSolver().limitTime(5000);
 		switch (mode) {
 			case 0:
-				model.solve();
+				model.getSolver().solve();
 				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getSolutionCount();
 			case 1:
 				model.setObjective(MINIMIZE, last);
-				while(model.solve());
+				while(model.getSolver().solve());
 				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getBestSolutionValue().longValue();
 			case 2:
-				while (model.solve()) ;// too many solutions to be used
+				while (model.getSolver().solve()) ;// too many solutions to be used
 				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getSolutionCount();
 			default:

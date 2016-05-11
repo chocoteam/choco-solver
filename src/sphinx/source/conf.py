@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Choco3 documentation build configuration file, created by
+# Choco Solver documentation build configuration file, created by
 # sphinx-quickstart on Tue Mar 25 10:03:28 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Choco3'
+project = u'ChocoSolver'
 copyright = u'2015, Jean-Guillaume Fages, Xavier Lorca, Charles Prud\'homme'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -192,7 +192,7 @@ html_sidebars = {
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Choco3doc'
+htmlhelp_basename = 'ChocoSolverdoc'
 
 html_logo = 'CHOCO_cmjn.jpg'
 
@@ -216,7 +216,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'Choco3.tex', u'Choco3 Documentation',
+  ('index', 'ChocoSolver.tex', u'Choco Solver Documentation',
    u'Charles Prud\'homme, Jean-Guillaume Fages, Xavier Lorca', 'manual'),
 ]
 

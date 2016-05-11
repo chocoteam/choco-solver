@@ -35,7 +35,12 @@
 package org.chocosolver.solver;
 
 
+import org.chocosolver.memory.EnvironmentBuilder;
+import org.chocosolver.memory.trailing.EnvironmentTrailing;
+import org.chocosolver.memory.trailing.trail.chunck.StoredIntChunckTrail;
+import org.chocosolver.memory.trailing.trail.flatten.StoredDoubleTrail;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
@@ -68,6 +73,18 @@ public class EnvironmentTest {
 		model.allDifferent(vectors, "BC").post();
 		Solver r = model.getSolver();
 		r.set(domOverWDegSearch(append(vectors, vars)));
-		model.solve();
+		model.getSolver().solve();
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testBuilder(){
+		StoredIntChunckTrail it = new StoredIntChunckTrail(1000, 3);
+		EnvironmentTrailing eb = new EnvironmentBuilder()
+				.setTrail(it)
+				.build();
+
+		Assert.assertEquals(eb.getIntTrail(), it);
+		Assert.assertTrue(eb.getDoubleTrail() instanceof StoredDoubleTrail);
+
 	}
 }

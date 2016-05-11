@@ -124,6 +124,14 @@ public interface IntIterableSet{
     void clear();
 
     /**
+     * Removes all values between <i>f</i> (inclusive) and <i>t</i> (inclusive)
+     * @param f first value to remove
+     * @param t last value to remove
+     * @return <tt>true</tt> if this set changed as a result of the call
+     */
+    boolean removeBetween(int f, int t);
+
+    /**
      * @param aValue (exclusive)
      * @return the value after aValue
      */

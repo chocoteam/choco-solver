@@ -52,10 +52,10 @@ public class ImpactTest {
 		Model s1 = costasArray(7, false);
 		Model s2 = costasArray(7, true);
 
-		while (s1.solve()) ;
+		while (s1.getSolver().solve()) ;
 		out.println(s1.getSolver().getSolutionCount());
 
-		while (s2.solve()) ;
+		while (s2.getSolver().solve()) ;
 
 		out.println(s2.getSolver().getSolutionCount());
 		assertEquals(s1.getSolver().getSolutionCount(), s2.getSolver().getSolutionCount());

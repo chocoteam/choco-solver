@@ -78,7 +78,7 @@ public class ExplanationTest {
                         case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
                         case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                     }
-                    assertFalse(model.solve());
+                    assertFalse(model.getSolver().solve());
                     System.out.println(model.getSolver().getMeasures().toOneLineString());
                     // get the last contradiction, which is
                     if (e > 1) {
@@ -103,7 +103,7 @@ public class ExplanationTest {
                         case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
                         case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                     }
-                    assertFalse(model.solve());
+                    assertFalse(model.getSolver().solve());
                     System.out.println(model.getSolver().getMeasures().toOneLineString());
                     // get the last contradiction, which is
                     assertEquals(model.getSolver().getNodeCount(), (n - 2) * 2);
@@ -123,7 +123,7 @@ public class ExplanationTest {
 
         model.getSolver().setCBJLearning(false, true);
         LearnCBJ cbj = (LearnCBJ) model.getSolver().getLearn();
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
         Explanation exp = cbj.getLastExplanation();
         assertEquals(2, exp.nbCauses());
     }
@@ -143,7 +143,7 @@ public class ExplanationTest {
                             case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
                             case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                         }
-                        assertFalse(model.solve());
+                        assertFalse(model.getSolver().solve());
                         model.getSolver().printShortStatistics();
                     }
                 }
@@ -203,7 +203,7 @@ public class ExplanationTest {
                             case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
                         }
 //                    SMF.shortlog(solver);
-                        assertEquals(n > 2, model.solve());
+                        assertEquals(n > 2, model.getSolver().solve());
                     }
                 }
             }
@@ -237,7 +237,7 @@ public class ExplanationTest {
                             break;
                     }
                     model.getSolver().showShortStatistics();
-                    assertFalse(model.solve());
+                    assertFalse(model.getSolver().solve());
                 }
             }
         }
@@ -270,7 +270,7 @@ public class ExplanationTest {
                         break;
                 }
                 model.getSolver().showStatistics();
-                assertFalse(model.solve());
+                assertFalse(model.getSolver().solve());
             }
         }
     }
@@ -302,7 +302,7 @@ public class ExplanationTest {
                         break;
                 }
                 model.getSolver().showStatistics();
-                assertFalse(model.solve());
+                assertFalse(model.getSolver().solve());
             }
         }
     }
@@ -327,7 +327,7 @@ public class ExplanationTest {
             model.getSolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
             model.getSolver().setDBTLearning(ng == 1, false);
             model.getSolver().showStatistics();
-            assertFalse(model.solve());
+            assertFalse(model.getSolver().solve());
         }
     }
 
@@ -398,7 +398,7 @@ public class ExplanationTest {
         );
         LearnExplained lex = new LearnExplained(model, true, false);
         model.getSolver().set(lex);
-        model.solve();
+        model.getSolver().solve();
         // force fake failure
         for(int i = 0; i < 5; i++){
             model.getSolver().getEngine().getContradictionException().set(Cause.Null, vs[i], "");

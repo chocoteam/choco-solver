@@ -50,6 +50,11 @@ public class UnsafeLongTrail implements IStoredLongTrail {
     public static final int SIZEOF_INT = Unsafe.ARRAY_INT_INDEX_SCALE;
 
     /**
+     * load factor
+     */
+    private double loadfactor;
+
+    /**
      * Stack of backtrackable search variables.
      */
     private StoredLong[] variableStack;
@@ -85,15 +90,17 @@ public class UnsafeLongTrail implements IStoredLongTrail {
      *
      * @param nUpdates maximal number of updates that will be stored
      * @param nWorlds  maximal number of worlds that will be stored
+     * @param loadfactor load factor for structures
      */
 
-    public UnsafeLongTrail(int nUpdates, int nWorlds) {
+    public UnsafeLongTrail(int nUpdates, int nWorlds, double loadfactor) {
         unsafe = getTheUnsafe();
         currentLevel = 0;
         variableStack = new StoredLong[nUpdates];
         valueStack = unsafe.allocateMemory(nUpdates * SIZEOF_DATA);
         stampStack = unsafe.allocateMemory(nUpdates * SIZEOF_INT);
         worldStartLevels = new int[nWorlds];
+        this.loadfactor = loadfactor;
     }
 
     public static Unsafe getTheUnsafe() {
@@ -114,6 +121,9 @@ public class UnsafeLongTrail implements IStoredLongTrail {
     @Override
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
+        if (worldIndex == worldStartLevels.length - 1) {
+            resizeWorldCapacity((int)(worldStartLevels.length * loadfactor));
+        }
     }
 
 
@@ -201,7 +211,7 @@ public class UnsafeLongTrail implements IStoredLongTrail {
 
     private void resizeUpdateCapacity() {
         int oldCapacity = variableStack.length;
-        int newCapacity = ((oldCapacity * 3) / 2);
+        int newCapacity = (int)(oldCapacity * loadfactor);
         // first, copy the stack of variables
         StoredLong[] tmp1 = new StoredLong[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, oldCapacity);
@@ -218,8 +228,7 @@ public class UnsafeLongTrail implements IStoredLongTrail {
         stampStack = ad2;
     }
 
-    @Override
-    public void resizeWorldCapacity(int newWorldCapacity) {
+    private void resizeWorldCapacity(int newWorldCapacity) {
         final int[] tmp = new int[newWorldCapacity];
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
         worldStartLevels = tmp;

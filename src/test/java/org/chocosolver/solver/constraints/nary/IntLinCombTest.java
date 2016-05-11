@@ -109,7 +109,7 @@ public class IntLinCombTest {
 
         s.getSolver().set(inputOrderLBSearch(vars));
 
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -194,8 +194,8 @@ public class IntLinCombTest {
             Model sum = sum(domains, coeffs, lb, op);
             Model intlincomb = intlincomb(domains, coeffs, lb, op);
 
-            while (sum.solve()) ;
-            while (intlincomb.solve()) ;
+            while (sum.getSolver().solve()) ;
+            while (intlincomb.getSolver().solve()) ;
             assertEquals(sum.getSolver().getSolutionCount(), intlincomb.getSolver().getSolutionCount());
             assertEquals(sum.getSolver().getNodeCount(), intlincomb.getSolver().getNodeCount());
         }
@@ -204,7 +204,7 @@ public class IntLinCombTest {
     @Test(groups="1s", timeOut=60000)
     public void testUSum1() {
         Model sumleq = sum(new int[][]{{-2, 3}}, new int[]{-2}, -6, -1);
-        while (sumleq.solve()) ;
+        while (sumleq.getSolver().solve()) ;
     }
 
     /**
@@ -232,7 +232,7 @@ public class IntLinCombTest {
         BoolVar[] bs = model.boolVarArray("b", 3);
         model.scalar(bs, new int[]{1, 2, 3}, "=", 2).post();
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -485,8 +485,8 @@ public class IntLinCombTest {
             BoolVar[] bs = s2.boolVarArray("b", 5);
             s2.sum(bs, "!=", 3).post();
         }
-        while (s1.solve()) ;
-        while (s2.solve()) ;
+        while (s1.getSolver().solve()) ;
+        while (s2.getSolver().solve()) ;
         assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
         assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
@@ -515,8 +515,8 @@ public class IntLinCombTest {
             BoolVar[] bs = s2.boolVarArray("b", 5);
             s2.sum(bs, "<=", 3).post();
         }
-        while (s1.solve()) ;
-        while (s2.solve()) ;
+        while (s1.getSolver().solve()) ;
+        while (s2.getSolver().solve()) ;
         assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
         assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
@@ -549,8 +549,8 @@ public class IntLinCombTest {
         }
         s1.getSolver().showDecisions();
         s2.getSolver().showDecisions();
-        while (s1.solve()) ;
-        while (s2.solve()) ;
+        while (s1.getSolver().solve()) ;
+        while (s2.getSolver().solve()) ;
         assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
         assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
@@ -574,7 +574,7 @@ public class IntLinCombTest {
         model.scalar(bs, cs, "=", sum).post();
         model.getSolver().set(inputOrderLBSearch(bs));
 //        IOutputFactory.showDecisions(solver);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
 
@@ -610,7 +610,7 @@ public class IntLinCombTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 1, 1, 3, false);
         model.scalar(X, new int[]{-1}, "<=", 2).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 3);
 
     }
@@ -692,28 +692,28 @@ public class IntLinCombTest {
     public void testJL1() {
         Model model = new Model();
         model.sum(new IntVar[]{model.intVar(3), model.intVar(-4)}, "<", 0).post();
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL2() {
         Model model = new Model();
         model.sum(new IntVar[]{model.intVar(3), model.intVar(-4)}, "<=", 0).post();
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL3() {
         Model model = new Model();
         model.sum(new IntVar[]{model.intVar(-3), model.intVar(4)}, ">", 0).post();
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testJL4() {
         Model model = new Model();
         model.sum(new IntVar[]{model.intVar(-3), model.intVar(4)}, ">=", 0).post();
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -724,7 +724,7 @@ public class IntLinCombTest {
         model.getSolver().set(inputOrderLBSearch(var));
         model.getSolver().showStatistics();
         model.getSolver().showSolutions();
-        model.solve();
+        model.getSolver().solve();
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -735,6 +735,6 @@ public class IntLinCombTest {
         model.getSolver().set(inputOrderLBSearch(var));
         model.getSolver().showStatistics();
         model.getSolver().showSolutions();
-        model.solve();
+        model.getSolver().solve();
     }
 }

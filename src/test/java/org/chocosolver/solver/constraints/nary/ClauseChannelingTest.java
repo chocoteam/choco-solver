@@ -59,7 +59,7 @@ public class ClauseChannelingTest {
 
                 Solver r = model.getSolver();
                 r.set(randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
-                while (model.solve()) ;
+                while (model.getSolver().solve()) ;
                 assertEquals(r.getMeasures().getSolutionCount(), i);
             }
         }
@@ -78,7 +78,7 @@ public class ClauseChannelingTest {
 
                 Solver r = model.getSolver();
                 r.set(randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
-                while (model.solve()) ;
+                while (model.getSolver().solve()) ;
                 assertEquals(r.getMeasures().getSolutionCount(), i);
             }
         }
@@ -104,7 +104,7 @@ public class ClauseChannelingTest {
 
                     Solver r = sr.getSolver();
                     r.set(randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
-                    while (sr.solve()) ;
+                    while (sr.getSolver().solve()) ;
                 }
                 {
                     IntVar iv = sc.intVar("iv", 1, i, false);
@@ -115,7 +115,7 @@ public class ClauseChannelingTest {
 
                     Solver r = sc.getSolver();
                     r.set(randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
-                    while (sc.solve()) ;
+                    while (sc.getSolver().solve()) ;
                 }
                 Assert.assertEquals(sr.getSolver().getSolutionCount(), i);
                 Assert.assertEquals(sc.getSolver().getSolutionCount(), i);
@@ -145,7 +145,7 @@ public class ClauseChannelingTest {
 
                     Solver r = sr.getSolver();
                     r.set(randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
-                    while (sr.solve()) ;
+                    while (sr.getSolver().solve()) ;
                 }
                 {
                     IntVar iv = sc.intVar("iv", 1, i, true);
@@ -156,7 +156,7 @@ public class ClauseChannelingTest {
 
                     Solver r = sc.getSolver();
                     r.set(randomSearch(append(new IntVar[]{iv}, eqs, lqs), seed));
-                    while (sc.solve()) ;
+                    while (sc.getSolver().solve()) ;
                 }
                 Assert.assertEquals(sr.getSolver().getSolutionCount(), i);
                 Assert.assertEquals(sc.getSolver().getSolutionCount(), i);

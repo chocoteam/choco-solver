@@ -79,14 +79,14 @@ public class CountTest {
     @Test(groups="1s", timeOut=60000)
     public void testMS4() {
         Model model = modelit(4);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testMS8() {
         Model model = modelit(8);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
@@ -121,7 +121,7 @@ public class CountTest {
 
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 9);
         }
     }
@@ -170,7 +170,7 @@ public class CountTest {
 
             Solver r = model.getSolver();
             r.set(randomSearch(vars, seed));
-            while (model.solve()) ;
+            while (model.getSolver().solve()) ;
             if (nbsol == -1) {
                 nbsol = r.getMeasures().getSolutionCount();
             } else {
@@ -196,7 +196,7 @@ public class CountTest {
 
         Tuples tuples = new Tuples(true);
         model.getSolver().set(inputOrderLBSearch(vars));
-        model.solve();
+        model.getSolver().solve();
         do {
             int[] tuple = new int[vars.length];
             for (int i = 0; i < tuple.length; i++) {
@@ -209,7 +209,7 @@ public class CountTest {
             if (checkocc == tuple[tuple.length - 1]) {
                 tuples.add(tuple);
             }
-        } while (model.solve() == TRUE);
+        } while (model.getSolver().solve() == TRUE);
 
         IntVar[] newvs = new IntVar[vs.length + 1];
         arraycopy(vs, 0, newvs, 0, vs.length);

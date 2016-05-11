@@ -114,7 +114,7 @@ Boolean variable
 Boolean variables, ``BoolVar``, are specific ``IntVar`` that take their value in :math:`[\![0,1]\!]`.
 The avantage of ``BoolVar`` is twofold:
  - They can be used to say whether or not constraint should be satisfied (reification)
- - They domain, and some filtering algorithms, are optimized
+ - Their domain, and some filtering algorithms, are optimized
 
 To create a new boolean variable: ::
 
@@ -184,7 +184,7 @@ Views can be combined together, e.g. ``x = 2*y + 5`` is: ::
 
  IntVar x = model.intOffsetView(model.intScaleView(y,2),5);
 
-We can also use a view mecanism to link an integer variable with a real variable.
+We can also use a view mecanism to link an integer variable with a real variable. ::
 
  IntVar ivar = model.intVar("i", 0, 4);
  double precision = 0.001d;
@@ -213,9 +213,11 @@ For a given requirement, there can be several constraints/propagators available.
 A widely used example is the `AllDifferent` constraint which ensures that all its variables take a distinct value in a solution.
 Such a rule can be formulated using :
  - a clique of basic inequality constraints,
- - a generic table constraint --an extension constraint which list the valid tuples,
- - a dedicated global constraint analysing bounds of variable (*Bound consistency*),
- - a dedicated global constraint analysing all values of the variables (*Arc consistency*).
+ - a generic table constraint (an extension constraint that lists the valid tuples),
+ - a dedicated global constraint analysing :
+        - instantiated variables (*Forward checking propagator*),
+        - variable domain bounds (*Bound consistency propagator*),
+        - variable domains (*Arc consistency propagator*).
 
 Depending on the problem to solve, the efficiency of each option may be dramatically different.
 In general, we tend to use global constraints, that capture a good part of the problem structure.
@@ -240,16 +242,15 @@ However, one can define specific constraints by defining combinations of existin
 Solution checking
 ~~~~~~~~~~~~~~~~~
 
-The satisfaction of the constraints is done on each solution when assertions are enabled.
-This means that, by default, solutions are not checked, to save computational time.
-Indeed, constraint-propagation should be sufficient to guarantee obtaining correct solutions.
+The satisfaction of the constraints is done on each solution by calling the ``isSatisfied()`` method of every constraint.
+By default, this method checks the ``isEntailed()`` method of each of its propagators.
 
 .. note::
 
-    One can enable assertions by adding the ``-ea`` instruction in the JVM arguments.
+    Additional checks (Java assertions) can be performed by adding the ``-ea`` instruction in the JVM arguments.
+    This is useful when debugging a program.
 
-A constraint may define its specific checker by overwriting the method ``isSatisfied()``.
-By default, this method checks the ``isEntailed()`` method of each of its propagators.
+
 
 List of available constraints
 =============================
@@ -397,8 +398,8 @@ Then you must implement the two following methods:
      - :math:`A = B` will never be satisfied when :math:`A=\{0,1,2\}` and :math:`B=\{4,5\}`.
      - The entailment of :math:`A \neq B` cannot be defined when :math:`A=\{0,1,2\}` and :math:`B=\{1,2,3\}`.
 
-``ESat isEntailed()`` implementation may be approximate but should at least cover the case where all variables are instantiated.
-This method is also called to check solutions when assertions are enabled, i.e. when the `-ea` JVM option is used.
+``ESat isEntailed()`` implementation may be approximate
+but should at least cover the case where all variables are instantiated, in order to check solutions.
 
 Here is an example of how to implement a propagator for ``X >= Y``: ::
 
@@ -553,7 +554,7 @@ The *decomposed*  (recommended) option:
 
     Split the original propagator into (partial) propagators so that the fix point is performed through the propagation engine.
     For instance, a channeling propagator :math:`A \Leftrightarrow B` can be decomposed into two propagators :math:`A \Rightarrow B` and :math:`B \Rightarrow A`.
-    The propagators can (but does not have to) react on fine events.
+    The propagators can (but do not have to) react on fine events.
 
 The *lazy* option:
 
@@ -583,151 +584,3 @@ The *coarse* option:
 .. note::
 
     Domain variable modifier returns a boolean valued to ``true`` if the domain variable has been modified.
-
-
-**************
-Solving models
-**************
-
-Solution computation
-====================
-
-Finding one solution
---------------------
-
-A call to ``model.solve()`` launches a resolution which stops on the first solution found, if any: ::
-
-    if(model.solve()){
-        // do something, e.g. print out variable values
-    }else if(model.getSolver().hasReachedLimit()){
-        System.out.println("The could not find a solution
-                            nor prove that none exists in the given limits");
-    }else {
-        System.out.println("The solver has proved the problem has no solution");
-    }
-
-If ``model.solve()`` returns ``true``, then a solution has been found and each variable is instantiated to a value.
-Otherwise, two cases must be considered:
-
-- A limit has been declared and reached (``model.getSolver().hasReachedLimit()`` returns true).
-  There may be a solution, but the solver has not been able to find it in the given limit
-  or there is no solution but the solver has not been able to prove it (i.e., to close to search tree) in the given limit.
-  The resolution process stops in no particular place in the search tree.
-- No limit has been declared or reached: The problem has no solution and the solver has proved it.
-
-Enumerating all solutions
--------------------------
-
-You can enumerate all solutions of a problem with a simple while loop as follows: ::
-
-    while(model.solve()){
-        // do something, e.g. print out variable values
-    }
-
-After the enumeration, the solver closes the search tree and variables are no longer instantiated to a value.
-
-.. tip::
-
-    On a solution, one can get the value assigned to each variable by calling ::
-
-        ivar.getValue();    // instantiation value of an IntVar, return a int
-        svar.getValue();    // instantiation values of a SerVar, return a int[]
-        rvar.getLB();       // lower bound of a RealVar, return a double
-        rvar.getUB();       // upper bound of a RealVar, return a double
-
-
-Optimization
-============
-
-In Constraint-Programming, optimization is done by computing improving solutions, until reaching an optimum.
-Therefore, it can be seen as solving multiple times the model while adding constraints on the fly to prevent the solver from computing dominated solutions.
-
-Mono-objective optimization
----------------------------
-
-The optimization process is the following: anytime a solution is found, the value of the objective variable is stored and a *cut* is posted.
-The cut is an additional constraint which states that the next solution must be (strictly) better than the current one.
-To solve an optimization problem, you must specify which variable to optimize and in which direction: ::
-
-   // to maximize X
-   model.setObjectives(ResolutionPolicy.MAXIMIZE, X);
-   // or model.setObjectives(ResolutionPolicy.MINIMIZE, X); to minimize X
-   while(model.solve()){
-       // an improving solution has been found
-   }
-   // the last solution found was optimal (if search completed)
-
-You can use custom cuts by overriding the default cut behavior.
-The *cut computer* function defines how the cut should bound the objective variable.
-The input *number* is the best solution value found so far, the output *number* define the new bound.
-When maximizing (resp. minimizing) a problem, the cut limits the lower bound (resp. upper bound) of the objective variable.
-For instance, one may want to indicate that the value of the objective variable is the next solution should be
- greater than or equal to the best value + 10 ::
-
-    ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
-    oman.setCutComputer(n -> n - 10);
-
-
-
-.. tip::
-
-    When the objective is a function over multiple variables, you need to model it through
-    one objective variable and additional constraints: ::
-
-        // Model objective function 3X + 4Y
-        IntVar OBJ = model.intVar("objective", 0, 999);
-        model.scalar(new IntVar[]{X,Y}, new int[]{3,4}, OBJ)).post();
-        // Specify objective
-        model.setObjectives(ResolutionPolicy.MAXIMIZE, OBJ);
-        // Compute optimum
-        model.solve();
-
-Multi-objective optimization
-----------------------------
-
-If you have multiple objective to optimize, you have several options. First, you may aggregate them in a function so that you end up with only one objective variable. Second, you can solve the problem multiple times, each one optimizing one variable and possibly fixing some bounds on the other. Third, you can enumerate solutions (without defining any objective) and add constraints on the fly to prevent search from finding dominated solutions. This is done by the `ParetoOptimizer` object which does the following:
-Anytime a solution is found, a constraint is posted which states that at least one of the objective variables must be strictly better:
-Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n)` where :math:`X_i` is the ith objective variable and :math:`b_i` its value.
-
-Here is a simple example on how to use the `ParetoOptimizer` to optimize two variables (a and b): ::
-
-		// simple model
-		Model model = new Model();
-		IntVar a = model.intVar("a", 0, 2, false);
-		IntVar b = model.intVar("b", 0, 2, false);
-		IntVar c = model.intVar("c", 0, 2, false);
-		model.arithm(a, "+", b, "=", c).post();
-
-		// create an object that will store the best solutions and remove dominated ones
-		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b});
-		model.getSolver().plugMonitor(po);
-
-		// optimization
-		while(model.solve());
-
-		// retrieve the pareto front
-		List<Solution> paretoFront = po.getParetoFront();
-		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
-		for(Solution s:paretoFront){
-			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
-		}
-
-
-.. note::
-
- All objectives must be optimized on the same direction (either minimization or maximization).
-
-
-Constraint propagation
-======================
-
-One may want to propagate all constraints without search for a solution.
-This can be achieved by calling ``solver.propagate()``.
-This method runs, in turn, the domain reduction algorithms of the constraints until it reaches a fix point.
-It may throw a ``ContradictionException`` if a contradiction occurs.
-In that case, the propagation engine must be flushed calling ``solver.getEngine().flush()``
-to ensure there is no pending events.
-
-.. warning::
-
- If there are still pending events in the propagation engine, the propagation may results in unexpected results.

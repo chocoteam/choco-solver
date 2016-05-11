@@ -81,7 +81,7 @@ public class CostasArrays extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 		model.getSolver().printStatistics();
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < n; i++) {
@@ -123,7 +123,7 @@ public class CostasArrays extends AbstractProblem {
 			CostasArrays ca = new CostasArrays();
 			ca.readArgs("-o", size[i] + "");
 			ca.buildModel();
-			while (ca.getModel().solve()) ;
+			while (ca.getModel().getSolver().solve()) ;
 			Assert.assertEquals(nbSols[i], ca.getModel().getSolver().getSolutionCount());
 		}
 	}

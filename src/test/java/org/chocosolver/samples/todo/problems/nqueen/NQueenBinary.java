@@ -58,7 +58,7 @@ public class NQueenBinary extends AbstractNQueen {
                     vars[i].ne(vars[j].add(j - i)).post();
                 })
         );
-        model.solve();
+        model.getSolver().solve();
     }
 
 

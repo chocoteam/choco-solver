@@ -120,7 +120,11 @@ public interface IViewFactory extends ISelf<Model> {
             return _me().intVar(-var.getValue());
         }
         if (_me().getSettings().enableViews()) {
-            return new MinusView(var);
+            if(var instanceof MinusView){
+                return ((MinusView)var).getVariable();
+            }else {
+                return new MinusView(var);
+            }
         } else {
             int ub = -var.getLB();
             int lb = -var.getUB();

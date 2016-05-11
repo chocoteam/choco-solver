@@ -61,7 +61,7 @@ public class SuspiciousTest {
     public void testBacktrack() {
         Model s = makeNQueenWithBinaryConstraints(12);
         s.getSolver().limitBacktrack(50);
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         long bc = s.getSolver().getBackTrackCount();
         assertEquals(bc, 52);
     }
@@ -99,7 +99,7 @@ public class SuspiciousTest {
             }
         });
         model.getSolver().limitNode(200);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         long sc = model.getSolver().getSolutionCount();
         assertEquals(sc, 54);
     }
@@ -113,7 +113,7 @@ public class SuspiciousTest {
         ks.solveIt(ks.modelIt("k20", 13), true);
     }
 
-    @Test(groups={"1s"})
+    @Test(groups="1s", timeOut=60000)
     public void testALL5() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
@@ -125,7 +125,7 @@ public class SuspiciousTest {
         }
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testALL10() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
@@ -137,7 +137,7 @@ public class SuspiciousTest {
         }
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testOPT13() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 13);
@@ -147,7 +147,7 @@ public class SuspiciousTest {
         Assert.assertEquals(s.getSolver().getNodeCount(), 166, "nb nod");
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testOPT14() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 14);
@@ -157,7 +157,7 @@ public class SuspiciousTest {
         Assert.assertEquals(s.getSolver().getNodeCount(), 172, "nb nod");
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testOPT15() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 15);

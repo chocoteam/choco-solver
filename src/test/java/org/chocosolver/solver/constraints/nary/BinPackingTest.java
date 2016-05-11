@@ -72,7 +72,7 @@ public class BinPackingTest {
 		}else{
 			model.binPacking(itemBin,itemSize,binLoad,offset).post();
 		}
-		while(model.solve()){
+		while(model.getSolver().solve()){
 			assertTrue(itemBin[0].getValue()>=offset);
 			assertTrue(itemBin[1].getValue()>=offset);
 			assertTrue(binLoad[0].getValue()>=0);
@@ -94,7 +94,7 @@ public class BinPackingTest {
 		}else{
 			model.binPacking(itemBin,itemSize,binLoad,offset).post();
 		}
-		while(model.solve()){
+		while(model.getSolver().solve()){
 			assertTrue(itemBin[0].getValue()>=offset);
 			assertTrue(itemBin[1].getValue()>=offset);
 			assertTrue(binLoad[0].getValue()>=0);
@@ -117,7 +117,7 @@ public class BinPackingTest {
 			model.binPacking(itemBin,itemSize,binLoad,offset).post();
 		}
 		System.out.println(model.getSolver().isSatisfied());
-		model.solve();
+		model.getSolver().solve();
 		assertEquals(0, model.getSolver().getSolutionCount());
 	}
 

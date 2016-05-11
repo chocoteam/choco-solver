@@ -120,7 +120,7 @@ public class MeetingScheduling extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         System.out.println(String.format("Meeting Scheduling Problem (%s)", mData));
 

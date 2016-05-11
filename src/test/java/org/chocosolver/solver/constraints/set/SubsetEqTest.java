@@ -63,7 +63,7 @@ public class SubsetEqTest {
         model.subsetEq(vars).post();
 
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             assertTrue(vars[2].getValue().contain(0));
             assertTrue(vars[2].getValue().contain(1));
@@ -81,7 +81,7 @@ public class SubsetEqTest {
         model.subsetEq(vars).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -95,7 +95,7 @@ public class SubsetEqTest {
         model.subsetEq(vars).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
@@ -103,7 +103,7 @@ public class SubsetEqTest {
 
     private void checkSolution(Model model, SetVar[] vars) {
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             for (int i = 0; i < vars.length - 1; i++) {
                 for (Integer value : vars[i].getValue()) {

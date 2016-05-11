@@ -58,7 +58,7 @@ public class ConstraintTest {
         SetVar s1 = model.setVar("s1", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         SetVar s2 = model.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         model.or(model.allEqual(new SetVar[]{s1, s2}), model.setBoolsChanneling(bs, s1, 0)).post();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(2040, model.getSolver().getSolutionCount());
     }
 
@@ -73,7 +73,7 @@ public class ConstraintTest {
 
         Solver r = model.getSolver();
         r.set(randomSearch(ivs, 0));
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 48);
         assertEquals(r.getMeasures().getNodeCount(), 100);
     }
@@ -243,15 +243,15 @@ public class ConstraintTest {
         IntVar w = m.intVar(0, 2);
         Constraint c1 = m.arithm(v, ">", w);
         c1.post();
-        while(m.solve());
+        while(m.getSolver().solve());
         Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 6);
         m.getSolver().reset();
         m.unpost(c1);
-        while(m.solve());
+        while(m.getSolver().solve());
         Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 9);
         m.getSolver().reset();
         c1.post();
-        while(m.solve());
+        while(m.getSolver().solve());
         Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 6);
     }
 

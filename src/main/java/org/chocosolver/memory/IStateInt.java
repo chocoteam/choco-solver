@@ -63,7 +63,6 @@ public abstract class IStateInt  {
      * Modifies the value and stores if needed the former value on the
      * trailing stack.
      */
-
     public abstract void set(int y);
 
     /**
@@ -84,7 +83,6 @@ public abstract class IStateInt  {
      * @param y      the new value
      * @param wstamp the stamp of the world in which the update is performed
      */
-
     public void _set(final int y, final int wstamp) {
         currentValue = y;
         timeStamp = wstamp;

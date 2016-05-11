@@ -50,7 +50,7 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         model.addClausesAtMostNMinusOne(BVARS);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -59,7 +59,7 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         model.addClausesAtMostOne(BVARS);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -68,7 +68,7 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         model.addClausesBoolAndArrayEqualFalse(BVARS);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -77,7 +77,7 @@ public class SatConstraintExamples {
         BoolVar[] BVARS = model.boolVarArray("BS", 4);
         model.addClausesBoolOrArrayEqualTrue(BVARS);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -88,7 +88,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolAndEqVar(L, R, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -98,7 +98,7 @@ public class SatConstraintExamples {
         BoolVar R = model.boolVar("R");
         model.addClausesBoolEq(L, R);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -109,7 +109,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolIsEqVar(L, R, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -120,7 +120,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolIsLeVar(L, R, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -131,7 +131,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolIsLtVar(L, R, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -142,7 +142,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolIsNeqVar(L, R, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -152,7 +152,7 @@ public class SatConstraintExamples {
         BoolVar R = model.boolVar("R");
         model.addClausesBoolLe(L, R);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -162,7 +162,7 @@ public class SatConstraintExamples {
         BoolVar R = model.boolVar("R");
         model.addClausesBoolLt(L, R);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -172,7 +172,7 @@ public class SatConstraintExamples {
         BoolVar R = model.boolVar("R");
         model.addClausesBoolNot(L, R);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -182,7 +182,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolAndArrayEqVar(BVARS, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -192,7 +192,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolOrArrayEqVar(BVARS, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -203,7 +203,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolOrEqVar(L, R, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -214,7 +214,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesBoolXorEqVar(L, R, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -226,7 +226,7 @@ public class SatConstraintExamples {
         BoolVar AR = model.boolVar("AR");
         model.addClauses(ifThenElse(nand(C1, C2), R, AR));
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -238,7 +238,7 @@ public class SatConstraintExamples {
         BoolVar N = model.boolVar("N");
         model.addClauses(new BoolVar[]{P1, P2, P3}, new BoolVar[]{N});
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -247,7 +247,7 @@ public class SatConstraintExamples {
         BoolVar B = model.boolVar("B");
         model.addClauseFalse(B);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -257,7 +257,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesMaxBoolArrayLessEqVar(BVARS, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -267,7 +267,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesSumBoolArrayGreaterEqVar(BVARS, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -277,7 +277,7 @@ public class SatConstraintExamples {
         BoolVar T = model.boolVar("T");
         model.addClausesSumBoolArrayLessEqVar(BVARS, T);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -286,6 +286,6 @@ public class SatConstraintExamples {
         BoolVar B = model.boolVar("B");
         model.addClauseTrue(B);
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 }

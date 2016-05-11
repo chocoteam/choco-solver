@@ -32,10 +32,10 @@ package org.chocosolver.solver.constraints.reification;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.variables.BoolVar;
@@ -45,10 +45,7 @@ import org.chocosolver.solver.variables.ranges.IntIterableRangeSet;
 import org.chocosolver.solver.variables.ranges.IntIterableSetUtils;
 import org.chocosolver.util.ESat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * A propagator for constructive disjunction.
@@ -71,7 +68,7 @@ import java.util.List;
  * @author Jean-Guillaume Fages
  * @since 25/01/2016.
  */
-public class PropConDis extends Propagator<BoolVar> {
+public class PropConDis extends Propagator<IntVar> {
 
     /**
      * List of known boolvars
@@ -123,7 +120,7 @@ public class PropConDis extends Propagator<BoolVar> {
     /**
      * Store new added variables when {@link #initialized} is <i>false</i>
      */
-    private ArrayList<BoolVar> add_var;
+    private ArrayList<IntVar> add_var;
 
     /**
      * Indicates if this is initialized or not
@@ -135,8 +132,8 @@ public class PropConDis extends Propagator<BoolVar> {
      * @param model a model
      */
     public PropConDis(Model model) {
-        super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds model.ONE to fit to the super constructor
-        this.vars = new BoolVar[0];    // erase model.ONE from the variable scope
+        super(new IntVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds model.ONE to fit to the super constructor
+        this.vars = new IntVar[0];    // erase model.ONE from the variable scope
         domains = new TIntObjectHashMap<>();
         toUnion = new BitSet();
         toZero = new BitSet();
@@ -148,20 +145,28 @@ public class PropConDis extends Propagator<BoolVar> {
     /**
      * Add a new disjunctions to the list of disjunctions
      *
-     * @param bvars boolvars in disjunction
+     * @param cstrs constraints in disjunction
      */
-    public void addDisjunction(BoolVar... bvars) {
-        for (BoolVar bv : bvars) {
-            if (!declared.contains(bv.getId())) {
-                if(initialized) {
-                    addVariable(bv);
-                }else {
-                    add_var.add(bv);
-                }
-                declared.add(bv.getId());
-            }
+    public void addDisjunction(Constraint... cstrs) {
+        BoolVar[] bvars = new BoolVar[cstrs.length];
+        for(int i  = 0; i < cstrs.length; i++){
+            Arrays.stream(cstrs[i].getPropagators()).forEach(
+                    p -> Arrays.stream(p.getVars()).forEach(v -> addOneVariable((IntVar) v)));
+            bvars[i] = cstrs[i].reify();
+            addOneVariable(bvars[i]);
         }
         disjunctions.add(bvars);
+    }
+
+    private void addOneVariable(final IntVar var) {
+        if (!declared.contains(var.getId())) {
+            declared.add(var.getId());
+            if (initialized) {
+                addVariable(var);
+            } else {
+                add_var.add(var);
+            }
+        }
     }
 
     /**
@@ -170,7 +175,7 @@ public class PropConDis extends Propagator<BoolVar> {
     public void initialize(){
         if (!initialized) {
             if (add_var.size() > 0) {
-                addVariable(add_var.toArray(new BoolVar[add_var.size()]));
+                addVariable(add_var.toArray(new IntVar[add_var.size()]));
             }
             add_var.clear();
             this.initialized = true;

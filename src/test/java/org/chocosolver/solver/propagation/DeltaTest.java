@@ -97,9 +97,9 @@ public class DeltaTest {
         model.setBoolsChanneling(new BoolVar[]{b0, b1}, s0).post();
         model.cardinality(s0, model.ZERO()).post();
 
-        model.solve();
+        model.getSolver().solve();
         model.getSolver().reset();
-        model.solve();
+        model.getSolver().solve();
     }
 
 
@@ -113,7 +113,7 @@ public class DeltaTest {
             //IOutputFactory.showSolutions(s);
             s.getSolver().set(randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
-            while (s.solve()) ;
+            while (s.getSolver().solve()) ;
         }
     }
 
@@ -127,7 +127,7 @@ public class DeltaTest {
             //IOutputFactory.showSolutions(s);
             s.getSolver().set(randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
-            while (s.solve()) ;
+            while (s.getSolver().solve()) ;
         }
     }
 
@@ -141,7 +141,7 @@ public class DeltaTest {
             //IOutputFactory.showSolutions(s);
             s.getSolver().set(randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
-            while (s.solve()) ;
+            while (s.getSolver().solve()) ;
         }
     }
 

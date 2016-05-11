@@ -58,8 +58,8 @@ public class SetCstrsTest {
 				assertTrue(v2[i].contains(v));
 			}
 		}
-		while (v1[0].getModel().solve()) ;
-		while (v2[0].getModel().solve()) ;
+		while (v1[0].getModel().getSolver().solve()) ;
+		while (v2[0].getModel().getSolver().solve()) ;
 		assertEquals(
 				v1[0].getModel().getSolver().getSolutionCount(),
 				v2[0].getModel().getSolver().getSolutionCount()

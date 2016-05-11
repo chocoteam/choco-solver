@@ -231,7 +231,7 @@ public class LogicTreeTest {
                 rows[0].not(),
                 model.arithm(rows[1], "+", rows[2], "<=", 1));
         //SearchMonitorFactory.log(solver, true, true);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         long nbSol = model.getSolver().getSolutionCount();
 
         for (int seed = 0; seed < 2000; seed++) {
@@ -245,7 +245,7 @@ public class LogicTreeTest {
             sCNF.getSolver().set(randomSearch(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);
-            while (sCNF.solve()) ;
+            while (sCNF.getSolver().solve()) ;
             assertEquals(sCNF.getSolver().getSolutionCount(), nbSol);
         }
     }

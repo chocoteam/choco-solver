@@ -217,7 +217,7 @@ public class ExplanationEngineTest {
 
             Solver r = model.getSolver();
             model.getSolver().setCBJLearning(false, false);
-            assertFalse(model.solve());
+            assertFalse(model.getSolver().solve());
 
             assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
             assertEquals(r.getMeasures().getFailCount(), n - 1);
@@ -236,7 +236,7 @@ public class ExplanationEngineTest {
             r.set(inputOrderLBSearch(vars));
 
             r.setCBJLearning(false, false);
-            assertFalse(model.solve());
+            assertFalse(model.getSolver().solve());
 
             assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
             assertEquals(r.getMeasures().getFailCount(), n - 1);
@@ -253,7 +253,7 @@ public class ExplanationEngineTest {
             }
 
             model.getSolver().setCBJLearning(false, false);
-            assertFalse(model.solve());
+            assertFalse(model.getSolver().solve());
 
             assertEquals(model.getSolver().getNodeCount(), 0);
             assertEquals(model.getSolver().getFailCount(), 1);
@@ -271,7 +271,7 @@ public class ExplanationEngineTest {
             model.getSolver().set(inputOrderLBSearch(vars));
 
             model.getSolver().setCBJLearning(false, false);
-            assertFalse(model.solve());
+            assertFalse(model.getSolver().solve());
 
             assertEquals(model.getSolver().getNodeCount(), 0);
             assertEquals(model.getSolver().getFailCount(), 1);
@@ -297,7 +297,7 @@ public class ExplanationEngineTest {
             model.getSolver().setCBJLearning(false, false);
 
             model.getSolver().showShortStatistics();
-            assertFalse(model.solve());
+            assertFalse(model.getSolver().solve());
         }
     }
 
@@ -322,7 +322,7 @@ public class ExplanationEngineTest {
         model.getSolver().showStatistics();
         model.getSolver().showSolutions();
         model.getSolver().showDecisions();
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
 
     }
 
@@ -347,7 +347,7 @@ public class ExplanationEngineTest {
         model.getSolver().showStatistics();
         model.getSolver().showSolutions();
         model.getSolver().showDecisions();
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
 
@@ -404,7 +404,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
-        assertTrue(model.solve() || model.getSolver().isStopCriterionMet());
+        assertTrue(model.getSolver().solve() || model.getSolver().isStopCriterionMet());
     }
 
     @DataProvider(name = "ls")
@@ -450,7 +450,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
     }
 
     @DataProvider(name = "ca")
@@ -504,7 +504,7 @@ public class ExplanationEngineTest {
         model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
         model.setObjective(MINIMIZE, ticks[m - 1]);
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
         assertTrue(model.getSolver().getSolutionCount() > 0);
     }
 
@@ -539,7 +539,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
-        assertTrue(model.solve());
+        assertTrue(model.getSolver().solve());
     }
 
     @DataProvider(name = "ln")
@@ -607,7 +607,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
-        assertTrue(model.solve() || r.isStopCriterionMet());
+        assertTrue(model.getSolver().solve() || r.isStopCriterionMet());
     }
 
     @DataProvider(name = "ms")
@@ -692,7 +692,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
-        assertTrue(model.solve() || model.getSolver().isStopCriterionMet());
+        assertTrue(model.getSolver().solve() || model.getSolver().isStopCriterionMet());
     }
 
     @DataProvider(name = "pa")
@@ -857,7 +857,7 @@ public class ExplanationEngineTest {
         // logging and solution
         s.getSolver().showStatistics();
         s.getSolver().showSolutions();
-        while (s.solve()) ;
+        while (s.getSolver().solve()) ;
         return s;
     }
 
@@ -891,7 +891,7 @@ public class ExplanationEngineTest {
         s.getSolver().setCBJLearning(false, true);
         LearnCBJ cbj = (LearnCBJ) s.getSolver().getLearn();
         s.getSolver().showDecisions();
-        assertFalse(s.solve());
+        assertFalse(s.getSolver().solve());
         // If the problem has no solution, the end-user explanation can be retrieved
         out.println(cbj.getLastExplanation());
         assertEquals(cbj.getLastExplanation().nbCauses(), 3);
@@ -912,7 +912,7 @@ public class ExplanationEngineTest {
         r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         model.getSolver().showDecisions();
         model.getSolver().showSolutions();
-        while (model.solve()) ;
+        while (model.getSolver().solve()) ;
     }
 
     @Test(groups="1s", timeOut=60000)

@@ -99,7 +99,7 @@ public class ScalarTest {
         model.scalar(vars, coeffs, ">=", 1).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -121,7 +121,7 @@ public class ScalarTest {
         int[] coeffs = new int[]{1, 1};
         model.scalar(vars, coeffs, "=", 6).post();
 
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -137,7 +137,7 @@ public class ScalarTest {
     private int checkSolutions(int[] coeffs, IntVar[] vars, IntVar sum, String operator) {
         Model model = vars[0].getModel();
         int nbSol = 0;
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             nbSol++;
             int computed = 0;
             for (int i = 0; i < vars.length; i++) {

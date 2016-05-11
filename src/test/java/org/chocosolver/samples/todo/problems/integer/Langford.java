@@ -89,7 +89,7 @@ public class Langford extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.solve();
+        model.getSolver().solve();
 
         StringBuilder st = new StringBuilder(String.format("Langford's number (%s,%s)\n", k, n));
         if (model.getSolver().isFeasible() == ESat.TRUE) {

@@ -54,7 +54,7 @@ public class NotEmptyTest {
 
         assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             assertFalse(var.getValue().isEmpty());
         }
@@ -72,7 +72,7 @@ public class NotEmptyTest {
         assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
 
         int nbSol = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             nbSol++;
             assertFalse(var.getValue().isEmpty());
         }
@@ -88,7 +88,7 @@ public class NotEmptyTest {
         model.post(notEmpty(var));
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
-        assertFalse(model.solve());
+        assertFalse(model.getSolver().solve());
     }
 
     @Test(groups = "10s", timeOut=60000)
@@ -103,7 +103,7 @@ public class NotEmptyTest {
 
         assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
         int nbSol1 = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             assertFalse(var.getValue().isEmpty());
             nbSol1++;
         }
@@ -113,7 +113,7 @@ public class NotEmptyTest {
         var = model.setVar(new int[]{}, ub);
         model.nbEmpty(new SetVar[]{var}, 0).post();
         int nbSol2 = 0;
-        while(model.solve()) {
+        while(model.getSolver().solve()) {
             assertFalse(var.getValue().isEmpty());
             nbSol2++;
         }

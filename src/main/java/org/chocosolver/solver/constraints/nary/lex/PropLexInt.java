@@ -78,8 +78,8 @@ public class PropLexInt extends Propagator<IntVar> {
      * @param newY new int vector
      */
     public void updateIntVector(int[] newY){
-        System.arraycopy(y, 0, newY, 0, newY.length);
-        this.model.getSolver().getEngine().propagateOnBacktrack(this);
+        System.arraycopy(newY, 0, y, 0, newY.length);
+        forcePropagationOnBacktrack();
     }
 
     @Override

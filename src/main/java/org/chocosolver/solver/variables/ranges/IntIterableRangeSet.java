@@ -50,7 +50,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     /**
      * Store elements
      */
-    protected  int[] ELEMENTS;
+    protected int[] ELEMENTS;
     /**
      * Used size in {@link #ELEMENTS}.
      * To get the nmber of range simply divide by 2.
@@ -75,16 +75,16 @@ public class IntIterableRangeSet implements IntIterableSet {
     public String toString() {
         StringBuilder st = new StringBuilder();
         st.append("set={");
-        for(int i = 0; i < SIZE - 1; i+=2){
-            if(ELEMENTS[i] == ELEMENTS[i+1]){
+        for (int i = 0; i < SIZE - 1; i += 2) {
+            if (ELEMENTS[i] == ELEMENTS[i + 1]) {
                 st.append(ELEMENTS[i]).append(',');
-            }else{
-                for(int j = ELEMENTS[i]; j <= ELEMENTS[i+1]; j++){
+            } else {
+                for (int j = ELEMENTS[i]; j <= ELEMENTS[i + 1]; j++) {
                     st.append(j).append(',');
                 }
             }
         }
-        if(SIZE>0)st.deleteCharAt(st.length()-1);
+        if (SIZE > 0) st.deleteCharAt(st.length() - 1);
         st.append("}");
         return st.toString();
     }
@@ -183,7 +183,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     @Override
     public boolean addAll(IntIterableSet set) {
         int c = CARDINALITY;
-        if(set.size()>0) {
+        if (set.size() > 0) {
             int v = set.first();
             while (v < Integer.MAX_VALUE) {
                 add(v);
@@ -196,9 +196,9 @@ public class IntIterableRangeSet implements IntIterableSet {
     @Override
     public boolean retainAll(IntIterableSet set) {
         int c = CARDINALITY;
-        if(set.size() == 0){
+        if (set.size() == 0) {
             this.clear();
-        }else if(size() > 0){
+        } else if (size() > 0) {
             int last = last();
             for (int i = first(); i <= last; i = nextValue(i)) {
                 if (!set.contains(i)) {
@@ -251,7 +251,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     @Override
     public boolean removeAll(IntIterableSet set) {
         int c = CARDINALITY;
-        if(set.size()>0) {
+        if (set.size() > 0) {
             int v = set.first();
             while (v < Integer.MAX_VALUE) {
                 remove(v);
@@ -263,9 +263,72 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     @Override
     public void clear() {
-//        ELEMENTS = new int[10]; // TODO: remove and patch
         CARDINALITY = 0;
         SIZE = 0;
+    }
+
+    @Override
+    public boolean removeBetween(int f, int t) {
+        boolean rem = false;
+        if(f > t){
+            return false;
+        }
+        int rf = rangeOf(f);
+        if (rf < 0) {
+            // find closest after
+            rf *= -1;
+            f = ELEMENTS[(rf - 1) << 1];
+        }
+        assert rf > 0;
+        int rt = rangeOf(t);
+        if (rt < 0) {
+            // find closest range before
+            rt = -rt - 1;
+            t = ELEMENTS[((rt - 1) << 1) + 1];
+        }
+        assert rt > 0;
+        int i = (rf - 1) << 1;
+        int j = (rt - 1) << 1;
+        if (rf <= rt) {
+            int dcard = -(f - ELEMENTS[i] + ELEMENTS[j+1] - t);
+            dcard += ELEMENTS[i + 1] - ELEMENTS[i] + 1;
+            if (rf < rt) {
+                for (int k = i + 2; k <= j + 1; k+=2) {
+                    dcard += ELEMENTS[k + 1] - ELEMENTS[k] + 1;
+                }
+                if (rf < rt) {
+                    // remove useless range
+                    System.arraycopy(ELEMENTS, j + 1, ELEMENTS, i + 1, SIZE - (j + 1));
+                }
+                SIZE -= (rt - rf) << 1;
+            }
+            CARDINALITY -= dcard;
+            int c = ELEMENTS[i] == f ? 1 : 0;
+            c += ELEMENTS[i + 1] == t ? 2 : 0;
+            switch (c) {
+                case 0: // split the range into two ranges
+                    grow(SIZE + 2);
+                    System.arraycopy(ELEMENTS, i, ELEMENTS, i + 2, SIZE - i);
+                    ELEMENTS[i + 1] = f - 1;
+                    ELEMENTS[i + 2] = t + 1;
+                    SIZE += 2;
+                    break;
+                case 1: // update the lower bound of the range
+                    ELEMENTS[i] = t + 1;
+                    break;
+                case 2: // update the upper bound of the range
+                    ELEMENTS[i + 1] = f - 1;
+                    break;
+                case 3: // remove the range
+                    if (i < SIZE - 2) {
+                        System.arraycopy(ELEMENTS, i + 2, ELEMENTS, i, SIZE - (i + 2));
+                    }
+                    SIZE -= 2;
+                    break;
+            }
+            rem = true;
+        }
+        return rem;
     }
 
     @Override
@@ -276,12 +339,19 @@ public class IntIterableRangeSet implements IntIterableSet {
             next = ELEMENTS[0];
         } else if (p >= 0) {
             int i = (p - 1) << 1;
-            if(ELEMENTS[i+1] != e){
-                next = e + 1; // not last element of the range
-            }else{
-                if (i + 2 < SIZE) {
-                    next = ELEMENTS[i + 2];
-                }
+            int c = ELEMENTS[i] == e ? 1 : 0;
+            c += ELEMENTS[i + 1] == e ? 2 : 0;
+            switch (c) {
+                case 0:
+                case 1:
+                    // not last element of the range
+                    next = e + 1;
+                    break;
+                case 2:
+                case 3:
+                    if (i + 2 < SIZE) {
+                        next = ELEMENTS[i + 2];
+                    }
             }
         } else if (p > -((SIZE >> 1) + 1)) {
             return ELEMENTS[(-p - 1) << 1];
@@ -297,15 +367,22 @@ public class IntIterableRangeSet implements IntIterableSet {
             prev = ELEMENTS[SIZE - 1];
         } else if (p >= 0) {
             int i = (p - 1) << 1;
-            if(ELEMENTS[i] == e){
-                if (i > 1) {
-                    prev = ELEMENTS[i - 1];
-                }
-            }else{
-                prev = e - 1;// not last element of the range
+            int c = ELEMENTS[i] == e ? 1 : 0;
+            c += ELEMENTS[i + 1] == e ? 2 : 0;
+            switch (c) {
+                case 0:
+                case 2:
+                    // not last element of the range
+                    prev = e - 1;
+                    break;
+                case 1:
+                case 3:
+                    if (i > 1) {
+                        prev = ELEMENTS[i - 1];
+                    }
             }
         } else if (p < -1) {
-            return ELEMENTS[((-p - 1) << 1)-1];
+            return ELEMENTS[((-p - 1) << 1) - 1];
         }
         return prev;
     }
@@ -370,7 +447,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      * @return the range index if the value is in the set or -<i>range point</i> - 1 otherwise
      * where <i>range point</i> corresponds to the range directly greater than the key
      */
-    protected int rangeOf(int x) {
+    int rangeOf(int x) {
         int p = Arrays.binarySearch(ELEMENTS, 0, SIZE, x);
         // if pos is positive, the value is a bound of a range
         if (p >= 0) {
@@ -396,7 +473,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      *
      * @param minCapacity the desired minimum capacity
      */
-    protected void grow(int minCapacity) {
+    void grow(int minCapacity) {
         if (minCapacity - ELEMENTS.length > 0) {
             // overflow-conscious code
             int oldCapacity = ELEMENTS.length;
@@ -406,5 +483,19 @@ public class IntIterableRangeSet implements IntIterableSet {
             // minCapacity is usually close to size, so this is a win:
             ELEMENTS = Arrays.copyOf(ELEMENTS, newCapacity);
         }
+    }
+
+    /**
+     * Push a range at the end of this set
+     * @param lb lower bound of the range
+     * @param ub upper bound of the range
+     */
+    void pushRange(int lb, int ub){
+        assert SIZE == 0 || ELEMENTS[SIZE-1] < lb - 1;
+        assert lb <= ub;
+        grow(SIZE + 2);
+        ELEMENTS[SIZE++] = lb;
+        ELEMENTS[SIZE++] = ub;
+        CARDINALITY += ub - lb + 1;
     }
 }

@@ -89,7 +89,7 @@ public class HybridCycloHexan extends AbstractProblem {
 
 	@Override
 	public void solve() {
-		model.solve();
+		model.getSolver().solve();
 		model.getIbex().release();
 	}
 

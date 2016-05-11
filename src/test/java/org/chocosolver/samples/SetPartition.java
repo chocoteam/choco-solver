@@ -90,14 +90,14 @@ public class SetPartition extends AbstractProblem {
 		// forbid empty sets
 		model.nbEmpty(new SetVar[]{x, y, z, universe}, model.intVar(0)).post();
 		// restricts the sum of elements in universe
-		model.sum(universe, sum, true).post();
+		model.sum(universe, sum).post();
 	}
 
 	@Override
 	public void solve() {
 		// find the optimum
 		model.setObjective(MINIMIZE, sum);
-		while(model.solve()){
+		while(model.getSolver().solve()){
 			System.out.println("new solution found");
 			System.out.println(x);
 			System.out.println(y);

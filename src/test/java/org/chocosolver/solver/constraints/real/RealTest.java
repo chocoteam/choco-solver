@@ -166,7 +166,7 @@ public class RealTest {
 //        rcons.discretize(x,y);
             model.realIbexGenericConstraint("{0} * {1} = 8", vars).post();
             model.getSolver().set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
-            model.solve();
+            model.getSolver().solve();
             assertEquals(x.getValue(), 2);
             assertEquals(y.getValue(), 4);
             model.getIbex().release();
@@ -188,7 +188,7 @@ public class RealTest {
 
         // Walk and print the solutions
         int numSolutions = 0;
-        boolean foundSolution = model.solve();
+        boolean foundSolution = model.getSolver().solve();
         while (foundSolution) {
             numSolutions++;
             System.out.println(String.format("Solution #%d:", numSolutions));
@@ -197,7 +197,7 @@ public class RealTest {
             System.out.println("attr: [" + attr.getLB() + ", " + attr.getUB() + "]");
             System.out.println();
 
-            foundSolution = model.solve();
+            foundSolution = model.getSolver().solve();
         }
         model.getIbex().release();
     }

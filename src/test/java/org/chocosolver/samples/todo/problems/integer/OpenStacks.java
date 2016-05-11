@@ -131,7 +131,7 @@ public class OpenStacks extends AbstractProblem {
     public void solve() {
         model.getSolver().limitNode(200000);
         model.setObjective(MINIMIZE, objective);
-        while (model.solve()) {
+        while (model.getSolver().solve()) {
             prettyOut();
         }
     }

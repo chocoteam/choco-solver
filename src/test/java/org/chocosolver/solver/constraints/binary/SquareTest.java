@@ -51,7 +51,7 @@ public class SquareTest {
         IntVar x = m.intVar(4);
         IntVar y = m.intVar(2);
         m.square(x,y).post();
-        while(m.solve());
+        while(m.getSolver().solve());
         assertEquals(m.getSolver().getSolutionCount(),1);
     }
 
@@ -61,7 +61,7 @@ public class SquareTest {
         IntVar x = m.intVar(4);
         IntVar y = m.intVar(-2);
         m.square(x,y).post();
-        while(m.solve());
+        while(m.getSolver().solve());
         assertEquals(m.getSolver().getSolutionCount(),1);
     }
 
@@ -71,7 +71,7 @@ public class SquareTest {
         IntVar x = m.intVar(4);
         IntVar y = m.intVar(-2,2);
         m.square(x,y).post();
-        while(m.solve());
+        while(m.getSolver().solve());
         assertEquals(m.getSolver().getSolutionCount(),2);
     }
 
@@ -81,7 +81,7 @@ public class SquareTest {
         IntVar x = m.intVar(2);
         IntVar y = m.intVar(2);
         m.square(x,y).post();
-        while(m.solve());
+        while(m.getSolver().solve());
         assertEquals(m.getSolver().getSolutionCount(),0);
     }
 
@@ -91,7 +91,7 @@ public class SquareTest {
         IntVar x = m.intVar(0,4);
         IntVar y = m.intVar(-2,2);
         m.square(x,y).post();
-        while(m.solve());
+        while(m.getSolver().solve());
         assertEquals(m.getSolver().getSolutionCount(),5);
     }
 }

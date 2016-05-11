@@ -698,30 +698,34 @@ public class Model implements IModel {
     /**
      * Remove permanently the constraint <code>c</code> from the constraint network.
      *
-     * @param c the constraint to remove
+     * @param constraints the constraints to remove
      * @throws SolverException if a constraint is unknown from the model
      */
-    public void unpost(Constraint c)  throws SolverException{
-        // 1. look for the constraint c
-        int idx = c.getCidxInModel();
-        c.declareAs(Constraint.Status.FREE, -1);
-        // 2. remove it from the network
-        Constraint cm = cstrs[--cIdx];
-        if(idx < cIdx) {
-            cstrs[idx] = cm;
-            cstrs[idx].declareAs(Constraint.Status.FREE, -1); // needed, to avoid throwing an exception
-            cstrs[idx].declareAs(Constraint.Status.POSTED, idx);
-        }
-        cstrs[cIdx] = null;
-        // 3. check if the resolution already started -> if true, dynamic deletion
-        IPropagationEngine engine = getSolver().getEngine();
-        if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
-            engine.dynamicDeletion(c.getPropagators());
-        }
-        // 4. remove the propagators of the constraint from its variables
-        for (Propagator prop : c.getPropagators()) {
-            for (int v = 0; v < prop.getNbVars(); v++) {
-                prop.getVar(v).unlink(prop);
+    public void unpost(Constraint... constraints) throws SolverException {
+        if (constraints != null) {
+            for (Constraint c : constraints) {
+                // 1. look for the constraint c
+                int idx = c.getCidxInModel();
+                c.declareAs(Constraint.Status.FREE, -1);
+                // 2. remove it from the network
+                Constraint cm = cstrs[--cIdx];
+                if (idx < cIdx) {
+                    cstrs[idx] = cm;
+                    cstrs[idx].declareAs(Constraint.Status.FREE, -1); // needed, to avoid throwing an exception
+                    cstrs[idx].declareAs(Constraint.Status.POSTED, idx);
+                }
+                cstrs[cIdx] = null;
+                // 3. check if the resolution already started -> if true, dynamic deletion
+                IPropagationEngine engine = getSolver().getEngine();
+                if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
+                    engine.dynamicDeletion(c.getPropagators());
+                }
+                // 4. remove the propagators of the constraint from its variables
+                for (Propagator prop : c.getPropagators()) {
+                    for (int v = 0; v < prop.getNbVars(); v++) {
+                        prop.getVar(v).unlink(prop);
+                    }
+                }
             }
         }
     }
@@ -773,24 +777,4 @@ public class Model implements IModel {
     public Model _me(){
         return this;
     }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////  RELATED TO SOLVING PROCESS   /////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Solves the model by executing {@link Solver#solve()}.
-     *
-     * Default configuration:
-     * - SATISFACTION : Computes a feasible solution. Use while(solve()) to enumerate all solutions.
-     * - OPTIMISATION : Computes a feasible solution, wrt to the objective defined. Use while(solve()) to find the optimal solution.
-     * Indeed, each new solution found improves the objective.
-     * If no new solution is found and no stop criterion encountered,the last one is guaranteed to be the optimal one.
-     * @return if at least one new solution has been found.
-     * @see Solver#solve()
-     */
-    public boolean solve(){
-        return getSolver().solve();
-    }
-
 }
