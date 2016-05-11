@@ -30,12 +30,10 @@
 package org.chocosolver.memory;
 
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
-import org.chocosolver.memory.trailing.trail.chunck.*;
+import org.chocosolver.memory.trailing.trail.*;
 import org.chocosolver.memory.trailing.trail.flatten.*;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeBoolTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeDoubleTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeIntTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
+
+import static org.chocosolver.memory.trailing.EnvironmentTrailing.*;
 
 /**
  * <p>
@@ -47,287 +45,74 @@ import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
 public class EnvironmentBuilder {
 
     /**
-     * Number of updates for int trail
+     * Trail to consider to manage doubles
      */
-    private int nu_int = EnvironmentTrailing.NBUPATES;
+    private IStoredDoubleTrail dt;
     /**
-     * Number of worlds for int trail
+     * Trail to consider to manage booleans
      */
-    private int nw_int = EnvironmentTrailing.NBWORLDS;
+    private IStoredBoolTrail bt;
     /**
-     * Load factor for int trail
+     * Trail to consider to manage integers
      */
-    private double lf_int = 1.5;
+    private IStoredIntTrail it;
     /**
-     * Type for int trail
+     * Trail to consider to manage longs
      */
-    private EnvironmentTrailing.Type t_int = EnvironmentTrailing.Type.FLAT;
-
+    private IStoredLongTrail lt;
     /**
-     * Number of updates for long trail
+     * Trail to consider to manage operations
      */
-    private int nu_long = EnvironmentTrailing.NBUPATES;
-    /**
-     * Number of worlds for long trail
-     */
-    private int nw_long = EnvironmentTrailing.NBWORLDS;
-    /**
-     * Load factor for long trail
-     */
-    private double lf_long = 1.5;
-    /**
-     * Type for long trail
-     */
-    private EnvironmentTrailing.Type t_long = EnvironmentTrailing.Type.FLAT;
-
-    /**
-     * Number of updates for bool trail
-     */
-    private int nu_bool = EnvironmentTrailing.NBUPATES;
-    /**
-     * Number of worlds for bool trail
-     */
-    private int nw_bool = EnvironmentTrailing.NBWORLDS;
-    /**
-     * Load factor for bool trail
-     */
-    private double lf_bool = 1.5;
-    /**
-     * Type for bool trail
-     */
-    private EnvironmentTrailing.Type t_bool = EnvironmentTrailing.Type.FLAT;
-
-    /**
-     * Number of updates for double trail
-     */
-    private int nu_double = EnvironmentTrailing.NBUPATES;
-    /**
-     * Number of worlds for double trail
-     */
-    private int nw_double = EnvironmentTrailing.NBWORLDS;
-    /**
-     * Load factor for double trail
-     */
-    private double lf_double = 1.5;
-    /**
-     * Type for double trail
-     */
-    private EnvironmentTrailing.Type t_double = EnvironmentTrailing.Type.FLAT;
-
-    /**
-     * Number of updates for operation trail
-     */
-    private int nu_ope = EnvironmentTrailing.NBUPATES;
-    /**
-     * Number of worlds for operation trail
-     */
-    private int nw_ope = EnvironmentTrailing.NBWORLDS;
-    /**
-     * Load factor for operation trail
-     */
-    private double lf_ope = 1.5;
-    /**
-     * Type for operation trail
-     */
-    private EnvironmentTrailing.Type t_ope = EnvironmentTrailing.Type.FLAT;
+    private IOperationTrail ot;
 
 
     /**
-     * Number of default updates allowed for int trail
-     * @param nu_int number of update
-     * @return this builder
+     * Set the int trail.
+     * @param t the trail to use
+     * @return {@code this}
      */
-    public EnvironmentBuilder setNbUpdatesForIntTrail(int nu_int) {
-        this.nu_int = nu_int;
+    public EnvironmentBuilder setTrail(IStoredIntTrail t) {
+        it = t;
         return this;
     }
 
     /**
-     * Number of default worlds allowed for int trail
-     * @param nw_int number of worlds
-     * @return this builder
+     * Set the long trail.
+     * @param t the trail to use
+     * @return {@code this}
      */
-    public EnvironmentBuilder setNbWorldsForIntTrail(int nw_int) {
-        this.nw_int = nw_int;
+    public EnvironmentBuilder setTrail(IStoredLongTrail t) {
+        lt = t;
         return this;
     }
 
     /**
-     * Set load factor for int trail resizing
-     * @param lf_int load factor
-     * @return this builder
+     * Set the double trail.
+     * @param t the trail to use
+     * @return {@code this}
      */
-    public EnvironmentBuilder setLoadFactorForIntTrail(double lf_int) {
-        this.lf_int = lf_int;
+    public EnvironmentBuilder setTrail(IStoredDoubleTrail t) {
+        dt = t;
         return this;
     }
 
     /**
-     * Set type for int trail
-     * @param t_int type of trail
-     * @return this builder
+     * Set the bool trail.
+     * @param t the trail to use
+     * @return {@code this}
      */
-    public EnvironmentBuilder setTypeForIntTrail(EnvironmentTrailing.Type t_int) {
-        this.t_int = t_int;
+    public EnvironmentBuilder setTrail(IStoredBoolTrail t) {
+        bt = t;
         return this;
     }
 
     /**
-     * Number of default updates allowed for long trail
-     * @param nu_long number of update
-     * @return this builder
+     * Set the operation trail.
+     * @param t the trail to use
+     * @return {@code this}
      */
-    public EnvironmentBuilder setNbUpdatesForLongTrail(int nu_long) {
-        this.nu_long = nu_long;
-        return this;
-    }
-    /**
-     * Number of default worlds allowed for long trail
-     * @param nw_long number of worlds
-     * @return this builder
-     */
-    public EnvironmentBuilder setNbWorldsForLongTrail(int nw_long) {
-        this.nw_long = nw_long;
-        return this;
-    }
-
-    /**
-     * Set load factor for long trail resizing
-     * @param lf_long load factor
-     * @return this builder
-     */
-    public EnvironmentBuilder setLoadFactorForLongTrail(double lf_long) {
-        this.lf_long = lf_long;
-        return this;
-    }
-
-    /**
-     * Set type for long trail
-     * @param t_long type of trail
-     * @return this builder
-     */
-    public EnvironmentBuilder setTypeForLongTrail(EnvironmentTrailing.Type t_long) {
-        this.t_long = t_long;
-        return this;
-    }
-
-    /**
-     * Number of default updates allowed for bool trail
-     * @param nu_bool number of update
-     * @return this builder
-     */
-    public EnvironmentBuilder setNbUpdatesForBoolTrail(int nu_bool) {
-        this.nu_bool = nu_bool;
-        return this;
-    }
-
-    /**
-     * Number of default worlds allowed for bool trail
-     * @param nw_bool number of worlds
-     * @return this builder
-     */
-    public EnvironmentBuilder setNbWorldsForBoolTrail(int nw_bool) {
-        this.nw_bool = nw_bool;
-        return this;
-    }
-
-    /**
-     * Set load factor for bool trail resizing
-     * @param lf_bool load factor
-     * @return this builder
-     */
-    public EnvironmentBuilder setLoadFactorForBoolTrail(double lf_bool) {
-        this.lf_bool = lf_bool;
-        return this;
-    }
-
-    /**
-     * Set type for bool trail
-     * @param t_bool type of trail
-     * @return this builder
-     */
-    public EnvironmentBuilder setTypeForBoolTrail(EnvironmentTrailing.Type t_bool) {
-        this.t_bool = t_bool;
-        return this;
-    }
-
-    /**
-     * Number of default updates allowed for double trail
-     * @param nu_double number of update
-     * @return this builder
-     */
-    public EnvironmentBuilder setNbUpdatesForDoubleTrail(int nu_double) {
-        this.nu_double = nu_double;
-        return this;
-    }
-
-    /**
-     * Number of default worlds allowed for double trail
-     * @param nw_double number of worlds
-     * @return this builder
-     */
-    public EnvironmentBuilder setNbWorldsForDoubleTrail(int nw_double) {
-        this.nw_double = nw_double;
-        return this;
-    }
-
-    /**
-     * Set load factor for double trail resizing
-     * @param lf_double load factor
-     * @return this builder
-     */
-    public EnvironmentBuilder setLoadFactorForDoubleTrail(double lf_double) {
-        this.lf_double = lf_double;
-        return this;
-    }
-
-    /**
-     * Set type for double trail
-     * @param t_double type of trail
-     * @return this builder
-     */
-    public EnvironmentBuilder setTypeForDoubleTrail(EnvironmentTrailing.Type t_double) {
-        this.t_double = t_double;
-        return this;
-    }
-
-    /**
-     * Number of default updates allowed for operation trail
-     * @param nu_ope number of update
-     * @return this builder
-     */
-    public EnvironmentBuilder setNbUpdatesForOperationTrail(int nu_ope) {
-        this.nu_ope = nu_ope;
-        return this;
-    }
-
-    /**
-     * Number of default worlds allowed for operation trail
-     * @param nw_ope number of worlds
-     * @return this builder
-     */
-    public EnvironmentBuilder setNbWorldsForOperationTrail(int nw_ope) {
-        this.nw_ope = nw_ope;
-        return this;
-    }
-
-    /**
-     * Set load factor for operation trail resizing
-     * @param lf_ope load factor
-     * @return this builder
-     */
-    public EnvironmentBuilder setLoadFactorForOperationTrail(double lf_ope) {
-        this.lf_ope = lf_ope;
-        return this;
-    }
-
-    /**
-     * Set type for oepration trail
-     * @param t_ope type of trail
-     * @return this builder
-     */
-    public EnvironmentBuilder setTypeForOperationTrail(EnvironmentTrailing.Type t_ope) {
-        this.t_ope = t_ope;
+    public EnvironmentBuilder setTrail(IOperationTrail t) {
+        ot = t;
         return this;
     }
 
@@ -337,59 +122,31 @@ public class EnvironmentBuilder {
      */
     public EnvironmentTrailing build(){
         EnvironmentTrailing env = new EnvironmentTrailing();
-        switch (t_int){
-            case FLAT:
-                env.setIntTrail(new StoredIntTrail(nu_int, nw_int, lf_int));
-                break;
-            case UNSAFE:
-                env.setIntTrail(new UnsafeIntTrail(nu_int, nw_int, lf_int));
-                break;
-            case CHUNCK:
-                env.setIntTrail(new StoredIntChunckTrail(nw_int, lf_int));
-                break;
+        if (bt == null) {
+            bt = new StoredBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR);
         }
-        switch (t_long){
-            case FLAT:
-                env.setLongTrail(new StoredLongTrail(nu_long, nw_long, lf_long));
-                break;
-            case UNSAFE:
-                env.setLongTrail(new UnsafeLongTrail(nu_long, nw_long, lf_long));
-                break;
-            case CHUNCK:
-                env.setLongTrail(new StoredLongChunckTrail(nw_long, lf_long));
-                break;
+
+        if (it == null) {
+            it = new StoredIntTrail(NBUPATES, NBWORLDS, LOADFACTOR);
         }
-        switch (t_bool){
-            case FLAT:
-                env.setBoolTrail(new StoredBoolTrail(nu_bool, nw_bool, lf_bool));
-                break;
-            case UNSAFE:
-                env.setBoolTrail(new UnsafeBoolTrail(nu_bool, nw_bool, lf_bool));
-                break;
-            case CHUNCK:
-                env.setBoolTrail(new StoredBoolChunckTrail(nw_bool, lf_bool));
-                break;
+
+        if (dt == null) {
+            dt = new StoredDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR);
         }
-        switch (t_double){
-            case FLAT:
-                env.setDoubleTrail(new StoredDoubleTrail(nu_double, nw_double, lf_double));
-                break;
-            case UNSAFE:
-                env.setDoubleTrail(new UnsafeDoubleTrail(nu_double, nw_double, lf_double));
-                break;
-            case CHUNCK:
-                env.setDoubleTrail(new StoredDoubleChunckTrail(nw_double, lf_double));
-                break;
+
+        if (lt == null) {
+            lt = new StoredLongTrail(NBUPATES, NBWORLDS, LOADFACTOR);
         }
-        switch (t_ope){
-            default:
-            case FLAT:
-                env.setOperationTrail(new OperationTrail(nu_ope, nw_ope, lf_ope));
-                break;
-            case CHUNCK:
-                env.setOperationTrail(new OperationChunckTrail(nw_ope, lf_ope));
-                break;
+
+        if (ot == null) {
+            ot = new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR);
         }
+
+        env.setBoolTrail(bt);
+        env.setIntTrail(it);
+        env.setDoubleTrail(dt);
+        env.setOperationTrail(ot);
+        env.setLongTrail(lt);
         return env;
     }
 }
