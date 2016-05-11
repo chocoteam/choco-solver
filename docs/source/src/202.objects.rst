@@ -9,7 +9,7 @@ Objects in Choco
 
 The content of this section is extracted from the Javadoc and the Choco's User Guide.
 Here, we **briefly** described the main aspects of the most commonly used objects.
-This does not aim to be complete: it covers the basic information.
+This does not aim at being complete: it covers the basic information.
 
 
 The `Model`
@@ -20,45 +20,48 @@ The `Model`
     Model model = new Model("My model");
 
 As said before, the `Model` is a key component of the library.
-It has to be the first instruction stated, since it provides
-the methods that help to model to problem.
+It has to be the first instruction declared, since it provides
+entry point methods that help modelling a problem.
 
 A good habit is to declare a model with a name, otherwise
 a random one will be assigned by default.
 
-We designed the model in such a way that you can reach almost everything from it.
+We designed the model in such a way that you can reach almost
+everything needed to describe a problem from it.
 
 For example, it stores its variables and constraints.
 Variables and constraints of a model can be retrieved thanks to API :
 
 .. code-block:: java
 
-    model.retrieveIntVars(false);
-    model.getCstrs();
+    model.retrieveIntVars(true); // extract IntVars, including BoolVars
+    model.getCstrs(); // extract posted constraints
 
 
 .. note::
 
-    We strongly encourage you to attach the Javadoc (provides either on the website or on Maven Central Repository) to the library.
+    We strongly encourage you to attach the Javadoc (provides either on the website or on Maven Central Repository)
+    to the library in your IDE.
 
 
 The `Variables`
 ===============
 
 A variable is an *unknown*, mathematically speaking.
-In a solution of a given problem (considering that at least one exists, which may be the case),
+In a solution of a given problem (considering that at least one exists),
 each variable is assigned to a *value* selected within its domain.
 The notion of *value* differs from one type of variable to the other.
 
 .. note::
 
     A variable can be declared in only one model at a time.
+    Indeed, a reference to the declaring model is maintained in it.
 
 
 Integer variable
 ++++++++++++++++
 
-An integer variable, `IntVar` should be assigned to an integer.
+An integer variable, `IntVar`, should be assigned to an integer.
 There are many ways to declare an `IntVar`
 
 .. code-block:: java
@@ -70,7 +73,7 @@ There are many ways to declare an `IntVar`
     // Only the values 1, 3 and 4 can be assigned to this variable
     IntVar y = model.intVar("X", new int[]{1, 3, 4});
 
-.. important::
+.. caution::
 
     Declaring a variable with an *infinite* domain, like :
 
@@ -93,7 +96,7 @@ On the contrary, with an enumerated domain, all possible values are explicitly s
 This consumes more memory (one integer and a bitset -- many longs -- are needed) but it allows
 making holes in it.
 
-.. admonition:: **Modelling**: Bounded or Enumerated?
+.. tip:: **Modelling**: Bounded or Enumerated?
 
     The memory consumption should not be the only criterion to consider when one needs to choose
     between one representation and the other.
@@ -107,10 +110,62 @@ making holes in it.
         + domain's cardinality smaller than 32768 can be enumerated without loss of efficiency
         + in any case, empirical evaluation is a good habit.
 
+Boolean variable
+++++++++++++++++
+
+An boolean variable, `BoolVar`, should be assigned to a boolean.
+A `BoolVar` is a specific `IntVar` with a domain restricted to :math:`[0,1]`,
+0 stands for `false`, 1 for `true`.
+Thus a `BoolVar` can be declared in any integer constraints (*e.g.*, a sum) and boolean constraints (*e.g.*, in clauses store).
+
+Here is the common way to declare a `BoolVar`
+
+.. code-block:: java
+
+    // A [0,1]-variable
+    BoolVar b = model.boolVar("b");
+
+Set variable
+++++++++++++
+
+A set variable, `SetVar`, should be assigned to a set of integers (possibly empty or singleton).
+Its domain is defined by a set of intervals `[LB,UB]` where
+`LB` denotes the integers that figure in all solutions
+and `UB` the integers that potentially figure in a solution.
+
+.. code-block:: java
+
+    // SetVar representing a subset of {1,2,3,5,12}
+    SetVar y = model.setVar("y", new int[]{}, new int[]{1,2,3,5,12});
+    // possible values: {}, {2}, {1,3,5} ...
+
+
+
+Real variable
++++++++++++++
+
+A real variable, `RealVar`, should be assigned an interval of doubles.
+Its domain is defined by its bounds and a *precision*.
+The precision parameter helps considering a real variable as instantiated:
+when the distance between the two bounds is less than or equal to the precision.
+
+.. code-block:: java
+
+    // A [0.2d, 3.4d]-variable, with a precision of 0.001d
+    RealVar x = model.realVar("x", 0.2d, 3.4d, 0.001d);
+
+.. note::
+
+    Using `RealVar` requires to install `Ibex <http://www.ibex-lib.org>`_ before.
+    Indeed, Choco relies on Ibex to deal with continuous constraints.
+
 
 The `Constraints`
 =================
 
+
+
 .. note::
 
     A constraint can be posted in only one model at a time.
+    Indeed, a reference to the declaring model is maintained in it.
