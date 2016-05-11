@@ -90,7 +90,7 @@ public class KnapsackTest {
         ks.solveIt(ks.modelIt("k20", 13), true);
     }
 
-    @Test(groups={"1s"})
+    @Test(groups="1s", timeOut=60000)
     public void testALL5() throws IOException {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
@@ -101,7 +101,7 @@ public class KnapsackTest {
         }
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testALL10() throws IOException {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
@@ -112,7 +112,7 @@ public class KnapsackTest {
         }
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testALL0() throws IOException {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
@@ -123,7 +123,7 @@ public class KnapsackTest {
         }
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testOPT13() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 13);
@@ -131,7 +131,7 @@ public class KnapsackTest {
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testOPT14() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 14);
@@ -139,7 +139,7 @@ public class KnapsackTest {
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
     }
 
-    @Test(groups={"1s"})
+	@Test(groups="1s", timeOut=60000)
     public void testOPT15() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 15);

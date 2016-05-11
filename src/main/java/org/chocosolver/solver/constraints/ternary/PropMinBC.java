@@ -193,7 +193,9 @@ public class PropMinBC extends Propagator<IntVar> {
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        if (var == vars[0]) {
+        if(var == null){
+            super.why(ruleStore, null, evt, value);
+        }else if (var == vars[0]) {
             if (IntEventType.isInstantiate(evt.getMask())) {
                 if (vars[1].isInstantiated()) {
                     newrules |= ruleStore.addFullDomainRule(vars[1]);

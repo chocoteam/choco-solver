@@ -45,7 +45,7 @@ public class TestMultiSequentialObjectives {
 	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
 	 * best solution is 32,33,34
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest1(){
 		Model m = new Model();
 		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -65,7 +65,7 @@ public class TestMultiSequentialObjectives {
 	 * find highest a,b,c (in that order) with a<b<c and a+b+c<100 and a+b=c<br />
 	 * best solution is 24,25,49
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest2(){
 		Model m = new Model();
 		IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -87,7 +87,7 @@ public class TestMultiSequentialObjectives {
      * find highest a,b,c (in that order) with a<b<c and a+b+c<100<br />
      * best solution is 32,33,34
      */
-    @Test
+	@Test(groups="1s", timeOut=60000)
     public void simpleLexTest3(){
         Model m = new Model();
         IntVar a = m.intVar("a", 0, 99), b = m.intVar("b", 0, 99), c = m.intVar("c", 0, 99);
@@ -103,21 +103,21 @@ public class TestMultiSequentialObjectives {
         Assert.assertEquals(s.getIntVal(c).intValue(), 2);
     }
 
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void simpleLexTest4(){
 		Model m = new Model();
 		SetVar sv = m.setVar(new int[]{}, new int[]{0,1,2,3,4,5});
 		int[] size = new int[]{8,6,3,3,3};
-		IntVar card = m.intVar(0,5);
-		IntVar load = m.intVar(0,10);
+		IntVar card = m.intVar("load", 0,5);
+		IntVar load = m.intVar("card", 0,10);
 		m.cardinality(sv,card).post();
-		m.sum(sv,size,0,load,true).post();
+		m.sumElements(sv,size,load).post();
         m.getSolver().set(SearchStrategyFactory.setVarSearch(sv),inputOrderLBSearch(card,load));
 		Solution s = m.getSolver().findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
 		Assert.assertNotNull(s);
 		System.out.println(s);
-		Assert.assertTrue(s.getIntVal(load)==9);
-		Assert.assertTrue(s.getIntVal(card)==2);
+		Assert.assertEquals(s.getIntVal(load).intValue(), 9);
+		Assert.assertEquals(s.getIntVal(card).intValue(), 2);
 	}
 
 }

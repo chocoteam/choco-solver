@@ -37,6 +37,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
+import org.chocosolver.solver.constraints.reification.LocalConstructiveDisjunction;
+import org.chocosolver.solver.constraints.reification.PropConDis;
 import org.chocosolver.solver.variables.BoolVar;
 
 /**
@@ -476,11 +478,25 @@ public interface ISatFactory extends ISelf<Model> {
     }
 
     /**
-     * Posts a constructive disjunction constraint
+     * Make an constructive disjunction constraint
      *
-     * @param BOOLS an array of boolean variable
+     * @param global set to <tt>true</tt> to enable constructive disjunction over all the constraint network of the CSP
+     *               (presumably filters more values, but slower),
+     *               set to <tt>false</tt> to restrict propagation to variables directly involved in <i>cstrs</i>.
+     *               In the latter, make sure at least one variable is shared by all constraints otherwise no filtering
+     *               will happen.
+     * @param cstrs constraint in disjunction
+     * @return <tt>true</tt> if the disjunction has been added to the constructive disjunction store.
      */
-    default void addConstructiveDisjunction(BoolVar... BOOLS) {
-        _me().getConDisStore().getPropCondis().addDisjunction(BOOLS);
+    default boolean addConstructiveDisjunction(boolean global, Constraint... cstrs) {
+        Model model = cstrs[0].propagators[0].getModel();
+        if(global) {
+            PropConDis condis = model.getConDisStore().getPropCondis();
+            condis.addDisjunction(cstrs);
+        }else{
+            new LocalConstructiveDisjunction(cstrs).post();
+        }
+        return true;
     }
+
 }

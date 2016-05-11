@@ -315,7 +315,7 @@ public class PropSat extends Propagator<BoolVar> {
      */
     public void addLearnt(int... lits) {
         sat_.learnClause(lits);
-        this.getModel().getSolver().getEngine().propagateOnBacktrack(this); // issue#327
+        forcePropagationOnBacktrack(); // issue#327
         // early deductions of learnt clause may lead to incorrect behavior on backtrack
         // since early deduction is not backtrackable.
     }

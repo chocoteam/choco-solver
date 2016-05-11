@@ -170,7 +170,7 @@ public interface ISetConstraintFactory {
 	}
 
 	//***********************************************************************************
-	// SUM - MAX - MIN
+	// SUM
 	//***********************************************************************************
 
 	/**
@@ -179,17 +179,32 @@ public interface ISetConstraintFactory {
 	 *
 	 * @param set       a set variable
 	 * @param sum       an integer variable representing sum{i | i in <i>set</i>}
-	 * @param notEmpty true : the set variable cannot be empty
-	 *                 false : the set may be empty (if <i>set</i> is empty, this constraint is not applied)
 	 * @return a constraint ensuring that sum{i | i in <i>set</i>} = <i>sum</i>
 	 */
-	default Constraint sum(SetVar set, IntVar sum, boolean notEmpty) {
-		return sum(set, null, 0, sum, notEmpty);
+	default Constraint sum(SetVar set, IntVar sum) {
+		return sumElements(set,null,0,sum);
+	}
+
+	/**
+	 * Creates a constraint summing weights given by a set of indices:
+	 * sum{<i>weights</i>[i] | i in <i>indices</i>} = <i>sum</i>
+	 *
+	 * Also ensures that elements in <i>indices</i> belong to [0, weights.length-1]
+	 *
+	 * @param indices   a set variable
+	 * @param weights   integers representing the weight of each element in <i>indices</i>
+	 * @param sum       an integer variable representing sum{<i>weights</i>[i] | i in <i>indices</i>}
+	 * @return a constraint ensuring that sum{<i>weights</i>[i] | i in <i>indices</i>} = <i>sum</i>
+	 */
+	default Constraint sumElements(SetVar indices, int[] weights, IntVar sum) {
+		return sumElements(indices,weights,0,sum);
 	}
 
 	/**
 	 * Creates a constraint summing weights given by a set of indices:
 	 * sum{<i>weights</i>[i-<i>offset</i>] | i in <i>indices</i>} = <i>sum</i>
+	 *
+	 * Also ensures that elements in <i>indices</i> belong to [offset, offset+weights.length-1]
 	 *
 	 * @param indices   a set variable
 	 * @param weights   integers representing the weight of each element in <i>indices</i>
@@ -197,17 +212,15 @@ public interface ISetConstraintFactory {
 	 *                  but generally 1 with MiniZinc API
 	 *                  which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
 	 * @param sum       an integer variable representing sum{<i>weights</i>[i-<i>offset</i>] | i in <i>indices</i>}
-	 * @param notEmpty  true : the set variable cannot be empty
-	 *                  false : the set may be empty (if <i>indices</i> is empty, this constraint is not applied)
 	 * @return a constraint ensuring that sum{<i>weights</i>[i-<i>offset</i>] | i in <i>indices</i>} = <i>sum</i>
 	 */
-	default Constraint sum(SetVar indices, int[] weights, int offset, IntVar sum, boolean notEmpty) {
-		if (notEmpty) {
-			return new Constraint("SetSum_NotEmpty", new PropNotEmpty(indices), new PropSumOfElements(indices, weights, offset, sum, true));
-		} else {
-			return new Constraint("SetSum", new PropSumOfElements(indices, weights, offset, sum, false));
-		}
+	default Constraint sumElements(SetVar indices, int[] weights, int offset, IntVar sum) {
+		return new Constraint("SetSum", new PropSumOfElements(indices, weights, offset, sum));
 	}
+
+	//***********************************************************************************
+	// MAX - MIN
+	//***********************************************************************************
 
 	/**
 	 * Creates a constraint over the maximum element in a set:

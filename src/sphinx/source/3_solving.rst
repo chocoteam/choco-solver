@@ -1,9 +1,449 @@
-###################
-Tuning the Solver
-###################
+#######
+Solving
+#######
 
-Each ``Model`` is associated with a ``Solver`` that is in charge of alternating constraint-propagation with search, and possibly learning,
-to compute solutions. This object may be configured in various ways.
+Up to here, we have seen how to model a problem with the ``Model`` object. To solve it, we need to use
+the ``Solver`` object that is obtained from the model as follows: ::
+
+    Solver solver = model.getSolver();
+
+The ``Solver`` is in charge of alternating constraint-propagation with search, and possibly learning,
+in order to compute solutions. This object may be configured in various ways.
+
+********************
+Core solving methods
+********************
+
+Solution computation
+====================
+
+Finding one solution
+--------------------
+
+A call to ``solver.solve()`` launches a resolution which stops on the first solution found, if any: ::
+
+    if(solver.solve()){
+        // do something, e.g. print out variable values
+    }else if(solver.hasReachedLimit()){
+        System.out.println("The could not find a solution
+                            nor prove that none exists in the given limits");
+    }else {
+        System.out.println("The solver has proved the problem has no solution");
+    }
+
+If ``solver.solve()`` returns ``true``, then a solution has been found and each variable is instantiated to a value.
+Otherwise, two cases must be considered:
+
+- A limit has been declared and reached (``solver.hasReachedLimit()`` returns true).
+  There may be a solution, but the solver has not been able to find it in the given limit
+  or there is no solution but the solver has not been able to prove it (i.e., to close to search tree) in the given limit.
+  The resolution process stops in no particular place in the search tree.
+- No limit has been declared or reached: The problem has no solution and the solver has proved it.
+
+Enumerating all solutions
+-------------------------
+
+You can enumerate all solutions of a problem with a simple while loop as follows: ::
+
+    while(solver.solve()){
+        // do something, e.g. print out variable values
+    }
+
+After the enumeration, the solver closes the search tree and variables are no longer instantiated to a value.
+
+.. tip::
+
+    On a solution, one can get the value assigned to each variable by calling ::
+
+        ivar.getValue();    // instantiation value of an IntVar, return a int
+        svar.getValue();    // instantiation values of a SerVar, return a int[]
+        rvar.getLB();       // lower bound of a RealVar, return a double
+        rvar.getUB();       // upper bound of a RealVar, return a double
+
+
+Optimization
+============
+
+In Constraint-Programming, optimization is done by computing improving solutions, until reaching an optimum.
+Therefore, it can be seen as solving multiple times the model while adding constraints on the fly to prevent the solver from computing dominated solutions.
+
+Mono-objective optimization
+---------------------------
+
+The optimization process is the following: anytime a solution is found, the value of the objective variable is stored and a *cut* is posted.
+The cut is an additional constraint which states that the next solution must be (strictly) better than the current one.
+To solve an optimization problem, you must specify which variable to optimize and in which direction: ::
+
+   // to maximize X
+   model.setObjectives(ResolutionPolicy.MAXIMIZE, X);
+   // or model.setObjectives(ResolutionPolicy.MINIMIZE, X); to minimize X
+   while(solver.solve()){
+       // an improving solution has been found
+   }
+   // the last solution found was optimal (if search completed)
+
+You can use custom cuts by overriding the default cut behavior.
+The *cut computer* function defines how the cut should bound the objective variable.
+The input *number* is the best solution value found so far, the output *number* define the new bound.
+When maximizing (resp. minimizing) a problem, the cut limits the lower bound (resp. upper bound) of the objective variable.
+For instance, one may want to indicate that the value of the objective variable is the next solution should be
+ greater than or equal to the best value + 10 ::
+
+    ObjectiveManager<IntVar, Integer> oman = solver.getObjectiveManager();
+    oman.setCutComputer(n -> n - 10);
+
+
+
+.. tip::
+
+    When the objective is a function over multiple variables, you need to model it through
+    one objective variable and additional constraints: ::
+
+        // Model objective function 3X + 4Y
+        IntVar OBJ = model.intVar("objective", 0, 999);
+        model.scalar(new IntVar[]{X,Y}, new int[]{3,4}, OBJ)).post();
+        // Specify objective
+        model.setObjectives(ResolutionPolicy.MAXIMIZE, OBJ);
+        // Compute optimum
+        model.getSolver().solve();
+
+Multi-objective optimization
+----------------------------
+
+If you have multiple objective to optimize, you have several options. First, you may aggregate them in a function so that you end up with only one objective variable. Second, you can solve the problem multiple times, each one optimizing one variable and possibly fixing some bounds on the other. Third, you can enumerate solutions (without defining any objective) and add constraints on the fly to prevent search from finding dominated solutions. This is done by the `ParetoOptimizer` object which does the following:
+Anytime a solution is found, a constraint is posted which states that at least one of the objective variables must be strictly better:
+Such as :math:`(X_0 < b_0 \lor X_1 < b_1 \lor \ldots \lor X_n < b_n)` where :math:`X_i` is the ith objective variable and :math:`b_i` its value.
+
+Here is a simple example on how to use the `ParetoOptimizer` to optimize two variables (a and b): ::
+
+		// simple model
+		Model model = new Model();
+		IntVar a = model.intVar("a", 0, 2, false);
+		IntVar b = model.intVar("b", 0, 2, false);
+		IntVar c = model.intVar("c", 0, 2, false);
+		model.arithm(a, "+", b, "=", c).post();
+
+		// create an object that will store the best solutions and remove dominated ones
+		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b});
+		Solver solver = model.getSolver();
+		solver.plugMonitor(po);
+
+		// optimization
+		while(solver.solve());
+
+		// retrieve the pareto front
+		List<Solution> paretoFront = po.getParetoFront();
+		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
+		for(Solution s:paretoFront){
+			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
+		}
+
+
+.. note::
+
+ All objectives must be optimized on the same direction (either minimization or maximization).
+
+
+Constraint propagation
+======================
+
+One may want to propagate all constraints without search for a solution.
+This can be achieved by calling ``solver.propagate()``.
+This method runs, in turn, the domain reduction algorithms of the constraints until it reaches a fix point.
+It may throw a ``ContradictionException`` if a contradiction occurs.
+In that case, the propagation engine must be flushed calling ``solver.getEngine().flush()``
+to ensure there is no pending events.
+
+.. warning::
+
+ If there are still pending events in the propagation engine, the propagation may results in unexpected results.
+
+Accessing variable values
+=========================
+
+The value of a variable can be accessed directly through the ``getValue()`` method only once the variable is instantiated, i.e. the value has been computed
+(call ``isInstantiated()`` to check it). Otherwise, the lower bound is returned (and an exception is thrown if ``-ea`` is on).
+
+For instance, the following code may throw an exception because the solution has not been computed yet: ::
+
+    int v = variable.getValue();
+    solver.solve();
+
+The following code may throw an exception in case no solution could be found (unsat problem or time limit reached): ::
+
+    solver.solve();
+    int v = variable.getValue();
+
+The correct approach is the following : ::
+
+    if(solver.solve()){
+        int v = variable.getValue();
+    }
+
+In optimization, you can print every solution as follows: ::
+
+    while(solver.solve()){
+        System.out.println(variable.getValue());
+    }
+
+The last print correspond to the best solution found.
+
+However, the following code does *NOT* display the best solution found: ::
+
+    while(solver.solve()){
+        System.out.println(variable.getValue());
+    }
+    System.out.println("best solution found: "+variable.getValue());
+
+Because it is outside the while loop, this code is reached once the search tree has been closed.
+It does not correspond to a solution state and therefore variable is no longer instantiated at this stage.
+To use solutions afterward, you need to record them using ``Solution`` objects.
+
+Recording solutions
+===================
+
+A solution can be stored through a ``Solution`` object which maps every variable with its current value.
+It can be created as follows: ::
+
+        Solution solution = new Solution(model());
+
+By default, a solution only records decision variables, that is, variables declared in the search heuristic.
+
+Let ``X`` be the set of decision variables and ``Y`` another variable set that you need to store.
+To record other variables (e.g. an objective variables) you have two options:
+
+- Declare them in the search strategy using a complementary strategy ::
+
+    solver.set(strategy(X),strategy(Y)).
+
+- Specify which variables to store in the solution constructor ::
+
+    Solution solution = new Solution(model(), ArrayUtils.append(X,Y));
+
+You can record the last solution found as follows : ::
+
+    Solution solution = new Solution(model());
+    while (solver.solve()) {
+        solution.record();
+    }
+
+You can also use a monitor as follows: ::
+
+    Solution solution = new Solution(model());
+    solver.plugMonitor(new IMonitorSolution() {
+          @Override
+          public void onSolution() {
+              s.record();
+          }
+    });
+
+Or with lambdas: ::
+
+    Solution solution = new Solution(model());
+    solver.plugMonitor((IMonitorSolution) () -> s.record());
+
+Note that the solution is erased on each new recording.
+To store all solutions, you need to create one new solution object for each solution.
+
+You can then access the value of a variable in a solution as follows: ::
+
+    int val = s.getIntVal(Y[0])
+
+The solution object can be used to store all variables in Choco Solver (binaries, integers, sets and reals)
+
+Search monitors
+===============
+
+Principle
+---------
+
+A search monitor is an observer of the resolver.
+It gives user access before and after executing each main step of the solving process:
+
+- `initialize`: when the solving process starts and the initial propagation is run,
+- `open node`: when a decision is computed,
+- `down branch`: on going down in the tree search applying or refuting a decision,
+- `up branch`: on going up in the tree search to reconsider a decision,
+- `solution`: when a solution is got,
+- `restart search`: when the search is restarted to a previous node, commonly the root node,
+- `close`: when the solving process ends,
+- `contradiction`: on a failure,
+
+With the accurate search monitor, one can easily observe with the resolver, from pretty printing of a solution to learning nogoods from restart, or many other actions.
+
+The interfaces to implement are:
+
+- ``IMonitorInitialize``,
+- ``IMonitorOpenNode``,
+- ``IMonitorDownBranch``,
+- ``IMonitorUpBranch``,
+- ``IMonitorSolution``,
+- ``IMonitorRestart``,
+- ``IMonitorContradiction``,
+- ``IMonitorClose``.
+
+Most of them gives the opportunity to do something before and after a step. The other ones are called after a step.
+
+.. important::
+
+	A search monitor should not modify the resolver behavior (forcing restart and interrupting the search, for instance).
+	This is the goal of the Move component of a resolver :ref:`440_loops_label`.
+
+Simple example to print every solution: ::
+
+        Solver s = model.getSolver();
+        s.plugMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                System.out.println("x = "+x.getValue());
+            }
+        });
+
+In Java 8 style: ::
+
+        Solver s = model.getSolver();
+        s.plugMonitor((IMonitorSolution) () -> {System.out.println("x = "+x.getValue());});
+
+Search limits
+=============
+
+Built-in search limits
+----------------------
+
+Search can be limited in various ways using the ``Solver`` (from ``model.getSolver()``).
+
+- ``limitTime`` stops the search when the given time limit has been reached. This is the most common limit, as many applications have a limited available runtime.
+
+.. note::
+    The potential search interruption occurs at the end of a propagation, i.e. it will not interrupt a propagation algorithm, so the overall runtime of the solver might exceed the time limit.
+
+- ``limitSolution`` stops the search when the given solution limit has been reached.
+- ``limitNode`` stops the search when the given search node limit has been reached.
+- ``limitFail`` stops the search when the given fail limit has been reached.
+- ``limitBacktrack`` stops the search when the given backtrack limit has been reached.
+
+For instance, to interrupt search after 10 seconds: ::
+
+    Solver s = model.getSolver();
+    s.limitTime("10s");
+    model.getSolver().solve();
+
+Custom search limits
+--------------------
+
+You can design you own search limit by implementing a ``Criterion`` and using ``resolver.limitSearch(Criterion c)``: ::
+
+        Solver s = model.getSolver();
+        s.limitSearch(new Criterion() {
+            @Override
+            public boolean isMet() {
+                // todo return true if you want to stop search
+            }
+        });
+
+In Java 8, this can be shortened using lambda expressions: ::
+
+        Solver s = model.getSolver();
+        s.limitSearch(() -> { /*todo return true if you want to stop search*/ });
+
+
+Using resolution statistics
+===========================
+
+Resolution data are available in the ``Solver`` object, whose default output is ``System.out``.
+It centralises widely used methods to have comprehensive feedback about the resolution process.
+There are two types of methods: those who need to be called **before** the resolution, with a prefix `show`, and those who need to called **after** the resolution, with a prefix `print`.
+
+For instance, one can indicate to print the solutions all resolution long: ::
+
+    solver.showSolutions();
+    solver.findAllSolutions();
+
+Or to print the search statistics once the search ends: ::
+
+    solver.solve();
+    solver.printStatistics();
+
+
+On a call to ``solver.printVersion()``, the following message will be printed:
+
+.. code-block:: none
+
+    ** Choco |version| (2015-12) : Constraint Programming Solver, Copyleft (c) 2010-2015
+
+On a call to ``solver.printVersion()``, the following message will be printed:
+
+.. code-block:: none
+
+     - [ Search complete - [ No solution | {0} solution(s) found ]
+       | Incomplete search - [ Limit reached | Unexpected interruption ] ].
+        Solutions: {0}
+     [  Maximize = {1}  ]
+     [  Minimize = {2}  ]
+        Building time : {3}s
+        Resolution : {6}s
+        Nodes: {7} ({7}/{6} n/s)
+        Backtracks: {8}
+        Fails: {9}
+        Restarts: {10}
+        Max depth: {11}
+        Variables: {12}
+        Constraints: {13}
+
+Curly brackets *{instruction | }* indicate alternative instructions
+
+Brackets *[instruction]* indicate an optional instruction.
+
+If the search terminates, the message "Search complete" appears on the first line, followed with either the the number of solutions found or the message "No solution".
+``Maximize`` –resp. ``Minimize``– indicates the best known value before exiting of the objective value using a ``ResolutionPolicy.MAXIMIZE`` –resp. ``ResolutionPolicy.MINIMIZE``- policy.
+
+Curly braces *{value}* indicate search statistics:
+
+0. number of solutions found
+1. objective value in maximization
+2. objective value in minimization
+3. building time in second (from ``new Model()`` to ``solve()`` or equivalent)
+4. initialisation time in second (before initial propagation)
+5. initial propagation time in second
+6. resolution time in second (from ``new Model()`` till now)
+7. number of nodes in the binary tree search : one for the root node and between one and two for each decision (two when the decision has been refuted)
+8. number of backtracks achieved
+9. number of failures that occurred (conflict number)
+10. number of restarts operated
+11. maximum depth reached in the binary tree search
+12. number of variables in the model
+13. number of constraints in the model
+
+
+If the resolution process reached a limit before ending *naturally*, the title of the message is set to :
+
+.. code-block:: none
+
+    - Incomplete search - Limit reached.
+
+The body of the message remains the same. The message is formatted thanks to the ``IMeasureRecorder`` interface which is a :ref:`search monitor <44_monitors_label>`.
+
+On a call to ``solver.showSolutions()``, on each solution the following message will be printed:
+
+.. code-block:: none
+
+    {0} Solutions, [Maximize = {1}][Minimize = {2}], Resolution {6}s, {7} Nodes, \\
+                                        {8} Backtracks, {9} Fails, {10} Restarts
+
+followed by one line exposing the value of each decision variables (those involved in the search strategy).
+
+On a call to ``solver.showDecisions()``, on each node of the search tree a message will be printed indicating which decision is applied.
+The message is prefixed by as many "." as nodes in the current branch of the search tree.
+A decision is prefixed with ``[R]`` and a refutation is prefixed by ``[L]``.
+
+.. code-block:: none
+
+    ..[L]x  ==  1 (0) //X = [0,5] Y = [0,6] ...
+
+.. warning::
+
+    ``solver.printDecisions()`` prints the tree search during the resolution.
+    Printing the decisions slows down the search process.
 
 *****************
 Search Strategies
@@ -36,7 +476,7 @@ The default search strategy splits variables according to their type and defines
 #. real variables :code:`realVarSearch(rvars)`
 #. objective variable, if any: lower bound or upper bound, depending on the `ResolutionPolicy`
 
-Note that `ISF.lastConflict(solver)` is also plugged-in.
+Note that `lastConflict` is also plugged-in.
 
 Specifying a search strategy
 ============================
@@ -252,209 +692,14 @@ immediately followed by coefficient ``grow``:math:`^k`.
 
 You can design your own restart strategies using: ::
 
-    solver.setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit)
-
-***************
-Search monitors
-***************
-
-Principle
----------
-
-A search monitor is an observer of the resolver.
-It gives user access before and after executing each main step of the solving process:
-
-- `initialize`: when the solving process starts and the initial propagation is run,
-- `open node`: when a decision is computed,
-- `down branch`: on going down in the tree search applying or refuting a decision,
-- `up branch`: on going up in the tree search to reconsider a decision,
-- `solution`: when a solution is got,
-- `restart search`: when the search is restarted to a previous node, commonly the root node,
-- `close`: when the solving process ends,
-- `contradiction`: on a failure,
-
-With the accurate search monitor, one can easily observe with the resolver, from pretty printing of a solution to learning nogoods from restart, or many other actions.
-
-The interfaces to implement are:
-
-- ``IMonitorInitialize``,
-- ``IMonitorOpenNode``,
-- ``IMonitorDownBranch``,
-- ``IMonitorUpBranch``,
-- ``IMonitorSolution``,
-- ``IMonitorRestart``,
-- ``IMonitorContradiction``,
-- ``IMonitorClose``.
-
-Most of them gives the opportunity to do something before and after a step. The other ones are called after a step.
-
-.. important::
-
-	A search monitor should not modify the resolver behavior (forcing restart and interrupting the search, for instance).
-	This is the goal of the Move component of a resolver :ref:`440_loops_label`.
-
-Simple example to print every solution: ::
-
-        Solver s = model.getSolver();
-        s.plugMonitor(new IMonitorSolution() {
-            @Override
-            public void onSolution() {
-                System.out.println("x = "+x.getValue());
-            }
-        });
-
-In Java 8 style: ::
-
-        Solver s = model.getSolver();
-        s.plugMonitor((IMonitorSolution) () -> {System.out.println("x = "+x.getValue());});
-
-*************
-Search limits
-*************
-
-Built-in search limits
-----------------------
-
-Search can be limited in various ways using the ``Solver`` (from ``model.getSolver()``).
-
-- ``limitTime`` stops the search when the given time limit has been reached. This is the most common limit, as many applications have a limited available runtime.
-
-.. note::
-    The potential search interruption occurs at the end of a propagation, i.e. it will not interrupt a propagation algorithm, so the overall runtime of the solver might exceed the time limit.
-
-- ``limitSolution`` stops the search when the given solution limit has been reached.
-- ``limitNode`` stops the search when the given search node limit has been reached.
-- ``limitFail`` stops the search when the given fail limit has been reached.
-- ``limitBacktrack`` stops the search when the given backtrack limit has been reached.
-
-For instance, to interrupt search after 10 seconds: ::
-
-    Solver s = model.getSolver();
-    s.limitTime("10s");
-    model.getSolver().solve();
-
-Custom search limits
---------------------
-
-You can design you own search limit by implementing a ``Criterion`` and using ``resolver.limitSearch(Criterion c)``: ::
-
-        Solver s = model.getSolver();
-        s.limitSearch(new Criterion() {
-            @Override
-            public boolean isMet() {
-                // todo return true if you want to stop search
-            }
-        });
-
-In Java 8, this can be shortened using lambda expressions: ::
-
-        Solver s = model.getSolver();
-        s.limitSearch(() -> { /*todo return true if you want to stop search*/ });
+    solver.setRestarts( LongCriterion restartCriterion,
+                        IRestartStrategy restartStrategy,
+                        int restartsLimit);
 
 
-***************************
-Using resolution statistics
-***************************
-
-Resolution data are available thanks to the ``Chatterbox`` class, which outputs by default to ``System.out``.
-It centralises widely used methods to have comprehensive feedback about the resolution process.
-There are two types of methods: those who need to be called **before** the resolution, with a prefix `show`, and those who need to called **after** the resolution, with a prefix `print`.
-
-For instance, one can indicate to print the solutions all resolution long: ::
-
-    Chatterbox.showSolutions(solver);
-    solver.findAllSolutions();
-
-Or to print the search statistics once the search ends: ::
-
-    solver.solve();
-    Chatterbox.printStatistics(solver);
-
-
-On a call to ``Chatterbox.printVersion()``, the following message will be printed:
-
-.. code-block:: none
-
-    ** Choco 3.3.3 (2015-12) : Constraint Programming Solver, Copyleft (c) 2010-2015
-
-On a call to ``Chatterbox.printVersion()``, the following message will be printed:
-
-.. code-block:: none
-
-     - [ Search complete - [ No solution | {0} solution(s) found ]
-       | Incomplete search - [ Limit reached | Unexpected interruption ] ].
-        Solutions: {0}
-     [  Maximize = {1}  ]
-     [  Minimize = {2}  ]
-        Building time : {3}s
-        Resolution : {6}s
-        Nodes: {7} ({7}/{6} n/s)
-        Backtracks: {8}
-        Fails: {9}
-        Restarts: {10}
-        Max depth: {11}
-        Variables: {12}
-        Constraints: {13}
-
-Curly brackets *{instruction | }* indicate alternative instructions
-
-Brackets *[instruction]* indicate an optional instruction.
-
-If the search terminates, the message "Search complete" appears on the first line, followed with either the the number of solutions found or the message "No solution".
-``Maximize`` –resp. ``Minimize``– indicates the best known value before exiting of the objective value using a ``ResolutionPolicy.MAXIMIZE`` –resp. ``ResolutionPolicy.MINIMIZE``- policy.
-
-Curly braces *{value}* indicate search statistics:
-
-0. number of solutions found
-1. objective value in maximization
-2. objective value in minimization
-3. building time in second (from ``new Model()`` to ``solve()`` or equivalent)
-4. initialisation time in second (before initial propagation)
-5. initial propagation time in second
-6. resolution time in second (from ``new Model()`` till now)
-7. number of decision created, that is, nodes in the binary tree search
-8. number of backtracks achieved
-9. number of failures that occurred
-10. number of restarts operated
-11. maximum depth reached in the binary tree search
-12. number of variables in the model
-13. number of constraints in the model
-
-
-If the resolution process reached a limit before ending *naturally*, the title of the message is set to :
-
-.. code-block:: none
-
-    - Incomplete search - Limit reached.
-
-The body of the message remains the same.
-The message is formatted thanks to the ``IMeasureRecorder`` which is a :ref:`search monitor <44_monitors_label>`.
-
-On a call to ``Chatterbox.showSolutions(solver)``, on each solution the following message will be printed:
-
-.. code-block:: none
-
-    {0} Solutions, [Maximize = {1}][Minimize = {2}], Resolution {6}s, {7} Nodes, \\
-                                        {8} Backtracks, {9} Fails, {10} Restarts
-
-followed by one line exposing the value of each decision variables (those involved in the search strategy).
-
-On a call to ``Chatterbox.showDecisions(solver)``, on each node of the search tree a message will be printed indicating which decision is applied.
-The message is prefixed by as many "." as nodes in the current branch of the search tree.
-A decision is prefixed with ``[R]`` and a refutation is prefixed by ``[L]``.
-
-.. code-block:: none
-
-    ..[L]x  ==  1 (0) //X = [0,5] Y = [0,6] ...
-
-.. warning::
-
-    ``Chatterbox.printDecisions(Solver solver)`` prints the tree search during the resolution.
-    Printing the decisions slows down the search process.
-
-************
-Moves (TODO)
-************
+*****
+Moves
+*****
 
 Large Neighborhood Search (LNS)
 ===============================
@@ -588,15 +833,9 @@ Other optimization policies may be encoded by using either search monitors or a 
 .. _43_explanations_label:
 
 
-List of available moves
-=======================
-
-Designing your own move
-=======================
-
-***************
-Learning (TODO)
-***************
+********
+Learning
+********
 
 Explanations
 ============
@@ -917,3 +1156,42 @@ The aim of the component is to make sure that the search mechanism will avoid (a
 	This is alwasy called *after* calling `Move.repair(SearchLoop)`.
 
 ``org.chocosolver.solver.search.loop.learn.LearnCBJ`` is good, yet not trivial, example of `Learn`.
+
+***********************
+Multi-thread resolution
+***********************
+
+Choco |version| provides a simple way to use several threads to treat a problem. The main idea of that driver is to solve the *same* model with different search strategies and to share few information to make these threads help each others.
+
+To use a portfolio of solvers in parallel, use ``ParallelPortfolio`` as follows: ::
+
+        ParallelPortfolio portfolio = new ParallelPortfolio();
+        int nbModels = 5;
+        for(int s=0;s<nbModels;s++){
+            portfolio.addModel(makeModel());
+        }
+        portfolio.solve();
+
+In this example, ``makeModel()`` is a method you have to implement to create a ``Model`` of the problem.
+Here all models are the same and the portfolio will change the search heuristics of all models but the first one.
+This means that the first thread will run according to your settings whereas the others will have a different configuration.
+
+In order to specify yourself the configuration of each thread, you need to create the portfolio by setting the optional
+boolean argument ``searchAutoConf`` to false as follows: ::
+
+        ParallelPortfolio portfolio = new ParallelPortfolio(false);
+        int nbModels = 5;
+        for(int s=0;s<nbModels;s++){
+            portfolio.addModel(makeModel(s));
+        }
+        portfolio.solve();
+
+In this second example, the parameter ``s`` enables you to change the search strategy within the ``makeModel`` method (e.g. using a ``switch(s)``).
+
+When dealing with multithreading resolution, very few data is shared between threads:
+everytime a solution has been found its value is shared among solvers. Moreover,
+when a solver ends, it communicates an interruption instruction to the others.
+This enables to explore the search space in various way, using different model settings such as search strategies
+(this should be done in the dedicated method which builds the model, though).
+
+.. _48_plm:

@@ -551,7 +551,7 @@ public class PropNogoods extends Propagator<IntVar> {
         sat_.learnClause(lits);
         // early deductions of learnt clause may lead to incorrect behavior on backtrack
         // since early deduction is not backtrackable.
-        this.getModel().getSolver().getEngine().propagateOnBacktrack(this); // issue#327
+        forcePropagationOnBacktrack(); // issue#327
         // compare the current clauses with the previous stored one,
         // just in case the current one dominates the previous none
         if (sat_.nLearnt() > 1) {

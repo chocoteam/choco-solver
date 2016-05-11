@@ -430,6 +430,21 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     /**
+     * Call this method when either the propagator has to be awake on backtrack.
+     * This is helpful when:
+     * <ul>
+     *     <li>the scope of this propagator has changed on failures or solutions (eg. learning clauses)</li>
+     *     <li>this propagator's internal structure has changed (eg. this acts as a cut)</li>
+     * </ul>
+     */
+    protected void forcePropagationOnBacktrack(){
+        if(isPassive()){ // force activation on backtrack, because something can have changed on our back
+            state = ACTIVE;
+        }
+        model.getSolver().getEngine().propagateOnBacktrack(this);
+    }
+
+    /**
      * Check wether <code>this</code> is entailed according to the current state of its internal structure.
      * At least, should check the satisfaction of <code>this</code> (when all is instantiated).
      *

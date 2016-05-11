@@ -39,12 +39,6 @@ import org.chocosolver.memory.structure.S64BitSet;
  */
 public abstract class AbstractEnvironment implements IEnvironment {
 
-    protected enum Type {
-        FLAT, UNSAFE
-    }
-
-    protected final Type type;
-
     protected int currentWorld = 0;
 
     private static final int SIZE = 128;
@@ -58,8 +52,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
      */
     private BasicIndexedBipartiteSet booleanSet;
 
-    protected AbstractEnvironment(Type type) {
-        this.type = type;
+    protected AbstractEnvironment() {
         this.timestamp = 0;
     }
 
