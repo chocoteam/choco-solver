@@ -110,7 +110,7 @@ public class TestMultiSequentialObjectives {
 		int[] size = new int[]{8,6,3,3,3};
 		IntVar card = m.intVar("load", 0,5);
 		IntVar load = m.intVar("card", 0,10);
-		m.cardinality(sv,card).post();
+		sv.setCard(card);
 		m.sumElements(sv,size,load).post();
         m.getSolver().set(SearchStrategyFactory.setVarSearch(sv),inputOrderLBSearch(card,load));
 		Solution s = m.getSolver().findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);

@@ -47,7 +47,7 @@ public class CardinalityTest {
     public void testNominal() {
         Model model = new Model();
         SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
-        model.cardinality(setVar, 4).post();
+        setVar.setCard(model.intVar(4));
 
         int nbSol = 0;
         while(model.getSolver().solve()) {
@@ -63,7 +63,7 @@ public class CardinalityTest {
         Model model = new Model();
         SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5});
         IntVar intVar = model.intVar(0, 100);
-        model.cardinality(setVar, intVar).post();
+        setVar.setCard(intVar);
 
         int nbSol = 0;
         while(model.getSolver().solve()) {
@@ -79,7 +79,7 @@ public class CardinalityTest {
     public void testEmpty() {
         Model model = new Model();
         SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5});
-        model.cardinality(setVar, 0).post();
+        setVar.setCard(model.intVar(0));
 
         assertTrue(model.getSolver().solve());
         assertTrue(setVar.getValue().isEmpty());
@@ -91,7 +91,7 @@ public class CardinalityTest {
         Model model = new Model();
         SetVar setVar = model.setVar(new int[]{1, 2, 3}, new int[]{1, 2, 3, 4, 5});
         IntVar intVar = model.intVar(0, 2);
-        model.cardinality(setVar, intVar).post();
+        setVar.setCard(intVar);
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
         assertFalse(model.getSolver().solve());
@@ -102,7 +102,7 @@ public class CardinalityTest {
         Model model = new Model();
         SetVar setVar = model.setVar(new int[]{}, new int[]{1, 2, 3});
         IntVar intVar = model.intVar(4, 10);
-        model.cardinality(setVar, intVar).post();
+        setVar.setCard(intVar);
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
     }
