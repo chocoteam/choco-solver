@@ -36,7 +36,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * @author Guillaume Le LouÃ«t [guillaume.lelouet@gmail.com] 2016
+ * @author Guillaume Le Louët [guillaume.lelouet@gmail.com] 2016
  */
 public class SetVarImplTest {
 
