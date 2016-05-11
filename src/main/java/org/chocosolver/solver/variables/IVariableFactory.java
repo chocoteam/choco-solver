@@ -579,7 +579,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param value value of the set variable, e.g. {0,4,9}
      * @return a constant SetVar of domain {<i>value</i>}
      */
-    default SetVar setVar(int[] value) {
+    default SetVar setVar(int... value) {
         String name = CSTE_NAME+"{";
         for(int i=0;i<value.length;i++){
             name+=value[i]+(i<value.length-1?", ":"");
@@ -602,12 +602,12 @@ public interface IVariableFactory extends ISelf<Model> {
     /**
      * Creates a constant set variable, equal to <i>value</i>
      * @param name name of the variable
-     * @param values value of the set variable, e.g. {0,4,9}
+     * @param value value of the set variable, e.g. {0,4,9}
      * @return a constant SetVar of domain {<i>value</i>}
      */
-    default SetVar setVar(String name, int... values) {
-    	if(values==null) values = new int[]{};
-      return new SetVarImpl(name, values, _me());
+    default SetVar setVar(String name, int... value) {
+    	if(value==null) value = new int[]{};
+      return new SetVarImpl(name, value, _me());
     }
 
     // ARRAY
