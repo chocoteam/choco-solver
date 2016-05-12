@@ -29,15 +29,14 @@ package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.parser.flatzinc.FznSettings;
-import org.chocosolver.parser.flatzinc.ast.propagators.*;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
+import org.chocosolver.parser.flatzinc.ast.propagators.*;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.extension.Tuples;
-import org.chocosolver.solver.constraints.extension.nary.PropCompactTable;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.geost.Constants;
@@ -1377,7 +1376,7 @@ public enum FConstraint {
 
             SetVar a = exps.get(0).setVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
-            model.cardinality(a, b).post();
+            a.setCard(b);
 
         }
     },
