@@ -101,28 +101,6 @@ public interface ISetConstraintFactory {
 	}
 
 	/**
-	 * Creates a cardinality constraint: |<i>sets</i>| = <i>card</i>
-	 *
-	 * @param set  a set variable having <i>card</i> elements
-	 * @param card an integer representing the number of elements in <i>sets</i>
-	 * @return A constraint ensuring that |<i>sets</i>| = <i>card</i>
-	 */
-	default Constraint cardinality(SetVar set, int card) {
-		return cardinality(set, set.getModel().intVar(card));
-	}
-
-	/**
-	 * Creates a cardinality constraint: |<i>sets</i>| = <i>card</i>
-	 *
-	 * @param set  a set variable having <i>card</i> elements
-	 * @param card an integer variable representing the number of elements in <i>sets</i>
-	 * @return A constraint ensuring that |<i>sets</i>| = <i>card</i>
-	 */
-	default Constraint cardinality(SetVar set, IntVar card) {
-		return new Constraint("SetCard", new PropCardinality(set, card));
-	}
-
-	/**
 	 * Creates a constraint counting the number of empty sets <i>sets</i>
 	 * |{s in <i>sets</i> where |s|=0}| = <i>nbEmpty</i>
 	 *
