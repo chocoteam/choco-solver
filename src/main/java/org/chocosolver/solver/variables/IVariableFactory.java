@@ -64,11 +64,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant of type BoolVar
      */
     default BoolVar boolVar(boolean value) {
-        if(value){
-            return _me().boolVar(true);
-        }else{
-            return _me().boolVar(false);
-        }
+        return boolVar(CSTE_NAME + (value?1:0),value);
     }
 
     /**
