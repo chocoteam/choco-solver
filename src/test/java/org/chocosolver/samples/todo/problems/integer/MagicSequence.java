@@ -53,7 +53,7 @@ import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.util.tools.ArrayUtils.zeroToN;
+import static org.chocosolver.util.tools.ArrayUtils.array;
 
 public class MagicSequence extends AbstractProblem {
 
@@ -66,7 +66,7 @@ public class MagicSequence extends AbstractProblem {
     public void buildModel() {
         model = new Model();
 
-        int[] values = zeroToN(n);
+        int[] values = array(0,n-1);
 
         x = model.intVarArray("x", n, 0, n - 1, false);
 

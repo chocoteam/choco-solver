@@ -38,45 +38,28 @@ import java.util.*;
  * This class contains various methods for manipulating arrays.
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 17 sept. 2010
  */
 public enum ArrayUtils {
     ;
 
     /**
-     * Creates an array of ints of size  <i>n</i>,
-     * then assigns values from 0 (inclusive) to <code>n</code> (exclusive) the elements.
-     * @param n size of the array and greatest exclusvie value, must be greater or equal to 0.
+     * Creates an array of ints of consecutive values from <i>lb</i> (inclusive) to <i>ub</i> (inclusive as well),
+     * i.e. the range <i>[lb, ub]</i>,
+     * For instance: {3,4,...,99,100}
+     * @param lb first element in the array
+     * @param ub last element in the array
      * @return an array of ints
-     * @throws NegativeArraySizeException if n is negative
+     * @throws NegativeArraySizeException if ub<lb is negative
      */
-    public static int[] zeroToN(int n) {
-        if (n < 0) {
-            throw new NegativeArraySizeException("Cannot create negative size array");
+    public static int[] array(int lb, int ub) {
+        if (ub < lb) {
+            throw new NegativeArraySizeException("Cannot create negative size array : "+lb+" should be <= "+ub);
         }
-        final int[] r = new int[n];
-        for (int i = 0; i < n; i++) {
-            r[i] = i;
-        }
-        return r;
-    }
-
-    /**
-     * Creates an array of ints of size <i>n</i>,
-     * then assigns values from 1 (inclusive) to <code>n</code> (inclusive) the elements.
-     * @param n size of the array and greatest inclusive value, must be greater or equal to 0.
-     * @return an array of ints
-     * @throws NegativeArraySizeException if n is negative
-     */
-    public static int[] oneToN(int n) {
-        if (n < 0) {
-            throw new NegativeArraySizeException("Cannot create negative size array");
-        }
-        assert n > -1;
-        final int[] r = new int[n];
-        for (int i = 1; i <= n; i++) {
-            r[i - 1] = i;
+        final int[] r = new int[ub-lb+1];
+        for (int i = 0; i < r.length; i++) {
+            r[i] = i+lb;
         }
         return r;
     }
@@ -643,48 +626,48 @@ public enum ArrayUtils {
     }
 
     /**
-   	 * Sorts the input array if it is not already sorted,
-   	 * and removes multiple occurrences of the same value
-   	 *
-   	 * @param values array of values
-   	 * @return a sorted array containing each value of values exactly once
-   	 */
-   	public static int[] mergeAndSortIfNot(int[] values) {
-   		int n = values.length;
-   		boolean sorted = true;
-   		boolean noDouble = true;
-   		for (int i = 0; i < n - 1 && sorted; i++) {
-   			if (values[i] > values[i + 1]) {
-   				sorted = false;
-   				noDouble = false;// cannot be sure
-   			}
-   			if (values[i] == values[i + 1]) {
-   				noDouble = false;
-   			}
-   		}
-   		if (!sorted) {
-   			Arrays.sort(values);
-   		}
-   		if (!noDouble) {
-   			int nbVals = 1;
-   			for (int i = 0; i < n - 1; i++) {
-   				assert values[i] <= values[i + 1];
-   				if (values[i] < values[i + 1]) {
-   					nbVals++;
-   				}
-   			}
-   			if (nbVals < n) {
-   				int[] correctValues = new int[nbVals];
-   				int idx = 0;
-   				for (int i = 0; i < n - 1; i++) {
-   					if (values[i] < values[i + 1]) {
-   						correctValues[idx++] = values[i];
-   					}
-   				}
-   				correctValues[idx] = values[n - 1];
-   				return correctValues;
-   			}
-   		}
-   		return values;
-   	}
+     * Sorts the input array if it is not already sorted,
+     * and removes multiple occurrences of the same value
+     *
+     * @param values array of values
+     * @return a sorted array containing each value of values exactly once
+     */
+    public static int[] mergeAndSortIfNot(int[] values) {
+        int n = values.length;
+        boolean sorted = true;
+        boolean noDouble = true;
+        for (int i = 0; i < n - 1 && sorted; i++) {
+            if (values[i] > values[i + 1]) {
+                sorted = false;
+                noDouble = false;// cannot be sure
+            }
+            if (values[i] == values[i + 1]) {
+                noDouble = false;
+            }
+        }
+        if (!sorted) {
+            Arrays.sort(values);
+        }
+        if (!noDouble) {
+            int nbVals = 1;
+            for (int i = 0; i < n - 1; i++) {
+                assert values[i] <= values[i + 1];
+                if (values[i] < values[i + 1]) {
+                    nbVals++;
+                }
+            }
+            if (nbVals < n) {
+                int[] correctValues = new int[nbVals];
+                int idx = 0;
+                for (int i = 0; i < n - 1; i++) {
+                    if (values[i] < values[i + 1]) {
+                        correctValues[idx++] = values[i];
+                    }
+                }
+                correctValues[idx] = values[n - 1];
+                return correctValues;
+            }
+        }
+        return values;
+    }
 }

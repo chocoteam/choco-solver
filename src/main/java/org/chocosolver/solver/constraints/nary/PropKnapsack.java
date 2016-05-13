@@ -77,7 +77,7 @@ public class PropKnapsack extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             ratio[i] = weight[i] == 0?Double.MAX_VALUE : ((double) (energy[i]) / (double) (weight[i]));
         }
-        this.order = ArrayUtils.zeroToN(n);
+        this.order = ArrayUtils.array(0,n-1);
         ArraySort sorter = new ArraySort(n,false,true);
         sorter.sort(order, n, (i1, i2) -> {return Double.compare(ratio[i2],ratio[i1]);});
     }
