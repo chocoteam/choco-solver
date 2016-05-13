@@ -242,7 +242,7 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testJL1() {
         Model s = new Model();
-        s.arithm(s.ONE(), "!=", s.ZERO()).post();
+        s.arithm(s.boolVar(true), "!=", s.boolVar(false)).post();
         while (s.getSolver().solve()) ;
     }
 

@@ -113,12 +113,6 @@ public class Model implements IModel {
     /** Counter used to set ids to variables and propagators */
     private int id = 1;
 
-    /** Basic ZERO constant, cached to avoid multiple useless occurrences. */
-    private BoolVar ZERO;
-
-    /** Basic ONE constant, cached to avoid multiple useless occurrences. */
-    private BoolVar ONE;
-
     /** A MiniSat instance, useful to deal with clauses*/
     protected SatConstraint minisat;
 
@@ -222,40 +216,11 @@ public class Model implements IModel {
     }
 
     /**
-     * The basic constant "0" used as an integer variable or a (false) boolean variable
-     * @return a BoolVar set to 0
-     */
-    public BoolVar ZERO() {
-        if (ZERO == null) {
-            _zeroOne();
-        }
-        return ZERO;
-    }
-
-    /**
-     * The basic constant "1" used as an integer variable or a (true) boolean variable
-     * @return a BoolVar set to 1
-     */
-    public BoolVar ONE() {
-        if (ONE == null) {
-            _zeroOne();
-        }
-        return ONE;
-    }
-
-    private void _zeroOne(){
-        ZERO = (BoolVar) this.intVar(0);
-        ONE = (BoolVar) this.intVar(1);
-        ZERO._setNot(ONE);
-        ONE._setNot(ZERO);
-    }
-
-    /**
      * The basic "true" constraint, which is always satisfied
      * @return a "true" constraint
      */
     public Constraint trueConstraint() {
-        return new Constraint("TRUE cstr", new PropTrue(ONE()));
+        return new Constraint("TRUE cstr", new PropTrue(boolVar(true)));
     }
 
     /**
@@ -263,7 +228,7 @@ public class Model implements IModel {
      * @return a "false" constraint
      */
     public Constraint falseConstraint() {
-        return new Constraint("FALSE cstr", new PropFalse(ZERO()));
+        return new Constraint("FALSE cstr", new PropFalse(boolVar(false)));
     }
 
     /**

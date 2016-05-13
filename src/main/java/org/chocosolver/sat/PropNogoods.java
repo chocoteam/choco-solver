@@ -138,7 +138,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @param model the model that declares the propagator
      */
     public PropNogoods(Model model) {
-        super(new BoolVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, true);
+        super(new BoolVar[]{model.boolVar(true)}, PropagatorPriority.VERY_SLOW, true);
         this.vars = new IntVar[0];// erase model.ONE from the variable scope
 
         int k = 16;

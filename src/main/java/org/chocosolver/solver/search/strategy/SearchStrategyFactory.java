@@ -341,7 +341,7 @@ public class SearchStrategyFactory {
 
         // 5. avoid null pointers in case all variables are instantiated
         if (strats.isEmpty()) {
-            strats.add(minDomLBSearch(model.ONE()));
+            strats.add(minDomLBSearch(model.boolVar(true)));
         }
 
         // 6. add last conflict

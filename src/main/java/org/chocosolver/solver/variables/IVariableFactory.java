@@ -65,9 +65,9 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default BoolVar boolVar(boolean value) {
         if(value){
-            return _me().ONE();
+            return _me().boolVar(true);
         }else{
-            return _me().ZERO();
+            return _me().boolVar(false);
         }
     }
 

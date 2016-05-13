@@ -61,7 +61,7 @@ public class DivTest extends AbstractTernaryTest {
     public void testJL() {
         Model model = new Model();
         IntVar i = model.intVar("i", 0, 2, false);
-        model.div(i, model.ONE(), model.ZERO()).getOpposite().post();
+        model.div(i, model.boolVar(true), model.boolVar(false)).getOpposite().post();
 //        SMF.log(solver, true, false);
         while (model.getSolver().solve()) ;
     }
