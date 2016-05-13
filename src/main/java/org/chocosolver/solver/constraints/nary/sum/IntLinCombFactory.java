@@ -136,17 +136,17 @@ public class IntLinCombFactory {
         if (k == 0) {
             switch (OPERATOR) {
                 case EQ:
-                    return RESULT == 0 ? Model.TRUE() : Model.FALSE();
+                    return RESULT == 0 ? Model.trueConstraint() : Model.falseConstraint();
                 case NQ:
-                    return RESULT != 0 ? Model.TRUE() : Model.FALSE();
+                    return RESULT != 0 ? Model.trueConstraint() : Model.falseConstraint();
                 case LE:
-                    return RESULT >= 0 ? Model.TRUE() : Model.FALSE();
+                    return RESULT >= 0 ? Model.trueConstraint() : Model.falseConstraint();
                 case LT:
-                    return RESULT > 0 ? Model.TRUE() : Model.FALSE();
+                    return RESULT > 0 ? Model.trueConstraint() : Model.falseConstraint();
                 case GE:
-                    return RESULT <= 0 ? Model.TRUE() : Model.FALSE();
+                    return RESULT <= 0 ? Model.trueConstraint() : Model.falseConstraint();
                 case GT:
-                    return RESULT < 0 ? Model.TRUE() : Model.FALSE();
+                    return RESULT < 0 ? Model.trueConstraint() : Model.falseConstraint();
                 default:
                     throw new SolverException("Unexpected Tuple operator " + OPERATOR
                             + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");

@@ -167,7 +167,7 @@ public class ObjectiveTest {
         new Constraint("Conditionnal",
                 new PropConditionnal(new IntVar[]{iv},
                         new Constraint[]{model.arithm(iv, ">=", 4)},
-                        new Constraint[]{model.TRUE()}) {
+                        new Constraint[]{model.trueConstraint()}) {
                     @Override
                     public ESat checkCondition() {
                         int nbNode = (int) this.model.getSolver().getNodeCount();

@@ -32,6 +32,7 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
@@ -104,7 +105,7 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
  * @author Charles Prud'homme
  * @since 4.0.0
  */
-public interface IIntConstraintFactory {
+public interface IIntConstraintFactory extends ISelf<Model> {
 
 	//##################################################################################################################
 	// UNARIES #########################################################################################################
@@ -529,6 +530,7 @@ public interface IIntConstraintFactory {
 	 *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
 	 */
 	default Constraint allDifferent(IntVar[] vars, String CONSISTENCY) {
+		if(vars.length<=1) return _me().trueConstraint();
 		return new AllDifferent(vars, CONSISTENCY);
 	}
 
@@ -1144,7 +1146,7 @@ public interface IIntConstraintFactory {
 			}
 			return new Constraint("int_value_precede", ps);
 		} else {
-			return X[0].getModel().TRUE();
+			return _me().trueConstraint();
 		}
 	}
 
@@ -1426,7 +1428,7 @@ public interface IIntConstraintFactory {
 				);
 			default:
 				if (start == end) {
-					return start.getModel().FALSE();
+					return start.getModel().falseConstraint();
 				} else {
 					return Constraint.merge("path",
 							arithm(start, "!=", end),

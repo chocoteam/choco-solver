@@ -254,7 +254,7 @@ public class Model implements IModel {
      * The basic "true" constraint, which is always satisfied
      * @return a "true" constraint
      */
-    public Constraint TRUE() {
+    public Constraint trueConstraint() {
         return new Constraint("TRUE cstr", new PropTrue(ONE()));
     }
 
@@ -262,7 +262,7 @@ public class Model implements IModel {
      * The basic "false" constraint, which is always violated
      * @return a "false" constraint
      */
-    public Constraint FALSE() {
+    public Constraint falseConstraint() {
         return new Constraint("FALSE cstr", new PropFalse(ZERO()));
     }
 
