@@ -89,27 +89,6 @@ public class KnapsackTest {
         ks.solveIt(ks.modelIt("k20", 13), true);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testALL5() throws IOException {
-        times.clear();
-        KnapsackTest ks = new KnapsackTest();
-        for (int i = 0; i < 1; i++) {
-            Model s = ks.modelIt("k10", 3);
-            ks.solveIt(s, true);
-            Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 1078, "obj val");
-        }
-    }
-
-	@Test(groups="1s", timeOut=60000)
-    public void testALL10() throws IOException {
-        times.clear();
-        KnapsackTest ks = new KnapsackTest();
-        for (int i = 0; i < 1; i++) {
-            Model s = ks.modelIt("k10", 10);
-            ks.solveIt(s, true);
-            Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 1078, "obj val");
-        }
-    }
 
 	@Test(groups="1s", timeOut=60000)
     public void testALL0() throws IOException {
@@ -122,28 +101,58 @@ public class KnapsackTest {
         }
     }
 
-	@Test(groups="1s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
+    public void testALL5() throws IOException {
+        KnapsackTest ks = new KnapsackTest();
+        for (int i = 0; i < 1; i++) {
+            Model s = ks.modelIt("k10", 3);
+            ks.solveIt(s, true);
+            Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 1078, "obj val");
+            Assert.assertEquals(s.getSolver().getSolutionCount(), 7, "nb sol");
+//            Assert.assertEquals(s.getResolver().getMeasures().getNodeCount(), 7, "nb nod");
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testALL10() throws IOException {
+        KnapsackTest ks = new KnapsackTest();
+        for (int i = 0; i < 1; i++) {
+            Model s = ks.modelIt("k10", 10);
+            ks.solveIt(s, true);
+            Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 1078, "obj val");
+            Assert.assertEquals(s.getSolver().getSolutionCount(), 28, "nb sol");
+            Assert.assertEquals(s.getSolver().getNodeCount(), 302, "nb nod");
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testOPT13() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 13);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
+        Assert.assertEquals(s.getSolver().getSolutionCount(), 5, "nb sol");
+        Assert.assertEquals(s.getSolver().getNodeCount(), 166, "nb nod");
     }
 
-	@Test(groups="1s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testOPT14() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 14);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
+        Assert.assertEquals(s.getSolver().getSolutionCount(), 5, "nb sol");
+        Assert.assertEquals(s.getSolver().getNodeCount(), 172, "nb nod");
     }
 
-	@Test(groups="1s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testOPT15() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 15);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
+        Assert.assertEquals(s.getSolver().getSolutionCount(), 6, "nb sol");
+        Assert.assertEquals(s.getSolver().getNodeCount(), 181, "nb nod");
     }
 
 }
