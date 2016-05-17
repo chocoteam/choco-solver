@@ -22,6 +22,6 @@ To run a sample, please follow the steps:
 5. Then run the resolution, with the optional arguments `-f -d rabbit` :
                 
     ```bash
-    java -cp classes:lib/choco-solver-4.0.0-SNAPSHOT-with-dependencies.jar \ 
+    java -cp classes:lib/choco-solver-4.0.0-SNAPSHOT-with-dependencies.jar \
             org.chocosolver.samples.integer.Nonogram -f -d rabbit
     ```            
