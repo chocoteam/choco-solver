@@ -27,32 +27,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.limits;
-
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.measure.IMeasures;
+package org.chocosolver.samples;
 
 /**
- * Set a limit over the number of backtracks allowed during the search.
- * When this limit is reached, the search loop is informed and the resolution is stopped.
- * <p/>
- * <br/>
  *
+ * <p>
+ * Project: choco-solver.
  * @author Charles Prud'homme
- * @since 15 juil. 2010
+ * @since 04/05/2016.
  */
-public final class BacktrackCounter extends ACounter {
+public class SetUpException extends Exception {
 
-    public BacktrackCounter(Model model, long backtracklimit) {
-        this(model.getSolver().getMeasures(), backtracklimit);
+    public SetUpException(String message) {
+        super(message);
     }
 
-    public BacktrackCounter(IMeasures measures, long backtracklimit) {
-        super(measures, backtracklimit);
-    }
-
-    @Override
-    public long currentValue() {
-        return measures.getBackTrackCount();
+    public SetUpException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

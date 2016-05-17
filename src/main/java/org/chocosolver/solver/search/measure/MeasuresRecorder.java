@@ -30,8 +30,8 @@
 package org.chocosolver.solver.search.measure;
 
 
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.objective.BoundsManager;
+import org.chocosolver.solver.search.SearchState;
 
 /**
  * Object which stores resolution information to get statistics
@@ -39,7 +39,7 @@ import org.chocosolver.solver.Solver;
  * @author Charles Prud'Homme
  * @since 3.0.0
  */
-public final class MeasuresRecorder implements IMeasures, Cloneable {
+public class MeasuresRecorder<N extends Number> implements IMeasures<N>, Cloneable {
 
     //***********************************************************************************
     // VARIABLE
@@ -48,84 +48,93 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
     /**
      * To transform time from nanoseconds to seconds
      */
-    private static final float IN_SEC = 1000 * 1000 * 1000f;
+    protected static final float IN_SEC = 1000 * 1000 * 1000f;
+
+    /**
+     * Name of the model observed -- no reference to the model should be done in this class
+     */
+    protected String modelName;
+
+    /**
+     * Reference to the bound manager
+     */
+    protected BoundsManager<N> boundsManager;
 
     /**
      * Indicates if an objective is declared (<tt>false</tt> means satisfaction problem).
      */
-    private boolean hasObjective;
+    protected boolean hasObjective;
 
     /**
      * Indicates if the optimal value has been proven for the objective (set to <tt>true</tt>).
      */
-    private boolean objectiveOptimal;
+    protected boolean objectiveOptimal;
 
     /**
      * Counts the number of solutions found so far.
      */
-    private long solutionCount;
+    protected long solutionCount;
 
     /**
      * Counts the time spent so far, starting from solver construction call.
      */
-    private long timeCount;
+    protected long timeCount;
 
     /**
      * Counts the time spent into reading the model
      */
-    private long readingTimeCount;
+    protected long readingTimeCount;
 
     /**
      * Counts the number of nodes opened so far.
      */
-    private long nodeCount;
+    protected long nodeCount;
 
     /**
      * Counts the number of backtracks done so far.
      */
-    private long backtrackCount;
+    protected long backtrackCount;
 
     /**
      * Counts the number of failures encountered so far.
      */
-    private long failCount;
+    protected long failCount;
 
     /**
      * Counts the number of restarts done so far.
      */
-    private long restartCount;
+    protected long restartCount;
 
     /**
      * Stores the overall maximum depth
      */
-    private long maxDepth;
+    protected long maxDepth;
 
     /**
      * Stores the current depth
      */
-    private long depth;
+    protected long depth;
 
     /**
      * When the clock watch starts
      */
-    private long startingTime;
+    protected long startingTime;
 
     /**
-     * The solver to measure
+     * Search state
      */
-    private Model model;
+    protected SearchState state;
 
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
 
     /**
-     * Create a measures recorder observing a {@code solver}
-     * @param model the solver to observe
+     * Create a measures recorder
      */
-    public MeasuresRecorder(Model model) {
+    public MeasuresRecorder(String modelName) {
         super();
-        this.model = model;
+        this.modelName = modelName;
     }
 
     //****************************************************************************************************************//
@@ -198,18 +207,23 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
     }
 
     @Override
-    public Number getBestSolutionValue() {
-        return model.getSolver().getObjectiveManager().getBestSolutionValue();
+    public N getBestSolutionValue() {
+        return boundsManager.getBestSolutionValue();
+    }
+
+    @Override
+    public SearchState getSearchState() {
+        return state;
+    }
+
+    @Override
+    public String getModelName() {
+        return modelName;
     }
 
     @Override
     public long getTimestamp() {
         return nodeCount + backtrackCount;
-    }
-
-    @Override
-    public Solver getSolver() {
-        return model.getSolver();
     }
 
     //****************************************************************************************************************//
@@ -319,9 +333,27 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         startingTime = System.nanoTime();
     }
 
+    /**
+     * Update the current search state
+     * @param state new search state
+     */
+    public void setSearchState(SearchState state){
+        this.state = state;
+    }
+
+    /**
+     * Update the bounds managed
+     * @param boundsManager new bound manager
+     */
+    public void setBoundsManager(BoundsManager<N> boundsManager){
+        this.boundsManager = boundsManager;
+        declareObjective(boundsManager.isOptimization());
+    }
+
     @Override
     public IMeasures copyMeasures() {
-        MeasuresRecorder ret = new MeasuresRecorder(model);
+        MeasuresRecorder ret = new MeasuresRecorder(modelName);
+        ret.boundsManager = new BoundsManager<>(boundsManager);
         ret.timeCount = this.timeCount;
         ret.nodeCount = this.nodeCount;
         ret.backtrackCount = this.backtrackCount;
@@ -337,6 +369,25 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         return ret;
     }
 
+    protected void set(IMeasures measures) {
+        timeCount = (long) (measures.getTimeCount() * MeasuresRecorder.IN_SEC);
+        nodeCount = measures.getNodeCount();
+        backtrackCount = measures.getBackTrackCount();
+        restartCount = measures.getRestartCount();
+        failCount = measures.getFailCount();
+        solutionCount = measures.getSolutionCount();
+        depth = measures.getCurrentDepth();
+        maxDepth = measures.getMaxDepth();
+        hasObjective = measures.hasObjective();
+        objectiveOptimal = measures.isObjectiveOptimal();
+        readingTimeCount = (long) (measures.getReadingTimeCount() * MeasuresRecorder.IN_SEC);
+    }
+
+    @Override
+    public BoundsManager getBoundsManager() {
+        return boundsManager;
+    }
+
     //****************************************************************************************************************//
 
     @Override
@@ -344,40 +395,46 @@ public final class MeasuresRecorder implements IMeasures, Cloneable {
         updateTime();
         StringBuilder st = new StringBuilder(256);
 //        st.append("- Search statistics\n");
-        if (model.getSolver().isStopCriterionMet()) {
-            st.append("- Incomplete search - Limit reached.\n");
-        } else if (model.getSolver().hasEndedUnexpectedly()) {
-            st.append("- Incomplete search - Unexpected interruption.\n");
-        } else {
-            if (model.getSolver().isSearchCompleted()) {
+        switch (state){
+            case NEW:
+                st.append("- Search not started- ");
+                break;
+            case RUNNING:
+                st.append("- Running search - ");
+                break;
+            case TERMINATED:
                 st.append("- Complete search - ");
-            }
-            if (solutionCount == 0) {
-                st.append("No solution.");
-            } else if (solutionCount == 1) {
-                st.append("1 solution found.");
-            } else {
-                st.append(String.format("%,d solution(s) found.", solutionCount));
-            }
-            st.append('\n');
+                if (solutionCount == 0) {
+                    st.append("No solution.");
+                } else if (solutionCount == 1) {
+                    st.append("1 solution found.");
+                } else {
+                    st.append(String.format("%,d solution(s) found.", solutionCount));
+                }
+                st.append('\n');
+                break;
+            case STOPPED:
+                st.append("- Incomplete search - Limit reached.\n");
+                break;
+            case KILLED:
+                st.append("- Incomplete search - Unexpected interruption.\n");
+                break;
         }
-        st.append("\tModel[").append(model.getName()).append("]\n");
+        st.append("\tModel[").append(modelName).append("]\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
-            st.append("\t").append(model.getSolver().getObjectiveManager()).append(",\n");
+            st.append("\t").append(boundsManager).append(",\n");
         }
         st.append(String.format("\tBuilding time : %,.3fs" +
                         "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                        "Restarts: %,d\n\tVariables: %,d\n\tConstraints: %,d",
+                        "Restarts: %,d",
                 getReadingTimeCount(),
                 getTimeCount(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
                 getFailCount(),
-                getRestartCount(),
-                model.getNbVars(),
-                model.getNbCstrs()
+                getRestartCount()
         ));
         return st.toString();
     }

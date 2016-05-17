@@ -30,14 +30,20 @@
 package org.chocosolver.solver.search.measure;
 
 
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.objective.BoundsManager;
+import org.chocosolver.solver.search.SearchState;
 
 /**
  * Interface for providing resolution statistics
  *
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
-public interface IMeasures {
+public interface IMeasures<N extends Number> {
+
+    /**
+     * @return name of the model/solver observed
+     */
+    String getModelName();
 
     /**
      * @return the current world unique id
@@ -107,17 +113,27 @@ public interface IMeasures {
     /**
      * @return the objective value of the best solution found (can be Integer or Double)
      */
-    Number getBestSolutionValue();
+    N getBestSolutionValue();
+
+    /**
+     * @return the search state
+     */
+    SearchState getSearchState();
+
+    /**
+     * @return current bound manager
+     */
+    BoundsManager<N> getBoundsManager();
 
     /**
      * @return a summary of recorded statistics
      */
     default String toOneLineString() {
         StringBuilder st = new StringBuilder(256);
-        st.append("Model[").append(getSolver().getModel().getName()).append("], ");
+        st.append("Model[").append(getModelName()).append("], ");
         st.append(String.format("%d Solutions, ", getSolutionCount()));
         if (hasObjective()) {
-            st.append(getSolver().getObjectiveManager()).append(", ");
+            st.append(getBoundsManager()).append(", ");
         }
         st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
                 getTimeCount(),
@@ -160,11 +176,6 @@ public interface IMeasures {
                 getFailCount(),
                 getRestartCount());
     }
-
-    /**
-     * @return the solver object associated with this measures
-     */
-    Solver getSolver();
 
     /**
      * copy the values

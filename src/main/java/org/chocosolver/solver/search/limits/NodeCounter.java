@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.limits;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.measure.IMeasures;
 
 /**
  * Set a limit over the number of nodes opened allowed during the search.
@@ -42,7 +43,11 @@ import org.chocosolver.solver.Model;
 public final class NodeCounter extends ACounter {
 
     public NodeCounter(Model model, long nodelimit) {
-        super(model, nodelimit);
+        this(model.getSolver().getMeasures(), nodelimit);
+    }
+
+    public NodeCounter(IMeasures measures, long nodelimit) {
+        super(measures, nodelimit);
     }
 
     @Override
