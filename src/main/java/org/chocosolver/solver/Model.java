@@ -730,7 +730,14 @@ public class Model implements IModel {
      * @return the ibex reference
      */
     public Ibex getIbex() {
-        if (ibex == null) ibex = new Ibex();
+        if (ibex == null) {
+            try {
+                ibex = new Ibex();
+            }catch (ExceptionInInitializerError ini){
+                throw new SolverException("Choco cannot initialize Ibex.\n" +
+                        "The following option should be passed as VM argument: \"-Djava.library.path=/path/to/ibex/dynlib\"");
+            }
+        }
         return ibex;
     }
 

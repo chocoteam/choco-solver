@@ -27,34 +27,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.expression.arithmetic;
+package org.chocosolver.solver.expression.continuous.relational;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.StringUtils;
-import org.chocosolver.util.tools.VariableUtils;
-
-import java.util.Map;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
+import org.chocosolver.solver.variables.RealVar;
 
 /**
- * Unary arithmetic expression
+ * Binary relational expression over continuous expressions
  * <p>
  * Project: choco-solver.
  *
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public class UnArExpression implements ArExpression {
-
-    /**
-     * The model in which the expression is declared
-     */
-    Model model;
-
-    /**
-     * Lazy creation of the underlying variable
-     */
-    IntVar me = null;
+public class BiCReExpression implements CReExpression {
 
     /**
      * Operator of the arithmetic expression
@@ -62,62 +51,50 @@ public class UnArExpression implements ArExpression {
     Operator op = null;
 
     /**
-     * The expression this expression relies on
+     * The first expression this expression relies on
      */
-    private ArExpression e;
+    private CArExpression e1;
+    /**
+     * The second expression this expression relies on
+     */
+    private CArExpression e2;
 
     /**
-     * Builds a unary expression
+     * Builds a binary expression
      *
-     * @param op  operator
-     * @param exp an arithmetic expression
+     * @param op an operator
+     * @param e1 an expression
+     * @param e2 an expression
      */
-    public UnArExpression(Operator op, ArExpression exp) {
+    public BiCReExpression(Operator op, CArExpression e1, CArExpression e2) {
         this.op = op;
-        this.e = exp;
-        this.model = e.getModel();
+        this.e1 = e1;
+        this.e2 = e2;
     }
 
     @Override
-    public Model getModel() {
-        return model;
-    }
-
-    @Override
-    public ArExpression[] getExpressionChild() {
-        return new ArExpression[]{e};
-    }
-
-    @Override
-    public IntVar intVar() {
-        if (me == null) {
-            IntVar v = e.intVar();
-            switch (op){
-                case NEG:
-                    me = model.intMinusView(v);
-                    break;
-                case ABS:
-                    me = model.intAbsView(v);
-                    break;
-                case SQR:
-                    int[] bounds = VariableUtils.boundsForMultiplication(v, v);
-                    me = model.intVar(StringUtils.randomName("sqr_exp_"), bounds[0], bounds[1]);
-                    model.times(v, v, me).post();
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unary arithmetic expressions does not support "+op.name());
-            }
+    public Constraint ibex(double p) {
+        RealVar v1 = e1.realVar(p);
+        RealVar v2 = e2.realVar(p);
+        Model model = v1.getModel();
+        switch (op) {
+            case LT:
+                return model.realIbexGenericConstraint("{0}<{1}", v1, v2);
+            case LE:
+                return model.realIbexGenericConstraint("{0}<={1}", v1, v2);
+            case GE:
+                return model.realIbexGenericConstraint("{0}>={1}", v1, v2);
+            case GT:
+                return model.realIbexGenericConstraint("{0}>{1}", v1, v2);
+            case EQ:
+                return model.realIbexGenericConstraint("{0}={1}", v1, v2);
         }
-        return me;
+        throw new SolverException("Unexpected case");
     }
 
-    @Override
-    public int eval(int[] values, Map<IntVar, Integer> map) {
-        return op.eval(e.eval(values, map));
-    }
 
     @Override
     public String toString() {
-        return op.name() + "(" + e.toString() + ")";
+        return op.name() + "(" + e1.toString() + "," + e2.toString() + ")";
     }
 }

@@ -27,11 +27,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.expression.arithmetic;
+package org.chocosolver.solver.expression.discrete.arithmetic;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.expression.relational.BiReExpression;
-import org.chocosolver.solver.expression.relational.ReExpression;
+import org.chocosolver.solver.expression.discrete.relational.BiReExpression;
+import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.MathUtils;
 
