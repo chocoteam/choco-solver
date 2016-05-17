@@ -15,13 +15,13 @@ To run a sample, please follow the steps:
     ```bash
     javac -d classes \
            -sourcepath ./src/main/java/ \
-           -cp .:choco-solver-4.0.0-SNAPSHOT-with-dependencies.jar \
+           -cp .:lib/choco-solver-4.0.0-SNAPSHOT-with-dependencies.jar \
            src/main/java/org/chocosolver/samples/integer/Nonogram.java
     ```
    
 5. Then run the resolution, with the optional arguments `-f -d rabbit` :
                 
     ```bash
-    java -cp classes:choco-solver-4.0.0-SNAPSHOT-with-dependencies.jar \ 
+    java -cp classes:lib/choco-solver-4.0.0-SNAPSHOT-with-dependencies.jar \ 
             org.chocosolver.samples.integer.Nonogram -f -d rabbit
     ```            
