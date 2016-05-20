@@ -31,7 +31,12 @@ package org.chocosolver.memory;
 
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.memory.trailing.trail.*;
+import org.chocosolver.memory.trailing.trail.chunck.*;
 import org.chocosolver.memory.trailing.trail.flatten.*;
+import org.chocosolver.memory.trailing.trail.unsafe.UnsafeBoolTrail;
+import org.chocosolver.memory.trailing.trail.unsafe.UnsafeDoubleTrail;
+import org.chocosolver.memory.trailing.trail.unsafe.UnsafeIntTrail;
+import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
 
 import static org.chocosolver.memory.trailing.EnvironmentTrailing.*;
 
@@ -147,6 +152,48 @@ public class EnvironmentBuilder {
         env.setDoubleTrail(dt);
         env.setOperationTrail(ot);
         env.setLongTrail(lt);
+        return env;
+    }
+
+    /**
+     * Build a chunk environment
+     * @return the resulting environment
+     */
+    public static EnvironmentTrailing buildChunkEnvironment(){
+        EnvironmentTrailing env = new EnvironmentTrailing();
+        env.setBoolTrail(new StoredBoolChunckTrail(NBWORLDS, LOADFACTOR));
+        env.setIntTrail(new StoredIntChunckTrail(NBWORLDS, LOADFACTOR));
+        env.setDoubleTrail(new StoredDoubleChunckTrail(NBWORLDS, LOADFACTOR));
+        env.setLongTrail(new StoredLongChunckTrail(NBWORLDS, LOADFACTOR));
+        env.setOperationTrail(new OperationChunckTrail(NBWORLDS, LOADFACTOR));
+        return env;
+    }
+
+    /**
+     * Build an unsafe environment (operations are flat)
+     * @return the resulting environment
+     */
+    public static EnvironmentTrailing buildUnsafeEnvironment(){
+        EnvironmentTrailing env = new EnvironmentTrailing();
+        env.setBoolTrail(new UnsafeBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        env.setIntTrail(new UnsafeIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        env.setDoubleTrail(new UnsafeDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        env.setLongTrail(new UnsafeLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        env.setOperationTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        return env;
+    }
+
+    /**
+     * Build a flat environment
+     * @return the resulting environment
+     */
+    public static EnvironmentTrailing buildFlatEnvironment(){
+        EnvironmentTrailing env = new EnvironmentTrailing();
+        env.setBoolTrail(new StoredBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        env.setIntTrail(new StoredIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        env.setDoubleTrail(new StoredDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        env.setLongTrail(new StoredLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        env.setOperationTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
         return env;
     }
 }

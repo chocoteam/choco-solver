@@ -43,10 +43,6 @@ import org.chocosolver.memory.trailing.trail.flatten.*;
  */
 public final class EnvironmentTrailing extends AbstractEnvironment {
 
-    public enum Type {
-        FLAT, UNSAFE, CHUNCK
-    }
-
     /**
      * The maximum numbers of worlds that a
      * {@link org.chocosolver.memory.IStorage} can handle.
