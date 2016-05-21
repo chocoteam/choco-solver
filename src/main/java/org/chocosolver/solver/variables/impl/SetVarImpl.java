@@ -102,6 +102,49 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	}
 
 	/**
+	 * Creates a set variable, of domain <code>[lb, ub]</code>
+	 * Beware : Use this constructor with caution (domain is directly accessible)
+	 * lb and ub should be created properly (e.g. lb subset of ub) and should not be modified externally
+	 *
+	 * Both lb and ub should be backtrackable sets (stored sets): use SetFactory.makeStoredSet to build them
+	 *
+	 * @param name		name of the variable
+	 * @param lb		lower bound of the set variable (mandatory elements)
+	 * @param ub		upper bound of the set variable (potential elements)
+	 * @param model	solver of the variable.
+	 */
+	public SetVarImpl(String name, ISet lb, ISet ub, Model model) {
+		super(name, model);
+		this.lb = lb;
+		this.ub = ub;
+		lbReadOnly = new Set_ReadOnly(lb);
+		ubReadOnly = new Set_ReadOnly(ub);
+		for(int i:lb){
+			if(!ub.contain(i)){
+				throw new UnsupportedOperationException("Invalid SetVar domain definition : "
+						+i+" is in the LB but not in the UB.");
+			}
+		}
+	}
+
+	/**
+	 * Creates a fixed Set variable, equal to <code>value</code>
+	 * Beware : Use this constructor with caution (domain is directly accessible)
+	 * value should be created properly and should not be modified afterward
+	 *
+	 * @param name		name of the variable
+	 * @param value		value of the set variable
+	 * @param model	solver of the variable.
+	 */
+	public SetVarImpl(String name, ISet value, Model model) {
+		super(name, model);
+		lb = value;
+		ub = lb;
+		lbReadOnly = new Set_ReadOnly(lb);
+		ubReadOnly = new Set_ReadOnly(ub);
+	}
+
+	/**
 	 * Creates a fixed Set variable, equal to <code>value</code>
 	 *
 	 * @param name		name of the variable
