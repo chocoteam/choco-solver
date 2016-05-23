@@ -188,12 +188,8 @@ public class EnvironmentBuilder {
      * @return the resulting environment
      */
     public static EnvironmentTrailing buildFlatEnvironment(){
-        EnvironmentTrailing env = new EnvironmentTrailing();
-        env.setBoolTrail(new StoredBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        env.setIntTrail(new StoredIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        env.setDoubleTrail(new StoredDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        env.setLongTrail(new StoredLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        env.setOperationTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        return env;
+        // default implementation is flat
+        // Creates trails on the fly
+        return new EnvironmentTrailing();
     }
 }
