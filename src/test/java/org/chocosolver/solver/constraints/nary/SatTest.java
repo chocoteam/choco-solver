@@ -219,7 +219,7 @@ public class SatTest {
         while(model.getSolver().solve()){
             solution.record();
         }
-        assertEquals(solution.getIntVal(var).intValue(), 2);
+        assertEquals(solution.getIntVal(var), 2);
 
     }
 }

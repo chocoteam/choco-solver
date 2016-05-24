@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.ProblemMaker;
 import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -471,4 +472,39 @@ public class ModelTest {
         });
         Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
     }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
+    public void testRecord() {
+        Model m = ProblemMaker.makeGolombRuler(6);
+		IntVar[] ticks = (IntVar[]) m.getHook("ticks");
+		Solution s = new Solution(m);
+		m.getSolver().solve();
+		// solution not recorded
+		System.out.println(s.getIntVal(ticks[0]));
+    }
+
+	@Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
+	public void testRecord2() {
+		Model m = ProblemMaker.makeGolombRuler(6);
+		IntVar[] ticks = (IntVar[]) m.getHook("ticks");
+		IntVar p = m.boolVar();
+		Solution s = new Solution(m, ticks);
+		m.getSolver().solve();
+		s.record();
+		System.out.println(s.getIntVal(ticks[0]));
+		// not recorded variable
+		System.out.println(s.getIntVal(p));
+	}
+
+	@Test(groups = "1s", timeOut = 60000)
+	public void testRecord3() {
+		Model m = ProblemMaker.makeGolombRuler(6);
+		IntVar[] ticks = (IntVar[]) m.getHook("ticks");
+		IntVar p = m.boolVar();
+		Solution s = new Solution(m, ArrayUtils.append(ticks, new IntVar[]{p}));
+		m.getSolver().solve();
+		s.record();
+		System.out.println(s.getIntVal(ticks[0]));
+		System.out.println(s.getIntVal(p));
+	}
 }

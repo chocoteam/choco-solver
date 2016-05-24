@@ -31,6 +31,7 @@ package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -205,9 +206,9 @@ public class Solution implements ICause {
      * @param v IntVar (or BoolVar)
      * @return the value of variable v in this solution, or null if the variable is not instantiated in the solution
      */
-    public Integer getIntVal(IntVar v) {
+    public int getIntVal(IntVar v) {
         if (empty) {
-            throw new UnsupportedOperationException("Empty solution. No solution recorded yet");
+            throw new SolverException("Cannot access value of "+v+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
         if (intmap.containsKey(v.getId())) {
             return intmap.get(v.getId());
@@ -215,7 +216,7 @@ public class Solution implements ICause {
             if ((v.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
                 return v.getValue();
             } else {
-                return null;
+                throw new SolverException("Cannot access value of "+v+": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
             }
         }
     }
@@ -228,14 +229,14 @@ public class Solution implements ICause {
      */
     public int[] getSetVal(SetVar s) {
         if (empty) {
-            throw new UnsupportedOperationException("Empty solution. No solution recorded yet");
+            throw new SolverException("Cannot access value of "+s+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
         if (setmap.containsKey(s.getId())) {
             return setmap.get(s.getId());
         } else if ((s.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
             return s.getValue().toArray();
         } else {
-            return null;
+            throw new SolverException("Cannot access value of "+s+": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
         }
     }
 
@@ -247,7 +248,7 @@ public class Solution implements ICause {
      */
     public double[] getRealBounds(RealVar r) {
         if (empty) {
-            throw new UnsupportedOperationException("Empty solution. No solution recorded yet");
+            throw new SolverException("Cannot access value of "+r+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
         if (realmap.containsKey(r.getId())) {
             return realmap.get(r.getId());
@@ -255,7 +256,7 @@ public class Solution implements ICause {
             if ((r.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
                 return new double[]{r.getLB(), r.getUB()};
             } else {
-                return null;
+                throw new SolverException("Cannot access value of "+r+": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
             }
         }
     }

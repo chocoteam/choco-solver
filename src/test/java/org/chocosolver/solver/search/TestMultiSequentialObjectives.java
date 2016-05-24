@@ -56,9 +56,9 @@ public class TestMultiSequentialObjectives {
         m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b, c));
 		Solution s = m.getSolver().findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
-		Assert.assertEquals(s.getIntVal(a).intValue(), 32);
-		Assert.assertEquals(s.getIntVal(b).intValue(), 33);
-		Assert.assertEquals(s.getIntVal(c).intValue(), 34);
+		Assert.assertEquals(s.getIntVal(a), 32);
+		Assert.assertEquals(s.getIntVal(b), 33);
+		Assert.assertEquals(s.getIntVal(c), 34);
 	}
 
 	/**
@@ -77,9 +77,9 @@ public class TestMultiSequentialObjectives {
         m.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(a, b));
 		Solution s = m.getSolver().findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
-		Assert.assertEquals(s.getIntVal(a).intValue(), 24);
-		Assert.assertEquals(s.getIntVal(b).intValue(), 25);
-		Assert.assertEquals(s.getIntVal(c).intValue(), 49);
+		Assert.assertEquals(s.getIntVal(a), 24);
+		Assert.assertEquals(s.getIntVal(b), 25);
+		Assert.assertEquals(s.getIntVal(c), 49);
 	}
 
 
@@ -98,9 +98,9 @@ public class TestMultiSequentialObjectives {
         m.getSolver().set(SearchStrategyFactory.inputOrderUBSearch(a, b, c));
         Solution s = m.getSolver().findLexOptimalSolution(vals, false);
         Assert.assertNotNull(s);
-        Assert.assertEquals(s.getIntVal(a).intValue(), 0);
-        Assert.assertEquals(s.getIntVal(b).intValue(), 1);
-        Assert.assertEquals(s.getIntVal(c).intValue(), 2);
+        Assert.assertEquals(s.getIntVal(a), 0);
+        Assert.assertEquals(s.getIntVal(b), 1);
+        Assert.assertEquals(s.getIntVal(c), 2);
     }
 
 	@Test(groups="1s", timeOut=60000)
@@ -116,8 +116,8 @@ public class TestMultiSequentialObjectives {
 		Solution s = m.getSolver().findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
 		Assert.assertNotNull(s);
 		System.out.println(s);
-		Assert.assertEquals(s.getIntVal(load).intValue(), 9);
-		Assert.assertEquals(s.getIntVal(card).intValue(), 2);
+		Assert.assertEquals(s.getIntVal(load), 9);
+		Assert.assertEquals(s.getIntVal(card), 2);
 	}
 
 }
