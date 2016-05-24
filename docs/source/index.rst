@@ -36,8 +36,8 @@ Overview
    src/202.objects
    src/203.firstexample2
 
-Tutorial: Alignment of DNA sequences
-====================================
+Blank page syndrome
+===================
 
 .. toctree::
    :maxdepth: 2
