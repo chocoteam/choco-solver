@@ -122,6 +122,36 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                     }
                 }
             }
+            if(!again){
+                int nbInst = 0;
+                for (int i = 0; i < n; i++) {
+                    if (vars[i].isInstantiated()) {
+                        nbInst++;
+                    }
+                }
+				// remove used variables when alldiff is required over uninstantiated variables
+                if(n-nbInst == countMax - count){
+                    for (int i = concernedValues.length - 1; i >= 0; i--) {
+                        boolean mandatory = false;
+                        int value = concernedValues[i];
+                        for (int v = 0; v < n; v++) {
+                            if (vars[v].isInstantiatedTo(value)) {
+                                mandatory = true;
+                                break;
+                            }
+                        }
+                        if (mandatory) {
+                            for (int v = 0; v < n; v++) {
+                                if(!vars[v].isInstantiated()){
+                                    if(vars[v].removeValue(value, this)){
+                                        again = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         if (count >= vars[n].getUB()) {
             setPassive();
