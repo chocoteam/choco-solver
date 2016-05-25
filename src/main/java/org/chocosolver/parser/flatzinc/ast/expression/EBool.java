@@ -83,7 +83,7 @@ public final class EBool extends Expression {
 
     @Override
     public BoolVar boolVarValue(Model model) {
-        return intValue() == 1? model.ONE(): model.ZERO();
+        return intValue() == 1 ? model.boolVar(true) : model.boolVar(false);
     }
 
     @Override

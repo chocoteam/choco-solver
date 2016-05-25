@@ -30,7 +30,6 @@ package org.chocosolver.parser.flatzinc.ast.expression;
 import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -125,9 +124,9 @@ public final class EIdentifier extends Expression {
     @Override
     public BoolVar boolVarValue(Model model) {
         if (Integer.class.isInstance(object)) {
-            return ((Integer) object == 1) ? model.ONE() : model.ZERO();
+            return ((Integer) object == 1) ? model.boolVar(true) : model.boolVar(false);
         } else if (Boolean.class.isInstance(object)) {
-            return ((Boolean) object) ? model.ONE() : model.ZERO();
+            return ((Boolean) object) ? model.boolVar(true) : model.boolVar(false);
         }
         return (BoolVar) object;
     }
@@ -140,14 +139,14 @@ public final class EIdentifier extends Expression {
                 int[] values = (int[]) object;
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Integer) object == 1) ? model.ONE() : model.ZERO();
+                    vars[i] = ((Integer) object == 1) ? model.boolVar(true) : model.boolVar(false);
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Boolean) object) ? model.ONE() : model.ZERO();
+                    vars[i] = ((Boolean) object) ? model.boolVar(true) : model.boolVar(false);
                 }
                 return vars;
             }

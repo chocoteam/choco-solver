@@ -970,7 +970,7 @@ public enum FConstraint {
             for (int i = 0; i < nbOfObj; i++) {
                 IntVar shapeId = kind[i];
                 IntVar[] coords = Arrays.copyOfRange(x, i * dim, (i + 1) * dim);
-                objects.add(new GeostObject(dim, i, shapeId, coords, model.ONE(), model.ONE(), model.ONE()));
+                objects.add(new GeostObject(dim, i, shapeId, coords, model.intVar(1), model.intVar(1), model.intVar(1)));
                 objIds[i] = i;
             }
 
@@ -988,7 +988,7 @@ public enum FConstraint {
             //Create the external constraints vecotr
             List<ExternalConstraint> extcstr = new ArrayList<>(1);
             //add the external constraint of type non overlapping
-            extcstr.add(new NonOverlapping(Constants.NON_OVERLAPPING, ArrayUtils.oneToN(dim), objIds));
+            extcstr.add(new NonOverlapping(Constants.NON_OVERLAPPING, ArrayUtils.array(1, dim), objIds));
 
 
             int originOfObjects = objects.size() * dim; //Number of domain variables to represent the origin of all objects
