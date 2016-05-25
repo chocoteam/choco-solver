@@ -34,6 +34,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
@@ -84,5 +85,17 @@ public class DivTest extends AbstractTernaryTest {
             });
             while (s.getSolver().solve()) ;
         }
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testTP1(){
+        final Model s = new Model();
+        IntVar a = s.intVar("a", 0, 525000);
+        IntVar b = s.intVar("b", 0, 5000);
+        IntVar c = s.intVar("c", 0, 525000);
+        s.div(a, b, c).post();
+        Solver r = s.getSolver();
+        r.solve();
+        Assert.assertEquals(r.getSolutionCount(), 1);
     }
 }

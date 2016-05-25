@@ -35,6 +35,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.MathUtils;
 
 /**
  * X/Y = Z
@@ -302,7 +303,8 @@ public class PropDivXYZ extends Propagator<IntVar> {
      * @throws ContradictionException
      */
     private boolean updateAbsX() throws ContradictionException {
-        return absX.updateLowerBound(absZ.getLB() * absY.getLB(), this) | absX.updateUpperBound((absZ.getUB() * absY.getUB()) + absY.getUB() - 1, this);
+        return absX.updateLowerBound(MathUtils.safeMultiply(absZ.getLB(), absY.getLB()), this)
+                | absX.updateUpperBound(MathUtils.safeAdd(MathUtils.safeMultiply(absZ.getUB(), absY.getUB()), absY.getUB() - 1), this);
     }
 
     /**
