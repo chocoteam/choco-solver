@@ -29,7 +29,6 @@
  */
 package org.chocosolver.solver.constraints.nary.nValue;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -50,7 +49,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private TIntArrayList concernedValues;
+    private int[] concernedValues;
     private int n;
     private int[] mate;
 
@@ -67,12 +66,11 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
      * @param concernedValues will be sorted!
      * @param nValues         integer variable
      */
-    public PropAtLeastNValues(IntVar[] variables, TIntArrayList concernedValues, IntVar nValues) {
+    public PropAtLeastNValues(IntVar[] variables, int[] concernedValues, IntVar nValues) {
         super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false);
         n = variables.length;
-        concernedValues.sort();
         this.concernedValues = concernedValues;
-        mate = new int[concernedValues.size()];
+        mate = new int[concernedValues.length];
     }
 
     //***********************************************************************************
@@ -84,11 +82,11 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         vars[n].updateUpperBound(n, this);
         int count = 0;
         int countMax = 0;
-        for (int i = concernedValues.size() - 1; i >= 0; i--) {
+        for (int i = concernedValues.length - 1; i >= 0; i--) {
             boolean possible = false;
             boolean mandatory = false;
             mate[i] = -1;
-            int value = concernedValues.get(i);
+            int value = concernedValues[i];
             for (int v = 0; v < n; v++) {
                 if (vars[v].contains(value)) {
                     possible = true;
@@ -117,10 +115,40 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         // filtering decision variables
         boolean again = false;
         if (count < countMax && countMax == vars[n].getLB()) {
-            for (int i = concernedValues.size() - 1; i >= 0; i--) {
+            for (int i = concernedValues.length - 1; i >= 0; i--) {
                 if (mate[i] >= 0) {
-                    if(vars[mate[i]].instantiateTo(concernedValues.get(i), this)){
+                    if(vars[mate[i]].instantiateTo(concernedValues[i], this)){
                         again = true;
+                    }
+                }
+            }
+            if(!again){
+                int nbInst = 0;
+                for (int i = 0; i < n; i++) {
+                    if (vars[i].isInstantiated()) {
+                        nbInst++;
+                    }
+                }
+				// remove used variables when alldiff is required over uninstantiated variables
+                if(n-nbInst == countMax - count){
+                    for (int i = concernedValues.length - 1; i >= 0; i--) {
+                        boolean mandatory = false;
+                        int value = concernedValues[i];
+                        for (int v = 0; v < n; v++) {
+                            if (vars[v].isInstantiatedTo(value)) {
+                                mandatory = true;
+                                break;
+                            }
+                        }
+                        if (mandatory) {
+                            for (int v = 0; v < n; v++) {
+                                if(!vars[v].isInstantiated()){
+                                    if(vars[v].removeValue(value, this)){
+                                        again = true;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -140,11 +168,11 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
     public ESat isEntailed() {
         int countMin = 0;
         int countMax = 0;
-        for (int i = concernedValues.size() - 1; i >= 0; i--) {
+        for (int i = concernedValues.length - 1; i >= 0; i--) {
             boolean possible = false;
             boolean mandatory = false;
             for (int v = 0; v < n; v++) {
-                if (vars[v].contains(concernedValues.get(i))) {
+                if (vars[v].contains(concernedValues[i])) {
                     possible = true;
                     if (vars[v].isInstantiated()) {
                         mandatory = true;

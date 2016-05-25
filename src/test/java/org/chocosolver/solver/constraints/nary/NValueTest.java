@@ -37,6 +37,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.BitSet;
@@ -95,5 +96,42 @@ public class NValueTest {
             }
         });
         while (model.getSolver().solve()) ;
+    }
+
+
+    @Test(groups="1s", timeOut=60000)
+    public void testAtLeastFixed() {
+        Model model = new Model();
+        final IntVar[] XS = model.intVarArray("XS", 6, 0, 5, false);
+        final IntVar N = model.intVar("N", 6);
+        model.atLeastNValues(XS, N, false).post();
+        model.getSolver().showStatistics();
+        model.getSolver().showDecisions();
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testAtMostFixed() {
+        Model model = new Model();
+        final IntVar[] XS = model.intVarArray("XS", 6, 0, 5, false);
+        final IntVar N = model.intVar("N", 6);
+        model.atMostNValues(XS, N, false).post();
+        model.getSolver().showStatistics();
+        model.getSolver().showDecisions();
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNValuesFixed() {
+        Model model = new Model();
+        final IntVar[] XS = model.intVarArray("XS", 6, 0, 5, false);
+        final IntVar N = model.intVar("N", 6);
+        model.nValues(XS, N).post();
+        model.getSolver().showStatistics();
+        model.getSolver().showDecisions();
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
     }
 }

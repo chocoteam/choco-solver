@@ -60,7 +60,7 @@ public interface IViewFactory extends ISelf<Model> {
         } else {
             BoolVar not;
             if(bool.isInstantiated()) {
-                not = bool.getValue() == 1 ? _me().ZERO() : _me().ONE();
+                not = bool.getValue() == 1 ? _me().boolVar(false) : _me().boolVar(true);
             }else if (_me().getSettings().enableViews()) {
                 not = new BoolNotView(bool);
             }else {

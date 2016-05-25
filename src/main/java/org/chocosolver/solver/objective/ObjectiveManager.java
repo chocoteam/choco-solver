@@ -51,14 +51,13 @@ import java.util.function.Function;
  *           if {@link #objective} is an {@link IntVar}, then this is an {@link Integer},
  *           if {@link #objective} is a {@link RealVar}, then this is a {@link Double},
  */
-public class ObjectiveManager<V extends Variable, N extends Number> implements ICause {
+public class ObjectiveManager<V extends Variable, N extends Number> extends BoundsManager<N> implements ICause {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    /** Define how should the objective be optimize */
-    protected ResolutionPolicy policy;
+
     /** The variable to optimize **/
     final protected V objective;
     /** set to <tt>true<tt/> if {@link #objective} is an integer variable, to <tt>false<tt/> if it is a real variable **/
@@ -67,10 +66,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     final private double precision;
     /** Define how the cut should be update when posting the cut **/
     private Function<N, N> mCutComputer;
-    /** best lower bound found so far **/
-    protected N bestProvedLB;
-    /** best upper bound found so far **/
-    protected N bestProvedUB; // best bounds found so far
+
 
     /**
      * Create an objective manager for satisfaction problem, ie when no objective is defined
@@ -95,6 +91,7 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     @SuppressWarnings("unchecked")
     private ObjectiveManager(V objective, ResolutionPolicy policy, double precision, boolean intOrReal,
                              Function<N,N> cutComputer) {
+        super(policy);
         this.policy = policy;
         this.objective = objective;
         this.precision = precision;
@@ -140,13 +137,6 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
-
-    /**
-     * @return true iff the problem is an optimization problem
-     */
-    public boolean isOptimization() {
-        return policy != ResolutionPolicy.SATISFACTION;
-    }
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
@@ -225,18 +215,6 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
         }
     }
 
-    /**
-     * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
-     */
-    public N getBestSolutionValue() {
-        if (policy == ResolutionPolicy.MINIMIZE) {
-            return bestProvedUB;
-        }
-        if (policy == ResolutionPolicy.MAXIMIZE) {
-            return bestProvedLB;
-        }
-        throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
-    }
 
     /**
      * States that lb is a global lower bound on the problem
@@ -359,30 +337,9 @@ public class ObjectiveManager<V extends Variable, N extends Number> implements I
     //***********************************************************************************
 
     /**
-     * @return the ResolutionPolicy of the problem
-     */
-    public ResolutionPolicy getPolicy() {
-        return policy;
-    }
-
-    /**
      * @return the objective variable
      */
     public V getObjective() {
         return objective;
-    }
-
-    /**
-     * @return the best lower bound computed so far
-     */
-    public N getBestLB() {
-        return bestProvedLB;
-    }
-
-    /**
-     * @return the best upper bound computed so far
-     */
-    public N getBestUB() {
-        return bestProvedUB;
     }
 }

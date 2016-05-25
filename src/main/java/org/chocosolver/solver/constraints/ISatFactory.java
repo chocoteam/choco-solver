@@ -62,10 +62,10 @@ public interface ISatFactory extends ISelf<Model> {
         ILogical tree = LogicTreeToolBox.toCNF(TREE, _me());
         sat.beforeAddingClauses();
         boolean ret = true;
-        if (_me().ONE().equals(tree)) {
-            ret = addClauseTrue(_me().ONE());
-        } else if (_me().ZERO().equals(tree)) {
-            ret = addClauseTrue(_me().ZERO());
+        if (_me().boolVar(true).equals(tree)) {
+            ret = addClauseTrue(_me().boolVar(true));
+        } else if (_me().boolVar(false).equals(tree)) {
+            ret = addClauseTrue(_me().boolVar(false));
         } else {
             ILogical[] clauses;
             if (!tree.isLit() && ((LogOp) tree).is(LogOp.Operator.AND)) {

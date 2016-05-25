@@ -30,6 +30,7 @@
 package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.solver.constraints.Constraint;
@@ -113,12 +114,6 @@ public class Model implements IModel {
     /** Counter used to set ids to variables and propagators */
     private int id = 1;
 
-    /** Basic ZERO constant, cached to avoid multiple useless occurrences. */
-    private BoolVar ZERO;
-
-    /** Basic ONE constant, cached to avoid multiple useless occurrences. */
-    private BoolVar ONE;
-
     /** A MiniSat instance, useful to deal with clauses*/
     protected SatConstraint minisat;
 
@@ -170,7 +165,7 @@ public class Model implements IModel {
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
      */
     public Model(String name) {
-        this(new EnvironmentTrailing(), name);
+        this(EnvironmentBuilder.buildFlatEnvironment(), name);
     }
 
     /**
@@ -222,48 +217,19 @@ public class Model implements IModel {
     }
 
     /**
-     * The basic constant "0" used as an integer variable or a (false) boolean variable
-     * @return a BoolVar set to 0
-     */
-    public BoolVar ZERO() {
-        if (ZERO == null) {
-            _zeroOne();
-        }
-        return ZERO;
-    }
-
-    /**
-     * The basic constant "1" used as an integer variable or a (true) boolean variable
-     * @return a BoolVar set to 1
-     */
-    public BoolVar ONE() {
-        if (ONE == null) {
-            _zeroOne();
-        }
-        return ONE;
-    }
-
-    private void _zeroOne(){
-        ZERO = (BoolVar) this.intVar(0);
-        ONE = (BoolVar) this.intVar(1);
-        ZERO._setNot(ONE);
-        ONE._setNot(ZERO);
-    }
-
-    /**
      * The basic "true" constraint, which is always satisfied
      * @return a "true" constraint
      */
-    public Constraint TRUE() {
-        return new Constraint("TRUE cstr", new PropTrue(ONE()));
+    public Constraint trueConstraint() {
+        return new Constraint("TRUE cstr", new PropTrue(boolVar(true)));
     }
 
     /**
      * The basic "false" constraint, which is always violated
      * @return a "false" constraint
      */
-    public Constraint FALSE() {
-        return new Constraint("FALSE cstr", new PropFalse(ZERO()));
+    public Constraint falseConstraint() {
+        return new Constraint("FALSE cstr", new PropFalse(boolVar(false)));
     }
 
     /**
@@ -765,7 +731,14 @@ public class Model implements IModel {
      * @return the ibex reference
      */
     public Ibex getIbex() {
-        if (ibex == null) ibex = new Ibex();
+        if (ibex == null) {
+            try {
+                ibex = new Ibex();
+            }catch (ExceptionInInitializerError ini){
+                throw new SolverException("Choco cannot initialize Ibex.\n" +
+                        "The following option should be passed as VM argument: \"-Djava.library.path=/path/to/ibex/dynlib\"");
+            }
+        }
         return ibex;
     }
 

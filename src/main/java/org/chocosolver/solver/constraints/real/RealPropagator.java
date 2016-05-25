@@ -149,6 +149,6 @@ public class RealPropagator extends Propagator<RealVar> {
 
     @Override
     public String toString() {
-        return "RealPropagator : "+functions+super.toString();
+        return super.toString()+" ->(\""+functions + "\")";
     }
 }

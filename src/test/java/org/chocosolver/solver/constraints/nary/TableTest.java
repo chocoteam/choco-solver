@@ -211,7 +211,7 @@ public class TableTest {
             }
             out.println("\n" + "obj = " + sol.getIntVal(sum) + ", backtracks = " + model.getSolver().getBackTrackCount());
         }
-        assertEquals(sol.getIntVal(sum).intValue(), 5);
+        assertEquals(sol.getIntVal(sum), 5);
     }
 
     @Test(groups="1s", timeOut=60000)

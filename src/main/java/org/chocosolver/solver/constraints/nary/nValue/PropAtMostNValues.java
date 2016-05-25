@@ -55,7 +55,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private TIntArrayList concernedValues;
+    private int[] concernedValues;
     private int n;
     private int[] unusedValues, mate;
     private boolean allEnum; // all variables are enumerated
@@ -77,13 +77,12 @@ public class PropAtMostNValues extends Propagator<IntVar> {
      * @param concernedValues will be sorted!
      * @param nValues integer variable
      */
-    public PropAtMostNValues(IntVar[] variables, TIntArrayList concernedValues, IntVar nValues) {
+    public PropAtMostNValues(IntVar[] variables, int[] concernedValues, IntVar nValues) {
         super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false);
         n = variables.length;
-        concernedValues.sort();
         this.concernedValues = concernedValues;
-        unusedValues = new int[concernedValues.size()];
-        mate = new int[concernedValues.size()];
+        unusedValues = new int[concernedValues.length];
+        mate = new int[concernedValues.length];
         allEnum = true;
         minVal = Integer.MAX_VALUE / 10;
         int maxVal = -minVal;
@@ -108,11 +107,11 @@ public class PropAtMostNValues extends Propagator<IntVar> {
         int countMax = 0;
         int idx = 0;
         nbInst = 0;
-        for (int i = concernedValues.size() - 1; i >= 0; i--) {
+        for (int i = concernedValues.length - 1; i >= 0; i--) {
             boolean possible = false;
             boolean mandatory = false;
             mate[i] = -1;
-            int value = concernedValues.get(i);
+            int value = concernedValues[i];
             for (int v = 0; v < n; v++) {
                 if (vars[v].contains(value)) {
                     possible = true;
@@ -260,11 +259,11 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     public ESat isEntailed() {
         int countMin = 0;
         int countMax = 0;
-        for (int i = 0; i < concernedValues.size(); i++) {
+        for (int i = 0; i < concernedValues.length; i++) {
             boolean possible = false;
             boolean mandatory = false;
             for (int v = 0; v < n; v++) {
-                if (vars[v].contains(concernedValues.get(i))) {
+                if (vars[v].contains(concernedValues[i])) {
                     possible = true;
                     if (vars[v].isInstantiated()) {
                         mandatory = true;

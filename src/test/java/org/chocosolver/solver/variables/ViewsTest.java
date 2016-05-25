@@ -570,7 +570,7 @@ public class ViewsTest {
         // 17/03/16 : seems not idempotent when multiple occurrence of same var
         // possible fix : split propagator in two ways
         s.setBoolsChanneling(new BoolVar[]{bool, bool}, set, 0).post();
-        s.member(s.ONE(), set).post();
+        s.member(s.boolVar(true), set).post();
         Solver r = s.getSolver();
         r.set(minDomUBSearch(bool));
         while (s.getSolver().solve()) ;

@@ -64,11 +64,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant of type BoolVar
      */
     default BoolVar boolVar(boolean value) {
-        if(value){
-            return _me().ONE();
-        }else{
-            return _me().ZERO();
-        }
+        return boolVar(CSTE_NAME + (value?1:0),value);
     }
 
     /**
@@ -460,6 +456,26 @@ public interface IVariableFactory extends ISelf<Model> {
     //*************************************************************************************
     // REAL VARIABLES
     //*************************************************************************************
+
+    /**
+     * Create a constant real variable equal to <i>value</i>
+     * @param value constant value of the variable
+     * @return a constant RealVar of domain [<i>value</i>,<i>value</i>]
+     */
+    default RealVar realVar(double value) {
+        return realVar(CSTE_NAME + value,value);
+    }
+
+    /**
+     * Create a constant real variable equal to <i>value</i>
+     * @param name name of the variable
+     * @param value value of the variable
+     * @return a constant RealVar of domain [<i>value</i>,<i>value</i>]
+     */
+    default RealVar realVar(String name, double value) {
+        RealVar cste = new FixedRealVarImpl(name, value, _me());
+        return cste;
+    }
 
     /**
      * Creates a constant real variable equal to <i>value</i>

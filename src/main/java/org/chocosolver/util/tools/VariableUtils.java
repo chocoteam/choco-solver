@@ -30,6 +30,7 @@
 package org.chocosolver.util.tools;
 
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -59,11 +60,29 @@ public class VariableUtils {
         return new int[]{MathUtils.safeCast(bounds[0]), MathUtils.safeCast(bounds[1])};
     }
 
+    /**
+     * @param vars array of variables
+     * @return computes the bounds for the sum of <i>vars</i>
+     */
+    public static double[] boundsForAddition(RealVar... vars) {
+        double[] bounds = new double[2];
+        IntStream.range(0, vars.length).forEach(i -> {
+                    bounds[0] += vars[i].getLB();
+                    bounds[1] += vars[i].getUB();
+                }
+        );
+        return bounds;
+    }
+
     private static int[] bound(long... values) {
         return new int[]{
                 MathUtils.safeCast(stream(values).min().getAsLong()),
                 MathUtils.safeCast(stream(values).max().getAsLong())
         };
+    }
+
+    private static double[] bound(double... values) {
+        return new double[]{stream(values).min().getAsDouble(),stream(values).max().getAsDouble()};
     }
 
     /**
@@ -76,6 +95,16 @@ public class VariableUtils {
                 MathUtils.safeCast(x.getLB() - y.getUB()),
                 MathUtils.safeCast(x.getUB() - y.getLB())};
     }
+
+    /**
+     * @param x a variable
+     * @param y a variable
+     * @return computes the bounds for "x - y"
+     */
+    public static double[] boundsForSubstraction(RealVar x, RealVar y) {
+        return new double[]{x.getLB() - y.getUB(),x.getUB() - y.getLB()};
+    }
+
 
     /**
      * @param x a variable
@@ -94,9 +123,37 @@ public class VariableUtils {
     /**
      * @param x a variable
      * @param y a variable
+     * @return computes the bounds for "x * y"
+     */
+    public static double[] boundsForMultiplication(RealVar x, RealVar y) {
+        return bound(
+                x.getLB() * y.getLB(),
+                x.getLB() * y.getUB(),
+                x.getUB() * y.getLB(),
+                x.getUB() * y.getUB()
+        );
+    }
+
+    /**
+     * @param x a variable
+     * @param y a variable
      * @return computes the bounds for "x / y"
      */
     public static int[] boundsForDivision(IntVar x, IntVar y) {
+        return bound(
+                x.getLB() / y.getLB(),
+                x.getLB() / y.getUB(),
+                x.getUB() / y.getLB(),
+                x.getUB() / y.getUB()
+        );
+    }
+
+    /**
+     * @param x a variable
+     * @param y a variable
+     * @return computes the bounds for "x / y"
+     */
+    public static double[] boundsForDivision(RealVar x, RealVar y) {
         return bound(
                 x.getLB() / y.getLB(),
                 x.getLB() / y.getUB(),
@@ -145,11 +202,54 @@ public class VariableUtils {
     }
 
     /**
+     * @param x a variable
+     * @param y a variable
+     * @return computes the bounds for "x ^ y"
+     */
+    public static double[] boundsForPow(RealVar x, RealVar y) {
+        return bound(
+                Math.pow(x.getLB(), y.getLB()),
+                Math.pow(x.getLB(), y.getUB()),
+                Math.pow(x.getUB(), y.getLB()),
+                Math.pow(x.getUB(), y.getUB())
+        );
+    }
+
+    /**
+     * @param x a variable
+     * @param y a variable
+     * @return computes the bounds for "atan2(x , y)"
+     */
+    public static double[] boundsForAtan2(RealVar x, RealVar y) {
+        return bound(
+                Math.atan2(x.getLB(), y.getLB()),
+                Math.atan2(x.getLB(), y.getUB()),
+                Math.atan2(x.getUB(), y.getLB()),
+                Math.atan2(x.getUB(), y.getUB())
+        );
+    }
+
+    /**
      * @param vars array of variables
      * @return computes the bounds for the minimum among <i>vars</i>
      */
     public static int[] boundsForMinimum(IntVar... vars) {
         int[] bounds = new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE};
+        IntStream.range(0, vars.length).forEach(i -> {
+                    bounds[0] = Math.min(bounds[0], vars[i].getLB());
+                    bounds[1] = Math.min(bounds[1], vars[i].getUB());
+                }
+        );
+        return bounds;
+    }
+
+
+    /**
+     * @param vars array of variables
+     * @return computes the bounds for the minimum among <i>vars</i>
+     */
+    public static double[] boundsForMinimum(RealVar... vars) {
+        double[] bounds = new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
         IntStream.range(0, vars.length).forEach(i -> {
                     bounds[0] = Math.min(bounds[0], vars[i].getLB());
                     bounds[1] = Math.min(bounds[1], vars[i].getUB());
@@ -164,6 +264,20 @@ public class VariableUtils {
      */
     public static int[] boundsForMaximum(IntVar... vars) {
         int[] bounds = new int[]{Integer.MIN_VALUE, Integer.MIN_VALUE};
+        IntStream.range(0, vars.length).forEach(i -> {
+                    bounds[0] = Math.max(bounds[0], vars[i].getLB());
+                    bounds[1] = Math.max(bounds[1], vars[i].getUB());
+                }
+        );
+        return bounds;
+    }
+
+    /**
+     * @param vars array of variables
+     * @return computes the bounds for the maximum among <i>vars</i>
+     */
+    public static double[] boundsForMaximum(RealVar... vars) {
+        double[] bounds = new double[]{Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
         IntStream.range(0, vars.length).forEach(i -> {
                     bounds[0] = Math.max(bounds[0], vars[i].getLB());
                     bounds[1] = Math.max(bounds[1], vars[i].getUB());

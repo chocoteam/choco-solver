@@ -189,6 +189,6 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public String toString() {
-        return String.format("%s = [%.16f,%.16f]", name, getLB(), getUB());
+        return String.format("%s = [%.16f .. %.16f]", name, getLB(), getUB());
     }
 }

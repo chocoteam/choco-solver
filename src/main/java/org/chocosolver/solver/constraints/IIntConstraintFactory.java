@@ -32,6 +32,7 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
@@ -91,6 +92,7 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.BitSet;
 
 import static java.lang.Math.abs;
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -104,7 +106,7 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
  * @author Charles Prud'homme
  * @since 4.0.0
  */
-public interface IIntConstraintFactory {
+public interface IIntConstraintFactory extends ISelf<Model> {
 
 	//##################################################################################################################
 	// UNARIES #########################################################################################################
@@ -529,6 +531,7 @@ public interface IIntConstraintFactory {
 	 *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
 	 */
 	default Constraint allDifferent(IntVar[] vars, String CONSISTENCY) {
+		if(vars.length<=1) return _me().trueConstraint();
 		return new AllDifferent(vars, CONSISTENCY);
 	}
 
@@ -623,7 +626,7 @@ public interface IIntConstraintFactory {
 	 * @param AC      additional filtering algorithm, domain filtering algorithm derivated from (Soft)AllDifferent
 	 */
 	default Constraint atLeastNValues(IntVar[] vars, IntVar nValues, boolean AC) {
-		TIntArrayList vals = getDomainUnion(vars);
+		int[] vals = getDomainUnion(vars);
 		if (AC) {
 			return new Constraint("AtLeastNValues", new PropAtLeastNValues(vars, vals, nValues), new PropAtLeastNValues_AC(vars, nValues));
 		} else {
@@ -647,7 +650,7 @@ public interface IIntConstraintFactory {
 	 *                Presumably useful when nValues must be minimized.
 	 */
 	default Constraint atMostNValues(IntVar[] vars, IntVar nValues, boolean STRONG) {
-		TIntArrayList vals = getDomainUnion(vars);
+		int[] vals = getDomainUnion(vars);
 		if (STRONG) {
 			Gci gci = new Gci(vars);
 			R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
@@ -1144,7 +1147,7 @@ public interface IIntConstraintFactory {
 			}
 			return new Constraint("int_value_precede", ps);
 		} else {
-			return X[0].getModel().TRUE();
+			return _me().trueConstraint();
 		}
 	}
 
@@ -1351,7 +1354,15 @@ public interface IIntConstraintFactory {
 	 * @return the conjunction of atleast_nvalue and atmost_nvalue
 	 */
 	default Constraint nValues(IntVar[] vars, IntVar nValues) {
-		return Constraint.merge("nValue",atLeastNValues(vars, nValues, false), atMostNValues(vars, nValues, true));
+		int[] vals = getDomainUnion(vars);
+		Gci gci = new Gci(vars);
+		R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
+		return new Constraint("nValue",
+				// at least
+				new PropAtLeastNValues(vars, vals, nValues),
+				// at most
+				new PropAtMostNValues(vars, vals, nValues),
+				new PropAMNV(vars, nValues, gci, new MDRk(gci), rules));
 	}
 
 	/**
@@ -1426,7 +1437,7 @@ public interface IIntConstraintFactory {
 				);
 			default:
 				if (start == end) {
-					return start.getModel().FALSE();
+					return start.getModel().falseConstraint();
 				} else {
 					return Constraint.merge("path",
 							arithm(start, "!=", end),
@@ -1767,16 +1778,29 @@ public interface IIntConstraintFactory {
 	 * @param vars an array of integer variables
 	 * @return the list of values in the domains of vars
 	 */
-	default TIntArrayList getDomainUnion(IntVar... vars) {
-		TIntArrayList values = new TIntArrayList();
-		for (IntVar v : vars) {
-			int ub = v.getUB();
-			for (int i = v.getLB(); i <= ub; i = v.nextValue(i)) {
-				if (!values.contains(i)) {
-					values.add(i);
-				}
-			}
-		}
-		return values;
+	default int[] getDomainUnion(IntVar... vars) {
+        int m = vars[0].getLB(), M = vars[0].getUB(), j, k;
+        for(int i  = 1; i < vars.length; i++){
+            if(m > (k = vars[i].getLB())){
+                m = k;
+            }
+            if(M < (j = vars[i].getUB())){
+                M = j;
+            }
+        }
+        BitSet values = new BitSet(M - m +1);
+        for (IntVar v : vars) {
+            int lb = v.getLB();
+            for (int i = v.getUB(); i >= lb; i = v.previousValue(i)) {
+                values.set(i - m);
+            }
+        }
+
+        int[] vs = new int[values.cardinality()];
+        k = 0;
+        for(int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i+1)){
+            vs[k++] = i + m;
+        }
+        return vs;
 	}
 }

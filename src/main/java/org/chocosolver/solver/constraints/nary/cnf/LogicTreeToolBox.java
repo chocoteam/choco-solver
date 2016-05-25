@@ -220,7 +220,7 @@ public class LogicTreeToolBox {
                 if (lits.containsKey(var)) {
                     ILogical prev = lits.get(var);
                     if (prev.isNot() != children[i].isNot()) {
-                        return model.ONE();
+                        return model.boolVar(true);
                     }
                 } else {
                     lits.put(var, children[i]);
@@ -238,7 +238,7 @@ public class LogicTreeToolBox {
                 if (lits.containsKey(var)) {
                     ILogical prev = lits.get(var);
                     if (prev.isNot() != children[i].isNot()) {
-                        return model.ZERO();
+                        return model.boolVar(false);
                     }
                 } else {
                     lits.put(var, children[i]);
@@ -270,7 +270,7 @@ public class LogicTreeToolBox {
         ILogical[] children = t.getChildren();
         ArrayList<ILogical> toRemove = new ArrayList<>();
         for (int i = 0; i < children.length; i++) {
-            if (model.ONE().equals(children[i])) {
+            if (model.boolVar(true).equals(children[i])) {
                 toRemove.add(children[i]);
             }
         }

@@ -132,7 +132,7 @@ public class PropConDis extends Propagator<IntVar> {
      * @param model a model
      */
     public PropConDis(Model model) {
-        super(new IntVar[]{model.ONE()}, PropagatorPriority.VERY_SLOW, false);// adds model.ONE to fit to the super constructor
+        super(new IntVar[]{model.boolVar(true)}, PropagatorPriority.VERY_SLOW, false);// adds model.ONE to fit to the super constructor
         this.vars = new IntVar[0];    // erase model.ONE from the variable scope
         domains = new TIntObjectHashMap<>();
         toUnion = new BitSet();

@@ -36,6 +36,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.IExplanationEngine;
 import org.chocosolver.solver.explanations.NoExplanationEngine;
+import org.chocosolver.solver.objective.BoundsManager;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
@@ -175,11 +176,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     private List<Criterion> criteria;
 
-    /**
-     * Current state of the solver
-     */
-    private SearchState state;
-
     /** Indicates if the default search loop is in use (set to <tt>true</tt> in that case). */
     private boolean defaultSearch = false;
 
@@ -228,9 +224,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         objectivemanager = SAT();
         dpath = new DecisionPath(aModel.getEnvironment());
         action = initialize;
-        mMeasures = new MeasuresRecorder(mModel);
+        mMeasures = new MeasuresRecorder(mModel.getName());
         criteria = new ArrayList<>();
-        state = SearchState.NEW;
+        mMeasures.setSearchState(SearchState.NEW);
+        mMeasures.setBoundsManager(objectivemanager);
         searchMonitors = new SearchMonitorList();
         set(new MoveBinaryDFS());
         setStandardPropagation();
@@ -279,15 +276,15 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     private boolean searchLoop() {
         boolean solution = false;
-        state = SearchState.RUNNING;
+        mMeasures.setSearchState(SearchState.RUNNING);
         boolean left = true;
         while(!stop){
             stop = isStopCriterionMet();
             if (stop || Thread.currentThread().isInterrupted()) {
                 if(stop){
-                    state = SearchState.STOPPED;
+                    mMeasures.setSearchState(SearchState.STOPPED);
                 }else{
-                    state = SearchState.KILLED;
+                    mMeasures.setSearchState(SearchState.KILLED);
                 }
             }
             switch (action) {
@@ -341,7 +338,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                     }
                     feasible = TRUE;
                     mMeasures.incSolutionCount();
-                    getObjectiveManager().update();
+                    objectivemanager.update();
                     searchMonitors.onSolution();
                     jumpTo = 1;
                     action = repair;
@@ -440,7 +437,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * - update statistics
      */
     private void closeSearch() {
-        state = SearchState.TERMINATED;
+        mMeasures.setSearchState(SearchState.TERMINATED);
         feasible = FALSE;
         if (mMeasures.getSolutionCount() > 0) {
             feasible = TRUE;
@@ -608,14 +605,14 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @return <tt>true</tt> if the search loops ends unexpectedly (externally killed, for instance).
      */
     public boolean hasEndedUnexpectedly() {
-        return state == SearchState.KILLED;
+        return mMeasures.getSearchState() == SearchState.KILLED;
     }
 
     /**
      * @return the state of this search. This method is designed for use in monitoring of the system state, not for synchronization control.
      */
     public SearchState getState(){
-        return state;
+        return mMeasures.getSearchState();
     }
 
     /**
@@ -761,7 +758,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void set(ObjectiveManager om) {
         this.objectivemanager = om;
-        mMeasures.declareObjective(objectivemanager.isOptimization());
+        mMeasures.setBoundsManager(om);
     }
 
     /**
@@ -919,6 +916,11 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
+    public String getModelName() {
+        return getMeasures().getModelName();
+    }
+
+    @Override
     public long getTimestamp() {
         return getMeasures().getTimestamp();
     }
@@ -989,9 +991,19 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     @Override
-    public Solver getSolver() {
-        return this;
+    public SearchState getSearchState() {
+        return getMeasures().getSearchState();
     }
+
+    /**
+     * @return the currently used objective manager
+     */
+    @Override
+    public BoundsManager getBoundsManager() {
+        assert getMeasures().getBoundsManager()== objectivemanager;
+        return getMeasures().getBoundsManager();
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////       OUTPUT        ////////////////////////////////////////////////////////

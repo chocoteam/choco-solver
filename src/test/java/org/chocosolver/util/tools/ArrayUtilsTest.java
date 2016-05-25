@@ -45,24 +45,41 @@ public class ArrayUtilsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testZeroToN() throws Exception {
-        int[] a = ArrayUtils.zeroToN(5);
+        int[] a = ArrayUtils.array(0,4);
         Assert.assertEquals(a, new int[]{0,1,2,3,4});
     }
 
     @Test(groups="1s", timeOut=60000, expectedExceptions = NegativeArraySizeException.class)
     public void testZeroToN2() throws Exception {
-        ArrayUtils.zeroToN(-2);
+        ArrayUtils.array(0,-2);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testOneToN() throws Exception {
-        int[] a = ArrayUtils.oneToN(5);
+        int[] a = ArrayUtils.array(1,5);
         Assert.assertEquals(a, new int[]{1,2,3,4, 5});
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testArray() throws Exception {
+        int[] a = ArrayUtils.array(5,8);
+        Assert.assertEquals(a, new int[]{5,6,7,8});
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = NegativeArraySizeException.class)
+    public void testArray2() throws Exception {
+        ArrayUtils.array(8,5);
+    }
+
+	@Test(groups="1s", timeOut=60000)
+	public void testArray3() {
+		int[] a = ArrayUtils.array(-8,-5);
+		Assert.assertEquals(a, new int[]{-8,-7,-6,-5});
+	}
+
     @Test(groups="1s", timeOut=60000, expectedExceptions = NegativeArraySizeException.class)
     public void testOneToN2() throws Exception {
-        int[] a = ArrayUtils.oneToN(-5);
+        int[] a = ArrayUtils.array(1,-5);
     }
 
     @Test(groups="1s", timeOut=60000)

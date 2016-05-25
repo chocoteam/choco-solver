@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.limits;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.measure.IMeasures;
 
 /**
  * Set a limit over the number of backtracks allowed during the search.
@@ -43,7 +44,11 @@ import org.chocosolver.solver.Model;
 public final class BacktrackCounter extends ACounter {
 
     public BacktrackCounter(Model model, long backtracklimit) {
-        super(model, backtracklimit);
+        this(model.getSolver().getMeasures(), backtracklimit);
+    }
+
+    public BacktrackCounter(IMeasures measures, long backtracklimit) {
+        super(measures, backtracklimit);
     }
 
     @Override
