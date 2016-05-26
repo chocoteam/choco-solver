@@ -91,7 +91,7 @@ Their value can then be read calling :code:`S.getValue()`:
 .. hint::
 
     Simply replace the `if` by a `while` to look for all solutions and print them all.
-    However, this problem has only solution.
+    However, this problem has only one solution.
 
 Model with a local interpretation
 =================================

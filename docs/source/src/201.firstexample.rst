@@ -106,4 +106,4 @@ What to do next ?
 =================
 
 We are going to use and extend this small problem in the future.
-But before, we will have a look of the different objects we can manipulate.
+But before, we will have a look at the different objects we can manipulate.

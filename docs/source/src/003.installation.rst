@@ -32,7 +32,7 @@ Since Choco is a Java library, it does not need to installed strictly speaking.
 You only have to add it to the classpath of your project.
 
 See instructions for `IntelliJ IDEA <https://www.jetbrains.com/help/idea/2016.1/configuring-module-dependencies-and-libraries.html?origin=old_help>`_
-or `clipse <https://wiki.eclipse.org/FAQ_How_do_I_add_an_extra_library_to_my_project's_classpath%3F>`_.
+or `Eclipse <https://wiki.eclipse.org/FAQ_How_do_I_add_an_extra_library_to_my_project's_classpath%3F>`_.
 
 
 As a Maven dependency

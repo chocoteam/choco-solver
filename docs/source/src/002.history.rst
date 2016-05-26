@@ -30,11 +30,7 @@ This version won seven medals in four entries in the `MiniZinc Challenge <http:/
 
 More recently, Jean-Guillaume and I wanted to review the API and the last version was born.
 
-
-The philosophy of "Choco"
-+++++++++++++++++++++++++
-
-
+.. philosophy of choco
 
 Why "Choco" ?
 +++++++++++++
@@ -43,16 +39,13 @@ Choco is the acronym of the french sentence:
 "Chouette, une boite à Outils de Contraintes orientée Object" which can be translated into:
 "Great, an object-oriented constraint toolbox".
 
-
 Why using Choco ?
 =================
 
-Why using a constraint programming solver ?
-+++++++++++++++++++++++++++++++++++++++++++
+.. First, why using a CP solver ?
 
-
-And why Choco ?
-+++++++++++++++
+Choco is one of the more mature free open source Java library for constraint programming.
+In a nutshell:
 
 - three types of variables: integer, boolean and set,
 - more than 70 constraints : the most useful and state-of-the-art implementations,
@@ -67,8 +60,3 @@ But also:
 - and gentle binding to Ibex: real variables and constraints supported
 
 If that doesn't sound like something familiar to you, let's give a try !
-
-
-Yeah, but still ?
-+++++++++++++++++
-
