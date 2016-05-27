@@ -152,15 +152,15 @@ We can define a function that prints any solutions in a pretty way.
 .. code-block:: java
     :linenos:
 
-    private void prettyPrint() {
+    private void prettyPrint(Model model, IntVar[] open, int W, IntVar[] supplier, int S, IntVar tot_cost) {
         StringBuilder st = new StringBuilder();
         st.append("Solution #").append(model.getSolver().getSolutionCount()).append("\n");
         for (int i = 0; i < W; i++) {
             if (open[i].getValue() > 0) {
-                st.append(String.format("\tWarehouse %d supplies customers : ", (i+1)));
+                st.append(String.format("\tWarehouse %d supplies customers : ", (i + 1)));
                 for (int j = 0; j < S; j++) {
-                    if (supplier[j].getValue() == (i+1)) {
-                        st.append(String.format("%d ", (j+1)));
+                    if (supplier[j].getValue() == (i + 1)) {
+                        st.append(String.format("%d ", (j + 1)));
                     }
                 }
                 st.append("\n");
@@ -249,7 +249,7 @@ The entire code
     );
     solver.showShortStatistics();
     while(solver.solve()){
-        prettyPrint();
+        prettyPrint(model, open, W, supplier, S, tot_cost);
     }
 
 
