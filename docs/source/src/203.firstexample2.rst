@@ -131,8 +131,7 @@ Updated code
     model.post(
             model.allDifferent(vars),
             model.allDifferent(IntStream.range(0, n).mapToObj(i -> vars[i].sub(i).intVar()).toArray(IntVar[]::new)),
-            model.allDifferent(IntStream.range(0, n).mapToObj(i -> vars[i].add(i).intVar()).toArray(IntVar[]::new))
-    );
+            model.allDifferent(IntStream.range(0, n).mapToObj(i -> vars[i].add(i).intVar()).toArray(IntVar[]::new)));
     Solver solver = model.getSolver();
     solver.showStatistics();
     solver.set(SearchStrategyFactory.domOverWDegSearch(vars));

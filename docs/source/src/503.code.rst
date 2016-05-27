@@ -129,8 +129,8 @@ Finally, the search strategy is defined:
             Optional<IntVar> selected =
                     Arrays.stream(variables)
                             .filter(v -> !v.isInstantiated())
-                            .min((v1, v2) -> closest(v2, map) - closest(v1, map));
-            return selected.isPresent() ? selected.get() : null;
+                            .min((v1, v2) -> closest(v2, map) - closest(v1, map))
+                            .orElse(null);
         },
         var -> closest(var, map),
         DecisionOperator.int_eq,
@@ -138,6 +138,7 @@ Finally, the search strategy is defined:
     ));
 
 Lines 2-7: non-instantiated variables are filtered and the more distant to the target landing time is returned.
+Note that if all variables are instantiated, null is expected to indicate that the strategy runs dry.
 Line 8: the closest possible landing time for a given variable is returned.
 Line 9: the decision is based on the assignment operator.
 Left decision branch is assignment, right decision branch (refutation) is value removal. That is why the domain of planes
@@ -287,8 +288,8 @@ The entire code
                 Optional<IntVar> selected =
                         Arrays.stream(variables)
                                 .filter(v -> !v.isInstantiated())
-                                .min((v1, v2) -> closest(v2, map) - closest(v1, map));
-                return selected.isPresent() ? selected.get() : null;
+                                .min((v1, v2) -> closest(v2, map) - closest(v1, map))
+                                .orElse(null);
             },
             var -> closest(var, map),
             DecisionOperator.int_eq,
