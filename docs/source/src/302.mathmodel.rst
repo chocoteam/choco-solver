@@ -42,3 +42,6 @@ Locally
     :math:`r_3 + s + e = o + 10\times m`
 
 where :math:`r_1,r_2,r_3` are :math:`[\![0-1]\!]`-domain variables and express the carries.
+
+
+`<<description <301.description.html>`_ / `code>> <303.code.html>`_

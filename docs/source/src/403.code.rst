@@ -22,7 +22,7 @@ A model
     // supplying cost per store
     IntVar[] cost = model.intVarArray("cost", S, 1, 96, true);
     // Total of all costs
-    IntVar[] tot_cost = model.intVar("C", 0, 99999, true);
+    IntVar tot_cost = model.intVar("C", 0, 99999, true);
 
     // CONSTRAINTS
     for (int j = 0; j < S; j++) {
@@ -39,7 +39,7 @@ A model
         // => we count occurrences of (i+1) in 'supplier'
         model.count(i+1, supplier, occ).post();
         // redundant link between 'occ' and 'open' for better propagation
-        occ.ge(open[w]).post();
+        occ.ge(open[i]).post();
     }
     // Prepare the constraint that maintains 'tot_cost'
     int[] coeffs = new int[W + S];
@@ -49,7 +49,7 @@ A model
     model.scalar(ArrayUtils.append(open, cost), coeffs, "=", tot_cost).post();
 
 
-The last parameter of the element constraints (line XX and YY) indicates an offset
+The last parameter of the element constraints (line 19 and 21) indicates an offset
 It enables to adapt the index range wrt to the domain of the variable: here supplier variables lower bound is 1.
 But, open array index starts at 0 and an offset is needed to match supplier with open array.
 In other words, first *element* constraint states that `open[supplier[s] - o] = 1` where `o` is set to 1.
@@ -185,7 +185,7 @@ The entire code
     // number of stores
     int S = 10;
     // maintenance cost
-    int C = 30
+    int C = 30;
     // capacity of each warehouse
     int[] K = new int[]{1, 4, 2, 1, 3};
     // matrix of supply costs, store x warehouse
@@ -212,7 +212,7 @@ The entire code
     // supplying cost per store
     IntVar[] cost = model.intVarArray("cost", S, 1, 96, true);
     // Total of all costs
-    IntVar[] tot_cost = model.intVar("tot_cost", 0, 99999, true);
+    IntVar tot_cost = model.intVar("tot_cost", 0, 99999, true);
 
     // CONSTRAINTS
     for (int j = 0; j < S; j++) {
@@ -229,7 +229,7 @@ The entire code
         // => we count occurrences of (i+1) in 'supplier'
         model.count(i+1, supplier, occ).post();
         // redundant link between 'occ' and 'open' for better propagation
-        occ.ge(open[w]).post();
+        occ.ge(open[i]).post();
     }
     // Prepare the constraint that maintains 'tot_cost'
     int[] coeffs = new int[W + S];
@@ -280,3 +280,6 @@ Things to remember
 + The resolution process can be unfold and limited. It allows interacting with solution state without building default solution object.
 
 + Cut process is managed by the solver, but it can be modified when using the unfold resolution process.
+
+`<<mathematical model <402.mathmodel.html>`_
+

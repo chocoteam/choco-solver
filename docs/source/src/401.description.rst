@@ -30,7 +30,7 @@ We consider here the following input (in java):
     // number of stores
     int S = 10;
     // maintenance cost
-    int C = 30
+    int C = 30;
     // capacity of each warehouse
     int[] K = new int[]{1, 4, 2, 1, 3};
     // matrix of supply costs, store x warehouse
@@ -45,3 +45,5 @@ We consider here the following input (in java):
         {10, 73, 13, 43, 96},
         {93, 35, 63, 85, 46},
         {47, 65, 55, 71, 95}};
+
+`mathematical model>> <402.mathmodel.html>`_

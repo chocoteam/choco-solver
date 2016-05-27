@@ -137,3 +137,5 @@ Things to remember
 + The `Solver` enables having access to a solution by calling the `solve()` method. This is also an easy way to loop over all solutions.
 
 + Defining a (dedicated) search strategy is a good habit to help the solver exploring the search space.
+
+`<<mathematical model <302.mathmodel.html>`_

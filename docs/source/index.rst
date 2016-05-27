@@ -17,17 +17,15 @@ Introduction
    src/002.history
    src/003.installation
 
-Constraint-Programming
-======================
-
-.. toctree::
-   :maxdepth: 2
-
-   src/101.shortintroduction
+..  Constraint-Programming
+    ======================
+    .. toctree::
+       :maxdepth: 2
+    src/101.shortintroduction
 
 
-Overview
-========
+Through a first example
+=======================
 
 .. toctree::
    :maxdepth: 2
@@ -36,22 +34,12 @@ Overview
    src/202.objects
    src/203.firstexample2
 
-Blank page syndrome
-===================
+Practicals
+==========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    src/301.description
-   src/302.mathmodel
-   src/303.code
-
-Warehouse Location
-==================
-
-.. toctree::
-   :maxdepth: 2
-
    src/401.description
-   src/402.mathmodel
-   src/403.code
+   src/501.description

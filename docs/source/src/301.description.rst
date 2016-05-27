@@ -22,3 +22,5 @@ Note that:
 - a word cannot start with à 0,
 - no two letters are assigned to the same digit.
 
+
+`mathematical model>> <302.mathmodel.html>`_
