@@ -113,8 +113,8 @@ public class PropConDisTest {
             out.printf("Size: %d\n", n);
             Model or = modelPb(n, n, rnd, false, true, local);
             Model cd = modelPb(n, n, rnd, true, true, local);
-            or.getSolver().set(inputOrderLBSearch(ArrayUtils.append((IntVar[]) or.getHook("decvars"),new IntVar[]{(IntVar) or.getObjective()})));
-            cd.getSolver().set(inputOrderLBSearch(ArrayUtils.append((IntVar[]) cd.getHook("decvars"),new IntVar[]{(IntVar) cd.getObjective()})));
+            or.getSolver().setSearch(inputOrderLBSearch(ArrayUtils.append((IntVar[]) or.getHook("decvars"),new IntVar[]{(IntVar) or.getObjective()})));
+            cd.getSolver().setSearch(inputOrderLBSearch(ArrayUtils.append((IntVar[]) cd.getHook("decvars"),new IntVar[]{(IntVar) cd.getObjective()})));
             Solution sor = new Solution(or);
             Solution scd = new Solution(cd);
             while(or.getSolver().solve()){
@@ -138,10 +138,10 @@ public class PropConDisTest {
             for (int seed = 0; seed < 5; seed += 1) {
                 out.printf("Size: %d (%d)\n", n, seed);
                 Model or = modelPb(n, seed, rnd, false, false, local);
-                or.getSolver().set(randomSearch((IntVar[]) or.getHook("decvars"), 0));
+                or.getSolver().setSearch(randomSearch((IntVar[]) or.getHook("decvars"), 0));
                 while (or.getSolver().solve()) ;
                 Model cd = modelPb(n, seed, rnd, true, false, local);
-                cd.getSolver().set(randomSearch((IntVar[]) cd.getHook("decvars"), 0));
+                cd.getSolver().setSearch(randomSearch((IntVar[]) cd.getHook("decvars"), 0));
                 while (cd.getSolver().solve()) ;
                 assertEquals(cd.getSolver().getSolutionCount(), or.getSolver().getSolutionCount(), "wrong nb of solutions");
                 assertTrue(or.getSolver().getNodeCount() >= cd.getSolver().getNodeCount(), "wrong nb of nodes");

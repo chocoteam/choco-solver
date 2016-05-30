@@ -65,7 +65,7 @@ public class RestartTest {
                 model.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
         return model;
     }
 
@@ -135,7 +135,7 @@ public class RestartTest {
                 model.arithm(Y[i], "=", X[i], "+", n).post();
             }
             model.getSolver().setRestartOnSolutions();
-            model.getSolver().set(inputOrderLBSearch(X));
+            model.getSolver().setSearch(inputOrderLBSearch(X));
             model.getSolver().limitSolution(100);
             while (model.getSolver().solve()) ;
             //System.out.printf("%d - %.3fms \n", n, solver.getTimeCount());

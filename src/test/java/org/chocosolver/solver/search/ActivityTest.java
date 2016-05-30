@@ -69,11 +69,11 @@ public class ActivityTest {
 		Solver r = model.getSolver();
 		//r.limitTime(5000);
 		if(activity){
-			r.set(activityBasedSearch(vectors));
+			r.setSearch(activityBasedSearch(vectors));
 			r.setGeometricalRestart(vectors.length * 3, 1.1d, new FailCounter(model, 0), 1000);
             r.setNoGoodRecordingFromSolutions(vectors);
 		}else{
-			r.set(SearchStrategyFactory.inputOrderLBSearch(vectors));
+			r.setSearch(SearchStrategyFactory.inputOrderLBSearch(vectors));
 		}
 		return model;
 	}

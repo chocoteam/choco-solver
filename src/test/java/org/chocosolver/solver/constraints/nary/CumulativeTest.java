@@ -154,7 +154,7 @@ public class CumulativeTest {
 		}
 		model.cumulative(t, h, capa, graph).post();
 		Solver r = model.getSolver();
-		r.set(lastConflict(randomSearch(model.retrieveIntVars(false), seed)));
+		r.setSearch(lastConflict(randomSearch(model.retrieveIntVars(false), seed)));
 		model.getSolver().limitTime(5000);
 		switch (mode) {
 			case 0:

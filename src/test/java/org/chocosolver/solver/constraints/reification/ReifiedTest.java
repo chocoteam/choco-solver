@@ -74,7 +74,7 @@ public class ReifiedTest {
             Constraint oppCons = s.arithm(x, "!=", y);
 
             s.ifThenElse(b, cons, oppCons);
-            s.getSolver().set(inputOrderLBSearch(vars));
+            s.getSolver().setSearch(inputOrderLBSearch(vars));
             while (s.getSolver().solve()) ;
             long sol = s.getSolver().getSolutionCount();
             assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
@@ -98,7 +98,7 @@ public class ReifiedTest {
 
         s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")).post();
 
-        s.getSolver().set(inputOrderLBSearch(new IntVar[]{x, y, z}));
+        s.getSolver().setSearch(inputOrderLBSearch(new IntVar[]{x, y, z}));
         while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
@@ -122,7 +122,7 @@ public class ReifiedTest {
 
             s.ifThenElse(b, cons, oppCons);
 
-            s.getSolver().set(inputOrderLBSearch(vars));
+            s.getSolver().setSearch(inputOrderLBSearch(vars));
             while (s.getSolver().solve()) ;
             long sol = s.getSolver().getSolutionCount();
             assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
@@ -150,7 +150,7 @@ public class ReifiedTest {
 
         s1.allDifferent(vars1, "AC").post();
 
-        s1.getSolver().set(inputOrderLBSearch(vars1));
+        s1.getSolver().setSearch(inputOrderLBSearch(vars1));
         return s1;
     }
 
@@ -216,7 +216,7 @@ public class ReifiedTest {
             }
         }
 
-        s2.getSolver().set(inputOrderLBSearch(X));
+        s2.getSolver().setSearch(inputOrderLBSearch(X));
         return s2;
     }
 

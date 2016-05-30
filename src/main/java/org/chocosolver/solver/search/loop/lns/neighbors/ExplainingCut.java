@@ -144,7 +144,7 @@ public class ExplainingCut implements INeighbor {
     public void recordSolution() {
         if (mExplanationEngine == null) {
             if (mModel.getSolver().getExplainer() == NoExplanationEngine.SINGLETON) {
-                mModel.getSolver().set(new ExplanationEngine(mModel, false, false));
+                mModel.getSolver().setExplainer(new ExplanationEngine(mModel, false, false));
             }
             this.mExplanationEngine = mModel.getSolver().getExplainer();
         }

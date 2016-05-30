@@ -124,7 +124,7 @@ public class ViewSumXYTest {
                 xs[1] = ref.intVar("y", 1, 5, true);
                 xs[2] = ref.intVar("z", 2, 10, true);
                 ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
-                ref.getSolver().set(randomSearch(xs, seed));
+                ref.getSolver().setSearch(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -134,7 +134,7 @@ public class ViewSumXYTest {
                 IntVar Z = model.intVar("Z", 0, 200, false);
                 model.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getSolver().set(randomSearch(xs, seed));
+                model.getSolver().setSearch(randomSearch(xs, seed));
             }
             while (ref.getSolver().solve()) ;
             while (model.getSolver().solve()) ;
@@ -155,7 +155,7 @@ public class ViewSumXYTest {
                 xs[1] = ref.intVar("y", 1, 5, false);
                 xs[2] = ref.intVar("z", 2, 10, false);
                 ref.scalar(xs, new int[]{1, 1, -1}, "=", 0).post();
-                ref.getSolver().set(randomSearch(xs, seed));
+                ref.getSolver().setSearch(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -165,7 +165,7 @@ public class ViewSumXYTest {
                 IntVar Z = model.intVar("Z", 0, 200, false);
                 model.sum(xs, "=", Z).post();
 //                SearchMonitorFactory.log(solver, true, true);
-                model.getSolver().set(randomSearch(xs, seed));
+                model.getSolver().setSearch(randomSearch(xs, seed));
             }
             while (ref.getSolver().solve()) ;
             while (model.getSolver().solve()) ;

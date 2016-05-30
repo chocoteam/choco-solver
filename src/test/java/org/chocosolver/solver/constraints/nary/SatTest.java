@@ -212,7 +212,7 @@ public class SatTest {
         model.addClausesBoolOrArrayEqualTrue(new BoolVar[]{eq2.not(), cond});
         model.addClausesBoolOrArrayEqVar(new BoolVar[]{bvar, cond}, bvar2);
         // SEARCH
-        model.getSolver().set(inputOrderLBSearch(var));
+        model.getSolver().setSearch(inputOrderLBSearch(var));
 
         model.setObjective(MAXIMIZE, var);
         Solution solution = new Solution(model);

@@ -67,7 +67,7 @@ public class TreeTest {
 					new PropKLoops(VS, 0, NT)
 			).post();
 		}
-		model.getSolver().set(randomSearch(VS, 0));
+		model.getSolver().setSearch(randomSearch(VS, 0));
 		return model;
 	}
 }

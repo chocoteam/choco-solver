@@ -307,8 +307,8 @@ public class ParallelPortfolio {
         // compute decision variables
         Variable[] varsX;
         boolean customSearch = false;
-        if (solver.getStrategy() != null && solver.getStrategy().getVariables().length > 0) {
-            varsX = solver.getStrategy().getVariables();
+        if (solver.getSearch() != null && solver.getSearch().getVariables().length > 0) {
+            varsX = solver.getSearch().getVariables();
             customSearch = true;
         }else{
             varsX = worker.getVars();
@@ -339,20 +339,20 @@ public class ParallelPortfolio {
                 break;
             case 1:
                 // custom + LC (or default + LC)
-                if (customSearch && !solver.getStrategy().getClass().getSimpleName().contains("LastConflict")) {
-                    solver.set(lastConflict(solver.getStrategy()));
+                if (customSearch && !solver.getSearch().getClass().getSimpleName().contains("LastConflict")) {
+                    solver.setSearch(lastConflict(solver.getSearch()));
                 }else{
-                    solver.set(lastConflict(intVarSearch(ivars)));
+                    solver.setSearch(lastConflict(intVarSearch(ivars)));
                     solver.setGeometricalRestart(ivars.length * 3, 1.1d, new FailCounter(solver.getModel(), 1000), 1000);
                 }
                 break;
             case 3:
                 // default + LC (or input order is already default) + LNS is optim
                 if(customSearch) {
-                    solver.set(lastConflict(intVarSearch(ivars)));
+                    solver.setSearch(lastConflict(intVarSearch(ivars)));
                     solver.setGeometricalRestart(ivars.length * 3, 1.1d, new FailCounter(solver.getModel(), 1000), 1000);
                 }else{
-                    solver.set(inputOrderLBSearch(ivars));
+                    solver.setSearch(inputOrderLBSearch(ivars));
                 }
                 if(policy!=ResolutionPolicy.SATISFACTION){
                     solver.setLNS(INeighborFactory.blackBox(ivars), new FailCounter(solver.getModel(), 1000));
@@ -360,7 +360,7 @@ public class ParallelPortfolio {
                 break;
             case 4:
                 // ABS with LC
-                solver.set(lastConflict(activityBasedSearch(ivars)));
+                solver.setSearch(lastConflict(activityBasedSearch(ivars)));
                 solver.setGeometricalRestart(ivars.length * 3, 1.1d, new FailCounter(solver.getModel(), 1000), 1000);
                 solver.setNoGoodRecordingFromRestarts();
                 if(ks+kr==0) {// plug no goods from solution is ABS is complete
@@ -369,7 +369,7 @@ public class ParallelPortfolio {
                 break;
             default:
                 // random search (various seeds) + LNS if optim
-                solver.set(lastConflict(randomSearch(ivars,workerID)));
+                solver.setSearch(lastConflict(randomSearch(ivars,workerID)));
                 if(policy!=ResolutionPolicy.SATISFACTION){
                     solver.setLNS(INeighborFactory.blackBox(ivars), new FailCounter(solver.getModel(), 1000));
                 }
@@ -377,11 +377,11 @@ public class ParallelPortfolio {
         }
         // complete with set default search
         if(ks>0) {
-            solver.set(solver.getStrategy(),setVarSearch(svars));
+            solver.setSearch(solver.getSearch(),setVarSearch(svars));
         }
         // complete with real default search
         if(kr>0) {
-            solver.set(solver.getStrategy(),realVarSearch(rvars));
+            solver.setSearch(solver.getSearch(),realVarSearch(rvars));
         }
     }
 

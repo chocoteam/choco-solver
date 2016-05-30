@@ -76,7 +76,7 @@ public class DynamicPostTest {
         final IntVar X = model.intVar("X", 1, 2, false);
         final IntVar Y = model.intVar("Y", 1, 2, false);
         final IntVar Z = model.intVar("Z", 1, 2, false);
-        model.getSolver().set(engine.make(model));
+        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 8);
     }
@@ -108,7 +108,7 @@ public class DynamicPostTest {
 
                     }
                 }).post();
-        model.getSolver().set(engine.make(model));
+        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
     }
@@ -134,7 +134,7 @@ public class DynamicPostTest {
         });
         model.getSolver().showDecisions();
         model.getSolver().showSolutions();
-        model.getSolver().set(engine.make(model));
+        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
@@ -151,7 +151,7 @@ public class DynamicPostTest {
         c2.post();
         model.unpost(c2);
         model.unpost(c1);
-        model.getSolver().set(engine.make(model));
+        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 8);
         assertEquals(model.getNbCstrs(), 0);
@@ -175,7 +175,7 @@ public class DynamicPostTest {
                 model.unpost(cs.pop());
             }
         });
-        model.getSolver().set(engine.make(model));
+        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 5);
         assertEquals(model.getNbCstrs(), 0);
@@ -217,12 +217,12 @@ public class DynamicPostTest {
                 model.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
         Solver r = model.getSolver();
-        r.set(
+        r.setEngine(
                 svnQ?
                         new SevenQueuesPropagatorEngine(model):
                         new TwoBucketPropagationEngine(model)
         );
-        r.set(inputOrderLBSearch(a, b, c, lbA, lbB));
+        r.setSearch(inputOrderLBSearch(a, b, c, lbA, lbB));
         int nbSolution = 0;
         while (model.getSolver().solve()) {
             int bestA;
@@ -313,7 +313,7 @@ public class DynamicPostTest {
     private Model costasArray(int n, boolean dynamic) {
         Model model = ProblemMaker.makeCostasArrays(n);
         IntVar[] vectors = (IntVar[]) model.getHook("vectors");
-        model.getSolver().set(domOverWDegSearch(vectors));
+        model.getSolver().setSearch(domOverWDegSearch(vectors));
         if (dynamic) {
             // should not change anything (the constraint is already posted)
             model.getSolver().plugMonitor((IMonitorSolution) () -> model.allDifferent(vectors, "BC").post());

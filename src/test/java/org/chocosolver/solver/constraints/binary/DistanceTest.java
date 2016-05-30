@@ -68,7 +68,7 @@ public class DistanceTest {
 
 
                 Solver r = model.getSolver();
-                r.set(randomSearch(new IntVar[]{X, Y}, i));
+                r.setSearch(randomSearch(new IntVar[]{X, Y}, i));
                 while (model.getSolver().solve()) ;
                 nbSol = r.getMeasures().getSolutionCount();
                 nbNod = r.getMeasures().getNodeCount();
@@ -79,7 +79,7 @@ public class DistanceTest {
                 IntVar Y = model.intVar("Y", 1, 10, false);
                 model.distance(X, Y, "=", 5).post();
                 Solver r = model.getSolver();
-                r.set(randomSearch(new IntVar[]{X, Y}, i));
+                r.setSearch(randomSearch(new IntVar[]{X, Y}, i));
                 while (model.getSolver().solve()) ;
                 assertEquals(r.getMeasures().getSolutionCount(), nbSol);
                 assertTrue(r.getMeasures().getNodeCount() <= nbNod);
@@ -148,7 +148,7 @@ public class DistanceTest {
         IntVar Z = model.intVar("Z", 0, 10, true);
         model.distance(X, Y, "=", Z).post();
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(new IntVar[]{Z, X, Y, Z}));
+        r.setSearch(inputOrderLBSearch(new IntVar[]{Z, X, Y, Z}));
         while (model.getSolver().solve()) ;
     }
 

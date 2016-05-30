@@ -223,16 +223,16 @@ public class ObjectiveTest {
 //        SMF.log(solver, true, true);
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
         if (r.getEngine() == SINGLETON) {
-            r.set(new SevenQueuesPropagatorEngine(model));
+            r.setEngine(new SevenQueuesPropagatorEngine(model));
         }
         r.getMeasures().setReadingTimeCount(nanoTime());
         while (model.getSolver().solve()) ;
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         r.reset();
-        r.set(ObjectiveManager.SAT());
+        r.setObjectiveManager(ObjectiveManager.SAT());
         model.arithm(b1, "=", bestvalue).post();
-        r.set(inputOrderLBSearch(new BoolVar[]{b1, b2}));
+        r.setSearch(inputOrderLBSearch(new BoolVar[]{b1, b2}));
         int count = 0;
         if (model.getSolver().solve()) {
             do {
@@ -249,7 +249,7 @@ public class ObjectiveTest {
         IntVar a = model.intVar("a", -2, 2, false);
         Solver r = model.getSolver();
         model.setObjective(MAXIMIZE, a);
-        r.set(new ObjectiveStrategy(a, OptimizationPolicy.TOP_DOWN), minDomLBSearch(a));
+        r.setSearch(new ObjectiveStrategy(a, OptimizationPolicy.TOP_DOWN), minDomLBSearch(a));
         r.setNoGoodRecordingFromSolutions(a);
         while (model.getSolver().solve()) ;
         Assert.assertEquals(model.getSolver().isStopCriterionMet(), false);

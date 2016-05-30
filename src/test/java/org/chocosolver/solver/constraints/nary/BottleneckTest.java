@@ -67,7 +67,7 @@ public class BottleneckTest {
             IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 
 
-            model.getSolver().set(minDomLBSearch(allvars));
+            model.getSolver().setSearch(minDomLBSearch(allvars));
             model.setObjective(MAXIMIZE, sum);
             while(model.getSolver().solve());
         }
@@ -95,7 +95,7 @@ public class BottleneckTest {
             IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 
             // Heuristic val
-            model.getSolver().set(minDomLBSearch(allvars));
+            model.getSolver().setSearch(minDomLBSearch(allvars));
 
             model.getSolver().solve();
         }

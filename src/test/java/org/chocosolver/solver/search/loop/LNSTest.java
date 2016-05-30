@@ -69,7 +69,7 @@ public class LNSTest {
         model.knapsack(objects, scalar, power, volumes, energies).post();
 
         Solver r = model.getSolver();
-        r.set(lastConflict(domOverWDegSearch(objects)));
+        r.setSearch(lastConflict(domOverWDegSearch(objects)));
         r.limitTime(900);
         switch (lns) {
             case 0:

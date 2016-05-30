@@ -207,9 +207,9 @@ public class LearnDBT extends LearnCBJ {
 
         @Override
         public void afterInitialize() {
-            this.mainStrategy = mModel.getSolver().getStrategy();
+            this.mainStrategy = mModel.getSolver().getSearch();
             // put this strategy before any other ones.
-            mModel.getSolver().set(this);
+            mModel.getSolver().setSearch(this);
         }
 
         @Override

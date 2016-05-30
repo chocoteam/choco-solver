@@ -67,7 +67,7 @@ public class LexTest {
                 vs2[i] = model.intVar("" + i, 0, k, true);
             }
             model.lexLessEq(vs1, vs2).post();
-            model.getSolver().set(randomSearch(append(vs1, vs2), seed));
+            model.getSolver().setSearch(randomSearch(append(vs1, vs2), seed));
             while (model.getSolver().solve()) ;
             int kpn = (int) pow(k + 1, n1 / 2);
             assertEquals(model.getSolver().getSolutionCount(), (kpn * (kpn + 1) / 2));
@@ -87,7 +87,7 @@ public class LexTest {
                 vs2[i] = model.intVar("" + i, 0, k, true);
             }
             model.lexLess(vs1, vs2).post();
-            model.getSolver().set(randomSearch(append(vs1, vs2), seed));
+            model.getSolver().setSearch(randomSearch(append(vs1, vs2), seed));
 
             while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 3240);

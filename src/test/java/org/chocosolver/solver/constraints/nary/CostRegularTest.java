@@ -87,7 +87,7 @@ public class CostRegularTest {
             costs[i][1][1] = 1;
         }
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9280);
@@ -128,7 +128,7 @@ public class CostRegularTest {
         auto.addCounter(c);
 
         model.costRegular(vars, cost, auto).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9280);
@@ -177,7 +177,7 @@ public class CostRegularTest {
         }
 
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 229376);
@@ -229,7 +229,7 @@ public class CostRegularTest {
         CostAutomaton cauto = new CostAutomaton(auto, c);
 
         model.costRegular(vars, cost, cauto).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 229376);
@@ -269,7 +269,7 @@ public class CostRegularTest {
         }
 
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 67584);
@@ -312,7 +312,7 @@ public class CostRegularTest {
         auto.addCounter(new CounterState(costs, 10, 10));
 
         model.costRegular(vars, cost, auto).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 67584);
@@ -351,7 +351,7 @@ public class CostRegularTest {
         }
 
         model.costRegular(vars, cost, makeSingleResource(auto, costs, cost.getLB(), cost.getUB())).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 149456);
@@ -391,7 +391,7 @@ public class CostRegularTest {
         auto.addCounter(new CounterState(costs, 4, 6));
 
         model.costRegular(vars, cost, auto).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 149456);
@@ -421,7 +421,7 @@ public class CostRegularTest {
         IntVar cost = model.intVar("z", n / 2, n / 2 + 1, true);
 
         model.costRegular(vars, cost, makeSingleResource(auto, c2, cost.getLB(), cost.getUB())).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 64008);
@@ -439,7 +439,7 @@ public class CostRegularTest {
         model.post(model.arithm(vars[0],"=",1));
         model.post(model.arithm(vars[1],"=",1));
         model.getSolver().showDecisions();
-        model.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(vars));
+        model.getSolver().setSearch(SearchStrategyFactory.inputOrderLBSearch(vars));
         model.getSolver().solve();
         Assert.assertTrue(cost.isInstantiated());
     }

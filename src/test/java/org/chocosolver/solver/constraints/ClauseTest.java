@@ -90,7 +90,7 @@ public class ClauseTest {
         }
         LogOp or = or(bs);
         s.addClauses(or);
-        s.getSolver().set(inputOrderLBSearch(bs));
+        s.getSolver().setSearch(inputOrderLBSearch(bs));
 
         while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
@@ -107,7 +107,7 @@ public class ClauseTest {
         LogOp and = and(bs[0], bs[0].not());
 
         s.addClauses(and);
-        s.getSolver().set(inputOrderLBSearch(bs));
+        s.getSolver().setSearch(inputOrderLBSearch(bs));
         while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 0);
@@ -124,7 +124,7 @@ public class ClauseTest {
         s.addClauses(or);
 
         BoolVar[] bs = new BoolVar[]{b};
-        s.getSolver().set(inputOrderLBSearch(bs));
+        s.getSolver().setSearch(inputOrderLBSearch(bs));
 //        SMF.log(s, true, true);
         while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
@@ -230,7 +230,7 @@ public class ClauseTest {
                         bvars[0]);
                 model.addClauses(tree);
 
-                model.getSolver().set(randomSearch(bvars, seed));
+                model.getSolver().setSearch(randomSearch(bvars, seed));
                 while (model.getSolver().solve()) ;
                 n1 = model.getSolver().getSolutionCount();
             }
@@ -239,7 +239,7 @@ public class ClauseTest {
                 BoolVar[] bvars = model.boolVarArray("b", 3);
                 model.times(bvars[1], bvars[2], bvars[0]).post();
 
-                model.getSolver().set(randomSearch(bvars, seed));
+                model.getSolver().setSearch(randomSearch(bvars, seed));
                 while (model.getSolver().solve()) ;
                 n2 = model.getSolver().getSolutionCount();
             }

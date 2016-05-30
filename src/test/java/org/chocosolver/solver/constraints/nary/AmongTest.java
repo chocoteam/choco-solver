@@ -95,7 +95,7 @@ public class AmongTest {
             int value = 1;
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.getSolver().set(randomSearch(allvars,i));
+            model.getSolver().setSearch(randomSearch(allvars,i));
             model.among(occ, vars, new int[]{value}).post();
 //            SearchMonitorFactory.log(solver, true, true);
             while (model.getSolver().solve()) ;
@@ -112,7 +112,7 @@ public class AmongTest {
             int[] values = {1, 2, 0};
             IntVar occ = model.intVar("oc", 0, n, true);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.getSolver().set(randomSearch(allvars,i));
+            model.getSolver().setSearch(randomSearch(allvars,i));
             model.among(occ, vars, values).post();
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
@@ -177,7 +177,7 @@ public class AmongTest {
             }
             model.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, "=", vars[6]).post();
 
-            model.getSolver().set(randomSearch(vars,seed));
+            model.getSolver().setSearch(randomSearch(vars,seed));
             while (model.getSolver().solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getSolver().getSolutionCount();
@@ -231,7 +231,7 @@ public class AmongTest {
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
 
-            model.getSolver().set(randomSearch(vars,seed));
+            model.getSolver().setSearch(randomSearch(vars,seed));
             while (model.getSolver().solve()) ;
             if (nbsol == -1) {
                 nbsol = model.getSolver().getSolutionCount();

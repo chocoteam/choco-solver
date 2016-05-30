@@ -242,7 +242,7 @@ public class LogicTreeTest {
                     and(rCNF[1], rCNF[2])
             );
             sCNF.addClauses(tree);
-            sCNF.getSolver().set(randomSearch(rCNF, seed));
+            sCNF.getSolver().setSearch(randomSearch(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);
             while (sCNF.getSolver().solve()) ;

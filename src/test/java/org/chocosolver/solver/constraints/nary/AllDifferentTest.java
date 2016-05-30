@@ -85,7 +85,7 @@ public class AllDifferentTest {
             s.allDifferent(diag2, "BC").post();
         }
         Solver r = s.getSolver();
-        r.set(inputOrderLBSearch(vars));
+        r.setSearch(inputOrderLBSearch(vars));
         while (s.getSolver().solve()) ;
         long sol = r.getMeasures().getSolutionCount();
         assertEquals(sol, nbSol, "nb sol incorrect");
@@ -124,7 +124,7 @@ public class AllDifferentTest {
                 s.arithm(vars[i], "!=", vars[j], "+", k).post();
             }
         }
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         //        ChocoLogging.toSolution();
         while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
@@ -144,7 +144,7 @@ public class AllDifferentTest {
         vars[3] = s.intVar("v_3", 2, 6, true);
         vars[4] = s.intVar("v_4", 2, 6, true);
         s.allDifferent(vars, "BC").post();
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
@@ -218,7 +218,7 @@ public class AllDifferentTest {
                 s.allDifferent(vars, "AC").post();
                 break;
         }
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         return s;
     }
 

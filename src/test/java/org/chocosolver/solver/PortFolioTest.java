@@ -124,7 +124,7 @@ public class PortFolioTest {
             ParallelPortfolio pares = new ParallelPortfolio(false);
             for (int i = 0; i < 20; i++) {
                 Model m = knapsack();
-                m.getSolver().set(activityBasedSearch(m.retrieveIntVars(true)));
+                m.getSolver().setSearch(activityBasedSearch(m.retrieveIntVars(true)));
                 pares.addModel(m);
             }
             while(pares.solve());
@@ -141,7 +141,7 @@ public class PortFolioTest {
             ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
                 Model m = knapsack();
-                m.getSolver().set(activityBasedSearch(m.retrieveIntVars(true)));
+                m.getSolver().setSearch(activityBasedSearch(m.retrieveIntVars(true)));
                 pares.addModel(m);
             }
             while(pares.solve());
@@ -158,7 +158,7 @@ public class PortFolioTest {
             ParallelPortfolio pares = new ParallelPortfolio(false);
             for (int i = 0; i < 20; i++) {
                 Model m = knapsack();
-                m.getSolver().set(inputOrderLBSearch(m.retrieveIntVars(true)));
+                m.getSolver().setSearch(inputOrderLBSearch(m.retrieveIntVars(true)));
                 pares.addModel(m);
             }
             while(pares.solve());
@@ -175,7 +175,7 @@ public class PortFolioTest {
             ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
                 Model m = knapsack();
-                m.getSolver().set(inputOrderLBSearch(m.retrieveIntVars(true)));
+                m.getSolver().setSearch(inputOrderLBSearch(m.retrieveIntVars(true)));
                 pares.addModel(m);
             }
             while(pares.solve());
@@ -209,7 +209,7 @@ public class PortFolioTest {
             ParallelPortfolio pares = new ParallelPortfolio(false);
             for (int i = 0; i < 10; i++) {
                 Model m = knapsack();
-                m.getSolver().set(randomSearch(m.retrieveIntVars(true),iter));
+                m.getSolver().setSearch(randomSearch(m.retrieveIntVars(true),iter));
                 pares.addModel(m);
             }
             while(pares.solve());

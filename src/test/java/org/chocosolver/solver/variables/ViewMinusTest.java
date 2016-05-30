@@ -128,7 +128,7 @@ public class ViewMinusTest {
                 xs[0] = ref.intVar("x", 1, 15, true);
                 xs[1] = ref.intVar("y", -15, -1, true);
                 ref.sum(xs, "=", 0).post();
-                ref.getSolver().set(randomSearch(xs, seed));
+                ref.getSolver().setSearch(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -136,7 +136,7 @@ public class ViewMinusTest {
                 xs[0] = model.intVar("x", 1, 15, true);
                 xs[1] = model.intMinusView(xs[0]);
                 model.sum(xs, "=", 0).post();
-                model.getSolver().set(randomSearch(xs, seed));
+                model.getSolver().setSearch(randomSearch(xs, seed));
             }
             while (ref.getSolver().solve()) ;
             while (model.getSolver().solve()) ;
@@ -156,7 +156,7 @@ public class ViewMinusTest {
                 xs[0] = ref.intVar("x", 1, 15, false);
                 xs[1] = ref.intVar("y", -15, -1, false);
                 ref.sum(xs, "=", 0).post();
-                ref.getSolver().set(randomSearch(xs, seed));
+                ref.getSolver().setSearch(randomSearch(xs, seed));
             }
             Model model = new Model();
             {
@@ -164,7 +164,7 @@ public class ViewMinusTest {
                 xs[0] = model.intVar("x", 1, 15, false);
                 xs[1] = model.intMinusView(xs[0]);
                 model.sum(xs, "=", 0).post();
-                model.getSolver().set(randomSearch(xs, seed));
+                model.getSolver().setSearch(randomSearch(xs, seed));
             }
             while (ref.getSolver().solve()) ;
             while (model.getSolver().solve()) ;

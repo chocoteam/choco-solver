@@ -83,7 +83,7 @@ public class ExplanationEngine implements IExplanationEngine{
         this.enablePartialExplanation = partialExplanationsOn;
         eventStore = new ArrayEventStore(model.getEnvironment());
         ruleStore = new RuleStore(saveCauses, enablePartialExplanation);
-        model.getSolver().set(this);
+        model.getSolver().setExplainer(this);
         this.explanationPool = new PoolManager<>();
     }
 

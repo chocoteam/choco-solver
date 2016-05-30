@@ -165,7 +165,7 @@ public class RealTest {
             // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
 //        rcons.discretize(x,y);
             model.realIbexGenericConstraint("{0} * {1} = 8", vars).post();
-            model.getSolver().set(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
+            model.getSolver().setSearch(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
             model.getSolver().solve();
             assertEquals(x.getValue(), 2);
             assertEquals(y.getValue(), 4);

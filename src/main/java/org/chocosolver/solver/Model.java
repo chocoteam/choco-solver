@@ -472,10 +472,10 @@ public class Model implements IModel {
             this.objective = objective;
             this.policy = policy;
             if ((objective.getTypeAndKind() & Variable.KIND) == Variable.REAL) {
-                getSolver().set(new ObjectiveManager<RealVar, Double>((RealVar) objective, policy, 0.00d,
+                getSolver().setObjectiveManager(new ObjectiveManager<RealVar, Double>((RealVar) objective, policy, 0.00d,
                         ObjectiveManager.strictRealVarCutComputer(policy, precision)));
             } else {
-                getSolver().set(new ObjectiveManager<IntVar, Integer>((IntVar) objective, policy,
+                getSolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>((IntVar) objective, policy,
                         ObjectiveManager.strictIntVarCutComputer(policy)));
             }
         }
@@ -487,7 +487,7 @@ public class Model implements IModel {
     public void clearObjective() {
         this.objective = null;
         this.policy = ResolutionPolicy.SATISFACTION;
-        getSolver().set(ObjectiveManager.SAT());
+        getSolver().setObjectiveManager(ObjectiveManager.SAT());
     }
 
     /**

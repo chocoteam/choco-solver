@@ -99,7 +99,7 @@ public class MultiCostRegularTest {
         ICostAutomaton costAutomaton = makeMultiResources(auto, costMatrix, bounds);
         model.multiCostRegular(sequence, bounds, costAutomaton).post();
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
-        model.getSolver().set(randomSearch(append(sequence, bounds), seed));
+        model.getSolver().setSearch(randomSearch(append(sequence, bounds), seed));
         return model;
     }
 

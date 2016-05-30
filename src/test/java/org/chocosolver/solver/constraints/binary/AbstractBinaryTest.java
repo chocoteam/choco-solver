@@ -96,7 +96,7 @@ public abstract class AbstractBinaryTest {
         }
         make(vars, s).post();
         Solver r = s.getSolver();
-        r.set(randomSearch(vars,seed));
+        r.setSearch(randomSearch(vars,seed));
         return s;
     }
 

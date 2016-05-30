@@ -51,6 +51,7 @@ import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveSeq;
 import org.chocosolver.solver.search.loop.propagate.Propagate;
+import org.chocosolver.solver.search.loop.propagate.PropagateBasic;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
@@ -229,8 +230,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         mMeasures.setSearchState(SearchState.NEW);
         mMeasures.setBoundsManager(objectivemanager);
         searchMonitors = new SearchMonitorList();
-        set(new MoveBinaryDFS());
-        setStandardPropagation();
+        setMove(new MoveBinaryDFS());
+        P = new PropagateBasic();
         setNoLearning();
     }
 
@@ -376,7 +377,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         // note jg : new (used to be in model)
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(PropagationEngineFactory.DEFAULT.make(mModel));
+            this.setEngine(PropagationEngineFactory.DEFAULT.make(mModel));
         }
         engine.initialize();
         getMeasures().setReadingTimeCount(System.currentTimeMillis() - mModel.getCreationTime());
@@ -410,12 +411,12 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                 getErr().printf("No search strategies defined.\nSet to default ones.");
             }
             defaultSearch = true;
-            set(mModel.getSettings().makeDefaultSearch(mModel));
+            setSearch(mModel.getSettings().makeDefaultSearch(mModel));
         }
         if (completeSearch && !defaultSearch) {
             AbstractStrategy<Variable> declared = M.getStrategy();
             AbstractStrategy complete = mModel.getSettings().makeDefaultSearch(mModel);
-            set(declared, complete);
+            setSearch(declared, complete);
         }
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
             mModel.getEnvironment().worldPop();
@@ -480,7 +481,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void propagate() throws ContradictionException {
         if (engine == NoPropagationEngine.SINGLETON) {
-            set(PropagationEngineFactory.DEFAULT.make(mModel));
+            setEngine(PropagationEngineFactory.DEFAULT.make(mModel));
         }
         if (!engine.isInitialized()) {
             engine.initialize();
@@ -529,16 +530,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * @return the current propagate
-     */
-    public Propagate getPropagate() {
-        return P;
-    }
-
-    /**
      * @return the current learn.
      */
-    public Learn getLearn() {
+    public Learn getLearner() {
         return L;
     }
 
@@ -567,7 +561,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @param <V> kind of variables the search strategy deals with
      * @return the current search strategy in use
      */
-    public <V extends Variable> AbstractStrategy<V> getStrategy() {
+    public <V extends Variable> AbstractStrategy<V> getSearch() {
         if (M.getChildMoves().size() > 1 && mModel.getSettings().warnUser()) {
             err.print("This search loop is based on a sequential Move, the strategy returned may not reflect the reality.");
         }
@@ -723,18 +717,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Replaces the current propagate with {@code p}
-     * @param p the new propagate to apply
-     */
-    public void set(Propagate p) {
-        this.P = p;
-    }
-
-    /**
      * Replaces the current learn with {@code l}
      * @param l the new learn to apply
      */
-    public void set(Learn l) {
+    public void setLearner(Learn l) {
         this.L = l;
     }
 
@@ -742,7 +728,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * Replaces the current move with {@code m}
      * @param m the new move to apply
      */
-    public void set(Move... m) {
+    public void setMove(Move... m) {
         if (m == null) {
             this.M = null;
         } else if (m.length == 1) {
@@ -756,7 +742,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * Declares an objective manager to use.
      * @param om the objective manager to use instead of the declared one (if any).
      */
-    public void set(ObjectiveManager om) {
+    public void setObjectiveManager(ObjectiveManager om) {
         this.objectivemanager = om;
         mMeasures.setBoundsManager(om);
     }
@@ -771,7 +757,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param strategies the search strategies to use.
      */
-    public void set(AbstractStrategy... strategies) {
+    public void setSearch(AbstractStrategy... strategies) {
         if (strategies == null || strategies.length == 0) {
             throw new UnsupportedOperationException("no search strategy has been specified");
         }
@@ -788,7 +774,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * Overrides the explanation engine.
      * @param explainer the explanation to use
      */
-    public void set(ExplanationEngine explainer) {
+    public void setExplainer(ExplanationEngine explainer) {
         this.explainer = explainer;
     }
 
@@ -797,7 +783,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * It overrides the previously defined one, if any.
      * @param propagationEngine a propagation strategy
      */
-    public void set(IPropagationEngine propagationEngine) {
+    public void setEngine(IPropagationEngine propagationEngine) {
         this.engine = propagationEngine;
     }
 

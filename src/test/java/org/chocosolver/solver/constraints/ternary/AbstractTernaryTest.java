@@ -87,7 +87,7 @@ public abstract class AbstractTernaryTest {
         }
         Constraint div = make(vars, s);
         div.post();
-        s.getSolver().set(randomSearch(vars,seed));
+        s.getSolver().setSearch(randomSearch(vars,seed));
         return s;
     }
 

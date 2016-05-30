@@ -162,7 +162,7 @@ class ExplainingObjective extends ExplainingCut{
         UB = objective.getUB();
         if (mExplanationEngine == null) {
             if (r.getExplainer() == NoExplanationEngine.SINGLETON) {
-                r.set(new ExplanationEngine(mModel, false, false));
+                r.setExplainer(new ExplanationEngine(mModel, false, false));
             }
             this.mExplanationEngine = r.getExplainer();
         }

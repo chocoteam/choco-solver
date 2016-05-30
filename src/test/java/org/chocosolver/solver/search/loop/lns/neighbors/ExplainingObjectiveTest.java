@@ -59,7 +59,7 @@ public class ExplainingObjectiveTest {
         model.arithm(o, "=", 5).reifyWith(bs[2]);
 
         model.setObjective(ResolutionPolicy.MAXIMIZE, o);
-        model.getSolver().set(new ExplanationEngine(model, false, false));
+        model.getSolver().setExplainer(new ExplanationEngine(model, false, false));
         ExplainingObjective eo = new ExplainingObjective(model, 10, 0);
         eo.init();
         DecisionPath dp = model.getSolver().getDecisionPath();

@@ -72,7 +72,7 @@ public interface Modeler {
 //                System.out.printf("");
             }
             s.arithm(vars[0], "=", vars[1]).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -96,7 +96,7 @@ public interface Modeler {
             }
             IntVar[] allvars = append(X, Y);
             s.inverseChanneling(X, Y, 0, 0).post();
-            s.getSolver().set(randomSearch(allvars, 0));
+            s.getSolver().setSearch(randomSearch(allvars, 0));
             return s;
         }
 
@@ -129,7 +129,7 @@ public interface Modeler {
             }
             IntVar[] allvars = append(X, Y);
             s.inverseChanneling(X, Y, 0, 0).post();
-            s.getSolver().set(randomSearch(allvars, 0));
+            s.getSolver().setSearch(randomSearch(allvars, 0));
             return s;
         }
 
@@ -149,7 +149,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.arithm(vars[0], "!=", vars[1]).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -169,7 +169,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.allDifferent(vars, "AC").post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -189,7 +189,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.allDifferent(vars, "BC").post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -217,7 +217,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i + n / 2], cards[i]);
             }
             s.globalCardinality(vars, values, cards, closed).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -237,7 +237,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.times(vars[0], vars[1], vars[2]).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -257,7 +257,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.absolute(vars[0], vars[1]).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -291,7 +291,7 @@ public interface Modeler {
             IntVar tmp = s.intVar("occ", 0, vars.length, true);
             s.arithm(tmp, ro, occVar).post();
             s.count(params[1], vars, tmp).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -325,7 +325,7 @@ public interface Modeler {
             IntVar tmp = s.intVar("occ", 0, vars.length, true);
             s.count(params[1], vars, tmp).post();
             s.arithm(tmp, ro, occVar).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -351,7 +351,7 @@ public interface Modeler {
             }
             Constraint ctr = (Boolean) parameters ? s.lexLess(X, Y) : s.lexLessEq(X, Y);
             ctr.post();
-            s.getSolver().set(randomSearch(append(X, Y), 0));
+            s.getSolver().setSearch(randomSearch(append(X, Y), 0));
             return s;
         }
 
@@ -382,7 +382,7 @@ public interface Modeler {
             }
             Constraint ctr = (Boolean) parameters ? s.lexChainLess(X, Y, Z) : s.lexChainLessEq(X, Y, Z);
             ctr.post();
-            s.getSolver().set(randomSearch(append(X, Y, Z), 0));
+            s.getSolver().setSearch(randomSearch(append(X, Y, Z), 0));
             return s;
         }
 
@@ -402,7 +402,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -425,7 +425,7 @@ public interface Modeler {
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             s.among(occVar, vars, params).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -448,7 +448,7 @@ public interface Modeler {
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             s.among(occVar, vars, params).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -488,7 +488,7 @@ public interface Modeler {
                         throw new UnsupportedOperationException();
                 }
             }
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -516,7 +516,7 @@ public interface Modeler {
             int[] values = vals.toArray();
             IntVar[] cards = s.boolVarArray("cards", values.length);
             s.globalCardinality(vars, values, cards, false).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -541,7 +541,7 @@ public interface Modeler {
             }
             IntVar nbRoots = vars[n - 1];
             s.tree(succs, nbRoots, 0).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -561,7 +561,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.circuit(vars).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -585,7 +585,7 @@ public interface Modeler {
             IntVar to = s.intVar("v_" + (n - 1), domains[n - 1]);
             if (map != null) map.put(domains[n - 1], to);
             s.path(vars, from, to, 0).post();
-            s.getSolver().set(randomSearch(append(vars, new IntVar[]{from, to}), 0));
+            s.getSolver().setSearch(randomSearch(append(vars, new IntVar[]{from, to}), 0));
             return s;
         }
 
@@ -605,7 +605,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.subCircuit(vars, 0, s.intVar("length", 0, vars.length - 1, true)).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -639,7 +639,7 @@ public interface Modeler {
                 dy[i] = vars[i + 3 * k];
             }
             s.diffN(x, y, dx, dy, true).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -670,7 +670,7 @@ public interface Modeler {
             }
             IntVar capa = vars[vars.length - 1];
             model.cumulative(tasks, h, capa, (boolean)parameters).post();
-            model.getSolver().set(randomSearch(vars, 0));
+            model.getSolver().setSearch(randomSearch(vars, 0));
             return model;
         }
 
@@ -696,7 +696,7 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], Y[i - n / 2]);
             }
             s.sort(X, Y).post();
-            s.getSolver().set(randomSearch(append(X, Y), currentTimeMillis()));
+            s.getSolver().setSearch(randomSearch(append(X, Y), currentTimeMillis()));
             return s;
         }
 
@@ -717,7 +717,7 @@ public interface Modeler {
             }
 
             s.mddc(vars, (MultivaluedDecisionDiagram) parameters).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -738,7 +738,7 @@ public interface Modeler {
             }
 
             s.intValuePrecedeChain(vars, 1, 2).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -759,7 +759,7 @@ public interface Modeler {
             }
 
             s.max(vars[0], copyOfRange(vars, 1, vars.length)).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -780,7 +780,7 @@ public interface Modeler {
             }
 
             s.min(vars[0], copyOfRange(vars, 1, vars.length)).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -802,7 +802,7 @@ public interface Modeler {
             }
 
             s.max(vars[0], copyOfRange(vars, 1, vars.length)).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -824,7 +824,7 @@ public interface Modeler {
             }
 
             s.min(vars[0], copyOfRange(vars, 1, vars.length)).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -845,7 +845,7 @@ public interface Modeler {
             }
 
             s.arithm(vars[0], "+", vars[1], "=", vars[2]).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 
@@ -872,7 +872,7 @@ public interface Modeler {
             }
 
             s.arithm(vars[0], "+", vars[1], "=", vars[2]).post();
-            s.getSolver().set(randomSearch(vars, 0));
+            s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }
 

@@ -89,7 +89,7 @@ public class NotMemberTest {
                 vars[0] = s.intVar("v", values[0]);
 
                 s.notMember(vars[0], values[1]).post();
-                s.getSolver().set(inputOrderLBSearch(vars));
+                s.getSolver().setSearch(inputOrderLBSearch(vars));
 
                 while (s.getSolver().solve()) ;
                 long sol = s.getSolver().getSolutionCount();
@@ -115,7 +115,7 @@ public class NotMemberTest {
                 vars[0] = s.intVar("v", lb, ub, true);
 
                 s.notMember(vars[0], values[1]).post();
-                s.getSolver().set(inputOrderLBSearch(vars));
+                s.getSolver().setSearch(inputOrderLBSearch(vars));
 
                 while (s.getSolver().solve()) ;
                 long sol = s.getSolver().getSolutionCount();
@@ -133,7 +133,7 @@ public class NotMemberTest {
         int[] values = new int[]{0, 2, 8, 9, 10, 5, 6};
 
         s.notMember(vars, values).post();
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 4);

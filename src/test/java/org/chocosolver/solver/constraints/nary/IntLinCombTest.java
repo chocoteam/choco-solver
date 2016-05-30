@@ -107,7 +107,7 @@ public class IntLinCombTest {
         s.scalar(vars, coeffs, "=", sum).post();
         s.arithm(sum, operatorToString(operator), constant).post();
 
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (s.getSolver().solve()) ;
     }
@@ -150,7 +150,7 @@ public class IntLinCombTest {
         IntVar sum = model.intVar("scal", -99999999, 99999999, true);
         model.scalar(bins, coeffs, "=", sum).post();
         model.arithm(sum, opname, b).post();
-        model.getSolver().set(inputOrderLBSearch(bins));
+        model.getSolver().setSearch(inputOrderLBSearch(bins));
         return model;
     }
 
@@ -171,7 +171,7 @@ public class IntLinCombTest {
         IntVar sum = model.intVar("scal", -99999999, 99999999, true);
         model.scalar(bins, coeffs, "=", sum).post();
         model.arithm(sum, opname, b).post();
-        model.getSolver().set(inputOrderLBSearch(bins));
+        model.getSolver().setSearch(inputOrderLBSearch(bins));
         return model;
     }
 
@@ -572,7 +572,7 @@ public class IntLinCombTest {
         fill(cs, k, n, -1);
         IntVar sum = model.intVar("S", -n / 2, n / 2, true);
         model.scalar(bs, cs, "=", sum).post();
-        model.getSolver().set(inputOrderLBSearch(bs));
+        model.getSolver().setSearch(inputOrderLBSearch(bs));
 //        IOutputFactory.showDecisions(solver);
         while (model.getSolver().solve()) ;
     }
@@ -721,7 +721,7 @@ public class IntLinCombTest {
         Model model = new Model("TestChoco 3.3.2 Briot");
         IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
         model.sum(new IntVar[]{var[0], var[1], var[2]}, ">=", 60).post();
-        model.getSolver().set(inputOrderLBSearch(var));
+        model.getSolver().setSearch(inputOrderLBSearch(var));
         model.getSolver().showStatistics();
         model.getSolver().showSolutions();
         model.getSolver().solve();
@@ -732,7 +732,7 @@ public class IntLinCombTest {
         Model model = new Model("TestChoco 3.3.2 Briot");
         IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
         model.sum(new IntVar[]{var[0], var[1], var[2]}, "<=", 120).post();
-        model.getSolver().set(inputOrderLBSearch(var));
+        model.getSolver().setSearch(inputOrderLBSearch(var));
         model.getSolver().showStatistics();
         model.getSolver().showSolutions();
         model.getSolver().solve();

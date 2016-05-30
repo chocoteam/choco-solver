@@ -110,7 +110,7 @@ public class TableTest {
                     IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                     allEquals(tsolver, tvars, a);
                     Solver r = tsolver.getSolver();
-                    r.set(randomSearch(tvars, s));
+                    r.setSearch(randomSearch(tvars, s));
                     long nbSolutions = 0;
                     while (tsolver.getSolver().solve()) {
                         nbSolutions++;
@@ -151,7 +151,7 @@ public class TableTest {
                     IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                     allDifferent(tsolver, tvars, a);
                     Solver r = tsolver.getSolver();
-                    r.set(randomSearch(tvars, s));
+                    r.setSearch(randomSearch(tvars, s));
                     long nbSolutions = 0;
                     while (tsolver.getSolver().solve()) {
                         nbSolutions++;
@@ -271,7 +271,7 @@ public class TableTest {
                 rnd.setSeed(seed);
                 Tuples tuples = generateTuples(values -> rnd.nextBoolean(), true, vars);
                 model.mddc(vars, new MultivaluedDecisionDiagram(vars, tuples)).post();
-                model.getSolver().set(randomSearch(vars, seed));
+                model.getSolver().setSearch(randomSearch(vars, seed));
                 long nbs = 0;
                 while (model.getSolver().solve()) {
                     nbs++;
@@ -282,7 +282,7 @@ public class TableTest {
                         Model tsolver = new Model(ALGOS[a]);
                         IntVar[] tvars = tsolver.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
                         model.table(tvars, tuples, ALGOS[a]).post();
-                        tsolver.getSolver().set(randomSearch(tvars, s));
+                        tsolver.getSolver().setSearch(randomSearch(tvars, s));
                         long nbSolutions = 0;
                         while (tsolver.getSolver().solve()) {
                             nbSolutions++;

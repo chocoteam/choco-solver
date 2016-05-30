@@ -102,7 +102,7 @@ public class Solution implements ICause {
         empty = false;
         boolean warn = false;
         if (varsToStore.length == 0) {
-            varsToStore = model.getSolver().getStrategy().getVariables();
+            varsToStore = model.getSolver().getSearch().getVariables();
         }
         assert varsToStore.length > 0;
         if (intmap != null) {

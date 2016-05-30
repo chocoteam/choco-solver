@@ -56,7 +56,7 @@ public class ScaleViewTest {
         IntVar Y = s.intScaleView(X, 2);
         IntVar[] vars = {X, Y};
         s.arithm(Y, "!=", 4).post();
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 2);
     }
@@ -72,7 +72,7 @@ public class ScaleViewTest {
 
         s.arithm(Y, "!=", -2).post();
 
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 4);
     }
@@ -88,7 +88,7 @@ public class ScaleViewTest {
         s.arithm(Y, ">=", low + coeff - 1).post();
         s.arithm(Y, "<=", upp - coeff - 1).post();
 
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         return s;
     }
 
@@ -105,7 +105,7 @@ public class ScaleViewTest {
         s.arithm(Y, "<=", upp - coeff - 1).post();
         s.times(X, C, Y).post();
 
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         return s;
     }
 

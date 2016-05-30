@@ -76,10 +76,10 @@ public class StrategyTest {
             variables[i] = s.intVar("V" + i, i, n + i, false);
         }
         Solver r = s.getSolver();
-        r.set(inputOrderLBSearch(variables));
+        r.setSearch(inputOrderLBSearch(variables));
 
         env.worldPush();
-        Decision decision = r.getStrategy().getDecision();
+        Decision decision = r.getSearch().getDecision();
         ArrayDeque<Decision> stack = new ArrayDeque<>();
         stack.push(decision);
         testStrat(stack, variables, n, r);
@@ -97,7 +97,7 @@ public class StrategyTest {
             }
             Assert.assertTrue(variables[i].isInstantiated());
             Assert.assertEquals(variables[i].getValue(), i);
-            decision = r.getStrategy().getDecision();
+            decision = r.getSearch().getDecision();
             if(decision!=null)stack.push(decision);
             env.worldPush();
         }
@@ -131,10 +131,10 @@ public class StrategyTest {
             variables[i] = s.intVar("V" + i, i, n + i, false);
             asgs[i] = inputOrderLBSearch(variables[i]);
         }
-        r.set(asgs);
+        r.setSearch(asgs);
 
         env.worldPush();
-        Decision decision = r.getStrategy().getDecision();
+        Decision decision = r.getSearch().getDecision();
         ArrayDeque<Decision> stack = new ArrayDeque<>();
         stack.push(decision);
         testStrat(stack, variables, n, r);
@@ -146,7 +146,7 @@ public class StrategyTest {
         Model model = new Model("OnceTest");
         IntVar x = model.intVar("x", 1, 2, false);
         IntVar[] v = {x};
-        model.getSolver().set(SearchStrategyFactory.greedySearch(SearchStrategyFactory.inputOrderLBSearch(v)));
+        model.getSolver().setSearch(SearchStrategyFactory.greedySearch(SearchStrategyFactory.inputOrderLBSearch(v)));
         model.getSolver().solve();
         Assert.assertTrue(x.getValue() == 1);
     }
@@ -159,7 +159,7 @@ public class StrategyTest {
         model.allDifferent(x).post();
         model.member(x[0], y).post();
         model.getSolver().solve();
-        AbstractStrategy strat = model.getSolver().getStrategy();
+        AbstractStrategy strat = model.getSolver().getSearch();
         assertTrue(strat instanceof LastConflict);
     }
 
@@ -339,7 +339,7 @@ public class StrategyTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         Solver r = model.getSolver();
-        r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), int_split, X));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), int_split, X));
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
@@ -350,7 +350,7 @@ public class StrategyTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         Solver r = model.getSolver();
-        r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(false), int_reverse_split, X));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(false), int_reverse_split, X));
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
@@ -362,7 +362,7 @@ public class StrategyTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         Solver r = model.getSolver();
-        r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), int_split, X));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), int_split, X));
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
@@ -373,7 +373,7 @@ public class StrategyTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         Solver r = model.getSolver();
-        r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(false), int_reverse_split, X));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(false), int_reverse_split, X));
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);

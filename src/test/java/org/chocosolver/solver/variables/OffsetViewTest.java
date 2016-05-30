@@ -60,7 +60,7 @@ public class OffsetViewTest {
 
         s.arithm(Y, "!=", 4).post();
 
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 2);
     }
@@ -77,7 +77,7 @@ public class OffsetViewTest {
 
         s.arithm(Y, "!=", -2).post();
 
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 4);
     }
@@ -93,7 +93,7 @@ public class OffsetViewTest {
         s.arithm(Y, ">=", low + coeff - 1).post();
         s.arithm(Y, "<=", upp - coeff - 1).post();
 
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         return s;
     }
 
@@ -109,7 +109,7 @@ public class OffsetViewTest {
         s.arithm(Y, "<=", upp - coeff - 1).post();
         s.arithm(X, "=", Y, "+", coeff).post();
 
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
         return s;
     }
 

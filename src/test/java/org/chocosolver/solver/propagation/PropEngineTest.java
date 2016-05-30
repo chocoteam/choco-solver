@@ -105,7 +105,7 @@ public class PropEngineTest {
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 3);
         model.getSolver().reset();
-        model.getSolver().set(NoPropagationEngine.SINGLETON);
+        model.getSolver().setEngine(NoPropagationEngine.SINGLETON);
         model.unpost(CSTR);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
@@ -141,7 +141,7 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         Model model = makeNQueenWithBinaryConstraints(8);
-        model.getSolver().set(new SevenQueuesPropagatorEngine(model));
+        model.getSolver().setEngine(new SevenQueuesPropagatorEngine(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 92);
     }
@@ -149,7 +149,7 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test4() {
         Model model = makeNQueenWithBinaryConstraints(8);
-        model.getSolver().set(new TwoBucketPropagationEngine(model));
+        model.getSolver().setEngine(new TwoBucketPropagationEngine(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 92);
     }
@@ -157,8 +157,8 @@ public class PropEngineTest {
     @Test(groups="10s", timeOut=60000)
     public void test5(){
         Model model = ProblemMaker.makeGolombRuler(10);
-        model.getSolver().set(new SevenQueuesPropagatorEngine(model));
-        model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
+        model.getSolver().setEngine(new SevenQueuesPropagatorEngine(model));
+        model.getSolver().setSearch(minDomLBSearch((IntVar[])model.getHook("ticks")));
         int obj = Integer.MAX_VALUE;
         while(model.getSolver().solve()){
             obj = ((IntVar)(model.getObjective())).getValue();
@@ -170,8 +170,8 @@ public class PropEngineTest {
     @Test(groups="10s", timeOut=60000)
     public void test6(){
         Model model = ProblemMaker.makeGolombRuler(10);
-        model.getSolver().set(new TwoBucketPropagationEngine(model));
-        model.getSolver().set(minDomLBSearch((IntVar[])model.getHook("ticks")));
+        model.getSolver().setEngine(new TwoBucketPropagationEngine(model));
+        model.getSolver().setSearch(minDomLBSearch((IntVar[])model.getHook("ticks")));
         int obj = Integer.MAX_VALUE;
         while(model.getSolver().solve()){
             obj = ((IntVar)(model.getObjective())).getValue();
@@ -213,7 +213,7 @@ public class PropEngineTest {
                     return TRUE;
                 }
             }).post();
-            model.getSolver().set(randomSearch(X, 0));
+            model.getSolver().setSearch(randomSearch(X, 0));
             while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 9);
         }

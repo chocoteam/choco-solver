@@ -75,7 +75,7 @@ public class NoGoodOnSolutionTest {
         }
         s.sum(costOf, "=", z).post();
         s.circuit(vars).post();
-        s.getSolver().set(randomSearch(vars, 0));
+        s.getSolver().setSearch(randomSearch(vars, 0));
         s.getSolver().limitSolution(MAX_NB_SOLS);
         return s;
     }
@@ -115,7 +115,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails (at activity presolve only) (loop infinitely)
         Model s = makeProblem();
         Solver r = s.getSolver();
-        r.set(activityBasedSearch(s.retrieveIntVars(true)));
+        r.setSearch(activityBasedSearch(s.retrieveIntVars(true)));
         while (s.getSolver().solve()) ;
         out.println(r.getMeasures());
         assertTrue(r.getMeasures().getSolutionCount() == MAX_NB_SOLS);
@@ -127,7 +127,7 @@ public class NoGoodOnSolutionTest {
         Model s = makeProblem();
         Solver r = s.getSolver();
         r.setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
-        r.set(activityBasedSearch(s.retrieveIntVars(true)));
+        r.setSearch(activityBasedSearch(s.retrieveIntVars(true)));
         s.getSolver().showSolutions();
         while (s.getSolver().solve()) ;
         out.println(r.getMeasures());
@@ -150,7 +150,7 @@ public class NoGoodOnSolutionTest {
             }
         }
         model.getSolver().setNoGoodRecordingFromSolutions(model.retrieveIntVars(true));
-        model.getSolver().set(randomSearch(vars, 0));
+        model.getSolver().setSearch(randomSearch(vars, 0));
 
         model.getSolver().setRestartOnSolutions();
         while (model.getSolver().solve()) ;
@@ -175,7 +175,7 @@ public class NoGoodOnSolutionTest {
         }
         model.getSolver().setNoGoodRecordingFromSolutions(model.retrieveIntVars(false));
         model.getSolver().setNoGoodRecordingFromRestarts();
-        model.getSolver().set(randomSearch(vars, 0));
+        model.getSolver().setSearch(randomSearch(vars, 0));
         model.getSolver().setRestartOnSolutions();
         while (model.getSolver().solve()) ;
         out.println(model.getSolver().getMeasures());
@@ -199,7 +199,7 @@ public class NoGoodOnSolutionTest {
         }
         model.getSolver().setNoGoodRecordingFromSolutions(vars[0]);
         model.getSolver().showSolutions();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
         while (model.getSolver().solve()) ;
         out.println(model.getSolver().getMeasures());
         assertEquals(model.getSolver().getSolutionCount(), 8);
@@ -222,7 +222,7 @@ public class NoGoodOnSolutionTest {
         }
         model.getSolver().setNoGoodRecordingFromSolutions(vars[0], vars[1]);
         model.getSolver().showSolutions();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 //        IOutputFactory.showDecisions(solver);
         while (model.getSolver().solve()) ;
         out.println(model.getSolver().getMeasures());

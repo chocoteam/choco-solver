@@ -86,7 +86,7 @@ public class SolverTest {
     public void test1DFS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(true)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(true)));
         r.setDFS();
         model.getSolver().showSolutions();
         model.getSolver().solve();
@@ -98,7 +98,7 @@ public class SolverTest {
     public void test1LDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLDS(4);
         model.getSolver().solve();
         assertEquals(r.getMeasures().getSolutionCount(), 1);
@@ -109,7 +109,7 @@ public class SolverTest {
     public void test1DDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(true)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(true)));
         r.setDDS(4);
         model.getSolver().solve();
         assertEquals(r.getMeasures().getSolutionCount(), 1);
@@ -120,7 +120,7 @@ public class SolverTest {
     public void test1HBFS() {
         Model model = makeGolombRuler(8);
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setHBFS(.05, .1, 32);
         while(model.getSolver().solve());
         assertEquals(model.getSolver().getSolutionCount(), 7);
@@ -132,7 +132,7 @@ public class SolverTest {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
         r.setDFS();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(true)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(true)));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 92);
         assertEquals(model.getSolver().getNodeCount(), 480);
@@ -142,7 +142,7 @@ public class SolverTest {
     public void test2LDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLDS(4);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
@@ -153,7 +153,7 @@ public class SolverTest {
     public void test2DDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setDDS(5);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
@@ -165,7 +165,7 @@ public class SolverTest {
         Model model = new Model();
         Solver r = model.getSolver();
         IntVar[] bs = model.boolVarArray("b", 4);
-        r.set(inputOrderLBSearch(bs));
+        r.setSearch(inputOrderLBSearch(bs));
         r.setDDS(3);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 8);
@@ -176,7 +176,7 @@ public class SolverTest {
         Model model = makeGolombRuler(6);
         Solver r = model.getSolver();
         r.setDFS();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         while (model.getSolver().solve()) ;
         model.getSolver().printShortStatistics();
         assertEquals(model.getSolver().getSolutionCount(), 3);
@@ -188,7 +188,7 @@ public class SolverTest {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
         r.setDFS();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         model.getSolver().setRestarts(limit -> model.getSolver().getNodeCount() >= limit, new LubyRestartStrategy(2, 2), 2);
         while (model.getSolver().solve()) ;
         model.getSolver().printShortStatistics();
@@ -200,7 +200,7 @@ public class SolverTest {
         Model model = makeGolombRuler(5);
         Solver r = model.getSolver();
         r.setDFS();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.limitSearch(() -> r.getMeasures().getNodeCount() >= 1000);
         while (model.getSolver().solve()) ;
@@ -213,7 +213,7 @@ public class SolverTest {
         Model model = makeGolombRuler(6);
         Solver r = model.getSolver();
         r.setDFS();
-        r.set(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         model.getSolver().setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
         while (model.getSolver().solve()) ;
@@ -228,7 +228,7 @@ public class SolverTest {
         int n = 3;
         BoolVar[] B = model.boolVarArray("b", n - 1);
         Solver r = model.getSolver();
-        r.set(inputOrderUBSearch(B));
+        r.setSearch(inputOrderUBSearch(B));
         r.setLDS(1);
         model.getSolver().showSolutions();
         model.getSolver().showDecisions();
@@ -247,7 +247,7 @@ public class SolverTest {
             model.arithm(X[i], "<", X[i + 1]).reifyWith(B[i]);
         }
         Solver r = model.getSolver();
-        r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
+        r.setSearch(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         r.setLDS(1);
         r.showDecisions();
         r.showSolutions();
@@ -267,7 +267,7 @@ public class SolverTest {
         }
 
         Solver r = model.getSolver();
-        r.set(new MoveBinaryLDS(inputOrderUBSearch(B), 1, model.getEnvironment()),
+        r.setMove(new MoveBinaryLDS(inputOrderUBSearch(B), 1, model.getEnvironment()),
                 new MoveBinaryDFS(greedySearch(inputOrderLBSearch(X)))
         );
         model.getSolver().showSolutions();

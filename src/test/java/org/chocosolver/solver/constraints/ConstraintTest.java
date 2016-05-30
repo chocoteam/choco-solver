@@ -72,7 +72,7 @@ public class ConstraintTest {
         model.arithm(ivs[0], "!=", ivs[3]).post(); // instantiation()
 
         Solver r = model.getSolver();
-        r.set(randomSearch(ivs, 0));
+        r.setSearch(randomSearch(ivs, 0));
         while (model.getSolver().solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 48);
         assertEquals(r.getMeasures().getNodeCount(), 100);

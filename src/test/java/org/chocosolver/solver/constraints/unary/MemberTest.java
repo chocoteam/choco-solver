@@ -90,7 +90,7 @@ public class MemberTest {
 
                 s.member(vars[0], values[1]).post();
 
-                s.getSolver().set(inputOrderLBSearch(vars));
+                s.getSolver().setSearch(inputOrderLBSearch(vars));
 
                 while (s.getSolver().solve()) ;
                 long sol = s.getSolver().getSolutionCount();
@@ -117,7 +117,7 @@ public class MemberTest {
 
                 s.member(vars[0], values[1]).post();
 
-                s.getSolver().set(inputOrderLBSearch(vars));
+                s.getSolver().setSearch(inputOrderLBSearch(vars));
 
                 while (s.getSolver().solve()) ;
                 long sol = s.getSolver().getSolutionCount();
@@ -135,7 +135,7 @@ public class MemberTest {
         int[] values = new int[]{0, 2, 4, 6, 8};
 
         s.member(vars, values).post();
-        s.getSolver().set(inputOrderLBSearch(vars));
+        s.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (s.getSolver().solve()) ;
 

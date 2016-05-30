@@ -79,7 +79,7 @@ public class ELNSTest {
         }
 
         r.setLNS(neighbor, None);
-        r.set(randomSearch(vars, seed));
+        r.setSearch(randomSearch(vars, seed));
         r.limitFail(500);
         r.showSolutions();
         model.setObjective(MINIMIZE, obj);

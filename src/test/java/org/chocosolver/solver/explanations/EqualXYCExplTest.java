@@ -71,10 +71,10 @@ public class EqualXYCExplTest {
             indicess[i] = sol.intVar("i_" + i, 0, nbvars, false);
         }
         IntVar[] allvarsr = flatten(toArray(varsr, indicesr));
-        ref.getSolver().set(inputOrderLBSearch(allvarsr));
+        ref.getSolver().setSearch(inputOrderLBSearch(allvarsr));
 
         IntVar[] allvarss = flatten(toArray(varss, indicess));
-        sol.getSolver().set(inputOrderLBSearch(allvarss));
+        sol.getSolver().setSearch(inputOrderLBSearch(allvarss));
 
 
         for (int i = 0; i < varsr.length - 1; i++) {

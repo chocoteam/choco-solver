@@ -87,7 +87,7 @@ public class MinMaxTest {
             model.arithm(v,min?">=":"<=",mMvar).post();
         }
         int nbSol2 = 0;
-        model.getSolver().set(inputOrderLBSearch(vars),inputOrderLBSearch(mMvar));
+        model.getSolver().setSearch(inputOrderLBSearch(vars),inputOrderLBSearch(mMvar));
         while (model.getSolver().solve()) {
             nbSol2++;
         }

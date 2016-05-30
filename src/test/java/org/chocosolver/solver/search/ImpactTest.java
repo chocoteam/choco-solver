@@ -68,9 +68,9 @@ public class ImpactTest {
 		Solver r = model.getSolver();
 		r.limitTime(20000);
 		if(impact){
-			r.set(new ImpactBased(vectors,2,3,10,0,true));
+			r.setSearch(new ImpactBased(vectors,2,3,10,0,true));
 		}else{
-			r.set(domOverWDegSearch(vectors));
+			r.setSearch(domOverWDegSearch(vectors));
 		}
 		return model;
 	}

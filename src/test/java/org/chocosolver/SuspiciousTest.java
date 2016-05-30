@@ -68,7 +68,7 @@ public class SuspiciousTest {
         NodeCounter nodeCounter = new NodeCounter(model, 100);
         INeighbor rnd = new RandomNeighborhood(model.retrieveIntVars(true), 30, 0);
         Move currentMove = model.getSolver().getMove();
-        model.getSolver().set(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
+        model.getSolver().setMove(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override
             public boolean extend(Solver solver) {
                 if (nodeCounter.isMet()) {

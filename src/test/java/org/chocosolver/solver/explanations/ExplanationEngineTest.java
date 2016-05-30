@@ -213,7 +213,7 @@ public class ExplanationEngineTest {
             IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
             model.arithm(vars[n - 2], "=", vars[n - 1]).post();
             model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-            model.getSolver().set(inputOrderLBSearch(vars));
+            model.getSolver().setSearch(inputOrderLBSearch(vars));
 
             Solver r = model.getSolver();
             model.getSolver().setCBJLearning(false, false);
@@ -233,7 +233,7 @@ public class ExplanationEngineTest {
             model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
 
             Solver r = model.getSolver();
-            r.set(inputOrderLBSearch(vars));
+            r.setSearch(inputOrderLBSearch(vars));
 
             r.setCBJLearning(false, false);
             assertFalse(model.getSolver().solve());
@@ -268,7 +268,7 @@ public class ExplanationEngineTest {
             for (int i = 0; i < n - 1; i++) {
                 new Constraint(i + ">" + (i + 1), new PropGreaterOrEqualX_YC(new IntVar[]{vars[i], vars[i + 1]}, 1)).post();
             }
-            model.getSolver().set(inputOrderLBSearch(vars));
+            model.getSolver().setSearch(inputOrderLBSearch(vars));
 
             model.getSolver().setCBJLearning(false, false);
             assertFalse(model.getSolver().solve());
@@ -292,7 +292,7 @@ public class ExplanationEngineTest {
 
             model.sum(copyOfRange(p, 0, 8), "=", 5).post();
             model.arithm(p[9], "+", p[8], ">", 4).post();
-            model.getSolver().set(randomSearch(p, seed));
+            model.getSolver().setSearch(randomSearch(p, seed));
 
             model.getSolver().setCBJLearning(false, false);
 
@@ -315,7 +315,7 @@ public class ExplanationEngineTest {
         model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
+        r.setSearch(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
 
         r.setCBJLearning(false, false);
 
@@ -340,7 +340,7 @@ public class ExplanationEngineTest {
         model.arithm(p[9], "+", p[8], ">", 4).post();
         // p[0], p[1] are just for fun
         Solver r = model.getSolver();
-        r.set(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
+        r.setSearch(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
 
         r.setCBJLearning(false, false);
 
@@ -393,7 +393,7 @@ public class ExplanationEngineTest {
             model.allDifferent(col, "FC").post();
             model.allDifferent(row, "FC").post();
         }
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 //        solver.set(ISF.custom(
 //                ISF.lexico_var_selector(),
 //                ISF.min_value_selector(),
@@ -445,7 +445,7 @@ public class ExplanationEngineTest {
         // symmetry-breaking
         model.arithm(vars[0], "<", vars[n - 1]).post();
 
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         configure(model, a);
         model.getSolver().showShortStatistics();
@@ -498,7 +498,7 @@ public class ExplanationEngineTest {
             model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
 
-        model.getSolver().set(inputOrderLBSearch(ticks));
+        model.getSolver().setSearch(inputOrderLBSearch(ticks));
 
         configure(model, a);
         model.getSolver().showShortStatistics();
@@ -534,7 +534,7 @@ public class ExplanationEngineTest {
         }
         model.allDifferent(position, "FC").post();
         Solver r = model.getSolver();
-        r.set(minDomUBSearch(position));
+        r.setSearch(minDomUBSearch(position));
 
         configure(model, a);
         model.getSolver().showShortStatistics();
@@ -602,7 +602,7 @@ public class ExplanationEngineTest {
         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
         Solver r = model.getSolver();
-        r.set(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), vars));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), vars));
 
         configure(model, a);
         model.getSolver().showShortStatistics();
@@ -687,7 +687,7 @@ public class ExplanationEngineTest {
         model.allDifferent(xy, "FC").post();
 
 
-        model.getSolver().set(minDomLBSearch(Ovars));
+        model.getSolver().setSearch(minDomLBSearch(Ovars));
 
         configure(model, a);
         model.getSolver().showShortStatistics();
@@ -889,7 +889,7 @@ public class ExplanationEngineTest {
         xE1.post();
 
         s.getSolver().setCBJLearning(false, true);
-        LearnCBJ cbj = (LearnCBJ) s.getSolver().getLearn();
+        LearnCBJ cbj = (LearnCBJ) s.getSolver().getLearner();
         s.getSolver().showDecisions();
         assertFalse(s.getSolver().solve());
         // If the problem has no solution, the end-user explanation can be retrieved
@@ -909,7 +909,7 @@ public class ExplanationEngineTest {
         }
         Solver r = model.getSolver();
         r.setCBJLearning(false, false);
-        r.set(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
+        r.setSearch(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         model.getSolver().showDecisions();
         model.getSolver().showSolutions();
         while (model.getSolver().solve()) ;

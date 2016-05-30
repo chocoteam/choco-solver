@@ -93,7 +93,7 @@ public class DeltaTest {
         final BoolVar b0 = model.boolVar("b0");
         final BoolVar b1 = model.boolVar("b1");
         final IntVar i0 = model.boolVar("i0");
-        model.getSolver().set(inputOrderLBSearch(i0));
+        model.getSolver().setSearch(inputOrderLBSearch(i0));
         model.setBoolsChanneling(new BoolVar[]{b0, b1}, s0).post();
         s0.setCard(model.intVar(0));
 
@@ -111,7 +111,7 @@ public class DeltaTest {
             final IntVar j = s.intVar("j", -2, 2, false);
             //IOutputFactory.showDecisions(s);
             //IOutputFactory.showSolutions(s);
-            s.getSolver().set(randomSearch(new IntVar[]{i, j}, 0));
+            s.getSolver().setSearch(randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             while (s.getSolver().solve()) ;
         }
@@ -125,7 +125,7 @@ public class DeltaTest {
             final IntVar j = s.intVar("j", -2, 2, true);
             //IOutputFactory.showDecisions(s);
             //IOutputFactory.showSolutions(s);
-            s.getSolver().set(randomSearch(new IntVar[]{i, j}, 0));
+            s.getSolver().setSearch(randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             while (s.getSolver().solve()) ;
         }
@@ -139,7 +139,7 @@ public class DeltaTest {
             final IntVar j = s.boolVar("j");
             //IOutputFactory.showDecisions(s);
             //IOutputFactory.showSolutions(s);
-            s.getSolver().set(randomSearch(new IntVar[]{i, j}, 0));
+            s.getSolver().setSearch(randomSearch(new IntVar[]{i, j}, 0));
             new Constraint("Constraint", new PropTestDM1(i, j), new PropTestDM2(i, j)).post();
             while (s.getSolver().solve()) ;
         }

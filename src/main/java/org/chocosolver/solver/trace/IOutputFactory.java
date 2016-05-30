@@ -278,7 +278,7 @@ public interface IOutputFactory extends ISelf<Solver> {
                     solver.getModel().getSettings().outputWithANSIColors()?ANSI_GREEN:"",
                     solver.getSolutionCount(),
                     solver.getMeasures().toOneLineString(),
-                    print(solver.getStrategy().getVariables()),
+                    print(solver.getSearch().getVariables()),
                     solver.getModel().getSettings().outputWithANSIColors()?ANSI_RESET:""
             );
         }
@@ -314,7 +314,7 @@ public interface IOutputFactory extends ISelf<Solver> {
         @Override
         public String print() {
             int limit = 120;
-            Variable[] vars = solver.getStrategy().getVariables();
+            Variable[] vars = solver.getSearch().getVariables();
             StringBuilder s = new StringBuilder(32);
             for (int i = 0; i < vars.length && s.length() < limit; i++) {
                 s.append(vars[i]).append(' ');

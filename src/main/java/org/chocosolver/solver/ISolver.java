@@ -33,7 +33,6 @@ import org.chocosolver.solver.search.IResolutionHelper;
 import org.chocosolver.solver.search.loop.learn.ILearnFactory;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitorFactory;
 import org.chocosolver.solver.search.loop.move.IMoveFactory;
-import org.chocosolver.solver.search.loop.propagate.IPropagateFactory;
 
 /**
  * Interface to ease modeling
@@ -42,7 +41,7 @@ import org.chocosolver.solver.search.loop.propagate.IPropagateFactory;
  * @author Jean-Guillaume FAGES
  * @since 4.0.0
  */
-public interface ISolver extends IPropagateFactory, ILearnFactory, IMoveFactory, ISearchMonitorFactory,
+public interface ISolver extends ILearnFactory, IMoveFactory, ISearchMonitorFactory,
 		IResolutionHelper {
 
 }

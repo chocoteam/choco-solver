@@ -106,7 +106,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
                     }
                 }
                 toUnion.clear();
-                model.getSolver().set(NoPropagationEngine.SINGLETON);
+                model.getSolver().setEngine(NoPropagationEngine.SINGLETON);
                 for (int i = idx.get(); i >= 0; i--) {
                     if (propagate(propagators[i], i)) {
                         int last = idx.add(-1) + 1;
@@ -119,10 +119,10 @@ public class PropLocalConDis extends Propagator<IntVar> {
                         break;
                     }
                 }
-                model.getSolver().set(eng);
+                model.getSolver().setEngine(eng);
             } while (applyDeductions());
         } finally {
-            model.getSolver().set(eng);
+            model.getSolver().setEngine(eng);
         }
     }
 

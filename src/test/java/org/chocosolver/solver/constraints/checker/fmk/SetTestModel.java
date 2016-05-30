@@ -185,7 +185,7 @@ public interface SetTestModel {
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             s.sum(bools, "=", vars[n - 1]).post();
-            s.getSolver().set(inputOrderLBSearch(vars));
+            s.getSolver().setSearch(inputOrderLBSearch(vars));
             return s;
         }
     };
@@ -206,7 +206,7 @@ public interface SetTestModel {
 //                System.out.printf("");
             }
             s.arithm(vars[0], "=", vars[1]).post();
-            s.getSolver().set(inputOrderLBSearch(vars));
+            s.getSolver().setSearch(inputOrderLBSearch(vars));
             return s;
         }
     };
@@ -227,7 +227,7 @@ public interface SetTestModel {
             }
             IntVar[] allvars = append(X, Y);
             s.inverseChanneling(X, Y, 0, 0).post();
-            s.getSolver().set(inputOrderLBSearch(allvars));
+            s.getSolver().setSearch(inputOrderLBSearch(allvars));
             return s;
         }
     };
@@ -249,7 +249,7 @@ public interface SetTestModel {
             }
             Solver r = s.getSolver();
             s.nValues(decvars, vars[n - 1]).post();
-            r.set(inputOrderLBSearch(vars));
+            r.setSearch(inputOrderLBSearch(vars));
             return s;
         }
     };

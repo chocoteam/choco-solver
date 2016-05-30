@@ -84,7 +84,7 @@ public class LearnExplained implements Learn {
     public LearnExplained(Model mModel, boolean partialExplanationsOn, boolean recordCauses) {
         this.mModel = mModel;
         if (mModel.getSolver().getExplainer() == NoExplanationEngine.SINGLETON) {
-            mModel.getSolver().set(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));
+            mModel.getSolver().setExplainer(new ExplanationEngine(mModel, partialExplanationsOn, recordCauses));
         }
         this.mExplainer = mModel.getSolver().getExplainer();
         this.saveCauses = recordCauses;

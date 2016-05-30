@@ -117,7 +117,7 @@ public class CountTest {
             model.count(value, vars, occ).post();
 
             Solver r = model.getSolver();
-            r.set(randomSearch(allvars,i));
+            r.setSearch(randomSearch(allvars,i));
 
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
@@ -169,7 +169,7 @@ public class CountTest {
 //            }
 
             Solver r = model.getSolver();
-            r.set(randomSearch(vars, seed));
+            r.setSearch(randomSearch(vars, seed));
             while (model.getSolver().solve()) ;
             if (nbsol == -1) {
                 nbsol = r.getMeasures().getSolutionCount();
@@ -195,7 +195,7 @@ public class CountTest {
         IntVar[] vars = model.intVarArray("e", vs.length + 1, 0, ub, false);
 
         Tuples tuples = new Tuples(true);
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
         model.getSolver().solve();
         do {
             int[] tuple = new int[vars.length];

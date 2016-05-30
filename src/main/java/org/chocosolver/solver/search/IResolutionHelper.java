@@ -271,9 +271,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
     default Solution findOptimalSolution(IntVar objective, boolean maximize, Criterion... stop) {
         _me().getModel().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
         _me().addStopCriterion(stop);
-		if(_me().getStrategy()!=null) {
+		if(_me().getSearch()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
-			_me().set(_me().getStrategy(), objSearch);
+			_me().setSearch(_me().getSearch(), objSearch);
 		}
         Solution s = new Solution(_me().getModel());
         while (_me().solve()) {
@@ -337,9 +337,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().addStopCriterion(stop);
-		if(_me().getStrategy()!=null) {
+		if(_me().getSearch()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
-			_me().set(_me().getStrategy(), objSearch);
+			_me().setSearch(_me().getSearch(), objSearch);
 		}
         _me().findOptimalSolution(objective, maximize);
         if (!_me().isStopCriterionMet()
@@ -405,9 +405,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().addStopCriterion(stop);
-		if(_me().getStrategy()!=null) {
+		if(_me().getSearch()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
-			_me().set(_me().getStrategy(), objSearch);
+			_me().setSearch(_me().getSearch(), objSearch);
 		}
         _me().findOptimalSolution(objective, maximize);
         if (!_me().isStopCriterionMet()
@@ -462,9 +462,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
         _me().addStopCriterion(stop);
-		if(_me().getStrategy()!=null) {
+		if(_me().getSearch()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
-			_me().set(_me().getStrategy(), objSearch);
+			_me().setSearch(_me().getSearch(), objSearch);
 		}
         ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objectives);
         while (_me().solve()) {
@@ -501,9 +501,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
         if (objectives == null || objectives.length == 0) {
             return findSolution(stop);
         }
-		if(_me().getStrategy()!=null) {
+		if(_me().getSearch()!=null) {
 			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
-			_me().set(_me().getStrategy(), objSearch);
+			_me().setSearch(_me().getSearch(), objSearch);
 		}
         _me().addStopCriterion(stop);
         Solution sol = null;

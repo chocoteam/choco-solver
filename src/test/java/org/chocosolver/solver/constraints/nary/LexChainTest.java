@@ -102,7 +102,7 @@ public class LexChainTest {
         }
 
         model.addClauses(LogOp.and(trees));
-        model.getSolver().set(randomSearch(ArrayUtils.flatten(X), seed));
+        model.getSolver().setSearch(randomSearch(ArrayUtils.flatten(X), seed));
         return model;
     }
 
@@ -115,7 +115,7 @@ public class LexChainTest {
                     model.intVarArray("X_" + i, m, 0, k, false);
         }
         model.lexChainLess(X).post();
-        model.getSolver().set(randomSearch(flatten(X),seed));
+        model.getSolver().setSearch(randomSearch(flatten(X),seed));
         return model;
     }
 

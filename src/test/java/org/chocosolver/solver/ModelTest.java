@@ -87,7 +87,7 @@ public class ModelTest {
         model.scalar(objects, energies, "=", power).post();
         model.setObjective(MAXIMIZE, power);
         model.addHook("obj", power);
-        model.getSolver().set(inputOrderLBSearch(objects));
+        model.getSolver().setSearch(inputOrderLBSearch(objects));
         return model;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +260,7 @@ public class ModelTest {
     public void testParBug3() {
         for (int iter = 0; iter < 5000; iter++) {
             Model model = knapsack();
-            model.getSolver().set(randomSearch(model.retrieveIntVars(true), iter));
+            model.getSolver().setSearch(randomSearch(model.retrieveIntVars(true), iter));
             while (model.getSolver().solve()) ;
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
@@ -338,7 +338,7 @@ public class ModelTest {
         IntVar[] w = model.boolVarArray("w", 2);
         model.arithm(v[0], "!=", v[1]).post();
         model.arithm(w[0], "!=", w[1]).post();
-        model.getSolver().set(inputOrderLBSearch(v));
+        model.getSolver().setSearch(inputOrderLBSearch(v));
         model.getSolver().makeCompleteStrategy(true);
         model.getSolver().solve();
         assertEquals(model.getSolver().isSatisfied(), TRUE);
@@ -430,7 +430,7 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testFindOptimalSolutionWithSearch() {
         Model m = ProblemMaker.makeGolombRuler(7);
-        m.getSolver().set(inputOrderLBSearch((IntVar[]) m.getHook("ticks")));
+        m.getSolver().setSearch(inputOrderLBSearch((IntVar[]) m.getHook("ticks")));
         Solution s = m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false);
         Assert.assertNotNull(s);
         Assert.assertTrue(s.getIntVal((IntVar) m.getHook("objective"))==25);

@@ -183,7 +183,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                     new MonotonicRestartStrategy(1),
                     new FailCounter(model.getSolver().getModel(), 1),
                     MAX_VALUE);
-            model.getSolver().set(rfMove);
+            model.getSolver().setMove(rfMove);
         }
         model.getSolver().plugMonitor(this);
 //        init(vars);
@@ -388,7 +388,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                     Solver sl = model.getSolver();
                     Move m = sl.getMove();
                     if(m == rfMove){
-                        sl.set(rfMove.getChildMoves().get(0));
+                        sl.setMove(rfMove.getChildMoves().get(0));
                     }else{
                         while(m.getChildMoves()!= null && m.getChildMoves().get(0)!= rfMove){
                             m = m.getChildMoves().get(0);

@@ -72,7 +72,7 @@ public class ExplanationTest {
                     IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
                     model.arithm(vars[n - 2], "=", vars[n - 1]).post();
                     model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-                    model.getSolver().set(inputOrderLBSearch(vars));
+                    model.getSolver().setSearch(inputOrderLBSearch(vars));
                     switch (e){
                         case 1:model.getSolver().setNoLearning();break;
                         case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
@@ -98,7 +98,7 @@ public class ExplanationTest {
                     IntVar[] vars = model.intVarArray("p", n, 0, n - 2, true);
                     model.arithm(vars[n - 2], "=", vars[n - 1]).post();
                     model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-                    model.getSolver().set(inputOrderLBSearch(vars));
+                    model.getSolver().setSearch(inputOrderLBSearch(vars));
                     switch (e){
                         case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
                         case 3:model.getSolver().setDBTLearning(ng == 1, false);break;
@@ -119,10 +119,10 @@ public class ExplanationTest {
         IntVar[] vars = model.intVarArray("p", n, 0, n - 2, false);
         model.arithm(vars[n - 2], "=", vars[n - 1]).post();
         model.arithm(vars[n - 2], "!=", vars[n - 1]).post();
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         model.getSolver().setCBJLearning(false, true);
-        LearnCBJ cbj = (LearnCBJ) model.getSolver().getLearn();
+        LearnCBJ cbj = (LearnCBJ) model.getSolver().getLearner();
         assertFalse(model.getSolver().solve());
         Explanation exp = cbj.getLastExplanation();
         assertEquals(2, exp.nbCauses());
@@ -137,7 +137,7 @@ public class ExplanationTest {
                         final Model model = new Model();
                         IntVar[] pigeons = model.intVarArray("p", n, 0, n - 2, false);
                         model.allDifferent(pigeons, "NEQS").post();
-                        model.getSolver().set(randomSearch(pigeons, seed));
+                        model.getSolver().setSearch(randomSearch(pigeons, seed));
                         switch (e){
                             case 1:model.getSolver().setNoLearning();break;
                             case 2:model.getSolver().setCBJLearning(ng == 1, false);break;
@@ -195,7 +195,7 @@ public class ExplanationTest {
                         model.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]).post();
                         model.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]).post();
                         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
-                        model.getSolver().set(randomSearch(vars, seed));
+                        model.getSolver().setSearch(randomSearch(vars, seed));
 
                         switch (e){
                             case 1:model.getSolver().setNoLearning();break;
@@ -224,7 +224,7 @@ public class ExplanationTest {
 
                     model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                     model.arithm(p[9], "+", p[8], ">", 4).post();
-                    model.getSolver().set(randomSearch(p, seed));
+                    model.getSolver().setSearch(randomSearch(p, seed));
                     switch (e) {
                         case 1:
                             model.getSolver().setNoLearning();
@@ -257,7 +257,7 @@ public class ExplanationTest {
                 model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
-                model.getSolver().set(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
+                model.getSolver().setSearch(inputOrderLBSearch(p[0], p[1], p[9], p[8], bs[0]));
                 switch (e) {
                     case 1:
                         model.getSolver().setNoLearning();
@@ -289,7 +289,7 @@ public class ExplanationTest {
                 model.sum(copyOfRange(p, 0, 8), "=", 5).post();
                 model.arithm(p[9], "+", p[8], ">", 4).post();
                 // p[0], p[1] are just for fun
-                model.getSolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
+                model.getSolver().setSearch(inputOrderLBSearch(p[0], p[1], bs[0], p[9], p[8]));
                 switch (e) {
                     case 1:
                         model.getSolver().setNoLearning();
@@ -324,7 +324,7 @@ public class ExplanationTest {
             bs[1] = model.arithm(p[3], "!=", p[4]).reify();
             model.arithm(bs[0], "=", bs[1]).post();
 
-            model.getSolver().set(inputOrderLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
+            model.getSolver().setSearch(inputOrderLBSearch(p[0], p[1], bs[0], p[2], p[3], p[4]));
             model.getSolver().setDBTLearning(ng == 1, false);
             model.getSolver().showStatistics();
             assertFalse(model.getSolver().solve());
@@ -390,14 +390,14 @@ public class ExplanationTest {
         vs[3] = model.intMinusView(vs[2]);
         vs[4] = model.intVar("B", -5, -2);
         model.arithm(vs[0], "+", vs[4],"=", 0).post();
-        model.getSolver().set(SearchStrategyFactory.intVarSearch(
+        model.getSolver().setSearch(SearchStrategyFactory.intVarSearch(
                 inputOrderVar(model),
                 midIntVal(dop != DecisionOperator.int_reverse_split),
                 dop,
                 vs[var])
         );
         LearnExplained lex = new LearnExplained(model, true, false);
-        model.getSolver().set(lex);
+        model.getSolver().setLearner(lex);
         model.getSolver().solve();
         // force fake failure
         for(int i = 0; i < 5; i++){

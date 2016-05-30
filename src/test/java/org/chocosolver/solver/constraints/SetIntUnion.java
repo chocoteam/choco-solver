@@ -53,7 +53,7 @@ public class SetIntUnion {
         s.union(x, values).post();
         s.getSolver().showStatistics();
         s.getSolver().showSolutions();
-        s.getSolver().set(inputOrderLBSearch(x));
+        s.getSolver().setSearch(inputOrderLBSearch(x));
         while (s.getSolver().solve()) ;
     }
 
@@ -71,7 +71,7 @@ public class SetIntUnion {
         s.union(x, values).post();
         s.getSolver().showStatistics();
         s.getSolver().showSolutions();
-        s.getSolver().set(inputOrderLBSearch(x));
+        s.getSolver().setSearch(inputOrderLBSearch(x));
         while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 0);
     }
@@ -90,7 +90,7 @@ public class SetIntUnion {
         s.union(x, values).post();
         s.getSolver().showStatistics();
         s.getSolver().showSolutions();
-        s.getSolver().set(inputOrderLBSearch(x));
+        s.getSolver().setSearch(inputOrderLBSearch(x));
         while (s.getSolver().solve()) ;
         out.println(values);
         assertEquals(s.getSolver().getSolutionCount(), 1);

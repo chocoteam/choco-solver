@@ -76,7 +76,7 @@ public class DivTest extends AbstractTernaryTest {
             IntVar c = s.intVar("c", new int[]{-3, 1, 4});
             s.div(a, b, c).post();
             Solver r = s.getSolver();
-            r.set(randomSearch(new IntVar[]{a, b, c}, i));
+            r.setSearch(randomSearch(new IntVar[]{a, b, c}, i));
             //SMF.log(s, true, true);
             r.plugMonitor((IMonitorSolution) () -> {
                 if (!TRUE.equals(r.isSatisfied())) {

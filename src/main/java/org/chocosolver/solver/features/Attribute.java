@@ -220,7 +220,7 @@ public enum Attribute implements IAttribute{
     NMDV {
         @Override
         public double evaluate(Model model) {
-            AbstractStrategy strat = model.getSolver().getStrategy();
+            AbstractStrategy strat = model.getSolver().getSearch();
             if (strat != null) {
                 return strat.getVariables().length * 1.0 / model.getVars().length;
             } else return 1.0;
