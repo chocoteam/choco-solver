@@ -29,6 +29,7 @@
  */
 package org.chocosolver.util.tools;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 
@@ -313,6 +314,16 @@ public class VariableUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Transform an array of int to an array of fixed IntVar
+     * @param values array of ints
+     * @param model model to create IntVar
+     * @return
+     */
+    public static IntVar[] toIntVar(Model model, int... values){
+        return Arrays.stream(values).mapToObj(i -> model.intVar(i)).toArray(IntVar[]::new);
     }
 
 }
