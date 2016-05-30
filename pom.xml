@@ -289,7 +289,7 @@
                 </executions>
             </plugin>
              <!--UNCOMMENT TO GENERATE CLASSES FOR MEMORY PACKAGE-->
-            <!--<plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.2.1</version>
@@ -302,14 +302,14 @@
                         <configuration>
                             <mainClass>org.chocosolver.memory.generator.CodeGenerator</mainClass>
                             <arguments>
-                                &lt;!&ndash;<argument>-c</argument>&ndash;&gt;
+                                <!--<argument>-c</argument>-->
                                 <argument>${basedir}/src/main/resources/</argument>
                                 <argument>${basedir}/src/main/java/</argument>
                             </arguments>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>

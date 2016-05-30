@@ -30,25 +30,25 @@
 package org.chocosolver.memory.trailing.trail.chunck;
 
 
-import org.chocosolver.memory.trailing.Stored#E#;
+import org.chocosolver.memory.trailing.StoredLong;
 
 /**
  * @author Fabien Hermenier
  * @author Charles Prud'homme
  * @since 29/05/2016
  */
-public class #E#World implements World{
+public class LongWorld implements World{
 
 
     /**
      * Stack of backtrackable search variables.
      */
-    private Stored#E#[] variableStack;
+    private StoredLong[] variableStack;
 
     /**
      * Stack of values (former values that need be restored upon backtracking).
      */
-    private #e#[] valueStack;
+    private long[] valueStack;
 
 
     /**
@@ -59,18 +59,18 @@ public class #E#World implements World{
 
     private int now;
 
-    public #E#World(int defaultSize) {
+    public LongWorld(int defaultSize) {
         now = 0;
-        valueStack = new #e#[defaultSize];
+        valueStack = new long[defaultSize];
         stampStack = new int[defaultSize];
-        variableStack = new Stored#E#[defaultSize];
+        variableStack = new StoredLong[defaultSize];
     }
 
     /**
-     * Reacts when a Stored#E# is modified: push the former value & timestamp
+     * Reacts when a StoredLong is modified: push the former value & timestamp
      * on the stacks.
      */
-    public void savePreviousState(Stored#E# v, #e# oldValue, int oldStamp) {
+    public void savePreviousState(StoredLong v, long oldValue, int oldStamp) {
         valueStack[now] = oldValue;
         variableStack[now] = v;
         stampStack[now] = oldStamp;
@@ -82,7 +82,7 @@ public class #E#World implements World{
 
     @Override
     public void revert() {
-        Stored#E# v;
+        StoredLong v;
         for (int i = now - 1; i >= 0; i--) {
             v = variableStack[i];
             v._set(valueStack[i], stampStack[i]);
@@ -91,10 +91,10 @@ public class #E#World implements World{
 
     private void resizeUpdateCapacity() {
         final int newCapacity = ((variableStack.length * 3) / 2);
-        final Stored#E#[] tmp1 = new Stored#E#[newCapacity];
+        final StoredLong[] tmp1 = new StoredLong[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
         variableStack = tmp1;
-        final #e#[] tmp2 = new #e#[newCapacity];
+        final long[] tmp2 = new long[newCapacity];
         System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
         valueStack = tmp2;
         final int[] tmp3 = new int[newCapacity];

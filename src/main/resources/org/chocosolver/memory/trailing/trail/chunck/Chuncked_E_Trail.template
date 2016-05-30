@@ -38,7 +38,7 @@ import org.chocosolver.memory.trailing.trail.IStored#E#Trail;
  * @author Charles Prud'homme
  * @since 29/05/2016
  */
-public class ChunckedIntTrail extends ChunckedTrail<#E#World> implements IStored#E#Trail {
+public class Chuncked#E#Trail extends ChunckedTrail<#E#World> implements IStored#E#Trail {
 
     /**
      * Load factor
@@ -49,7 +49,7 @@ public class ChunckedIntTrail extends ChunckedTrail<#E#World> implements IStored
      * Constructs a trail with predefined size and loadfactor
      * @param size
      */
-    public ChunkedIntTrail(int size, double loadfactor) {
+    public Chuncked#E#Trail(int size, double loadfactor) {
         worlds = new #E#World[size];
         this.loadfactor = loadfactor;
     }

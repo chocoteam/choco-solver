@@ -160,11 +160,11 @@ public class EnvironmentBuilder {
      * @return {@code this}
      */
     public EnvironmentBuilder fromChunk(){
-        setTrail(new StoredBoolChunckTrail(NBWORLDS, LOADFACTOR));
-        setTrail(new StoredIntChunckTrail(NBWORLDS, LOADFACTOR));
-        setTrail(new StoredDoubleChunckTrail(NBWORLDS, LOADFACTOR));
-        setTrail(new StoredLongChunckTrail(NBWORLDS, LOADFACTOR));
-        setTrail(new OperationChunckTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedBoolTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedIntTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedDoubleTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedLongTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedOperationTrail(NBWORLDS, LOADFACTOR));
         return this;
     }
 

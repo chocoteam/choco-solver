@@ -37,7 +37,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
-import org.chocosolver.memory.trailing.trail.chunck.StoredIntChunckTrail;
+import org.chocosolver.memory.trailing.trail.chunck.ChunckedIntTrail;
 import org.chocosolver.memory.trailing.trail.flatten.StoredDoubleTrail;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -78,13 +78,13 @@ public class EnvironmentTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testBuilder(){
-		StoredIntChunckTrail it = new StoredIntChunckTrail(1000, 3);
+		ChunckedIntTrail it = new ChunckedIntTrail(1000, 3);
 		EnvironmentTrailing eb = new EnvironmentBuilder()
 				.setTrail(it)
 				.build();
 
 		Assert.assertEquals(eb.getIntTrail(), it);
 		Assert.assertTrue(eb.getDoubleTrail() instanceof StoredDoubleTrail);
-
+//
 	}
 }

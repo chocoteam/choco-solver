@@ -41,19 +41,19 @@ import org.chocosolver.memory.trailing.trail.flatten.*;
  * A environment is associated to each problem.
  * It is responsible for managing backtrackable data.
  */
-public final class EnvironmentTrailing extends AbstractEnvironment {
+public class EnvironmentTrailing extends AbstractEnvironment {
 
     /**
      * The maximum numbers of worlds that a
      * {@link org.chocosolver.memory.IStorage} can handle.
      */
-    public static final int NBWORLDS = 1000;
+    public static final int NBWORLDS = 128;
 
     /**
      * The maximum numbers of updates that a
      * {@link org.chocosolver.memory.IStorage} can handle.
      */
-    public static final int NBUPATES = 1024 * 4;
+    public static final int NBUPATES = 1024;
 
     /**
      * The load factor to update {@link org.chocosolver.memory.IStorage}.
