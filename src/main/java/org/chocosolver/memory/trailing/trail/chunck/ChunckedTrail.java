@@ -34,7 +34,7 @@ package org.chocosolver.memory.trailing.trail.chunck;
  * @author Charles Prud'homme
  * @since 29/05/2016
  */
-public abstract class ChunkedTrail<W extends World> {
+public abstract class ChunckedTrail<W extends World> {
 
     protected W[] worlds;
 
