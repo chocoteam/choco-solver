@@ -145,14 +145,14 @@ public class PropBoolMin extends Propagator<BoolVar> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("PropBoolMin ");
-        sb.append(vars[n]).append(" = min({");
+        StringBuilder sb = new StringBuilder("");
+        sb.append(vars[n]).append(" = min(");
         sb.append(vars[0]);
         for (int i = 1; i < n; i++) {
             sb.append(", ");
             sb.append(vars[i]);
         }
-        sb.append("})");
+        sb.append(")");
         return sb.toString();
     }
 }

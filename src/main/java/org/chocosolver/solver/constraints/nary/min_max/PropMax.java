@@ -131,14 +131,14 @@ public class PropMax extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("PropMax ");
-        sb.append(vars[n]).append(" = max({");
+        StringBuilder sb = new StringBuilder();
+        sb.append(vars[n]).append(" = max(");
         sb.append(vars[0]);
         for (int i = 1; i < n; i++) {
             sb.append(", ");
             sb.append(vars[i]);
         }
-        sb.append("})");
+        sb.append(")");
         return sb.toString();
     }
 }
