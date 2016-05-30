@@ -157,30 +157,28 @@ public class EnvironmentBuilder {
 
     /**
      * Build a chunk environment
-     * @return the resulting environment
+     * @return {@code this}
      */
-    public static EnvironmentTrailing buildChunkEnvironment(){
-        EnvironmentTrailing env = new EnvironmentTrailing();
-        env.setBoolTrail(new StoredBoolChunckTrail(NBWORLDS, LOADFACTOR));
-        env.setIntTrail(new StoredIntChunckTrail(NBWORLDS, LOADFACTOR));
-        env.setDoubleTrail(new StoredDoubleChunckTrail(NBWORLDS, LOADFACTOR));
-        env.setLongTrail(new StoredLongChunckTrail(NBWORLDS, LOADFACTOR));
-        env.setOperationTrail(new OperationChunckTrail(NBWORLDS, LOADFACTOR));
-        return env;
+    public EnvironmentBuilder fromChunk(){
+        setTrail(new StoredBoolChunckTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new StoredIntChunckTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new StoredDoubleChunckTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new StoredLongChunckTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new OperationChunckTrail(NBWORLDS, LOADFACTOR));
+        return this;
     }
 
     /**
      * Build an unsafe environment (operations are flat)
-     * @return the resulting environment
+     * @return {@code this}
      */
-    public static EnvironmentTrailing buildUnsafeEnvironment(){
-        EnvironmentTrailing env = new EnvironmentTrailing();
-        env.setBoolTrail(new UnsafeBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        env.setIntTrail(new UnsafeIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        env.setDoubleTrail(new UnsafeDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        env.setLongTrail(new UnsafeLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        env.setOperationTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        return env;
+    public EnvironmentBuilder fromUnsafe(){
+        setTrail(new UnsafeBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new UnsafeIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new UnsafeDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new UnsafeLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        return this;
     }
 
     /**
