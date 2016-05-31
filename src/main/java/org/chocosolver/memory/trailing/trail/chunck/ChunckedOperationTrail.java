@@ -40,6 +40,8 @@ import org.chocosolver.memory.trailing.trail.IOperationTrail;
  */
 public class ChunckedOperationTrail extends ChunckedTrail<OperationWorld> implements IOperationTrail {
 
+    private final int ws;
+
     /**
      * Load factor
      */
@@ -47,17 +49,21 @@ public class ChunckedOperationTrail extends ChunckedTrail<OperationWorld> implem
 
     /**
      * Constructs a trail with predefined size and loadfactor
-     * @param size
+     * @param ws the initial world size
+     * @param nbWorlds the initial number of worlds
+     * @param loadfactor how to resize world
      */
-    public ChunckedOperationTrail(int size, double loadfactor) {
-        worlds = new OperationWorld[size];
-        this.loadfactor = loadfactor;
+    public ChunckedOperationTrail(int ws, int nbWorlds, double loadfactor) {
+            worlds = new OperationWorld[nbWorlds];
+            this.ws = ws;
+            this.loadfactor = loadfactor;
+            worlds[0] = current = new OperationWorld(ws, loadfactor);
     }
 
     @Override
     public void worldPush(int worldIndex) {
         if (worlds[worldIndex] == null) {
-            current = new OperationWorld(preferredSize());
+            current = new OperationWorld(ws, loadfactor);
             worlds[worldIndex] = current;
         } else {
             current = worlds[worldIndex];
@@ -77,6 +83,5 @@ public class ChunckedOperationTrail extends ChunckedTrail<OperationWorld> implem
 
     @Override
     public void savePreviousState(IOperation oldValue) {
-        current.savePreviousState(oldValue);
     }
 }

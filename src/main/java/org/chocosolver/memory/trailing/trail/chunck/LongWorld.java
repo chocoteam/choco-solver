@@ -33,6 +33,7 @@ package org.chocosolver.memory.trailing.trail.chunck;
 import org.chocosolver.memory.trailing.StoredLong;
 
 /**
+ * A world devoted to integers.
  * @author Fabien Hermenier
  * @author Charles Prud'homme
  * @since 29/05/2016
@@ -59,11 +60,19 @@ public class LongWorld implements World{
 
     private int now;
 
-    public LongWorld(int defaultSize) {
-        now = 0;
-        valueStack = new long[defaultSize];
-        stampStack = new int[defaultSize];
-        variableStack = new StoredLong[defaultSize];
+    private int defaultSize;
+
+    private double loadfactor;
+
+    /**
+     * Make a new world.
+     *
+     * @param defaultSize the default world size
+     */
+    public LongWorld(int defaultSize, double loadfactor) {
+        this.now = 0;
+        this.loadfactor = loadfactor;
+        this.defaultSize = defaultSize;
     }
 
     /**
@@ -71,6 +80,11 @@ public class LongWorld implements World{
      * on the stacks.
      */
     public void savePreviousState(StoredLong v, long oldValue, int oldStamp) {
+        if (stampStack == null) {
+            valueStack = new long[defaultSize];
+            stampStack = new int[defaultSize];
+            variableStack = new StoredLong[defaultSize];
+        }
         valueStack[now] = oldValue;
         variableStack[now] = v;
         stampStack[now] = oldStamp;
@@ -82,15 +96,13 @@ public class LongWorld implements World{
 
     @Override
     public void revert() {
-        StoredLong v;
         for (int i = now - 1; i >= 0; i--) {
-            v = variableStack[i];
-            v._set(valueStack[i], stampStack[i]);
+            variableStack[i]._set(valueStack[i], stampStack[i]);
         }
     }
 
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((variableStack.length * 3) / 2);
+        int newCapacity = (int)(variableStack.length * loadfactor);
         final StoredLong[] tmp1 = new StoredLong[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
         variableStack = tmp1;
@@ -102,11 +114,18 @@ public class LongWorld implements World{
         stampStack = tmp3;
     }
 
+    @Override
     public void clear() {
         now = 0;
     }
+
     @Override
     public int used() {
         return now;
+    }
+
+    @Override
+    public int allocated() {
+        return stampStack == null ? 0 : stampStack.length;
     }
 }

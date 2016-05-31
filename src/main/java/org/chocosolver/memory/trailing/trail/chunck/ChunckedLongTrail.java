@@ -34,11 +34,15 @@ import org.chocosolver.memory.trailing.StoredLong;
 import org.chocosolver.memory.trailing.trail.IStoredLongTrail;
 
 /**
+ * A trail for integers.
+ *
  * @author Fabien Hermenier
  * @author Charles Prud'homme
  * @since 29/05/2016
  */
 public class ChunckedLongTrail extends ChunckedTrail<LongWorld> implements IStoredLongTrail {
+
+    private final int ws;
 
     /**
      * Load factor
@@ -47,17 +51,21 @@ public class ChunckedLongTrail extends ChunckedTrail<LongWorld> implements IStor
 
     /**
      * Constructs a trail with predefined size and loadfactor
-     * @param size
+     * @param ws the initial world size
+     * @param nbWorlds the initial number of worlds
+     * @param loadfactor how to resize world
      */
-    public ChunckedLongTrail(int size, double loadfactor) {
-        worlds = new LongWorld[size];
+    public ChunckedLongTrail(int ws, int nbWorlds, double loadfactor) {
+        worlds = new LongWorld[nbWorlds];
+        this.ws = ws;
         this.loadfactor = loadfactor;
+        worlds[0] = current = new LongWorld(ws, loadfactor);
     }
 
     @Override
     public void worldPush(int worldIndex) {
         if (worlds[worldIndex] == null) {
-            current = new LongWorld(preferredSize());
+            current = new LongWorld(ws, loadfactor);
             worlds[worldIndex] = current;
         } else {
             current = worlds[worldIndex];
@@ -81,12 +89,12 @@ public class ChunckedLongTrail extends ChunckedTrail<LongWorld> implements IStor
     }
 
     @Override
-    public void buildFakeHistory(StoredLong v, long initValue, int fromStamp) {
+    public void buildFakeHistory(StoredLong v, long initValue, int olderStamp) {
         // first save the current state on the top of the stack
-        savePreviousState(v, initValue, fromStamp - 1);
+        savePreviousState(v, initValue, olderStamp - 1);
         // then rewrite older states
-        for (int w = fromStamp; w > 1; w--) {
-            LongWorld cur = worlds[fromStamp];
+        for (int w = olderStamp; w > 1; w--) {
+            LongWorld cur = worlds[olderStamp];
             cur.savePreviousState(v, initValue, w - 1);
         }
     }

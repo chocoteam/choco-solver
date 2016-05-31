@@ -160,11 +160,11 @@ public class EnvironmentBuilder {
      * @return {@code this}
      */
     public EnvironmentBuilder fromChunk(){
-        setTrail(new ChunckedBoolTrail(NBWORLDS, LOADFACTOR));
-        setTrail(new ChunckedIntTrail(NBWORLDS, LOADFACTOR));
-        setTrail(new ChunckedDoubleTrail(NBWORLDS, LOADFACTOR));
-        setTrail(new ChunckedLongTrail(NBWORLDS, LOADFACTOR));
-        setTrail(new ChunckedOperationTrail(NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedOperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
         return this;
     }
 
@@ -185,9 +185,9 @@ public class EnvironmentBuilder {
      * Build a flat environment
      * @return the resulting environment
      */
-    public static EnvironmentTrailing buildFlatEnvironment(){
+    public EnvironmentBuilder fromFlat(){
         // default implementation is flat
         // Creates trails on the fly
-        return new EnvironmentTrailing();
+        return this;
     }
 }

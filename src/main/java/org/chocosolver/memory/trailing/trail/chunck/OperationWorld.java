@@ -46,8 +46,11 @@ public class OperationWorld implements World{
 
     private int now;
 
-    public OperationWorld(int defaultSize) {
+    private double loadfactor;
+
+    public OperationWorld(int defaultSize, double loadfactor) {
         now = 0;
+        this.loadfactor = loadfactor;
         variableStack = new IOperation[defaultSize];
     }
 
@@ -73,7 +76,7 @@ public class OperationWorld implements World{
     }
 
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((variableStack.length * 3) / 2);
+        final int newCapacity = (int)(variableStack.length * loadfactor);
         final IOperation[] tmp1 = new IOperation[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
         variableStack = tmp1;
@@ -82,6 +85,12 @@ public class OperationWorld implements World{
     public void clear() {
         now = 0;
     }
+
+    @Override
+    public int allocated() {
+        return 0;
+    }
+
     @Override
     public int used() {
         return now;
