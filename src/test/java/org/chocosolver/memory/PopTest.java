@@ -40,8 +40,7 @@ public class PopTest {
     public Object[][] getEnvs(){
         return new EnvironmentTrailing[][]{
                 {new EnvironmentBuilder().fromFlat().build()},
-                {new EnvironmentBuilder().fromChunk().build()},
-                {new EnvironmentBuilder().fromUnsafe().build()}
+                {new EnvironmentBuilder().fromChunk().build()}
         };
     }
 
