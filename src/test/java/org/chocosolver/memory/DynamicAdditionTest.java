@@ -31,6 +31,7 @@ package org.chocosolver.memory;
 
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -41,9 +42,18 @@ import org.testng.annotations.Test;
  */
 public class DynamicAdditionTest {
 
-    @Test(groups="1s", timeOut=60000)
-    public void test1() {
-        IEnvironment environment = new EnvironmentTrailing();
+    @DataProvider(name = "env")
+    public Object[][] getEnvs(){
+        return new EnvironmentTrailing[][]{
+                {new EnvironmentBuilder().fromFlat().build()},
+                {new EnvironmentBuilder().fromChunk().build()},
+                {new EnvironmentBuilder().fromUnsafe().build()}
+        };
+    }
+
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "env")
+    public void test1(EnvironmentTrailing environment) {
         environment.buildFakeHistoryOn(new Except_0());
         IStateInt a = environment.makeInt(10);
         a.set(11);
@@ -104,9 +114,8 @@ public class DynamicAdditionTest {
         Assert.assertEquals(d.get(), 43);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test2(){
-        IEnvironment environment = new EnvironmentTrailing();
+    @Test(groups="1s", timeOut=60000, dataProvider = "env")
+    public void test2(EnvironmentTrailing environment){
         environment.buildFakeHistoryOn(new Except_0());
         int n = 100;
         int m = 100;
@@ -134,10 +143,8 @@ public class DynamicAdditionTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
-    public void test3() {
-        IEnvironment environment = new EnvironmentTrailing();
-        long time = System.currentTimeMillis();
+    @Test(groups="5m", timeOut=300000, dataProvider = "env")
+    public void test3(EnvironmentTrailing environment) {
         environment.buildFakeHistoryOn(new Except_0());
         int n = 50000;
         int m = 3000;
@@ -163,7 +170,5 @@ public class DynamicAdditionTest {
         for (int i = 0; i < m; i++) {
             Assert.assertEquals(si2[i].get(), -i);
         }
-        long duration = System.currentTimeMillis() - time;
-        Assert.assertTrue(duration>5000);
     }
 }

@@ -41,6 +41,7 @@ import org.chocosolver.memory.trailing.trail.chunck.ChunckedIntTrail;
 import org.chocosolver.memory.trailing.trail.flatten.StoredDoubleTrail;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
@@ -49,11 +50,21 @@ import static org.chocosolver.util.tools.StringUtils.randomName;
 
 public class EnvironmentTest {
 
-	@Test(groups="10s", timeOut=60000)
-	public void testSize() {
+	@DataProvider(name = "env")
+	public Object[][] getEnvs(){
+		return new EnvironmentTrailing[][]{
+				{new EnvironmentBuilder().fromFlat().build()},
+				{new EnvironmentBuilder().fromChunk().build()},
+				{new EnvironmentBuilder().fromUnsafe().build()}
+		};
+	}
+
+
+	@Test(groups="10s", timeOut=60000, dataProvider = "env")
+	public void testSize(EnvironmentTrailing env) {
 		int n = 14;
 		IntVar[] vars, vectors;
-		Model model = new Model("CostasArrays");
+		Model model = new Model(env, "CostasArrays");
 		vars = model.intVarArray("v", n, 0, n - 1, false);
 		vectors = new IntVar[n * n - n];
 		int idx = 0;
@@ -78,7 +89,7 @@ public class EnvironmentTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testBuilder(){
-		ChunckedIntTrail it = new ChunckedIntTrail(1000, 3);
+		ChunckedIntTrail it = new ChunckedIntTrail(1000, 3, 1.4);
 		EnvironmentTrailing eb = new EnvironmentBuilder()
 				.setTrail(it)
 				.build();

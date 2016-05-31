@@ -32,6 +32,7 @@ package org.chocosolver.memory;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -42,9 +43,17 @@ import org.testng.annotations.Test;
  */
 public class BasicIndexBipartiteSetTest {
 
-    @Test(groups="1s", timeOut=60000)
-    public void testBasicIndexedBipartiteSet(){
-        IEnvironment env = new EnvironmentTrailing();
+    @DataProvider(name = "env")
+    public Object[][] getEnvs(){
+        return new EnvironmentTrailing[][]{
+                {new EnvironmentBuilder().fromFlat().build()},
+                {new EnvironmentBuilder().fromChunk().build()},
+                {new EnvironmentBuilder().fromUnsafe().build()}
+        };
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "env")
+    public void testBasicIndexedBipartiteSet(EnvironmentTrailing env){
         BasicIndexedBipartiteSet set = new BasicIndexedBipartiteSet(env, 2);
 
         int b1 = set.add();
