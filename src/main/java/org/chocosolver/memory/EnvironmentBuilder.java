@@ -186,8 +186,11 @@ public class EnvironmentBuilder {
      * @return the resulting environment
      */
     public EnvironmentBuilder fromFlat(){
-        // default implementation is flat
-        // Creates trails on the fly
+        setTrail(new StoredBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new StoredIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new StoredDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new StoredLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
         return this;
     }
 }

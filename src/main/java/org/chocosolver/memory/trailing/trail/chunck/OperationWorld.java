@@ -35,6 +35,7 @@ import org.chocosolver.memory.structure.IOperation;
 /**
  * @author Fabien Hermenier
  * @author Charles Prud'homme
+ * @since 31/05/2016
  */
 public class OperationWorld implements World{
 
@@ -88,7 +89,7 @@ public class OperationWorld implements World{
 
     @Override
     public int allocated() {
-        return 0;
+        return variableStack == null ? 0 : variableStack.length;
     }
 
     @Override

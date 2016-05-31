@@ -90,11 +90,9 @@ public class ChunckedBoolTrail extends ChunckedTrail<BoolWorld> implements IStor
 
     @Override
     public void buildFakeHistory(StoredBool v, boolean initValue, int olderStamp) {
-        // first save the current state on the top of the stack
-        savePreviousState(v, initValue, olderStamp - 1);
-        // then rewrite older states
-        for (int w = olderStamp; w > 1; w--) {
-            BoolWorld cur = worlds[olderStamp];
+        // rewrite older states
+        for (int w = olderStamp; w > 0; w--) {
+            BoolWorld cur = worlds[w];
             cur.savePreviousState(v, initValue, w - 1);
         }
     }

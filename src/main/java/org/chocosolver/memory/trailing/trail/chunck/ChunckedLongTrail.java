@@ -90,11 +90,9 @@ public class ChunckedLongTrail extends ChunckedTrail<LongWorld> implements IStor
 
     @Override
     public void buildFakeHistory(StoredLong v, long initValue, int olderStamp) {
-        // first save the current state on the top of the stack
-        savePreviousState(v, initValue, olderStamp - 1);
-        // then rewrite older states
-        for (int w = olderStamp; w > 1; w--) {
-            LongWorld cur = worlds[olderStamp];
+        // rewrite older states
+        for (int w = olderStamp; w > 0; w--) {
+            LongWorld cur = worlds[w];
             cur.savePreviousState(v, initValue, w - 1);
         }
     }

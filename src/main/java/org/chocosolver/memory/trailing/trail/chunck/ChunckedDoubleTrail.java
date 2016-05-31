@@ -90,11 +90,9 @@ public class ChunckedDoubleTrail extends ChunckedTrail<DoubleWorld> implements I
 
     @Override
     public void buildFakeHistory(StoredDouble v, double initValue, int olderStamp) {
-        // first save the current state on the top of the stack
-        savePreviousState(v, initValue, olderStamp - 1);
-        // then rewrite older states
-        for (int w = olderStamp; w > 1; w--) {
-            DoubleWorld cur = worlds[olderStamp];
+        // rewrite older states
+        for (int w = olderStamp; w > 0; w--) {
+            DoubleWorld cur = worlds[w];
             cur.savePreviousState(v, initValue, w - 1);
         }
     }
