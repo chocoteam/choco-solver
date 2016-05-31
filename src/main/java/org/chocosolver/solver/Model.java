@@ -32,7 +32,6 @@ package org.chocosolver.solver;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
@@ -165,7 +164,7 @@ public class Model implements IModel {
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
      */
     public Model(String name) {
-        this(EnvironmentBuilder.buildFlatEnvironment(), name);
+        this(new EnvironmentBuilder().fromChunk().build(), name);
     }
 
     /**
