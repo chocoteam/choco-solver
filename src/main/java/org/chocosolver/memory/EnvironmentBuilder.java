@@ -38,8 +38,6 @@ import org.chocosolver.memory.trailing.trail.unsafe.UnsafeDoubleTrail;
 import org.chocosolver.memory.trailing.trail.unsafe.UnsafeIntTrail;
 import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
 
-import static org.chocosolver.memory.trailing.EnvironmentTrailing.*;
-
 /**
  * <p>
  * Project: choco-solver.
@@ -48,6 +46,23 @@ import static org.chocosolver.memory.trailing.EnvironmentTrailing.*;
  * @since 10/05/2016.
  */
 public class EnvironmentBuilder {
+
+    /**
+     * The maximum numbers of worlds that a
+     * {@link org.chocosolver.memory.IStorage} can handle.
+     */
+    private int worldnumber = EnvironmentTrailing.NBWORLDS;
+
+    /**
+     * The maximum numbers of updates that a
+     * {@link org.chocosolver.memory.IStorage} can handle.
+     */
+    private int worldsize = EnvironmentTrailing.NBUPATES;
+
+    /**
+     * The load factor to update {@link org.chocosolver.memory.IStorage}.
+     */
+    private double loadfactor = EnvironmentTrailing.LOADFACTOR;
 
     /**
      * Trail to consider to manage doubles
@@ -69,6 +84,38 @@ public class EnvironmentBuilder {
      * Trail to consider to manage operations
      */
     private IOperationTrail ot;
+
+    /**
+     * The maximum numbers of updates that a
+     * {@link org.chocosolver.memory.IStorage} can handle.
+     * @param ws maximum numbers
+     * @return {@code this}
+     */
+    public EnvironmentBuilder setWorldSize(int ws){
+        worldsize = ws;
+        return this;
+    }
+
+    /**
+     * The maximum numbers of worlds that a
+     * {@link org.chocosolver.memory.IStorage} can handle.
+     * @param wn maximum numbers
+     * @return {@code this}
+     */
+    public EnvironmentBuilder setWorldNumber(int wn){
+        worldnumber = wn;
+        return this;
+    }
+
+    /**
+     * The load factor to update {@link org.chocosolver.memory.IStorage}.
+     * @param lf load factor
+     * @return {@code this}
+     */
+    public EnvironmentBuilder setLoadfactor(double lf){
+        loadfactor = lf;
+        return this;
+    }
 
 
     /**
@@ -128,23 +175,23 @@ public class EnvironmentBuilder {
     public EnvironmentTrailing build(){
         EnvironmentTrailing env = new EnvironmentTrailing();
         if (bt == null) {
-            bt = new StoredBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR);
+            bt = new StoredBoolTrail(worldsize, worldnumber, loadfactor);
         }
 
         if (it == null) {
-            it = new StoredIntTrail(NBUPATES, NBWORLDS, LOADFACTOR);
+            it = new StoredIntTrail(worldsize, worldnumber, loadfactor);
         }
 
         if (dt == null) {
-            dt = new StoredDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR);
+            dt = new StoredDoubleTrail(worldsize, worldnumber, loadfactor);
         }
 
         if (lt == null) {
-            lt = new StoredLongTrail(NBUPATES, NBWORLDS, LOADFACTOR);
+            lt = new StoredLongTrail(worldsize, worldnumber, loadfactor);
         }
 
         if (ot == null) {
-            ot = new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR);
+            ot = new OperationTrail(worldsize, worldnumber, loadfactor);
         }
 
         env.setBoolTrail(bt);
@@ -160,11 +207,11 @@ public class EnvironmentBuilder {
      * @return {@code this}
      */
     public EnvironmentBuilder fromChunk(){
-        setTrail(new ChunckedBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new ChunckedIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new ChunckedDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new ChunckedLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new ChunckedOperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new ChunckedBoolTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new ChunckedIntTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new ChunckedDoubleTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new ChunckedLongTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new ChunckedOperationTrail(worldsize, worldnumber, loadfactor));
         return this;
     }
 
@@ -173,11 +220,11 @@ public class EnvironmentBuilder {
      * @return {@code this}
      */
     public EnvironmentBuilder fromUnsafe(){
-        setTrail(new UnsafeBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new UnsafeIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new UnsafeDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new UnsafeLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new UnsafeBoolTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new UnsafeIntTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new UnsafeDoubleTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new UnsafeLongTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new OperationTrail(worldsize, worldnumber, loadfactor));
         return this;
     }
 
@@ -186,11 +233,11 @@ public class EnvironmentBuilder {
      * @return the resulting environment
      */
     public EnvironmentBuilder fromFlat(){
-        setTrail(new StoredBoolTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new StoredIntTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new StoredDoubleTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new StoredLongTrail(NBUPATES, NBWORLDS, LOADFACTOR));
-        setTrail(new OperationTrail(NBUPATES, NBWORLDS, LOADFACTOR));
+        setTrail(new StoredBoolTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new StoredIntTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new StoredDoubleTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new StoredLongTrail(worldsize, worldnumber, loadfactor));
+        setTrail(new OperationTrail(worldsize, worldnumber, loadfactor));
         return this;
     }
 }
