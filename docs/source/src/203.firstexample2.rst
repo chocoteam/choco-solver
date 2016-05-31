@@ -85,21 +85,48 @@ Luckily, there exists a *global constraint* that captures that conditions:
 
     ("*The Complexity of Global Constraints*", C.Bessière, E.Hebrard, B.Hnich and T.Walsh, AAAI 2004.)
 
-Together with Java8 lambdas, we can reformulate the set of constraints into:
+We can reformulate the set of constraints to:
 
 .. code-block:: java
     :linenos:
 
+    IntVar[] diag1 = new IntVar[n];
+    IntVar[] diag2 = new IntVar[n];
+    for(int i = 0 ; i < n; i++){
+        diag1[i] = vars[i].sub(i).intVar();
+        diag2[i] = vars[i].add(i).intVar();
+    }
     model.post(
         model.allDifferent(vars),
-        model.allDifferent(IntStream.range(0, n).mapToObj(i -> vars[i].sub(i).intVar()).toArray(IntVar[]::new)),
-        model.allDifferent(IntStream.range(0, n).mapToObj(i -> vars[i].add(i).intVar()).toArray(IntVar[]::new))
+        model.allDifferent(diag1),
+        model.allDifferent(diag2)
     );
 
-The constraint on line 2 simply states that all variables from `vars` must be different.
-The constraint on line 3 (or 4) states that all variables from a diagonal must be different.
-The variables of a diagonal are given by :code:`IntStream.range(0, n).mapToObj(i -> vars[i].add(i).intVar()).toArray(IntVar[]::new)`
-which construct an array of `IntVar` from the mapping function :code:`-> vars[i].add(i).intVar()`.
+
+
+
+Or with Java8 lambdas:
+
+.. code-block:: java
+    :linenos:
+
+    IntVar[] diag1 = IntStream.range(0, n)
+                              .mapToObj(i -> vars[i].sub(i).intVar())
+                              .toArray(IntVar[]::new);
+    IntVar[] diag2 = IntStream.range(0, n)
+                               .mapToObj(i -> vars[i].add(i).intVar())
+                               .toArray(IntVar[]::new);
+    model.post(
+        model.allDifferent(vars),
+        model.allDifferent(diag1),
+        model.allDifferent(diag2)
+    );
+
+The constraint on line 8 simply states that all variables from `vars` must be different.
+The constraint on line 9 (or 10) states that all variables from a diagonal must be different.
+The variables of a diagonal are given by
+:code:`IntStream.range(0, n).mapToObj(i -> vars[i].add(i).intVar()).toArray(IntVar[]::new)`
+(lines 4-6) which construct an array of `IntVar` from the mapping function :code:`-> vars[i].add(i).intVar()`.
 This function maps each index *i* in the [0,n] range to an integer variable equals to :code:`vars[i].add(i)`.
 The call to the `intVar()` method effectively turns the arithmetic expression into an integer variable.
 This extraction may introduce additional variables and constraints automatically.
@@ -128,10 +155,13 @@ Updated code
     int n = 8;
     Model model = new Model(n + "-queens problem");
     IntVar[] vars = model.intVarArray("Q", n, 1, n, false);
+    IntVar[] diag1 = IntStream.range(0, n).mapToObj(i -> vars[i].sub(i).intVar()).toArray(IntVar[]::new);
+    IntVar[] diag2 = IntStream.range(0, n).mapToObj(i -> vars[i].add(i).intVar()).toArray(IntVar[]::new);
     model.post(
-            model.allDifferent(vars),
-            model.allDifferent(IntStream.range(0, n).mapToObj(i -> vars[i].sub(i).intVar()).toArray(IntVar[]::new)),
-            model.allDifferent(IntStream.range(0, n).mapToObj(i -> vars[i].add(i).intVar()).toArray(IntVar[]::new)));
+        model.allDifferent(vars),
+        model.allDifferent(diag1),
+        model.allDifferent(diag2)
+    );
     Solver solver = model.getSolver();
     solver.showStatistics();
     solver.set(SearchStrategyFactory.domOverWDegSearch(vars));
