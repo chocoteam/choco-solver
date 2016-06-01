@@ -832,7 +832,7 @@ Walking
 A complementary technique that appear to be efficient in practice is named `Walking` and consists in accepting equivalent intermediate solutions in a search iteration instead of requiring a strictly better one.
 This can be achieved by defining an ``ObjectiveManager`` like this: ::
 
-    solver.set(new ObjectiveManager(objective, ResolutionPolicy.MAXIMIZE, false));
+    solver.setObjectiveManager(new ObjectiveManager(objective, ResolutionPolicy.MAXIMIZE, false));
 
 Where the last parameter, named ``strict`` must be set to false to accept equivalent intermediate solutions.
 
