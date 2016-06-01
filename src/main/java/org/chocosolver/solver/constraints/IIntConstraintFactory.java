@@ -1727,7 +1727,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				break;
 			case "GAC3rm+": p = new PropLargeGAC3rmPositive(vars, tuples);
 				break;
-			case "STR2+": p = new PropTableStr2(vars, tuples.toMatrix());
+			case "STR2+": p = new PropTableStr2(vars, tuples);
 				break;
 			default: throw new SolverException("Table algorithm "+algo+" is unkown");
 		}

@@ -34,6 +34,7 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -65,13 +66,16 @@ public class PropTableStr2 extends Propagator<IntVar> {
     private ArrayList<str2_var> Ssup;
     private ArrayList<str2_var> Sval;
     private boolean firstProp = true;
+	private Tuples tuplesObject;
 
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public PropTableStr2(IntVar[] vars_, int[][] table) {
+    public PropTableStr2(IntVar[] vars_, Tuples tuplesObject) {
         super(vars_, PropagatorPriority.LINEAR, false);
+        this.table = tuplesObject.toMatrix();
+		this.tuplesObject = tuplesObject;
         str2vars = new str2_var[table[0].length];
         for (int i = 0; i < table[0].length; i++) {
             str2vars[i] = new str2_var(model.getEnvironment(), vars_[i], i, table);
@@ -79,7 +83,6 @@ public class PropTableStr2 extends Propagator<IntVar> {
         tuples = SetFactory.makeStoredSet(SetType.BIPARTITESET,0,model);
         Ssup = new ArrayList<>();
         Sval = new ArrayList<>();
-        this.table = table;
     }
 
     //***********************************************************************************
@@ -97,21 +100,25 @@ public class PropTableStr2 extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        boolean hasSupport = false;
-        for (int tuple : tuples) {
-            if (is_tuple_supported(tuple)) {
-                hasSupport = true;
-            }
-        }
-        if (hasSupport) {
-            if (isCompletelyInstantiated()) {
-                return ESat.TRUE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        } else {
-            return ESat.FALSE;
-        }
+		if(firstProp){ // data structure not ready
+			return tuplesObject.check(vars);
+		}else {
+			boolean hasSupport = false;
+			for (int tuple : tuples) {
+				if (is_tuple_supported(tuple)) {
+					hasSupport = true;
+				}
+			}
+			if (hasSupport) {
+				if (isCompletelyInstantiated()) {
+					return ESat.TRUE;
+				} else {
+					return ESat.UNDEFINED;
+				}
+			} else {
+				return ESat.FALSE;
+			}
+		}
     }
 
     @Override

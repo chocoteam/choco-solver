@@ -88,7 +88,13 @@ public class Tuples {
 	 * @param vars set of integer variables to test
 	 * @return an ESat object indicating the entailement of the table over vars and this
 	 */
-	public ESat check(IntVar[] vars) {
+	public ESat check(IntVar... vars) {
+		if(nbTuples() == 0){
+			return isFeasible()? ESat.FALSE: ESat.TRUE;
+		}
+		if(vars.length != arity){
+			throw new SolverException("The given variable array does not match the arity: " + arity);
+		}
 		int[] values = new int[vars.length];
 		for (int i=0;i<vars.length;i++) {
 			if (vars[i].isInstantiated()) {

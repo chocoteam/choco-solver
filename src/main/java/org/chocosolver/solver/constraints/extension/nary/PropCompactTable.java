@@ -250,20 +250,8 @@ public class PropCompactTable extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (!isCompletelyInstantiated()) {
-            return ESat.UNDEFINED;
-        }
-        for (int ti = 0; ti < tuples.nbTuples(); ti++) {
-            int[] tuple = tuples.get(ti);
-            boolean valid = true;
-            for (int i = 0; i < vars.length && valid; i++) {
-                if (tuple[i] != vars[i].getValue()) valid = false;
-            }
-            if (valid) {
-                return ESat.TRUE;
-            }
-        }
-        return ESat.FALSE;
+		// TODO optim : check current according to currTable?
+        return tuples.check(vars);
     }
 
     //***********************************************************************************
