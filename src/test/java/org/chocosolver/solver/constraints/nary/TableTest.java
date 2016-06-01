@@ -169,11 +169,6 @@ public class TableTest {
 		}
 	}
 
-	public static void main(String[] args) {
-		TableTest tt = new TableTest();
-		tt.testAllDifferent();
-	}
-
 	public static void test(String type) {
 		Model model;
 		IntVar[] vars;
@@ -500,18 +495,6 @@ public class TableTest {
 			Assert.assertEquals(table.isSatisfied(), ESat.FALSE);
 			Assert.assertEquals(ts.check(x,y,z), ESat.FALSE);
 		}
-	}
-
-	@Test(groups="1s", timeOut=60000)
-	public void testMDDArrayOutOfBound() {
-		Model model = new Model();
-		IntVar x = model.intVar(1);
-		IntVar y = model.intVar(3);
-		IntVar z = model.intVar(4);
-		Tuples ts = new Tuples(true);
-		ts.add(1,3,1);
-		Assert.assertEquals(model.table(new IntVar[]{x,y,z}, ts, "MDD+").isSatisfied(), ESat.FALSE);
-		Assert.assertEquals(ts.check(x,y,z), ESat.FALSE);
 	}
 
 	@Test(groups="1s", timeOut=60000)

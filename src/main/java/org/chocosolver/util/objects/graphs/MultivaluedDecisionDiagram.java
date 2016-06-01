@@ -171,8 +171,7 @@ public class MultivaluedDecisionDiagram  {
 
         // Then add tuples
         if (TUPLES.nbTuples() > 0) {
-            addTuples(TUPLES);
-            if (compactOnce) { // compact at the end, or not
+            if (addTuples(TUPLES) && compactOnce) { // compact at the end, or not
                 compact();
             }
         }
@@ -183,11 +182,13 @@ public class MultivaluedDecisionDiagram  {
      *
      * @param TUPLES tuples to add
      */
-    public void addTuples(Tuples TUPLES) {
+    public boolean addTuples(Tuples TUPLES) {
         if (sortTuples) TUPLES.sort();
+        boolean atLeastOne = false;
         for (int t = 0; t < TUPLES.nbTuples(); t++) {
-            addTuple(TUPLES.get(t));
+            atLeastOne |= addTuple(TUPLES.get(t));
         }
+        return atLeastOne;
     }
 
     /**
@@ -195,11 +196,11 @@ public class MultivaluedDecisionDiagram  {
      *
      * @param TUPLE tuple to add
      */
-    public void addTuple(int[] TUPLE) {
+    public boolean addTuple(int[] TUPLE) {
         for (int i = 0; i < nbLayers; i++) {
             // if the tuple is out of declared domain
             if(TUPLE[i] < offsets[i] || TUPLE[i] >= offsets[i] + sizes[i]){
-                return;
+                return false;
             }
             // get the position of the value relatively to the offset of each variable
             _pos[i] = TUPLE[i] - offsets[i];
@@ -222,6 +223,7 @@ public class MultivaluedDecisionDiagram  {
         if (!compactOnce) { // compact during the addition or not
             compact();
         }
+        return true;
     }
 
     /**
