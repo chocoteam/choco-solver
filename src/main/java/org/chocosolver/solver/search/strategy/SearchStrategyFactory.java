@@ -38,15 +38,12 @@ import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
-import org.chocosolver.solver.search.strategy.selectors.variables.ActivityBased;
-import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
+import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
 import org.chocosolver.solver.variables.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.*;
 
 public class SearchStrategyFactory {
 
@@ -100,7 +97,7 @@ public class SearchStrategyFactory {
      * @return a strategy to instantiate sets
      */
     public static SetStrategy setVarSearch(SetVar... sets) {
-        return setVarSearch(minDomVar(), new SetDomainMin(), true, sets);
+        return setVarSearch(new GeneralizedMinDomVarSelector(), new SetDomainMin(), true, sets);
     }
 
     // ************************************************************************************
@@ -125,7 +122,7 @@ public class SearchStrategyFactory {
      * @return a strategy to instantiate real variables
      */
     public static RealStrategy realVarSearch(RealVar... reals) {
-        return realVarSearch(roundRobinVar(), new RealDomainMiddle(), reals);
+        return realVarSearch(new Cyclic<>(), new RealDomainMiddle(), reals);
     }
 
     // ************************************************************************************
@@ -230,7 +227,7 @@ public class SearchStrategyFactory {
                 return bound.selectValue(var);
             }
         };
-        return intVarSearch(randomVar(seed), selector, vars);
+        return intVarSearch(new Random<>(seed), selector, vars);
     }
 
     // ************************************************************************************
@@ -243,7 +240,7 @@ public class SearchStrategyFactory {
      * @return int strategy based on value assignments
      */
     public static IntStrategy inputOrderLBSearch(IntVar... vars) {
-        return intVarSearch(inputOrderVar(vars[0].getModel()), new IntDomainMin(), vars);
+        return intVarSearch(new InputOrder<>(vars[0].getModel()), new IntDomainMin(), vars);
     }
 
     /**
@@ -252,7 +249,7 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy inputOrderUBSearch(IntVar... vars) {
-        return intVarSearch(inputOrderVar(vars[0].getModel()), new IntDomainMax(), vars);
+        return intVarSearch(new InputOrder<>(vars[0].getModel()), new IntDomainMax(), vars);
     }
 
     /**
@@ -261,7 +258,7 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy minDomLBSearch(IntVar... vars) {
-        return intVarSearch(minDomIntVar(vars[0].getModel()), new IntDomainMin(), vars);
+        return intVarSearch(new FirstFail(vars[0].getModel()), new IntDomainMin(), vars);
     }
 
     /**
@@ -270,7 +267,7 @@ public class SearchStrategyFactory {
      * @return assignment strategy
      */
     public static IntStrategy minDomUBSearch(IntVar... vars) {
-        return intVarSearch(minDomIntVar(vars[0].getModel()), new IntDomainMax(), vars);
+        return intVarSearch(new FirstFail(vars[0].getModel()), new IntDomainMax(), vars);
     }
 
     // ************************************************************************************
@@ -333,7 +330,7 @@ public class SearchStrategyFactory {
         if (objective != null) {
             boolean max = r.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
             if((objective.getTypeAndKind() & Variable.REAL) != 0){
-                strats.add(realVarSearch(roundRobinVar(), max?new RealDomainMax():new RealDomainMin(), (RealVar) objective));
+                strats.add(realVarSearch(new Cyclic<>(), max?new RealDomainMax():new RealDomainMin(), (RealVar) objective));
             }else{
                 strats.add(max ? minDomUBSearch((IntVar) objective) : minDomLBSearch((IntVar) objective));
             }
