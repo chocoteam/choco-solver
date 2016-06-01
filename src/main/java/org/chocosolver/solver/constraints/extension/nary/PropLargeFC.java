@@ -70,19 +70,6 @@ public class PropLargeFC extends PropLargeCSP<LargeRelation> {
     }
 
     @Override
-    public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            int[] tuple = new int[vars.length];
-            for (int i = 0; i < vars.length; i++) {
-                tuple[i] = vars[i].getValue();
-            }
-            return ESat.eval(relation.isConsistent(tuple));
-        }
-        return ESat.UNDEFINED;
-//        return ESat.TRUE;
-    }
-
-    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("CSPLarge({");

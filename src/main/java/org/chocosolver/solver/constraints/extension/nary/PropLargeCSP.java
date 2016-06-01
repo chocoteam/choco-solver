@@ -63,7 +63,6 @@ public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<I
             return ESat.eval(relation.isConsistent(tuple));
         }
         return ESat.UNDEFINED;
-//        return ESat.TRUE;
     }
 
     @Override
