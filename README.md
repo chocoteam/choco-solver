@@ -42,7 +42,7 @@ IntVar y = model.intVar("Y", 0, 5);
 // 3. Create and post constraints by using constraint factories
 x.add(y).lt(5).post();
 // 4. Define the search strategy
-model.getSolver().set(SearchStrategyFactory.inputOrderLBSearch(x, y));
+model.getSolver().setSearch(Search.inputOrderLBSearch(x, y));
 // 5. Launch the resolution process
 model.getSolver().solve();
 // 6. Print search statistics

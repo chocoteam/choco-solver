@@ -35,7 +35,7 @@ import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -272,7 +272,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
         _me().getModel().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
         _me().addStopCriterion(stop);
 		if(_me().getSearch()!=null) {
-			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			IntStrategy objSearch = maximize ? Search.inputOrderUBSearch(objective) : Search.inputOrderLBSearch(objective);
 			_me().setSearch(_me().getSearch(), objSearch);
 		}
         Solution s = new Solution(_me().getModel());
@@ -338,7 +338,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().addStopCriterion(stop);
 		if(_me().getSearch()!=null) {
-			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			IntStrategy objSearch = maximize ? Search.inputOrderUBSearch(objective) : Search.inputOrderLBSearch(objective);
 			_me().setSearch(_me().getSearch(), objSearch);
 		}
         _me().findOptimalSolution(objective, maximize);
@@ -406,7 +406,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().addStopCriterion(stop);
 		if(_me().getSearch()!=null) {
-			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objective) : SearchStrategyFactory.inputOrderLBSearch(objective);
+			IntStrategy objSearch = maximize ? Search.inputOrderUBSearch(objective) : Search.inputOrderLBSearch(objective);
 			_me().setSearch(_me().getSearch(), objSearch);
 		}
         _me().findOptimalSolution(objective, maximize);
@@ -463,7 +463,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
         _me().addStopCriterion(stop);
 		if(_me().getSearch()!=null) {
-			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
+			IntStrategy objSearch = maximize ? Search.inputOrderUBSearch(objectives) : Search.inputOrderLBSearch(objectives);
 			_me().setSearch(_me().getSearch(), objSearch);
 		}
         ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objectives);
@@ -502,7 +502,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             return findSolution(stop);
         }
 		if(_me().getSearch()!=null) {
-			IntStrategy objSearch = maximize ? SearchStrategyFactory.inputOrderUBSearch(objectives) : SearchStrategyFactory.inputOrderLBSearch(objectives);
+			IntStrategy objSearch = maximize ? Search.inputOrderUBSearch(objectives) : Search.inputOrderLBSearch(objectives);
 			_me().setSearch(_me().getSearch(), objSearch);
 		}
         _me().addStopCriterion(stop);

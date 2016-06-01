@@ -44,7 +44,7 @@ import java.util.Random;
 
 import static java.lang.System.currentTimeMillis;
 import static org.chocosolver.solver.constraints.binary.element.ElementFactory.detect;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.chocosolver.util.tools.ArrayUtils.toArray;
 import static org.testng.Assert.assertEquals;

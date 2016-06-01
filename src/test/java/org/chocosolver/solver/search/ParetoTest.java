@@ -34,7 +34,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -96,7 +96,7 @@ public class ParetoTest {
         // --- Monitor
         s.getSolver().plugMonitor((IMonitorSolution) () -> bestProfit1 = max(bestProfit1, totalProfit_1.getValue()));
         // --- Search
-        s.getSolver().setSearch(SearchStrategyFactory.domOverWDegSearch(occurrences), SearchStrategyFactory.inputOrderLBSearch(totalProfit_1,totalProfit_2));
+        s.getSolver().setSearch(Search.domOverWDegSearch(occurrences), Search.inputOrderLBSearch(totalProfit_1,totalProfit_2));
         // --- solve
         ParetoOptimizer pareto = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{totalProfit_1,totalProfit_2});
         s.getSolver().plugMonitor(pareto);

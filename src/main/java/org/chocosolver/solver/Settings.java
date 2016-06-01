@@ -32,7 +32,7 @@ package org.chocosolver.solver;
 import org.chocosolver.memory.Except_0;
 import org.chocosolver.memory.ICondition;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -183,10 +183,10 @@ public interface Settings  {
      *
      * @param model a model requiring a default search strategy
      * @return a default search strategy for model
-     * @see SearchStrategyFactory#defaultSearch(Model)
+     * @see Search#defaultSearch(Model)
      */
     default AbstractStrategy makeDefaultSearch(Model model) {
-        return SearchStrategyFactory.defaultSearch(model);
+        return Search.defaultSearch(model);
     }
 
     /**

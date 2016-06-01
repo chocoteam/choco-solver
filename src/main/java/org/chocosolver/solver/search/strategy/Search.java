@@ -45,7 +45,7 @@ import org.chocosolver.solver.variables.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchStrategyFactory {
+public class Search {
 
     // ************************************************************************************
    	// GENERIC PATTERNS

@@ -38,7 +38,7 @@ import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality.reformulate;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

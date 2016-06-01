@@ -46,8 +46,8 @@ import java.util.Random;
 
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.nary.cnf.LogOp.*;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
 
 /**

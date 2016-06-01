@@ -33,7 +33,7 @@ import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -46,7 +46,7 @@ import java.util.List;
 
 import static org.chocosolver.solver.constraints.Operator.EQ;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.testng.Assert.*;
 
 /**
@@ -713,7 +713,7 @@ public class ViewsTest {
 
         model.allDifferent(x).post();
         model.sum(y, "<", n*2).post();
-        model.getSolver().setSearch(SearchStrategyFactory.randomSearch(y,0));
+        model.getSolver().setSearch(Search.randomSearch(y,0));
     }
 
     private static void scale(Model model, int n){
@@ -726,7 +726,7 @@ public class ViewsTest {
 
         model.allDifferent(x).post();
         model.sum(y, "<", n*2).post();
-        model.getSolver().setSearch(SearchStrategyFactory.randomSearch(y,0));
+        model.getSolver().setSearch(Search.randomSearch(y,0));
     }
 
     private static void minus(Model model, int n){
@@ -739,7 +739,7 @@ public class ViewsTest {
 
         model.allDifferent(x).post();
         model.sum(y, "<", n*2).post();
-        model.getSolver().setSearch(SearchStrategyFactory.randomSearch(y,0));
+        model.getSolver().setSearch(Search.randomSearch(y,0));
     }
 
     private static void boolNot(Model model, int n){
@@ -751,7 +751,7 @@ public class ViewsTest {
         checkDomains(true, x, y);
 
         model.sum(x,"=",n/2).post();
-        model.getSolver().setSearch(SearchStrategyFactory.randomSearch(y,0));
+        model.getSolver().setSearch(Search.randomSearch(y,0));
     }
 
     public static void boolNotNot(Model model, int n) {
@@ -768,7 +768,7 @@ public class ViewsTest {
         checkDomains(true, x, y, z);
 
         model.sum(x, "=", n/2).post();
-        model.getSolver().setSearch(SearchStrategyFactory.randomSearch(z, 0));
+        model.getSolver().setSearch(Search.randomSearch(z, 0));
     }
 
     private static <T extends IntVar> void checkDomains(boolean noHoles, T[] ... vars) {

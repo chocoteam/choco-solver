@@ -46,8 +46,8 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
 import static org.chocosolver.solver.variables.IntVar.MIN_INT_BOUND;
 import static org.chocosolver.util.ESat.FALSE;

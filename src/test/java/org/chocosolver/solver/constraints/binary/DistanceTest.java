@@ -40,8 +40,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 

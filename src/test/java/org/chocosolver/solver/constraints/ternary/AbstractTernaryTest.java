@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 
 /**
  * <br/>

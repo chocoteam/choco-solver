@@ -39,8 +39,8 @@ import org.testng.annotations.Test;
 
 import static java.lang.Math.ceil;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
+import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
 /**
  * <br/>

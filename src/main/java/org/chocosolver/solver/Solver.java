@@ -54,7 +54,7 @@ import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.loop.propagate.PropagateBasic;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.IOutputFactory;
@@ -781,7 +781,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                     "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
                     "An iteration over it child moves is needed: this.getMove().getChildMoves().");
         } else {
-            M.setStrategy(strategies.length == 1 ? strategies[0] : SearchStrategyFactory.sequencer(strategies));
+            M.setStrategy(strategies.length == 1 ? strategies[0] : Search.sequencer(strategies));
         }
     }
 

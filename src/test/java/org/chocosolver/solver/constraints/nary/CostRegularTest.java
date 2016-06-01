@@ -36,7 +36,7 @@ import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.Counter;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.CounterState;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeSingleResource;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -439,7 +439,7 @@ public class CostRegularTest {
         model.post(model.arithm(vars[0],"=",1));
         model.post(model.arithm(vars[1],"=",1));
         model.getSolver().showDecisions();
-        model.getSolver().setSearch(SearchStrategyFactory.inputOrderLBSearch(vars));
+        model.getSolver().setSearch(Search.inputOrderLBSearch(vars));
         model.getSolver().solve();
         Assert.assertTrue(cost.isInstantiated());
     }

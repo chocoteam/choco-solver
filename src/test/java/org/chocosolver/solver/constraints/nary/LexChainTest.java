@@ -51,7 +51,7 @@ import java.util.Random;
 
 import static java.lang.String.format;
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.util.ESat.TRUE;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 import static org.testng.Assert.assertEquals;

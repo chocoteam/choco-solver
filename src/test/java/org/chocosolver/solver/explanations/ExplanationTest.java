@@ -34,7 +34,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.search.loop.learn.LearnCBJ;
 import org.chocosolver.solver.search.loop.learn.LearnExplained;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
@@ -49,8 +49,8 @@ import java.util.List;
 
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
@@ -390,7 +390,7 @@ public class ExplanationTest {
         vs[3] = model.intMinusView(vs[2]);
         vs[4] = model.intVar("B", -5, -2);
         model.arithm(vs[0], "+", vs[4],"=", 0).post();
-        model.getSolver().setSearch(SearchStrategyFactory.intVarSearch(
+        model.getSolver().setSearch(Search.intVarSearch(
                 new InputOrder<>(model),
                 new IntDomainMiddle(dop != DecisionOperator.int_reverse_split),
                 dop,

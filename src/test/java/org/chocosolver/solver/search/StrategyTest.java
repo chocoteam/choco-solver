@@ -33,7 +33,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.variables.VariableEvaluator;
 import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
@@ -48,8 +48,8 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayDeque;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.intVarSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_reverse_split;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
 import static org.testng.Assert.assertEquals;
@@ -145,7 +145,7 @@ public class StrategyTest {
         Model model = new Model("OnceTest");
         IntVar x = model.intVar("x", 1, 2, false);
         IntVar[] v = {x};
-        model.getSolver().setSearch(SearchStrategyFactory.greedySearch(SearchStrategyFactory.inputOrderLBSearch(v)));
+        model.getSolver().setSearch(Search.greedySearch(Search.inputOrderLBSearch(v)));
         model.getSolver().solve();
         Assert.assertTrue(x.getValue() == 1);
     }

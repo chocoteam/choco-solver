@@ -37,7 +37,7 @@ import org.chocosolver.util.ProblemMaker;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
+import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
 import static org.testng.Assert.assertEquals;
 
 /**

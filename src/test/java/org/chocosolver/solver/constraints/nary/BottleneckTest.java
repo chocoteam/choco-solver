@@ -34,7 +34,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**

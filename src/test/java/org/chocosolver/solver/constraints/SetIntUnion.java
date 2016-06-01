@@ -40,7 +40,7 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
 public class SetIntUnion {

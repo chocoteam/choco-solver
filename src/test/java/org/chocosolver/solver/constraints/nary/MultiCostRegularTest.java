@@ -36,7 +36,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeMultiResources;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 

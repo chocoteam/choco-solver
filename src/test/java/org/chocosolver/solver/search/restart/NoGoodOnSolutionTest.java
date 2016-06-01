@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 

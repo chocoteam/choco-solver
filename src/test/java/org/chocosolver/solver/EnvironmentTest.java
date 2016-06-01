@@ -44,7 +44,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
+import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 

@@ -53,7 +53,7 @@ import java.util.Random;
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.testng.Assert.*;
 
 /**

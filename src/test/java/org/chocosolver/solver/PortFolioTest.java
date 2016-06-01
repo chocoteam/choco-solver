@@ -34,7 +34,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ModelTest.knapsack;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.Search.*;
 
 /**
  * <br/>

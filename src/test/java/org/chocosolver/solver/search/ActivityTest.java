@@ -32,13 +32,13 @@ package org.chocosolver.solver.search;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.activityBasedSearch;
+import static org.chocosolver.solver.search.strategy.Search.activityBasedSearch;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -73,7 +73,7 @@ public class ActivityTest {
 			r.setGeometricalRestart(vectors.length * 3, 1.1d, new FailCounter(model, 0), 1000);
             r.setNoGoodRecordingFromSolutions(vectors);
 		}else{
-			r.setSearch(SearchStrategyFactory.inputOrderLBSearch(vectors));
+			r.setSearch(Search.inputOrderLBSearch(vectors));
 		}
 		return model;
 	}

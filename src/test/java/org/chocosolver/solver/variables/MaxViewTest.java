@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 

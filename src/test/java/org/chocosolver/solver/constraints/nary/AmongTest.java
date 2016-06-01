@@ -43,7 +43,7 @@ import java.util.Random;
 
 import static java.util.Arrays.asList;
 import static org.chocosolver.solver.Cause.Null;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;

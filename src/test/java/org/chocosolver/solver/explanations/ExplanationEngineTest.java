@@ -53,7 +53,7 @@ import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 import static org.testng.Assert.*;

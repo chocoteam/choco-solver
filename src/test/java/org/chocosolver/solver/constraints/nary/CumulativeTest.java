@@ -37,8 +37,8 @@ import org.chocosolver.solver.variables.Task;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 
 /**
  * Tests the various filtering algorithms of the cumulative constraint

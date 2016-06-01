@@ -31,13 +31,13 @@ package org.chocosolver.solver.search;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
-import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 
 public class TestMultiSequentialObjectives {
 
@@ -53,7 +53,7 @@ public class TestMultiSequentialObjectives {
 		m.sum(vals, "<", 100).post();// a+b+c<100
 		m.arithm(a, "<", b).post();
 		m.arithm(b, "<", c).post();// a<b<c
-        m.getSolver().setSearch(SearchStrategyFactory.inputOrderLBSearch(a, b, c));
+        m.getSolver().setSearch(Search.inputOrderLBSearch(a, b, c));
 		Solution s = m.getSolver().findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
 		Assert.assertEquals(s.getIntVal(a), 32);
@@ -74,7 +74,7 @@ public class TestMultiSequentialObjectives {
 		m.arithm(a, "<", b).post();
 		m.arithm(b, "<", c).post();// a<b<c
 		m.arithm(a,"+",b,"=",c).post();
-        m.getSolver().setSearch(SearchStrategyFactory.inputOrderLBSearch(a, b));
+        m.getSolver().setSearch(Search.inputOrderLBSearch(a, b));
 		Solution s = m.getSolver().findLexOptimalSolution(vals, true);
 		Assert.assertNotNull(s);
 		Assert.assertEquals(s.getIntVal(a), 24);
@@ -95,7 +95,7 @@ public class TestMultiSequentialObjectives {
         m.sum(vals, "<", 100).post();// a+b+c<100
         m.arithm(a, "<", b).post();
         m.arithm(b, "<", c).post();// a<b<c
-        m.getSolver().setSearch(SearchStrategyFactory.inputOrderUBSearch(a, b, c));
+        m.getSolver().setSearch(Search.inputOrderUBSearch(a, b, c));
         Solution s = m.getSolver().findLexOptimalSolution(vals, false);
         Assert.assertNotNull(s);
         Assert.assertEquals(s.getIntVal(a), 0);
@@ -112,7 +112,7 @@ public class TestMultiSequentialObjectives {
 		IntVar load = m.intVar("card", 0,10);
 		sv.setCard(card);
 		m.sumElements(sv,size,load).post();
-        m.getSolver().setSearch(SearchStrategyFactory.setVarSearch(sv),inputOrderLBSearch(card,load));
+        m.getSolver().setSearch(Search.setVarSearch(sv),inputOrderLBSearch(card,load));
 		Solution s = m.getSolver().findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
 		Assert.assertNotNull(s);
 		System.out.println(s);

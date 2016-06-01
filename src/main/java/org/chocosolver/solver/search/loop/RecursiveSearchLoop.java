@@ -40,7 +40,7 @@ import org.chocosolver.util.ESat;
 
 import java.util.Arrays;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 
 /**
  * A list of service, just for fun

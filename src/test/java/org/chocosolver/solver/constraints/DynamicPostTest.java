@@ -46,8 +46,8 @@ import org.testng.annotations.Test;
 import java.util.ArrayDeque;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.domOverWDegSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.util.ESat.*;
 import static org.testng.Assert.assertEquals;
 

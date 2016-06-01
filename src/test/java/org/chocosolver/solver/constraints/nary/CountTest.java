@@ -45,8 +45,8 @@ import java.util.Random;
 import static java.lang.Boolean.TRUE;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.asList;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
 

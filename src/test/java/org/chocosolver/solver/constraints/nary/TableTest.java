@@ -54,7 +54,7 @@ import static java.lang.System.out;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.scalar;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
 
 public class TableTest {

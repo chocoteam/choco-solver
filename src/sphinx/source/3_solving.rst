@@ -467,7 +467,7 @@ The classical search is based on `Depth First Search <http://en.wikipedia.org/wi
 Default search strategy
 =======================
 
-If no search strategy is specified to the resolver, Choco |version| will rely on the default one (defined by a ``defaultSearch`` in ``SearchStrategyFactory``).
+If no search strategy is specified to the resolver, Choco |version| will rely on the default one (defined by a ``defaultSearch`` in ``Search``).
 In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.setSearch(...)``.
 The default search strategy splits variables according to their type and defines specific search strategies for each type that are sequentially applied:
 
@@ -483,7 +483,7 @@ Specifying a search strategy
 
 You may specify a search strategy to the resolver by using ``solver.setSearch(...)`` method as follows: ::
 
-        import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+        import static org.chocosolver.solver.search.strategy.Search.*;
 
         // to use the default SetVar search on mySetVars
         Solver s = model.getSolver();
@@ -511,14 +511,14 @@ There are several ways to achieve this: ::
 
     // 1) verbose approach using usual imports
 
-    import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+    import org.chocosolver.solver.search.strategy.Search;
     import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
     import org.chocosolver.solver.search.strategy.selectors.values.*;
     import org.chocosolver.solver.search.strategy.selectors.variables.*;
 
 
         Solver s = model.getSolver();
-        s.setSearch(SearchStrategyFactory.intVarSearch(
+        s.setSearch(Search.intVarSearch(
                         // selects the variable of smallest domain size
                         new FirstFail(model),
                         // selects the smallest domain value (lower bound)
@@ -529,11 +529,10 @@ There are several ways to achieve this: ::
                         x, y
         ));
 
-    // 2) Shorter approach
+    // 2) Shorter approach : Use a static import for Search
+    // and do not specify the operator (equality by default)
 
-    Use a static import for SearchStrategyFactory and do not specify the operator (equality by default)
-
-    import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+    import static org.chocosolver.solver.search.strategy.Search.*;
 
     import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
     import org.chocosolver.solver.search.strategy.selectors.values.*;
@@ -553,7 +552,7 @@ There are several ways to achieve this: ::
 
     // 3) Shortest approach using built-in strategies imports
 
-    import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+    import static org.chocosolver.solver.search.strategy.Search.*;
 
         Solver s = model.getSolver();
         s.setSearch(minDomLBSearch(x, y));
@@ -571,14 +570,14 @@ There are several ways to achieve this: ::
 List of available search strategy
 =================================
 
-Most available search strategies are listed in ``SearchStrategyFactory``.
+Most available search strategies are listed in ``Search``.
 This factory enables you to create search strategies using static methods.
 Most search strategies rely on :
  - variable selectors (see package ``org.chocosolver.solver.search.strategy.selectors.values``)
  - value selectors (see package ``org.chocosolver.solver.search.strategy.selectors.variables``)
  - operators (see ``DecisionOperator``)
 
-``SearchStrategyFactory`` is not exhaustive, look at the selectors package to see learn more search possibilities.
+``Search`` is not exhaustive, look at the selectors package to see learn more search possibilities.
 
 
 Designing your own search strategy
@@ -587,7 +586,7 @@ Designing your own search strategy
 Using selectors
 ---------------
 
-To design your own strategy using SearchStrategyFactory.intVarSearch, you simply have to implement
+To design your own strategy using Search.intVarSearch, you simply have to implement
 your own variable and value selectors: ::
 
     public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
