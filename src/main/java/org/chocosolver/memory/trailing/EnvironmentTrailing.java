@@ -53,12 +53,12 @@ public class EnvironmentTrailing extends AbstractEnvironment {
      * The maximum numbers of updates that a
      * {@link org.chocosolver.memory.IStorage} can handle.
      */
-    public static final int NBUPATES = 1024;
+    public static final int NBUPATES = 256;
 
     /**
      * The load factor to update {@link org.chocosolver.memory.IStorage}.
      */
-    public static final double LOADFACTOR = 1.5;
+    public static final double LOADFACTOR = 2;
 
     //Contains all the {@link IStorage} trails for
     // storing different kinds of data.

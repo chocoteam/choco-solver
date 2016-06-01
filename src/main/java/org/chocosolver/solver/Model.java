@@ -164,7 +164,7 @@ public class Model implements IModel {
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
      */
     public Model(String name) {
-        this(new EnvironmentBuilder().fromChunk().build(), name);
+        this(new EnvironmentBuilder().fromFlat().build(), name);
     }
 
     /**
