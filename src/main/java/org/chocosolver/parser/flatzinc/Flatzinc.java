@@ -35,10 +35,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 
@@ -46,10 +42,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.nio.file.Paths;
 import java.util.List;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
 
 /**
  * A Flatzinc to Choco parser.
@@ -124,8 +120,9 @@ public class Flatzinc extends RegParser {
             System.out.printf("%% simple solver\n");
         }
         datas = new Datas[nb_cores];
+        String iname = Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(instance + "_" + (i+1));
+            Model threadModel = new Model(iname + "_" + (i+1));
             threadModel.set(defaultSettings);
             portfolio.addModel(threadModel);
             datas[i] = new Datas(threadModel,all,stat);
