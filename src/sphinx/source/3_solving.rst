@@ -75,8 +75,8 @@ The cut is an additional constraint which states that the next solution must be 
 To solve an optimization problem, you must specify which variable to optimize and in which direction: ::
 
    // to maximize X
-   model.setObjectives(ResolutionPolicy.MAXIMIZE, X);
-   // or model.setObjectives(ResolutionPolicy.MINIMIZE, X); to minimize X
+   model.setObjectives(Model.MAXIMIZE, X);
+   // or model.setObjectives(Model.MINIMIZE, X); to minimize X
    while(solver.solve()){
        // an improving solution has been found
    }
@@ -103,7 +103,7 @@ For instance, one may want to indicate that the value of the objective variable 
         IntVar OBJ = model.intVar("objective", 0, 999);
         model.scalar(new IntVar[]{X,Y}, new int[]{3,4}, OBJ)).post();
         // Specify objective
-        model.setObjectives(ResolutionPolicy.MAXIMIZE, OBJ);
+        model.setObjectives(Model.MAXIMIZE, OBJ);
         // Compute optimum
         model.getSolver().solve();
 
@@ -124,7 +124,7 @@ Here is a simple example on how to use the `ParetoOptimizer` to optimize two var
 		model.arithm(a, "+", b, "=", c).post();
 
 		// create an object that will store the best solutions and remove dominated ones
-		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b});
+		ParetoOptimizer po = new ParetoOptimizer(Model.MAXIMIZE,new IntVar[]{a,b});
 		Solver solver = model.getSolver();
 		solver.plugMonitor(po);
 
@@ -394,8 +394,8 @@ Curly brackets *{instruction | }* indicate alternative instructions
 
 Brackets *[instruction]* indicate an optional instruction.
 
-If the search terminates, the message "Search complete" appears on the first line, followed with either the the number of solutions found or the message "No solution".
-``Maximize`` –resp. ``Minimize``– indicates the best known value before exiting of the objective value using a ``ResolutionPolicy.MAXIMIZE`` –resp. ``ResolutionPolicy.MINIMIZE``- policy.
+If the search terminates, the message "Search complete" appears on the first line, followed with either the number of solutions found or the message "No solution".
+``Maximize`` –resp. ``Minimize``– indicates the best known value for the objective variable before exiting when an (single) objective has been defined.
 
 Curly braces *{value}* indicate search statistics:
 
@@ -474,7 +474,7 @@ The default search strategy splits variables according to their type and defines
 #. integer variables and boolean variables : ``intVarSearch(ivars)`` (calls ``domOverWDegSearch``)
 #. set variables: :code:`setVarSearch(svars)`
 #. real variables :code:`realVarSearch(rvars)`
-#. objective variable, if any: lower bound or upper bound, depending on the `ResolutionPolicy`
+#. objective variable, if any: lower bound or upper bound, depending on the optimization direction
 
 Note that `lastConflict` is also plugged-in.
 
@@ -735,7 +735,7 @@ The ``LNSFactory`` provides pre-defined configurations.
 Here is the way to declare LNS to solve a problem: ::
 
     LNSFactory.rlns(solver, ivars, 30, 20140909L, new FailCounter(solver, 100));
-    solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+    solver.findOptimalSolution(Model.MINIMIZE, objective);
 
 It declares a *random* LNS which, on a solution, computes a partial solution based on ``ivars``.
 If no solution are found within 100 fails (``FailCounter(solver, 100)``), a restart is forced.

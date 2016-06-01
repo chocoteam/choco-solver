@@ -37,7 +37,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
@@ -214,7 +213,7 @@ public class SatTest {
         // SEARCH
         model.getSolver().setSearch(inputOrderLBSearch(var));
 
-        model.setObjective(MAXIMIZE, var);
+        model.setObjective(Model.MAXIMIZE, var);
         Solution solution = new Solution(model);
         while(model.getSolver().solve()){
             solution.record();

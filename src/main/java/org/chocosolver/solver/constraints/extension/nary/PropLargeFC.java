@@ -35,7 +35,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
 import org.chocosolver.solver.variables.ranges.IntIterableSet;
-import org.chocosolver.util.ESat;
 
 /**
  * <br/>

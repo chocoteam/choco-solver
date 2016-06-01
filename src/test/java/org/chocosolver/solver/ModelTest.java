@@ -45,7 +45,6 @@ import org.testng.annotations.Test;
 import java.text.MessageFormat;
 import java.util.List;
 
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
@@ -85,7 +84,7 @@ public class ModelTest {
         }
         model.scalar(objects, volumes, "=", model.intVar("capa", capacites[0], capacites[1], true)).post();
         model.scalar(objects, energies, "=", power).post();
-        model.setObjective(MAXIMIZE, power);
+        model.setObjective(Model.MAXIMIZE, power);
         model.addHook("obj", power);
         model.getSolver().setSearch(inputOrderLBSearch(objects));
         return model;
@@ -108,7 +107,7 @@ public class ModelTest {
                     while (s.getSolver().solve()) ;
                     break;
                 case OPT:
-                    s.setObjective(MAXIMIZE, (IntVar) s.getVar(0));
+                    s.setObjective(Model.MAXIMIZE, (IntVar) s.getVar(0));
                     s.getSolver().solve();
                     break;
                 default:
@@ -270,7 +269,7 @@ public class ModelTest {
     public void testJL300() {
         Model s = new Model();
         IntVar i = s.intVar("i", -5, 5, false);
-        s.setObjective(MAXIMIZE, i);
+        s.setObjective(Model.MAXIMIZE, i);
         s.getSolver().solve();
         assertEquals(s.getSolver().getSolutionCount(), 1);
         assertEquals(i.getValue(), 5);
@@ -362,7 +361,7 @@ public class ModelTest {
         Model model = new Model();
         IntVar[] v = model.boolVarArray("v", 2);
         model.arithm(v[0], "!=", v[1]).post();
-        model.setObjective(MAXIMIZE, v[0]);
+        model.setObjective(Model.MAXIMIZE, v[0]);
         model.getSolver().solve();
         assertTrue(v[0].isInstantiated());
         model.getSolver().solve();

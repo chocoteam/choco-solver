@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.NodeCounter;
@@ -64,7 +63,7 @@ public class SolverTest {
    		m.member(x, new int[]{1,2}).post();
 
         // computeOptimum
-        m.setObjective(ResolutionPolicy.MAXIMIZE,x);
+        m.setObjective(Model.MAXIMIZE,x);
         while (m.getSolver().solve());
         assertEquals(m.getSolver().getSolutionCount(),1);
 

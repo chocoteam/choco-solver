@@ -41,8 +41,6 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.sort.ArraySort;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import java.util.BitSet;
-
 /**
  * Propagator for the Knapsack constraint
  * based on Dantzig-Wolfe relaxation

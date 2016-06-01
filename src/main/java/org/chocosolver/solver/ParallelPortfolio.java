@@ -74,7 +74,7 @@ import static org.chocosolver.solver.search.strategy.Search.*;
  *     the other ones are eagerly stopped.
  *     Moreover, when dealing with an optimization problem, cut on the objective variable's value is propagated
  *     to all models on solution.
- *     It is essential to eagerly declare the objective variable(s) with {@link Model#setObjective(ResolutionPolicy, Variable)}.
+ *     It is essential to eagerly declare the objective variable(s) with {@link Model#setObjective(boolean, Variable)}.
  *
  * </p>
  * <p>
@@ -174,7 +174,7 @@ public class ParallelPortfolio {
      *  </li>
      *  <li>
      *      when dealing with optimization problems, the objective variables <b>HAVE</b> to be declared eagerly with
-     *      {@link Model#setObjective(ResolutionPolicy, Variable)}.
+     *      {@link Model#setObjective(boolean, Variable)}.
      *  </li>
      *  </ul>
      *

@@ -30,7 +30,6 @@
 package org.chocosolver.util;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
@@ -166,7 +165,7 @@ public class ProblemMaker {
             model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
         model.addHook("objective", ticks[m - 1]);
-        model.setObjective(ResolutionPolicy.MINIMIZE,ticks[m - 1]);
+        model.setObjective(Model.MINIMIZE,ticks[m - 1]);
         return model;
     }
 

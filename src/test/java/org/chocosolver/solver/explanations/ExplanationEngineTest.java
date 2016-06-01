@@ -52,7 +52,6 @@ import java.util.List;
 import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
 import static org.chocosolver.util.tools.StringUtils.randomName;
@@ -503,7 +502,7 @@ public class ExplanationEngineTest {
         configure(model, a);
         model.getSolver().showShortStatistics();
         model.getSolver().limitTime("5m");
-        model.setObjective(MINIMIZE, ticks[m - 1]);
+        model.setObjective(Model.MINIMIZE, ticks[m - 1]);
         while (model.getSolver().solve()) ;
         assertTrue(model.getSolver().getSolutionCount() > 0);
     }

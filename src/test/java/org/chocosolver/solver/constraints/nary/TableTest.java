@@ -55,7 +55,6 @@ import org.testng.annotations.Test;
 import java.util.Random;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.scalar;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -195,7 +194,7 @@ public class TableTest {
 			c.post();
 		}
 		model.sum(reified, "=", sum).post();
-		model.setObjective(MINIMIZE, sum);
+		model.setObjective(Model.MINIMIZE, sum);
 		Solution sol = new Solution(model);
 		while(model.getSolver().solve()){
 			sol.record();

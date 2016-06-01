@@ -49,8 +49,6 @@ import java.util.Random;
 
 import static java.lang.Math.floorDiv;
 import static java.lang.System.nanoTime;
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.objective.ObjectiveManager.walkingIntVarCutComputer;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
@@ -118,7 +116,7 @@ public class ObjectiveTest {
     private void min(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
-            model.setObjective(MINIMIZE, iv);
+            model.setObjective(Model.MINIMIZE, iv);
             while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getBestSolutionValue(), 0);
             assertEquals(model.getSolver().getNodeCount(), 2);
@@ -128,7 +126,7 @@ public class ObjectiveTest {
     private void max(Model model, IntVar iv) {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
-            model.setObjective(MAXIMIZE, iv);
+            model.setObjective(Model.MAXIMIZE, iv);
             while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getBestSolutionValue(), 10);
             assertEquals(model.getSolver().getNodeCount(), 21);
@@ -141,7 +139,7 @@ public class ObjectiveTest {
         IntVar iv = model.intVar("iv", 0, 10, false);
         model.arithm(iv, ">=", 2).post();
 
-        model.setObjective(MINIMIZE, iv);
+        model.setObjective(Model.MINIMIZE, iv);
         int value = 11;
         while (model.getSolver().solve()) {
             value = iv.getValue();
@@ -151,7 +149,7 @@ public class ObjectiveTest {
         model.getSolver().reset();
 
         value = 11;
-        model.setObjective(MINIMIZE, iv);
+        model.setObjective(Model.MINIMIZE, iv);
         while (model.getSolver().solve()) {
             value = iv.getValue();
         }
@@ -202,12 +200,12 @@ public class ObjectiveTest {
         IntVar iv = model.intVar("iv", 0, 10, false);
         BoolVar v = model.arithm(iv, "<=", 2).reify();
 
-        model.setObjective(MINIMIZE, v);
+        model.setObjective(Model.MINIMIZE, v);
         while (model.getSolver().solve()) ;
 //        System.out.println("Minimum1: " + iv + " : " + solver.isSatisfied());
         model.getSolver().reset();
 
-        model.setObjective(MINIMIZE, v);
+        model.setObjective(Model.MINIMIZE, v);
         while (model.getSolver().solve()) ;
 //        System.out.println("Minimum2: " + iv + " : " + solver.isSatisfied());
     }
@@ -218,7 +216,7 @@ public class ObjectiveTest {
         BoolVar b1 = model.boolVar("b1");
         BoolVar b2 = model.boolVar("b2");
         model.arithm(b1, "<=", b2).post();
-        model.setObjective(MINIMIZE, b1);
+        model.setObjective(Model.MINIMIZE, b1);
         Solver r = model.getSolver();
 //        SMF.log(solver, true, true);
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
@@ -248,7 +246,7 @@ public class ObjectiveTest {
         Model model = new Model();
         IntVar a = model.intVar("a", -2, 2, false);
         Solver r = model.getSolver();
-        model.setObjective(MAXIMIZE, a);
+        model.setObjective(Model.MAXIMIZE, a);
         r.setSearch(new ObjectiveStrategy(a, OptimizationPolicy.TOP_DOWN), minDomLBSearch(a));
         r.setNoGoodRecordingFromSolutions(a);
         while (model.getSolver().solve()) ;
@@ -260,7 +258,7 @@ public class ObjectiveTest {
         Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
         final int[] ends = {5, 2, 1};
-        model.setObjective(MINIMIZE, objective);
+        model.setObjective(Model.MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
         oman.setCutComputer(n -> n - 10);
         int best = objective.getUB();
@@ -282,7 +280,7 @@ public class ObjectiveTest {
         Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
         final int[] ends = {10};
-        model.setObjective(MINIMIZE, objective);
+        model.setObjective(Model.MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
         oman.setCutComputer(n -> n - ends[0]);
         int best = objective.getUB();
@@ -302,7 +300,7 @@ public class ObjectiveTest {
     public void testAdaptiveCut3() {
         Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
-        model.setObjective(MINIMIZE, objective);
+        model.setObjective(Model.MINIMIZE, objective);
         ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
         oman.setCutComputer(walkingIntVarCutComputer());
         int best = objective.getUB();
