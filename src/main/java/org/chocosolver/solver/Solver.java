@@ -231,7 +231,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         mMeasures.setBoundsManager(objectivemanager);
         searchMonitors = new SearchMonitorList();
         setMove(new MoveBinaryDFS());
-        P = new PropagateBasic();
+        setPropagate(new PropagateBasic());
         setNoLearning();
     }
 
@@ -544,6 +544,13 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * @return the current propagate.
+     */
+    public Propagate getPropagate() {
+        return P;
+    }
+
+    /**
      * @return the backtracking environment used for this solver
      */
     public IEnvironment getEnvironment() {
@@ -736,6 +743,14 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         } else {
             this.M = new MoveSeq(getModel(), m);
         }
+    }
+
+    /**
+     * Overrides the Propagate object
+     * @param p the new Propagate to use
+     */
+    public void setPropagate(Propagate p) {
+        this.P = p;
     }
 
     /**
