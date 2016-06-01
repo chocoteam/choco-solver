@@ -13,13 +13,13 @@
 * [Contributing](#con)
 * [Download and installation](#dow)
 
-Choco3 is an open-source Java library for Constraint Programming.
+Choco-solver is an open-source Java library for Constraint Programming.
 
-Choco3 is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
+Choco-solver is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
 
 Current stable version is 3.3.3 (22 Dec 2015).
 
-Choco3 comes with:
+Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
 - various state-of-the-art constraints (alldifferent, count, nvalues, etc.),
 - various search strategies, from basic ones (first_fail, smallest, etc.) to most complex (impact-based and activity-based search),
@@ -27,7 +27,7 @@ Choco3 comes with:
 
 But also, facilities to interact with the search loop, factories to help modelling, many samples, etc.
 
-Choco3 is distributed under BSD 4-Clause License (Copyright (c) 1999-2015, Ecole des Mines de Nantes).
+Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2015, Ecole des Mines de Nantes).
 
 Contact: choco@mines-nantes.fr
 

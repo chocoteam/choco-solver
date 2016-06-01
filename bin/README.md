@@ -1,7 +1,7 @@
 Release process
 ===============
 
-Choco3 is an open-source Java library for Constraint Programming.
+Choco-solver is an open-source Java library for Constraint Programming.
 
 This document reports the release process.
 
@@ -29,7 +29,7 @@ And run license check:
 
 4. Check that ALL issues are reported in CHANGES.md files
 
-    $ git log master..develop | grep "#[0-9]"
+    $ ltag=`git describe --abbrev=0 --tags`;git log ${ltag}..develop | grep "#[0-9]"
 
 5. Make sure the website is mounted to /Volume/htdocs/ and run the command :
 
@@ -44,6 +44,6 @@ And run license check:
 6. Upload the zip file onto the website
 
 ===================
-The Choco3 dev team.
+The Choco-solver dev team.
 
 

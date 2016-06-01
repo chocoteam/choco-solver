@@ -1,5 +1,5 @@
 #!/bin/bash
-LOCAL=`mktemp -d -t btrplace.XXX`
+LOCAL=`mktemp -d -t choco.XXX`
 REMOTE=$1
 VERSION=$2
 echo "${LOCAL}"

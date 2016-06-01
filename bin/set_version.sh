@@ -40,7 +40,7 @@ then
     sedInPlace "s%Current stable version is .*.%Current stable version is $VERSION ($d).%"  README.md
     sedInPlace "s%The name of the jar file terms the packaging: .*%The name of the jar file terms the packaging: \`choco\-solver\-$VERSION\-with\-dependencies\.jar\` or \`choco\-solver\-$VERSION.jar\`.%" README.md
     sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
-    sedInPlace "s%Choco3 is distributed.*.%Choco3 is distributed under BSD 4-Clause License \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
+    sedInPlace "s%Choco-solver is distributed.*.%Choco-solver is distributed under BSD 4-Clause License \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
     sedInPlace "s%branch=develop%branch=master%g"  README.md
 
     ## The LICENSE
