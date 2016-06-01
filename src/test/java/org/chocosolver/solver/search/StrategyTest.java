@@ -37,6 +37,7 @@ import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
 import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.LastConflict;
@@ -51,7 +52,6 @@ import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.input
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.intVarSearch;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_reverse_split;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
-import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.midIntVal;
 import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.minDomIntVar;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -339,7 +339,7 @@ public class StrategyTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         Solver r = model.getSolver();
-        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), int_split, X));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), new IntDomainMiddle(true), int_split, X));
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
@@ -350,7 +350,7 @@ public class StrategyTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         Solver r = model.getSolver();
-        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(false), int_reverse_split, X));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), new IntDomainMiddle(false), int_reverse_split, X));
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
@@ -362,7 +362,7 @@ public class StrategyTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         Solver r = model.getSolver();
-        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), int_split, X));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), new IntDomainMiddle(true), int_split, X));
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
@@ -373,7 +373,7 @@ public class StrategyTest {
         Model model = new Model();
         IntVar[] X = model.intVarArray("X", 2, 0, 2, false);
         Solver r = model.getSolver();
-        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(false), int_reverse_split, X));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), new IntDomainMiddle(false), int_reverse_split, X));
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);

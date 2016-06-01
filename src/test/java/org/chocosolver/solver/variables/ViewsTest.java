@@ -34,6 +34,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -45,7 +46,6 @@ import java.util.List;
 import static org.chocosolver.solver.constraints.Operator.EQ;
 import static org.chocosolver.solver.constraints.ternary.Max.var;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
-import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.randomIntBound;
 import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.randomVar;
 import static org.testng.Assert.*;
 
@@ -417,7 +417,7 @@ public class ViewsTest {
                 ref.arithm(x,"-",y, "=", z).post();
                 IntVar az = ref.intVar("az", 0, 2, false);
                 ref.absolute(az, z).post();
-                ref.getSolver().setSearch(intVarSearch(randomVar(seed), randomIntBound(seed),x, y, az));
+                ref.getSolver().setSearch(intVarSearch(randomVar(seed), new IntDomainRandomBound(seed),x, y, az));
             }
             Model model = new Model();
             {
@@ -426,7 +426,7 @@ public class ViewsTest {
                 IntVar z = model.intVar("Z", -2, 2, false);
                 model.arithm(x,"-",y, "=", z).post();
                 IntVar az = model.intAbsView(z);
-                model.getSolver().setSearch(intVarSearch(randomVar(seed), randomIntBound(seed),x, y, az));
+                model.getSolver().setSearch(intVarSearch(randomVar(seed), new IntDomainRandomBound(seed),x, y, az));
             }
             check(ref, model, seed, true, true);
         }

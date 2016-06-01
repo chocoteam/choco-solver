@@ -37,6 +37,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.learn.LearnCBJ;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -53,7 +54,6 @@ import static java.util.Arrays.fill;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
-import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.midIntVal;
 import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.minDomIntVar;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 import static org.testng.Assert.*;
@@ -602,7 +602,7 @@ public class ExplanationEngineTest {
         model.arithm(matrix[0][0], "<", matrix[n - 1][0]).post();
 
         Solver r = model.getSolver();
-        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), midIntVal(true), vars));
+        r.setSearch(intVarSearch(minDomIntVar(r.getModel()), new IntDomainMiddle(true), vars));
 
         configure(model, a);
         model.getSolver().showShortStatistics();
