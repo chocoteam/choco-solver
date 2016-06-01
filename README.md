@@ -58,7 +58,7 @@ both the user guide (pdf) and the apidocs (zip).
 You can get help on our [forum](http://choco-solver.org/?q=Forum).
 Most support requests are answered very fast.
 
-Use the [issue tracker](https://github.com/chocoteam/choco3/issues) here on GitHub to report issues.
+Use the [issue tracker](https://github.com/chocoteam/choco-solver/issues) here on GitHub to report issues.
 As far as possible, provide a [Minimal Working Example](https://en.wikipedia.org/wiki/Minimal_Working_Example).
 
 <a name="con"></a>
@@ -71,22 +71,22 @@ it lists the requirements and good practices to ease the contribution process.
 
 ##### Promoting is contributing !  
 
-[![Choco3](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
+[![Choco-solver](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
 
-Following are code snippets to add on your website to help us promoting Choco3.
+Following are code snippets to add on your website to help us promoting Choco-solver.
 
 **html**:
 
 ```html
 <a href="http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge">
-<img border="0" alt="Choco3" src="http://choco-solver.org/sites/default/files/banner.svg" width="160" height="18">
+<img border="0" alt="Choco-solver" src="http://choco-solver.org/sites/default/files/banner.svg" width="160" height="18">
 </a>
 ```
 
 **Markdown**:
 
 ```md
-[![Choco3](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
+[![Choco-solver](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
 ```
 
 And thank you for giving back to choco-solver.
@@ -101,10 +101,10 @@ Please meet our team of cho-coders :
 ## Download and installation ##
 
 Requirements:
-* JDK 8+ (JDK 7 compliant jars are also available)
+* JDK 8+
 * maven 3+
 
-Choco3 is available on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.choco-solver),
+Choco-solver is available on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.choco-solver),
 or directly from the [official website](http://choco-solver.org/?q=Download).
 
 [Snapshot releases](https://oss.sonatype.org/content/repositories/snapshots/org/choco-solver/choco-solver/) are also available for curious.
@@ -186,4 +186,4 @@ installed in your local maven repository and available in the `target` sub-folde
 
 
 ===================
-The Choco3 dev team.
+The Choco-solver dev team.

@@ -1,8 +1,6 @@
-# Contributing to Choco3
+# Contributing to Choco Solver
 
-The developments are pushed on the develop branch, so this is the most up-to-date version of the code.
-As far as possible, the master branch is only updated twice or thrice a year,
-based on the following [Git branching model](http://nvie.com/posts/a-successful-git-branching-model/).
+The developments are pushed on the master branch, so this is the most up-to-date version of the code.
 
 ## Using the issue tracker
 
@@ -15,20 +13,20 @@ most support requests are answered very fast.
 <a name="bug"></a>
 ## Bug reports
 
-Choco3 is a living library which is frequently modified, sometimes deeply.
-We do our best to track bugs in the [tracker](https://github.com/chocoteam/choco3/issues).
+Choco solver is a living library which is frequently modified, sometimes deeply.
+We do our best to track bugs in the [tracker](https://github.com/chocoteam/choco-solver/issues).
 But, it happens that a modification exhibit a bug or, simply, that we did not test the code enough.
 In that case:
 
-1. Search in [tracker](https://github.com/chocoteam/choco3/issues) to see if the bug has already been reported
+1. Search in [tracker](https://github.com/chocoteam/choco-solver/issues) to see if the bug has already been reported
 (do not forget to look for closed issues), and/or fixed;
 
 2. Isolate the problem, describe it and provide a [Minimal Working Example](https://en.wikipedia.org/wiki/Minimal_Working_Example).
 The [stackoverflow guidelines](http://stackoverflow.com/help/mcve) is a very good starting point.
-If possible, try to reproduce the bug on the develop branch
+If possible, try to reproduce the bug on the master branch
 and do not forget to indicate which version were used to reproduce the bug (release version or revision number).
 
-Doing so, we will endeavor to reproduce the bug and fix it as soon as possible in the develop branch.
+Doing so, we will endeavor to reproduce the bug and fix it as soon as possible in the master branch.
 If the bug is critical, a release could be done in advance.
 
 <a name="feat"></a>
@@ -43,13 +41,13 @@ And if you feel like doing it by yourself, what about submitting a [pull request
 <a name="pull"></a>
 ## Pull requests
 
-Contributing to Choco3 is easy.
+Contributing to Choco solver is easy.
 
 0. Make sure you have the right to send any changes you make. If you do changes at work you may find your employer owns the patch not you.
 
-1. Fork Choco3 on https://github.com/chocoteam/choco3,
+1. Fork Choco solver on https://github.com/chocoteam/choco-solver,
 
-2. Work with the source: Choco3 is maven-based project, easy to install on any IDEs,
+2. Work with the source: Choco solver is maven-based project, easy to install on any IDEs,
 
 3. Add your features and test them,
 
