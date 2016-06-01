@@ -467,8 +467,8 @@ The classical search is based on `Depth First Search <http://en.wikipedia.org/wi
 Default search strategy
 =======================
 
-If no search strategy is specified to the resolver, Choco |version| will rely on the default one (defined by a ``DefaultSearchBinder`` in ``Settings``).
-In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.set(...)``.
+If no search strategy is specified to the resolver, Choco |version| will rely on the default one (defined by a ``defaultSearch`` in ``SearchStrategyFactory``).
+In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using ``solver.setSearch(...)``.
 The default search strategy splits variables according to their type and defines specific search strategies for each type that are sequentially applied:
 
 #. integer variables and boolean variables : ``intVarSearch(ivars)`` (calls ``domOverWDegSearch``)
@@ -481,20 +481,22 @@ Note that `lastConflict` is also plugged-in.
 Specifying a search strategy
 ============================
 
-You may specify a search strategy to the resolver by using ``resolver.set(...)`` method as follows: ::
+You may specify a search strategy to the resolver by using ``solver.setSearch(...)`` method as follows: ::
+
+        import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
         // to use the default SetVar search on mySetVars
         Solver s = model.getSolver();
-        s.set(setVarSearch(mySetVars));
+        s.setSearch(setVarSearch(mySetVars));
 
         // to use activity based search on myIntVars
         Solver s = model.getSolver();
-        s.set(activityBasedSearch(myIntVars));
+        s.setSearch(activityBasedSearch(myIntVars));
 
         // to use activity based search on myIntVars
         // then the default SetValSelectorFactoryVar search on mySetVars
         Solver s = model.getSolver();
-        s.set(activityBasedSearch(myIntVars), setVarSearch(mySetVars));
+        s.setSearch(activityBasedSearch(myIntVars), setVarSearch(mySetVars));
 
 .. note::
 
@@ -511,45 +513,50 @@ There are several ways to achieve this: ::
 
     import org.chocosolver.solver.search.strategy.SearchStrategyFactory;
     import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-    import org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory;
-    import org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory;
+    import org.chocosolver.solver.search.strategy.selectors.values.*;
+    import org.chocosolver.solver.search.strategy.selectors.variables.*;
 
 
         Solver s = model.getSolver();
-        s.set(SearchStrategyFactory.intVarSearch(
-                        // selects the variable of smallest domain
-                        VarSelectorFactory.minDomIntVar(),
+        s.setSearch(SearchStrategyFactory.intVarSearch(
+                        // selects the variable of smallest domain size
+                        new FirstFail(model),
                         // selects the smallest domain value (lower bound)
-                        ValSelectorFactory.minIntVal(),
+                        new IntDomainMin(),
                         // apply equality (var = val)
                         DecisionOperator.int_eq,
                         // variables to branch on
                         x, y
         ));
 
-    // 2) Shorter approach using static imports
+    // 2) Shorter approach
+
+    Use a static import for SearchStrategyFactory and do not specify the operator (equality by default)
 
     import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
-    import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.*;
-    import static org.chocosolver.solver.search.strategy.selectors.ValSelectorFactory.*;
-    import static org.chocosolver.solver.search.strategy.selectors.VarSelectorFactory.*;
+
+    import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+    import org.chocosolver.solver.search.strategy.selectors.values.*;
+    import org.chocosolver.solver.search.strategy.selectors.variables.*;
 
 
         Solver s = model.getSolver();
-        s.set(intVarSearch(
-                minDomIntVar(),
-                minIntVal(),
-                int_eq, // not required field (used by default)
-                x, y
+        s.setSearch(intVarSearch(
+                        // selects the variable of smallest domain size
+                        new FirstFail(model),
+                        // selects the smallest domain value (lower bound)
+                        new IntDomainMin(),
+                        // variables to branch on
+                        x, y
         ));
 
 
-    // 3) Short approach using built-in strategies imports
+    // 3) Shortest approach using built-in strategies imports
 
     import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
         Solver s = model.getSolver();
-        s.set(minDomLBSearch(x, y));
+        s.setSearch(minDomLBSearch(x, y));
 
 .. important:: Black-box search strategies
 
@@ -564,12 +571,14 @@ There are several ways to achieve this: ::
 List of available search strategy
 =================================
 
-Available search strategies are listed in ``SearchStrategyFactory``.
+Most available search strategies are listed in ``SearchStrategyFactory``.
 This factory enables you to create search strategies using static methods.
 Most search strategies rely on :
- - variable selectors (see ``VarSelectorFactory``)
- - value selectors (see ``ValSelectorFactory``)
+ - variable selectors (see package ``org.chocosolver.solver.search.strategy.selectors.values``)
+ - value selectors (see package ``org.chocosolver.solver.search.strategy.selectors.variables``)
  - operators (see ``DecisionOperator``)
+
+``SearchStrategyFactory`` is not exhaustive, look at the selectors package to see learn more search possibilities.
 
 
 Designing your own search strategy
@@ -589,7 +598,7 @@ For instance, to select the first non instantiated variable and assign it to its
 
 
         Solver s = model.getSolver();
-        s.set(intVarSearch(
+        s.setSearch(intVarSearch(
                 // variable selector
                 (VariableSelector<IntVar>) variables -> {
                     for(IntVar v:variables){
@@ -614,7 +623,7 @@ From scratch
 
 You can design your own strategy by creating ``Decision`` objects directly as follows: ::
 
-        s.set(new AbstractStrategy<IntVar>(x,y) {
+        s.setSearch(new AbstractStrategy<IntVar>(x,y) {
             // enables to recycle decision objects (good practice)
             PoolManager<IntDecision> pool = new PoolManager();
             @Override
@@ -651,7 +660,7 @@ You can make a decision non-refutable by using ``decision.setRefutable(false)``
 To make an entire search strategy greedy, use: ::
 
         Solver s = model.getSolver();
-        s.set(greedySearch(inputOrderLBSearch(x,y,z)));
+        s.setSearch(greedySearch(inputOrderLBSearch(x,y,z)));
 
 Restarts
 ========
