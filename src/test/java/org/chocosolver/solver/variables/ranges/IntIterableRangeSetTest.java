@@ -537,7 +537,6 @@ public class IntIterableRangeSetTest {
         Random rnd = new Random();
         for(int i = 0; i < 2000; i++){
             rnd.setSeed(i);
-            System.out.printf("%d\n", i);
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
             IntIterableRangeSet s1 = intersect1(t1, t2);
@@ -553,7 +552,6 @@ public class IntIterableRangeSetTest {
     public void testUnion() {
         Random rnd = new Random();
         for(int i = 0; i < 2000; i++){
-            System.out.printf("seed: %d\n", i);
             rnd.setSeed(i);
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
@@ -583,7 +581,6 @@ public class IntIterableRangeSetTest {
         Random rnd = new Random();
         for(int i = 0; i < 2000; i++){
             rnd.setSeed(i);
-            System.out.printf("%d\n", i);
             IntIterableRangeSet t1 = makeItv(rnd, 50);
             IntIterableRangeSet t2 = makeItv(rnd, 50);
             IntIterableRangeSet s1 = union1(t1, t2);
