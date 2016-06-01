@@ -49,15 +49,12 @@ if [ ${BRANCH} = "release" ]; then
     mvn -q -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to deploy"
 
     #Set the next development version
-    echo "** Prepare develop for the next version **"
-    git checkout develop ||quit "Unable to checkout develop"
-    git merge --no-ff ${TAG} ||quit "Unable to integrate to develop"
+    echo "** Prepare master for the next version **"
     ./bin/set_version.sh --next ${VERSION}
-    git commit -m "Prepare the code for the next version" -a ||quit "Unable to commit to develop"
+    git commit -m "Prepare the code for the next version" -a ||quit "Unable to commit to master"
 
     #Push changes on develop, with the tag
-    git push origin develop ||quit "Unable to push to develop"
-
+    git push origin master ||quit "Unable to push to master"
 
     #Clean
     git push origin --delete release ||quit "Unable to delete release"
