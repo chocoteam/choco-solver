@@ -31,8 +31,6 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.selectors.VariableEvaluator;
-import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
 import org.chocosolver.solver.variables.IntVar;
 
 /**

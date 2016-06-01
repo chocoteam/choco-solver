@@ -36,7 +36,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.IntMap;

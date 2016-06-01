@@ -31,8 +31,8 @@ package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.SetValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.SetValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
 import org.chocosolver.solver.variables.SetVar;
 
 /**

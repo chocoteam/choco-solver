@@ -27,28 +27,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.selectors;
+package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.Variable;
 
 
 
 /**
- * A value selector specifies which value should be chosen to constrain the selected variable.
- * The value chosen must belong to the domain of the selected variable.
+ * A variable selector specifies which variable should be selected at a fix point. It is based specifications
+ * (ex: smallest domain, most constrained, etc.).
+ * <br/> Basically, the variable selected should not be already instantiated to a singleton (although it is allowed).
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 28 sept. 2010
+ * @since 2 juil. 2010
  */
-public interface RealValueSelector  {
+public interface VariableSelector<V extends Variable>  {
 
     /**
-     * Selects and returns the value to constrained chosen variable with.
-     * The chosen value must belong to the domain of <code>variable</code>.
+     * Provides access to the current selected variable among {@code variables}.
+     * If there is no variable left, return {@code null}.
      *
-     * @return the value, based on the domain of variable
+     * @return the current selected variable if any, {@code null} otherwise.
      */
-    double selectValue(RealVar var);
+    V getVariable(V[] variables);
 
 }

@@ -27,29 +27,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.selectors;
+package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import org.chocosolver.solver.variables.Variable;
 
-
-
 /**
- * A variable selector specifies which variable should be selected at a fix point. It is based specifications
- * (ex: smallest domain, most constrained, etc.).
- * <br/> Basically, the variable selected should not be already instantiated to a singleton (although it is allowed).
+ * A variable evaluator. One provide a way to evaluate a variable (domain size, smallest values, ...).
+ * It should return a value which can be minimized.
+ * For instance, to select the integer variable with the smallest value in its domain, return ivar.getLB().
+ * To select the variable with the largest value in its domain, return -ivar.getUB().
+ * <p/>
+ * Such evaluator can be called and combined with others to define a variable selector which enables tie breaking.
+ * Indeed, many uninstantied variables may return the same value for the evaluation.
+ * In that case, the next evaluator should break ties, otherwise the first computed variable would be returned.
+ * <p/>
+ * Be aware that using a single variable evaluator in {@code solver.search.strategy.selectors.VariableSelectorWithTies} may result
+ * in a slower execution due to the generalisation it requires.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 2 juil. 2010
+ * @since 17/03/2014
  */
-public interface VariableSelector<V extends Variable>  {
+public interface VariableEvaluator<V extends Variable> {
 
     /**
-     * Provides access to the current selected variable among {@code variables}.
-     * If there is no variable left, return {@code null}.
+     * Evaluates the heuristic that is <b>minimized</b> in order to find the best variable
      *
-     * @return the current selected variable if any, {@code null} otherwise.
+     * @param variable array of variable
+     * @return the result of the evaluation, to minimize
      */
-    V getVariable(V[] variables);
-
+    double evaluate(V variable);
 }

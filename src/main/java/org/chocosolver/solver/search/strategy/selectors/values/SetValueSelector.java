@@ -27,28 +27,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.selectors;
+package org.chocosolver.solver.search.strategy.selectors.values;
 
-import org.chocosolver.solver.variables.IntVar;
-
-
+import org.chocosolver.solver.variables.SetVar;
 
 /**
- * A value selector specifies which value should be chosen to constrain the given variable.
- * The value chosen must belong to the domain of the selected variable.
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 28 sept. 2010
+ * Heuristic for branching on a given SetVar
+ * @author Jean-Guillaume Fages
+ * @since 6/10/13
  */
-public interface IntValueSelector  {
+public interface SetValueSelector {
 
-    /**
-     * Selects and returns the value to constrained chosen variable with.
-     * The chosen value must belong to the domain of <code>variable</code>.
-     *
-     * @return the value, based on the domain of variable
-     */
-    int selectValue(IntVar var);
+	/**
+	 * Value selection heuristic
+	 * @param v a non-instantiated SetVar
+	 * @return an integer i of v's envelope, which is not included in v's kernel
+	 * so that a decision (forcing/removing i) can be applied on v
+	 */
+	int selectValue(SetVar v);
 
 }

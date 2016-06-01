@@ -27,65 +27,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.selectors;
+package org.chocosolver.solver.search.strategy.selectors.values;
 
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.RealVar;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.stream.Collectors;
+
 
 /**
+ * A value selector specifies which value should be chosen to constrain the selected variable.
+ * The value chosen must belong to the domain of the selected variable.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 17/03/2014
+ * @since 28 sept. 2010
  */
-public class VariableSelectorWithTies<V extends Variable> implements VariableSelector<V> {
+public interface RealValueSelector  {
 
-    private final VariableEvaluator<V>[] heuristics;
-    private ArrayList<V> oldv = new ArrayList<>();
-    private ArrayList<V> newv = new ArrayList<>();
+    /**
+     * Selects and returns the value to constrained chosen variable with.
+     * The chosen value must belong to the domain of <code>variable</code>.
+     *
+     * @return the value, based on the domain of variable
+     */
+    double selectValue(RealVar var);
 
-
-    @SafeVarargs
-    public VariableSelectorWithTies(VariableEvaluator<V>... heuristics) {
-        this.heuristics = heuristics;
-    }
-
-
-    @Override
-    public V getVariable(V[] variables) {
-        oldv.clear();
-        newv.clear();
-        Collections.addAll(oldv, variables);
-        // 1. remove instantied variables
-        newv.addAll(oldv.stream().filter(v -> !v.isInstantiated()).collect(Collectors.toList()));
-        if (newv.size() == 0) return null;
-
-        // Then apply each heuristic one by one
-        for (VariableEvaluator<V> h : heuristics) {
-            double minValue = Double.MAX_VALUE - 1;
-            oldv.clear();
-            oldv.addAll(newv);
-            newv.clear();
-            for (V v : oldv) {
-                double val = h.evaluate(v);
-                if (val < minValue) {
-                    newv.clear();
-                    newv.add(v);
-                    minValue = val;
-                } else if (val == minValue) {
-                    newv.add(v);
-                }
-            }
-        }
-        switch (oldv.size()) {
-            case 0:
-                return null;
-            default:
-            case 1:
-                return oldv.get(0);
-        }
-    }
 }

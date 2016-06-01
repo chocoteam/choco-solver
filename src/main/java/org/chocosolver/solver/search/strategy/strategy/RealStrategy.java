@@ -30,8 +30,8 @@
 package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.RealValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.RealValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
 import org.chocosolver.solver.variables.RealVar;
 
 /**
