@@ -1,6 +1,16 @@
-package org.chocosolver.parser.xcsp.tools;
+package org.xcsp.parser;
+
+import java.util.stream.Stream;
 
 public class XEnums {
+
+	public static <T extends Enum<T>> T valueOf(Class<T> enumType, String name) {
+		try {
+			return Enum.valueOf(enumType, name.toUpperCase()); // just for upper-case
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
 
 	/** The enum type describing the different types of frameworks. */
 	public static enum TypeFramework {
@@ -37,7 +47,7 @@ public class XEnums {
 		allDistant,
 		ordered,
 		lex,
-		allIncomprable,
+		allIncomparable,
 		sum,
 		count,
 		nValues,
@@ -62,7 +72,7 @@ public class XEnums {
 		nArbos,
 		nCliques,
 		clause,
-		cube,
+		instantiation,
 		allIntersecting,
 		range,
 		roots,
@@ -77,7 +87,8 @@ public class XEnums {
 		or,
 		not,
 		slide,
-		seqbin;
+		seqbin,
+		smart; // future constraint to be taken into account
 
 		/** Returns true if the element has a sliding nature. */
 		public boolean isSliding() {
@@ -146,16 +157,19 @@ public class XEnums {
 
 	/**
 	 * The enum type describing the different types of attributes of constraints. We use lower-case letters, so as to directly get the names of the elements
-	 * (except for FOR and CASE that need to be managed apart, because they correspond to keywords).
+	 * (except for CLASS, FOR and CASE that need to be managed apart, because they correspond to keywords).
 	 */
 	public static enum TypeAtt {
 		format,
 		type,
 		id,
+		CLASS, // upper-cased because a keyword
+		note,
 		as,
 		size,
 		measure,
 		parameters,
+		defaultCost,
 		reifiedBy,
 		hreifiedFrom,
 		hreifiedTo,
@@ -164,6 +178,7 @@ public class XEnums {
 		restriction,
 		rank,
 		startIndex,
+		zeroIgnored,
 		CASE, // upper-cased because a keyword
 		order,
 		circular,
@@ -171,8 +186,9 @@ public class XEnums {
 		collect,
 		violable,
 		optimization,
-		unfiltered,
-		starred;
+		combination;
+		// unclean, // used for tuples of table constraints
+		// starred; // used for tuples of table constraints
 
 		/** Returns true iff the element has a (full or half) reification nature. */
 		public boolean isReifying() {
@@ -181,44 +197,89 @@ public class XEnums {
 
 		/** Returns the constant that corresponds to the specified string (we need this method to manage the special constants FOR and CASE). */
 		public static TypeAtt valOf(String s) {
-			return s.equals("for") ? FOR : s.equals("case") ? TypeAtt.CASE : valueOf(s);
+			return s.equals("class") ? CLASS : s.equals("for") ? FOR : s.equals("case") ? TypeAtt.CASE : valueOf(s);
 		}
+	}
 
+	/** The enum type describing the different flags that may be associated with some elements (e.g., constraints). */
+	public static enum TypeFlag {
+		STARRED_TUPLES,
+		UNCLEAN_TUPLES;
+	}
+
+	/** The enum type describing the different types of reification. */
+	public static enum TypeReification {
+		FULL,
+		HALF_FROM,
+		HALF_TO;
 	}
 
 	/** The enum type describing the different types of operators that can be used in conditions. */
 	public static enum TypeConditionOperator {
-		lt,
-		le,
-		ge,
-		gt,
-		ne,
-		eq,
-		in,
-		notin;
+		LT,
+		LE,
+		GE,
+		GT,
+		NE,
+		EQ,
+		IN,
+		NOTIN;
 
 		/** Returns true iff the constant corresponds to a set operator. */
 		public boolean isSet() {
-			return this == in || this == notin;
+			return this == IN || this == NOTIN;
 		}
+	}
+
+	/** The enum type describing the different types of classical relational operators that can be used in conditions. */
+	public static enum TypeConditionOperatorRel {
+		LT,
+		LE,
+		GE,
+		GT,
+		NE,
+		EQ;
+
+		public TypeConditionOperatorRel reverseForSwap() {
+			return this == LT ? GT : this == LE ? GE : this == GE ? LE : this == GT ? LT : this; // no change for NE and EQ
+		}
+	}
+
+	/** The enum type describing the different types of operators that can be used in conditions. */
+	public static enum TypeConditionOperatorSet {
+		IN,
+		NOTIN;
 	}
 
 	/** The enum type describing the different types of operators that can be used in elements <operator>. */
 	public static enum TypeOperator {
-		lt,
-		le,
-		ge,
-		gt,
-		subset,
-		subseq,
-		supseq,
-		supset;
+		LT,
+		LE,
+		GE,
+		GT,
+		SUBSET,
+		SUBSEQ,
+		SUPSEQ,
+		SUPSET;
+
+		public static TypeOperator valOf(String s) {
+			return TypeOperator.valueOf(s.trim().toUpperCase());
+		}
 
 		/** Returns true iff the constant corresponds to a set operator. */
 		public boolean isSet() {
-			return this == subset || this == subseq || this == supseq || this == supset;
+			return this == SUBSET || this == SUBSEQ || this == SUPSEQ || this == SUPSET;
 		}
+	}
 
+	/** The enum type describing the different types of operators that can be used in elements <operator>. */
+	public static enum TypeArithmeticOperator {
+		ADD,
+		SUB,
+		MUL,
+		DIV,
+		MOD,
+		DIST;
 	}
 
 	/** The enum type describing the different types of nodes that can be found in syntactic trees (built for intensional expressions). */
@@ -282,7 +343,8 @@ public class XEnums {
 		RATIONAL(0),
 		DECIMAL(0),
 		VAR(0),
-		PAR(0);
+		PAR(0),
+		SYMBOL(0);
 
 		/** The minimal and maximal arity (number of sons) of the node. */
 		protected final int arityMin, arityMax;
@@ -297,24 +359,92 @@ public class XEnums {
 		TypeExpr(int arity) {
 			this(arity, arity);
 		}
+
+		// public TypeConditionOperator toConditionOperator() {
+		// return this == LT || this == LE || this == GE || this == GT || this == EQ || this == NE;
+		// }
+
 	}
 
 	/** The enum type describing the different types of measures used by elements <cost>. */
 	public static enum TypeMeasure {
-		var,
-		dec,
-		val,
-		edit;
+		VAR,
+		DEC,
+		VAL,
+		EDIT;
 	}
 
 	/** The enum type describing the different types of objectives. */
 	public static enum TypeObjective {
-		expression,
-		sum,
-		product,
-		minimum,
-		maximum,
-		nValues,
-		lex;
+		EXPRESSION,
+		SUM,
+		PRODUCT,
+		MINIMUM,
+		MAXIMUM,
+		NVALUES,
+		LEX;
+	}
+
+	/** The enum type describing the different types of combination of objectives. */
+	public static enum TypeCombination {
+		LEXICO,
+		PARETO;
+	}
+
+	/** The enum type describing the different types of ranking used by constraints <maximum>, <minimum>, <element>. */
+	public static enum TypeRank {
+		FIRST,
+		LAST,
+		ANY;
+	}
+
+	/** The interface that denotes a class that can be associated with an XCSP3 element */
+	public interface TypeClass {
+		public String name();
+
+		/** Transforms String objects into TypeClass objects. */
+		public static TypeClass[] classesFor(String... classes) {
+			return Stream
+					.of(classes)
+					.map(s -> Stream.of(StandardClass.values()).map(c -> (TypeClass) c).filter(c -> c.name().equals(s)).findFirst().orElse(new SpecialClass(s)))
+					.toArray(TypeClass[]::new);
+		}
+
+		/** Determines if the two specified arrays of TypeClass objects are disjoint or not. */
+		public static boolean disjoint(TypeClass[] t1, TypeClass[] t2) {
+			if (t1 == null || t2 == null)
+				return true;
+			for (TypeClass c1 : t1)
+				for (TypeClass c2 : t2)
+					if (c1.name().equals(c2.name()))
+						return false;
+			return true;
+		}
+
+	}
+
+	/** The enum type describing the different standard classes that can be associated with XCSP3 elements. */
+	public static enum StandardClass implements TypeClass {
+		channeling,
+		clues,
+		rows,
+		columns,
+		diagonals,
+		symmetryBreaking,
+		redundantConstraints,
+		nogoods;
+	}
+
+	/** The class that allows the user to define his own classes */
+	public static class SpecialClass implements TypeClass {
+		private String name;
+
+		public SpecialClass(String name) {
+			this.name = name;
+		}
+
+		public String name() {
+			return name;
+		}
 	}
 }

@@ -27,11 +27,6 @@
 package org.chocosolver.parser.flatzinc;
 
 
-import org.antlr.v4.runtime.RecognitionException;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-
 /**
  * The main entry point
  * <br/>
@@ -41,7 +36,7 @@ import java.net.URISyntaxException;
  */
 public class ChocoFZN {
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
+    public static void main(String[] args) throws Exception {
         Flatzinc fzn = new Flatzinc();
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.parseParameters(args);

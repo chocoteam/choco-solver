@@ -1,17 +1,23 @@
-package org.chocosolver.parser.xcsp.tools;
+package org.xcsp.parser;
 
-import org.chocosolver.parser.xcsp.tools.XDomains.DomBasic;
-import org.chocosolver.parser.xcsp.tools.XDomains.DomInteger;
-import org.chocosolver.parser.xcsp.tools.XParser.ModifiableBoolean;
-import org.chocosolver.parser.xcsp.tools.XVariables.TypeVar;
-import org.chocosolver.parser.xcsp.tools.XVariables.Var;
+import static org.xcsp.parser.XConstants.MAX_SAFE_BYTE;
+import static org.xcsp.parser.XConstants.MAX_SAFE_INT;
+import static org.xcsp.parser.XConstants.MAX_SAFE_SHORT;
+import static org.xcsp.parser.XConstants.MIN_SAFE_BYTE;
+import static org.xcsp.parser.XConstants.MIN_SAFE_INT;
+import static org.xcsp.parser.XConstants.MIN_SAFE_SHORT;
+import static org.xcsp.parser.XUtility.safeLong;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.chocosolver.parser.xcsp.tools.XConstants.*;
-import static org.chocosolver.parser.xcsp.tools.XUtility.safeLong;
+import org.xcsp.parser.XDomains.XDomBasic;
+import org.xcsp.parser.XDomains.XDomInteger;
+import org.xcsp.parser.XParser.ModifiableBoolean;
+import org.xcsp.parser.XVariables.TypeVar;
+import org.xcsp.parser.XVariables.XVar;
 
 public class XValues {
 
@@ -43,10 +49,10 @@ public class XValues {
 		 * Returns the smallest primitive that can be used for representing any value of the domains of the specified variables. If one variable is not integer,
 		 * null is returned.
 		 */
-		public static TypePrimitive whichPrimitiveFor(Var[] vars) {
+		public static TypePrimitive whichPrimitiveFor(XVar[] vars) {
 			if (Stream.of(vars).anyMatch(x -> x.type != TypeVar.integer))
 				return null;
-			return TypePrimitive.values()[Stream.of(vars).mapToInt(x -> ((DomInteger) x.dom).whichPrimitive().ordinal()).max()
+			return TypePrimitive.values()[Stream.of(vars).mapToInt(x -> ((XDomInteger) x.dom).whichPrimitive().ordinal()).max()
 					.orElse(TypePrimitive.LONG.ordinal())];
 		}
 
@@ -54,7 +60,7 @@ public class XValues {
 		 * Returns the smallest primitive that can be used for representing any value of the domains of the specified variables. If one variable is not integer,
 		 * null is returned.
 		 */
-		public static TypePrimitive whichPrimitiveFor(Var[][] varss) {
+		public static TypePrimitive whichPrimitiveFor(XVar[][] varss) {
 			if (whichPrimitiveFor(varss[0]) == null)
 				return null;
 			return TypePrimitive.values()[Stream.of(varss).mapToInt(t -> whichPrimitiveFor(t).ordinal()).max().orElse(TypePrimitive.LONG.ordinal())];
@@ -66,12 +72,12 @@ public class XValues {
 		}
 
 		/**
-		 * Parse the specified string that denotes a sequence of values. In case, we have at least one interval, we just return an array of IntegerEntity (as
-		 * for integer domains), and no validity test on values is performed. Otherwise, we return an array of integer (either long[] or int[]). It is possible
-		 * that some values are discarded because either they do not belong to the specified domain (test performed if this domain is not null), or they cannot
-		 * be represented by the primitive.
+		 * Parse the specified string that denotes a sequence of values. In case we have at least one interval, we just return an array of IntegerEntity (as for
+		 * integer domains), and no validity test on values is performed. Otherwise, we return an array of integer (either long[] or int[]). It is possible that
+		 * some values are discarded because either they do not belong to the specified domain (test performed if this domain is not null), or they cannot be
+		 * represented by the primitive.
 		 */
-		protected Object parseSeq(String s, DomInteger dom) {
+		protected Object parseSeq(String s, XDomInteger dom) {
 			if (s.indexOf("..") != -1)
 				return IntegerEntity.parseSeq(s);
 			int nbDiscarded = 0;
@@ -97,7 +103,7 @@ public class XValues {
 		 * Parse the specified string, and builds a tuple of (long) integers put in the specified array t. If the tuple is not valid wrt the specified domains
 		 * or the primitive, false is returned, in which case, the tuple can be discarded. If * is encountered, the specified modifiable boolean is set to true.
 		 */
-		protected boolean parseTuple(String s, long[] t, DomBasic[] doms, ModifiableBoolean mb) {
+		protected boolean parseTuple(String s, long[] t, XDomBasic[] doms, ModifiableBoolean mb) {
 			String[] toks = s.split("\\s*,\\s*");
 			assert toks.length == t.length : toks.length + " " + t.length;
 			for (int i = 0; i < toks.length; i++) {
@@ -106,7 +112,7 @@ public class XValues {
 					mb.value = true;
 				} else {
 					long l = XUtility.safeLong(toks[i]);
-					if (canRepresent(l) && (doms == null || ((DomInteger) doms[i]).contains(l)))
+					if (canRepresent(l) && (doms == null || ((XDomInteger) doms[i]).contains(l)))
 						t[i] = l;
 					else
 						return false; // because the tuple can be discarded
@@ -157,6 +163,44 @@ public class XValues {
 		/** Returns an array of integer entities (integer values or integer intervals) obtained by parsing the specified string. */
 		public static IntegerEntity[] parseSeq(String seq) {
 			return Stream.of(seq.split("\\s+")).map(tok -> IntegerEntity.parse(tok)).toArray(IntegerEntity[]::new);
+		}
+
+		/** Returns the number of values in the specified array of integer entities. Note that -1 is returned if this number is infinite. */
+		public static long getNbValues(IntegerEntity[] pieces) {
+			assert IntStream.range(0, pieces.length - 1).noneMatch(i -> pieces[i].greatest() >= pieces[i + 1].smallest());
+			if (pieces[0].smallest() == XConstants.VAL_MINUS_INFINITY || pieces[pieces.length - 1].greatest() == XConstants.VAL_PLUS_INFINITY)
+				return -1L; // infinite number of values
+			long cnt = 0;
+			for (IntegerEntity piece : pieces)
+				if (piece instanceof IntegerValue)
+					cnt++;
+				else {
+					long diff = piece.width(), l = cnt + diff;
+					XUtility.control(cnt == l - diff, "Overflow");
+					cnt = l;
+				}
+			return cnt;
+		}
+
+		/**
+		 * Returns an array of int with all integer values represented by the specified integer entities. Note that null is returned if the number of values is
+		 * infinite or greater than the specified limit value.
+		 */
+		public static int[] toIntArray(IntegerEntity[] pieces, int limit) {
+			long l = getNbValues(pieces);
+			if (l == -1L || l > limit)
+				return null;
+			int[] values = new int[(int) l];
+			int i = 0;
+			for (IntegerEntity piece : pieces)
+				if (piece instanceof IntegerValue)
+					values[i++] = XUtility.safeLong2Int(((IntegerValue) piece).v, true);
+				else {
+					int min = XUtility.safeLong2Int(((IntegerInterval) piece).inf, true), max = XUtility.safeLong2Int(((IntegerInterval) piece).sup, true);
+					for (int v = min; v <= max; v++)
+						values[i++] = v;
+				}
+			return values;
 		}
 
 		@Override

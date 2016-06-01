@@ -28,6 +28,7 @@ package org.chocosolver.parser;
 
 import gnu.trove.set.hash.THashSet;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
@@ -49,7 +50,9 @@ import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
  */
 public abstract class RegParser implements IParser {
 
-
+    /**
+     * Name of the parser
+     */
     private final String parser_cmd;
 
     @Option(name = "-tl", aliases = {"--time-limit"}, metaVar = "TL", usage = "Time limit.", required = false)
@@ -58,16 +61,50 @@ public abstract class RegParser implements IParser {
     @Option(name = "-stat", aliases = {"--print-statistics"}, usage = "Print statistics on each solution (default: false).", required = false)
     protected boolean stat = false;
 
-//    @Option(name = "-e", aliases = {"--explanations"}, usage = "Plug explanations in : CBJ, DBT or NONE (default: NONE).", required = false)
-//    protected ExplanationFactory expl = ExplanationFactory.NONE;
+    @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ", required = false)
+    protected boolean free = false;
 
+    @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).", required = false)
+    protected boolean all = false;
+
+    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).", required = false)
+    protected int nb_cores = 1;
+    /**
+     * Default time limit, as long, in ms
+     */
     protected long tl_ = -1;
-    // List of listeners plugged, ease user interactions.
+    /**
+     * List of listeners
+     */
     protected List<ParserListener> listeners = new LinkedList<>();
+    /**
+     * Default settings to apply
+     */
     protected Settings defaultSettings;
 
+    /**
+     * The resolution portfolio
+     */
+    protected ParallelPortfolio portfolio = new ParallelPortfolio();
+
+    /**
+     * Indicates that the resolution stops on user instruction
+     */
+    protected boolean userinterruption = true;
+    /**
+     * Action to do on user interruption
+     */
+    protected final Thread statOnKill;
+
+    /**
+     * Create a default regular parser
+     * @param parser_cmd name of the parser
+     *
+     */
     protected RegParser(String parser_cmd) {
         this.parser_cmd = parser_cmd;
+        statOnKill = actionOnKill();
+        Runtime.getRuntime().addShutdownHook(statOnKill);
     }
 
     @Override
@@ -100,16 +137,9 @@ public abstract class RegParser implements IParser {
         listeners.forEach(ParserListener::afterParsingParameters);
     }
 
-
     @Override
     public final void defineSettings(Settings defaultSettings) {
         this.defaultSettings = defaultSettings;
-    }
-
-
-    @Override
-    public void configureSearch() {
-
     }
 
     /**
@@ -119,10 +149,10 @@ public abstract class RegParser implements IParser {
      */
     protected static void makeComplementarySearch(Model m) {
         Solver solver = m.getSolver();
-        if(solver.getStrategy() != null) {
+        if(solver.getSearch() != null) {
             IntVar[] ovars = new IntVar[m.getNbVars()];
             THashSet<Variable> dvars = new THashSet<>();
-            dvars.addAll(Arrays.asList(solver.getStrategy().getVariables()));
+            dvars.addAll(Arrays.asList(solver.getSearch().getVariables()));
             int k = 0;
             for (IntVar iv:m.retrieveIntVars(true)) {
                 if (!dvars.contains(iv)) {
@@ -131,18 +161,33 @@ public abstract class RegParser implements IParser {
             }
             // do not enumerate on the complementary search (greedy assignment)
             if(k>0) {
-                solver.set(solver.getStrategy(), greedySearch(inputOrderLBSearch(Arrays.copyOf(ovars, k))));
+                solver.setSearch(solver.getSearch(), greedySearch(inputOrderLBSearch(Arrays.copyOf(ovars, k))));
             }
         }
     }
 
     @Override
-    public void solve() {
-
+    public final void configureSearch() {
+        listeners.forEach(ParserListener::beforeConfiguringSearch);
+        if(nb_cores == 1 && free){ // add last conflict
+            Solver solver = portfolio.getModels().get(0).getSolver();
+            solver.setSearch(lastConflict(solver.getSearch()));
+        }
+        if (tl_ > -1) {
+            for (int i = 0; i < nb_cores; i++) {
+                portfolio.getModels().get(i).getSolver().limitTime(tl);
+                makeComplementarySearch(portfolio.getModels().get(i));
+            }
+        }
+        listeners.forEach(ParserListener::afterConfiguringSearch);
     }
 
     @Override
-    public Model getModel() {
-        return null;
+    public final Model getModel() {
+        Model m = portfolio.getBestModel();
+        if (m == null) {
+            m = portfolio.getModels().get(0);
+        }
+        return m;
     }
 }

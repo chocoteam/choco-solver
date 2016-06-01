@@ -29,8 +29,6 @@ package org.chocosolver.parser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 
-import java.io.FileNotFoundException;
-
 /**
  * An interface for all parsers
  * <br/>
@@ -78,7 +76,7 @@ public interface IParser {
     /**
      * Parse the file
      */
-    void parseInputFile() throws FileNotFoundException;
+    void parseInputFile() throws Exception;
 
     /**
      * Configure the search strategy
@@ -91,10 +89,14 @@ public interface IParser {
     void solve();
 
     /**
+     * @return a thread to execute on unexpected exit
+     */
+    Thread actionOnKill();
+
+    /**
      * Get the solver
      *
      * @return solver
      */
     Model getModel();
-
 }

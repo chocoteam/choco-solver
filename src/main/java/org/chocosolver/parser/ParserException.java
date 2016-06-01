@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.chocosolver.parser.flatzinc;
+package org.chocosolver.parser;
 
 /**
  * <br/>
@@ -33,19 +33,19 @@ package org.chocosolver.parser.flatzinc;
  * @author Charles Prud'homme
  * @since 26/01/11
  */
-public class FZNException extends RuntimeException {
-    public FZNException() {
+public class ParserException extends RuntimeException {
+    public ParserException() {
     }
 
-    public FZNException(String message) {
+    public ParserException(String message) {
         super(message);
     }
 
-    public FZNException(String message, Throwable cause) {
+    public ParserException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public FZNException(Throwable cause) {
+    public ParserException(Throwable cause) {
         super(cause);
     }
 }

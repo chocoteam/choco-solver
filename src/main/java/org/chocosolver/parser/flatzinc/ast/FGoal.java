@@ -27,7 +27,7 @@
 
 package org.chocosolver.parser.flatzinc.ast;
 
-import org.chocosolver.parser.flatzinc.FZNException;
+import org.chocosolver.parser.ParserException;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.EArray;
 import org.chocosolver.parser.flatzinc.ast.expression.EIdentifier;
@@ -38,7 +38,6 @@ import org.chocosolver.parser.flatzinc.ast.searches.SetSearch;
 import org.chocosolver.parser.flatzinc.ast.searches.VarChoice;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
@@ -101,7 +100,7 @@ public class FGoal {
                 } else {
                     strategy = readSearchAnnotation(annotation, aModel, description);
                 }
-                aModel.getSolver().set(strategy);
+                aModel.getSolver().setSearch(strategy);
             }
         }
     }
@@ -133,7 +132,7 @@ public class FGoal {
             }
             default:
                 System.err.println("Unknown search annotation " + e.toString());
-                throw new FZNException();
+                throw new ParserException();
         }
     }
 }

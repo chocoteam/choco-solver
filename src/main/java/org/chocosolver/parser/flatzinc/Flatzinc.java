@@ -32,20 +32,14 @@ import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
 import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.List;
-
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
 
 /**
  * A Flatzinc to Choco parser.
@@ -63,29 +57,15 @@ public class Flatzinc extends RegParser {
     @Argument(required = true, metaVar = "file", usage = "Flatzinc file to parse.")
     public String instance;
 
-    @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).", required = false)
-    protected boolean all = false;
-
-    @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ", required = false)
-    protected boolean free = false;
-
-    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).", required = false)
-    protected int nb_cores = 1;
-
     // Contains mapping with variables and output prints
     public Datas[] datas;
-
-    protected ParallelPortfolio portfolio = new ParallelPortfolio();
-
-    boolean userinterruption = true;
-    final Thread statOnKill;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
     public Flatzinc() {
-        this(false,false,1,-1);
+        this(false, false, 1, -1);
     }
 
     public Flatzinc(boolean all, boolean free, int nb_cores, long tl) {
@@ -95,7 +75,11 @@ public class Flatzinc extends RegParser {
         this.nb_cores = nb_cores;
         this.tl_ = tl;
         this.defaultSettings = new FznSettings();
-        statOnKill = new Thread() {
+    }
+
+    @Override
+    public Thread actionOnKill() {
+        return new Thread() {
             public void run() {
                 if (userinterruption) {
                     datas[bestModelID()].doFinalOutPut(userinterruption);
@@ -103,7 +87,6 @@ public class Flatzinc extends RegParser {
                 }
             }
         };
-        Runtime.getRuntime().addShutdownHook(statOnKill);
     }
 
     //***********************************************************************************
@@ -113,28 +96,28 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
-        assert nb_cores>0;
-        if(nb_cores>1) {
-            System.out.printf("%% "+ nb_cores+" solvers in parallel\n");
-        }else{
+        assert nb_cores > 0;
+        if (nb_cores > 1) {
+            System.out.printf("%% " + nb_cores + " solvers in parallel\n");
+        } else {
             System.out.printf("%% simple solver\n");
         }
         datas = new Datas[nb_cores];
         String iname = Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i+1));
+            Model threadModel = new Model(iname + "_" + (i + 1));
             threadModel.set(defaultSettings);
             portfolio.addModel(threadModel);
-            datas[i] = new Datas(threadModel,all,stat);
+            datas[i] = new Datas(threadModel, all, stat);
         }
         listeners.forEach(ParserListener::afterSolverCreation);
     }
 
     @Override
-    public void parseInputFile() throws FileNotFoundException {
+    public void parseInputFile() throws Exception {
         listeners.forEach(ParserListener::beforeParsingFile);
         List<Model> models = portfolio.getModels();
-        for (int i=0;i<models.size();i++) {
+        for (int i = 0; i < models.size(); i++) {
             parse(models.get(i), datas[i], new FileInputStream(new File(instance)));
         }
         listeners.forEach(ParserListener::afterParsingFile);
@@ -152,57 +135,29 @@ public class Flatzinc extends RegParser {
         parser.flatzinc_model(target, data, all, free);
     }
 
-
-    @Override
-    public void configureSearch() {
-        listeners.forEach(ParserListener::beforeConfiguringSearch);
-        if(nb_cores == 1 && free){ // add last conflict
-            Solver solver = portfolio.getModels().get(0).getSolver();
-            solver.set(lastConflict(solver.getStrategy()));
-        }
-        if (tl_ > -1) {
-            for (int i = 0; i < nb_cores; i++) {
-                portfolio.getModels().get(i).getSolver().limitTime(tl);
-                makeComplementarySearch(portfolio.getModels().get(i));
-            }
-        }
-        listeners.forEach(ParserListener::afterConfiguringSearch);
-    }
-
     @Override
     public void solve() {
         listeners.forEach(ParserListener::beforeSolving);
-
-        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION || all;
+        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         if (enumerate) {
-            while (portfolio.solve()){
+            while (portfolio.solve()) {
                 datas[bestModelID()].onSolution();
             }
-        }else{
-            if(portfolio.solve()){
+        } else {
+            if (portfolio.solve()) {
                 datas[bestModelID()].onSolution();
             }
         }
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
         datas[bestModelID()].doFinalOutPut(userinterruption);
-
         listeners.forEach(ParserListener::afterSolving);
     }
 
-    @Override
-    public Model getModel() {
-        Model m = portfolio.getBestModel();
-        if (m==null){
-            m = portfolio.getModels().get(0);
-        }
-        return m;
-    }
-
-    private int bestModelID(){
+    private int bestModelID() {
         Model best = getModel();
-        for(int i=0;i<nb_cores;i++){
-            if(best == portfolio.getModels().get(i)) {
+        for (int i = 0; i < nb_cores; i++) {
+            if (best == portfolio.getModels().get(i)) {
                 return i;
             }
         }

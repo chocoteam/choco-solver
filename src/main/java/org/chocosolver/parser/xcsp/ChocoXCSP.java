@@ -26,11 +26,7 @@
  */
 package org.chocosolver.parser.xcsp;
 
-import org.antlr.v4.runtime.RecognitionException;
 import org.chocosolver.parser.flatzinc.FznSettings;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * Created by cprudhom on 01/09/15.
@@ -38,7 +34,7 @@ import java.net.URISyntaxException;
  */
 public class ChocoXCSP {
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
+    public static void main(String[] args) throws Exception {
         XCSP xscp = new XCSP();
 //        fzn.addListener(new BaseFlatzincListener(fzn));
         xscp.parseParameters(args);

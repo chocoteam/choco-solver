@@ -1,42 +1,45 @@
-package org.chocosolver.parser.xcsp.tools;
-
-import org.chocosolver.parser.xcsp.tools.XValues.*;
-import org.chocosolver.parser.xcsp.tools.XVariables.TypeVar;
-import org.chocosolver.parser.xcsp.tools.XVariables.Var;
+package org.xcsp.parser;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.chocosolver.parser.xcsp.tools.XVariables.TypeVar.*;
+import org.xcsp.parser.XValues.IntegerEntity;
+import org.xcsp.parser.XValues.IntegerValue;
+import org.xcsp.parser.XValues.RealInterval;
+import org.xcsp.parser.XValues.SimpleValue;
+import org.xcsp.parser.XValues.TypePrimitive;
+import org.xcsp.parser.XVariables.TypeVar;
+import org.xcsp.parser.XVariables.XVar;
 
 /** In this class, we find intern classes for managing all types of domains. */
 public class XDomains {
 
 	/** The root interface to tag domain objects. */
-	public static interface Dom {
+	public static interface XDom {
 	}
 
 	/** A class for representing basic domains, i.e. domains for integer, symbolic, real and stochastic variables. */
-	public static class DomBasic implements Dom {
+	public static class XDomBasic implements XDom {
 
 		/** Returns the basic domain obtained by parsing the specified string, according to the value of the specified type. */
-		public static DomBasic parse(String s, TypeVar type) {
-			return type == integer ? new DomInteger(s) : type == symbolic ? new DomSymbolic(s) : type == real ? new DomReal(s) : DomStochastic.parse(s, type);
+		public static XDomBasic parse(String s, TypeVar type) {
+			return type == TypeVar.integer ? new XDomInteger(s) : type == TypeVar.symbolic ? new XDomSymbolic(s) : type == TypeVar.real ? new XDomReal(s)
+					: XDomStochastic.parse(s, type);
 		}
 
 		/** Returns the sequence of basic domains for the variables in the specified array. */
-		public static DomBasic[] domainsFor(Var[] vars) {
-			return Stream.of(vars).map(x -> ((DomBasic) x.dom)).toArray(DomBasic[]::new);
+		public static XDomBasic[] domainsFor(XVar[] vars) {
+			return Stream.of(vars).map(x -> ((XDomBasic) x.dom)).toArray(XDomBasic[]::new);
 		}
 
 		/**
 		 * Returns the sequence of basic domains for the variables in the first row of the specified two-dimensional array, provided that variables of the other
 		 * rows have similar domains. Returns null otherwise.
 		 */
-		public static DomBasic[] domainsFor(Var[][] varss) {
-			DomBasic[] doms = domainsFor(varss[0]);
-			for (Var[] vars : varss)
+		public static XDomBasic[] domainsFor(XVar[][] varss) {
+			XDomBasic[] doms = domainsFor(varss[0]);
+			for (XVar[] vars : varss)
 				if (IntStream.range(0, vars.length).anyMatch(i -> doms[i] != vars[i].dom))
 					return null;
 			return doms;
@@ -49,7 +52,7 @@ public class XDomains {
 		public final Object[] values;
 
 		/** Builds a basic domain, with the specified values. */
-		protected DomBasic(Object[] values) {
+		protected XDomBasic(Object[] values) {
 			this.values = values;
 		}
 
@@ -60,10 +63,10 @@ public class XDomains {
 	}
 
 	/** The class for representing the domain of an integer variable. */
-	public static class DomInteger extends DomBasic {
+	public static class XDomInteger extends XDomBasic {
 
 		/** Builds an integer domain, with the integer values (entities that are either integers or integer intervals) obtained by parsing the specified string. */
-		protected DomInteger(String seq) {
+		protected XDomInteger(String seq) {
 			super(IntegerEntity.parseSeq(seq)); // must be already sorted.
 		}
 
@@ -103,7 +106,7 @@ public class XDomains {
 		public long getNbValues() {
 			if (nbValues != null)
 				return nbValues;
-			if (getFirstValue() == XConstants.VAL_M_INFINITY || getLastValue() == XConstants.VAL_P_INFINITY)
+			if (getFirstValue() == XConstants.VAL_MINUS_INFINITY || getLastValue() == XConstants.VAL_PLUS_INFINITY)
 				return nbValues = -1L; // infinite number of values
 			long cnt = 0;
 			for (IntegerEntity entity : (IntegerEntity[]) values)
@@ -119,10 +122,10 @@ public class XDomains {
 	}
 
 	/** The class for representing the domain of a symbolic variable. */
-	public static final class DomSymbolic extends DomBasic {
+	public static final class XDomSymbolic extends XDomBasic {
 
 		/** Builds a symbolic domain, with the symbols obtained by parsing the specified string. */
-		protected DomSymbolic(String seq) {
+		protected XDomSymbolic(String seq) {
 			super(XUtility.sort(seq.split("\\s+")));
 		}
 
@@ -133,18 +136,18 @@ public class XDomains {
 	}
 
 	/** The class for representing the domain of a real variable. */
-	public static class DomReal extends DomBasic {
+	public static class XDomReal extends XDomBasic {
 
 		/** Builds a real domain, with the intervals obtained by parsing the specified string. */
-		protected DomReal(String seq) {
+		protected XDomReal(String seq) {
 			super(RealInterval.parseSeq(seq));
 		}
 	}
 
 	/** The class for representing the domain of a stochastic variable. */
-	public static final class DomStochastic extends DomBasic {
+	public static final class XDomStochastic extends XDomBasic {
 		/** Returns the stochastic domain obtained by parsing the specified string, according to the specified type. */
-		public static DomStochastic parse(String s, TypeVar type) {
+		public static XDomStochastic parse(String s, TypeVar type) {
 			String[] toks = s.split("\\s+");
 			Object[] values = new Object[toks.length];
 			SimpleValue[] probas = new SimpleValue[toks.length];
@@ -153,7 +156,7 @@ public class XDomains {
 				values[i] = type == TypeVar.symbolic_stochastic ? t[0] : IntegerEntity.parse(t[0]);
 				probas[i] = SimpleValue.parse(t[1]);
 			}
-			return new DomStochastic(values, probas);
+			return new XDomStochastic(values, probas);
 		}
 
 		/**
@@ -163,7 +166,7 @@ public class XDomains {
 		public final SimpleValue[] probas;
 
 		/** Builds a stochastic domain, with the specified values and the specified probabilities. */
-		protected DomStochastic(Object[] values, SimpleValue[] probas) {
+		protected XDomStochastic(Object[] values, SimpleValue[] probas) {
 			super(values);
 			this.probas = probas;
 			assert values.length == probas.length;
@@ -176,22 +179,22 @@ public class XDomains {
 	}
 
 	/** The interface to tag complex domains, i.e. domains for set or graph variables. */
-	public static interface DomComplex extends Dom {
+	public static interface XDomComplex extends XDom {
 	}
 
 	/** The class for representing the domain of a set variable. */
-	public static final class DomSet implements DomComplex {
+	public static final class XDomSet implements XDomComplex {
 		/** Returns the set domain obtained by parsing the specified strings, according to the specified type. */
-		public static DomSet parse(String req, String pos, TypeVar type) {
-			return type == TypeVar.set ? new DomSet(IntegerEntity.parseSeq(req), IntegerEntity.parseSeq(pos))
-					: new DomSet(req.split("\\s+"), pos.split("\\s+"));
+		public static XDomSet parse(String req, String pos, TypeVar type) {
+			return type == TypeVar.set ? new XDomSet(IntegerEntity.parseSeq(req), IntegerEntity.parseSeq(pos))
+					: new XDomSet(req.split("\\s+"), pos.split("\\s+"));
 		}
 
 		/** The required and possible values. For an integer set domain, values are IntegerEntity. For a symbolic set domain, values are String. */
 		public final Object[] required, possible;
 
 		/** Builds a set domain, with the specified required and possible values. */
-		protected DomSet(Object[] required, Object[] possible) {
+		protected XDomSet(Object[] required, Object[] possible) {
 			this.required = required;
 			this.possible = possible;
 		}
@@ -203,13 +206,13 @@ public class XDomains {
 	}
 
 	/** The class for representing the domain of a graph variable. */
-	public static final class DomGraph implements DomComplex {
+	public static final class XDomGraph implements XDomComplex {
 		/** Returns the graph domain obtained by parsing the specified strings, according to the specified type. */
-		public static DomGraph parse(String reqV, String reqE, String posV, String posE, TypeVar type) {
+		public static XDomGraph parse(String reqV, String reqE, String posV, String posE, TypeVar type) {
 			String[] rV = reqV.split("\\s+"), pV = posV.split("\\s+");
 			String[][] rE = Stream.of(reqE.split(XConstants.DELIMITER_LISTS)).skip(1).map(tok -> tok.split("\\s*,\\s*")).toArray(String[][]::new);
 			String[][] pE = Stream.of(posE.split(XConstants.DELIMITER_LISTS)).skip(1).map(tok -> tok.split("\\s*,\\s*")).toArray(String[][]::new);
-			return new DomGraph(rV, pV, rE, pE);
+			return new XDomGraph(rV, pV, rE, pE);
 		}
 
 		/** The required and possible nodes (vertices). */
@@ -219,7 +222,7 @@ public class XDomains {
 		public final String[][] requiredE, possibleE;
 
 		/** Builds a graph domain, with the specified required and possible values (nodes and edges/arcs). */
-		protected DomGraph(String[] requiredV, String[] possibleV, String[][] requiredE, String[][] possibleE) {
+		protected XDomGraph(String[] requiredV, String[] possibleV, String[][] requiredE, String[][] possibleE) {
 			this.requiredV = requiredV;
 			this.possibleV = possibleV;
 			this.requiredE = requiredE;

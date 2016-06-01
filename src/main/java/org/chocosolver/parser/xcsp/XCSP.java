@@ -28,11 +28,14 @@ package org.chocosolver.parser.xcsp;
 
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
-import org.chocosolver.parser.xcsp.tools.XCSPParser;
+import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.kohsuke.args4j.Argument;
 
-import java.io.FileNotFoundException;
+import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Created by cprudhom on 01/09/15.
@@ -45,41 +48,78 @@ public class XCSP extends RegParser {
 
     public XCSP() {
         super("ChocoXCSP");
+        this.defaultSettings = new FznSettings(); // todo: rename or create the right one
     }
 
     @Override
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
-        System.out.printf("%% simple solver\n");
-//        mModel = new Model(instance);
-//        mModel.set(defaultSettings);
+        assert nb_cores > 0;
+        if (nb_cores > 1) {
+            System.out.printf("%% " + nb_cores + " solvers in parallel\n");
+        } else {
+            System.out.printf("%% simple solver\n");
+        }
+        String iname = Paths.get(instance).getFileName().toString();
+        for (int i = 0; i < nb_cores; i++) {
+            Model threadModel = new Model(iname + "_" + (i + 1));
+            threadModel.set(defaultSettings);
+            portfolio.addModel(threadModel);
+            if (stat) {
+                threadModel.getSolver().plugMonitor(
+                        (IMonitorSolution) ()
+                                -> System.out.printf("%% %s \n", threadModel.getSolver().toOneLineString()));
+            }
+        }
         listeners.forEach(ParserListener::afterSolverCreation);
     }
 
     @Override
-    public void parseInputFile() throws FileNotFoundException {
+    public void parseInputFile() throws Exception {
         listeners.forEach(ParserListener::beforeParsingFile);
-//        parse(mModel, instance);
+        List<Model> models = portfolio.getModels();
+        for (int i = 0; i < models.size(); i++) {
+            parse(models.get(i));
+        }
         listeners.forEach(ParserListener::afterParsingFile);
     }
 
-    private void parse(Model model, String input) {
-        XCSPParser parser = new XCSPParser();
-        parser.parse(input);
+    public void parse(Model target) throws Exception {
+        new XCSPParser().model(target, instance);
     }
 
-    @Override
-    public void configureSearch() {
-
-    }
 
     @Override
     public void solve() {
+        listeners.forEach(ParserListener::beforeSolving);
+        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
+        if (enumerate) {
+            while (portfolio.solve()) {
+//                datas[bestModelID()].onSolution();
+            }
+        } else {
+            if (portfolio.solve()) {
+//                datas[bestModelID()].onSolution();
+            }
+        }
+        userinterruption = false;
+        Runtime.getRuntime().removeShutdownHook(statOnKill);
+//        datas[bestModelID()].doFinalOutPut(userinterruption);
+        listeners.forEach(ParserListener::afterSolving);
+    }
 
+    private int bestModelID() {
+        Model best = getModel();
+        for (int i = 0; i < nb_cores; i++) {
+            if (best == portfolio.getModels().get(i)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
-    public Model getModel() {
-        return null;
+    public Thread actionOnKill() {
+        return new Thread();
     }
 }
