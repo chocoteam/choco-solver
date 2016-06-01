@@ -61,6 +61,21 @@ public class Tuples {
 	// CONSTRUCTOR
 	//***********************************************************************************
 
+    /**
+     * Create a list of tuples which represents all allowed tuples if feasible=true
+     * or a set of forbidden tuples if feasible=false
+     *
+     * @param values list of tuples
+     * @param feasible indicates whether the tuples are allowed or forbidden
+     */
+    public Tuples(int[][] values, boolean feasible) {
+        this.feasible = feasible;
+        tuples = new ArrayList<>();
+        for(int[] t : values){
+            add(t);
+        }
+    }
+
 	/**
 	 * Create a list of tuples which represents all allowed tuples if feasible=true
 	 * or a set of forbidden tuples if feasible=false

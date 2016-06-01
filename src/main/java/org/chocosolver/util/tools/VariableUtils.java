@@ -65,6 +65,20 @@ public class VariableUtils {
      * @param vars array of variables
      * @return computes the bounds for the sum of <i>vars</i>
      */
+    public static int[] boundsForScalar(IntVar[] vars, int[] coeffs) {
+        long[] bounds = new long[2];
+        IntStream.range(0, vars.length).forEach(i -> {
+                    bounds[0] += vars[i].getLB() * coeffs[i];
+                    bounds[1] += vars[i].getUB() * coeffs[i];
+                }
+        );
+        return new int[]{MathUtils.safeCast(bounds[0]), MathUtils.safeCast(bounds[1])};
+    }
+
+    /**
+     * @param vars array of variables
+     * @return computes the bounds for the sum of <i>vars</i>
+     */
     public static double[] boundsForAddition(RealVar... vars) {
         double[] bounds = new double[2];
         IntStream.range(0, vars.length).forEach(i -> {
