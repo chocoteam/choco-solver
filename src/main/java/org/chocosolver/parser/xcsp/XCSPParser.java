@@ -29,9 +29,11 @@
  */
 package org.chocosolver.parser.xcsp;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.parser.ParserException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
@@ -293,7 +295,7 @@ public class XCSPParser implements XCallbacks2 {
                     model.notMember(sum, ((XParser.ConditionIntvl) condition).min, ((XParser.ConditionIntvl) condition).max);
                 } else if (condition instanceof XParser.ConditionVal) {
                     sum.ne(((XParser.ConditionVal) condition).k).post();
-                }else {
+                } else {
                     throw new ParserException("unknow result for scalar constraint");
                 }
                 model.scalar(vars(list), coeffs, "=", sum).post();
@@ -312,6 +314,30 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrSum(String id, XVariables.XVarInteger[] list, int[] coeffs, XParser.Condition condition) {
         scalar(list, coeffs, condition);
+    }
+
+    @Override
+    public void buildCtrRegular(String id, XVariables.XVarInteger[] list, Object[][] transitions, String startState, String[] finalStates) {
+        FiniteAutomaton auto = new FiniteAutomaton();
+        TObjectIntHashMap<String> s2s = new TObjectIntHashMap<>(16, 1.5f, -1);
+        for (Object[] tr : transitions) {
+            int f = s2s.get(tr[0]);
+            int v = (int) tr[1];
+            int t = s2s.get(tr[2]);
+
+            if (f == -1) {
+                f = auto.addState();
+                s2s.put((String) tr[0], f);
+            }
+            if (t == -1) {
+                t = auto.addState();
+                s2s.put((String) tr[0], t);
+            }
+            auto.addTransition(f, t, v);
+        }
+        auto.setInitialState(s2s.get(startState));
+        auto.setFinal(Arrays.stream(finalStates).mapToInt(s -> s2s.get(s)).toArray());
+        model.regular(vars(list), auto).post();
     }
 
 
