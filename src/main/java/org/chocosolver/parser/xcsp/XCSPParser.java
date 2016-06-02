@@ -255,6 +255,14 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
+    public void buildCtrAllEqual(String id, XVariables.XVarInteger[] list) {
+        IntVar first = var(list[0]);
+        for(int i = 1; i < list.length; i++){
+            first.eq(var(list[i])).post();
+        }
+    }
+
+    @Override
     public void buildCtrClause(String id, XVariables.XVarInteger[] pos, XVariables.XVarInteger[] neg) {
         model.addClauses(bools(pos), bools(neg));
     }
