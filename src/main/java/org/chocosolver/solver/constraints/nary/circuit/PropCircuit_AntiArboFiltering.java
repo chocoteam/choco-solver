@@ -32,6 +32,12 @@ package org.chocosolver.solver.constraints.nary.circuit;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
+/**
+ * Propagator for circuit constraint based on dominators
+ * Redundant propagator
+ *
+ * @author Jean-Guillaume Fages
+ */
 public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 
     //***********************************************************************************
@@ -80,5 +86,4 @@ public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 			fails();
 		}
 	}
-
 }

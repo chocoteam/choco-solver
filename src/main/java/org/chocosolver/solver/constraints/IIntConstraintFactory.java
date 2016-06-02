@@ -1525,8 +1525,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * <p/> Filtering algorithms:
 	 * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
 	 * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
-	 * <p/> (not by default) dominator-based filtering: Fages & Lorca (CP'11)
-	 * <p/> (not by default) SCC-based filtering
+	 * <p/> dominator-based filtering: Fages & Lorca (CP'11) (adaptive scheme by default, see implementation)
 	 *
 	 * @param vars            a vector of variables
 	 * @param offset          0 by default but 1 if used within MiniZinc
@@ -1543,9 +1542,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				ArrayUtils.toArray(
 						new PropEqualXY_C(new IntVar[]{nbLoops, subCircuitLength}, n),
 						new PropKLoops(vars, offset, nbLoops),
-						new PropSubcircuit(vars, offset, subCircuitLength)
-//						new PropSubcircuit_AntiArboFiltering(vars, offset),
-//						new PropSubCircuitSCC(vars, offset)
+						new PropSubcircuit(vars, offset, subCircuitLength),
+						new PropSubcircuitDominatorFilter(vars, offset,true)
 				)
 		));
 	}

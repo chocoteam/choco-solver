@@ -42,6 +42,12 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Random;
 
+/**
+ * Propagator for sub-circuit constraint based on dominators
+ * Redundant propagator
+ *
+ * @author Jean-Guillaume Fages
+ */
 public class PropCircuit_ArboFiltering extends Propagator<IntVar> {
 
     //***********************************************************************************
