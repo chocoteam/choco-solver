@@ -105,12 +105,16 @@ public class FastTest {
     public Object[][] provider1() {
         return new Object[][]{
                 {basics + "AllInterval-005.xml", 1, -1, 15, true},
+                {basics + "KnightTour-06-ext02.xml", 1, -1, 8692, true},
+                {basics + "KnightTour-08-ext03.xml", 1, -1, 161715, true},
+                {basics + "mknap1-01.xml", 1, -1, 2, true},
                 {basics + "QuadraticAssignment-qap.xml", 18, 4776, 601, true},
                 {basics + "testExtension1.xml", 1, -1, 4, true},
                 {basics + "testExtension2.xml", 1, -1, 4, true},
                 {basics + "testExtension3.xml", 0, -1, 15, true},
                 {basics + "testObjective1.xml", 2, 11, 10, true},
                 {basics + "testPrimitive.xml", 1, -1, 3, true},
+                {basics + "TravellingSalesman-13-13-0.xml.lzma", 14, 36, 137174, true},
         };
     }
 

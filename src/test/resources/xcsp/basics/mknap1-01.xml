@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<instance format="XCSP3" type="CSP">
+  <variables>
+    <array id="x" size="[6]"> 0..1 </array>
+  </variables>
+  <constraints>
+    <sum>
+      <list> x[0] x[1] x[2] x[4] x[5] x[3] </list>
+      <coeffs> 8 12 13 22 41 64 </coeffs>
+      <condition> (le,80) </condition>
+    </sum>
+    <sum>
+      <list> x[0] x[1] x[2] x[4] x[5] x[3] </list>
+      <coeffs> 8 12 13 22 41 75 </coeffs>
+      <condition> (le,96) </condition>
+    </sum>
+    <sum>
+      <list> x[0] x[2] x[5] x[1] x[4] x[3] </list>
+      <coeffs> 3 4 4 6 6 18 </coeffs>
+      <condition> (le,20) </condition>
+    </sum>
+    <sum>
+      <list> x[0] x[4] x[2] x[1] x[5] x[3] </list>
+      <coeffs> 5 6 8 10 12 32 </coeffs>
+      <condition> (le,36) </condition>
+    </sum>
+    <sum>
+      <list> x[0] x[4] x[2] x[1] x[5] x[3] </list>
+      <coeffs> 5 6 8 13 20 42 </coeffs>
+      <condition> (le,44) </condition>
+    </sum>
+    <sum>
+      <list> x[0] x[4] x[2] x[1] x[5] x[3] </list>
+      <coeffs> 5 6 8 13 20 48 </coeffs>
+      <condition> (le,48) </condition>
+    </sum>
+    <sum>
+      <list> x[4] </list>
+      <coeffs> 8 </coeffs>
+      <condition> (le,10) </condition>
+    </sum>
+    <sum>
+      <list> x[0] x[2] x[4] </list>
+      <coeffs> 3 4 8 </coeffs>
+      <condition> (le,18) </condition>
+    </sum>
+    <sum>
+      <list> x[1] x[0] x[2] x[5] x[4] </list>
+      <coeffs> 2 3 4 4 8 </coeffs>
+      <condition> (le,22) </condition>
+    </sum>
+    <sum>
+      <list> x[1] x[0] x[2] x[5] x[3] x[4] </list>
+      <coeffs> 2 3 4 4 8 8 </coeffs>
+      <condition> (le,24) </condition>
+    </sum>
+    <sum>
+      <list> x[0] x[4] x[1] x[2] x[5] x[3] </list>
+      <coeffs> 100 500 600 1200 2000 2400 </coeffs>
+      <condition> (eq,3800) </condition>
+    </sum>
+  </constraints>
+</instance>

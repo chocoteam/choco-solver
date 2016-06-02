@@ -39,6 +39,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.VariableUtils;
 import org.xcsp.parser.XCallbacks2;
 import org.xcsp.parser.XEnums;
+import org.xcsp.parser.XParser;
 import org.xcsp.parser.XVariables;
 
 import java.util.Arrays;
@@ -244,6 +245,54 @@ public class XCSPParser implements XCallbacks2 {
         model.addClauses(bools(pos), bools(neg));
     }
 
+    private static String op(XParser.Condition condition) {
+        String op = "";
+        switch (condition.operator) {
+            case LT:
+                op = "<";
+                break;
+            case LE:
+                op = "<=";
+                break;
+            case GE:
+                op = ">=";
+                break;
+            case GT:
+                op = ">";
+                break;
+            case NE:
+                op = "!=";
+                break;
+            case EQ:
+                op = "=";
+                break;
+            case IN:
+                break;
+            case NOTIN:
+                break;
+        }
+        return op;
+    }
+
+    @Override
+    public void buildCtrSum(String id, XVariables.XVarInteger[] list, XParser.Condition condition) {
+        if (condition instanceof XParser.ConditionVar)
+            model.sum(vars(list), op(condition), var((XVariables.XVarInteger) ((XParser.ConditionVar) condition).x)).post();
+        else if (condition instanceof XParser.ConditionVal)
+            model.sum(vars(list), op(condition), ((XParser.ConditionVal) condition).k).post();
+        else
+            throw new ParserException("unknown condition for sum");
+    }
+
+    @Override
+    public void buildCtrSum(String id, XVariables.XVarInteger[] list, int[] coeffs, XParser.Condition condition) {
+        if (condition instanceof XParser.ConditionVar)
+            model.scalar(vars(list), coeffs, op(condition), var((XVariables.XVarInteger) ((XParser.ConditionVar) condition).x)).post();
+        else if (condition instanceof XParser.ConditionVal)
+            model.scalar(vars(list), coeffs, op(condition), ((XParser.ConditionVal) condition).k).post();
+        else
+            throw new ParserException("unknown condition for sum");
+    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
