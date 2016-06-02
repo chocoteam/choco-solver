@@ -31,7 +31,6 @@ package org.chocosolver.parser.xcsp;
 
 import org.chocosolver.parser.ParserException;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
@@ -254,12 +253,12 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildObjToMinimize(String id, XVariables.XVarInteger x) {
-        model.setObjective(ResolutionPolicy.MINIMIZE, var(x));
+        model.setObjective(false, var(x));
     }
 
     @Override
     public void buildObjToMaximize(String id, XVariables.XVarInteger x) {
-        model.setObjective(ResolutionPolicy.MAXIMIZE, var(x));
+        model.setObjective(true, var(x));
     }
 
     private IntVar optSum(String id, XVariables.XVarInteger[] list) {
@@ -272,12 +271,12 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildObjToMinimize(String id, XEnums.TypeObjective type, XVariables.XVarInteger[] list) {
-        model.setObjective(ResolutionPolicy.MINIMIZE, optSum(id, list));
+        model.setObjective(false, optSum(id, list));
     }
 
     @Override
     public void buildObjToMaximize(String id, XEnums.TypeObjective type, XVariables.XVarInteger[] list) {
-        model.setObjective(ResolutionPolicy.MAXIMIZE, optSum(id, list));
+        model.setObjective(true, optSum(id, list));
     }
 
     private IntVar optScalar(String id, XVariables.XVarInteger[] list, int[] coeffs) {
@@ -290,12 +289,12 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildObjToMinimize(String id, XEnums.TypeObjective type, XVariables.XVarInteger[] list, int[] coeffs) {
-        model.setObjective(ResolutionPolicy.MINIMIZE, optScalar(id, list, coeffs));
+        model.setObjective(false, optScalar(id, list, coeffs));
     }
 
 
     @Override
     public void buildObjToMaximize(String id, XEnums.TypeObjective type, XVariables.XVarInteger[] list, int[] coeffs) {
-        model.setObjective(ResolutionPolicy.MAXIMIZE, optScalar(id, list, coeffs));
+        model.setObjective(true, optScalar(id, list, coeffs));
     }
 }

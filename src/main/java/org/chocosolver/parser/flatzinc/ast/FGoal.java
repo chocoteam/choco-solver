@@ -72,7 +72,7 @@ public class FGoal {
         // First define solving process
         if (type != ResolutionPolicy.SATISFACTION) {
             IntVar obj = expr.intVarValue(aModel);
-            aModel.setObjective(type, obj);
+            aModel.setObjective(type == ResolutionPolicy.MAXIMIZE, obj);
         }
         // Then define search goal
         Variable[] vars = aModel. getVars();

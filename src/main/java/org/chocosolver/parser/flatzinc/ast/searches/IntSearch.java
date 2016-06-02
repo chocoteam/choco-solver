@@ -29,9 +29,6 @@ package org.chocosolver.parser.flatzinc.ast.searches;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.VariableSelector;
-import org.chocosolver.solver.search.strategy.selectors.VariableSelectorWithTies;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;

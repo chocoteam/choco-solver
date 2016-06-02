@@ -42,7 +42,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
+import static org.chocosolver.solver.search.strategy.Search.*;
+
 /**
  * A regular parser with default and common services
  * Created by cprudhom on 01/09/15.
