@@ -38,6 +38,7 @@ import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 import org.xcsp.parser.XCallbacks2;
 import org.xcsp.parser.XEnums;
@@ -240,6 +241,17 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrAllDifferent(String id, XVariables.XVarInteger[] list) {
         model.allDifferent(vars(list)).post();
+    }
+
+    @Override
+    public void buildCtrAllDifferentMatrix(String id, XVariables.XVarInteger[][] matrix) {
+        for (XVariables.XVarInteger[] list : matrix) {
+            model.allDifferent(vars(list)).post();
+        }
+        XVariables.XVarInteger[][] tmatrix = ArrayUtils.transpose(matrix);
+        for(XVariables.XVarInteger[] list : tmatrix){
+            model.allDifferent(vars(list)).post();
+        }
     }
 
     @Override
