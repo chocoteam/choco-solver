@@ -249,7 +249,7 @@ public class XCSPParser implements XCallbacks2 {
             model.allDifferent(vars(list)).post();
         }
         XVariables.XVarInteger[][] tmatrix = ArrayUtils.transpose(matrix);
-        for(XVariables.XVarInteger[] list : tmatrix){
+        for (XVariables.XVarInteger[] list : tmatrix) {
             model.allDifferent(vars(list)).post();
         }
     }
@@ -257,7 +257,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrAllEqual(String id, XVariables.XVarInteger[] list) {
         IntVar first = var(list[0]);
-        for(int i = 1; i < list.length; i++){
+        for (int i = 1; i < list.length; i++) {
             first.eq(var(list[i])).post();
         }
     }
@@ -267,7 +267,7 @@ public class XCSPParser implements XCallbacks2 {
         model.addClauses(bools(pos), bools(neg));
     }
 
-    private IntVar sumR(XParser.Condition condition) {
+    private IntVar condV(XParser.Condition condition) {
         IntVar sum;
         if (condition instanceof XParser.ConditionVar)
             sum = var((XVariables.XVarInteger) ((XParser.ConditionVar) condition).x);
@@ -278,32 +278,42 @@ public class XCSPParser implements XCallbacks2 {
         return sum;
     }
 
+    private void notin(IntVar var, XParser.Condition condition){
+        if (condition instanceof XParser.ConditionIntvl) {
+            model.notMember(var, ((XParser.ConditionIntvl) condition).min, ((XParser.ConditionIntvl) condition).max);
+        } else if (condition instanceof XParser.ConditionVal) {
+            var.ne(((XParser.ConditionVal) condition).k).post();
+        } else {
+            throw new ParserException("unknow result for scalar constraint");
+        }
+    }
+
     private void scalar(XVariables.XVarInteger[] list, int[] coeffs, XParser.Condition condition) {
         switch (condition.operator) {
             case LT:
-                model.scalar(vars(list), coeffs, "<", sumR(condition)).post();
+                model.scalar(vars(list), coeffs, "<", condV(condition)).post();
                 break;
             case LE:
-                model.scalar(vars(list), coeffs, "<=", sumR(condition)).post();
+                model.scalar(vars(list), coeffs, "<=", condV(condition)).post();
                 break;
             case GE:
-                model.scalar(vars(list), coeffs, ">", sumR(condition)).post();
+                model.scalar(vars(list), coeffs, ">", condV(condition)).post();
                 break;
             case GT:
-                model.scalar(vars(list), coeffs, ">=", sumR(condition)).post();
+                model.scalar(vars(list), coeffs, ">=", condV(condition)).post();
                 break;
             case NE:
-                model.scalar(vars(list), coeffs, "!=", sumR(condition)).post();
+                model.scalar(vars(list), coeffs, "!=", condV(condition)).post();
                 break;
             case EQ:
-                model.scalar(vars(list), coeffs, "=", sumR(condition)).post();
+                model.scalar(vars(list), coeffs, "=", condV(condition)).post();
                 break;
             case IN: {
                 IntVar sum;
                 if (condition instanceof XParser.ConditionIntvl) {
                     sum = model.intVar(((XParser.ConditionIntvl) condition).min, ((XParser.ConditionIntvl) condition).max);
                 } else {
-                    sum = sumR(condition);
+                    sum = condV(condition);
                 }
                 model.scalar(vars(list), coeffs, "=", sum).post();
             }
@@ -311,13 +321,7 @@ public class XCSPParser implements XCallbacks2 {
             case NOTIN: {
                 int[] bounds = VariableUtils.boundsForScalar(vars(list), coeffs);
                 IntVar sum = model.intVar(bounds[0], bounds[1]);
-                if (condition instanceof XParser.ConditionIntvl) {
-                    model.notMember(sum, ((XParser.ConditionIntvl) condition).min, ((XParser.ConditionIntvl) condition).max);
-                } else if (condition instanceof XParser.ConditionVal) {
-                    sum.ne(((XParser.ConditionVal) condition).k).post();
-                } else {
-                    throw new ParserException("unknow result for scalar constraint");
-                }
+                notin(sum, condition);
                 model.scalar(vars(list), coeffs, "=", sum).post();
             }
             break;
@@ -360,6 +364,131 @@ public class XCSPParser implements XCallbacks2 {
         model.regular(vars(list), auto).post();
     }
 
+    @Override
+    public void buildCtrMinimum(String id, XVariables.XVarInteger[] list, XParser.Condition condition) {
+        IntVar[] vars = vars(list);
+        int min = Arrays.stream(vars).min((v1, v2) -> v1.getLB() - v2.getLB()).get().getLB();
+        int max = Arrays.stream(vars).max((v1, v2) -> v1.getUB() - v2.getUB()).get().getUB();
+        switch (condition.operator) {
+            case LT: {
+                IntVar res = model.intVar(min, max);
+                model.min(res, vars).post();
+                res.lt(condV(condition)).post();
+            }
+            break;
+            case LE: {
+                IntVar res = model.intVar(min, max);
+                model.min(res, vars).post();
+                res.le(condV(condition)).post();
+            }
+            break;
+            case GE:
+            {
+                IntVar res = model.intVar(min, max);
+                model.min(res, vars).post();
+                res.ge(condV(condition)).post();
+            }
+                break;
+            case GT:
+            {
+                IntVar res = model.intVar(min, max);
+                model.min(res, vars).post();
+                res.gt(condV(condition)).post();
+            }
+                break;
+            case NE:
+            {
+                IntVar res = model.intVar(min, max);
+                model.min(res, vars).post();
+                res.ne(condV(condition)).post();
+            }
+                break;
+            case EQ:
+                model.min(condV(condition), vars).post();
+                break;
+            case IN: {
+                IntVar res;
+                if (condition instanceof XParser.ConditionIntvl) {
+                    res = model.intVar(((XParser.ConditionIntvl) condition).min, ((XParser.ConditionIntvl) condition).max);
+                } else {
+                    res = condV(condition);
+                }
+                model.min(res, vars(list)).post();
+            }
+            break;
+            case NOTIN: {
+                IntVar res = model.intVar(min, max);
+                model.min(res, vars).post();
+                res.ne(condV(condition)).post();
+                notin(res, condition);
+                model.min(res, vars(list)).post();
+            }
+            break;
+        }
+    }
+
+    @Override
+    public void buildCtrMaximum(String id, XVariables.XVarInteger[] list, XParser.Condition condition) {
+        IntVar[] vars = vars(list);
+        int min = Arrays.stream(vars).min((v1, v2) -> v1.getLB() - v2.getLB()).get().getLB();
+        int max = Arrays.stream(vars).max((v1, v2) -> v1.getUB() - v2.getUB()).get().getUB();
+        switch (condition.operator) {
+            case LT: {
+                IntVar res = model.intVar(min, max);
+                model.max(res, vars).post();
+                res.lt(condV(condition)).post();
+            }
+            break;
+            case LE: {
+                IntVar res = model.intVar(min, max);
+                model.max(res, vars).post();
+                res.le(condV(condition)).post();
+            }
+            break;
+            case GE:
+            {
+                IntVar res = model.intVar(min, max);
+                model.max(res, vars).post();
+                res.ge(condV(condition)).post();
+            }
+            break;
+            case GT:
+            {
+                IntVar res = model.intVar(min, max);
+                model.max(res, vars).post();
+                res.gt(condV(condition)).post();
+            }
+            break;
+            case NE:
+            {
+                IntVar res = model.intVar(min, max);
+                model.max(res, vars).post();
+                res.ne(condV(condition)).post();
+            }
+            break;
+            case EQ:
+                model.max(condV(condition), vars).post();
+                break;
+            case IN: {
+                IntVar res;
+                if (condition instanceof XParser.ConditionIntvl) {
+                    res = model.intVar(((XParser.ConditionIntvl) condition).min, ((XParser.ConditionIntvl) condition).max);
+                } else {
+                    res = condV(condition);
+                }
+                model.max(res, vars(list)).post();
+            }
+            break;
+            case NOTIN: {
+                IntVar res = model.intVar(min, max);
+                model.max(res, vars).post();
+                res.ne(condV(condition)).post();
+                notin(res, condition);
+                model.min(res, vars(list)).post();
+            }
+            break;
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// OBJECTIVE ///////////////////////////////////////////////////////////////
