@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
@@ -58,7 +57,7 @@ public class ExplainingObjectiveTest {
         model.arithm(o, "<", 10).reifyWith(bs[1]);
         model.arithm(o, "=", 5).reifyWith(bs[2]);
 
-        model.setObjective(ResolutionPolicy.MAXIMIZE, o);
+        model.setObjective(Model.MAXIMIZE, o);
         model.getSolver().setExplainer(new ExplanationEngine(model, false, false));
         ExplainingObjective eo = new ExplainingObjective(model, 10, 0);
         eo.init();

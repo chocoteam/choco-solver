@@ -30,7 +30,6 @@
 package org.chocosolver.solver.search;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -98,7 +97,7 @@ public class ParetoTest {
         // --- Search
         s.getSolver().setSearch(Search.domOverWDegSearch(occurrences), Search.inputOrderLBSearch(totalProfit_1,totalProfit_2));
         // --- solve
-        ParetoOptimizer pareto = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{totalProfit_1,totalProfit_2});
+        ParetoOptimizer pareto = new ParetoOptimizer(Model.MAXIMIZE,new IntVar[]{totalProfit_1,totalProfit_2});
         s.getSolver().plugMonitor(pareto);
         while(s.getSolver().solve());
         System.out.println("Pareto Front:");

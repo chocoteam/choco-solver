@@ -36,7 +36,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 
@@ -162,7 +161,7 @@ public class CumulativeTest {
 				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getSolutionCount();
 			case 1:
-				model.setObjective(MINIMIZE, last);
+				model.setObjective(Model.MINIMIZE, last);
 				while(model.getSolver().solve());
 				if (r.isStopCriterionMet()) return -1;
 				return r.getMeasures().getBestSolutionValue().longValue();

@@ -74,6 +74,9 @@ public class Model implements IModel {
     /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public static boolean MAXIMIZE = true;
+    public static boolean MINIMIZE = false;
+
     /** Settings to use with this solver */
     private Settings settings = new Settings() {};
 
@@ -449,27 +452,25 @@ public class Model implements IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Defines the variable to optimize according to <i>policy</i>.
+     * Defines the variable to optimize (maximize or minimize)
      * By default, each solution forces either :
      * <ul>
-     * <li> for {@link ResolutionPolicy#MAXIMIZE}: to increase by one for {@link IntVar} (or {@link #precision} for {@link RealVar}) the objective lower bound, or</li>
-     * <li> for {@link ResolutionPolicy#MINIMIZE}:  to decrease by one {@link IntVar} (or {@link #precision} for {@link RealVar}) the objective upper bound.</li>
+     * <li> for {@link Model#MAXIMIZE}: to increase by one {@link IntVar} (or {@link #precision} for {@link RealVar}) the objective lower bound, or</li>
+     * <li> for {@link Model#MINIMIZE}:  to decrease by one {@link IntVar} (or {@link #precision} for {@link RealVar}) the objective upper bound.</li>
      * </ul>
      * @see ObjectiveManager#strictIntVarCutComputer(ResolutionPolicy)
      * @see ObjectiveManager#strictRealVarCutComputer(ResolutionPolicy, double)
      * @see ObjectiveManager#setCutComputer(Function)
-     * @param policy optimisation policy (minimisation or maximisation)
+     * @param maximize whether to maximize (true) or minimize (false) the objective
      * @param objective variable to optimize
      */
     @SuppressWarnings("unchecked")
-    public <V extends Variable, N extends Number> void setObjective(ResolutionPolicy policy, V objective) {
+    public <V extends Variable> void setObjective(boolean maximize, V objective) {
         if(objective == null){
-            assert policy == ResolutionPolicy.SATISFACTION;
-            clearObjective();
+            throw new SolverException("Cannot set objective to null");
         }else {
-            assert policy != ResolutionPolicy.SATISFACTION;
+			this.policy = maximize? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE;
             this.objective = objective;
-            this.policy = policy;
             if ((objective.getTypeAndKind() & Variable.KIND) == Variable.REAL) {
                 getSolver().setObjectiveManager(new ObjectiveManager<RealVar, Double>((RealVar) objective, policy, 0.00d,
                         ObjectiveManager.strictRealVarCutComputer(policy, precision)));

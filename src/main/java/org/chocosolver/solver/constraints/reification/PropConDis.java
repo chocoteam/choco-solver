@@ -45,7 +45,10 @@ import org.chocosolver.solver.variables.ranges.IntIterableRangeSet;
 import org.chocosolver.solver.variables.ranges.IntIterableSetUtils;
 import org.chocosolver.util.ESat;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
 
 /**
  * A propagator for constructive disjunction.

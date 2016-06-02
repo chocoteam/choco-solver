@@ -29,7 +29,9 @@
  */
 package org.chocosolver.solver.search;
 
-import org.chocosolver.solver.*;
+import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
 import org.chocosolver.solver.objective.ParetoOptimizer;
@@ -246,7 +248,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <p>
      * <pre>
      *     {@code
-     *     model.setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
+     *     model.setObjective(maximize, objective);
      *     Solution s = new Solution(model);
      *     while (model.getSolver().solve()) {
      *          s.record();
@@ -269,7 +271,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * </ul>
      */
     default Solution findOptimalSolution(IntVar objective, boolean maximize, Criterion... stop) {
-        _me().getModel().setObjective(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objective);
+        _me().getModel().setObjective(maximize, objective);
         _me().addStopCriterion(stop);
 		if(_me().getSearch()!=null) {
 			IntStrategy objSearch = maximize ? Search.inputOrderUBSearch(objective) : Search.inputOrderLBSearch(objective);
@@ -443,8 +445,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <p>
      * <pre>
      * {@code
-     * ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE,
-     * 			objectives);
+     * ParetoOptimizer pareto = new ParetoOptimizer(maximize, objectives);
      * 	while (_me().solve()) {
      * 		pareto.onSolution();
      * 	}
@@ -466,7 +467,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
 			IntStrategy objSearch = maximize ? Search.inputOrderUBSearch(objectives) : Search.inputOrderLBSearch(objectives);
 			_me().setSearch(_me().getSearch(), objSearch);
 		}
-        ParetoOptimizer pareto = new ParetoOptimizer(maximize ? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE, objectives);
+        ParetoOptimizer pareto = new ParetoOptimizer(maximize, objectives);
         while (_me().solve()) {
             pareto.onSolution();
         }

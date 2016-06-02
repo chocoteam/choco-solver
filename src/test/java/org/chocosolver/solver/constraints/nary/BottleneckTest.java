@@ -33,7 +33,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
@@ -68,7 +67,7 @@ public class BottleneckTest {
 
 
             model.getSolver().setSearch(minDomLBSearch(allvars));
-            model.setObjective(MAXIMIZE, sum);
+            model.setObjective(Model.MAXIMIZE, sum);
             while(model.getSolver().solve());
         }
     }

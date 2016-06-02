@@ -31,16 +31,11 @@ package org.chocosolver.solver.objective;
 
 import org.chocosolver.sat.PropSat;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.tools.ArrayUtils;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -65,7 +60,7 @@ public class ParetoOptimizer implements IMonitorSolution {
     private LinkedList<Solution> pool = new LinkedList<>();
 
     // objective function
-    private ResolutionPolicy policy;
+    private boolean maximize;
     private IntVar[] objectives;
     private int n;
 
@@ -90,13 +85,13 @@ public class ParetoOptimizer implements IMonitorSolution {
      * The Solutions store decision variables (those declared in the search strategy)
 	 * BEWARE: requires the objectives to be declared in the search strategy
      *
-     * @param policy    optimization policy : either MINIMIZE or MAXIMIZE
-     * @param objectives    objective variables (must all be optimized in the same direction)
+     * @param maximize whether to maximize or minimize the objectives
+     * @param objectives objective variables (must all be optimized in the same direction)
      */
-    public ParetoOptimizer(final ResolutionPolicy policy, final IntVar[] objectives) {
+    public ParetoOptimizer(final boolean maximize, final IntVar[] objectives) {
         this.paretoFront = new LinkedList<>();
         this.objectives = objectives.clone();
-        this.policy = policy;
+        this.maximize = maximize;
         n = objectives.length;
         model = objectives[0].getModel();
         psat = model.getMinisat().getPropSat();
@@ -131,7 +126,7 @@ public class ParetoOptimizer implements IMonitorSolution {
         }
         // post dynamical constraints to prevent search from computing dominated solutions
         Operator symbol = Operator.GT;
-        if (policy == ResolutionPolicy.MINIMIZE) {
+        if (!maximize) {
             symbol = Operator.LT;
         }
         for (int i = 0; i < n; i++) {
@@ -150,7 +145,7 @@ public class ParetoOptimizer implements IMonitorSolution {
     private boolean isDominated(Solution solution, int[] vals) {
         for (int i = 0; i < n; i++) {
             int delta = solution.getIntVal(objectives[i]) - vals[i];
-            if ((delta > 0 && policy == ResolutionPolicy.MAXIMIZE) || (delta < 0 && policy == ResolutionPolicy.MINIMIZE)) {
+            if ((delta > 0 && maximize) || (delta < 0 && !maximize)) {
                 return false;
             }
         }

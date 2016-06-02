@@ -38,7 +38,6 @@ import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.search.limits.ICounter.Impl.None;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 
@@ -82,7 +81,7 @@ public class ELNSTest {
         r.setSearch(randomSearch(vars, seed));
         r.limitFail(500);
         r.showSolutions();
-        model.setObjective(MINIMIZE, obj);
+        model.setObjective(Model.MINIMIZE, obj);
         while(model.getSolver().solve());
     }
 

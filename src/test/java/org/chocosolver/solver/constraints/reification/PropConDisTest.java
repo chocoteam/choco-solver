@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.reification;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -186,7 +185,7 @@ public class PropConDisTest {
         IntVar horizon = model.intVar("H", 0, os[2 * size - 1] + ls[2 * size - 1], true);
         model.sum(new IntVar[]{OS[size - 1], LS[size - 1]}, "=", horizon).post();
         if (optimize) {
-            model.setObjective(ResolutionPolicy.MINIMIZE, horizon);
+            model.setObjective(Model.MINIMIZE, horizon);
         }
         model.addHook("decvars", append(OS, LS));
 //        showShortStatistics(model);

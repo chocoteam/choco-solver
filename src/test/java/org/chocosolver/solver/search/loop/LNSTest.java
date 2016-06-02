@@ -38,7 +38,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static java.lang.Math.ceil;
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
 import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
@@ -99,7 +98,7 @@ public class LNSTest {
                         new RandomNeighborhood(objects, 200, 123456L)));
                 break;
         }
-        model.setObjective(MAXIMIZE, power);
+        model.setObjective(Model.MAXIMIZE, power);
         int bw = 0, bp = 0;
         while(model.getSolver().solve()){
             bp = power.getValue();

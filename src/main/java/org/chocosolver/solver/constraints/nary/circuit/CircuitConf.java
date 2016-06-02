@@ -34,6 +34,11 @@
  */
 package org.chocosolver.solver.constraints.nary.circuit;
 
+/**
+ * Enum to specify the filtering level of the circuit global constraint
+ *
+ * @author Jean-Guillaume Fages
+ */
 public enum  CircuitConf {
 
 	LIGHT,
