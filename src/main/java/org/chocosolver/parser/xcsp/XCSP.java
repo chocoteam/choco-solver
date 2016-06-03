@@ -86,6 +86,10 @@ public class XCSP extends RegParser {
 
     public void parse(Model target) throws Exception {
         new XCSPParser().model(target, instance);
+//        Files.move(Paths.get(instance),
+//                Paths.get("/Users/cprudhom/Sources/XCSP/ok/"+ Paths.get(instance).getFileName().toString()),
+//                StandardCopyOption.REPLACE_EXISTING);
+//        System.exit(-1);
     }
 
 

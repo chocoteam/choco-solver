@@ -40,14 +40,12 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
-import org.xcsp.parser.XCallbacks2;
-import org.xcsp.parser.XEnums;
-import org.xcsp.parser.XParser;
-import org.xcsp.parser.XVariables;
+import org.xcsp.parser.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -244,6 +242,11 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
+    public void buildCtrAllDifferentList(String id, XVariables.XVarInteger[][] lists) {
+        Stream.of(lists).forEach(l -> model.allDifferent(vars(l)).post());
+    }
+
+    @Override
     public void buildCtrAllDifferentMatrix(String id, XVariables.XVarInteger[][] matrix) {
         for (XVariables.XVarInteger[] list : matrix) {
             model.allDifferent(vars(list)).post();
@@ -256,10 +259,12 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrAllEqual(String id, XVariables.XVarInteger[] list) {
-        IntVar first = var(list[0]);
-        for (int i = 1; i < list.length; i++) {
-            first.eq(var(list[i])).post();
-        }
+        model.allEqual(vars(list)).post();
+    }
+
+    @Override
+    public void buildCtrNotAllEqual(String id, XVariables.XVarInteger[] list) {
+        model.notAllEqual(vars(list)).post();
     }
 
     @Override
@@ -278,7 +283,7 @@ public class XCSPParser implements XCallbacks2 {
         return sum;
     }
 
-    private void notin(IntVar var, XParser.Condition condition){
+    private void notin(IntVar var, XParser.Condition condition) {
         if (condition instanceof XParser.ConditionIntvl) {
             model.notMember(var, ((XParser.ConditionIntvl) condition).min, ((XParser.ConditionIntvl) condition).max);
         } else if (condition instanceof XParser.ConditionVal) {
@@ -382,27 +387,24 @@ public class XCSPParser implements XCallbacks2 {
                 res.le(condV(condition)).post();
             }
             break;
-            case GE:
-            {
+            case GE: {
                 IntVar res = model.intVar(min, max);
                 model.min(res, vars).post();
                 res.ge(condV(condition)).post();
             }
-                break;
-            case GT:
-            {
+            break;
+            case GT: {
                 IntVar res = model.intVar(min, max);
                 model.min(res, vars).post();
                 res.gt(condV(condition)).post();
             }
-                break;
-            case NE:
-            {
+            break;
+            case NE: {
                 IntVar res = model.intVar(min, max);
                 model.min(res, vars).post();
                 res.ne(condV(condition)).post();
             }
-                break;
+            break;
             case EQ:
                 model.min(condV(condition), vars).post();
                 break;
@@ -445,22 +447,19 @@ public class XCSPParser implements XCallbacks2 {
                 res.le(condV(condition)).post();
             }
             break;
-            case GE:
-            {
+            case GE: {
                 IntVar res = model.intVar(min, max);
                 model.max(res, vars).post();
                 res.ge(condV(condition)).post();
             }
             break;
-            case GT:
-            {
+            case GT: {
                 IntVar res = model.intVar(min, max);
                 model.max(res, vars).post();
                 res.gt(condV(condition)).post();
             }
             break;
-            case NE:
-            {
+            case NE: {
                 IntVar res = model.intVar(min, max);
                 model.max(res, vars).post();
                 res.ne(condV(condition)).post();
@@ -489,6 +488,131 @@ public class XCSPParser implements XCallbacks2 {
             break;
         }
     }
+
+    @Override
+    public void buildCtrLexMatrix(String id, XVariables.XVarInteger[][] matrix, XEnums.TypeOperator operator) {
+        switch (operator) {
+            case LT: {
+                for (XVariables.XVarInteger[] list : matrix) {
+                    model.lexChainLess(vars(list)).post();
+                }
+                XVariables.XVarInteger[][] tmatrix = ArrayUtils.transpose(matrix);
+                for (XVariables.XVarInteger[] list : tmatrix) {
+                    model.lexChainLessEq(vars(list)).post();
+                }
+            }
+            break;
+            case LE: {
+                for (XVariables.XVarInteger[] list : matrix) {
+                    model.lexChainLessEq(vars(list)).post();
+                }
+                XVariables.XVarInteger[][] tmatrix = ArrayUtils.transpose(matrix);
+                for (XVariables.XVarInteger[] list : tmatrix) {
+                    model.lexChainLessEq(vars(list)).post();
+                }
+            }
+            break;
+            case GE: {
+                XVariables.XVarInteger[][] rmatrix = matrix.clone();
+                ArrayUtils.reverse(rmatrix);
+                for (XVariables.XVarInteger[] list : matrix) {
+                    model.lexChainLessEq(vars(list)).post();
+                }
+                XVariables.XVarInteger[][] tmatrix = ArrayUtils.transpose(rmatrix);
+                for (XVariables.XVarInteger[] list : tmatrix) {
+                    model.lexChainLessEq(vars(list)).post();
+                }
+            }
+            break;
+            case GT: {
+                XVariables.XVarInteger[][] rmatrix = matrix.clone();
+                ArrayUtils.reverse(rmatrix);
+                for (XVariables.XVarInteger[] list : matrix) {
+                    model.lexChainLess(vars(list)).post();
+                }
+                XVariables.XVarInteger[][] tmatrix = ArrayUtils.transpose(rmatrix);
+                for (XVariables.XVarInteger[] list : tmatrix) {
+                    model.lexChainLess(vars(list)).post();
+                }
+            }
+            break;
+            case SUBSET:
+            case SUBSEQ:
+            case SUPSEQ:
+            case SUPSET:
+                XCallbacks2.super.buildCtrLexMatrix(id, matrix, operator);
+                break;
+        }
+    }
+
+    @Override
+    public void buildCtrOrdered(String id, XVariables.XVarInteger[] list, XEnums.TypeOperator operator) {
+        IntVar[] vars = vars(list);
+        IntVar[][] vectors = new IntVar[vars.length][1];
+        for (int i = 0; i < vars.length; i++) {
+            vectors[i] = new IntVar[]{vars[i]};
+        }
+        switch (operator) {
+            case LT:
+                model.lexChainLess(vectors).post();
+                break;
+            case LE:
+                model.lexChainLessEq(vectors).post();
+                break;
+            case GE: {
+                ArrayUtils.reverse(vectors);
+                model.lexChainLessEq(vectors).post();
+            }
+            break;
+            case GT: {
+                ArrayUtils.reverse(vectors);
+                model.lexChainLess(vectors).post();
+            }
+            break;
+            case SUBSET:
+            case SUBSEQ:
+            case SUPSEQ:
+            case SUPSET:
+                XCallbacks2.super.buildCtrOrdered(id, list, operator);
+                break;
+        }
+    }
+
+    @Override
+    public void buildCtrChannel(String id, XVariables.XVarInteger[] list, int startIndex) {
+        model.inverseChanneling(vars(list), vars(list), startIndex, startIndex).post();
+    }
+
+    @Override
+    public void buildCtrChannel(String id, XVariables.XVarInteger[] list1, int startIndex1, XVariables.XVarInteger[] list2, int startIndex2) {
+        model.inverseChanneling(vars(list1), vars(list2), startIndex1, startIndex2).post();
+    }
+
+    @Override
+    public void buildCtrChannel(String id, XVariables.XVarInteger[] list, int startIndex, XVariables.XVarInteger value) {
+        model.boolsIntChanneling(bools(list), var(value), startIndex).post();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// GROUP ///////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void loadGroup(XConstraints.XGroup g) {
+        beginGroup(g);
+        if (g.template instanceof XConstraints.XCtr)
+            loadCtrs((XConstraints.XCtr) g.template, g.argss, g);
+        else if (g.template instanceof XConstraints.XLogic && ((XConstraints.XLogic) g.template).getType() == XEnums.TypeCtr.not) {
+            XConstraints.CEntry child = ((XConstraints.XLogic) g.template).components[0];
+            if (child instanceof XConstraints.XCtr && ((XConstraints.XCtr) child).type == XEnums.TypeCtr.allEqual) {
+                // http://sofdem.github.io/gccat/aux/pdf/not_all_equal.pdf
+                Stream.of(g.argss).forEach(o -> model.notAllEqual(vars((XVariables.XVarInteger[]) o)).post());
+            }
+        } else
+            unimplementedCase(g);
+        endGroup(g);
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// OBJECTIVE ///////////////////////////////////////////////////////////////

@@ -3,12 +3,12 @@
 STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
 NB_NODES=1
-TIME_LIMIT=900000
-JAVA_ARGS="-server"
-CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/3.3.1-SNAPSHOT/choco-parsers-3.3.1-SNAPSHOT-with-dependencies.jar
+TIME_LIMIT=10000
+JAVA_ARGS=""
+CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.0.0-SNAPSHOT/choco-parsers-4.0.0-SNAPSHOT-with-dependencies.jar
 usage="\
 
-Usage: fzn_choco.sh [<options>] [<file>]
+Usage: xcsp_choco.sh [<options>] [<file>]
 
     Parse and solve <file> using Choco.
 
@@ -41,16 +41,16 @@ OPTIONS:
 EXAMPLES:
 	
 	Basic command to solve a fzn model with choco:
-	$> fzn_choco.sh ./choco.jar ./alpha.fzn
+	$> xcsp_choco.sh ./choco.jar ./alpha.xml
 
 	Additionnal arguments:
-	$> fzn_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.fzn
+	$> xcsp_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.xml
 
 "
 
 if test $# -eq 0
 then
-    echo "%% No flatzinc file found"
+    echo "%% No XCSP file found"
     exit 1
 fi
 
@@ -115,10 +115,10 @@ fi
 
 if test "${FREE_SEARCH}" = "yes"
 then
-    ARGS=$ARGS" -lf"
+    ARGS=$ARGS" -f"
 fi
 
-CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS}"
+CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
 
 echo "% $CMD"
 eval ${CMD}
