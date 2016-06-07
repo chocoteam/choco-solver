@@ -21,7 +21,7 @@ install:
 - npm install travis-ping
 branches:
   only:
-  - develop
+  - /^develop.*$/
   - master
   - /^feature.*$/
 notifications:
