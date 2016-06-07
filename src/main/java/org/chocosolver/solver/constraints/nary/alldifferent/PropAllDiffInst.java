@@ -46,8 +46,14 @@ import org.chocosolver.util.ESat;
  */
 public class PropAllDiffInst extends Propagator<IntVar> {
 
+    protected static class FastResetArrayStack extends TIntArrayStack{
+        public void resetQuick(){
+            this._list.resetQuick();
+        }
+    }
+
     protected final int n;
-    protected TIntArrayStack toCheck = new TIntArrayStack();
+    protected FastResetArrayStack toCheck = new FastResetArrayStack();
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -80,7 +86,8 @@ public class PropAllDiffInst extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        toCheck.clear();
+//        toCheck.clear();
+        toCheck.resetQuick();
         for (int v = 0; v < n; v++) {
             if (vars[v].isInstantiated()) {
                 toCheck.push(v);
@@ -91,7 +98,8 @@ public class PropAllDiffInst extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        toCheck.clear();
+//        toCheck.clear();
+        toCheck.resetQuick();
         toCheck.push(varIdx);
         fixpoint();
     }
