@@ -51,21 +51,21 @@ after_success:
 - travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
 
 before_deploy:
-  - echo $GPG_EXECUTABLE
-  - echo $GPG_SECRET_KEYS | base64 --decode
   - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
   - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
 deploy:
   -
     provider: script
-    script: .travis/deploy.sh
+    script: /bin/sh ./.travis/deploy.sh
+    skip_cleanup: true
     on:
       repo: chocoteam/choco-solver
       branch: master
       jdk: oraclejdk8
   -
     provider: script
-    script: .travis/deploy.sh
+    script: /bin/sh ./.travis/deploy.sh
+    skip_cleanup: true
     on:
       repo: chocoteam/choco-solver
       tags: true
