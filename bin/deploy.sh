@@ -46,7 +46,7 @@ if [ ${BRANCH} = "release" ]; then
 
 #    #Deploy the artifacts
     echo "** Deploying the artifacts **"
-    mvn -q -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to deploy"
+    mvn -q --settings .travis/settings.xml -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to deploy"
 
     #Set the next development version
     echo "** Prepare master for the next version **"
