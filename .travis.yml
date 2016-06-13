@@ -62,6 +62,7 @@ deploy:
       repo: chocoteam/choco-solver
       branch: master
       jdk: oraclejdk8
+      condition: $GROUP = 10s
   -
     provider: script
     script: /bin/sh ./.travis/deploy.sh
@@ -70,6 +71,7 @@ deploy:
       repo: chocoteam/choco-solver
       tags: true
       jdk: oraclejdk8
+      condition: $GROUP = 10s
 
 ####
 # based on: https://dracoblue.net/dev/uploading-snapshots-and-releases-to-maven-central-with-travis/
