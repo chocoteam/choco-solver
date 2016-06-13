@@ -162,12 +162,14 @@ The next step is to add the jar file to your classpath of your application and a
 The required dependencies for compilation are:
 
     dk.brics.automaton:automaton:1.11-8
-    args4j:args4j:2.32
+    args4j:args4j:2.33
     org.javabits.jgrapht:jgrapht-core:0.9.3
-    net.sf.trove4j:trove4j:3.0.3
     com.github.cp-profiler:cpprof-java:1.1.0
+    org.choco-solver:choco-sat:1.0.2
+    net.sf.trove4j:trove4j:3.0.3
     org.zeromq:jeromq:0.3.4
     com.google.protobuf:protobuf-java:2.6.1
+
 
 They are available on Maven Repository (http://mvnrepository.com/).
 
