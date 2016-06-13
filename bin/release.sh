@@ -16,6 +16,7 @@ git pull --rebase origin master || quit "unable to pull master"
 
 #Establish the version, maven side, misc. side
 ./bin/set_version.sh ${VERSION}
+mvn license:format -q || quit "unable to update license"
 git commit -m "initiate release ${VERSION}" -a || quit "unable to commit last changes"
 git push origin master || quit "unable  to push on master"
 
