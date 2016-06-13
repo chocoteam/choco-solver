@@ -2,13 +2,12 @@
 echo "Start release with zip option on"
 VERSION=$1
 mkdir choco-${VERSION}
-git checkout choco-${VERSION}
+git checkout ${VERSION}
 mvn clean install -DskipTests || exit 1
 
-mv ./choco-solver/target/choco-solver-${VERSION}.jar ./choco-${VERSION}
-mv ./choco-solver/target/choco-solver-${VERSION}-with-dependencies.jar ./choco-${VERSION}
-mv ./choco-solver/target/choco-solver-${VERSION}-sources.jar ./choco-${VERSION}
-mv ./choco-samples/target/choco-samples-${VERSION}-sources.jar ./choco-${VERSION}
+mv ./target/choco-solver-${VERSION}.jar ./choco-${VERSION}
+mv ./target/choco-solver-${VERSION}-with-dependencies.jar ./choco-${VERSION}
+mv ./target/choco-solver-${VERSION}-sources.jar ./choco-${VERSION}
 
 cp ./user_guide.pdf ./choco-${VERSION}/user_guide-${VERSION}.pdf
 cp ./README.md ./choco-${VERSION}
@@ -28,8 +27,8 @@ rm -r /Volumes/htdocs/apidocs/*
 cp -r ./target/site/apidocs/* /Volumes/htdocs/apidocs/
 rm -r /Volumes/htdocs/user_guide/*
 rm -r ../Choco3-docs/html/*
-cd ./docs/ && make html && cd ..
+cd ./src/sphinx/ && make html && cd ../..
 cp -r ../Choco3-docs/html/ /Volumes/htdocs/user_guide/
 
-git checkout develop
+git checkout master
 rmdir choco-${VERSION}
