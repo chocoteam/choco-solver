@@ -51,6 +51,8 @@ after_success:
 - travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
 
 before_deploy:
+  - echo $GPG_EXECUTABLE
+  - echo $GPG_SECRET_KEYS | base64 --decode
   - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
   - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 deploy:
