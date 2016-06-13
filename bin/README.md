@@ -35,8 +35,6 @@ And run license check:
 
     $ ./bin/release.sh
 
-    $ ./bin/deploy.sh
-
     However, deployment and zip file (jar files, user guide and javadoc) need to be done locally:
 
     ./bin/package.sh X.Y.Z
