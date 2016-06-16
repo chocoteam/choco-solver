@@ -35,8 +35,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
-import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 
@@ -52,7 +50,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 15/06/2016
  */
-public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy<V> implements IMonitorRestart, IMonitorSolution, IMonitorContradiction {
+public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy<V> implements IMonitorContradiction {
 
     //***********************************************************************************
     // VARIABLES
@@ -67,11 +65,6 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
      * The main strategy declared in the solver
      */
     protected AbstractStrategy<V> mainStrategy;
-
-    /**
-     * Set to <tt>true</tt> when this strategy is active
-     */
-    protected boolean active;
     /**
      * Store the variables in conflict
      */
@@ -108,7 +101,6 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
         this.model = model;
         this.mainStrategy = mainStrategy;
         model.getSolver().plugMonitor(this);
-        active = false;
         // internal datastructures
         vars = new ArrayList<>();
         var2pos = new TIntIntHashMap(16, .5f, -1, -1);
@@ -129,16 +121,13 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     @SuppressWarnings("unchecked")
     @Override
     public Decision<V> getDecision() {
-        if (active) {
-            V decVar = firstNotInst();
-            if (decVar != null) {
-                Decision d = mainStrategy.computeDecision(decVar);
-                if (d != null) {
-                    return d;
-                }
+        V decVar = firstNotInst();
+        if (decVar != null) {
+            Decision d = mainStrategy.computeDecision(decVar);
+            if (d != null) {
+                return d;
             }
         }
-        active = true;
         return mainStrategy.getDecision();
     }
 
@@ -163,8 +152,8 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
             // then retrieve lcft
             if (pcft > -1) {
                 next.add(-1);
-                next.set(pos - 1, pos);
-                prev.add(prev.size() - 1);
+                next.set(pcft, pos);
+                prev.add(pcft);
             } else {
                 assert pos == 0;
                 prev.add(-1);
@@ -176,29 +165,14 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
             if (p > -1) {
                 next.set(p, n);
             }
+            next.set(pcft, pos);
+            next.set(pos, -1);
             if (n > -1) {
                 prev.set(n, p);
             }
-            next.set(pos, -1/*next.get(pcft)*/);
-            next.set(pcft, pos);
             prev.set(pos, pcft);
         }
         pcft = pos;
-    }
-
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
-        active = false;
-    }
-
-    @Override
-    public void onSolution() {
-        active = false;
     }
 
     //***********************************************************************************
@@ -215,6 +189,22 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
             p = prev.get(p);
         }
         return null;
+    }
+
+    boolean check(){
+        boolean ok = true;
+        int first = -1;
+        for(int i = 0; i < vars.size() && ok; i++){
+            int p = prev.get(i);
+            int n = next.get(i);
+            ok = (i == pcft && n == -1) || prev.get(n) == i;
+            ok &= p == -1 || next.get(p) == i;
+            if(p == -1){
+                ok &= first == -1;
+                first = i;
+            }
+        }
+        return ok;
     }
 
 }

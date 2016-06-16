@@ -5,9 +5,12 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Random;
 
 /**
  * <br/>
@@ -29,7 +32,7 @@ public class ConflictOrderingSearchTest {
     }
 
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public void testStampIt1() throws Exception {
         cos.stampIt(mvars[0]);
         Assert.assertEquals(cos.vars.size(), 1);
@@ -91,7 +94,7 @@ public class ConflictOrderingSearchTest {
         Assert.assertEquals(cos.pcft, 3);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public void testStampIt2() throws Exception {
         cos.stampIt(mvars[0]);
         Assert.assertEquals(cos.vars.size(), 1);
@@ -107,7 +110,23 @@ public class ConflictOrderingSearchTest {
         Assert.assertEquals(cos.pcft, 0);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
+    public void testStampIt3() throws Exception {
+        for(int n = 3; n < 20; n++) {
+            IntVar[] cvars = model.intVarArray(n, 1, 1);
+            Random rnd = new Random(0);
+            for (int i = 0; i < 200; i++) {
+                for (int j = 0; j < (n * 3 / 2) + 1; j++) {
+                    int x = rnd.nextInt(n);
+                    cos.stampIt(cvars[x]);
+                    Assert.assertTrue(cos.check());
+                    Assert.assertNull(cos.firstNotInst());
+                }
+            }
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
     public void testfirstNotInst() throws ContradictionException {
         cos.stampIt(mvars[0]);
         cos.stampIt(mvars[1]);
@@ -126,6 +145,17 @@ public class ConflictOrderingSearchTest {
         mvars[1].instantiateTo(0, Cause.Null);
         mvars[0].instantiateTo(0, Cause.Null);
         Assert.assertNull(cos.firstNotInst());
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testM1(){
+        Model model = ProblemMaker.makeGolombRuler(6);
+        model.getSolver().setSearch(Search.conflictOrderingSearch(
+                Search.domOverWDegSearch(model.retrieveIntVars(
+                        true
+                ))
+        ));
+        model.getSolver().findAllSolutions();
     }
 
 }
