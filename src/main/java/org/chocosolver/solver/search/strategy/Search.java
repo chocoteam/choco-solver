@@ -56,7 +56,7 @@ public class Search {
    	 * @return last conflict strategy
    	 */
     public static AbstractStrategy lastConflict(AbstractStrategy formerSearch) {
-   		return new LastConflict(formerSearch.getVariables()[0].getModel(), formerSearch,1);
+   		return lastConflict(formerSearch, 1);
    	}
 
     /**
