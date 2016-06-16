@@ -59,6 +59,25 @@ public class Search {
    		return new LastConflict(formerSearch.getVariables()[0].getModel(), formerSearch,1);
    	}
 
+    /**
+     * Use the last conflict heuristic as a pluggin to improve a former search heuristic
+     * Should be set after specifying a search strategy.
+     * @param k the maximum number of conflicts to store
+     * @return last conflict strategy
+     */
+    public static AbstractStrategy lastConflict(AbstractStrategy formerSearch, int k) {
+        return new LastConflict(formerSearch.getVariables()[0].getModel(), formerSearch, k);
+    }
+
+    /**
+     * Use the conflict ordering search as a pluggin to improve a former search heuristic
+     * Should be set after specifying a search strategy.
+     * @return last conflict strategy
+     */
+    public static AbstractStrategy conflictOrderingSearch(AbstractStrategy formerSearch) {
+        return new ConflictOrderingSearch<>(formerSearch.getVariables()[0].getModel(), formerSearch);
+    }
+
    	/**
    	 * Make the input search strategy greedy, that is, decisions can be applied but not refuted.
    	 * @param search a search heuristic building branching decisions
