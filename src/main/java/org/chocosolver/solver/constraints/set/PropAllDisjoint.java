@@ -126,7 +126,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
             }
             for (int j : vars[i].getLB()) {
                 for (int i2 = 0; i2 < n; i2++) {
-                    if (i2 != i && vars[i2].getLB().contain(j)) {
+                    if (i2 != i && vars[i2].getLB().contains(j)) {
                         return ESat.FALSE;
                     }
                 }

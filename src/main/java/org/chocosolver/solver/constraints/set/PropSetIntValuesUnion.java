@@ -84,7 +84,7 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 			}
 			if(support == -1){
 				values.remove(v, this);
-			}else if(support!=-2 && values.getLB().contain(v)){
+			}else if(support!=-2 && values.getLB().contains(v)){
 				X[support].instantiateTo(v, this);
 			}
 		}
@@ -93,7 +93,7 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 				values.force(X[i].getValue(), this);
 			}else {
 				for (int v = X[i].getLB(); v <= X[i].getUB(); v = X[i].nextValue(v)) {
-					if (!values.getUB().contain(v)) {
+					if (!values.getUB().contains(v)) {
 						X[i].removeValue(v, this);
 					}
 				}
@@ -120,7 +120,7 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 			}
 		}
 		for(IntVar x:X){
-			if(x.isInstantiated() && !values.getUB().contain(x.getValue())){
+			if(x.isInstantiated() && !values.getUB().contains(x.getValue())){
 				return ESat.FALSE;
 			}
 		}

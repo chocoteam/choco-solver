@@ -89,7 +89,7 @@ public class PropSymmetric extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
             for (int j : vars[i].getUB()) {
-                if (j < offSet || j >= n + offSet || !vars[j - offSet].getUB().contain(i + offSet)) {
+                if (j < offSet || j >= n + offSet || !vars[j - offSet].getUB().contains(i + offSet)) {
                     vars[i].remove(j, this);
                 }
             }
@@ -115,7 +115,7 @@ public class PropSymmetric extends Propagator<SetVar> {
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
             for (int j : vars[i].getLB()) {
-                if (!vars[j - offSet].getUB().contain(i + offSet)) {
+                if (!vars[j - offSet].getUB().contains(i + offSet)) {
                     return ESat.FALSE;
                 }
             }

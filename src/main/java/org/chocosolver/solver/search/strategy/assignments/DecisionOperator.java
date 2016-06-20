@@ -198,7 +198,7 @@ public interface DecisionOperator<V extends Variable>  {
 
         @Override
         public boolean isValid(SetVar var, int element) {
-            return var.getUB().contain(element) && !var.getLB().contain(element);
+            return var.getUB().contains(element) && !var.getLB().contains(element);
         }
 
         @Override
@@ -226,7 +226,7 @@ public interface DecisionOperator<V extends Variable>  {
 
         @Override
         public boolean isValid(SetVar var, int element) {
-			return var.getUB().contain(element) && !var.getLB().contain(element);
+			return var.getUB().contains(element) && !var.getLB().contains(element);
         }
 
         @Override

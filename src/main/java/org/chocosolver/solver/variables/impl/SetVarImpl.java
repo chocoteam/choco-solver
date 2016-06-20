@@ -94,7 +94,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 		}
 		for(int i:ker){
 			lb.add(i);
-			if(!ub.contain(i)){
+			if(!ub.contains(i)){
 				throw new UnsupportedOperationException("Invalid SetVar domain definition : "
 						+i+" is in the LB but not in the UB.");
 			}
@@ -120,7 +120,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 		lbReadOnly = new Set_ReadOnly(lb);
 		ubReadOnly = new Set_ReadOnly(ub);
 		for(int i:lb){
-			if(!ub.contain(i)){
+			if(!ub.contains(i)){
 				throw new UnsupportedOperationException("Invalid SetVar domain definition : "
 						+i+" is in the LB but not in the UB.");
 			}
@@ -165,7 +165,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 
     @Override
     public boolean isInstantiated() {
-        return ub.getSize() == lb.getSize();
+        return ub.size() == lb.size();
     }
 
 	@Override
@@ -181,7 +181,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	@Override
 	public IntVar getCard() {
 		if(cardinality==null){
-			int ubc =  ub.getSize(), lbc = lb.getSize();
+			int ubc =  ub.size(), lbc = lb.size();
 			if(ubc==lbc) cardinality = model.intVar(ubc);
 			else{
 				cardinality = model.intVar(name+".card", lbc, ubc);
@@ -204,7 +204,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	@Override
     public boolean force(int element, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (!ub.contain(element)) {
+        if (!ub.contains(element)) {
             contradiction(cause, "");
             return true;
         }
@@ -222,7 +222,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public boolean remove(int element, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (lb.contain(element)) {
+        if (lb.contains(element)) {
             contradiction(cause, "");
             return true;
         }
@@ -243,12 +243,12 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         for (int i : value) {
             force(i, cause);
         }
-        if (lb.getSize() != value.length) {
+        if (lb.size() != value.length) {
             contradiction(cause, "");
         }
-        if (ub.getSize() != value.length) {
+        if (ub.size() != value.length) {
             for (int i : getUB()) {
-                if (!getLB().contain(i)) {
+                if (!getLB().contains(i)) {
                     remove(i, cause);
                 }
             }

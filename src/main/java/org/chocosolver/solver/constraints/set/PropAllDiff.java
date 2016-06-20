@@ -85,16 +85,16 @@ public class PropAllDiff extends Propagator<SetVar> {
     @Override
     public void propagate(int idx, int mask) throws ContradictionException {
         if (vars[idx].isInstantiated()) {
-            int s = vars[idx].getUB().getSize();
+            int s = vars[idx].getUB().size();
             for (int i = 0; i < n; i++) {
                 if (i != idx) {
-                    int sei = vars[i].getUB().getSize();
-                    int ski = vars[i].getLB().getSize();
+                    int sei = vars[i].getUB().size();
+                    int ski = vars[i].getLB().size();
                     if (ski >= s - 1 && sei <= s + 1) {
                         int nbSameInKer = 0;
                         int diff = -1;
                         for (int j : vars[idx].getLB())
-                            if (vars[i].getLB().contain(j)) {
+                            if (vars[i].getLB().contains(j)) {
                                 nbSameInKer++;
                             } else {
                                 diff = j;
@@ -107,7 +107,7 @@ public class PropAllDiff extends Propagator<SetVar> {
                                     vars[i].force(j, this);
                             }
                         } else if (sei == s && nbSameInKer == s - 1) { // remove other (if same elements in ker)
-                            if (vars[i].getUB().contain(diff)) {
+                            if (vars[i].getUB().contains(diff)) {
                                 vars[i].remove(diff, this);
                             }
                         }
@@ -133,11 +133,11 @@ public class PropAllDiff extends Propagator<SetVar> {
     }
 
     private boolean same(int i, int i2) {
-        if (vars[i].getUB().getSize() < vars[i2].getLB().getSize()) return false;
-        if (vars[i2].getUB().getSize() < vars[i].getLB().getSize()) return false;
+        if (vars[i].getUB().size() < vars[i2].getLB().size()) return false;
+        if (vars[i2].getUB().size() < vars[i].getLB().size()) return false;
         if (vars[i].isInstantiated() && vars[i2].isInstantiated()) {
             for (int j : vars[i].getLB()) {
-                if (!vars[i2].getUB().contain(j)) {
+                if (!vars[i2].getUB().contains(j)) {
                     return false;
                 }
             }

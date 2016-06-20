@@ -288,7 +288,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         // iterate over the values in the domain, remove the ones that are not in values
         for (int index = INDICES.nextSetBit(LB.get() + 1); index > -1 && index <= to; index = INDICES.nextSetBit(index + 1)) {
             value = VALUES[index];
-            if (!values.contain(value)) {
+            if (!values.contains(value)) {
                 model.getSolver().getExplainer().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);

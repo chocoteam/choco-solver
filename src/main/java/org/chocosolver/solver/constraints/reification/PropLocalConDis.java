@@ -205,7 +205,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
                 // check if domain has changed
                 if (cardinalities[p] > vars[p].getDomainSize()) {
                     IntIterableSetUtils.union(domains.get(p), vars[p]);
-                    if (domains.get(p).getSize() == cardinalities[p]) {
+                    if (domains.get(p).size() == cardinalities[p]) {
                         toUnion.clear(p);
                     }
                 } else {

@@ -99,10 +99,10 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
 			setPassive();
 		}else {
 			ISet ub = set.getUB();
-			if (ub.getSize() == 0) {
+			if (ub.size() == 0) {
 				fails();
 			} else {
-				if(ub.contain(iv.getLB()) && ub.contain(iv.getUB())){
+				if(ub.contains(iv.getLB()) && ub.contains(iv.getUB())){
 					return;
 				}
 				int max = ub.iterator().next();
@@ -123,10 +123,10 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         if (iv.isInstantiated()) {
-            if (!set.getUB().contain(iv.getValue())) {
+            if (!set.getUB().contains(iv.getValue())) {
                 return ESat.FALSE;
             } else {
-                if (set.getLB().contain(iv.getValue())) {
+                if (set.getLB().contains(iv.getValue())) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;
@@ -137,7 +137,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
             int ub = iv.getUB();
             boolean all = true;
             for (int i = lb; i <= ub; i++) {
-                if (!set.getLB().contain(i)) {
+                if (!set.getLB().contains(i)) {
                     all = false;
                     break;
                 }
@@ -146,7 +146,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
                 return ESat.TRUE;
             }
             for (int i = lb; i <= ub; i++) {
-                if (set.getUB().contain(i)) {
+                if (set.getUB().contains(i)) {
                     return ESat.UNDEFINED;
                 }
             }

@@ -98,7 +98,7 @@ public class PropSubsetEq extends Propagator<SetVar> {
             vars[1].force(j, this);
         }
         for (int j : vars[0].getUB()) {
-            if (!vars[1].getUB().contain(j))
+            if (!vars[1].getUB().contains(j))
                 vars[0].remove(j, this);
         }
         sdm[0].unfreeze();
@@ -118,12 +118,12 @@ public class PropSubsetEq extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int j : vars[0].getLB()) {
-            if (!vars[1].getUB().contain(j)) {
+            if (!vars[1].getUB().contains(j)) {
                 return ESat.FALSE;
             }
         }
         for (int j : vars[0].getUB()) {
-            if (!vars[1].getLB().contain(j)) {
+            if (!vars[1].getLB().contains(j)) {
                 return ESat.UNDEFINED;
             }
         }

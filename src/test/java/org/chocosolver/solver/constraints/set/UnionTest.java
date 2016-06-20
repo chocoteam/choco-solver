@@ -86,7 +86,7 @@ public class UnionTest {
             ISet computed = SetFactory.makeLinkedList();
             for (SetVar setVar : setVars) {
                 for (Integer value : setVar.getValue()) {
-                    assertTrue(union.getValue().contain(value));
+                    assertTrue(union.getValue().contains(value));
                     computed.add(value);
                 }
             }

@@ -141,7 +141,7 @@ public class DirectedGraph implements IGraph {
 
     @Override
     public boolean addNode(int x) {
-        return !nodes.contain(x) && nodes.add(x);
+        return !nodes.contains(x) && nodes.add(x);
     }
 
     @Override
@@ -157,8 +157,8 @@ public class DirectedGraph implements IGraph {
             predecessors[x].clear();
             return true;
         }
-        assert (predecessors[x].getSize() == 0) : "incoherent directed graph";
-        assert (successors[x].getSize() == 0) : "incoherent directed graph";
+        assert (predecessors[x].size() == 0) : "incoherent directed graph";
+        assert (successors[x].size() == 0) : "incoherent directed graph";
         return false;
     }
 
@@ -170,8 +170,8 @@ public class DirectedGraph implements IGraph {
      * @return true iff arc (from,to) was in the graph
      */
     public boolean removeArc(int from, int to) {
-        if (successors[from].contain(to)) {
-            assert (predecessors[to].contain(from)) : "incoherent directed graph";
+        if (successors[from].contains(to)) {
+            assert (predecessors[to].contains(from)) : "incoherent directed graph";
             successors[from].remove(to);
             predecessors[to].remove(from);
             return true;
@@ -187,8 +187,8 @@ public class DirectedGraph implements IGraph {
      * @return true iff arc (from,to) exists in the graph
      */
     public boolean arcExists(int from, int to) {
-        if (successors[from].contain(to)) {
-            assert (predecessors[to].contain(from)) : "incoherent directed graph";
+        if (successors[from].contains(to)) {
+            assert (predecessors[to].contains(from)) : "incoherent directed graph";
             return true;
         }
         return false;
@@ -214,8 +214,8 @@ public class DirectedGraph implements IGraph {
     public boolean addArc(int from, int to) {
         addNode(from);
         addNode(to);
-        if (!successors[from].contain(to)) {
-            assert (!predecessors[to].contain(from)) : "incoherent directed graph";
+        if (!successors[from].contains(to)) {
+            assert (!predecessors[to].contains(from)) : "incoherent directed graph";
             successors[from].add(to);
             predecessors[to].add(from);
             return true;

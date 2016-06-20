@@ -88,15 +88,15 @@ public class PropCardinality extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int k = set.getLB().getSize();
+        int k = set.getLB().size();
         card.updateLowerBound(k, this);
-        int e = set.getUB().getSize();
+        int e = set.getUB().size();
         card.updateUpperBound(e, this);
         if (card.isInstantiated()) {
             int c = card.getValue();
             if (c == k) {
                 for (int j : set.getUB()) {
-                    if (!set.getLB().contain(j)) {
+                    if (!set.getLB().contains(j)) {
                         set.remove(j, this);
                     }
                 }
@@ -110,8 +110,8 @@ public class PropCardinality extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        int k = set.getLB().getSize();
-        int e = set.getUB().getSize();
+        int k = set.getLB().size();
+        int e = set.getUB().size();
         if (k > card.getUB() || e < card.getLB()) {
             return ESat.FALSE;
         }

@@ -71,7 +71,7 @@ public class Set_Std_Swap extends Set_Swap {
 	//***********************************************************************************
 
     @Override
-    public int getSize() {
+    public int size() {
         return size.get();
     }
 

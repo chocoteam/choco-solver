@@ -158,7 +158,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
         int card = 0;
         for (int i = 0; i < n; i++) {
-            if (digraph.getPredOf(i).getSize()>0) {
+            if (digraph.getPredOf(i).size()>0) {
                 card++;
             }
         }
@@ -242,7 +242,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (digraph.getPredOf(i).contain(j)) {
+                    if (digraph.getPredOf(i).contains(j)) {
                         v.instantiateTo(k, this);
                     } else {
                         v.removeValue(k, this);
@@ -289,12 +289,12 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         digraph.removeNode(n2 + 1);
         free.clear();
         for (int i = 0; i < n; i++) {
-            if (digraph.getPredOf(i).getSize() == 0) {
+            if (digraph.getPredOf(i).size() == 0) {
                 free.set(i);
             }
         }
         for (int i = n; i < n2; i++) {
-            if (digraph.getSuccOf(i).getSize() == 0) {
+            if (digraph.getSuccOf(i).size() == 0) {
                 free.set(i);
             }
         }

@@ -128,14 +128,14 @@ public class PropMaxElement extends Propagator<Variable> {
                 }
             }
         }
-        if (notEmpty || set.getLB().getSize() > 0) {
+        if (notEmpty || set.getLB().size() > 0) {
             max.updateUpperBound(maxVal, this);
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if (set.getUB().getSize() == 0) {
+        if (set.getUB().size() == 0) {
             if (notEmpty) {
                 return ESat.FALSE;
             } else {
@@ -155,7 +155,7 @@ public class PropMaxElement extends Propagator<Variable> {
                 maxVal = get(j);
             }
         }
-        if (maxVal < lb && (notEmpty || set.getLB().getSize() > 0)) {
+        if (maxVal < lb && (notEmpty || set.getLB().size() > 0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {

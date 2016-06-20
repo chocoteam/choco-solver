@@ -79,13 +79,13 @@ public class Set_ReadOnly implements ISet {
     }
 
     @Override
-    public boolean contain(int element) {
-        return set.contain(element);
+    public boolean contains(int element) {
+        return set.contains(element);
     }
 
     @Override
-    public int getSize() {
-        return set.getSize();
+    public int size() {
+        return set.size();
     }
 
     @Override

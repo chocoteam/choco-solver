@@ -47,7 +47,7 @@ public class ConstantSetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testSize() {
         ISet set = create();
-        assertEquals(set.getSize(), 3);
+        assertEquals(set.size(), 3);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -57,9 +57,9 @@ public class ConstantSetTest {
         for (Integer i : set) {
             reached.add(i);
         }
-        assertEquals(reached.size(), set.getSize());
+        assertEquals(reached.size(), set.size());
         for(int i=-5;i<=20;i++){
-            assertEquals(reached.contains(i),set.contain(i));
+            assertEquals(reached.contains(i),set.contains(i));
         }
         assertEquals(reached.size(), 4);
         assertTrue(reached.contains(0));
@@ -89,7 +89,7 @@ public class ConstantSetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testDuplicates() {
         ISet set = SetFactory.makeConstantSet(new int[]{0, 5, 5, 8});
-        assertEquals(set.getSize(), 3);
+        assertEquals(set.size(), 3);
     }
 
     private ISet create() {

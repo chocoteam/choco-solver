@@ -90,7 +90,7 @@ public class PropDiffN extends Propagator<IntVar> {
 				overlappingBoxes.removeEdge(v, i);
 			}
 		}
-		if (!boxesToCompute.contain(v)) {
+		if (!boxesToCompute.contains(v)) {
 			boxesToCompute.add(v);
 		}
 		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);

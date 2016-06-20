@@ -82,7 +82,7 @@ public class IntCstMemberTest {
         int nbSol = 0;
         while(model.getSolver().solve()) {
             nbSol++;
-            assertTrue(set.getValue().contain(value));
+            assertTrue(set.getValue().contains(value));
         }
         assertTrue(nbSol > 0);
         return nbSol;

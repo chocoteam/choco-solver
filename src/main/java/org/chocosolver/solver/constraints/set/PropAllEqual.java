@@ -101,7 +101,7 @@ public class PropAllEqual extends Propagator<SetVar> {
 			TIntArrayList toRemove = new TIntArrayList();
 			for (int j : vars[0].getUB()) {
 				for (int i = 1; i < n; i++) {
-					if(!vars[i].getUB().contain(j)){
+					if(!vars[i].getUB().contains(j)){
 						toRemove.add(j);
 						break;
 					}
@@ -109,7 +109,7 @@ public class PropAllEqual extends Propagator<SetVar> {
 			}
             for (int i = 0; i < n; i++) {
 				for (int j : vars[i].getUB()) {
-					if((i>0 && !vars[0].getUB().contain(j)) || toRemove.contains(j)){
+					if((i>0 && !vars[0].getUB().contains(j)) || toRemove.contains(j)){
 						vars[i].remove(j, this);
 					}
 				}
@@ -142,7 +142,7 @@ public class PropAllEqual extends Propagator<SetVar> {
             }
             for (int j : vars[i].getLB()) {
                 for (int i2 = 0; i2 < n; i2++) {
-                    if (!vars[i2].getUB().contain(j)) {
+                    if (!vars[i2].getUB().contains(j)) {
                         return ESat.FALSE;
                     }
                 }

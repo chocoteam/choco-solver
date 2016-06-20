@@ -103,7 +103,7 @@ public class IntersectionTest {
                 }
             }
             for (Integer inIntersect : intersect.getValue()) {
-                assertTrue(computed.contain(inIntersect));
+                assertTrue(computed.contains(inIntersect));
             }
         }
         assertTrue(nbSol > 0);

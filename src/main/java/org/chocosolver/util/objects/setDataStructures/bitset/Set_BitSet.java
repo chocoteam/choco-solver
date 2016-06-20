@@ -115,7 +115,7 @@ public class Set_BitSet extends BitSet implements ISet {
 
 	@Override
 	public boolean remove(int element) {
-		if(contain(element)) {
+		if(contains(element)) {
 			clear(element - offset);
 			card--;
 			return true;
@@ -125,12 +125,12 @@ public class Set_BitSet extends BitSet implements ISet {
 	}
 
 	@Override
-	public boolean contain(int element) {
+	public boolean contains(int element) {
 		return element >= offset && get(element - offset);
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return card;
 	}
 

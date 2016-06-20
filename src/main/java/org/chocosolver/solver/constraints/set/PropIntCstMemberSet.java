@@ -81,9 +81,9 @@ public class PropIntCstMemberSet extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-		if(vars[0].getLB().contain(cst)){
+		if(vars[0].getLB().contains(cst)){
 			return ESat.TRUE;
-		}else if(vars[0].getUB().contain(cst)){
+		}else if(vars[0].getUB().contains(cst)){
 			return ESat.UNDEFINED;
 		}else{
 			return ESat.FALSE;

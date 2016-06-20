@@ -129,7 +129,7 @@ public class IntIterableBitSet implements IntIterableSet {
     public boolean retainAll(IntIterableSet set) {
         boolean modified = false;
         for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
-            if (!set.contain(i + offset)) {
+            if (!set.contains(i + offset)) {
                 values.clear(i);
                 modified = true;
             }
@@ -148,7 +148,7 @@ public class IntIterableBitSet implements IntIterableSet {
     public boolean removeAll(IntIterableSet set) {
         boolean modified = false;
         for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
-            if (set.contain(i + offset)) {
+            if (set.contains(i + offset)) {
                 values.clear(i);
                 modified = true;
             }
@@ -212,7 +212,7 @@ public class IntIterableBitSet implements IntIterableSet {
     }
 
     @Override
-    public boolean contain(int aValue) {
+    public boolean contains(int aValue) {
         aValue -= offset;
         return aValue > -1 && aValue < values.length() && values.get(aValue);
     }
@@ -245,7 +245,7 @@ public class IntIterableBitSet implements IntIterableSet {
     }
 
     @Override
-    public int getSize() {
+    public int size() {
         return values.cardinality();
     }
 

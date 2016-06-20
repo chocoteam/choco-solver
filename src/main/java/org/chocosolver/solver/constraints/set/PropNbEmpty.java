@@ -108,9 +108,9 @@ public class PropNbEmpty extends Propagator<Variable> {
             canBeEmpty.clear();
             isEmpty.clear();
             for (int i = 0; i < n; i++) {
-                if (sets[i].getLB().getSize() == 0) {
+                if (sets[i].getLB().size() == 0) {
                     nbMax++;
-                    if (sets[i].getUB().getSize() == 0) {
+                    if (sets[i].getUB().size() == 0) {
                         nbMin++;
                         isEmpty.add(i);
                     } else {
@@ -127,12 +127,12 @@ public class PropNbEmpty extends Propagator<Variable> {
     @Override
     public void propagate(int v, int mask) throws ContradictionException {
         if (v < n) {
-            if (canBeEmpty.contain(v)) {
-                if (sets[v].getLB().getSize() > 0) {
+            if (canBeEmpty.contains(v)) {
+                if (sets[v].getLB().size() > 0) {
                     canBeEmpty.remove(v);
                     nbMaybeEmpty.add(-1);
                 } else {
-                    if (sets[v].getUB().getSize() == 0) {
+                    if (sets[v].getUB().size() == 0) {
                         isEmpty.add(v);
                         canBeEmpty.remove(v);
                         nbMaybeEmpty.add(-1);
@@ -163,7 +163,7 @@ public class PropNbEmpty extends Propagator<Variable> {
             if (nbEmpty.getValue() == nbMin) {
                 boolean allFixed = true;
                 for (int i : canBeEmpty) {
-                    if (sets[i].getUB().getSize() == 1) {
+                    if (sets[i].getUB().size() == 1) {
                         int val = sets[i].getUB().iterator().next();
                         sets[i].force(val, this);
                         canBeEmpty.remove(i);
@@ -183,9 +183,9 @@ public class PropNbEmpty extends Propagator<Variable> {
         int nbMin = 0;
         int nbMax = 0;
         for (int i = 0; i < n; i++) {
-            if (sets[i].getLB().getSize() == 0) {
+            if (sets[i].getLB().size() == 0) {
                 nbMax++;
-                if (sets[i].getUB().getSize() == 0) {
+                if (sets[i].getUB().size() == 0) {
                     nbMin++;
                 }
             }

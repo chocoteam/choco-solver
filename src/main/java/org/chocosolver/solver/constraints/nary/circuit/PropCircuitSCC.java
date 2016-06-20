@@ -203,7 +203,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int next = -1;
 		ISet succs = G_R.getSuccOf(node);
 		for(int x:succs){
-			if (G_R.getPredOf(x).getSize() == 1) {
+			if (G_R.getPredOf(x).size() == 1) {
 				if (next != -1) {
 					return 0;
 				}
@@ -237,7 +237,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 				if(to==source){
 					to = n;
 				}
-				if (to != -1 && sccOf[to] != x && mates[x].getSize() > 1) {
+				if (to != -1 && sccOf[to] != x && mates[x].size() > 1) {
 					arc = (i + 1) * n2 + to;
 					for (int a:mates[x]) {
 						if (a != arc) {

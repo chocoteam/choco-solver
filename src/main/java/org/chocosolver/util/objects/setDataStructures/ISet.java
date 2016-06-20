@@ -81,42 +81,24 @@ public interface ISet extends Iterable<Integer>{
      * @param element element to add
      * @return true iff the set contains element
      */
-    boolean contain(int element);
+    boolean contains(int element);
 
     /**
      * @return true iff the set is empty
      */
     default boolean isEmpty(){
-		return getSize()==0;
+		return size()==0;
 	}
 
     /**
      * @return the number of elements in the set
      */
-    int getSize();
+    int size();
 
     /**
      * Remove all elements from the set
      */
     void clear();
-
-	/**
-	 * @return the implementation type of this set
-	 */
-	SetType getSetType();
-
-	/**
-	 * Copies the set in an array if integers
-	 * @return an array containing every integer of the set
-	 */
-	default int[] toArray(){
-		int[] a = new int[getSize()];
-		int idx = 0;
-		for(int i:this){
-			a[idx++] = i;
-		}
-		return a;
-	}
 
 	/**
 	 * @return the smallest element in the set
@@ -131,4 +113,22 @@ public interface ISet extends Iterable<Integer>{
 	 * Time complexity is linear for BIPARTITESET and LINKED_LIST (constant time otherwise)
 	 */
 	int max();
+
+	/**
+	 * @return the implementation type of this set
+	 */
+	SetType getSetType();
+
+	/**
+	 * Copies the set in an array if integers
+	 * @return an array containing every integer of the set
+	 */
+	default int[] toArray(){
+		int[] a = new int[size()];
+		int idx = 0;
+		for(int i:this){
+			a[idx++] = i;
+		}
+		return a;
+	}
 }

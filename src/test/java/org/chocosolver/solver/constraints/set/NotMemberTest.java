@@ -131,7 +131,7 @@ public class NotMemberTest {
         boolean solutionFound = false;
         while(model.getSolver().solve()) {
             solutionFound = true;
-            assertFalse(setVar.getValue().contain(var.getValue()));
+            assertFalse(setVar.getValue().contains(var.getValue()));
         }
         assertTrue(solutionFound);
     }

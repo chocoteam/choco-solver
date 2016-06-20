@@ -30,7 +30,6 @@
 package org.chocosolver.util.objects.setDataStructures.iterable;
 
 import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * An interface to store a set of values, to be used with

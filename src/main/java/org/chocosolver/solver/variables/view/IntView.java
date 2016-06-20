@@ -258,7 +258,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         int value = nextValue(nlb);
         // iterate over the values in the domain, remove the ones that are not in values
         for (; value <= to; value = nextValue(value)) {
-            if (!values.contain(value)) {
+            if (!values.contains(value)) {
                 model.getSolver().getExplainer().removeValue(this, value, cause);
                 if(doRemoveValueFromVar(value)){
                     hasRemoved |= true;

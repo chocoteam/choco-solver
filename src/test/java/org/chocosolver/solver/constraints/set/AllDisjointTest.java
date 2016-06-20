@@ -87,7 +87,7 @@ public class AllDisjointTest {
             ISet set = SetFactory.makeBipartiteSet(0);
             for (SetVar setVar : setVars) {
                 for (Integer integer : setVar.getValue()) {
-                    assertFalse(set.contain(integer));
+                    assertFalse(set.contains(integer));
                     set.add(integer);
                 }
             }

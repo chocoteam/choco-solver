@@ -106,7 +106,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
         }
         int ub = iv.getUB();
         for (int i = iv.getLB(); i <= ub; i = iv.nextValue(i)) {
-            if (!set.getUB().contain(i)) {
+            if (!set.getUB().contains(i)) {
                 iv.removeValue(i, this);
             }
         }
@@ -134,10 +134,10 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         if (iv.isInstantiated()) {
-            if (!set.getUB().contain(iv.getValue())) {
+            if (!set.getUB().contains(iv.getValue())) {
                 return ESat.FALSE;
             } else {
-                if (set.getLB().contain(iv.getValue())) {
+                if (set.getLB().contains(iv.getValue())) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;
@@ -148,7 +148,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
             int maxVal = iv.getUB();
             boolean all = true;
             for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
-                if (!set.getLB().contain(i)) {
+                if (!set.getLB().contains(i)) {
                     all = false;
                     break;
                 }
@@ -157,7 +157,7 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
                 return ESat.TRUE;
             }
             for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
-                if (set.getUB().contain(i)) {
+                if (set.getUB().contains(i)) {
                     return ESat.UNDEFINED;
                 }
             }

@@ -88,7 +88,7 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 
 	@Override
 	public boolean remove(int element) {
-		if(contain(element)) {
+		if(contains(element)) {
 			set(element - offset, false);
 			card.add(-1);
 			return true;
@@ -98,12 +98,12 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 	}
 
 	@Override
-	public boolean contain(int element) {
+	public boolean contains(int element) {
 		return element >= offset && get(element - offset);
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return this.card.get();
 	}
 

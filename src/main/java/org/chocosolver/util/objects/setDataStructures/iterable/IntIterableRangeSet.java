@@ -217,7 +217,7 @@ public class IntIterableRangeSet implements IntIterableSet {
         } else {
             int last = max();
             for (int i = min(); i <= last; i = nextValue(i)) {
-                if (!set.contain(i)) {
+                if (!set.contains(i)) {
                     remove(i);
                 }
             }
@@ -409,7 +409,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     @Override
-    public boolean contain(int o) {
+    public boolean contains(int o) {
         return rangeOf(o) >= 0;
     }
 
@@ -423,7 +423,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     @Override
-    public int getSize() {
+    public int size() {
         return CARDINALITY;
     }
 

@@ -65,8 +65,8 @@ public class SubsetEqTest {
         int nbSol = 0;
         while(model.getSolver().solve()) {
             nbSol++;
-            assertTrue(vars[2].getValue().contain(0));
-            assertTrue(vars[2].getValue().contain(1));
+            assertTrue(vars[2].getValue().contains(0));
+            assertTrue(vars[2].getValue().contains(1));
         }
         assertEquals(nbSol, 2);
     }
@@ -107,7 +107,7 @@ public class SubsetEqTest {
             nbSol++;
             for (int i = 0; i < vars.length - 1; i++) {
                 for (Integer value : vars[i].getValue()) {
-                    assertTrue(vars[i + 1].getValue().contain(value));
+                    assertTrue(vars[i + 1].getValue().contains(value));
                 }
             }
         }

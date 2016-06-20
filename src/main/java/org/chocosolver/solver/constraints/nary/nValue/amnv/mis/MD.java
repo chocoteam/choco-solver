@@ -80,7 +80,7 @@ public class MD implements F{
 		out.clear();
 		inMIS.clear();
 		for (int i = 0; i < n; i++) {
-			nbNeighbours[i] = graph.getNeighOf(i).getSize();
+			nbNeighbours[i] = graph.getNeighOf(i).size();
 		}
 		int idx = out.nextClearBit(0);
 		while (idx < n) {

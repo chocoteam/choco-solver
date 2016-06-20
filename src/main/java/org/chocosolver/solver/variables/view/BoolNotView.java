@@ -96,10 +96,10 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (values.contain(0)) {
+        if (values.contains(0)) {
             hasChanged = instantiateTo(1, cause);
         }
-        if (values.contain(1)) {
+        if (values.contains(1)) {
             hasChanged = instantiateTo(0, cause);
         }
         return hasChanged;
@@ -108,10 +108,10 @@ public final class BoolNotView extends IntView implements BoolVar {
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (!values.contain(0)) {
+        if (!values.contains(0)) {
             hasChanged = instantiateTo(1, cause);
         }
-        if (!values.contain(1)) {
+        if (!values.contains(1)) {
             hasChanged = instantiateTo(0, cause);
         }
         return hasChanged;

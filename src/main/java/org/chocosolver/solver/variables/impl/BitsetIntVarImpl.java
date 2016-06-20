@@ -298,7 +298,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         // iterate over the values in the domain, remove the ones that are not in values
         for (int aValue = VALUES.nextSetBit(from); aValue > -1 && aValue <= to; aValue = VALUES.nextSetBit(aValue + 1)) {
             value = aValue + OFFSET;
-            if (!values.contain(value)) {
+            if (!values.contains(value)) {
                 model.getSolver().getExplainer().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
