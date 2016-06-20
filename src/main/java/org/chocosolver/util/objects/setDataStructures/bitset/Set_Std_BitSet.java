@@ -119,6 +119,18 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 	}
 
 	@Override
+	public int min() {
+		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
+		return offset+nextSetBit(0);
+	}
+
+	@Override
+	public int max() {
+		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
+		return offset+prevSetBit(length());
+	}
+
+	@Override
 	public String toString() {
 		String st = "{";
 		for(int i:this){

@@ -114,6 +114,16 @@ public class Set_CstInterval implements ISet {
 	}
 
 	@Override
+	public int min() {
+		return lb;
+	}
+
+	@Override
+	public int max() {
+		return ub;
+	}
+
+	@Override
 	public String toString(){
 		return "["+lb+","+ub+"]";
 	}

@@ -113,6 +113,18 @@ public class Set_FixedArray implements ISet {
 		return SetType.FIXED_ARRAY;
 	}
 
+	@Override
+	public int min() {
+		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
+		return values[0];
+	}
+
+	@Override
+	public int max() {
+		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
+		return values[size-1];
+	}
+
 	//***********************************************************************************
 	// ITERATOR
 	//***********************************************************************************

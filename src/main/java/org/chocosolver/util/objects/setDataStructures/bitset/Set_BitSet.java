@@ -141,6 +141,18 @@ public class Set_BitSet extends BitSet implements ISet {
 	}
 
 	@Override
+	public int min() {
+		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
+		return offset+nextSetBit(0);
+	}
+
+	@Override
+	public int max() {
+		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
+		return offset+previousSetBit(length());
+	}
+
+	@Override
 	public SetType getSetType(){
 		return SetType.BITSET;
 	}

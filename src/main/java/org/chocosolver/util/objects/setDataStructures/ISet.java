@@ -117,4 +117,18 @@ public interface ISet extends Iterable<Integer>{
 		}
 		return a;
 	}
+
+	/**
+	 * @return the smallest element in the set
+	 * throws an exception if the set is empty
+	 * Time complexity is linear for BIPARTITESET and LINKED_LIST (constant time otherwise)
+	 */
+	int min();
+
+	/**
+	 * @return the largest element in the set
+	 * throws an exception if the set is empty
+	 * Time complexity is linear for BIPARTITESET and LINKED_LIST (constant time otherwise)
+	 */
+	int max();
 }

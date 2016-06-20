@@ -152,6 +152,30 @@ public class Set_Swap implements ISet {
 	}
 
 	@Override
+	public int min() {
+		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
+		int min = values[0];
+		for(int i=1;i<getSize();i++){
+			if(min > values[i]){
+				min = values[i];
+			}
+		}
+		return min;
+	}
+
+	@Override
+	public int max() {
+		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
+		int max = values[0];
+		for(int i=1;i<getSize();i++){
+			if(max < values[i]){
+				max = values[i];
+			}
+		}
+		return max;
+	}
+
+	@Override
 	public String toString() {
 		String st = "{";
 		for(int i:this){

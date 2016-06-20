@@ -171,6 +171,35 @@ public abstract class SetTest {
         assertEquals(set.getSize(), 0);
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testMinMax() {
+        ISet set = create(-5);
+		set.add(1);
+        set.add(5);
+		set.add(6);
+		set.add(-2);
+		set.add(3);
+		set.add(10);
+		assertEquals(set.min(), -2);
+		assertEquals(set.max(), 10);
+    }
+
+	@Test(groups="1s", timeOut=60000, expectedExceptions = IllegalStateException.class)
+	public void testEmptyMin() {
+		ISet set = create(0);
+		set.add(1);
+		set.clear();
+		int error = set.min();
+	}
+
+	@Test(groups="1s", timeOut=60000, expectedExceptions = IllegalStateException.class)
+	public void testEmptyMax() {
+		ISet set = create(0);
+		set.add(1);
+		set.remove(1);
+		int error = set.max();
+	}
+
     /**
      * Tests with 2 elements
      */

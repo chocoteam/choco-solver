@@ -102,4 +102,14 @@ public class Set_ReadOnly implements ISet {
 	public SetType getSetType(){
 		return set.getSetType();
 	}
+
+	@Override
+	public int min() {
+		return set.min();
+	}
+
+	@Override
+	public int max() {
+		return set.max();
+	}
 }

@@ -140,6 +140,34 @@ public class Set_LinkedList implements ISet {
 	}
 
 	@Override
+	public int min() {
+		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
+		IntCell current = first;
+		int min = current.element;
+		while(current.next!=null){
+			current = current.next;
+			if(min > current.element){
+				min = current.element;
+			}
+		}
+		return min;
+	}
+
+	@Override
+	public int max() {
+		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
+		IntCell current = first;
+		int max = current.element;
+		while(current.next!=null){
+			current = current.next;
+			if(max < current.element){
+				max = current.element;
+			}
+		}
+		return max;
+	}
+
+	@Override
 	public String toString() {
 		String st = "{";
 		for(int i:this){

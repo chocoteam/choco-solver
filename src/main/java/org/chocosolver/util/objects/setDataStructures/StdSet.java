@@ -129,6 +129,16 @@ public class StdSet implements ISet {
     }
 
     @Override
+   	public int min() {
+   		return set.min();
+   	}
+
+   	@Override
+   	public int max() {
+   		return set.max();
+   	}
+
+    @Override
     public String toString() {
         return set.toString();
     }
