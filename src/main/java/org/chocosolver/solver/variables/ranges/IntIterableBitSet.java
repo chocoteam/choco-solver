@@ -29,7 +29,11 @@
  */
 package org.chocosolver.solver.variables.ranges;
 
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+
 import java.util.BitSet;
+import java.util.Iterator;
 
 /**
  * An IntIterableBitSet based on a BitSet
@@ -40,8 +44,12 @@ import java.util.BitSet;
  */
 public class IntIterableBitSet implements IntIterableSet {
 
-    public BitSet values;
-    int offset;
+    private BitSet values;
+    private int offset;
+
+	/** Create an ISet iterator */
+    private ISetIterator iter = newIterator();
+
 
     public IntIterableBitSet() {
         this.values = new BitSet();
@@ -131,7 +139,12 @@ public class IntIterableBitSet implements IntIterableSet {
         values.clear();
     }
 
-    @Override
+	@Override
+	public SetType getSetType() {
+		return SetType.BITSET;
+	}
+
+	@Override
     public boolean removeBetween(int f, int t) {
         f -= offset;
         t -= offset;
@@ -213,6 +226,12 @@ public class IntIterableBitSet implements IntIterableSet {
     public int size() {
         return values.cardinality();
     }
+
+   	@Override
+   	public Iterator<Integer> iterator(){
+   		iter.reset();
+   		return iter;
+   	}
 
     @Override
     public void plus(int x) {

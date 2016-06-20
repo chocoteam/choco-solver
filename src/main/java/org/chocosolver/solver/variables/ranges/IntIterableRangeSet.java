@@ -31,8 +31,11 @@ package org.chocosolver.solver.variables.ranges;
 
 
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Concret implementation of {@link IntIterableSet} wherein values are stored in range set.
@@ -46,6 +49,10 @@ import java.util.Arrays;
  * @since 14/01/2016.
  */
 public class IntIterableRangeSet implements IntIterableSet {
+
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
     /**
      * Store elements
@@ -62,6 +69,13 @@ public class IntIterableRangeSet implements IntIterableSet {
      */
     protected int CARDINALITY;
 
+	/** Create an ISet iterator */
+    private ISetIterator iter = newIterator();
+
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
+
     /**
      * Create an interval-based ordered set
      */
@@ -70,6 +84,35 @@ public class IntIterableRangeSet implements IntIterableSet {
         SIZE = 0;
         CARDINALITY = 0;
     }
+
+	/**
+	 * Create an interval-based ordered set initialized to [a,b]
+	 *
+	 * @param a lower bound of the interval
+	 * @param b upper bound of the interval
+	 */
+	public IntIterableRangeSet(int a, int b) {
+		ELEMENTS = new int[10];
+		SIZE = 2;
+		CARDINALITY = b - a + 1;
+		ELEMENTS[0] = a;
+		ELEMENTS[1] = b;
+	}
+
+	/**
+	 * Create an interval-based ordered set initialized to singleton {e}
+	 * @param e singleton value
+	 */
+	public IntIterableRangeSet(int e) {
+		ELEMENTS = new int[10];
+		SIZE = 2;
+		CARDINALITY = 1;
+		ELEMENTS[0] = ELEMENTS[1] = e;
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
     @Override
     public String toString() {
@@ -87,31 +130,6 @@ public class IntIterableRangeSet implements IntIterableSet {
         if (SIZE > 0) st.deleteCharAt(st.length() - 1);
         st.append("}");
         return st.toString();
-    }
-
-    /**
-     * Create an interval-based ordered set initialized to [a,b]
-     *
-     * @param a lower bound of the interval
-     * @param b upper bound of the interval
-     */
-    public IntIterableRangeSet(int a, int b) {
-        ELEMENTS = new int[10];
-        SIZE = 2;
-        CARDINALITY = b - a + 1;
-        ELEMENTS[0] = a;
-        ELEMENTS[1] = b;
-    }
-
-    /**
-     * Create an interval-based ordered set initialized to singleton {e}
-     * @param e singleton value
-     */
-    public IntIterableRangeSet(int e) {
-        ELEMENTS = new int[10];
-        SIZE = 2;
-        CARDINALITY = 1;
-        ELEMENTS[0] = ELEMENTS[1] = e;
     }
 
 
@@ -268,6 +286,11 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     @Override
+    public SetType getSetType() {
+        return SetType.RANGESET;
+    }
+
+    @Override
     public boolean removeBetween(int f, int t) {
         boolean rem = false;
         if(f > t){
@@ -416,6 +439,12 @@ public class IntIterableRangeSet implements IntIterableSet {
             ELEMENTS[i] += x;
         }
     }
+
+   	@Override
+   	public Iterator<Integer> iterator(){
+   		iter.reset();
+   		return iter;
+   	}
 
     /**
      * subtract the value <i>x</i> to all integers stored in this set

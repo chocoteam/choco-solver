@@ -27,14 +27,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.backtrackable;
 
-public enum SetType {
-	BIPARTITESET,
-    LINKED_LIST,
-	BITSET,
-	FIXED_ARRAY,
-	FIXED_INTERVAL,
-	RANGESET
+import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.nonbacktrackable.SetTest;
+
+/**
+ * @author Jean-Guillaume FAGES
+ */
+public class SortedBitSetTest extends SetTest {
+
+    @Override
+    public ISet create(int offset) {
+        IntIterableBitSet set = new IntIterableBitSet();
+        set.setOffset(offset);
+        return set;
+    }
 }
-

@@ -29,6 +29,9 @@
  */
 package org.chocosolver.solver.variables.ranges;
 
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+
 /**
  * An interface to store a set of values, to be used with
  * {@link org.chocosolver.solver.variables.IntVar#removeValues(IntIterableSet, org.chocosolver.solver.ICause)} and
@@ -37,7 +40,7 @@ package org.chocosolver.solver.variables.ranges;
  * Project: choco.
  * @author Charles Prud'homme
  */
-public interface IntIterableSet{
+public interface IntIterableSet extends ISet{
 
     /**
      * For memory consumption purpose, an offset is needed to indicate the lowest value stored in this set.
@@ -177,4 +180,60 @@ public interface IntIterableSet{
      * @param x value to add
      */
     void minus(int x);
+
+	//***********************************************************************************
+	// ISET METHODS
+	//***********************************************************************************
+
+	@Override // todo : homogenize
+	default boolean contain(int element) {
+		return contains(element);
+	}
+
+	@Override // todo : homogenize
+	default int getSize() {
+		return size();
+	}
+
+	@Override
+	default int min() {
+		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
+		return first();
+	}
+
+	@Override
+	default int max() {
+		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
+		return last();
+	}
+
+	@Override
+	default ISetIterator newIterator(){
+		return new ISetIterator() {
+			private boolean started = false;
+			private int current;
+			@Override
+			public void reset() {
+				started = false;
+			}
+			@Override
+			public boolean hasNext() {
+				if(started){
+					return nextValue(current) < Integer.MAX_VALUE;
+				}else{
+					return !isEmpty();
+				}
+			}
+			@Override
+			public Integer next() {
+				if(started){
+					current = nextValue(current);
+				}else{
+					started = true;
+					current = first();
+				}
+				return current;
+			}
+		};
+	}
 }
