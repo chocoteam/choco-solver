@@ -29,11 +29,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.iterable;
 
-import org.chocosolver.util.objects.setDataStructures.ISetIterator;
-import org.chocosolver.util.objects.setDataStructures.SetType;
-
-import java.util.BitSet;
-import java.util.Iterator;
+import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
 
 /**
  * An IntIterableBitSet based on a BitSet
@@ -42,18 +38,7 @@ import java.util.Iterator;
  * Project: choco.
  * @author Charles Prud'homme
  */
-public class IntIterableBitSet implements IntIterableSet {
-
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
-
-    private BitSet values;
-    private int offset;
-
-	/** Create an ISet iterator */
-    private ISetIterator iter = newIterator();
-
+public class IntIterableBitSet extends Set_BitSet implements IntIterableSet {
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -63,7 +48,7 @@ public class IntIterableBitSet implements IntIterableSet {
 	 * Creates an IntIterable object relying on an offseted bitset implementation.
      */
     public IntIterableBitSet() {
-        this.values = new BitSet();
+        super(0);
     }
 
 	//***********************************************************************************
@@ -79,100 +64,59 @@ public class IntIterableBitSet implements IntIterableSet {
 		this.offset = offset;
 	}
 
-	@Override
-	public boolean isEmpty(){
-		return values.isEmpty();
-	}
-
-    @Override
-    public int min(){
-        if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
-        return values.nextSetBit(0) + offset;
-    }
-
-    @Override
-    public int max() {
-		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
-        return values.previousSetBit(values.size()) + offset;
-    }
-
-    @Override
-    public boolean add(int e) {
-		if(e < offset) throw new IllegalStateException("Cannot add "+e+" to set of offset "+offset);
-        boolean add = !values.get(e - offset);
-        values.set(e - offset);
-        return add;
-    }
-
     @Override
     public boolean addAll(int... values) {
-        int card = this.values.cardinality();
+        int prevCard = size();
         for(int i = 0; i < values.length; i++){
-            this.values.set(values[i] - offset);
+            add(values[i]);
         }
-        return this.values.cardinality() - card > 0;
+        return size() - prevCard > 0;
     }
 
     @Override
     public boolean addAll(IntIterableSet set) {
 		if(set.isEmpty())return false;
-        int card = values.cardinality();
+        int prevCard = size();
         int v = set.min();
         while(v < Integer.MAX_VALUE){
             add(v);
             v = set.nextValue(v);
         }
-        return values.cardinality() - card > 0;
+        return size() - prevCard > 0;
     }
 
     @Override
     public boolean retainAll(IntIterableSet set) {
-        boolean modified = false;
+		int prevCard = card;
         for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
             if (!set.contains(i + offset)) {
                 values.clear(i);
-                modified = true;
+				card--;
             }
         }
-        return modified;
-    }
-
-    @Override
-    public boolean remove(int e) {
-        boolean rem  = values.get(e - offset);
-        values.clear(e - offset);
-        return rem;
+        return card < prevCard;
     }
 
     @Override
     public boolean removeAll(IntIterableSet set) {
-        boolean modified = false;
+		int prevCard = card;
         for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
             if (set.contains(i + offset)) {
                 values.clear(i);
-                modified = true;
+				card--;
             }
         }
-        return modified;
+        return card < prevCard;
     }
-
-    @Override
-    public void clear() {
-        values.clear();
-    }
-
-	@Override
-	public SetType getSetType() {
-		return SetType.BITSET;
-	}
 
 	@Override
     public boolean removeBetween(int f, int t) {
         f -= offset;
         t -= offset;
-        int card = values.cardinality();
+        int prevCard = card;
         values.clear(f, t);
-        return values.cardinality() - card != 0;
+		card = values.cardinality();
+        return card - prevCard != 0;
     }
 
     @Override
@@ -211,12 +155,6 @@ public class IntIterableBitSet implements IntIterableSet {
         return Integer.MIN_VALUE;
     }
 
-    @Override
-    public boolean contains(int aValue) {
-        aValue -= offset;
-        return aValue > -1 && aValue < values.length() && values.get(aValue);
-    }
-
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append('{');
@@ -237,23 +175,13 @@ public class IntIterableBitSet implements IntIterableSet {
         return b.toString();
     }
 
+	@Override
     public IntIterableSet duplicate() {
         IntIterableBitSet bsrm = new IntIterableBitSet();
 		bsrm.setOffset(this.offset);
         bsrm.values.or(this.values);
         return bsrm;
     }
-
-    @Override
-    public int size() {
-        return values.cardinality();
-    }
-
-   	@Override
-   	public Iterator<Integer> iterator(){
-   		iter.reset();
-   		return iter;
-   	}
 
     @Override
     public void plus(int x) {
@@ -264,24 +192,4 @@ public class IntIterableBitSet implements IntIterableSet {
     public void minus(int x) {
         this.offset -= x;
     }
-
-	@Override
-	public ISetIterator newIterator(){
-		return new ISetIterator() {
-			private int current = -1;
-			@Override
-			public void reset() {
-				current = -1;
-			}
-			@Override
-			public boolean hasNext() {
-				return values.nextSetBit(current+1) >= 0;
-			}
-			@Override
-			public Integer next() {
-				current = values.nextSetBit(current + 1);
-				return current+offset;
-			}
-		};
-	}
 }
