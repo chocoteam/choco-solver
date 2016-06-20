@@ -370,7 +370,7 @@ public class PropConDis extends Propagator<IntVar> {
                 // check if domain has changed
                 if (cardinalities[p] > allvars[p].getDomainSize()) {
                     IntIterableSetUtils.union(domains.get(p), allvars[p]);
-                    if (domains.get(p).size() == cardinalities[p]) {
+                    if (domains.get(p).getSize() == cardinalities[p]) {
                         toUnion.clear(p);
                     }
                 } else {

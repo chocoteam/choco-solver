@@ -118,7 +118,7 @@ public class PropElement extends Propagator<IntVar> {
                 }
             }
             result.updateBounds(nmin, nmax, this);
-            if (fidx.size() > 0) {
+            if (!fidx.isEmpty()) {
                 index.removeValues(fidx, this);
             }
             min = result.getLB();

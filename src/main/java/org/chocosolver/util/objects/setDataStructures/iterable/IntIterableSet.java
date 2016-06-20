@@ -38,21 +38,9 @@ import org.chocosolver.util.objects.setDataStructures.ISetIterator;
  * {@link org.chocosolver.solver.variables.IntVar#removeAllValuesBut(IntIterableSet, org.chocosolver.solver.ICause)}
  * Created by cprudhom on 09/07/15.
  * Project: choco.
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  */
 public interface IntIterableSet extends ISet{
-
-    /**
-     * Ensures that this set contains the specified element.
-     * Returns <tt>true</tt> if this set changed as a
-     * result of the call.  (Returns <tt>false</tt> if this set
-     * already contains the specified element.)<p>
-     *
-     * @param e element whose presence in this set is to be ensured
-     * @return <tt>true</tt> if this set changed as a result of the
-     *         call
-     */
-    boolean add(int e);
 
     /**
      * Adds all of the elements in the array to this set.
@@ -80,17 +68,6 @@ public interface IntIterableSet extends ISet{
     boolean retainAll(IntIterableSet set);
 
     /**
-     * Removes a single instance of the specified element from this
-     * set, if it is present. Returns
-     * <tt>true</tt> if this set contained the specified element (or
-     * equivalently, if this set changed as a result of the call).
-     *
-     * @param e element to be removed from this set, if present
-     * @return <tt>true</tt> if an element was removed as a result of this call
-     */
-    boolean remove(int e);
-
-    /**
      * Removes all of this set's elements that are also contained in the
      * specified set.  After this call returns,
      * this set will contain no elements in common with the specified
@@ -101,12 +78,6 @@ public interface IntIterableSet extends ISet{
      *         call
      */
     boolean removeAll(IntIterableSet set);
-
-    /**
-     * Removes all of the elements from this set.
-     * The set will be empty after this method returns.
-     */
-    void clear();
 
     /**
      * Removes all values between <i>f</i> (inclusive) and <i>t</i> (inclusive)
@@ -129,25 +100,10 @@ public interface IntIterableSet extends ISet{
     int previousValue(int aValue);
 
     /**
-     * Returns <tt>true</tt> if this set contains the specified element.
-     *
-     * @param o element whose presence in this set is to be tested
-     * @return <tt>true</tt> if this set contains the specified
-     *         element
-     */
-    boolean contains(int o);
-
-    /**
      * Returns a carbon-copy of this set
      * @return a carbon-copy of this set
      */
     IntIterableSet duplicate();
-
-    /**
-     * Return the number of elements
-     * @return the number of elements
-     */
-    int size();
 
     /**
      * add the value x to all integers stored in this set
@@ -162,48 +118,4 @@ public interface IntIterableSet extends ISet{
      * @param x value to add
      */
     void minus(int x);
-
-	//***********************************************************************************
-	// ISET METHODS
-	//***********************************************************************************
-
-	@Override // todo : homogenize
-	default boolean contain(int element) {
-		return contains(element);
-	}
-
-	@Override // todo : homogenize
-	default int getSize() {
-		return size();
-	}
-
-	@Override
-	default ISetIterator newIterator(){
-		return new ISetIterator() {
-			private boolean started = false;
-			private int current;
-			@Override
-			public void reset() {
-				started = false;
-			}
-			@Override
-			public boolean hasNext() {
-				if(started){
-					return nextValue(current) < Integer.MAX_VALUE;
-				}else{
-					return !isEmpty();
-				}
-			}
-			@Override
-			public Integer next() {
-				if(started){
-					current = nextValue(current);
-				}else{
-					started = true;
-					current = min();
-				}
-				return current;
-			}
-		};
-	}
 }

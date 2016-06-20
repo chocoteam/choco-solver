@@ -146,10 +146,10 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (values.contains(0)) {
+        if (values.contain(0)) {
             hasChanged = instantiateTo(1, cause);
         }
-        if (values.contains(1)) {
+        if (values.contain(1)) {
             hasChanged = instantiateTo(0, cause);
         }
         return hasChanged;
@@ -158,10 +158,10 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (!values.contains(0)) {
+        if (!values.contain(0)) {
             hasChanged = instantiateTo(1, cause);
         }
-        if (!values.contains(1)) {
+        if (!values.contain(1)) {
             hasChanged = instantiateTo(0, cause);
         }
         return hasChanged;

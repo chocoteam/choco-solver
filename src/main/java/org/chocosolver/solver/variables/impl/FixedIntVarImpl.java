@@ -101,7 +101,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
-        if (values.contains(constante)) {
+        if (values.contain(constante)) {
             assert cause != null;
             model.getSolver().getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
@@ -111,7 +111,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
-        if (!values.contains(constante)) {
+        if (!values.contain(constante)) {
             assert cause != null;
             model.getSolver().getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");

@@ -199,7 +199,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     public boolean addAll(IntIterableSet set) {
 		if(set.isEmpty())return false;
         int c = CARDINALITY;
-        if (set.size() > 0) {
+        if (!set.isEmpty()) {
             int v = set.min();
             while (v < Integer.MAX_VALUE) {
                 add(v);
@@ -212,12 +212,12 @@ public class IntIterableRangeSet implements IntIterableSet {
     @Override
     public boolean retainAll(IntIterableSet set) {
         int c = CARDINALITY;
-        if (set.size() == 0) {
+        if (set.isEmpty()) {
             this.clear();
-        } else if (size() > 0) {
+        } else {
             int last = max();
             for (int i = min(); i <= last; i = nextValue(i)) {
-                if (!set.contains(i)) {
+                if (!set.contain(i)) {
                     remove(i);
                 }
             }
@@ -267,7 +267,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     @Override
     public boolean removeAll(IntIterableSet set) {
         int c = CARDINALITY;
-        if (set.size() > 0) {
+        if (!set.isEmpty()) {
             int v = set.min();
             while (v < Integer.MAX_VALUE) {
                 remove(v);
@@ -409,7 +409,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     @Override
-    public boolean contains(int o) {
+    public boolean contain(int o) {
         return rangeOf(o) >= 0;
     }
 
@@ -423,9 +423,39 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     @Override
-    public int size() {
+    public int getSize() {
         return CARDINALITY;
     }
+
+	@Override
+	public ISetIterator newIterator(){
+		return new ISetIterator() {
+			private boolean started = false;
+			private int current;
+			@Override
+			public void reset() {
+				started = false;
+			}
+			@Override
+			public boolean hasNext() {
+				if(started){
+					return nextValue(current) < Integer.MAX_VALUE;
+				}else{
+					return !isEmpty();
+				}
+			}
+			@Override
+			public Integer next() {
+				if(started){
+					current = nextValue(current);
+				}else{
+					started = true;
+					current = min();
+				}
+				return current;
+			}
+		};
+	}
 
     /**
      * add the value <i>x</i> to all integers stored in this set

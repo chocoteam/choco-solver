@@ -79,6 +79,11 @@ public class IntIterableBitSet implements IntIterableSet {
 		this.offset = offset;
 	}
 
+	@Override
+	public boolean isEmpty(){
+		return values.isEmpty();
+	}
+
     @Override
     public int min(){
         if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
@@ -124,7 +129,7 @@ public class IntIterableBitSet implements IntIterableSet {
     public boolean retainAll(IntIterableSet set) {
         boolean modified = false;
         for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
-            if (!set.contains(i + offset)) {
+            if (!set.contain(i + offset)) {
                 values.clear(i);
                 modified = true;
             }
@@ -143,7 +148,7 @@ public class IntIterableBitSet implements IntIterableSet {
     public boolean removeAll(IntIterableSet set) {
         boolean modified = false;
         for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
-            if (set.contains(i + offset)) {
+            if (set.contain(i + offset)) {
                 values.clear(i);
                 modified = true;
             }
@@ -207,7 +212,7 @@ public class IntIterableBitSet implements IntIterableSet {
     }
 
     @Override
-    public boolean contains(int aValue) {
+    public boolean contain(int aValue) {
         aValue -= offset;
         return aValue > -1 && aValue < values.length() && values.get(aValue);
     }
@@ -240,7 +245,7 @@ public class IntIterableBitSet implements IntIterableSet {
     }
 
     @Override
-    public int size() {
+    public int getSize() {
         return values.cardinality();
     }
 
@@ -259,4 +264,24 @@ public class IntIterableBitSet implements IntIterableSet {
     public void minus(int x) {
         this.offset -= x;
     }
+
+	@Override
+	public ISetIterator newIterator(){
+		return new ISetIterator() {
+			private int current = -1;
+			@Override
+			public void reset() {
+				current = -1;
+			}
+			@Override
+			public boolean hasNext() {
+				return values.nextSetBit(current+1) >= 0;
+			}
+			@Override
+			public Integer next() {
+				current = values.nextSetBit(current + 1);
+				return current+offset;
+			}
+		};
+	}
 }

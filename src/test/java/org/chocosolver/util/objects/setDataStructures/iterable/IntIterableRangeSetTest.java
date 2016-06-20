@@ -521,7 +521,7 @@ public class IntIterableRangeSetTest {
 
 	public static IntIterableRangeSet intersect1(IntIterableRangeSet set1, IntIterableRangeSet set2){
 		IntIterableRangeSet t;
-		if (set1.size() < set2.size()) {
+		if (set1.getSize() < set2.getSize()) {
 			t = (IntIterableRangeSet) set1.duplicate();
 			t.retainAll(set2);
 		} else {
@@ -565,7 +565,7 @@ public class IntIterableRangeSetTest {
 
 	public static IntIterableRangeSet union1(IntIterableRangeSet set1, IntIterableRangeSet set2){
 		IntIterableRangeSet t;
-		if (set1.size() < set2.size()) {
+		if (set1.getSize() < set2.getSize()) {
 			t = (IntIterableRangeSet) set1.duplicate();
 			t.addAll(set2);
 		} else {

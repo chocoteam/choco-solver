@@ -108,7 +108,7 @@ public class Set_BitSet extends BitSet implements ISet {
 			return false;
 		}else{
 			card++;
-			set(element-offset, true);
+			set(element-offset);
 			return true;
 		}
 	}
@@ -116,7 +116,7 @@ public class Set_BitSet extends BitSet implements ISet {
 	@Override
 	public boolean remove(int element) {
 		if(contain(element)) {
-			set(element - offset, false);
+			clear(element - offset);
 			card--;
 			return true;
 		}else{
