@@ -48,10 +48,10 @@ public class Set_BitSet implements ISet {
 	// VARIABLES
 	//***********************************************************************************
 
-	private int card;
-	private int offset;  // allow using negative numbers
+	protected int card;
+	protected int offset;  // allow using negative numbers
+	protected BitSet values = new BitSet();
 	private ISetIterator iter = newIterator();
-	private BitSet bitSet = new BitSet();
 
 	//***********************************************************************************
 	// ITERATOR
@@ -73,11 +73,11 @@ public class Set_BitSet implements ISet {
 			}
 			@Override
 			public boolean hasNext() {
-				return bitSet.nextSetBit(current+1) >= 0;
+				return values.nextSetBit(current+1) >= 0;
 			}
 			@Override
 			public Integer next() {
-				current = bitSet.nextSetBit(current + 1);
+				current = values.nextSetBit(current + 1);
 				return current+offset;
 			}
 		};
@@ -105,11 +105,11 @@ public class Set_BitSet implements ISet {
 	@Override
 	public boolean add(int element) {
 		if(element < offset) throw new IllegalStateException("Cannot add "+element+" to set of offset "+offset);
-		if (bitSet.get(element-offset)) {
+		if (values.get(element-offset)) {
 			return false;
 		}else{
 			card++;
-			bitSet.set(element-offset);
+			values.set(element-offset);
 			return true;
 		}
 	}
@@ -117,7 +117,7 @@ public class Set_BitSet implements ISet {
 	@Override
 	public boolean remove(int element) {
 		if(contains(element)) {
-			bitSet.clear(element - offset);
+			values.clear(element - offset);
 			card--;
 			return true;
 		}else{
@@ -127,7 +127,7 @@ public class Set_BitSet implements ISet {
 
 	@Override
 	public boolean contains(int element) {
-		return element >= offset && bitSet.get(element - offset);
+		return element >= offset && values.get(element - offset);
 	}
 
 	@Override
@@ -138,19 +138,19 @@ public class Set_BitSet implements ISet {
 	@Override
 	public void clear() {
 		card = 0;
-		bitSet.clear();
+		values.clear();
 	}
 
 	@Override
 	public int min() {
 		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
-		return offset+bitSet.nextSetBit(0);
+		return offset+values.nextSetBit(0);
 	}
 
 	@Override
 	public int max() {
 		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
-		return offset+bitSet.previousSetBit(bitSet.length());
+		return offset+values.previousSetBit(values.length());
 	}
 
 	@Override
