@@ -29,8 +29,8 @@
  */
 package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertTrue;

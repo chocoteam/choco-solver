@@ -34,10 +34,9 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

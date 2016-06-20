@@ -31,7 +31,6 @@ package org.chocosolver.util.objects.setDataStructures.iterable;
 
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.Arrays;
 

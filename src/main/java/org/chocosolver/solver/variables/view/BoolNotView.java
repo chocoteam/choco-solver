@@ -39,8 +39,8 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
  * A view for boolean variable, that enforce not(b).

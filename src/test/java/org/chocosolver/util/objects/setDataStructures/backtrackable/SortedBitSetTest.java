@@ -29,8 +29,8 @@
  */
 package org.chocosolver.util.objects.setDataStructures.backtrackable;
 
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.chocosolver.util.objects.setDataStructures.nonbacktrackable.SetTest;
 
 /**
