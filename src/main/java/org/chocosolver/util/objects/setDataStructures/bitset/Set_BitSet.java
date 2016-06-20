@@ -42,7 +42,7 @@ import java.util.Iterator;
  *
  * @author Jean-Guillaume Fages, Xavier Lorca
  */
-public class Set_BitSet extends BitSet implements ISet {
+public class Set_BitSet implements ISet {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -51,6 +51,7 @@ public class Set_BitSet extends BitSet implements ISet {
 	private int card;
 	private int offset;  // allow using negative numbers
 	private ISetIterator iter = newIterator();
+	private BitSet bitSet = new BitSet();
 
 	//***********************************************************************************
 	// ITERATOR
@@ -72,11 +73,11 @@ public class Set_BitSet extends BitSet implements ISet {
 			}
 			@Override
 			public boolean hasNext() {
-				return nextSetBit(current+1) >= 0;
+				return bitSet.nextSetBit(current+1) >= 0;
 			}
 			@Override
 			public Integer next() {
-				current = nextSetBit(current + 1);
+				current = bitSet.nextSetBit(current + 1);
 				return current+offset;
 			}
 		};
@@ -104,11 +105,11 @@ public class Set_BitSet extends BitSet implements ISet {
 	@Override
 	public boolean add(int element) {
 		if(element < offset) throw new IllegalStateException("Cannot add "+element+" to set of offset "+offset);
-		if (get(element-offset)) {
+		if (bitSet.get(element-offset)) {
 			return false;
 		}else{
 			card++;
-			set(element-offset);
+			bitSet.set(element-offset);
 			return true;
 		}
 	}
@@ -116,7 +117,7 @@ public class Set_BitSet extends BitSet implements ISet {
 	@Override
 	public boolean remove(int element) {
 		if(contains(element)) {
-			clear(element - offset);
+			bitSet.clear(element - offset);
 			card--;
 			return true;
 		}else{
@@ -126,7 +127,7 @@ public class Set_BitSet extends BitSet implements ISet {
 
 	@Override
 	public boolean contains(int element) {
-		return element >= offset && get(element - offset);
+		return element >= offset && bitSet.get(element - offset);
 	}
 
 	@Override
@@ -137,19 +138,19 @@ public class Set_BitSet extends BitSet implements ISet {
 	@Override
 	public void clear() {
 		card = 0;
-		super.clear();
+		bitSet.clear();
 	}
 
 	@Override
 	public int min() {
 		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
-		return offset+nextSetBit(0);
+		return offset+bitSet.nextSetBit(0);
 	}
 
 	@Override
 	public int max() {
 		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
-		return offset+previousSetBit(length());
+		return offset+bitSet.previousSetBit(bitSet.length());
 	}
 
 	@Override
@@ -165,19 +166,5 @@ public class Set_BitSet extends BitSet implements ISet {
 		}
 		st+="}";
 		return st.replace(", }","}");
-	}
-
-	// equals and hashcode are overwritten back to default Object behavior
-	// (this extends BitSet, which overwrites these methods)
-	// so that all ISet objects have the same behavior (i.e. compare reference, not content)
-
-	@Override
-	public boolean equals(Object obj) {
-		return obj == this;
-	}
-
-	@Override
-	public int hashCode(){
-		return java.lang.System.identityHashCode(this);
 	}
 }

@@ -40,11 +40,11 @@ import java.util.Iterator;
 
 /**
  * BitSet implementation for a set of integers
- * Supports negative numbers when using int... constructor
+ * Supports negative numbers if offset is set properly
  *
  * @author : chameau, Jean-Guillaume Fages
  */
-public class Set_Std_BitSet extends S64BitSet implements ISet {
+public class Set_Std_BitSet implements ISet {
 
 	//***********************************************************************************
 	// VARIABLE
@@ -52,6 +52,7 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 
 	private IStateInt card;	// enables to get the cardinality in O(1)
 	private int offset;		// allow using negative numbers
+	private S64BitSet bitSet;
 	private ISetIterator iter = newIterator();
 
 	//***********************************************************************************
@@ -65,7 +66,7 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 	 * @param offSet smallest allowed value in the set
 	 */
 	public Set_Std_BitSet(IEnvironment environment, int offSet) {
-		super(environment);
+		bitSet = new S64BitSet(environment);
 		card = environment.makeInt(0);
 		offset = offSet;
 	}
@@ -77,11 +78,11 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 	@Override
 	public boolean add(int element) {
 		if(element < offset) throw new IllegalStateException("Cannot add "+element+" to set of offset "+offset);
-		if (get(element-offset)) {
+		if (bitSet.get(element-offset)) {
 			return false;
 		}else{
 			card.add(1);
-			set(element-offset, true);
+			bitSet.set(element-offset, true);
 			return true;
 		}
 	}
@@ -89,7 +90,7 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 	@Override
 	public boolean remove(int element) {
 		if(contains(element)) {
-			set(element - offset, false);
+			bitSet.set(element - offset, false);
 			card.add(-1);
 			return true;
 		}else{
@@ -99,7 +100,7 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 
 	@Override
 	public boolean contains(int element) {
-		return element >= offset && get(element - offset);
+		return element >= offset && bitSet.get(element - offset);
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 
 	@Override
 	public void clear() {
-		super.clear();
+		bitSet.clear();
 		card.set(0);
 	}
 
@@ -121,13 +122,13 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 	@Override
 	public int min() {
 		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
-		return offset+nextSetBit(0);
+		return offset+bitSet.nextSetBit(0);
 	}
 
 	@Override
 	public int max() {
 		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
-		return offset+prevSetBit(length());
+		return offset+bitSet.prevSetBit(bitSet.length());
 	}
 
 	@Override
@@ -160,11 +161,11 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
 			}
 			@Override
 			public boolean hasNext() {
-				return nextSetBit(current+1) >= 0;
+				return bitSet.nextSetBit(current+1) >= 0;
 			}
 			@Override
 			public Integer next() {
-				current = nextSetBit(current + 1);
+				current = bitSet.nextSetBit(current + 1);
 				return current+offset;
 			}
 		};
