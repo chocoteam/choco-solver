@@ -35,8 +35,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
  * AC2001 algorithm for binary table constraint
@@ -53,7 +53,7 @@ public class PropBinAC2001 extends PropBinCSP {
     private int offset0;
     private int offset1;
 
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
 
     public PropBinAC2001(IntVar x, IntVar y, Tuples tuples) {

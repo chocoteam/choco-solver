@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.variables.ranges;
+package org.chocosolver.util.objects.setDataStructures.iterable;
 
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -44,6 +44,10 @@ import java.util.Iterator;
  */
 public class IntIterableBitSet implements IntIterableSet {
 
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
+
     private BitSet values;
     private int offset;
 
@@ -51,33 +55,45 @@ public class IntIterableBitSet implements IntIterableSet {
     private ISetIterator iter = newIterator();
 
 
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
+
+	/**
+	 * Creates an IntIterable object relying on an offseted bitset implementation.
+     */
     public IntIterableBitSet() {
         this.values = new BitSet();
     }
 
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	/**
+	 * Creates an IntIterable object relying on a bitset implementation.
+	 * For memory consumption purpose, an offset is needed to indicate the lowest value stored in this set.
+	 * @param offset lowest value to be stored in this set
+	 */
+	public void setOffset(int offset){
+		this.offset = offset;
+	}
 
     @Override
-    public int first(){
-        if(values.cardinality() == 0){
-            return Integer.MIN_VALUE;
-        }
+    public int min(){
+        if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
         return values.nextSetBit(0) + offset;
     }
 
-
     @Override
-    public int last() {
-        if(values.cardinality() == 0){
-            return Integer.MAX_VALUE;
-        }
+    public int max() {
+		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
         return values.previousSetBit(values.size()) + offset;
     }
 
     @Override
     public boolean add(int e) {
+		if(e < offset) throw new IllegalStateException("Cannot add "+e+" to set of offset "+offset);
         boolean add = !values.get(e - offset);
         values.set(e - offset);
         return add;
@@ -94,8 +110,9 @@ public class IntIterableBitSet implements IntIterableSet {
 
     @Override
     public boolean addAll(IntIterableSet set) {
+		if(set.isEmpty())return false;
         int card = values.cardinality();
-        int v = set.first();
+        int v = set.min();
         while(v < Integer.MAX_VALUE){
             add(v);
             v = set.nextValue(v);
@@ -217,7 +234,7 @@ public class IntIterableBitSet implements IntIterableSet {
 
     public IntIterableSet duplicate() {
         IntIterableBitSet bsrm = new IntIterableBitSet();
-        bsrm.setOffset(this.offset);
+		bsrm.setOffset(this.offset);
         bsrm.values.or(this.values);
         return bsrm;
     }

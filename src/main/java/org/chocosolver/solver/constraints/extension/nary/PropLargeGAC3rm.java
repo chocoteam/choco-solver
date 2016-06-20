@@ -33,8 +33,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
@@ -60,7 +60,7 @@ public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     private DisposableValueIterator[] seekIter;
 
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
     private PropLargeGAC3rm(IntVar[] vs, LargeRelation relation) {
         super(vs, relation);

@@ -77,7 +77,7 @@ public class Set_Swap implements ISet {
 
 	@Override
 	public boolean add(int element) {
-		assert element>=mapOffset;
+		if(element < mapOffset) throw new IllegalStateException("Cannot add "+element+" to set of offset "+mapOffset);
 		if (contain(element)) {
 			return false;
 		}

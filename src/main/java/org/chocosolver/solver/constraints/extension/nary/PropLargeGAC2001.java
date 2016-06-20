@@ -37,8 +37,8 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
  * <br/>
@@ -65,7 +65,7 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
     //by avoiding checking the bounds
     private ValidityChecker valcheck;
 
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
     private PropLargeGAC2001(IntVar[] vs, LargeRelation relation) {
         super(vs, relation);

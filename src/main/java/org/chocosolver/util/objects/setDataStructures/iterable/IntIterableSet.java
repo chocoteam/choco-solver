@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.variables.ranges;
+package org.chocosolver.util.objects.setDataStructures.iterable;
 
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
@@ -41,24 +41,6 @@ import org.chocosolver.util.objects.setDataStructures.ISetIterator;
  * @author Charles Prud'homme
  */
 public interface IntIterableSet extends ISet{
-
-    /**
-     * For memory consumption purpose, an offset is needed to indicate the lowest value stored in this set.
-     * @param offset lowest value stored in this set
-     */
-    void setOffset(int offset);
-
-    /**
-     * @return the first (lowest) element currently in this set,
-     * or {@link Integer#MIN_VALUE} if there is no element in the set.
-     */
-    int first();
-
-    /**
-     * @return the last (highest) element currently in this set,
-     * or {@link Integer#MAX_VALUE} if there is no element in the set.
-     */
-    int last();
 
     /**
      * Ensures that this set contains the specified element.
@@ -196,18 +178,6 @@ public interface IntIterableSet extends ISet{
 	}
 
 	@Override
-	default int min() {
-		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
-		return first();
-	}
-
-	@Override
-	default int max() {
-		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
-		return last();
-	}
-
-	@Override
 	default ISetIterator newIterator(){
 		return new ISetIterator() {
 			private boolean started = false;
@@ -230,7 +200,7 @@ public interface IntIterableSet extends ISet{
 					current = nextValue(current);
 				}else{
 					started = true;
-					current = first();
+					current = min();
 				}
 				return current;
 			}

@@ -33,8 +33,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
  * <br/>
@@ -45,7 +45,7 @@ import org.chocosolver.solver.variables.ranges.IntIterableSet;
 public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     private final int[] currentTuple;
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
     private PropLargeFC(IntVar[] vars, LargeRelation relation) {
         super(vars, relation);

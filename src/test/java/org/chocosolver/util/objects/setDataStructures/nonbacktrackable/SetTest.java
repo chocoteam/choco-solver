@@ -54,7 +54,7 @@ public abstract class SetTest {
     /**
      * Value which is lower than the offset
      */
-    @Test(groups = "1s", timeOut=60000, expectedExceptions = AssertionError.class)
+    @Test(groups = "1s", timeOut=60000, expectedExceptions = IllegalStateException.class)
     public void testAddNegativeKO() {
         ISet set = create();
         assertFalse(set.add(-2)); // expected exception here

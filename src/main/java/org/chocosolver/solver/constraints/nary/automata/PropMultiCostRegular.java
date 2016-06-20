@@ -49,8 +49,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableIntIterator;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
@@ -178,7 +178,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     public final double _MCR_DECIMAL_PREC;
 
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
     /**
      * Constructs a multi-cost-regular propagator

@@ -29,8 +29,11 @@
  */
 package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 
-import org.chocosolver.solver.variables.ranges.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Jean-Guillaume FAGES
@@ -40,5 +43,15 @@ public class RangeSetTest extends SetTest {
     @Override
     public ISet create(int offset) {
         return new IntIterableRangeSet();
+    }
+
+    /**
+     * Value which is lower than the offset
+     * There is no offset for Range sets
+     */
+    @Test(groups = "1s", timeOut=60000)
+    public void testAddNegativeKO() {
+        ISet set = create();
+        assertTrue(set.add(-2));
     }
 }

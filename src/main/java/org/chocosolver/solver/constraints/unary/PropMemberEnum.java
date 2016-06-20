@@ -36,8 +36,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.ESat;
 
 import java.util.Arrays;
@@ -51,7 +51,7 @@ import java.util.Arrays;
 public class PropMemberEnum extends Propagator<IntVar> {
 
     private final TIntHashSet values;
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
     public PropMemberEnum(IntVar var, int[] values) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);

@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.variables;
+package org.chocosolver.util.objects.setDataStructures.backtrackable;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;

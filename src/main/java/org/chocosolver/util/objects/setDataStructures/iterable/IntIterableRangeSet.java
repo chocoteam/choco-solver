@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.variables.ranges;
+package org.chocosolver.util.objects.setDataStructures.iterable;
 
 
 import org.chocosolver.solver.exception.SolverException;
@@ -57,17 +57,18 @@ public class IntIterableRangeSet implements IntIterableSet {
     /**
      * Store elements
      */
-    protected int[] ELEMENTS;
+	protected int[] ELEMENTS;
+
     /**
      * Used size in {@link #ELEMENTS}.
-     * To get the nmber of range simply divide by 2.
+     * To get the number of range simply divide by 2.
      */
-    protected int SIZE;
+	protected int SIZE;
 
     /**
      * Total number of elements in the set
      */
-    protected int CARDINALITY;
+	protected int CARDINALITY;
 
 	/** Create an ISet iterator */
     private ISetIterator iter = newIterator();
@@ -132,19 +133,15 @@ public class IntIterableRangeSet implements IntIterableSet {
         return st.toString();
     }
 
-
     @Override
-    public void setOffset(int offset) {
-        // nothing to do
-    }
-
-    @Override
-    public int first() {
+    public int min() {
+		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
         return ELEMENTS[0];
     }
 
     @Override
-    public int last() {
+    public int max() {
+		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
         return ELEMENTS[SIZE - 1];
     }
 
@@ -200,9 +197,10 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     @Override
     public boolean addAll(IntIterableSet set) {
+		if(set.isEmpty())return false;
         int c = CARDINALITY;
         if (set.size() > 0) {
-            int v = set.first();
+            int v = set.min();
             while (v < Integer.MAX_VALUE) {
                 add(v);
                 v = set.nextValue(v);
@@ -217,8 +215,8 @@ public class IntIterableRangeSet implements IntIterableSet {
         if (set.size() == 0) {
             this.clear();
         } else if (size() > 0) {
-            int last = last();
-            for (int i = first(); i <= last; i = nextValue(i)) {
+            int last = max();
+            for (int i = min(); i <= last; i = nextValue(i)) {
                 if (!set.contains(i)) {
                     remove(i);
                 }
@@ -270,7 +268,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     public boolean removeAll(IntIterableSet set) {
         int c = CARDINALITY;
         if (set.size() > 0) {
-            int v = set.first();
+            int v = set.min();
             while (v < Integer.MAX_VALUE) {
                 remove(v);
                 v = set.nextValue(v);
@@ -476,7 +474,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      * @return the range index if the value is in the set or -<i>range point</i> - 1 otherwise
      * where <i>range point</i> corresponds to the range directly greater than the key
      */
-    int rangeOf(int x) {
+    protected int rangeOf(int x) {
         int p = Arrays.binarySearch(ELEMENTS, 0, SIZE, x);
         // if pos is positive, the value is a bound of a range
         if (p >= 0) {
