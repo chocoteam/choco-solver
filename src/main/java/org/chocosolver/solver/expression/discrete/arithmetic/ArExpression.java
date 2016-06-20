@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, Ecole des Mines de Nantes
+ * Copyright (c) 2016, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -287,6 +287,14 @@ public interface ArExpression {
     }
 
     /**
+     * @param y some expressions
+     * @return return the expression "x + y_1 + y_2 + ..." where this is "x"
+     */
+    default ArExpression add(ArExpression... y) {
+        return new NaArExpression(ArExpression.Operator.ADD, this, y);
+    }
+
+    /**
      * @param y an int
      * @return return the expression "x - y" where this is "x"
      */
@@ -317,6 +325,14 @@ public interface ArExpression {
      */
     default ArExpression mul(ArExpression y) {
         return new BiArExpression(ArExpression.Operator.MUL, this, y);
+    }
+
+    /**
+     * @param y some expressions
+     * @return return the expression "x * y_1 * y_2 * ..." where this is "x"
+     */
+    default ArExpression mul(ArExpression... y) {
+        return new NaArExpression(ArExpression.Operator.MUL, this, y);
     }
 
     /**
@@ -391,6 +407,14 @@ public interface ArExpression {
     }
 
     /**
+     * @param y some expressions
+     * @return return the expression "min(x, y_1, y_2, ...)" where this is "x"
+     */
+    default ArExpression min(ArExpression... y) {
+        return new NaArExpression(ArExpression.Operator.MIN, this, y);
+    }
+
+    /**
      * @param y an int
      * @return return the expression "max(x, y)" where this is "x"
      */
@@ -404,6 +428,14 @@ public interface ArExpression {
      */
     default ArExpression max(ArExpression y) {
         return new BiArExpression(ArExpression.Operator.MAX, this, y);
+    }
+
+    /**
+     * @param y some expressions
+     * @return return the expression "max(x, y_1, y_2, ...)" where this is "x"
+     */
+    default ArExpression max(ArExpression... y) {
+        return new NaArExpression(ArExpression.Operator.MAX, this, y);
     }
 
     /**

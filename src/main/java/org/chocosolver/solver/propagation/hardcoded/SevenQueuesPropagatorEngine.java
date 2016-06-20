@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, Ecole des Mines de Nantes
+ * Copyright (c) 2016, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -169,7 +169,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
-    public void initialize() throws SolverException{
+    public void initialize() throws SolverException {
         if (!init) {
             List<Propagator> _propagators = new ArrayList<>();
             Constraint[] constraints = model.getCstrs();
@@ -184,12 +184,12 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
             p2i = new IntMap(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
-                if(p2i.containsKey(propagators[j].getId())){
+                if (p2i.containsKey(propagators[j].getId())) {
                     throw new SolverException("The following propagator " +
                             "is declared more than once into the propagation engine " +
                             "(this happens when a constraint is posted twice " +
                             "or when a posted constraint is also reified.)\n" +
-                            propagators[j]+" of "+propagators[j].getConstraint());
+                            propagators[j] + " of " + propagators[j].getConstraint());
                 }
                 p2i.put(propagators[j].getId(), j);
             }
@@ -251,7 +251,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         lastProp.propagate(v, mask);
                     }
                     // now we can check whether a delayed propagation has been scheduled
-                    if(delayedPropagationType > 0){
+                    if (delayedPropagationType > 0) {
                         if (DEBUG) {
                             IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
                         }
@@ -285,22 +285,23 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void flush() {
         if (lastProp != null) {
-            flush(p2i.get(lastProp.getId()));
+            flush(lastProp);
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(i + 1)) {
             while (!pro_queue[i].isEmpty()) {
-                lastProp = pro_queue[i].pollFirst();
                 // revision of the variable
-                flush(p2i.get(lastProp.getId()));
+                flush(pro_queue[i].pollFirst());
             }
             notEmpty = notEmpty & ~(1 << i);
         }
         lastProp = null;
     }
 
-    private void flush(int aid) {
+    private void flush(Propagator prop) {
         IntCircularQueue evtset;
-        if (lastProp.reactToFineEvent()) {
+        int aid = p2i.get(prop.getId());
+        assert aid > -1: "cannot flush unknown propagator";
+        if (prop.reactToFineEvent()) {
             evtset = eventsets[aid];
             while (evtset.size() > 0) {
                 int v = evtset.pollFirst();
@@ -403,10 +404,11 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         eventmasks = null;
         notEmpty = 0;
         init = false;
+        lastProp = null;
     }
 
     @Override
-    public void dynamicAddition(boolean permanent, Propagator... ps) throws SolverException{
+    public void dynamicAddition(boolean permanent, Propagator... ps) throws SolverException {
         int osize = propagators.length;
         int nbp = ps.length;
         int nsize = osize + nbp;
@@ -415,12 +417,12 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         System.arraycopy(_propagators, 0, propagators, 0, osize);
         System.arraycopy(ps, 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
-            if(p2i.containsKey(propagators[j].getId())){
+            if (p2i.containsKey(propagators[j].getId())) {
                 throw new SolverException("The following propagator " +
                         "is declared more than once into the propagation engine " +
                         "(this happens when a constraint is posted twice " +
                         "or when a posted constraint is also reified.)\n" +
-                        propagators[j]+" of "+propagators[j].getConstraint());
+                        propagators[j] + " of " + propagators[j].getConstraint());
             }
             p2i.put(propagators[j].getId(), j);
             trigger.dynAdd(propagators[j], permanent);
@@ -471,6 +473,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void dynamicDeletion(Propagator... ps) {
         for (Propagator toDelete : ps) {
+            if(lastProp == toDelete){
+                lastProp = null;
+            }
             int nsize = propagators.length - 1;
             Propagator toMove = propagators[nsize];
             int idtd = p2i.get(toDelete.getId());

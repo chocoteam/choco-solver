@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, Ecole des Mines de Nantes
+ * Copyright (c) 2016, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@ public interface Settings  {
      * @return the welcome message
      */
     default String getWelcomeMessage() {
-        return "** Choco 3.3.3 (2015-12) : Constraint Programming Solver, Copyleft (c) 2010-2015";
+        return "** Choco 4.0.0.a (2016-06) : Constraint Programming Solver, Copyleft (c) 2010-2016";
     }
 
     /**

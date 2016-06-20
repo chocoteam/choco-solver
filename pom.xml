@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2015, Ecole des Mines de Nantes
+    Copyright (c) 2016, Ecole des Mines de Nantes
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
     <groupId>org.choco-solver</groupId>
     <artifactId>choco-solver</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.0.b-SNAPSHOT</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://choco-solver.org/</url>
     <description>Choco is a Free and Open-Source Software dedicated to Constraint Programming.
@@ -186,13 +186,24 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.3</version>
                 <configuration>
                     <optimize>true</optimize>
                     <compilerVersion>1.8</compilerVersion>
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>ISO-8859-1</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>sonatype</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
             <plugin>

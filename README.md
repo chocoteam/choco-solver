@@ -17,7 +17,7 @@ Choco-solver is an open-source Java library for Constraint Programming.
 
 Choco-solver is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
 
-Current stable version is 3.3.3 (22 Dec 2015).
+Current stable version is 4.0.0.a (13 Jun 2016).
 
 Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -27,7 +27,7 @@ Choco-solver comes with:
 
 But also, facilities to interact with the search loop, factories to help modelling, many samples, etc.
 
-Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2015, Ecole des Mines de Nantes).
+Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2016, Ecole des Mines de Nantes).
 
 Contact: choco@mines-nantes.fr
 
@@ -114,7 +114,7 @@ In the following, we distinguish two usages of Choco:
 - as a standalone application: the jar file includes all required dependencies,
 - as a library: the jar file excludes all dependencies.
 
-The name of the jar file terms the packaging: `choco-solver-3.3.3-with-dependencies.jar` or `choco-solver-3.3.3.jar`.
+The name of the jar file terms the packaging: `choco-solver-4.0.0.a-with-dependencies.jar` or `choco-solver-4.0.0.a.jar`.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
@@ -127,7 +127,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 <dependency>
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>3.3.3</version>
+   <version>4.0.0.a</version>
 </dependency>
 ```
 
@@ -162,12 +162,14 @@ The next step is to add the jar file to your classpath of your application and a
 The required dependencies for compilation are:
 
     dk.brics.automaton:automaton:1.11-8
-    args4j:args4j:2.32
+    args4j:args4j:2.33
     org.javabits.jgrapht:jgrapht-core:0.9.3
-    net.sf.trove4j:trove4j:3.0.3
     com.github.cp-profiler:cpprof-java:1.1.0
+    org.choco-solver:choco-sat:1.0.2
+    net.sf.trove4j:trove4j:3.0.3
     org.zeromq:jeromq:0.3.4
     com.google.protobuf:protobuf-java:2.6.1
+
 
 They are available on Maven Repository (http://mvnrepository.com/).
 

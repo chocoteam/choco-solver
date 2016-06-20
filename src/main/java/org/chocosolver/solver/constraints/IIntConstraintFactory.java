@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, Ecole des Mines de Nantes
+ * Copyright (c) 2016, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -566,6 +566,26 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint allDifferentExcept0(IntVar[] vars) {
 		return allDifferentUnderCondition(vars, Condition.EXCEPT_0, true);
 	}
+
+    /**
+     * Creates an allEqual constraint.
+     * Ensures that all variables from vars take the same value.
+     *
+     * @param vars list of variables
+     */
+    default Constraint allEqual(IntVar... vars) {
+        return atMostNValues(vars, _me().intVar(1), false);
+    }
+
+    /**
+     * Creates an allEqual constraint.
+     * Ensures that all variables from vars take more than a single value.
+     *
+     * @param vars list of variables
+     */
+    default Constraint notAllEqual(IntVar... vars) {
+        return atLeastNValues(vars, _me().intVar(2), false);
+    }
 
 	/**
 	 * Creates an among constraint.

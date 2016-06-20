@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, Ecole des Mines de Nantes
+ * Copyright (c) 2016, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.constraints.Propagator;

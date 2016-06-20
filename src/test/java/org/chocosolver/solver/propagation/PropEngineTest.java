@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, Ecole des Mines de Nantes
+ * Copyright (c) 2016, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@ package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -41,6 +42,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.sort;
@@ -61,6 +63,14 @@ import static org.testng.Assert.*;
  * @since 01/06/12
  */
 public class PropEngineTest {
+
+    @DataProvider(name = "env")
+    public Object[][] env(){
+        return new PropagationEngineFactory[][]{
+                {PropagationEngineFactory.PROPAGATORDRIVEN_7QD},
+                {PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE},
+        };
+    }
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
@@ -217,5 +227,35 @@ public class PropEngineTest {
             while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getSolutionCount(), 9);
         }
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "env")
+    public void testJG1(PropagationEngineFactory ef) {
+        Model model = new Model();
+        Solver solver = model.getSolver();
+        IntVar[] variables = model.intVarArray("s", 3, 0, 2);
+        Constraint arithm = model.arithm(variables[0], "!=", variables[1]);
+
+        model.post(arithm);
+        solver.setEngine(ef.make(model));
+        solver.findAllSolutions();
+
+        model.unpost(arithm);
+        solver.reset(); // error (-1)
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "env")
+    public void testJG2(PropagationEngineFactory ef){
+        Model model = new Model();
+        Solver solver = model.getSolver();
+        IntVar[] variables=model.intVarArray("s", 3, 0, 2);
+        Constraint arithm = model.arithm(variables[0], "!=", variables[1]);
+
+        model.post(arithm);
+        solver.setEngine(ef.make(model));
+        solver.findAllSolutions();
+
+        solver.getEngine().clear();
+        solver.reset(); // error (null)
     }
 }

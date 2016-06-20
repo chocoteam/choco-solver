@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, Ecole des Mines de Nantes
+ * Copyright (c) 2016, Ecole des Mines de Nantes
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,7 +146,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     /**
      * Indicates which propagators are currently scheduled for fine event propagation.
-     * More efficient than calling <code>pro_queue_f.contains(p)</code>.
+     * More efficient than calling {@code pro_queue_f.contains(p)}.
      */
     private boolean[] schedule_f;
 
@@ -167,7 +167,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     /**
      * Indicates which propagators are currently scheduled for coarse event propagation.
-     * More efficient than calling <code>pro_queue_c.contains(p)</code>.
+     * More efficient than calling {@code pro_queue_c.contains(p)}.
      */
     private boolean[] schedule_c;
 
@@ -385,19 +385,17 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     @Override
     public void flush() {
         if (lastProp != null) {
-            flushFine();
-            flushCoarse();
+            flushFine(lastProp);
+            flushCoarse(lastProp);
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(0)) {
             if (i < max_f) { // other finest events, lower priority
                 while (!pro_queue_f[i].isEmpty()) {
-                    lastProp = pro_queue_f[i].pollLast();
-                    flushFine();
+                    flushFine(pro_queue_f[i].pollLast());
                 }
             } else { // coarse events
                 while (!pro_queue_c[i - max_f].isEmpty()) {
-                    lastProp = pro_queue_c[i - max_f].pollLast();
-                    flushCoarse();
+                    flushCoarse(pro_queue_c[i - max_f].pollLast());
                 }
             }
             notEmpty = notEmpty & ~(1 << i);
@@ -405,9 +403,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         lastProp = null;
     }
 
-    private void flushFine() {
-        int aid = p2i.get(lastProp.getId());
-        if (lastProp.reactToFineEvent()) {
+    private void flushFine(Propagator prop) {
+        int aid = p2i.get(prop.getId());
+        if (prop.reactToFineEvent()) {
             IntCircularQueue evtset = event_f[aid];
             while (!evtset.isEmpty()) {
                 eventmasks[aid][evtset.pollLast()] = 0;
@@ -417,8 +415,8 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         schedule_f[aid] = false;
     }
 
-    private void flushCoarse() {
-        int aid = p2i.get(lastProp.getId());
+    private void flushCoarse(Propagator prop) {
+        int aid = p2i.get(prop.getId());
         schedule_c[aid] = false;
         event_c[aid] = PropagatorEventType.VOID;
     }
@@ -483,16 +481,14 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     @Override
     public void onPropagatorExecution(Propagator propagator) {
-        lastProp = propagator;
-        flushFine();
-        flushCoarse();
+        flushFine(propagator);
+        flushCoarse(propagator);
     }
 
     @Override
     public void desactivatePropagator(Propagator propagator) {
-        lastProp = propagator;
-        flushFine();
-        flushCoarse();
+        flushFine(propagator);
+        flushCoarse(propagator);
     }
 
     @Override
@@ -511,6 +507,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         eventmasks = null;
         event_c = null;
         init = false;
+        lastProp = null;
     }
 
     @Override
@@ -583,6 +580,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     @Override
     public void dynamicDeletion(Propagator... ps) {
         for (Propagator toDelete : ps) {
+            if(lastProp == toDelete){
+                lastProp = null;
+            }
             int nsize = propagators.length - 1;
             Propagator toMove = propagators[nsize];
             int idtd = p2i.get(toDelete.getId());

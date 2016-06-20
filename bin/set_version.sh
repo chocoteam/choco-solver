@@ -3,7 +3,7 @@
 function guess() {
     v=$1
     if [[ $v == *-SNAPSHOT ]]; then
-        echo "&{v%%-SNAPSHOT}"
+        echo "${v%%-SNAPSHOT}"
     else
         echo "${v%.*}.$((${v##*.}+1))-SNAPSHOT"
     fi
@@ -46,10 +46,10 @@ then
     sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, Ecole des Mines de Nantes%"  LICENSE
 
     ## The configuration file
-    sedInPlace "s%.*Constraint Programming Solver, Copyleft.*%        return \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR\";%"  choco-solver/src/main/java/org/chocosolver/solver/Settings.java
+    sedInPlace "s%.*Constraint Programming Solver, Copyleft.*%        return \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR\";%"  ./src/main/java/org/chocosolver/solver/Settings.java
 
     ## The doc
-    sedInPlace "s%\*\* Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  ./src/docs/source/3_solving.rst
+    sedInPlace "s%\*\* Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  ./src/sphinx/source/3_solving.rst
 
     ## The CHANGES.md
     # replace the 'NEXT MILESTONE' version by VERSION
@@ -64,10 +64,10 @@ then
     \
     ' CHANGES.md
 
-    sedInPlace "s%copyright = .*%copyright = u'${YEAR}, Jean-Guillaume Fages, Xavier Lorca, Charles Prud\\\'homme'%" ./src/docs/source/conf.py
+    sedInPlace "s%copyright = .*%copyright = u'${YEAR}, Jean-Guillaume Fages, Xavier Lorca, Charles Prud\\\'homme'%" ./src/sphinx/source/conf.py
     sedInPlace "s%release = .*%release = '${VERSION}'%" ./src/docs/source/conf.py
 
-    cd ./src/docs/
+    cd ./src/sphinx/
     make latexpdf
     make latexpdf
     make latexpdf
