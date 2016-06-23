@@ -31,10 +31,11 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -96,19 +97,25 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getSolver().set(minDomLBSearch(append(rows)));
+        model.getSolver().setSearch(minDomLBSearch(append(rows)));
 
     }
 
     @Override
     public void solve() {
-        model.getSolver().solve();
+//        model.getSolver().showStatistics();
+//        model.getSolver().solve();
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
 
         StringBuilder st = new StringBuilder(String.format("Sudoku -- %s\n", data.name()));
         st.append("\t");
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                st.append(rows[i][j].getValue()).append(" ");
+                st.append(rows[i][j]).append("\t\t\t");
             }
             st.append("\n\t");
         }

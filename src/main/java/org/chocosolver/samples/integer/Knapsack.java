@@ -32,12 +32,13 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderUBSearch;
+import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
 
 /**
  * <a href="http://en.wikipedia.org/wiki/Knapsack_problem">wikipedia</a>:<br/>
@@ -110,16 +111,20 @@ public class Knapsack extends AbstractProblem {
     @Override
     public void configureSearch() {
         Solver r = model.getSolver();
+        try{
+            r.propagate();
+        }catch (ContradictionException ce){
+        }
         // trick : top-down maximization
-        r.set(inputOrderUBSearch(power), inputOrderLBSearch(objects));
+        r.setSearch(inputOrderUBSearch(power), inputOrderLBSearch(objects));
         model.getSolver().showDecisions();
     }
 
     @Override
     public void solve() {
-        model.setObjective(MAXIMIZE, power);
-        while(model.getSolver().solve()){
-            System.out.println(power);
+        model.setObjective(true, power);
+        while (model.getSolver().solve()) {
+            out.println(power);
             prettyOut();
         }
     }

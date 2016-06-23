@@ -34,13 +34,13 @@ import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -48,10 +48,6 @@ import java.util.regex.Pattern;
 import static java.lang.Math.max;
 import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.constraints.ternary.Max.var;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.randomSearch;
 
 /**
  * OR-LIBRARY:<br/>
@@ -109,7 +105,6 @@ public class AirPlaneLanding extends AbstractProblem {
     BoolVar[] bVars;
     int[] costLAT;
     TObjectIntHashMap<IntVar> maxCost;
-    int[] LLTs;
 
     IntVar objective;
 
@@ -121,19 +116,13 @@ public class AirPlaneLanding extends AbstractProblem {
         planes = new IntVar[n];
         tardiness = new IntVar[n];
         earliness = new IntVar[n];
-        LLTs = new int[n];
-        int obj_ub = 0;
-        IntVar ZERO = model.intVar(0);
+//        int obj_ub = 0;
         for (int i = 0; i < n; i++) {
             planes[i] = model.intVar("p_" + i, data[i][ELT], data[i][LLT], true);
-
-            obj_ub += max(
-                    (data[i][TT] - data[i][ELT]) * data[i][PCBT],
-                    (data[i][LLT] - data[i][TT]) * data[i][PCAT]
-            );
-            earliness[i] = var(ZERO, model.intOffsetView(model.intMinusView(planes[i]), data[i][TT]));
-            tardiness[i] = var(ZERO, model.intOffsetView(planes[i], -data[i][TT]));
-            LLTs[i] = data[i][LLT];
+            earliness[i] = model.intVar("e_" + i, 0, data[i][TT] - data[i][ELT], true);
+            tardiness[i] = model.intVar("t_" + i, 0, data[i][LLT] - data[i][TT], true);
+            earliness[i].eq((planes[i].neg().add(data[i][TT])).max(0)).post();
+            tardiness[i].eq((planes[i].sub(data[i][TT])).max(0)).post();
         }
         List<BoolVar> booleans = new ArrayList<>();
         //disjunctive
@@ -144,32 +133,34 @@ public class AirPlaneLanding extends AbstractProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
-                model.ifThenElse(boolVar, c1, c2);
+//                model.ifThenElse(boolVar, c1, c2);
+                model.addClausesBoolNot(c1.reify(),c2.reify());
             }
         }
 
         bVars = booleans.toArray(new BoolVar[booleans.size()]);
 
-        objective = model.intVar("obj", 0, obj_ub, true);
+        objective = model.intVar("obj", 0, 999999, true);
 
-        // build cost array
+        // build C array
         costLAT = new int[2 * n];
         maxCost = new TObjectIntHashMap<>();
         for (int i = 0; i < n; i++) {
             costLAT[i] = data[i][PCBT];
             costLAT[n + i] = data[i][PCAT];
             maxCost.put(planes[i], max(data[i][PCBT], data[i][PCAT]));
+
         }
 
-        IntVar obj_e = model.intVar("obj_e", 0, obj_ub, true);
+        IntVar obj_e = model.intVar("obj_e", 0, 999999, true);
         model.scalar(earliness, copyOfRange(costLAT, 0, n), "=", obj_e).post();
 
-        IntVar obj_t = model.intVar("obj_t", 0, obj_ub, true);
+        IntVar obj_t = model.intVar("obj_t", 0, 999999, true);
         model.scalar(tardiness, copyOfRange(costLAT, n, 2 * n), "=", obj_t).post();
         model.sum(new IntVar[]{obj_e, obj_t}, "=", objective).post();
 
         model.allDifferent(planes, "BC").post();
-        model.setObjective(MINIMIZE, objective);
+        model.setObjective(false, objective);
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {
@@ -178,9 +169,10 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        Arrays.sort(planes, (o1, o2) -> maxCost.get(o2) - maxCost.get(o1));
+//        Arrays.sort(planes, (o1, o2) -> maxCost.get(o2) - maxCost.get(o1));
         Solver r = model.getSolver();
-        r.set(randomSearch(bVars, seed), inputOrderLBSearch(planes));
+        r.setSearch(Search.minDomLBSearch(planes));
+//        r.set(/*randomSearch(bVars, seed), */inputOrderLBSearch(planes));
     }
 
     @Override
@@ -198,12 +190,13 @@ public class AirPlaneLanding extends AbstractProblem {
             st.append("\tINFEASIBLE");
         } else {
             for (int i = 0; i < n; i++) {
-                st.append("plane ").append(i).append(" [").
-                        append(planes[i].getValue()).append(",+").
-                        append("]\n");
+                System.out.printf("%s lands at %d, (diff: %d)\n",
+                        planes[i].getName(),
+                        planes[i].getValue(),
+                        planes[i].getValue() - data[i][TT]);
             }
         }
-        System.out.println(st.toString());
+//        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {
@@ -221,9 +214,9 @@ public class AirPlaneLanding extends AbstractProblem {
             data[i][2] = sc.nextInt(); // target landing time
             data[i][3] = sc.nextInt(); // latest landing time
             Double tt = Double.parseDouble(sc.next(decimalPattern));
-            data[i][4] = (int) Math.ceil(tt); // penalty cost per unit of time for landing before target
+            data[i][4] = (int) Math.ceil(tt); // penalty C per unit of time for landing before target
             tt = Double.parseDouble(sc.next(decimalPattern));
-            data[i][5] = (int) Math.ceil(tt); // penalty cost per unit of time for landing after target
+            data[i][5] = (int) Math.ceil(tt); // penalty C per unit of time for landing after target
             for (int j = 0; j < nb; j++) {
                 data[i][6 + j] = sc.nextInt();
             }
@@ -236,36 +229,36 @@ public class AirPlaneLanding extends AbstractProblem {
 
     enum Data {
         airland1(" 10 10 \n" +
+
                 " 54 129 155 559 10.00 10.00\n" +
-                " 99999 3 15 15 15 15 15 15 \n" +
-                " 15 15 \n" +
+                " 99999 3 15 15 15 15 15 15 15 15 \n" +
+
                 " 120 195 258 744 10.00 10.00 \n" +
-                " 3 99999 15 15 15 15 15 15 \n" +
-                " 15 15 \n" +
+                " 3 99999 15 15 15 15 15 15 15 15 \n" +
+
                 " 14 89 98 510 30.00 30.00 \n" +
-                " 15 15 99999 8 8 8 8 8 \n" +
-                " 8 8 \n" +
+                " 15 15 99999 8 8 8 8 8 8 8 \n" +
+
                 " 21 96 106 521 30.00 30.00 \n" +
-                " 15 15 8 99999 8 8 8 8 \n" +
-                " 8 8 \n" +
+                " 15 15 8 99999 8 8 8 8 8 8 \n" +
+
                 " 35 110 123 555 30.00 30.00 \n" +
-                " 15 15 8 8 99999 8 8 8 \n" +
-                " 8 8 \n" +
+                " 15 15 8 8 99999 8 8 8 8 8 \n" +
+
                 " 45 120 135 576 30.00 30.00 \n" +
-                " 15 15 8 8 8 99999 8 8 \n" +
-                " 8 8 \n" +
+                " 15 15 8 8 8 99999 8 8 8 8 \n" +
+
                 " 49 124 138 577 30.00 30.00 \n" +
-                " 15 15 8 8 8 8 99999 8 \n" +
-                " 8 8 \n" +
+                " 15 15 8 8 8 8 99999 8 8 8 \n" +
+
                 " 51 126 140 573 30.00 30.00 \n" +
-                " 15 15 8 8 8 8 8 99999 \n" +
-                " 8 8 \n" +
+                " 15 15 8 8 8 8 8 99999 8 8 \n" +
+
                 " 60 135 150 591 30.00 30.00 \n" +
-                " 15 15 8 8 8 8 8 8 \n" +
-                " 99999 8 \n" +
+                " 15 15 8 8 8 8 8 8  99999 8 \n" +
+
                 " 85 160 180 657 30.00 30.00 \n" +
-                " 15 15 8 8 8 8 8 8 \n" +
-                " 8 99999"
+                " 15 15 8 8 8 8 8 8  8 99999"
         ),
         airland2(" 15 10 \n" +
                 " 54 129 155 559 10.00 10.00 \n" +
