@@ -62,13 +62,13 @@ public class MagicSquareTest {
         Model sol;
         int j = 3;
         sol = modeler(j);
-        sol.getSolver().set(new ImpactBased((IntVar[]) sol.getSolver().getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
+        sol.getSolver().setSearch(new ImpactBased((IntVar[]) sol.getSolver().getSearch().getVariables(), 2, 3, 10, 29091981L, false));
         while (sol.getSolver().solve()) ;
         long nbsol = sol.getSolver().getSolutionCount();
         long node = sol.getSolver().getNodeCount();
         for (int t = 0; t < values().length; t++) {
             sol = modeler(j);
-            sol.getSolver().set(new ImpactBased((IntVar[]) sol.getSolver().getStrategy().getVariables(), 2, 3, 10, 29091981L, false));
+            sol.getSolver().setSearch(new ImpactBased((IntVar[]) sol.getSolver().getSearch().getVariables(), 2, 3, 10, 29091981L, false));
             values()[t].make(sol);
             while (sol.getSolver().solve()) ;
             assertEquals(sol.getSolver().getSolutionCount(), nbsol);

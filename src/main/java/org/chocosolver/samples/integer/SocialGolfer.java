@@ -36,7 +36,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderUBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
@@ -158,7 +158,7 @@ public class SocialGolfer extends AbstractProblem {
     @Override
     public void configureSearch() {
         BoolVar[] vars = flatten(P);
-        model.getSolver().set(inputOrderUBSearch(vars));
+        model.getSolver().setSearch(inputOrderUBSearch(vars));
     }
 
     @Override

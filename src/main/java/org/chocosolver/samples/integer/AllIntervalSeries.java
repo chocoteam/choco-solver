@@ -31,10 +31,10 @@ package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
@@ -92,7 +92,7 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getSolver().set(minDomLBSearch(vars));
+        model.getSolver().setSearch(Search.minDomLBSearch(vars));
     }
 
     @Override

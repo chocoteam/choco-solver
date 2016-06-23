@@ -30,10 +30,9 @@
 package org.chocosolver.samples.nqueen;
 
 import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
-
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 
 /**
  * <br/>
@@ -49,7 +48,7 @@ public abstract class AbstractNQueen extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getSolver().set(minDomLBSearch(vars));
+        model.getSolver().setSearch(Search.minDomLBSearch(vars));
     }
 
     @Override

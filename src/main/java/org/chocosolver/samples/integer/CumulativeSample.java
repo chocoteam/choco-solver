@@ -44,9 +44,10 @@ import org.chocosolver.solver.variables.Task;
 
 import java.util.Random;
 
+import static java.lang.System.out;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 
 public class CumulativeSample extends AbstractProblem{
 
@@ -87,14 +88,14 @@ public class CumulativeSample extends AbstractProblem{
 	@Override
 	public void configureSearch() {
 		Solver r = model.getSolver();
-		r.set(lastConflict(minDomLBSearch(start)));
+		r.setSearch(lastConflict(minDomLBSearch(start)));
 	}
 
 	@Override
 	public void solve() {
-		model.setObjective(MINIMIZE, makespan);
-		while(model.getSolver().solve()){
-			System.out.println("New solution found : "+makespan);
+		model.setObjective(false, makespan);
+		while (model.getSolver().solve()) {
+			out.println("New solution found : " + makespan);
 		}
 		model.getSolver().printStatistics();
 	}

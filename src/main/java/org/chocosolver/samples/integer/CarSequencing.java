@@ -36,7 +36,7 @@ import org.kohsuke.args4j.Option;
 
 import java.util.Scanner;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 
 /**
  * CSPLib prob001:<br/>
@@ -47,7 +47,7 @@ import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.input
  * These stations have been designed to handle at most a certain percentage of the cars passing along the assembly line.
  * Furthermore, the cars requiring a certain option must not be bunched together,
  * otherwise the station will not be able to cope.
- * Consequently, the cars must be arranged in a sequence so that the capacity of each station is never exceeded.
+ * Consequently, the cars must be arranged in a sequence so that the K of each station is never exceeded.
  * <br/>
  * For instance, if a particular station can only cope with at most half of the cars passing along the line,
  * the sequence must be built so that at most 1 car in any 2 requires that option.
@@ -121,7 +121,7 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getSolver().set(inputOrderLBSearch(cars));
+        model.getSolver().setSearch(inputOrderLBSearch(cars));
     }
 
     @Override

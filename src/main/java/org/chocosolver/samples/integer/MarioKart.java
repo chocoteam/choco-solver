@@ -38,8 +38,8 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.Random;
 
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.lastConflict;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
 
 /**
@@ -148,13 +148,13 @@ public class MarioKart extends AbstractProblem {
 		/* Listeners */
 		Solver r = model.getSolver();
 		/* Heuristic choices */
-		r.set(lastConflict(inputOrderLBSearch(next)));
+		r.setSearch(lastConflict(inputOrderLBSearch(next)));
 	}
 
 	@Override
 	public void solve() {
-		model.setObjective(MAXIMIZE, goldFound);
-		while(model.getSolver().solve()){
+		model.setObjective(true, goldFound);
+		while (model.getSolver().solve()) {
 			prettyOut();
 		}
 		printInputData();

@@ -36,8 +36,7 @@ import org.chocosolver.solver.variables.RealVar;
 
 import static java.lang.String.format;
 import static java.lang.System.out;
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 
 /**
@@ -90,7 +89,7 @@ public class SmallSantaClaude {
         model.realIbexGenericConstraint("({0}+{1}+{2})/3={3};(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}", allRV).post();
 
         // set search strategy (ABS)
-        model.getSolver().set(minDomLBSearch(kid_gift));
+        model.getSolver().setSearch(minDomLBSearch(kid_gift));
         // displays resolution statistics
         model.getSolver().showStatistics();
         model.getSolver().showSolutions();
@@ -106,7 +105,7 @@ public class SmallSantaClaude {
             out.println(format("Average deviation: %.3f ", average_deviation.getLB()));
         });
         // find optimal solution (Santa Claus is stingy)
-        model.setObjective(MINIMIZE, average_deviation);
+        model.setObjective(false, average_deviation);
         model.setPrecision(precision);
         while (model.getSolver().solve()) ;
         // free IBEX structures from memory

@@ -35,7 +35,6 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.variables.IntVar;
@@ -61,7 +60,7 @@ public class ParetoFront {
 		model.arithm(a, "+", b, "=", c).post();
 
 		// create an object that will store the best solutions and remove dominated ones
-		ParetoOptimizer po = new ParetoOptimizer(ResolutionPolicy.MAXIMIZE,new IntVar[]{a,b});
+		ParetoOptimizer po = new ParetoOptimizer(true,new IntVar[]{a,b});
 		model.getSolver().plugMonitor(po);
 
 		// optimization

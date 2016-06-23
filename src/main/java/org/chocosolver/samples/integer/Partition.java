@@ -32,12 +32,12 @@ package org.chocosolver.samples.integer;
 import org.chocosolver.samples.AbstractProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.Option;
 
 import static java.util.Arrays.fill;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
 
 /**
  * CSPLib prob049:<br/>
@@ -133,7 +133,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getSolver().set(minDomLBSearch(Ovars));
+        model.getSolver().setSearch(Search.minDomLBSearch(Ovars));
     }
 
     @Override

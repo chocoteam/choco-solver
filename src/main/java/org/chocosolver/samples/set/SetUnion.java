@@ -41,7 +41,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.SetVar;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.setVarSearch;
+import static org.chocosolver.solver.search.strategy.Search.setVarSearch;
 
 /**
  * Small problem to illustrate how to use set variables
@@ -73,7 +73,7 @@ public class SetUnion extends AbstractProblem {
     @Override
     public void configureSearch() {
         Solver r = model.getSolver();
-        r.set(setVarSearch(x, y, z));
+        r.setSearch(setVarSearch(x, y, z));
     }
 
     @Override

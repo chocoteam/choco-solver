@@ -37,6 +37,7 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.System.out;
 import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 
 /**
@@ -88,35 +89,35 @@ public class BinPacking extends AbstractProblem{
 		switch (mode) {
 			case 0:// to check
 				model.arithm(minLoad, "=", 17).post();
-				while(model.getSolver().solve()){
-                    solutions.add(new Solution(model).record());
-					nbOpt ++;
+				while (model.getSolver().solve()) {
+					solutions.add(new Solution(model).record());
+					nbOpt++;
 				}
-				System.out.println("There are "+nbOpt+" optima");
-				for(Solution s:solutions){
-					System.out.println(s);
+				out.println("There are " + nbOpt + " optima");
+				for (Solution s : solutions) {
+					out.println(s);
 				}
 				break;
 			case 1:// one step approach (could be slow)
 				// non-strict optimization
-				model.setObjective(MAXIMIZE, minLoad);
-				while (model.getSolver().solve());
+				model.setObjective(true, minLoad);
+				while (model.getSolver().solve()) ;
 				break;
 			case 2:// two step approach (find and prove optimum, then enumerate)
-				model.setObjective(MAXIMIZE, minLoad);
+				model.setObjective(true, minLoad);
 				int opt = -1;
-				while(model.getSolver().solve()){
-					System.out.println("better solution found : "+minLoad);
+				while (model.getSolver().solve()) {
+					out.println("better solution found : " + minLoad);
 					opt = minLoad.getValue();
 				}
 				if (opt != -1) {
 					model.getSolver().reset();
 					model.arithm(minLoad, "=", opt).post();
 					model.clearObjective();
-					while(model.getSolver().solve()){
-						nbOpt ++;
+					while (model.getSolver().solve()) {
+						nbOpt++;
 					}
-					System.out.println("There are "+nbOpt+" optima");
+					out.println("There are " + nbOpt + " optima");
 				}
 				break;
 			default:

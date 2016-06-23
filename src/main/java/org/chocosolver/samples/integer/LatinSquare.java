@@ -37,7 +37,7 @@ import org.kohsuke.args4j.Option;
 
 import java.text.MessageFormat;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 
 /**
  * <a href="http://en.wikipedia.org/wiki/Latin_square">wikipedia</a>:<br/>
@@ -78,7 +78,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getSolver().set(inputOrderLBSearch(vars));
+        model.getSolver().setSearch(inputOrderLBSearch(vars));
     }
 
     @Override

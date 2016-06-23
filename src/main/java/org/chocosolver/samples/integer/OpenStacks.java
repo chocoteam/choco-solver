@@ -49,7 +49,7 @@ import static org.chocosolver.solver.constraints.nary.cnf.LogOp.ifOnlyIf;
 public class OpenStacks extends AbstractProblem {
 
     @Option(name = "-d", aliases = "--data", usage = "Open stacks instance.", required = false)
-    Data data = Data.small;
+    Data data = Data.V_small;
 
     int nc; // nb of customers
     int np; // nb of products
@@ -130,7 +130,7 @@ public class OpenStacks extends AbstractProblem {
     @Override
     public void solve() {
         model.getSolver().limitNode(200000);
-        model.setObjective(MINIMIZE, objective);
+        model.setObjective(false, objective);
         while (model.getSolver().solve()) {
             prettyOut();
         }

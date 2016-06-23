@@ -41,8 +41,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-
 /**
  * Small problem to illustrate how to use set variables
  * finds a partition a universe so that the sum of elements in universe
@@ -95,7 +93,7 @@ public class SetPartition extends AbstractProblem {
 	@Override
 	public void solve() {
 		// find the optimum
-		model.setObjective(MINIMIZE, sum);
+		model.setObjective(false, sum);
 		while(model.getSolver().solve()){
 			System.out.println("new solution found");
 			System.out.println(x);

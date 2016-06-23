@@ -93,9 +93,7 @@ public class Nonogram extends AbstractProblem {
         StringBuilder regexp = new StringBuilder("0*");
         int m = rest.length;
         for (int i = 0; i < m; i++) {
-            for (int j = 0; j < rest[i]; j++) {
-                regexp.append('1');
-            }
+            regexp.append('1').append('{').append(rest[i]).append('}');
             regexp.append('0');
             regexp.append(i == m - 1 ? '*' : '+');
         }

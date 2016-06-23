@@ -40,9 +40,9 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
+import static java.lang.System.out;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 
 /**
  * simple CP model to solve a toy SMPTSP instance
@@ -110,20 +110,20 @@ public class SMPTSP extends AbstractProblem {
 	public void configureSearch() {
 		// bottom-up optimisation, then classical branching
 		Solver r = model.getSolver();
-		r.set(inputOrderLBSearch(nbValues), minDomLBSearch(assignment));
+		r.setSearch(inputOrderLBSearch(nbValues), minDomLBSearch(assignment));
 		// displays the root lower bound
 		r.plugMonitor(new IMonitorInitialize() {
 			@Override
 			public void afterInitialize() {
-				System.out.println("bound after initial propagation : " + nbValues);
+				out.println("bound after initial propagation : " + nbValues);
 			}
 		});
 		r.plugMonitor((IMonitorSolution) () -> {
 			bestObj = nbValues.getValue();
-			System.out.println("Solution found! Objective = "+bestObj);
+			out.println("Solution found! Objective = " + bestObj);
 		});
 		// searches for all optimal solutions (non-strict optimization)
-		model.setObjective(MAXIMIZE, nbValues);
+		model.setObjective(true, nbValues);
 	}
 
 	@Override

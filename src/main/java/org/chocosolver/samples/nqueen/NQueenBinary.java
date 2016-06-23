@@ -35,7 +35,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import java.util.HashSet;
 import java.util.stream.IntStream;
 
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 
 /**
  * <br/>
@@ -65,7 +65,7 @@ public class NQueenBinary extends AbstractNQueen {
 
     @Override
     public void configureSearch() {
-        model.getSolver().set(minDomLBSearch(vars));
+        model.getSolver().setSearch(minDomLBSearch(vars));
 //        SearchMonitorFactory.log(solver, true, false);
     }
 

@@ -34,8 +34,9 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
+import static java.lang.System.out;
 import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 
 /**
  * CSPLib prob006:<br/>
@@ -93,14 +94,14 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getSolver().set(inputOrderLBSearch(ticks));
+        model.getSolver().setSearch(inputOrderLBSearch(ticks));
     }
 
     @Override
     public void solve() {
-        model.setObjective(MINIMIZE, (IntVar) model.getVars()[m - 1]);
-        while(model.getSolver().solve()){
-            System.out.println("New solution found : "+model.getVars()[m - 1]);
+        model.setObjective(false, (IntVar) model.getVars()[m - 1]);
+        while (model.getSolver().solve()) {
+            out.println("New solution found : " + model.getVars()[m - 1]);
         }
     }
 
