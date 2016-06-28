@@ -326,4 +326,9 @@ public class PropScalar extends PropSum {
         }
     }
 
+    @Override
+    protected PropSum opposite(){
+        return new PropScalar(vars, c, pos, nop(o), b + nb(o));
+    }
+
 }

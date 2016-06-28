@@ -276,4 +276,11 @@ public class PropSumBool extends PropSum {
         linComb.append(vars[i].getName()).append(" ").append(b < 0 ? "- " : "+ ").append(Math.abs(b));
         return linComb.toString();
     }
+
+    @Override
+    protected PropSum opposite(){
+        BoolVar[] bvars = new BoolVar[vars.length-1];
+        System.arraycopy(vars, 0, bvars, 0, bvars.length);
+        return new PropSumBool(bvars, pos, nop(o), vars[vars.length-1], b + nb(o), reactToFineEvt);
+    }
 }

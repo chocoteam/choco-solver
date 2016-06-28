@@ -221,13 +221,22 @@ public interface Settings  {
     }
 
     /**
+     * Return true if boolean sum should be decomposed into an equality constraint and an arithmetic constraint,
+     * return false if a single constraint should be used instead.
+     * @return <tt>false</tt>
+     */
+    default boolean enableDecompositionOfBooleanSum(){
+        return false;
+    }
+
+    /**
      * Return true if the incrementality is enabled on boolean sum, based on the number of variables involved.
      * Default condition is : nbvars > 10
      * @param nbvars number of variables in the constraint
      * @return <tt>true</tt>
      */
     default boolean enableIncrementalityOnBoolSum(int nbvars) {
-        return nbvars > 10;
+        return nbvars > 1;
     }
 
     /**

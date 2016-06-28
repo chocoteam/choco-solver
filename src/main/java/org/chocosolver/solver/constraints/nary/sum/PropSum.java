@@ -547,4 +547,30 @@ public class PropSum extends Propagator<IntVar> {
         }
         return newrules;
     }
+
+    protected static int nb(Operator co){
+        switch (co){
+            case LE:
+                return 1;
+            case GE:
+                return -1;
+            default:
+                return 0;
+        }
+    }
+
+    protected static Operator nop(Operator co){
+        switch (co){
+            case LE:
+                return Operator.GE;
+            case GE:
+                return Operator.LE;
+            default:
+                return Operator.getOpposite(co);
+        }
+    }
+
+    protected PropSum opposite(){
+        return new PropSum(vars, pos, nop(o), b + nb(o));
+    }
 }

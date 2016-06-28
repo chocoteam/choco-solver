@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.constraints.nary;
+package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
@@ -37,15 +37,14 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
-import org.chocosolver.solver.constraints.nary.sum.PropScalar;
-import org.chocosolver.solver.constraints.nary.sum.PropSum;
-import org.chocosolver.solver.constraints.nary.sum.PropSumBool;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Random;
@@ -769,5 +768,119 @@ public class IntLinCombTest {
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 780);
         Assert.assertEquals(model.getSolver().getNodeCount(), 1559);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testOpp1() {
+        Model m = new Model();
+        IntVar row[] = m.intVarArray("r", 3, 0, 5);
+        BoolVar b = m.boolVar();
+        Constraint c = m.sum(row, "<=", 5);
+        c.reifyWith(b);
+        Constraint oc = c.getOpposite();
+        Assert.assertTrue(c instanceof SumConstraint);
+        Assert.assertTrue(c.getPropagator(0) instanceof PropSum);
+        Assert.assertTrue(oc instanceof SumConstraint);
+        Assert.assertTrue(oc.getPropagator(0) instanceof PropSum);
+        PropSum poc = (PropSum) oc.getPropagator(0);
+        Assert.assertEquals(poc.o, Operator.GT);
+        Assert.assertEquals(oc.getOpposite(), c);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testOpp2() {
+        Model m = new Model();
+        BoolVar row[] = m.boolVarArray("r", 6);
+        BoolVar b = m.boolVar();
+        Constraint c = m.sum(row, "=", 1);
+        c.reifyWith(b);
+        Constraint oc = c.getOpposite();
+        Assert.assertTrue(c instanceof SumConstraint);
+        Assert.assertTrue(c.getPropagator(0) instanceof PropSumBool);
+        Assert.assertTrue(oc instanceof SumConstraint);
+        Assert.assertTrue(oc.getPropagator(0) instanceof PropSumBool);
+        PropSumBool poc = (PropSumBool) oc.getPropagator(0);
+        Assert.assertEquals(poc.o, Operator.NQ);
+        Assert.assertEquals(oc.getOpposite(), c);
+    }
+
+
+    @Test(groups="1s", timeOut=60000)
+    public void testOpp3() {
+        Model m = new Model();
+        BoolVar row[] = m.boolVarArray("r", 20);
+        BoolVar b = m.boolVar();
+        Constraint c = m.sum(row, "=", 10);
+        c.reifyWith(b);
+        Constraint oc = c.getOpposite();
+        Assert.assertTrue(c instanceof SumConstraint);
+        Assert.assertTrue(c.getPropagator(0) instanceof PropSumBoolIncr);
+        Assert.assertTrue(oc instanceof SumConstraint);
+        Assert.assertTrue(oc.getPropagator(0) instanceof PropSumBoolIncr);
+        PropSumBoolIncr poc = (PropSumBoolIncr) oc.getPropagator(0);
+        Assert.assertEquals(poc.o, Operator.NQ);
+        Assert.assertEquals(oc.getOpposite(), c);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testOpp4() {
+        Model m = new Model();
+        IntVar row[] = m.intVarArray("r", 3, 0, 5);
+        BoolVar b = m.boolVar();
+        Constraint c = m.scalar(row, new int[]{3,4,5}, "<=", 10);
+        c.reifyWith(b);
+        Constraint oc = c.getOpposite();
+        Assert.assertTrue(c instanceof SumConstraint);
+        Assert.assertTrue(c.getPropagator(0) instanceof PropScalar);
+        Assert.assertTrue(oc instanceof SumConstraint);
+        Assert.assertTrue(oc.getPropagator(0) instanceof PropScalar);
+        PropScalar poc = (PropScalar) oc.getPropagator(0);
+        Assert.assertEquals(poc.o, Operator.GT);
+        Assert.assertEquals(oc.getOpposite(), c);
+    }
+
+    @DataProvider(name = "decomp")
+    public Object[][] decomp(){
+        return new Object[][]{
+                {true, 21},
+                {true, 22},
+                {true, 23},
+                {false, 21},
+                {false, 22},
+                {false, 23},
+        };
+    }
+
+    @Test(groups="1s", timeOut=6000000, dataProvider = "decomp")
+    public void testDec1(boolean decomp, int size) {
+        Model m = new Model();
+        m.set(new Settings() {
+            @Override
+            public boolean enableDecompositionOfBooleanSum() {
+                return decomp;
+            }
+        });
+        BoolVar row[] = m.boolVarArray("r", size);
+        m.sum(row, "<", 10).post();
+        m.getSolver().setSearch(Search.inputOrderLBSearch(row));
+        m.getSolver().findAllSolutions();
+        m.getSolver().printShortStatistics();
+    }
+
+    @Test(groups="1s", timeOut=6000000, dataProvider = "decomp")
+    public void testDec2(boolean decomp, int size) {
+        Model m = new Model();
+        m.set(new Settings() {
+            @Override
+            public boolean enableDecompositionOfBooleanSum() {
+                return decomp;
+            }
+        });
+        BoolVar row[] = m.boolVarArray("r", size);
+        BoolVar b = m.boolVar();
+        m.sum(row, "<", 10).reifyWith(b);
+        m.getSolver().setSearch(Search.inputOrderLBSearch(row), Search.inputOrderLBSearch(b));
+        m.getSolver().findAllSolutions();
+        m.getSolver().printShortStatistics();
     }
 }

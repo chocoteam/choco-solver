@@ -147,4 +147,11 @@ public class PropSumBoolIncr extends PropSumBool {
         sumUB = bUB.get() - sum.getLB();
     }
 
+    @Override
+    protected PropSum opposite(){
+        BoolVar[] bvars = new BoolVar[vars.length-1];
+        System.arraycopy(vars, 0, bvars, 0, bvars.length);
+        return new PropSumBoolIncr(bvars, pos, nop(o), vars[vars.length-1], b + nb(o));
+    }
+
 }
