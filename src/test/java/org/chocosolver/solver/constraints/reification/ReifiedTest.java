@@ -451,4 +451,20 @@ public class ReifiedTest {
         assertEquals(s.getSolver().getSolutionCount(), 5);
 
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test_fillo0() {
+        Model m = new Model();
+        IntVar row[] = m.intVarArray("r", 3, 0, 5);
+        BoolVar zero = m.boolVar(false);
+        m.sum(row, "=", 5).reifyWith(zero);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test_fillo1() {
+        Model m = new Model();
+        IntVar row[] = m.intVarArray("r", 3, 0, 5);
+        BoolVar one = m.boolVar(true);
+        m.sum(row, "=", 5).reifyWith(one);
+    }
 }
