@@ -737,4 +737,37 @@ public class IntLinCombTest {
         model.getSolver().showSolutions();
         model.getSolver().solve();
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRFP1() {
+        Model model = new Model("Test reduce frequency propagation");
+        IntVar[] var = model.intVarArray("var", 5, 0, 5);
+        model.sum(var, "<=", 20).post();
+        model.getSolver().setSearch(inputOrderLBSearch(var));
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 7650);
+        Assert.assertEquals(model.getSolver().getNodeCount(), 15299);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRFP2() {
+        Model model = new Model("Test reduce frequency propagation");
+        IntVar[] var = model.intVarArray("var", 5, 0, 5);
+        model.sum(var, ">=", 5).post();
+        model.getSolver().setSearch(inputOrderLBSearch(var));
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 7650);
+        Assert.assertEquals(model.getSolver().getNodeCount(), 15299);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRFP3() {
+        Model model = new Model("Test reduce frequency propagation");
+        IntVar[] var = model.intVarArray("var", 5, 0, 5);
+        model.sum(var, "=", 12).post();
+        model.getSolver().setSearch(inputOrderLBSearch(var));
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 780);
+        Assert.assertEquals(model.getSolver().getNodeCount(), 1559);
+    }
 }

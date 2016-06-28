@@ -72,6 +72,11 @@ public class PropSum extends Propagator<IntVar> {
     protected final int[] I;
 
     /**
+     * Stores the maximal variability
+     */
+    protected int maxI;
+
+    /**
      * SUm of lower bounds
      */
     protected int sumLB;
@@ -110,6 +115,7 @@ public class PropSum extends Propagator<IntVar> {
         this.b = b;
         l = variables.length;
         I = new int[l];
+        maxI = 0;
     }
 
     /**
@@ -151,12 +157,14 @@ public class PropSum extends Propagator<IntVar> {
         sumLB = sumUB = 0;
         int i = 0;
         int lb, ub;
+        maxI = 0;
         for (; i < pos; i++) { // first the positive coefficients
             lb = vars[i].getLB();
             ub = vars[i].getUB();
             sumLB += lb;
             sumUB += ub;
             I[i] = (ub - lb);
+            if(maxI < I[i])maxI = I[i];
         }
         for (; i < l; i++) { // then the negative ones
             lb = -vars[i].getUB();
@@ -164,6 +172,7 @@ public class PropSum extends Propagator<IntVar> {
             sumLB += lb;
             sumUB += ub;
             I[i] = (ub - lb);
+            if(maxI < I[i])maxI = I[i];
         }
     }
 
@@ -208,60 +217,66 @@ public class PropSum extends Propagator<IntVar> {
             if (F < 0 || E < 0) {
                 fails();
             }
-            int lb, ub, i = 0;
-            // positive coefficients first
-            while (i < pos) {
-                if (I[i] - F > 0) {
-                    lb = vars[i].getLB();
-                    ub = lb + I[i];
-                    if (vars[i].updateUpperBound(F + lb, this)) {
-                        int nub = vars[i].getUB();
-                        E += nub - ub;
-                        I[i] = nub - lb;
-                        anychange = true;
+            if (maxI > F || maxI > E) {
+                int lb, ub, i = 0;
+                maxI = 0;
+                // positive coefficients first
+                while (i < pos) {
+                    if (I[i] - F > 0) {
+                        lb = vars[i].getLB();
+                        ub = lb + I[i];
+                        if (vars[i].updateUpperBound(F + lb, this)) {
+                            int nub = vars[i].getUB();
+                            E += nub - ub;
+                            I[i] = nub - lb;
+                            anychange = true;
+                        }
                     }
-                }
-                if (I[i] + E > 0) {
-                    ub = vars[i].getUB();
-                    lb = ub - I[i];
-                    if (vars[i].updateLowerBound(ub - E, this)) {
-                        int nlb = vars[i].getLB();
-                        F -= nlb - lb;
-                        I[i] = ub - nlb;
-                        anychange = true;
+                    if (I[i] + E > 0) {
+                        ub = vars[i].getUB();
+                        lb = ub - I[i];
+                        if (vars[i].updateLowerBound(ub - E, this)) {
+                            int nlb = vars[i].getLB();
+                            F -= nlb - lb;
+                            I[i] = ub - nlb;
+                            anychange = true;
+                        }
                     }
+                    if(maxI < I[i])maxI = I[i];
+                    i++;
                 }
-                i++;
+                // then negative ones
+                while (i < l) {
+                    if (I[i] - F > 0) {
+                        lb = -vars[i].getUB();
+                        ub = lb + I[i];
+                        if (vars[i].updateLowerBound(-F - lb, this)) {
+                            int nub = -vars[i].getLB();
+                            E += nub - ub;
+                            I[i] = nub - lb;
+                            anychange = true;
+                        }
+                    }
+                    if (I[i] - E > 0) {
+                        ub = -vars[i].getLB();
+                        lb = ub - I[i];
+                        if (vars[i].updateUpperBound(-ub + E, this)) {
+                            int nlb = -vars[i].getUB();
+                            F -= nlb - lb;
+                            I[i] = ub - nlb;
+                            anychange = true;
+                        }
+                    }
+                    if(maxI < I[i])maxI = I[i];
+                    i++;
+                }
             }
-            // then negative ones
-            while (i < l) {
-                if (I[i] - F > 0) {
-                    lb = -vars[i].getUB();
-                    ub = lb + I[i];
-                    if (vars[i].updateLowerBound(-F - lb, this)) {
-                        int nub = -vars[i].getLB();
-                        E += nub - ub;
-                        I[i] = nub - lb;
-                        anychange = true;
-                    }
-                }
-                if (I[i] - E > 0) {
-                    ub = -vars[i].getLB();
-                    lb = ub - I[i];
-                    if (vars[i].updateUpperBound(-ub + E, this)) {
-                        int nlb = -vars[i].getUB();
-                        F -= nlb - lb;
-                        I[i] = ub - nlb;
-                        anychange = true;
-                    }
-                }
-                i++;
+            // useless since true when all variables are instantiated
+            if (F <= 0 && E <= 0) {
+                this.setPassive();
+                return;
             }
-        } while (anychange);
-        // useless since true when all variables are instantiated
-        /*if (F <= 0 && E <= 0) {
-            this.setPassive();
-        }*/
+        }while (anychange) ;
     }
 
     /**
@@ -274,32 +289,37 @@ public class PropSum extends Propagator<IntVar> {
         if (F < 0) {
             fails();
         }
-        int lb, ub, i = 0;
-        // positive coefficients first
-        while (i < pos) {
-            if (I[i] - F > 0) {
-                lb = vars[i].getLB();
-                ub = lb + I[i];
-                if (vars[i].updateUpperBound(F + lb, this)) {
-                    int nub = vars[i].getUB();
-                    E += nub - ub;
-                    I[i] = nub - lb;
+        if (maxI > F) {
+            maxI = 0;
+            int lb, ub, i = 0;
+            // positive coefficients first
+            while (i < pos) {
+                if (I[i] - F > 0) {
+                    lb = vars[i].getLB();
+                    ub = lb + I[i];
+                    if (vars[i].updateUpperBound(F + lb, this)) {
+                        int nub = vars[i].getUB();
+                        E += nub - ub;
+                        I[i] = nub - lb;
+                    }
                 }
+                if(maxI < I[i])maxI = I[i];
+                i++;
             }
-            i++;
-        }
-        // then negative ones
-        while (i < l) {
-            if (I[i] - F > 0) {
-                lb = -vars[i].getUB();
-                ub = lb + I[i];
-                if (vars[i].updateLowerBound(-F - lb, this)) {
-                    int nub = -vars[i].getLB();
-                    E += nub - ub;
-                    I[i] = nub - lb;
+            // then negative ones
+            while (i < l) {
+                if (I[i] - F > 0) {
+                    lb = -vars[i].getUB();
+                    ub = lb + I[i];
+                    if (vars[i].updateLowerBound(-F - lb, this)) {
+                        int nub = -vars[i].getLB();
+                        E += nub - ub;
+                        I[i] = nub - lb;
+                    }
                 }
+                if(maxI < I[i])maxI = I[i];
+                i++;
             }
-            i++;
         }
         if (E <= 0) {
             this.setPassive();
@@ -316,32 +336,37 @@ public class PropSum extends Propagator<IntVar> {
         if (E < 0) {
             fails();
         }
-        int lb, ub, i = 0;
-        // positive coefficients first
-        while (i < pos) {
-            if (I[i] - E > 0) {
-                ub = vars[i].getUB();
-                lb = ub - I[i];
-                if (vars[i].updateLowerBound(ub - E, this)) {
-                    int nlb = vars[i].getLB();
-                    F -= nlb - lb;
-                    I[i] = ub - nlb;
+        if(maxI > E) {
+            maxI = 0;
+            int lb, ub, i = 0;
+            // positive coefficients first
+            while (i < pos) {
+                if (I[i] - E > 0) {
+                    ub = vars[i].getUB();
+                    lb = ub - I[i];
+                    if (vars[i].updateLowerBound(ub - E, this)) {
+                        int nlb = vars[i].getLB();
+                        F -= nlb - lb;
+                        I[i] = ub - nlb;
+                    }
                 }
+                if(maxI < I[i])maxI = I[i];
+                i++;
             }
-            i++;
-        }
-        // then negative ones
-        while (i < l) {
-            if (I[i] - E > 0) {
-                ub = -vars[i].getLB();
-                lb = ub - I[i];
-                if (vars[i].updateUpperBound(-ub + E, this)) {
-                    int nlb = -vars[i].getUB();
-                    F -= nlb - lb;
-                    I[i] = ub - nlb;
+            // then negative ones
+            while (i < l) {
+                if (I[i] - E > 0) {
+                    ub = -vars[i].getLB();
+                    lb = ub - I[i];
+                    if (vars[i].updateUpperBound(-ub + E, this)) {
+                        int nlb = -vars[i].getUB();
+                        F -= nlb - lb;
+                        I[i] = ub - nlb;
+                    }
                 }
+                if(maxI < I[i])maxI = I[i];
+                i++;
             }
-            i++;
         }
         if (F <= 0) {
             this.setPassive();
