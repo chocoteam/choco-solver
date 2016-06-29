@@ -61,15 +61,17 @@ public interface IViewFactory extends ISelf<Model> {
             BoolVar not;
             if(bool.isInstantiated()) {
                 not = bool.getValue() == 1 ? _me().boolVar(false) : _me().boolVar(true);
-            }else if (_me().getSettings().enableViews()) {
-                not = new BoolNotView(bool);
             }else {
-                not = _me().boolVar("not(" + bool.getName() + ")");
-                _me().arithm(not, "!=", bool).post();
+                if (_me().getSettings().enableViews()) {
+                    not = new BoolNotView(bool);
+                } else {
+                    not = _me().boolVar("not(" + bool.getName() + ")");
+                    _me().arithm(not, "!=", bool).post();
+                }
+                not.setNot(true);
             }
             bool._setNot(not);
             not._setNot(bool);
-            not.setNot(true);
             return not;
         }
     }

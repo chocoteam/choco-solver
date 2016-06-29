@@ -204,7 +204,13 @@ public class Constraint {
             boolReif = bool;
             assert opposite.boolReif == null;
             opposite.boolReif = this.boolReif.not();
-            new ReificationConstraint(boolReif, this, opposite).post();
+            if(boolReif.isInstantiatedTo(1)){
+                this.post();
+            }else if(boolReif.isInstantiatedTo(0)){
+                this.opposite.post();
+            }else{
+                new ReificationConstraint(boolReif, this, opposite).post();
+            }
         } else if (bool != boolReif) {
             s.arithm(bool, "=", boolReif).post();
         }

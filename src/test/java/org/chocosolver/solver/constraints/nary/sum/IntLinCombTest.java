@@ -842,12 +842,12 @@ public class IntLinCombTest {
     @DataProvider(name = "decomp")
     public Object[][] decomp(){
         return new Object[][]{
-                {true, 21},
-                {true, 22},
-                {true, 23},
-                {false, 21},
-                {false, 22},
-                {false, 23},
+                {true, 18},
+                {true, 19},
+                {true, 20},
+                {false, 18},
+                {false, 19},
+                {false, 20},
         };
     }
 
