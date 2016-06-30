@@ -90,6 +90,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -1660,18 +1661,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param sum  a variable
 	 */
 	default Constraint sum(BoolVar[] vars, String operator, IntVar sum) {
-		if ("=".equals(operator)) {
-			return IntLinCombFactory.reduce(vars, Operator.EQ, sum);
-		}
-		int lb = 0;
-		int ub = 0;
-		for (BoolVar v : vars) {
-			lb += v.getLB();
-			ub += v.getUB();
-		}
-		IntVar p = sum.getModel().intVar(randomName(), lb, ub, true);
-		sum(vars, "=", p).post();
-		return arithm(p, operator, sum);
+		if(sum.getModel().getSettings().enableDecompositionOfBooleanSum()){
+			int[] bounds = VariableUtils.boundsForAddition(vars);
+			IntVar p = sum.getModel().intVar(randomName(), bounds[0], bounds[1], true);
+			IntLinCombFactory.reduce(vars, Operator.EQ, p).post();
+			return arithm(p, operator, sum);
+		}else {
+            return IntLinCombFactory.reduce(vars, Operator.get(operator), sum);
+        }
 	}
 
 	/**

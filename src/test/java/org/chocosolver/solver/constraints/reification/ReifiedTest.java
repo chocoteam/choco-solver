@@ -35,6 +35,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ import static org.testng.Assert.assertEquals;
 public class ReifiedTest {
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRandomEq() {
         for (int seed = 0; seed < 200; seed++) {
             Random r = new Random(seed);
@@ -81,7 +82,7 @@ public class ReifiedTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRandomMember() {
         Model s = new Model();
 
@@ -104,7 +105,7 @@ public class ReifiedTest {
         assertEquals(sol, 2, "nb sol incorrect");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRandomNeq() {
         for (int seed = 0; seed < 200; seed++) {
             Random r = new Random(seed);
@@ -225,7 +226,7 @@ public class ReifiedTest {
      * C. Bessiere, G. Katsirelos, N. Narodytska, C.G. Quimper, T. Walsh.
      * Proceedings IJCAI'09, Pasadena CA, pages 419-424.
      */
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testAllDifferentDecomp() {
 
         for (int i = 1; i < 12; i++) {
@@ -252,7 +253,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testAllDifferentDecompSpe1() {
 
         int[][] values; //= DomainBuilder.buildFullDomains(i, 1, i, r, d, false);
@@ -273,7 +274,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBACP() {
         Model model = new Model();
         IntVar cp = model.intVar("cp", 1, 10, false);
@@ -306,7 +307,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test_wellaweg1() {
         Model s = new Model();
 
@@ -342,7 +343,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test_wellaweg3() {
         Model s = new Model();
 
@@ -378,7 +379,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test_wellaweg4() {
         Model s = new Model();
 
@@ -415,7 +416,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test_wellaweg5() {
         Model s = new Model();
 
@@ -450,5 +451,41 @@ public class ReifiedTest {
 
         assertEquals(s.getSolver().getSolutionCount(), 5);
 
+    }
+
+    @DataProvider(name = "reif")
+    public Object[][] reif() {
+        return new Object[][]{
+                {2, 2},
+                {1, 2},
+                {0, 2},
+                {2, 1},
+                {1, 1},
+                {0, 1},
+                {2, 0},
+                {1, 0},
+                {0, 0},
+        };
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "reif")
+    public void test_reif(int b1, int b2) {
+        Model m = new Model();
+        IntVar row[] = m.intVarArray("r", 3, 0, 5);
+        BoolVar a1 = b1 == 2 ? m.boolVar() : b1 == 1 ? m.boolVar(true) : m.boolVar(false);
+        m.sum(row, "=", 5).reifyWith(a1);
+        BoolVar a2 = b2 == 2 ? m.boolVar() : b2 == 1 ? m.boolVar(true) : m.boolVar(false);
+        m.sum(row, "=", 5).reifyWith(a2);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "reif")
+    public void test_reif2(int b1, int b2) {
+        Model m = new Model();
+        IntVar row[] = m.intVarArray("r", 3, 0, 5);
+        BoolVar a1 = b1 == 2 ? m.boolVar("b1") : b1 == 1 ? m.boolVar("b1", true) : m.boolVar("b1", false);
+        m.sum(row, "=", 5).reifyWith(a1);
+        BoolVar a2 = b2 == 2 ? m.boolVar("b2") : b2 == 1 ? m.boolVar("b2", true) : m.boolVar("b2", false);
+        m.sum(row, "=", 5).reifyWith(a2);
     }
 }
