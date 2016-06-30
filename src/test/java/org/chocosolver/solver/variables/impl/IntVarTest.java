@@ -32,9 +32,9 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableRangeSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

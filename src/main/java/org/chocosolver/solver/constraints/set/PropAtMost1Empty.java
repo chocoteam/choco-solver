@@ -85,14 +85,14 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
 
     @Override
     public void propagate(int v, int mask) throws ContradictionException {
-        if (vars[v].getUB().getSize() == 0) {
+        if (vars[v].getUB().size() == 0) {
             if (emptySetIndex.get() != -1) {
                 fails(); // TODO: could be more precise, for explanation purpose
             } else {
                 emptySetIndex.set(v);
                 for (int i = 0; i < vars.length; i++) {
-                    int s = vars[i].getUB().getSize();
-                    if (i != v && s != vars[i].getLB().getSize()) {
+                    int s = vars[i].getUB().size();
+                    if (i != v && s != vars[i].getLB().size()) {
                         if (s == 0) {
                             fails(); // TODO: could be more precise, for explanation purpose
                         } else if (s == 1) {
@@ -102,7 +102,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
                 }
             }
         }
-        if (vars[v].getUB().getSize() == 1 && emptySetIndex.get() != -1) {
+        if (vars[v].getUB().size() == 1 && emptySetIndex.get() != -1) {
             vars[v].force(vars[v].getUB().iterator().next(), this);
         }
     }
@@ -112,7 +112,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
         boolean none = true;
         boolean allInstantiated = true;
         for (int i = 0; i < vars.length; i++) {
-            if (vars[i].getUB().getSize() == 0) {
+            if (vars[i].getUB().size() == 0) {
                 if (!none) {
                     return ESat.FALSE;
                 }

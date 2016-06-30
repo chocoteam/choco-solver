@@ -84,12 +84,12 @@ public class PropOffSet extends Propagator<SetVar> {
         }
         // envelope
         for (int j : vars[0].getUB()) {
-            if (!vars[1].getUB().contain(j + offSet)) {
+            if (!vars[1].getUB().contains(j + offSet)) {
                 vars[0].remove(j, this);
             }
         }
         for (int j : vars[1].getUB()) {
-            if (!vars[0].getUB().contain(j - offSet)) {
+            if (!vars[0].getUB().contains(j - offSet)) {
                 vars[1].remove(j, this);
             }
         }
@@ -115,12 +115,12 @@ public class PropOffSet extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int j : vars[0].getLB()) {
-            if (!vars[1].getUB().contain(j + offSet)) {
+            if (!vars[1].getUB().contains(j + offSet)) {
                 return ESat.FALSE;
             }
         }
         for (int j : vars[1].getLB()) {
-            if (!vars[0].getUB().contain(j - offSet)) {
+            if (!vars[0].getUB().contains(j - offSet)) {
                 return ESat.FALSE;
             }
         }

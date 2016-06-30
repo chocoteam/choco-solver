@@ -68,7 +68,7 @@ public class DefaultCumulFilter extends CumulFilter {
 			max = Math.max(max, e[t].getUB());
 			hInst &= h[t].isInstantiated();
 		}
-		if (max - min < tasks.getSize() * tasks.getSize()) {
+		if (max - min < tasks.size() * tasks.size()) {
 			getTime().filter(s, d, e, h, capa, tasks);
 		} else {
 			getSweep().filter(s, d, e, h, capa, tasks);
@@ -78,7 +78,7 @@ public class DefaultCumulFilter extends CumulFilter {
 		}
 		nrj.filter(s, d, e, h, capa, tasks);
 		// only propagated on less than 50 tasks (too costly otherwise)
-		if (tasks.getSize() < 50) {
+		if (tasks.size() < 50) {
 			if (capa.isInstantiatedTo(1)) {
 				getDisjTaskInter().filter(s, d, e, h, capa, tasks);
 			}

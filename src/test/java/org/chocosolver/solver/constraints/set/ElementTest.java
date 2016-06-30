@@ -81,10 +81,10 @@ public class ElementTest {
         while (model.getSolver().solve()) {
             nbSol++;
             for (Integer val : sets[index.getValue()].getValue()) {
-                assertTrue(element.getValue().contain(val));
+                assertTrue(element.getValue().contains(val));
             }
             for (Integer val : element.getValue()) {
-                assertTrue(sets[index.getValue()].getValue().contain(val));
+                assertTrue(sets[index.getValue()].getValue().contains(val));
             }
         }
         assertTrue(nbSol > 0);

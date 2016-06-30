@@ -77,8 +77,8 @@ public class PropIntersection extends Propagator<SetVar> {
         intersectionRemoved = element -> {
             int mate = -1;
             for (int i = 0; i < k; i++)
-                if (vars[i].getUB().contain(element)) {
-                    if (!vars[i].getLB().contain(element)) {
+                if (vars[i].getUB().contains(element)) {
+                    if (!vars[i].getLB().contains(element)) {
                         if (mate == -1) {
                             mate = i;
                         } else {
@@ -99,11 +99,11 @@ public class PropIntersection extends Propagator<SetVar> {
         setForced = element -> {
             boolean allKer = true;
             for (int i = 0; i < k; i++) {
-                if (!vars[i].getUB().contain(element)) {
+                if (!vars[i].getUB().contains(element)) {
                     vars[k].remove(element, this);
                     allKer = false;
                     break;
-                } else if (!vars[i].getLB().contain(element)) {
+                } else if (!vars[i].getLB().contains(element)) {
                     allKer = false;
                 }
             }
@@ -125,7 +125,7 @@ public class PropIntersection extends Propagator<SetVar> {
             for (int j : vars[0].getLB()) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
-                    if (!vars[i].getLB().contain(j)) {
+                    if (!vars[i].getLB().contains(j)) {
                         all = false;
                         break;
                     }
@@ -135,13 +135,13 @@ public class PropIntersection extends Propagator<SetVar> {
                 }
             }
             for (int j : intersection.getUB()) {
-                if (intersection.getLB().contain(j)) {
+                if (intersection.getLB().contains(j)) {
                     for (int i = 0; i < k; i++) {
                         vars[i].force(j, this);
                     }
                 } else {
                     for (int i = 0; i < k; i++)
-                        if (!vars[i].getUB().contain(j)) {
+                        if (!vars[i].getUB().contains(j)) {
                             intersection.remove(j, this);
                             break;
                         }
@@ -170,13 +170,13 @@ public class PropIntersection extends Propagator<SetVar> {
     public ESat isEntailed() {
         for (int j : vars[k].getLB())
             for (int i = 0; i < k; i++)
-                if (!vars[i].getUB().contain(j))
+                if (!vars[i].getUB().contains(j))
                     return ESat.FALSE;
         for (int j : vars[0].getLB()) {
-            if (!vars[k].getUB().contain(j)) {
+            if (!vars[k].getUB().contains(j)) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
-                    if (!vars[i].getLB().contain(j)) {
+                    if (!vars[i].getLB().contains(j)) {
                         all = false;
                         break;
                     }

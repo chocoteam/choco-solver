@@ -47,7 +47,7 @@ public class IntervalSetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testSize() {
         ISet set = create();
-        assertEquals(set.getSize(), 9);
+        assertEquals(set.size(), 9);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -58,9 +58,9 @@ public class IntervalSetTest {
         for (int i : set) {
             reached.add(i);
         }
-        assertEquals(reached.size(), set.getSize());
+        assertEquals(reached.size(), set.size());
         for(int i=-5;i<=20;i++){
-            assertEquals(reached.contains(i),set.contain(i));
+            assertEquals(reached.contains(i),set.contains(i));
         }
     }
 

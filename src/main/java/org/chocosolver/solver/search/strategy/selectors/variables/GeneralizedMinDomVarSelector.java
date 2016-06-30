@@ -77,7 +77,7 @@ public class GeneralizedMinDomVarSelector implements VariableSelector {
                     dsize = 2 + (int) ((rv.getUB() - rv.getLB())/rv.getPrecision());
                 } else if (kind == Variable.SET) {
                     SetVar sv = (SetVar) v;
-                    dsize = 1 + (sv.getUB().getSize() - sv.getLB().getSize());
+                    dsize = 1 + (sv.getUB().size() - sv.getLB().size());
                 } else {
                     throw new UnsupportedOperationException("unrocognised variable kind");
                 }

@@ -156,7 +156,7 @@ public class PropAntiArborescences extends Propagator<IntVar> {
         int y = vars[x].getValue()-offSet;
         while (x != y) {
             x = y;
-            if (tmp.contain(x)) {
+            if (tmp.contains(x)) {
                 return true;
             }
             tmp.add(x);

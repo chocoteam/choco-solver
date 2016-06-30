@@ -34,9 +34,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 
 import java.util.Arrays;
 
@@ -62,7 +61,7 @@ public class PropBinAC3rm extends PropBinCSP {
     private int initDomSize0;
     private int initDomSize1;
 
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
     public PropBinAC3rm(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));

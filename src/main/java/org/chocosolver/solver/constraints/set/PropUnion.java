@@ -78,7 +78,7 @@ public class PropUnion extends Propagator<SetVar> {
         unionForced = element -> {
             int mate = -1;
             for (int i = 0; i < k && mate != -2; i++) {
-                if (vars[i].getUB().contain(element)) {
+                if (vars[i].getUB().contains(element)) {
                     if (mate == -1) {
                         mate = i;
                     } else {
@@ -99,10 +99,10 @@ public class PropUnion extends Propagator<SetVar> {
         };
         setForced = element -> vars[k].force(element, this);
         setRemoved = element -> {
-            if (vars[k].getUB().contain(element)) {
+            if (vars[k].getUB().contains(element)) {
                 int mate = -1;
                 for (int i = 0; i < k && mate != -2; i++) {
-                    if (vars[i].getUB().contain(element)) {
+                    if (vars[i].getUB().contains(element)) {
                         if (mate == -1) {
                             mate = i;
                         } else {
@@ -112,7 +112,7 @@ public class PropUnion extends Propagator<SetVar> {
                 }
                 if (mate == -1) {
                     vars[k].remove(element, this);
-                } else if (mate != -2 && vars[k].getLB().contain(element)) {
+                } else if (mate != -2 && vars[k].getLB().contains(element)) {
                     vars[mate].force(element, this);
                 }
             }
@@ -131,14 +131,14 @@ public class PropUnion extends Propagator<SetVar> {
                 for (int j : vars[i].getLB())
                     union.force(j, this);
                 for (int j : vars[i].getUB())
-                    if (!union.getUB().contain(j))
+                    if (!union.getUB().contains(j))
                         vars[i].remove(j, this);
             }
             for (int j : union.getUB()) {
-                if (union.getLB().contain(j)) {
+                if (union.getLB().contains(j)) {
                     int mate = -1;
                     for (int i = 0; i < k && mate != -2; i++) {
-                        if (vars[i].getUB().contain(j)) {
+                        if (vars[i].getUB().contains(j)) {
                             if (mate == -1) {
                                 mate = i;
                             } else {
@@ -154,7 +154,7 @@ public class PropUnion extends Propagator<SetVar> {
                 } else {
                     int mate = -1;
                     for (int i = 0; i < k; i++) {
-                        if (vars[i].getUB().contain(j)) {
+                        if (vars[i].getUB().contains(j)) {
                             mate = i;
                             break;
                         }
@@ -185,13 +185,13 @@ public class PropUnion extends Propagator<SetVar> {
     public ESat isEntailed() {
         for (int i = 0; i < k; i++) {
             for (int j : vars[i].getLB())
-                if (!vars[k].getUB().contain(j))
+                if (!vars[k].getUB().contains(j))
                     return ESat.FALSE;
         }
         for (int j : vars[k].getLB()) {
             int mate = -1;
             for (int i = 0; i < k; i++)
-                if (vars[i].getUB().contain(j)) {
+                if (vars[i].getUB().contains(j)) {
                     mate = i;
                     break;
                 }

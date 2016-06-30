@@ -37,9 +37,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -54,7 +53,7 @@ public class PropSquare extends Propagator<IntVar> {
 
     private final RemProc rem_proc;
     private final IIntDeltaMonitor[] idms;
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
     public PropSquare(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);

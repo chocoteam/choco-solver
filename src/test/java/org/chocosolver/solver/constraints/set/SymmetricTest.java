@@ -73,7 +73,7 @@ public class SymmetricTest {
             nbSol++;
             for (int i = 0; i < vars.length; i++) {
                 for (Integer value : vars[i].getValue()) {
-                    assertTrue(vars[value].getValue().contain(i));
+                    assertTrue(vars[value].getValue().contains(i));
                 }
             }
         }

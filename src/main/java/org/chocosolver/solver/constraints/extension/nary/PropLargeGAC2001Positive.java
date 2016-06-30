@@ -34,9 +34,8 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 
 /**
  * <br/>
@@ -65,7 +64,7 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
     //by avoiding checking the bounds
     private ValidityChecker valcheck;
 
-    private final IntIterableSet vrms;
+    private final IntIterableBitSet vrms;
 
     private PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation) {
         super(vs, relation);

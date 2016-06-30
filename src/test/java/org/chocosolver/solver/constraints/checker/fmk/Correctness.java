@@ -188,7 +188,7 @@ public class Correctness {
         int[] _values = new int[d.length];
         int k = 0;
         for (int i : d) {
-            if (!variable.getUB().contain(i)) {
+            if (!variable.getUB().contains(i)) {
                 _values[k++] = i;
             }
         }
@@ -197,7 +197,7 @@ public class Correctness {
 
     ////////////////////////////////////////////////////////////////////////
     private static int[] getForcedElements(SetVar v, int[] d) {
-        int[] _values = new int[v.getLB().getSize()];
+        int[] _values = new int[v.getLB().size()];
         int k = 0;
         for (int j : v.getLB()) {
             boolean newEl = true;

@@ -34,9 +34,8 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -84,7 +83,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     private IStateInt last;
     private int[] listuples;
 
-    private IntIterableSet vrms;
+    private IntIterableBitSet vrms;
 
     private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
         super(vs, relation);

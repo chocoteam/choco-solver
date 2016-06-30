@@ -128,7 +128,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int vidx, int evtmask) throws ContradictionException {
-        if (vidx != nb_vars && poss.contain(vidx)) {
+        if (vidx != nb_vars && poss.contains(vidx)) {
             IntVar var = vars[vidx];
             int nb = 0;
             for (int j : values) {
@@ -142,7 +142,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                 vars[nb_vars].updateLowerBound(nbSure.get(), this);
             } else if (nb == 0) {
                 poss.remove(vidx);
-                vars[nb_vars].updateUpperBound(poss.getSize() + nbSure.get(), this);
+                vars[nb_vars].updateUpperBound(poss.size() + nbSure.get(), this);
             }
         }
         forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
@@ -150,7 +150,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     private void filter() throws ContradictionException {
         int lb = nbSure.get();
-        int ub = poss.getSize() + lb;
+        int ub = poss.size() + lb;
         vars[nb_vars].updateBounds(lb, ub, this);
         if (vars[nb_vars].isInstantiated() && lb < ub) {
             if (vars[nb_vars].getValue() == lb) {

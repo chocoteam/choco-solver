@@ -148,17 +148,17 @@ public class PropFastGCC extends Propagator<IntVar> {
         Iterator<Integer> iter = valueToCompute.iterator();
         while (iter.hasNext()) {
             int i = iter.next();
-            again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), this);
-            again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), this);
+            again |= vars[n + i].updateLowerBound(mandatories[i].size(), this);
+            again |= vars[n + i].updateUpperBound(mandatories[i].size() + possibles[i].size(), this);
             if (vars[n + i].isInstantiated()) {
-                if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
+                if (possibles[i].size() + mandatories[i].size() == vars[n + i].getLB()) {
                     for (int j : possibles[i]) {
                         mandatories[i].add(j);
                         again |= vars[j].instantiateTo(values[i], this);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
-                } else if (mandatories[i].getSize() == vars[n + i].getUB()) {
+                } else if (mandatories[i].size() == vars[n + i].getUB()) {
                     for (int var : possibles[i]) {
                         again |= vars[var].removeValue(values[i], this);
                     }
@@ -184,7 +184,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                 if (map.containsKey(lb)) {
                     index = map.get(lb);
                 }
-                boolean b = index != -1 && !(possibles[index].contain(var) || mandatories[index].contain(var));
+                boolean b = index != -1 && !(possibles[index].contains(var) || mandatories[index].contains(var));
                 while (b) {
                     useful = true;
                     vars[var].removeValue(lb, this);
@@ -193,14 +193,14 @@ public class PropFastGCC extends Propagator<IntVar> {
                     if (map.containsKey(lb)) {
                         index = map.get(lb);
                     }
-                    b = index != -1 && !(possibles[index].contain(var) || mandatories[index].contain(var));
+                    b = index != -1 && !(possibles[index].contains(var) || mandatories[index].contains(var));
                 }
                 int ub = vars[var].getUB();
                 index = -1;
                 if (map.containsKey(ub)) {
                     index = map.get(ub);
                 }
-                b = index != -1 && !(possibles[index].contain(var) || mandatories[index].contain(var));
+                b = index != -1 && !(possibles[index].contains(var) || mandatories[index].contains(var));
                 while (b) {
                     useful = true;
                     vars[var].removeValue(ub, this);
@@ -209,13 +209,13 @@ public class PropFastGCC extends Propagator<IntVar> {
                     if (map.containsKey(ub)) {
                         index = map.get(ub);
                     }
-                    b = index != -1 && !(possibles[index].contain(var) || mandatories[index].contain(var));
+                    b = index != -1 && !(possibles[index].contains(var) || mandatories[index].contains(var));
                 }
             } else {
                 int val = vars[var].getValue();
                 if (map.containsKey(val)) {
                     int index = map.get(val);
-                    if ((!possibles[index].contain(var) && !mandatories[index].contain(var))) {
+                    if ((!possibles[index].contains(var) && !mandatories[index].contains(var))) {
                         fails(); // TODO: could be more precise, for explanation purpose
                     }
                 }

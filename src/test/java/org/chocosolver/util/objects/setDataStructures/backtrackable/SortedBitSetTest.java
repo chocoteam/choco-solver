@@ -27,59 +27,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.util.objects.setDataStructures.swapList;
+package org.chocosolver.util.objects.setDataStructures.backtrackable;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateInt;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.nonbacktrackable.SetTest;
 
 /**
- * Set of integers based on BipartiteSet implementation
- * BEWARE : CANNOT BOTH ADD AND REMOVE ELEMENTS DURING SEARCH
- * (add only or remove only)
- *
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
- *
- * @author : Jean-Guillaume Fages
+ * @author Jean-Guillaume FAGES
  */
-public class Set_Std_Swap extends Set_Swap {
-
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
-
-    protected IStateInt size;
-
-	//***********************************************************************************
-	// CONSTRUCTOR
-	//***********************************************************************************
-
-	/**
-	 * Creates an empty bipartite set having numbers greater or equal than <code>offSet</code> (possibly < 0)
-	 * @param e backtracking environment
-	 * @param offSet smallest allowed value in this set (possibly < 0)
-	 */
-	public Set_Std_Swap(IEnvironment e, int offSet){
-		super(offSet);
-		size = e.makeInt(0);
-	}
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+public class SortedBitSetTest extends SetTest {
 
     @Override
-    public int size() {
-        return size.get();
-    }
-
-    protected void setSize(int s) {
-        size.set(s);
-    }
-
-    protected void addSize(int delta) {
-        size.add(delta);
+    public ISet create(int offset) {
+        IntIterableBitSet set = new IntIterableBitSet();
+        set.setOffset(offset);
+        return set;
     }
 }

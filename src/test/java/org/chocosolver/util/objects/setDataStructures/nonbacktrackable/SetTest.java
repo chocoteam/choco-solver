@@ -48,13 +48,13 @@ public abstract class SetTest {
     public void testAddNominal() {
         ISet set = create();
         assertTrue(set.add(1));
-        assertTrue(set.contain(1));
+        assertTrue(set.contains(1));
     }
 
     /**
      * Value which is lower than the offset
      */
-    @Test(groups = "1s", timeOut=60000, expectedExceptions = AssertionError.class)
+    @Test(groups = "1s", timeOut=60000, expectedExceptions = IllegalStateException.class)
     public void testAddNegativeKO() {
         ISet set = create();
         assertFalse(set.add(-2)); // expected exception here
@@ -67,14 +67,14 @@ public abstract class SetTest {
     public void testAddNegativeOK() {
         ISet set = create(-1);
         assertTrue(set.add(-1));
-        assertEquals(set.getSize(), 1);
+        assertEquals(set.size(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testAddMaxValue() {
         ISet set = create(Integer.MAX_VALUE);
         set.add(Integer.MAX_VALUE);
-        assertEquals(set.getSize(), 1);
+        assertEquals(set.size(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -82,7 +82,7 @@ public abstract class SetTest {
         ISet set = create();
         assertTrue(set.add(5));
         assertFalse(set.add(5));
-        assertEquals(set.getSize(), 1);
+        assertEquals(set.size(), 1);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -114,25 +114,25 @@ public abstract class SetTest {
 
         size = 0;
         for (Integer integer : set) {
-            if(set.contain(1)){
+            if(set.contains(1)){
                 set.remove(1);
             }
             assertNotNull(integer);
             size++;
         }
         assertTrue(5 <= size);
-        assertEquals(5, set.getSize());
+        assertEquals(5, set.size());
 
         size = 0;
         for (Integer integer : set) {
-            if(set.contain(6)){
+            if(set.contains(6)){
                 set.remove(6);
             }
             assertNotNull(integer);
             size++;
         }
         assertTrue(4 <= size);
-        assertEquals(4, set.getSize());
+        assertEquals(4, set.size());
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -168,7 +168,7 @@ public abstract class SetTest {
             set.add(i);
         }
         set.clear();
-        assertEquals(set.getSize(), 0);
+        assertEquals(set.size(), 0);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -209,7 +209,7 @@ public abstract class SetTest {
         ISet set = create();
         set.add(5);
         set.add(6);
-        assertEquals(set.getSize(), 2);
+        assertEquals(set.size(), 2);
     }
 
     /**
@@ -245,7 +245,7 @@ public abstract class SetTest {
             iterator.next();
             size++;
         }
-       assertEquals(size, set.getSize());
+       assertEquals(size, set.size());
     }
 
     /**
@@ -271,16 +271,16 @@ public abstract class SetTest {
         assertTrue(ro.isEmpty());
 
         assertTrue(set.add(1));
-        assertTrue(ro.contain(1));
+        assertTrue(ro.contains(1));
         try {
             ro.remove(1);
             fail();
         } catch(UnsupportedOperationException e) {
-            assertTrue(set.contain(1));
+            assertTrue(set.contains(1));
         }
 
         assertTrue(set.remove(1));
-        assertFalse(ro.contain(1));
+        assertFalse(ro.contains(1));
 
         set.add(2);
 

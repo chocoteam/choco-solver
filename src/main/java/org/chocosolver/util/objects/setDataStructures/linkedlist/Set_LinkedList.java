@@ -61,12 +61,12 @@ public class Set_LinkedList implements ISet {
 	//***********************************************************************************
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return size;
 	}
 
 	@Override
-	public boolean contain(int element) {
+	public boolean contains(int element) {
 		IntCell cell = first;
 		while(cell != null){
 			if(cell.element == element){
@@ -79,7 +79,7 @@ public class Set_LinkedList implements ISet {
 
 	@Override
 	public boolean add(int element) {
-		if(contain(element)){
+		if(contains(element)){
 			return false;
 		}
 		if (poolGC == null) {

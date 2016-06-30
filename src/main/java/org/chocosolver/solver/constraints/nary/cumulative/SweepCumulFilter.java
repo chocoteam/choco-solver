@@ -104,7 +104,7 @@ public class SweepCumulFilter extends CumulFilter {
 	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		// removing tasks with a duration lower bound equal to 0
 		removeNullDurations(d, tasks);
-		int nbT = tasksToUSe.getSize();
+		int nbT = tasksToUSe.size();
 		// filtering start lower bounds
 		boolean again;
 		do{

@@ -128,14 +128,14 @@ public class PropMinElement extends Propagator<Variable> {
                 }
             }
         }
-        if (notEmpty || set.getLB().getSize() > 0) {
+        if (notEmpty || set.getLB().size() > 0) {
             min.updateLowerBound(minVal, this);
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if (set.getUB().getSize() == 0) {
+        if (set.getUB().size() == 0) {
             if (notEmpty) {
                 return ESat.FALSE;
             } else {
@@ -155,7 +155,7 @@ public class PropMinElement extends Propagator<Variable> {
                 minVal = get(j);
             }
         }
-        if (minVal > ub && (notEmpty || set.getLB().getSize() > 0)) {
+        if (minVal > ub && (notEmpty || set.getLB().size() > 0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {

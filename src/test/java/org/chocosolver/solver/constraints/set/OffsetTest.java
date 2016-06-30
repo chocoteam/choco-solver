@@ -117,9 +117,9 @@ public class OffsetTest {
         int nbSol = 0;
         while (model.getSolver().solve()) {
             nbSol++;
-            assertEquals(set.getValue().getSize(), offseted.getValue().getSize());
+            assertEquals(set.getValue().size(), offseted.getValue().size());
             for (Integer value : set.getValue()) {
-                assertTrue(offseted.getValue().contain(value + offset));
+                assertTrue(offseted.getValue().contains(value + offset));
             }
         }
     }

@@ -60,12 +60,12 @@ public abstract class BacktrackableSetTest extends SetTest{
         environment.worldPush();
 
         set.remove(1);
-        assertFalse(set.contain(1));
+        assertFalse(set.contains(1));
         environment.worldPush();
 
         environment.worldPop();
         environment.worldPop();
-        assertTrue(set.contain(1));
+        assertTrue(set.contains(1));
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -110,8 +110,8 @@ public abstract class BacktrackableSetTest extends SetTest{
 
         environment.worldPop();
         for (int i = 10000 - 1; i >= 0; i--) {
-            assertTrue(set.contain(i));
-            assertFalse(set.contain(i+1));
+            assertTrue(set.contains(i));
+            assertFalse(set.contains(i+1));
             environment.worldPop();
         }
 
@@ -152,15 +152,15 @@ public abstract class BacktrackableSetTest extends SetTest{
         a.add(3); // not read
 
         environment.worldPop();
-        assertTrue(a.contain(1));
-        assertFalse(a.contain(2));
-        assertFalse(b.contain(1));
-        assertTrue(b.contain(2));
-        assertFalse(a.contain(3));
+        assertTrue(a.contains(1));
+        assertFalse(a.contains(2));
+        assertFalse(b.contains(1));
+        assertTrue(b.contains(2));
+        assertFalse(a.contains(3));
 
         environment.worldPop();
-        assertTrue(a.contain(1));
-        assertFalse(b.contain(1));
+        assertTrue(a.contains(1));
+        assertFalse(b.contains(1));
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -175,7 +175,7 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertTrue(set.add(2));
         environment.worldPop();
         environment.worldPop();
-        assertFalse(set.contain(2));
+        assertFalse(set.contains(2));
         assertFalse(set.remove(1));
     }
 
@@ -199,24 +199,24 @@ public abstract class BacktrackableSetTest extends SetTest{
 
         size = 0;
         for (Integer integer : set) {
-            if(set.contain(1)){
+            if(set.contains(1)){
                 set.remove(1);
             }
             assertNotNull(integer);
             size++;
         }
         assertTrue(5 <= size);
-        assertEquals(5, set.getSize());
+        assertEquals(5, set.size());
 
         size = 0;
         for (Integer integer : set) {
-            if(set.contain(6)){
+            if(set.contains(6)){
                 set.remove(6);
             }
             assertNotNull(integer);
             size++;
         }
         assertTrue(4 <= size);
-        assertEquals(4, set.getSize());
+        assertEquals(4, set.size());
     }
 }

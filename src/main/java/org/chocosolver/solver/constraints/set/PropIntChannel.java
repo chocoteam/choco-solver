@@ -113,7 +113,7 @@ public class PropIntChannel extends Propagator<Variable> {
         for (int i = 0; i < nInts; i++) {
             int ub = ints[i].getUB();
             for (int j = ints[i].getLB(); j <= ub; j = ints[i].nextValue(j)) {
-                if (!sets[j - offSet1].getUB().contain(i + offSet2)) {
+                if (!sets[j - offSet1].getUB().contains(i + offSet2)) {
                     ints[i].removeValue(j, this);
                 }
             }
@@ -165,7 +165,7 @@ public class PropIntChannel extends Propagator<Variable> {
         for (int i = 0; i < nInts; i++) {
             if (ints[i].isInstantiated()) {
                 int val = ints[i].getValue();
-                if (val < offSet1 || val >= nSets + offSet1 || !sets[val - offSet1].getUB().contain(i + offSet2)) {
+                if (val < offSet1 || val >= nSets + offSet1 || !sets[val - offSet1].getUB().contains(i + offSet2)) {
                     return ESat.FALSE;
                 }
             }

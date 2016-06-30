@@ -77,11 +77,11 @@ public class Set_Swap implements ISet {
 
 	@Override
 	public boolean add(int element) {
-		assert element>=mapOffset;
-		if (contain(element)) {
+		if(element < mapOffset) throw new IllegalStateException("Cannot add "+element+" to set of offset "+mapOffset);
+		if (contains(element)) {
 			return false;
 		}
-		int size = getSize();
+		int size = size();
 		if (size == values.length) {
 			int[] tmp = values;
 			int ns = tmp.length + 1 + (tmp.length * 2) / 3;
@@ -108,11 +108,11 @@ public class Set_Swap implements ISet {
 
 	@Override
 	public boolean remove(int element) {
-		if (!contain(element)) {
+		if (!contains(element)) {
 			return false;
 		}
 		iter.notifyRemoving(element);
-		int size = getSize();
+		int size = size();
 		if (size > 1) {
 			int idx = map[element-mapOffset];
 			int replacer = values[size - 1];
@@ -126,15 +126,15 @@ public class Set_Swap implements ISet {
 	}
 
 	@Override
-	public boolean contain(int element) {
+	public boolean contains(int element) {
 		if(element<mapOffset || element >= mapOffset+map.length){
 			return false;
 		}
-		return map[element-mapOffset] >= 0 && map[element-mapOffset] < getSize() && values[map[element-mapOffset]] == element;
+		return map[element-mapOffset] >= 0 && map[element-mapOffset] < size() && values[map[element-mapOffset]] == element;
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return size;
 	}
 
@@ -155,7 +155,7 @@ public class Set_Swap implements ISet {
 	public int min() {
 		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
 		int min = values[0];
-		for(int i=1;i<getSize();i++){
+		for(int i = 1; i< size(); i++){
 			if(min > values[i]){
 				min = values[i];
 			}
@@ -167,7 +167,7 @@ public class Set_Swap implements ISet {
 	public int max() {
 		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
 		int max = values[0];
-		for(int i=1;i<getSize();i++){
+		for(int i = 1; i< size(); i++){
 			if(max < values[i]){
 				max = values[i];
 			}
@@ -216,7 +216,7 @@ public class Set_Swap implements ISet {
 			}
 			@Override
 			public boolean hasNext() {
-				return idx < getSize();
+				return idx < size();
 			}
 			@Override
 			public Integer next() {

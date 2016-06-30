@@ -98,7 +98,7 @@ public class IntChannelTest {
                 }
             }
             for (int i = 0; i < intVars.length; i++) {
-                assertTrue(setVars[intVars[i].getValue() - offset].getValue().contain(i + offset));
+                assertTrue(setVars[intVars[i].getValue() - offset].getValue().contains(i + offset));
             }
         }
         assertTrue(solutionFound);

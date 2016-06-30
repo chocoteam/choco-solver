@@ -89,8 +89,8 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     public ESat isEntailed() {
         if (iv.isInstantiated()) {
             int v = iv.getValue();
-            if (sv.getUB().contain(v)) {
-                if (sv.getLB().contain(v)) {
+            if (sv.getUB().contains(v)) {
+                if (sv.getLB().contains(v)) {
                     return ESat.FALSE;
                 } else {
                     return ESat.UNDEFINED;
@@ -100,7 +100,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
             }
         } else {
             for (int v = iv.getLB(); v <= iv.getUB(); v = iv.nextValue(v)) {
-                if (!sv.getLB().contain(v)) {
+                if (!sv.getLB().contains(v)) {
                     return ESat.UNDEFINED;
                 }
             }

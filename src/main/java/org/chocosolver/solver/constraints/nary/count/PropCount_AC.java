@@ -128,7 +128,7 @@ public class PropCount_AC extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx < n) {
-            if (possibles.contain(varIdx)) {
+            if (possibles.contains(varIdx)) {
                 if (!vars[varIdx].contains(value)) {
                     possibles.remove(varIdx);
                     filter();
@@ -144,15 +144,15 @@ public class PropCount_AC extends Propagator<IntVar> {
     }
 
     private void filter() throws ContradictionException {
-        vars[n].updateBounds(mandatories.getSize(), mandatories.getSize() + possibles.getSize(), this);
+        vars[n].updateBounds(mandatories.size(), mandatories.size() + possibles.size(), this);
         if (vars[n].isInstantiated()) {
             int nb = vars[n].getValue();
-            if (possibles.getSize() + mandatories.getSize() == nb) {
+            if (possibles.size() + mandatories.size() == nb) {
                 for (int j : possibles) {
                     vars[j].instantiateTo(value, this);
                 }
                 setPassive();
-            } else if (mandatories.getSize() == nb) {
+            } else if (mandatories.size() == nb) {
                 for (int j : possibles) {
                     if (vars[j].removeValue(value, this)) {
                         possibles.remove(j);

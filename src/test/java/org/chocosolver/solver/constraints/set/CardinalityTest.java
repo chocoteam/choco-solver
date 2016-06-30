@@ -52,7 +52,7 @@ public class CardinalityTest {
         int nbSol = 0;
         while(model.getSolver().solve()) {
             nbSol++;
-            assertEquals(setVar.getValue().getSize(), 4);
+            assertEquals(setVar.getValue().size(), 4);
         }
         assertEquals(nbSol, 126); // binomial coefficient, 4 in 9
     }
@@ -68,7 +68,7 @@ public class CardinalityTest {
         int nbSol = 0;
         while(model.getSolver().solve()) {
             nbSol++;
-            assertEquals(setVar.getValue().getSize(), intVar.getValue());
+            assertEquals(setVar.getValue().size(), intVar.getValue());
         }
         assertTrue(nbSol > 0);
         assertEquals(nbSol, 32); // (1,5) + (2,5) + (3,5) + (4, 5) + (5,5)

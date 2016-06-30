@@ -98,7 +98,7 @@ public class IntEnumMemberSet {
         int nbSol = 0;
         while(model.getSolver().solve()) {
             nbSol++;
-            assertTrue(set.getValue().contain(member.getValue()));
+            assertTrue(set.getValue().contains(member.getValue()));
         }
         assertTrue(nbSol > 0);
         return nbSol;

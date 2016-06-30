@@ -106,7 +106,7 @@ public class PropGraphCumulative extends PropCumulative {
                             g.removeEdge(i, j);
                         }
                     }
-                    count += g.getNeighOf(i).getSize();
+                    count += g.getNeighOf(i).size();
                     if(count >= 2*n)break;
                 }
                 if (count >= 2*n) {

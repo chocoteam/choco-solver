@@ -108,7 +108,7 @@ public class PropSumOfElements extends Propagator<Variable> {
 			if(outOfScope(j)){
 				set.remove(j,this);
 			}else {
-				if (set.getLB().contain(j)) {
+				if (set.getLB().contains(j)) {
 					lbSum += get(j);
 				} else if (get(j) >= 0) {
 					ubPosSum += get(j);
@@ -125,7 +125,7 @@ public class PropSumOfElements extends Propagator<Variable> {
 		int lb = sum.getLB();
 		int ub = sum.getUB();
 		for (int j : set.getUB()) {
-			if (!set.getLB().contain(j)) {
+			if (!set.getLB().contains(j)) {
 				if(min + get(j) > ub || max + get(j) < lb){
 					if (set.remove(j, this)) {
 						again = true;
@@ -157,7 +157,7 @@ public class PropSumOfElements extends Propagator<Variable> {
 		int ubPosSum = 0;
 		int ubNegSum = 0;
 		for (int j : set.getUB()) {
-			if(set.getLB().contain(j)){
+			if(set.getLB().contains(j)){
 				if(outOfScope(j)){
 					return ESat.FALSE;
 				}

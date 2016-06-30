@@ -118,7 +118,7 @@ public class BoolChannelTest {
                 assertEquals(boolVars[value - offset].getBooleanValue(), ESat.TRUE);
             }
             for (int i = 0; i < boolVars.length; i++) {
-                assertEquals(boolVars[i].getBooleanValue() == ESat.TRUE, setVar.getValue().contain(i + offset));
+                assertEquals(boolVars[i].getBooleanValue() == ESat.TRUE, setVar.getValue().contains(i + offset));
             }
         }
         assertTrue(nbSol > 0);

@@ -110,12 +110,12 @@ public class InverseTest {
     private void checkSolution(SetVar[] setVars, SetVar[] inverseSetVars) {
         for (int i = 0; i < setVars.length; i++) {
             for (Integer val : setVars[i].getValue()) {
-                assertTrue(inverseSetVars[val].getValue().contain(i));
+                assertTrue(inverseSetVars[val].getValue().contains(i));
             }
         }
         for (int i = 0; i < inverseSetVars.length; i++) {
             for (Integer val : inverseSetVars[i].getValue()) {
-                assertTrue(setVars[val].getValue().contain(i));
+                assertTrue(setVars[val].getValue().contains(i));
             }
         }
     }

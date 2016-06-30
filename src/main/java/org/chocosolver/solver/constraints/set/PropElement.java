@@ -109,7 +109,7 @@ public class PropElement extends Propagator<Variable> {
                 if (disjoint(set, array[i - offSet]) || disjoint(array[i - offSet], set)) {// array[i] != set
                     index.removeValue(i, this);
                 } else {
-                    if (array[i - offSet].getLB().getSize() == 0) {
+                    if (array[i - offSet].getLB().size() == 0) {
                         noEmptyKer = false;
                     }
                 }
@@ -120,14 +120,14 @@ public class PropElement extends Propagator<Variable> {
                 constructiveDisjunction.clear();
                 SetVar v = array[index.getLB() - offSet];
                 for (int j : v.getLB()) {
-                    if (!set.getLB().contain(j)) {
+                    if (!set.getLB().contains(j)) {
                         constructiveDisjunction.add(j);
                     }
                 }
                 for (int cd = constructiveDisjunction.size() - 1; cd >= 0; cd--) {
                     int j = constructiveDisjunction.get(cd);
                     for (int i = index.nextValue(index.getLB()); i <= ub; i = index.nextValue(i)) {
-                        if (!array[i - offSet].getLB().contain(j)) {
+                        if (!array[i - offSet].getLB().contains(j)) {
                             constructiveDisjunction.remove(j);
                             break;
                         }
@@ -142,7 +142,7 @@ public class PropElement extends Propagator<Variable> {
                 for (int j : set.getUB()) {
                     boolean valueExists = false;
                     for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
-                        if (array[i - offSet].getUB().contain(j)) {
+                        if (array[i - offSet].getUB().contains(j)) {
                             valueExists = true;
                             break;
                         }
@@ -160,7 +160,7 @@ public class PropElement extends Propagator<Variable> {
             s1.force(j, this);
         }
         for (int j : s1.getUB()) {
-            if (!s2.getUB().contain(j)) {
+            if (!s2.getUB().contains(j)) {
                 s1.remove(j, this);
             }
         }
@@ -168,7 +168,7 @@ public class PropElement extends Propagator<Variable> {
 
     private boolean disjoint(SetVar s1, SetVar s2) {
         for (int j : s2.getLB()) {
-            if (!s1.getUB().contain(j)) {
+            if (!s1.getUB().contains(j)) {
                 return true;
             }
         }

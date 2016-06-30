@@ -105,7 +105,7 @@ public class PropBoolChannel extends Propagator<Variable> {
                 } else {
                     set.force(i + offSet, this);
                 }
-            } else if (!set.getUB().contain(i + offSet)) {
+            } else if (!set.getUB().contains(i + offSet)) {
                 bools[i].setToFalse(this);
             }
         }
@@ -146,7 +146,7 @@ public class PropBoolChannel extends Propagator<Variable> {
         }
         for (int i = 0; i < n; i++) {
             if (bools[i].isInstantiatedTo(1)) {
-                if (!set.getUB().contain(i + offSet)) {
+                if (!set.getUB().contains(i + offSet)) {
                     return ESat.FALSE;
                 }
             }

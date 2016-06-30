@@ -34,10 +34,9 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -55,7 +54,6 @@ public class BoolVarImplTest {
     public void setUp() throws Exception {
         var = new BoolVarImpl("test", new Model());
     }
-
 
     @Test(groups="1s", timeOut=60000)
     public void testRemoveValue() throws Exception {
@@ -187,7 +185,7 @@ public class BoolVarImplTest {
     public void testRemVals1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -1, 1, 2, 4);
         x.removeValues(rems, Cause.Null);
@@ -199,7 +197,7 @@ public class BoolVarImplTest {
     public void testRemVals21() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -2);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
@@ -210,7 +208,7 @@ public class BoolVarImplTest {
     public void testRemVals22() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
         rems.add(-4);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
@@ -221,7 +219,7 @@ public class BoolVarImplTest {
     public void testRemVals3() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(1, 2, 3);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
@@ -232,7 +230,7 @@ public class BoolVarImplTest {
     public void testRemVals31() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(4);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
@@ -244,7 +242,7 @@ public class BoolVarImplTest {
     public void testRemVals41() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 0, 1);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
@@ -254,7 +252,7 @@ public class BoolVarImplTest {
     public void testRemVals42() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(0);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
@@ -264,7 +262,7 @@ public class BoolVarImplTest {
     public void testRemVals5() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-1);
         rems.addAll(-1, 0, 1);
         x.removeValues(rems, Cause.Null);
@@ -317,7 +315,7 @@ public class BoolVarImplTest {
     public void testRemValsBut1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 1, 2, 4);
         x.removeAllValuesBut(rems, Cause.Null);
@@ -330,7 +328,7 @@ public class BoolVarImplTest {
     public void testRemValsBut21() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(0);
         rems.addAll(0, 1);
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
@@ -342,7 +340,7 @@ public class BoolVarImplTest {
     public void testRemValsBut22() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
         rems.add(-4);
         x.removeAllValuesBut(rems, Cause.Null);
@@ -352,7 +350,7 @@ public class BoolVarImplTest {
     public void testRemValsBut3() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(1, 2, 3);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
@@ -364,7 +362,7 @@ public class BoolVarImplTest {
     public void testRemValsBut31() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(4);
         x.removeAllValuesBut(rems, Cause.Null);
@@ -375,7 +373,7 @@ public class BoolVarImplTest {
     public void testRemValsBut41() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 0, 1);
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
@@ -385,7 +383,7 @@ public class BoolVarImplTest {
     public void testRemValsBut42() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.boolVar();
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(0);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));

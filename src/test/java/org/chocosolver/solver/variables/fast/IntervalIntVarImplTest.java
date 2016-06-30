@@ -35,10 +35,9 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
-import org.chocosolver.solver.variables.ranges.IntIterableBitSet;
-import org.chocosolver.solver.variables.ranges.IntIterableSet;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -198,7 +197,7 @@ public class IntervalIntVarImplTest {
     public void testRemVals1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -1, 1, 2, 4);
         x.removeValues(rems, Cause.Null);
@@ -210,7 +209,7 @@ public class IntervalIntVarImplTest {
     public void testRemVals21() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -2);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
@@ -221,7 +220,7 @@ public class IntervalIntVarImplTest {
     public void testRemVals22() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
         rems.add(-4);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
@@ -232,7 +231,7 @@ public class IntervalIntVarImplTest {
     public void testRemVals3() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(1, 2, 3);
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
@@ -243,7 +242,7 @@ public class IntervalIntVarImplTest {
     public void testRemVals31() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(4);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
@@ -255,7 +254,7 @@ public class IntervalIntVarImplTest {
     public void testRemVals41() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 0, 1);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
@@ -265,7 +264,7 @@ public class IntervalIntVarImplTest {
     public void testRemVals42() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(0);
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
@@ -275,7 +274,7 @@ public class IntervalIntVarImplTest {
     public void testRemVals5() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -1, 1, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-1);
         rems.addAll(-1, 0, 1);
         x.removeValues(rems, Cause.Null);
@@ -328,7 +327,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 1, 2, 4);
         x.removeAllValuesBut(rems, Cause.Null);
@@ -341,7 +340,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut21() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-3, -2);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
@@ -353,7 +352,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut22() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-4);
         rems.add(-4);
         x.removeAllValuesBut(rems, Cause.Null);
@@ -363,7 +362,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut3() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(1, 2, 3);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
@@ -375,7 +374,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut31() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(4);
         x.removeAllValuesBut(rems, Cause.Null);
@@ -386,7 +385,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut41() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -1, 1, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.addAll(-1, 0, 1);
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
@@ -396,7 +395,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut42() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, true);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-3);
         rems.add(0);
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
@@ -407,7 +406,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut8() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -27,-20);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-29);
         rems.addAll(-29,-28,-26,-22,-21);
         x.removeAllValuesBut(rems, Cause.Null);
@@ -419,7 +418,7 @@ public class IntervalIntVarImplTest {
     public void testRemValsBut9() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -27,-20);
-        IntIterableSet rems = new IntIterableBitSet();
+        IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-29);
         rems.addAll(-29,-28,-26,-22,-20);
         x.removeAllValuesBut(rems, Cause.Null);
@@ -468,5 +467,4 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.previousValueOut(2), 0);
         Assert.assertEquals(x.previousValueOut(0), -1);
     }
-
 }

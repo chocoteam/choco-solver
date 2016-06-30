@@ -42,14 +42,15 @@ import java.util.Iterator;
  *
  * @author Jean-Guillaume Fages, Xavier Lorca
  */
-public class Set_BitSet extends BitSet implements ISet {
+public class Set_BitSet implements ISet {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private int card;
-	private int offset;  // allow using negative numbers
+	protected int card;
+	protected int offset;  // allow using negative numbers
+	protected BitSet values = new BitSet();
 	private ISetIterator iter = newIterator();
 
 	//***********************************************************************************
@@ -72,11 +73,11 @@ public class Set_BitSet extends BitSet implements ISet {
 			}
 			@Override
 			public boolean hasNext() {
-				return nextSetBit(current+1) >= 0;
+				return values.nextSetBit(current+1) >= 0;
 			}
 			@Override
 			public Integer next() {
-				current = nextSetBit(current + 1);
+				current = values.nextSetBit(current + 1);
 				return current+offset;
 			}
 		};
@@ -103,20 +104,20 @@ public class Set_BitSet extends BitSet implements ISet {
 
 	@Override
 	public boolean add(int element) {
-		assert element>=offset:"Cannot add "+element+" to set of offset "+offset;
-		if (get(element-offset)) {
+		if(element < offset) throw new IllegalStateException("Cannot add "+element+" to set of offset "+offset);
+		if (values.get(element-offset)) {
 			return false;
 		}else{
 			card++;
-			set(element-offset, true);
+			values.set(element-offset);
 			return true;
 		}
 	}
 
 	@Override
 	public boolean remove(int element) {
-		if(contain(element)) {
-			set(element - offset, false);
+		if(contains(element)) {
+			values.clear(element - offset);
 			card--;
 			return true;
 		}else{
@@ -125,31 +126,31 @@ public class Set_BitSet extends BitSet implements ISet {
 	}
 
 	@Override
-	public boolean contain(int element) {
-		return element >= offset && get(element - offset);
+	public boolean contains(int element) {
+		return element >= offset && values.get(element - offset);
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return card;
 	}
 
 	@Override
 	public void clear() {
 		card = 0;
-		super.clear();
+		values.clear();
 	}
 
 	@Override
 	public int min() {
 		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
-		return offset+nextSetBit(0);
+		return offset+values.nextSetBit(0);
 	}
 
 	@Override
 	public int max() {
 		if(isEmpty()) throw new IllegalStateException("cannot find maximum of an empty set");
-		return offset+previousSetBit(length());
+		return offset+values.previousSetBit(values.length());
 	}
 
 	@Override
@@ -165,19 +166,5 @@ public class Set_BitSet extends BitSet implements ISet {
 		}
 		st+="}";
 		return st.replace(", }","}");
-	}
-
-	// equals and hashcode are overwritten back to default Object behavior
-	// (this extends BitSet, which overwrites these methods)
-	// so that all ISet objects have the same behavior (i.e. compare reference, not content)
-
-	@Override
-	public boolean equals(Object obj) {
-		return obj == this;
-	}
-
-	@Override
-	public int hashCode(){
-		return java.lang.System.identityHashCode(this);
 	}
 }

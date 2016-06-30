@@ -71,23 +71,23 @@ public class Set_FixedArray implements ISet {
 
 	@Override
 	public boolean add(int element) {
-		if(contain(element))return false;
+		if(contains(element))return false;
 		throw new UnsupportedOperationException("Cannot add element to Set_FixedArray");
 	}
 
 	@Override
 	public boolean remove(int element) {
-		if(!contain(element))return false;
+		if(!contains(element))return false;
 		throw new UnsupportedOperationException("Cannot remove element from Set_FixedArray");
 	}
 
 	@Override
-	public boolean contain(int element) {
+	public boolean contains(int element) {
 		return Arrays.binarySearch(values,element) >= 0;
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return size;
 	}
 

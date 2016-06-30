@@ -99,7 +99,7 @@ public class PropInverse extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
             for (int j : sets[i].getUB()) {
-                if (j < offSet1 || j >= n2 + offSet1 || !invsets[j - offSet2].getUB().contain(i + offSet1)) {
+                if (j < offSet1 || j >= n2 + offSet1 || !invsets[j - offSet2].getUB().contains(i + offSet1)) {
                     sets[i].remove(j, this);
                 }
             }
@@ -109,7 +109,7 @@ public class PropInverse extends Propagator<SetVar> {
         }
         for (int i = 0; i < n2; i++) {
             for (int j:invsets[i].getUB()) {
-                if (j < offSet2 || j >= n + offSet2 || !sets[j - offSet1].getUB().contain(i + offSet2)) {
+                if (j < offSet2 || j >= n + offSet2 || !sets[j - offSet1].getUB().contains(i + offSet2)) {
                     invsets[i].remove(j, this);
                 }
             }
@@ -145,14 +145,14 @@ public class PropInverse extends Propagator<SetVar> {
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
             for (int j:sets[i].getLB()) {
-                if (!invsets[j - offSet2].getUB().contain(i + offSet1)) {
+                if (!invsets[j - offSet2].getUB().contains(i + offSet1)) {
                     return ESat.FALSE;
                 }
             }
         }
         for (int i = 0; i < n2; i++) {
             for (int j:invsets[i].getLB()) {
-                if (!sets[j - offSet1].getUB().contain(i + offSet2)) {
+                if (!sets[j - offSet1].getUB().contains(i + offSet2)) {
                     return ESat.FALSE;
                 }
             }
