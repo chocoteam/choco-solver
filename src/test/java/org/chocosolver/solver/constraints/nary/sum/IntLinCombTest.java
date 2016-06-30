@@ -880,7 +880,7 @@ public class IntLinCombTest {
         BoolVar b = m.boolVar();
         m.sum(row, "<", 10).reifyWith(b);
         m.getSolver().setSearch(Search.inputOrderLBSearch(row), Search.inputOrderLBSearch(b));
-        m.getSolver().findAllSolutions();
+        while(m.getSolver().solve());
         m.getSolver().printShortStatistics();
     }
 }
