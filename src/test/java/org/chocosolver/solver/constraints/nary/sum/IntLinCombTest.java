@@ -768,24 +768,43 @@ public class IntLinCombTest {
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 780);
         Assert.assertEquals(model.getSolver().getNodeCount(), 1559);
-    }
+	}
 
-    @Test(groups="1s", timeOut=60000)
-    public void testOpp1() {
-        Model m = new Model();
-        IntVar row[] = m.intVarArray("r", 3, 0, 5);
-        BoolVar b = m.boolVar();
-        Constraint c = m.sum(row, "<=", 5);
-        c.reifyWith(b);
-        Constraint oc = c.getOpposite();
-        Assert.assertTrue(c instanceof SumConstraint);
-        Assert.assertTrue(c.getPropagator(0) instanceof PropSum);
-        Assert.assertTrue(oc instanceof SumConstraint);
-        Assert.assertTrue(oc.getPropagator(0) instanceof PropSum);
-        PropSum poc = (PropSum) oc.getPropagator(0);
-        Assert.assertEquals(poc.o, Operator.GT);
-        Assert.assertEquals(oc.getOpposite(), c);
-    }
+	@Test(groups="1s", timeOut=60000)
+	public void testOpp1() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		BoolVar b = m.boolVar();
+		Constraint c = m.sum(row, "<=", 5);
+		c.reifyWith(b);
+		Constraint oc = c.getOpposite();
+		Assert.assertTrue(c instanceof SumConstraint);
+		Assert.assertTrue(c.getPropagator(0) instanceof PropSum);
+		Assert.assertTrue(oc instanceof SumConstraint);
+		Assert.assertTrue(oc.getPropagator(0) instanceof PropSum);
+		PropSum poc = (PropSum) oc.getPropagator(0);
+		Assert.assertEquals(poc.o, Operator.GE);
+		Assert.assertEquals(poc.b, 6);
+		Assert.assertEquals(oc.getOpposite(), c);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testOpp1strict() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		BoolVar b = m.boolVar();
+		Constraint c = m.sum(row, "<", 5);
+		c.reifyWith(b);
+		Constraint oc = c.getOpposite();
+		Assert.assertTrue(c instanceof SumConstraint);
+		Assert.assertTrue(c.getPropagator(0) instanceof PropSum);
+		Assert.assertTrue(oc instanceof SumConstraint);
+		Assert.assertTrue(oc.getPropagator(0) instanceof PropSum);
+		PropSum poc = (PropSum) oc.getPropagator(0);
+		Assert.assertEquals(poc.o, Operator.GE);
+		Assert.assertEquals(poc.b, 5);
+		Assert.assertEquals(oc.getOpposite(), c);
+	}
 
     @Test(groups="1s", timeOut=60000)
     public void testOpp2() {
@@ -804,13 +823,12 @@ public class IntLinCombTest {
         Assert.assertEquals(oc.getOpposite(), c);
     }
 
-
     @Test(groups="1s", timeOut=60000)
     public void testOpp3() {
         Model m = new Model();
         BoolVar row[] = m.boolVarArray("r", 20);
         BoolVar b = m.boolVar();
-        Constraint c = m.sum(row, "=", 10);
+        Constraint c = m.sum(row, "!=", 10);
         c.reifyWith(b);
         Constraint oc = c.getOpposite();
         Assert.assertTrue(c instanceof SumConstraint);
@@ -818,7 +836,7 @@ public class IntLinCombTest {
         Assert.assertTrue(oc instanceof SumConstraint);
         Assert.assertTrue(oc.getPropagator(0) instanceof PropSumBoolIncr);
         PropSumBoolIncr poc = (PropSumBoolIncr) oc.getPropagator(0);
-        Assert.assertEquals(poc.o, Operator.NQ);
+        Assert.assertEquals(poc.o, Operator.EQ);
         Assert.assertEquals(oc.getOpposite(), c);
     }
 
@@ -827,7 +845,7 @@ public class IntLinCombTest {
         Model m = new Model();
         IntVar row[] = m.intVarArray("r", 3, 0, 5);
         BoolVar b = m.boolVar();
-        Constraint c = m.scalar(row, new int[]{3,4,5}, "<=", 10);
+        Constraint c = m.scalar(row, new int[]{3,4,5}, ">=", 10);
         c.reifyWith(b);
         Constraint oc = c.getOpposite();
         Assert.assertTrue(c instanceof SumConstraint);
@@ -835,9 +853,102 @@ public class IntLinCombTest {
         Assert.assertTrue(oc instanceof SumConstraint);
         Assert.assertTrue(oc.getPropagator(0) instanceof PropScalar);
         PropScalar poc = (PropScalar) oc.getPropagator(0);
-        Assert.assertEquals(poc.o, Operator.GT);
+		Assert.assertEquals(poc.o, Operator.LE);
+		Assert.assertEquals(poc.b, 9);
         Assert.assertEquals(oc.getOpposite(), c);
     }
+
+	@Test(groups="1s", timeOut=60000)
+	public void testOpp4strict() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		BoolVar b = m.boolVar();
+		Constraint c = m.scalar(row, new int[]{3,4,5}, ">", 9);
+		c.reifyWith(b);
+		Constraint oc = c.getOpposite();
+		Assert.assertTrue(c instanceof SumConstraint);
+		Assert.assertTrue(c.getPropagator(0) instanceof PropScalar);
+		Assert.assertTrue(oc instanceof SumConstraint);
+		Assert.assertTrue(oc.getPropagator(0) instanceof PropScalar);
+		PropScalar poc = (PropScalar) oc.getPropagator(0);
+		Assert.assertEquals(poc.o, Operator.LE);
+		Assert.assertEquals(poc.b, 9);
+		Assert.assertEquals(oc.getOpposite(), c);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testGT() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		m.scalar(row, new int[]{3,4,5}, ">", 9).post();
+		while(m.getSolver().solve()){
+			int tot = row[0].getValue()*3+row[1].getValue()*4+row[2].getValue()*5;
+			Assert.assertTrue(tot>9);
+		}
+		Assert.assertTrue(m.getSolver().getSolutionCount()>0);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testGE() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		m.scalar(row, new int[]{3,4,5}, ">=", 9).post();
+		while(m.getSolver().solve()){
+			int tot = row[0].getValue()*3+row[1].getValue()*4+row[2].getValue()*5;
+			Assert.assertTrue(tot>=9);
+		}
+		Assert.assertTrue(m.getSolver().getSolutionCount()>0);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testEQ() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		m.scalar(row, new int[]{3,4,5}, "=", 9).post();
+		while(m.getSolver().solve()){
+			int tot = row[0].getValue()*3+row[1].getValue()*4+row[2].getValue()*5;
+			Assert.assertTrue(tot==9);
+		}
+		Assert.assertTrue(m.getSolver().getSolutionCount()==2);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testNE() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		m.scalar(row, new int[]{3,4,5}, "!=", 9).post();
+		while(m.getSolver().solve()){
+			int tot = row[0].getValue()*3+row[1].getValue()*4+row[2].getValue()*5;
+			Assert.assertTrue(tot!=9);
+		}
+		Assert.assertTrue(m.getSolver().getSolutionCount()>0);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testLT() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		m.scalar(row, new int[]{3,4,5}, "<", 9).post();
+		while(m.getSolver().solve()){
+			int tot = row[0].getValue()*3+row[1].getValue()*4+row[2].getValue()*5;
+			System.out.println(row[0]+" / "+row[1]+" / "+row[2]);
+			System.out.println(tot);
+			Assert.assertTrue(tot<9);
+		}
+		Assert.assertTrue(m.getSolver().getSolutionCount()>0);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testLE() {
+		Model m = new Model();
+		IntVar row[] = m.intVarArray("r", 3, 0, 5);
+		m.scalar(row, new int[]{3,4,5}, "<=", 9).post();
+		while(m.getSolver().solve()){
+			int tot = row[0].getValue()*3+row[1].getValue()*4+row[2].getValue()*5;
+			Assert.assertTrue(tot<=9);
+		}
+		Assert.assertTrue(m.getSolver().getSolutionCount()>0);
+	}
 
     @DataProvider(name = "decomp")
     public Object[][] decomp(){

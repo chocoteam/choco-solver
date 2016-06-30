@@ -325,10 +325,10 @@ public class IntLinCombFactory {
         }
         if (OPERATOR == Operator.GT) {
             OPERATOR = Operator.GE;
-            RESULT--;
+            RESULT++;
         } else if (OPERATOR == Operator.LT) {
             OPERATOR = Operator.LE;
-            RESULT++;
+            RESULT--;
         }
         return new SumConstraint("ScalarProduct", new PropScalar(tmpV, tmpC, b, OPERATOR, RESULT));
     }
