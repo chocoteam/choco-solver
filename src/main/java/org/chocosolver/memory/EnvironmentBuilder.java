@@ -33,10 +33,6 @@ import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.memory.trailing.trail.*;
 import org.chocosolver.memory.trailing.trail.chunck.*;
 import org.chocosolver.memory.trailing.trail.flatten.*;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeBoolTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeDoubleTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeIntTrail;
-import org.chocosolver.memory.trailing.trail.unsafe.UnsafeLongTrail;
 
 /**
  * <p>
@@ -212,19 +208,6 @@ public class EnvironmentBuilder {
         setTrail(new ChunckedDoubleTrail(worldsize, worldnumber, loadfactor));
         setTrail(new ChunckedLongTrail(worldsize, worldnumber, loadfactor));
         setTrail(new ChunckedOperationTrail(worldsize, worldnumber, loadfactor));
-        return this;
-    }
-
-    /**
-     * Build an unsafe environment (operations are flat)
-     * @return {@code this}
-     */
-    public EnvironmentBuilder fromUnsafe(){
-        setTrail(new UnsafeBoolTrail(worldsize, worldnumber, loadfactor));
-        setTrail(new UnsafeIntTrail(worldsize, worldnumber, loadfactor));
-        setTrail(new UnsafeDoubleTrail(worldsize, worldnumber, loadfactor));
-        setTrail(new UnsafeLongTrail(worldsize, worldnumber, loadfactor));
-        setTrail(new OperationTrail(worldsize, worldnumber, loadfactor));
         return this;
     }
 
