@@ -343,14 +343,24 @@ public class ParallelPortfolio {
                     solver.setSearch(lastConflict(solver.getSearch()));
                 }else{
                     solver.setSearch(lastConflict(intVarSearch(ivars)));
-                    solver.setGeometricalRestart(ivars.length * 3, 1.1d, new FailCounter(solver.getModel(), 1000), 1000);
+                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
+                }
+                break;
+            case 2:
+                // custom + COS (or default + COS)
+                if (customSearch && !solver.getSearch().getClass().getSimpleName().contains("ConflictOrderingSearch")) {
+                    solver.setSearch(conflictOrderingSearch(solver.getSearch()));
+                }else{
+                    solver.setSearch(conflictOrderingSearch(intVarSearch(ivars)));
+                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
                 }
                 break;
             case 3:
-                // default + LC (or input order is already default) + LNS is optim
+                // default + LC (or input order is already default) + LNS if optim
                 if(customSearch) {
                     solver.setSearch(lastConflict(intVarSearch(ivars)));
-                    solver.setGeometricalRestart(ivars.length * 3, 1.1d, new FailCounter(solver.getModel(), 1000), 1000);
+                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
+                    solver.setNoGoodRecordingFromRestarts();
                 }else{
                     solver.setSearch(inputOrderLBSearch(ivars));
                 }
@@ -359,12 +369,25 @@ public class ParallelPortfolio {
                 }
                 break;
             case 4:
-                // ABS with LC
-                solver.setSearch(lastConflict(activityBasedSearch(ivars)));
-                solver.setGeometricalRestart(ivars.length * 3, 1.1d, new FailCounter(solver.getModel(), 1000), 1000);
-                solver.setNoGoodRecordingFromRestarts();
-                if(ks+kr==0) {// plug no goods from solution is ABS is complete
-                    solver.setNoGoodRecordingFromSolutions(ivars);
+                // custom + LDS(+infty) + COS (or default + LDS(+infty) + COS)
+                if (customSearch && !solver.getSearch().getClass().getSimpleName().contains("ConflictOrderingSearch")) {
+                    solver.setLDS(Integer.MAX_VALUE);
+                    solver.setSearch(conflictOrderingSearch(solver.getSearch()));
+                }else{
+                    solver.setLDS(Integer.MAX_VALUE);
+                    solver.setSearch(conflictOrderingSearch(intVarSearch(ivars)));
+                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
+                }
+                break;
+            case 5:
+                // custom + CBJ + LC (or default + CBJ + LC)
+                if (customSearch && !solver.getSearch().getClass().getSimpleName().contains("LastConflict")) {
+                    solver.setCBJLearning(false, false);
+                    solver.setSearch(lastConflict(solver.getSearch()));
+                }else{
+                    solver.setCBJLearning(false, false);
+                    solver.setSearch(lastConflict(intVarSearch(ivars)));
+                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
                 }
                 break;
             default:

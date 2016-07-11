@@ -64,7 +64,7 @@ public class DisjunctiveTaskIntervalFilter extends CumulFilter{
         // filtering algorithm for disjunctive constraint
         capa.updateUpperBound(1,aCause);
         // remove tasks that do not consume any resource
-        list.clear();
+        list.reset();//clear();
         for(int t:tasks){
             if(d[t].getLB()>0 && h[t].getLB()>0){
                 list.add(t);
