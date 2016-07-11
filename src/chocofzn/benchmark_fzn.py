@@ -5,6 +5,7 @@ import multiprocessing
 import argparse
 import os
 import time
+import ctypes 
 
 
 def call(*popenargs, timeout=None, **kwargs):
@@ -83,10 +84,9 @@ parser.add_argument(
     "-cp", "--classpath",
     help='Classpath for Choco (choco-parsers and choco-solver)',
     default='.:'
-    # '/Users/cprudhom/.m2/repository/org/choco-solver/choco-parsers/3.3.2-SNAPSHOT/choco-parsers-3.3.2-SNAPSHOT-with-dependencies.jar',
-    #         '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
-    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20151110/choco-parsers.jar',
-    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/SNAPSHOT/snap-alldiffD.jar',
+    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
+    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160624/choco-parsers.jar',
+    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160627/choco-parsers.jar',
 )
 
 parser.add_argument(
@@ -121,7 +121,18 @@ parser.add_argument(
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'SNA322:-stat'
+        'C4DFS:-stat',
+        'C4LDS:-stat -tree 1',
+        'C4DDS:-stat -tree 2',
+        'C4CBJ:-stat -tree 3',
+        'C4DFS+LC:-stat -f',
+        'C4LDS+LC:-stat -f -tree 1',
+        'C4DDS+LC:-stat -f -tree 2',
+        'C4CBJ+LC:-stat -f -tree 3',
+        'C4DFS+COS:-stat -f -cos',
+        'C4LDS+COS:-stat -f -cos -tree 1',
+        'C4DDS+COS:-stat -f -cos -tree 2',
+        'C4CBJ+COS:-stat -f -cos -tree 3',
         # 'SADAC:-stat'
     ]
 )

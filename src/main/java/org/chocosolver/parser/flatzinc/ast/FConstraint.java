@@ -46,7 +46,6 @@ import org.chocosolver.solver.constraints.nary.geost.externalConstraints.Externa
 import org.chocosolver.solver.constraints.nary.geost.externalConstraints.NonOverlapping;
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.GeostObject;
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.ShiftedBox;
-import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
@@ -486,15 +485,7 @@ public enum FConstraint {
                         return;
                     }
                 }
-                if (((FznSettings) model.getSettings()).enableDecompositionOfLinearCombination()) {
-                    int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
-                    IntVar scal = model.intVar(StringUtils.randomName(), tmp[0], tmp[1], true);
-                    Constraint cstr = model.scalar(bs, as, "=", scal);
-                    model.arithm(scal, "=", c).reifyWith(r);
-                    cstr.post();
-                } else {
-                    model.scalar(bs, as, "=", c).reifyWith(r);
-                }
+                model.scalar(bs, as, "=", c).reifyWith(r);
             }
         }
     },
@@ -557,15 +548,7 @@ public enum FConstraint {
                         }
                     }
                 }
-                if (((FznSettings) model.getSettings()).enableDecompositionOfLinearCombination()) {
-                    int[] tmp = IntLinCombFactory.getScalarBounds(bs, as);
-                    IntVar scal = model.intVar(StringUtils.randomName(), tmp[0], tmp[1], true);
-                    Constraint cstr = model.scalar(bs, as, "=", scal);
-                    model.arithm(scal, "<=", c).reifyWith(r);
-                    cstr.post();
-                } else {
-                    model.scalar(bs, as, "<=", c).reifyWith(r);
-                }
+                model.scalar(bs, as, "<=", c).reifyWith(r);
             }
         }
     },

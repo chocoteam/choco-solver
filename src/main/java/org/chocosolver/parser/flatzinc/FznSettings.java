@@ -65,8 +65,4 @@ public class FznSettings implements Settings {
     public int getMaxTupleSizeForSubstitution() {
         return 10000;
     }
-
-    public boolean enableDecompositionOfLinearCombination(){
-        return false;
-    }
 }
