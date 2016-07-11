@@ -31,6 +31,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.TimeUtils;
@@ -64,6 +65,9 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ", required = false)
     protected boolean free = false;
+
+    @Option(name = "-cos", usage = "set to true to use free + COS, false to use free+LC", required = false)
+    protected boolean cos = false;
 
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).", required = false)
     protected boolean all = false;
@@ -172,7 +176,11 @@ public abstract class RegParser implements IParser {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
         if(nb_cores == 1 && free){ // add last conflict
             Solver solver = portfolio.getModels().get(0).getSolver();
-            solver.setSearch(lastConflict(solver.getSearch()));
+            if(cos) {
+                solver.setSearch(Search.conflictOrderingSearch(solver.getSearch()));
+            }else {
+                solver.setSearch(lastConflict(solver.getSearch()));
+            }
         }
         if (tl_ > -1) {
             for (int i = 0; i < nb_cores; i++) {
