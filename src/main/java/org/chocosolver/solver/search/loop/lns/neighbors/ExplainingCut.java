@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.Explanation;
 import org.chocosolver.solver.explanations.ExplanationEngine;
@@ -150,6 +151,11 @@ public class ExplainingCut implements INeighbor {
         }
         clonePath();
         forceCft = true;
+    }
+
+    @Override
+    public void loadFromSolution(Solution solution) {
+        throw new UnsupportedOperationException("ExplanintCut does not support loading a solution");
     }
 
     @Override

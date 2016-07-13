@@ -29,6 +29,8 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
+import org.chocosolver.solver.Solution;
+
 import java.util.Random;
 
 /**
@@ -52,6 +54,12 @@ public class AdaptiveNeighborhood extends SequenceNeighborhood {
     public void recordSolution() {
         sum++;
         super.recordSolution();
+    }
+
+    @Override
+    public void loadFromSolution(Solution solution) {
+        sum++;
+        super.loadFromSolution(solution);
     }
 
     @Override

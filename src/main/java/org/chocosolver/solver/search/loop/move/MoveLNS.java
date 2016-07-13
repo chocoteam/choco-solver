@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.move;
 
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
@@ -226,6 +227,22 @@ public class MoveLNS implements Move {
             repair = move.repair(solver);
         }
         return repair;
+    }
+
+    /**
+     * Give an initial solution to begin with if called before executing the solving process
+     * or erase the last recorded one otherwise.
+     * @param solution a solution to record
+     * @param solver that manages the LNS
+     */
+    public void loadFromSolution(Solution solution, Solver solver){
+        neighbor.loadFromSolution(solution);
+        if(solutions == 0){
+            solutions++;
+            freshRestart = true;
+        }else{
+            doRestart(solver);
+        }
     }
 
     @Override

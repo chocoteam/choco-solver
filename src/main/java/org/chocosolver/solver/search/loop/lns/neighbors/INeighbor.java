@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 
 /**
@@ -69,4 +70,10 @@ public interface INeighbor {
      * @return true iff the search is in a complete mode (no fixed variable)
      */
     boolean isSearchComplete();
+
+    /**
+     * Load a solution and record it
+     * @param solution a solution to record
+     */
+    void loadFromSolution(Solution solution);
 }

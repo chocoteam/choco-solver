@@ -31,6 +31,7 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
@@ -138,6 +139,13 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     public void recordSolution() {
         for (int i = 0; i < vars.length; i++) {
             bestSolution[i] = vars[i].getValue();
+        }
+    }
+
+    @Override
+    public void loadFromSolution(Solution solution) {
+        for (int i = 0; i < vars.length; i++) {
+            bestSolution[i] = solution.getIntVal(vars[i]);
         }
     }
 

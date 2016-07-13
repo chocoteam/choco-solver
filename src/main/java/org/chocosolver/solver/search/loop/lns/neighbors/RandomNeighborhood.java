@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
@@ -117,6 +118,16 @@ public class RandomNeighborhood implements INeighbor {
     public void recordSolution() {
         for (int i = 0; i < vars.length; i++) {
             bestSolution[i] = vars[i].getValue();
+        }
+        nbFixedVariables = 2. * n / 3. + 1;
+        nbCall = 0;
+        limit = 200; //geo.getNextCutoff(nbCall);
+    }
+
+    @Override
+    public void loadFromSolution(Solution solution) {
+        for (int i = 0; i < vars.length; i++) {
+            bestSolution[i] = solution.getIntVal(vars[i]);
         }
         nbFixedVariables = 2. * n / 3. + 1;
         nbCall = 0;

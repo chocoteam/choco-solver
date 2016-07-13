@@ -29,6 +29,7 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 
 /**
@@ -74,6 +75,14 @@ public class SequenceNeighborhood implements INeighbor {
         }
         who = count - 1; // forces to start with the first neighbor
 //        System.out.printf("%s %s\n", "% REPARTITION", Arrays.toString(counters));
+    }
+
+    @Override
+    public void loadFromSolution(Solution solution) {
+        for (int i = 0; i < count; i++) {
+            neighbors[i].loadFromSolution(solution);
+        }
+        who = count - 1; // forces to start with the first neighbor
     }
 
     @Override
