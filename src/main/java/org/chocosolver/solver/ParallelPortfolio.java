@@ -360,12 +360,13 @@ public class ParallelPortfolio {
                 if(customSearch) {
                     solver.setSearch(lastConflict(intVarSearch(ivars)));
                     solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
-                    solver.setNoGoodRecordingFromRestarts();
                 }else{
                     solver.setSearch(inputOrderLBSearch(ivars));
                 }
                 if(policy!=ResolutionPolicy.SATISFACTION){
                     solver.setLNS(INeighborFactory.blackBox(ivars), new FailCounter(solver.getModel(), 1000));
+                }else{
+                    solver.setNoGoodRecordingFromRestarts();
                 }
                 break;
             case 4:
