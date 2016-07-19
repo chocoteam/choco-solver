@@ -571,26 +571,32 @@ public interface IResolutionHelper extends ISelf<Solver> {
 	}
 
 	/**
-	 * find the best solution wrt a variable, using several strategies in parrallel.
-	 * 
+	 * find the best solution wrt a variable, using several search strategies in
+	 * parallel.
+	 *
 	 * @param objective
 	 *          The objective fo maximize/minimize, not null
 	 * @param maximize
 	 *          true to maximize the objective in a solution
 	 * @param modelDuplicator
-	 * @param stop
+	 *          The function to duplicate this model. This function should only
+	 *          recreate variables, constraints and configure stop criterions.
 	 * @param heuristics
-	 * @return
+	 *          the heuristics to guide the search, each one is launched on a
+	 *          parallel solver.
+	 * @return the best solution found, if exists, or null if no solution was
+	 *         found. If criterions prevents a complete search, then there may
+	 *         exist a better solution.
 	 */
 	@SuppressWarnings("unchecked")
 	default <T extends Model> Solution findOptimalParallel(IntVar objective, boolean maximize,
-			Function<T, T> modelDuplicator, Criterion stop, Heuristic<T>... heuristics) {
+			Function<T, T> modelDuplicator, Heuristic<T>... heuristics) {
 		T t = (T) _me().getModel();
 		if (heuristics == null || heuristics.length == 0) {
 			return null;
 		}
 		if (heuristics.length == 1) {
-			return findOptimalSolution(objective, maximize, stop);
+			return findOptimalSolution(objective, maximize);
 		}
 		ParallelPortfolio pp = new ParallelPortfolio(false);
 		pp.addModel(_me().getModel());
@@ -604,9 +610,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
 		}
 		Solution ret = null;
 		while (pp.solve()) {
-// if(ret==null) ret = new Solution(t);
-// ret.setModel(pp.getBestModel());
-// ret.record();
+			// if(ret==null) ret = new Solution(t);
+			// ret.setModel(pp.getBestModel());
+			// ret.record();
 			ret = new Solution(pp.getBestModel());
 			ret.record();
 		}
