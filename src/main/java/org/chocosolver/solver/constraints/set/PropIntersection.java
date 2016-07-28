@@ -174,10 +174,13 @@ public class PropIntersection extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         ISetIterator iter = vars[k].getLB().iterator();
-        while (iter.hasNext())
+        while (iter.hasNext()) {
+            int j = iter.nextInt();
             for (int i = 0; i < k; i++)
-                if (!vars[i].getUB().contains(iter.nextInt()))
+                if (!vars[i].getUB().contains(j)) {
                     return ESat.FALSE;
+                }
+        }
         iter = vars[0].getLB().iterator();
         while (iter.hasNext()){
             int j = iter.nextInt();

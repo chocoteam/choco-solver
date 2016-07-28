@@ -64,7 +64,7 @@ public class IntersectionTest {
         checkSolutions(model, setVars, intersect);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut=60000)
     public void testIntersectToVars() {
         Model model = new Model();
         SetVar[] setVars = new SetVar[3];

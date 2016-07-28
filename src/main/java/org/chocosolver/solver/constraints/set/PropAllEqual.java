@@ -120,8 +120,9 @@ public class PropAllEqual extends Propagator<SetVar> {
 				}
 				iter = vars[i].getLB().iterator();
                 while (iter.hasNext()){
+                    int j = iter.nextInt();
                     for (int i2 = 0; i2 < n; i2++) {
-                        vars[i2].force(iter.nextInt(), this);
+                        vars[i2].force(j, this);
                     }
                 }
             }
