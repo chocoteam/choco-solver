@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.strategy.selectors.variables;
+package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
