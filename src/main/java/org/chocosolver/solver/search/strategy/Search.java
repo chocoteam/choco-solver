@@ -51,7 +51,7 @@ public class Search {
    	// ************************************************************************************
 
     /**
-   	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic
+   	 * Use the last conflict heuristic as a plugin to improve a former search heuristic
    	 * Should be set after specifying a search strategy.
    	 * @return last conflict strategy
    	 */
