@@ -36,6 +36,9 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
+/**
+ * Small factory enabling an easier instantiation of the variable selectors.
+ */
 public class VariableSelect {
 
     // ************************************************************************************
