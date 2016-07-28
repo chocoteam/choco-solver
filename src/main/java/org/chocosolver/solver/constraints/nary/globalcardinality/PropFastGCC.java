@@ -158,7 +158,7 @@ public class PropFastGCC extends Propagator<IntVar> {
             if (vars[n + i].isInstantiated()) {
                 if (possibles[i].size() + mandatories[i].size() == vars[n + i].getLB()) {
                     ISetIterator possIt = possibles[i].iterator();
-                    while (iter.hasNext()){
+                    while (possIt.hasNext()){
                         int j = possIt.nextInt();
                         mandatories[i].add(j);
                         again |= vars[j].instantiateTo(values[i], this);
@@ -167,7 +167,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                     valueToCompute.remove(i);//value[i] restriction entailed
                 } else if (mandatories[i].size() == vars[n + i].getUB()) {
                     ISetIterator possIt = possibles[i].iterator();
-                    while (iter.hasNext()){
+                    while (possIt.hasNext()){
                         again |= vars[possIt.nextInt()].removeValue(values[i], this);
                     }
                     possibles[i].clear();
