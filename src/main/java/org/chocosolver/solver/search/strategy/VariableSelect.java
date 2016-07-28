@@ -33,9 +33,14 @@ package org.chocosolver.solver.search.strategy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
 public class VariableSelect {
+
+    // ************************************************************************************
+    // INTVAR VARIABLES SELECTORS
+    // ************************************************************************************
 
     /**
      * Chooses the variable with the smallest domain (instantiated variables are ignored).
@@ -58,21 +63,6 @@ public class VariableSelect {
         return new FirstFail(model);
     }
 
-
-    /**
-     * Chooses the variable with the smallest domain (instantiated variables are ignored).
-     * Used to fail early and avoid to explore a large part of the search space
-     *  <br/>
-     * This var selector works for {@link IntVar}, {@link org.chocosolver.solver.variables.RealVar} and
-     * {@link org.chocosolver.solver.variables.SetVar}. It is heavier than {@link VariableSelect#firstFail(Model)}
-     * (more checks), but handles more variables types.
-     *
-     * @return generic first fail variable selector
-     */
-    public static VariableSelector firstFailGeneric() {
-        return new GeneralizedMinDomVarSelector();
-    }
-
     /**
      * Chooses the variable with the largest domain (instantiated variables are ignored).
      * <br/>
@@ -88,9 +78,93 @@ public class VariableSelect {
      * @param model choco {@link Model}
      * @return anti first fail variable selector
      */
-    public static VariableSelector<IntVar> antiFirstFailInt(Model model) {
+    public static VariableSelector<IntVar> antiFirstFail(Model model) {
         return new AntiFirstFail(model);
     }
+
+    /**
+     * Chooses the variable with the smallest value in its domain (instantiated variables are ignored).
+     * <br/>
+     * <p>
+     *     e.g. if three {@link IntVar} are defined :
+     *     <ul>
+     *         <li>a of domain {1, 5, 8, 9}</li>
+     *         <li>b of domain {5, 8, 9}</li>
+     *         <li>c of domain {8, 9, 10, 15}</li>
+     *     </ul>
+     *     it chooses a
+     * </p>
+     * @return smallest value variable selector
+     */
+    public static VariableSelector<IntVar> smallestValue() {
+        return new Smallest();
+    }
+
+    /**
+     * Chooses the variable with the largest value in its domain (instantiated variables are ignored).
+     * <br/>
+     * <p>
+     *     e.g. if three {@link IntVar} are defined :
+     *     <ul>
+     *         <li>a of domain {1, 5, 8, 9}</li>
+     *         <li>b of domain {5, 8, 9}</li>
+     *         <li>c of domain {8, 9, 10, 15}</li>
+     *     </ul>
+     *     it chooses c
+     * </p>
+     * @return largest value variable selector
+     */
+    public static VariableSelector<IntVar> largestValue() {
+        return new Largest();
+    }
+
+
+    /**
+     * Chooses the variable with the largest difference between the two smallest values in its domain
+     * (instantiated variables are ignored)
+     * <br/>
+     * <p>
+     *     e.g. if three {@link IntVar} are defined :
+     *     <ul>
+     *         <li>a of domain {1, 5, 8, 9}</li>
+     *         <li>b of domain {5, 8, 9}</li>
+     *         <li>c of domain {8, 9, 10, 15}</li>
+     *     </ul>
+     *     it chooses a
+     * </p>
+     * @return max regret variable selector
+     */
+    public static VariableSelector<IntVar> maxRegret() {
+        return new MaxRegret();
+    }
+
+
+    // ************************************************************************************
+    // SETVAR VARIABLES SELECTORS
+    // ************************************************************************************
+
+    /**
+     * Chooses the variables minimising envelopeSize-kernelSize (quite similar to {@link VariableSelect#firstFail(Model)})
+     * (instantiated variables are ignored)
+     * @return min delta variable selector
+     */
+    public static VariableSelector<SetVar> minDelta() {
+        return new MinDelta();
+    }
+
+
+    /**
+     * Chooses the variables maximising envelopeSize-kernelSize (quite similar to {@link VariableSelect#antiFirstFail(Model)})
+     * (instantiated variables are ignored)
+     * @return max delta variable selector
+     */
+    public static VariableSelector<SetVar> maxDelta() {
+        return new MaxDelta();
+    }
+
+    // ************************************************************************************
+    // GENERIC VARIABLES SELECTORS
+    // ************************************************************************************
 
     /**
      * Chooses iteratively variables in a cyclic manner.
@@ -110,5 +184,51 @@ public class VariableSelect {
     public static <T extends Variable> VariableSelector<T> cyclic() {
         return new Cyclic<>();
     }
+
+
+    /**
+     * Chooses the variable with the smallest domain (instantiated variables are ignored).
+     * Used to fail early and avoid to explore a large part of the search space
+     *  <br/>
+     * This var selector works for {@link IntVar}, {@link org.chocosolver.solver.variables.RealVar} and
+     * {@link org.chocosolver.solver.variables.SetVar}. It is heavier than {@link VariableSelect#firstFail(Model)}
+     * (more checks), but handles more variables types.
+     *
+     * @return generic first fail variable selector
+     */
+    public static VariableSelector firstFailGeneric() {
+        return new GeneralizedMinDomVarSelector();
+    }
+
+
+    /**
+     * Chooses variables in order they appears (instantiated variables are ignored).
+     * @param model choco {@link Model}
+     * @return input order variable selector
+     */
+    public static VariableSelector inputOrder(Model model) {
+        return new InputOrder(model);
+    }
+
+
+    /**
+     * Chooses the variable with the largest number of attached propagators (instantiated variables are ignored).
+     * @return occurences variable selector
+     */
+    public static VariableSelector occurences() {
+        return new Occurrence();
+    }
+
+
+    /**
+     * Chooses randomly a non-instantiated variables
+     * @param seed random generator seed
+     * @return random variable selector
+     */
+    public static VariableSelector random(long seed) {
+        return new Random(seed);
+    }
+
+
 
 }
