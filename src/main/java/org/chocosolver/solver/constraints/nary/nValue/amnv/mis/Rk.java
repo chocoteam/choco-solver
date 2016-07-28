@@ -31,6 +31,7 @@ package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 import java.util.BitSet;
 import java.util.Random;
@@ -107,9 +108,9 @@ public class Rk implements F {
             }
             inMIS.set(idx);
             out.set(idx);
-            ISet nei = graph.getNeighOf(idx);
-            for (int j : nei) {
-                out.set(j);
+            ISetIterator nei = graph.getNeighOf(idx).iterator();
+            while (nei.hasNext()) {
+                out.set(nei.nextInt());
             }
         }
     }

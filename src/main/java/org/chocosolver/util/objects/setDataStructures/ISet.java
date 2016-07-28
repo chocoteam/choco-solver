@@ -131,8 +131,9 @@ public interface ISet extends Iterable<Integer>{
 	default int[] toArray(){
 		int[] a = new int[size()];
 		int idx = 0;
-		for(int i:this){
-			a[idx++] = i;
+		ISetIterator iter = iterator();
+		while(iter.hasNext()){
+			a[idx++] = iter.nextInt();
 		}
 		return a;
 	}

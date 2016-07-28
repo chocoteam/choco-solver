@@ -36,6 +36,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.graphOperations.connectivity.StrongConnectivityFinder;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.BitSet;
@@ -164,11 +165,12 @@ public class AlgoAllDiffAC {
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
         int x;
-        ISet succs;
+        ISetIterator succs;
         while (indexFirst != indexLast) {
             x = fifo[indexFirst++];
-            succs = digraph.getSuccOf(x);
-            for (int y : succs) {
+            succs = digraph.getSuccOf(x).iterator();
+            while (succs.hasNext()) {
+                int y = succs.nextInt();
                 if (!in.get(y)) {
                     father[y] = x;
                     fifo[indexLast++] = y;

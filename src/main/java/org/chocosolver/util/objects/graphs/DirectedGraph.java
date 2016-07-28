@@ -31,6 +31,7 @@ package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -147,12 +148,14 @@ public class DirectedGraph implements IGraph {
     @Override
     public boolean removeNode(int x) {
         if (nodes.remove(x)) {
-            for (int j : successors[x]) {
-                predecessors[j].remove(x);
+            ISetIterator iter = successors[x].iterator();
+            while (iter.hasNext()) {
+                predecessors[iter.nextInt()].remove(x);
             }
             successors[x].clear();
-            for (int j : predecessors[x]) {
-                successors[j].remove(x);
+            iter = predecessors[x].iterator();
+            while (iter.hasNext()) {
+                successors[iter.nextInt()].remove(x);
             }
             predecessors[x].clear();
             return true;

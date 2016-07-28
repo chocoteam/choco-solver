@@ -36,6 +36,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -90,7 +91,9 @@ public class R3 implements R {
                 for (int k = lb; k <= ub; k = vars[i].nextValue(k)) {
                     valToRem[last++] = k;
                 }
-                for (int j : graph.getNeighOf(i)) {
+                ISetIterator nei = graph.getNeighOf(i).iterator();
+                while (nei.hasNext()) {
+                    int j = nei.nextInt();
                     if (mis.get(j)) {
                         if (mate == -1) {
                             mate = j;
@@ -119,8 +122,9 @@ public class R3 implements R {
             }
         }
         for (int i = 0; i < n; i++) {
-            for (int j : learntEqualities[i]) {
-                enforceEq(i, j, vars, aCause);
+            ISetIterator eqs = learntEqualities[i].iterator();
+            while (eqs.hasNext()) {
+                enforceEq(i, eqs.nextInt(), vars, aCause);
             }
         }
     }

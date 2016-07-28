@@ -31,6 +31,7 @@ package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 import java.util.BitSet;
 
@@ -95,20 +96,21 @@ public class MD implements F{
 	}
 
 	protected void addToMIS(int node) {
-		ISet nei = graph.getNeighOf(node);
 		inMIS.set(node);
 		out.set(node);
 		int sizeFifo=0;
-		for (int j : nei) {
+		ISetIterator nei = graph.getNeighOf(node).iterator();
+		while (nei.hasNext()) {
+			int j = nei.nextInt();
 			if (!out.get(j)) {
 				out.set(j);
 				fifo[sizeFifo++] = j;
 			}
 		}
 		for (int i=0; i<sizeFifo; i++) {
-			nei = graph.getNeighOf(fifo[i]);
-			for (int j : nei) {
-				nbNeighbours[j]--;
+			nei = graph.getNeighOf(fifo[i]).iterator();
+			while (nei.hasNext()) {
+				nbNeighbours[nei.nextInt()]--;
 			}
 		}
 	}

@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.strategy.selectors.values;
 
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * Selects the first integer in the envelope and not in the kernel
@@ -41,7 +42,9 @@ public class SetDomainMin implements SetValueSelector {
 
     @Override
     public int selectValue(SetVar s) {
-        for (int i : s.getUB()) {
+        ISetIterator iter = s.getUB().iterator();
+        while (iter.hasNext()) {
+            int i = iter.nextInt();
             if (!s.getLB().contains(i)) {
                 return i;
             }

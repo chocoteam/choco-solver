@@ -38,6 +38,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.graphOperations.connectivity.StrongConnectivityFinder;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -179,12 +180,13 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			G_R.getNodes().add(i);
 		}
 		sccOf = SCCfinder.getNodesSCC();
-		ISet succs;
+		ISetIterator succs;
 		int x;
 		for (int i = 0; i < n; i++) {
 			x = sccOf[i];
-			succs = support.getSuccOf(i);
-			for (int j :succs) {
+			succs = support.getSuccOf(i).iterator();
+			while (succs.hasNext()) {
+				int j = succs.nextInt();
 				if (x != sccOf[j]) {
 					G_R.addArc(x, sccOf[j]);
 					mates[x].add((i + 1) * n2 + j);
@@ -201,8 +203,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			return 1;
 		}
 		int next = -1;
-		ISet succs = G_R.getSuccOf(node);
-		for(int x:succs){
+		ISetIterator succs = G_R.getSuccOf(node).iterator();
+		while(succs.hasNext()){
+			int x = succs.nextInt();
 			if (G_R.getPredOf(x).size() == 1) {
 				if (next != -1) {
 					return 0;
@@ -212,9 +215,10 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 				G_R.removeArc(node, x);
 			}
 		}
-		succs = mates[node];
+		succs = mates[node].iterator();
 		int from, to;
-		for (int e:succs) {
+		while (succs.hasNext()) {
+			int e = succs.nextInt();
 			to = e % n2;
 			if (sccOf[to] != next) {
 				from = e / n2 - 1;
@@ -239,7 +243,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 				}
 				if (to != -1 && sccOf[to] != x && mates[x].size() > 1) {
 					arc = (i + 1) * n2 + to;
-					for (int a:mates[x]) {
+					ISetIterator iter = mates[x].iterator();
+					while (iter.hasNext()) {
+						int a = iter.nextInt();
 						if (a != arc) {
 							int val = a%n2;
 							if(val==n){
@@ -258,7 +264,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	private void checkSCCLink(int sccFrom) throws ContradictionException {
 		int inDoor = -1;
 		int outDoor = -1;
-		for (int i : mates[sccFrom]) {
+		ISetIterator iter = mates[sccFrom].iterator();
+		while (iter.hasNext()) {
+			int i = iter.nextInt();
 			if(inDoor==-1){
 				inDoor = i%n2;
 			}else if (inDoor!=i%n2){
@@ -280,7 +288,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			if (G_R.getPredOf(sccFrom).iterator().hasNext()) {
 				int in = -1;
 				int p = G_R.getPredOf(sccFrom).iterator().next();
-				for (int i : mates[p]) {
+				ISetIterator iterP = mates[p].iterator();
+				while (iterP.hasNext()) {
+					int i = iterP.nextInt();
 					if (in == -1) {
 						in = i % n2;
 					} else if (in != i % n2) {

@@ -132,7 +132,9 @@ public class PropItemToLoad extends Propagator<IntVar> {
 					maxLoad[val].add(itemSize[i]);
 				}
 			}else{
-				for(int val : binOfItem[i]){
+				IntVar vr = binOfItem[i];
+				int ub = vr.getUB();
+				for(int val=vr.getLB(); val<=ub; val=vr.nextValue(val)){
 					if(val>= offset && val<offset+nbAvailableBins) {
 						maxLoad[val - offset].add(itemSize[i]);
 					}

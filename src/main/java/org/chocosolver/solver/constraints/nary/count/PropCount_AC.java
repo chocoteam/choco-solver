@@ -39,6 +39,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -148,12 +149,15 @@ public class PropCount_AC extends Propagator<IntVar> {
         if (vars[n].isInstantiated()) {
             int nb = vars[n].getValue();
             if (possibles.size() + mandatories.size() == nb) {
-                for (int j : possibles) {
-                    vars[j].instantiateTo(value, this);
+                ISetIterator iter = possibles.iterator();
+                while (iter.hasNext()) {
+                    vars[iter.nextInt()].instantiateTo(value, this);
                 }
                 setPassive();
             } else if (mandatories.size() == nb) {
-                for (int j : possibles) {
+                ISetIterator iter = possibles.iterator();
+                while (iter.hasNext()) {
+                    int j = iter.nextInt();
                     if (vars[j].removeValue(value, this)) {
                         possibles.remove(j);
                     }

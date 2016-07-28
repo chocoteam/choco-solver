@@ -32,6 +32,7 @@ package org.chocosolver.util.graphOperations.dominance;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Iterator;
@@ -173,11 +174,12 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 
 	private void findAllIdom() {
 		int w, u;
-		ISet prds;
+		ISetIterator prds;
 		for (int i = n - 1; i >= 1; i--) {
 			w = vertex[i];
-			prds = preds[w];
-			for (int v : prds) {
+			prds = preds[w].iterator();
+			while (prds.hasNext()) {
+				int v = prds.nextInt();
 				u = eval(v);
 				if (semi[u] < semi[w]) {
 					semi[w] = semi[u];

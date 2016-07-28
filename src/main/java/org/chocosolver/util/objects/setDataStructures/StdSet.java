@@ -118,12 +118,13 @@ public class StdSet implements ISet {
 
     @Override
     public void clear() {
-        for (int i :set) {
+        ISetIterator iter = iterator();
+        while (iter.hasNext()) {
             ListOP op = operationPoolGC.getE();
             if (op == null) {
                 op = new ListOP();
             }
-            op.set(i, ADD);
+            op.set(iter.nextInt(), ADD);
         }
         set.clear();
     }

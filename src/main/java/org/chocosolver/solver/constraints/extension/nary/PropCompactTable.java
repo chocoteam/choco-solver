@@ -127,7 +127,7 @@ public class PropCompactTable extends Propagator<IntVar> {
             offset[i] = lb;
             supports[i] = new long[ub - lb + 1][currTable.words.length];
             residues[i] = new int[ub - lb + 1];
-            for (int v : vars[i]) {
+            for (int v=lb ; v<=ub; v=vars[i].nextValue(v)) {
                 long[] tmp = supports[i][v - lb];
                 int wI = 0;
                 int bI = 63;
@@ -154,7 +154,8 @@ public class PropCompactTable extends Propagator<IntVar> {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             for (int i = 0; i < vars.length; i++) {
                 currTable.clearMask();
-                for (int v : vars[i]) {
+                int ub = vars[i].getUB();
+                for (int v=vars[i].getLB(); v<=ub; v=vars[i].nextValue(v)) {
                     currTable.addToMask(supports[i][v - offset[i]]);
                 }
                 currTable.intersectWithMask();
@@ -174,7 +175,8 @@ public class PropCompactTable extends Propagator<IntVar> {
             monitors[vIdx].forEachRemVal(onValRem.set(vIdx));
             currTable.reverseMask();
         } else {
-            for (int v : vars[vIdx]) {
+            int ub = vars[vIdx].getUB();
+            for (int v=vars[vIdx].getLB(); v<=ub; v=vars[vIdx].nextValue(v)) {
                 currTable.addToMask(supports[vIdx][v - offset[vIdx]]);
             }
         }
@@ -235,7 +237,8 @@ public class PropCompactTable extends Propagator<IntVar> {
 	}
 
 	private void enumFilter(int i) throws ContradictionException {
-		for (int v : vars[i]) {
+	    int ub = vars[i].getUB();
+		for (int v=vars[i].getLB(); v<=ub; v=vars[i].nextValue(v)) {
 			int index = residues[i][v - offset[i]];
 			if ((currTable.words[index].get() & supports[i][v - offset[i]][index]) == 0L) {
 				index = currTable.intersectIndex(supports[i][v - offset[i]]);

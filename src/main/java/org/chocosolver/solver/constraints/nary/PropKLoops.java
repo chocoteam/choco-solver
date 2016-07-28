@@ -37,6 +37,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -108,7 +109,9 @@ public class PropKLoops extends Propagator<IntVar> {
         vars[n].updateBounds(nbMin, nbMax, this);
         if (vars[n].isInstantiated() && nbMin != nbMax) {
             if (vars[n].getValue() == nbMax) {
-                for (int i : possibleLoops) {
+                ISetIterator iter = possibleLoops.iterator();
+                while (iter.hasNext()) {
+                    int i = iter.nextInt();
                     vars[i].instantiateTo(i + offSet, this);
                     assert vars[i].isInstantiatedTo(i + offSet);
                     nbMinLoops.add(1);
@@ -116,7 +119,9 @@ public class PropKLoops extends Propagator<IntVar> {
                 possibleLoops.clear();
                 setPassive();
             } else if (vars[n].getValue() == nbMin) {
-                for (int i : possibleLoops) {
+                ISetIterator iter = possibleLoops.iterator();
+                while (iter.hasNext()) {
+                    int i = iter.nextInt();
                     if (vars[i].removeValue(i + offSet, this)) {
                         possibleLoops.remove(i);
                     }
