@@ -34,6 +34,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.sort.ArraySort;
 
@@ -107,10 +108,13 @@ public class SweepCumulFilter extends CumulFilter {
 		int nbT = tasksToUSe.size();
 		// filtering start lower bounds
 		boolean again;
+		ISetIterator tIter;
 		do{
 			again = false;
 			int i = 0;
-			for(int t:tasksToUSe) {
+			tIter = tasksToUSe.iterator();
+			while (tIter.hasNext()){
+				int t = tIter.nextInt();
 				slb[i]=s[t].getLB();
 				sub[i]=s[t].getUB();
 				elb[i]=e[t].getLB();
@@ -127,7 +131,9 @@ public class SweepCumulFilter extends CumulFilter {
 			pruneMin(s);
 			// symmetric approach for the end upper bounds
 			i = 0;
-			for(int t:tasksToUSe) {
+			tIter = tasksToUSe.iterator();
+			while (tIter.hasNext()){
+				int t = tIter.nextInt();
 				slb[i]=-e[t].getUB()+1;
 				sub[i]=-e[t].getLB()+1;
 				elb[i]=-s[t].getUB()+1;
@@ -144,7 +150,9 @@ public class SweepCumulFilter extends CumulFilter {
 
 	protected void removeNullDurations(IntVar[] d, ISet tasks){
 		tasksToUSe.clear();
-		for(int t:tasks) {
+		ISetIterator tIter = tasks.iterator();
+		while (tIter.hasNext()){
+			int t = tIter.nextInt();
 			if(d[t].getLB()>0){
 				tasksToUSe.add(t);
 			}
@@ -153,14 +161,16 @@ public class SweepCumulFilter extends CumulFilter {
 
 	protected void pruneMin(IntVar[] s) throws ContradictionException {
 		int i = 0;
-		for(int t:tasksToUSe)
-			s[t].updateLowerBound(slb[i++], aCause);
+		ISetIterator tIter = tasksToUSe.iterator();
+		while (tIter.hasNext())
+			s[tIter.nextInt()].updateLowerBound(slb[i++], aCause);
 	}
 
 	protected void pruneMax(IntVar[] e) throws ContradictionException {
 		int i = 0;
-		for(int t:tasksToUSe)
-			e[t].updateUpperBound(1- slb[i++], aCause);
+		ISetIterator tIter = tasksToUSe.iterator();
+		while (tIter.hasNext())
+			e[tIter.nextInt()].updateUpperBound(1- slb[i++], aCause);
 	}
 
 	//***********************************************************************************

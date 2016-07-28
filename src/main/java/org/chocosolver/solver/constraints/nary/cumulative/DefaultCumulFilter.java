@@ -33,6 +33,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * Default filtering for cumulative
@@ -63,7 +64,9 @@ public class DefaultCumulFilter extends CumulFilter {
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
 		boolean hInst = true;
-		for (int t : tasks) {
+		ISetIterator tIter = tasks.iterator();
+		while (tIter.hasNext()){
+			int t = tIter.nextInt();
 			min = Math.min(min, s[t].getLB());
 			max = Math.max(max, e[t].getUB());
 			hInst &= h[t].isInstantiated();

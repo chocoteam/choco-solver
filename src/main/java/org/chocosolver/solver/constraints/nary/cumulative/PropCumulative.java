@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -160,7 +161,9 @@ public class PropCumulative extends Propagator<IntVar> {
     }
 
     public void filter(ISet tasks) throws ContradictionException {
-        for(int t:tasks){
+        ISetIterator tIter = tasks.iterator();
+        while (tIter.hasNext()){
+            int t = tIter.nextInt();
             if(h[t].getUB()==0 || d[t].getUB()==0){
                 tasks.remove(t);
             }

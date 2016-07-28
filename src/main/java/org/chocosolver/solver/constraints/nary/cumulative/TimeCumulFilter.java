@@ -33,6 +33,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 import java.util.Arrays;
 
@@ -63,7 +64,9 @@ public class TimeCumulFilter extends CumulFilter {
 	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		int min = Integer.MAX_VALUE / 2;
 		int max = Integer.MIN_VALUE / 2;
-		for (int i : tasks) {
+		ISetIterator tIter = tasks.iterator();
+		while (tIter.hasNext()){
+			int i = tIter.nextInt();
 			if (s[i].getUB() < e[i].getLB()) {
 				min = Math.min(min, s[i].getUB());
 				max = Math.max(max, e[i].getLB());
@@ -80,7 +83,10 @@ public class TimeCumulFilter extends CumulFilter {
 			// fill mandatory parts and filter capacity
 			int elb,hlb;
 			int maxC=0;
-			for (int i : tasks) {
+
+			tIter = tasks.iterator();
+			while (tIter.hasNext()){
+				int i = tIter.nextInt();
 				elb = e[i].getLB();
 				hlb = h[i].getLB();
 				for (int t = s[i].getUB(); t < elb; t++) {
@@ -91,7 +97,10 @@ public class TimeCumulFilter extends CumulFilter {
 			capa.updateLowerBound(maxC, aCause);
 			// filter max height
 			int minH;
-			for (int i : tasks) {
+
+			tIter = tasks.iterator();
+			while (tIter.hasNext()){
+				int i = tIter.nextInt();
 				if(!h[i].isInstantiated()){
 					minH = h[i].getUB();
 					elb = e[i].getLB();
