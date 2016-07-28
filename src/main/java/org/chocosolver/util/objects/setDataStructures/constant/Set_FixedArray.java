@@ -35,7 +35,6 @@ import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * Fixed array of integers (cannot add nor remove items)

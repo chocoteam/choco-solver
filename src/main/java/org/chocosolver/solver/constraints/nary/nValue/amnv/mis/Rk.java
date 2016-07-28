@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
 
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 import java.util.BitSet;

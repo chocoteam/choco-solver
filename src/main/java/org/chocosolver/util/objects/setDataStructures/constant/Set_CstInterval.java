@@ -33,8 +33,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.util.Iterator;
-
 /**
  * Constant Interval set of the form [min, max]
  * BEWARE: Cannot add/remove elements

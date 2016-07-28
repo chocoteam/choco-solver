@@ -35,7 +35,6 @@ import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * Concret implementation of {@link IntIterableSet} wherein values are stored in range set.

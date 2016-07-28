@@ -33,8 +33,6 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.util.PoolManager;
 
-import java.util.Iterator;
-
 /**
  * Generic backtrable set for trailing
  *

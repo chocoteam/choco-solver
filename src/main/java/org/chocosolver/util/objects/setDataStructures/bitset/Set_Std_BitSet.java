@@ -36,8 +36,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.util.Iterator;
-
 /**
  * BitSet implementation for a set of integers
  * Supports negative numbers if offset is set properly

@@ -30,7 +30,6 @@
 package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
