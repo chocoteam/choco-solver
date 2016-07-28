@@ -32,6 +32,11 @@ package org.chocosolver.solver.search.strategy;
 
 import org.chocosolver.solver.search.strategy.selectors.values.*;
 
+/**
+ * Small factory enabling an easier instantiation of the value selectors.
+ * It gathers the {@link org.chocosolver.solver.variables.IntVar}, {@link org.chocosolver.solver.variables.RealVar}
+ * and {@link org.chocosolver.solver.variables.SetVar} value selectors.
+ */
 public class ValueSelect {
 
 
@@ -69,12 +74,12 @@ public class ValueSelect {
 
     /**
      * Selects the median value of an IntVar
-     *  <br>
+     *  <br/>
      * BEWARE: this should not be used within assignments and/or value removals if variables
      *  have a bounded domain
      * <p>
      *     e.g. if an <code>IntVar</code> with values {1, 5, 8, 9}
-     *     is chosen by the variable selector, it selects <code>8</code> <br><br>
+     *     is chosen by the variable selector, it selects <code>8</code> <br/><br/>
      *
  *         if an <code>IntVar</code> with values {2, 6, 7, 10, 12}
      *     is chosen by the variable selector, it selects <code>7</code>

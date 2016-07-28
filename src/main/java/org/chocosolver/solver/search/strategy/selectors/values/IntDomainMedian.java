@@ -33,7 +33,7 @@ import org.chocosolver.solver.variables.IntVar;
 
 /**
  * Selects the median value in the variable domain.
- *	<br>
+ *	<br/>
  * BEWARE: this should not be used within assignments and/or value removals if variables
  * have a bounded domain.
  * <br/>
