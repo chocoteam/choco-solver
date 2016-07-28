@@ -76,7 +76,7 @@ public class StdSet implements ISet {
     }
 
 	@Override
-	public Iterator<Integer> iterator(){
+    public ISetIterator iterator(){
 		return set.iterator();
 	}
 

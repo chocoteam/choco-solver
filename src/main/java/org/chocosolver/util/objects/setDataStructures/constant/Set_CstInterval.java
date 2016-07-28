@@ -133,7 +133,7 @@ public class Set_CstInterval implements ISet {
 	//***********************************************************************************
 
 	@Override
-	public Iterator<Integer> iterator(){
+	public ISetIterator iterator(){
 		iter.reset();
 		return iter;
 	}
@@ -151,7 +151,7 @@ public class Set_CstInterval implements ISet {
 				return value <= ub;
 			}
 			@Override
-			public Integer next() {
+			public int nextInt() {
 				value++;
 				return value-1;
 			}

@@ -29,8 +29,6 @@
  */
 package org.chocosolver.util.objects.setDataStructures;
 
-import java.util.Iterator;
-
 /**
  * Generic read-only view of a set
  *
@@ -64,7 +62,7 @@ public class Set_ReadOnly implements ISet {
     }
 
 	@Override
-	public Iterator<Integer> iterator(){
+    public ISetIterator iterator(){
 		return set.iterator();
 	}
 

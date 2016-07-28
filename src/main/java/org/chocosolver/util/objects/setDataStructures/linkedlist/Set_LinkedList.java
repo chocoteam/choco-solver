@@ -187,7 +187,7 @@ public class Set_LinkedList implements ISet {
 	//***********************************************************************************
 
 	@Override
-	public Iterator<Integer> iterator(){
+	public ISetIterator iterator(){
 		iter.reset();
 		return iter;
 	}
@@ -211,7 +211,7 @@ public class Set_LinkedList implements ISet {
 				return nextCell != null;
 			}
 			@Override
-			public Integer next() {
+			public int nextInt() {
 				int e = nextCell.element;
 				nextCell = nextCell.next;
 				return e;

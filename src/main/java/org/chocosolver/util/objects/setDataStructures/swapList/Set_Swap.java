@@ -195,7 +195,7 @@ public class Set_Swap implements ISet {
 	//***********************************************************************************
 
 	@Override
-	public Iterator<Integer> iterator(){
+	public ISetIterator iterator(){
 		iter.reset();
 		return iter;
 	}
@@ -219,7 +219,7 @@ public class Set_Swap implements ISet {
 				return idx < size();
 			}
 			@Override
-			public Integer next() {
+			public int nextInt() {
 				idx ++;
 				return values[idx-1];
 			}

@@ -445,7 +445,7 @@ public class IntIterableRangeSet implements IntIterableSet {
 				}
 			}
 			@Override
-			public Integer next() {
+			public int nextInt() {
 				if(started){
 					current = nextValue(current);
 				}else{
@@ -469,7 +469,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
    	@Override
-   	public Iterator<Integer> iterator(){
+   	public ISetIterator iterator(){
    		iter.reset();
    		return iter;
    	}
