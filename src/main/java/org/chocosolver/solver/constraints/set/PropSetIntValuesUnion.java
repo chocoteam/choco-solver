@@ -35,6 +35,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -70,7 +71,9 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		for(int v:values.getUB()){
+		ISetIterator iter = values.getUB().iterator();
+		while (iter.hasNext()){
+			int v = iter.nextInt();
 			int support = -1;
 			for(int i=0;i<X.length;i++){
 				if(X[i].contains(v)){
@@ -103,7 +106,9 @@ public class PropSetIntValuesUnion extends Propagator<Variable> {
 
 	@Override
 	public ESat isEntailed() {
-		for(int v:values.getLB()){
+		ISetIterator iter = values.getLB().iterator();
+		while (iter.hasNext()){
+			int v = iter.nextInt();
 			int support = -1;
 			for(int i=0;i<X.length;i++){
 				if(X[i].contains(v)){

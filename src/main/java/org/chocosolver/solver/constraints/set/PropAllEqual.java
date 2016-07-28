@@ -45,6 +45,7 @@ import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 
 /**
@@ -99,7 +100,9 @@ public class PropAllEqual extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
 			TIntArrayList toRemove = new TIntArrayList();
-			for (int j : vars[0].getUB()) {
+            ISetIterator iter = vars[0].getUB().iterator();
+            while (iter.hasNext()){
+                int j = iter.nextInt();
 				for (int i = 1; i < n; i++) {
 					if(!vars[i].getUB().contains(j)){
 						toRemove.add(j);
@@ -108,14 +111,17 @@ public class PropAllEqual extends Propagator<SetVar> {
 				}
 			}
             for (int i = 0; i < n; i++) {
-				for (int j : vars[i].getUB()) {
+                iter = vars[i].getUB().iterator();
+                while (iter.hasNext()){
+                    int j = iter.nextInt();
 					if((i>0 && !vars[0].getUB().contains(j)) || toRemove.contains(j)){
 						vars[i].remove(j, this);
 					}
 				}
-                for (int j : vars[i].getLB()) {
+				iter = vars[i].getLB().iterator();
+                while (iter.hasNext()){
                     for (int i2 = 0; i2 < n; i2++) {
-                        vars[i2].force(j, this);
+                        vars[i2].force(iter.nextInt(), this);
                     }
                 }
             }
@@ -140,7 +146,9 @@ public class PropAllEqual extends Propagator<SetVar> {
             if (!vars[i].isInstantiated()) {
                 allInstantiated = false;
             }
-            for (int j : vars[i].getLB()) {
+            ISetIterator iter = vars[i].getLB().iterator();
+            while (iter.hasNext()){
+                int j = iter.nextInt();
                 for (int i2 = 0; i2 < n; i2++) {
                     if (!vars[i2].getUB().contains(j)) {
                         return ESat.FALSE;

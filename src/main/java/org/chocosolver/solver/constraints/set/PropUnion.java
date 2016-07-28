@@ -44,6 +44,7 @@ import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -128,13 +129,19 @@ public class PropUnion extends Propagator<SetVar> {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             SetVar union = vars[k];
             for (int i = 0; i < k; i++) {
-                for (int j : vars[i].getLB())
-                    union.force(j, this);
-                for (int j : vars[i].getUB())
+                ISetIterator iter = vars[i].getLB().iterator();
+                while(iter.hasNext())
+                    union.force(iter.nextInt(),this);
+                iter = vars[i].getUB().iterator();
+                while(iter.hasNext()) {
+                    int j = iter.nextInt();
                     if (!union.getUB().contains(j))
                         vars[i].remove(j, this);
+                }
             }
-            for (int j : union.getUB()) {
+            ISetIterator unionUB = union.getUB().iterator();
+            while (unionUB.hasNext()) {
+                int j = unionUB.nextInt();
                 if (union.getLB().contains(j)) {
                     int mate = -1;
                     for (int i = 0; i < k && mate != -2; i++) {

@@ -44,6 +44,7 @@ import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -122,7 +123,9 @@ public class PropIntersection extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         SetVar intersection = vars[k];
         if (PropagatorEventType.isFullPropagation(evtmask)) {
-            for (int j : vars[0].getLB()) {
+            ISetIterator iter = vars[0].getLB().iterator();
+            while (iter.hasNext()){
+                int j = iter.nextInt();
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
                     if (!vars[i].getLB().contains(j)) {
@@ -134,7 +137,9 @@ public class PropIntersection extends Propagator<SetVar> {
                     intersection.force(j, this);
                 }
             }
-            for (int j : intersection.getUB()) {
+            iter = intersection.getUB().iterator();
+            while (iter.hasNext()){
+                int j = iter.nextInt();
                 if (intersection.getLB().contains(j)) {
                     for (int i = 0; i < k; i++) {
                         vars[i].force(j, this);
@@ -168,11 +173,14 @@ public class PropIntersection extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        for (int j : vars[k].getLB())
+        ISetIterator iter = vars[k].getLB().iterator();
+        while (iter.hasNext())
             for (int i = 0; i < k; i++)
-                if (!vars[i].getUB().contains(j))
+                if (!vars[i].getUB().contains(iter.nextInt()))
                     return ESat.FALSE;
-        for (int j : vars[0].getLB()) {
+        iter = vars[0].getLB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             if (!vars[k].getUB().contains(j)) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {

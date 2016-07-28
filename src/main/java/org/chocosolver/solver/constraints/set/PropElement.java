@@ -44,6 +44,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -118,8 +119,9 @@ public class PropElement extends Propagator<Variable> {
             // filter set (constructive disjunction)
             if (noEmptyKer) {// from ker
                 constructiveDisjunction.clear();
-                SetVar v = array[index.getLB() - offSet];
-                for (int j : v.getLB()) {
+                ISetIterator iter = array[index.getLB() - offSet].getLB().iterator();
+                while (iter.hasNext()){
+                    int j = iter.nextInt();
                     if (!set.getLB().contains(j)) {
                         constructiveDisjunction.add(j);
                     }
@@ -139,7 +141,9 @@ public class PropElement extends Propagator<Variable> {
                 }
             }
             if (!set.isInstantiated()) {// from env
-                for (int j : set.getUB()) {
+                ISetIterator iter = set.getUB().iterator();
+                while (iter.hasNext()){
+                    int j = iter.nextInt();
                     boolean valueExists = false;
                     for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
                         if (array[i - offSet].getUB().contains(j)) {
@@ -156,10 +160,13 @@ public class PropElement extends Propagator<Variable> {
     }
 
     private void setEq(SetVar s1, SetVar s2) throws ContradictionException {
-        for (int j : s2.getLB()) {
-            s1.force(j, this);
+        ISetIterator iter = s2.getLB().iterator();
+        while (iter.hasNext()){
+            s1.force(iter.nextInt(), this);
         }
-        for (int j : s1.getUB()) {
+        iter = s1.getUB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             if (!s2.getUB().contains(j)) {
                 s1.remove(j, this);
             }
@@ -167,8 +174,9 @@ public class PropElement extends Propagator<Variable> {
     }
 
     private boolean disjoint(SetVar s1, SetVar s2) {
-        for (int j : s2.getLB()) {
-            if (!s1.getUB().contains(j)) {
+        ISetIterator iter = s2.getLB().iterator();
+        while (iter.hasNext()){
+            if (!s1.getUB().contains(iter.nextInt())) {
                 return true;
             }
         }

@@ -45,6 +45,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -109,12 +110,16 @@ public class PropBoolChannel extends Propagator<Variable> {
                 bools[i].setToFalse(this);
             }
         }
-        for (int j : set.getUB()) {
+        ISetIterator iter = set.getUB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             if (j < offSet || j >= n + offSet) {
                 set.remove(j, this);
             }
         }
-        for (int j : set.getLB()) {
+        iter = set.getLB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             bools[j - offSet].setToTrue(this);
         }
         sdm.unfreeze();
@@ -138,8 +143,9 @@ public class PropBoolChannel extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        for (int j : set.getLB()) {
-            int i = j - offSet;
+        ISetIterator iter = set.getLB().iterator();
+        while (iter.hasNext()){
+            int i = iter.nextInt() - offSet;
             if (i < 0 || i >= bools.length || bools[i].isInstantiatedTo(0)) {
                 return ESat.FALSE;
             }

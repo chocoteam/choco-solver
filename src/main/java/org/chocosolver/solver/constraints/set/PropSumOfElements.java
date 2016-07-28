@@ -45,6 +45,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * Sums elements given by a set variable
@@ -104,7 +105,9 @@ public class PropSumOfElements extends Propagator<Variable> {
 		int lbSum = 0;
 		int ubPosSum = 0;
 		int ubNegSum = 0;
-		for (int j : set.getUB()) {
+		ISetIterator iter = set.getUB().iterator();
+		while (iter.hasNext()){
+			int j = iter.nextInt();
 			if(outOfScope(j)){
 				set.remove(j,this);
 			}else {
@@ -124,7 +127,9 @@ public class PropSumOfElements extends Propagator<Variable> {
 		// filter set
 		int lb = sum.getLB();
 		int ub = sum.getUB();
-		for (int j : set.getUB()) {
+		iter = set.getUB().iterator();
+		while (iter.hasNext()){
+			int j = iter.nextInt();
 			if (!set.getLB().contains(j)) {
 				if(min + get(j) > ub || max + get(j) < lb){
 					if (set.remove(j, this)) {
@@ -156,7 +161,9 @@ public class PropSumOfElements extends Propagator<Variable> {
 		int lbSum = 0;
 		int ubPosSum = 0;
 		int ubNegSum = 0;
-		for (int j : set.getUB()) {
+		ISetIterator iter = set.getUB().iterator();
+		while (iter.hasNext()){
+			int j = iter.nextInt();
 			if(set.getLB().contains(j)){
 				if(outOfScope(j)){
 					return ESat.FALSE;

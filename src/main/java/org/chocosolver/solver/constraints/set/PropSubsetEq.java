@@ -43,6 +43,7 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 
 /**
@@ -94,10 +95,13 @@ public class PropSubsetEq extends Propagator<SetVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j : vars[0].getLB()) {
-            vars[1].force(j, this);
+        ISetIterator iter = vars[0].getLB().iterator();
+        while (iter.hasNext()){
+            vars[1].force(iter.nextInt(), this);
         }
-        for (int j : vars[0].getUB()) {
+        iter = vars[0].getUB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             if (!vars[1].getUB().contains(j))
                 vars[0].remove(j, this);
         }
@@ -117,13 +121,15 @@ public class PropSubsetEq extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        for (int j : vars[0].getLB()) {
-            if (!vars[1].getUB().contains(j)) {
+        ISetIterator iter = vars[0].getLB().iterator();
+        while (iter.hasNext()){
+            if (!vars[1].getUB().contains(iter.nextInt())) {
                 return ESat.FALSE;
             }
         }
-        for (int j : vars[0].getUB()) {
-            if (!vars[1].getLB().contains(j)) {
+        iter = vars[0].getUB().iterator();
+        while (iter.hasNext()){
+            if (!vars[1].getLB().contains(iter.nextInt())) {
                 return ESat.UNDEFINED;
             }
         }

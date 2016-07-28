@@ -43,6 +43,7 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 
 /**
@@ -88,13 +89,16 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            for (int j : vars[i].getUB()) {
+            ISetIterator iter = vars[i].getUB().iterator();
+            while (iter.hasNext()){
+                int j = iter.nextInt();
                 if (j < offSet || j >= n + offSet || !vars[j - offSet].getUB().contains(i + offSet)) {
                     vars[i].remove(j, this);
                 }
             }
-            for (int j : vars[i].getLB()) {
-                vars[j - offSet].force(i + offSet, this);
+            iter = vars[i].getLB().iterator();
+            while (iter.hasNext()){
+                vars[iter.nextInt() - offSet].force(i + offSet, this);
             }
         }
         for (int i = 0; i < n; i++) {

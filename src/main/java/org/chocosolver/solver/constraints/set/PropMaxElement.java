@@ -45,6 +45,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * Retrieves the maximum element of the set
@@ -113,12 +114,15 @@ public class PropMaxElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j : set.getLB()) {
-            max.updateLowerBound(get(j), this);
+        ISetIterator iter = set.getLB().iterator();
+        while (iter.hasNext()){
+            max.updateLowerBound(get(iter.nextInt()), this);
         }
         int maxVal = Integer.MIN_VALUE;
         int ub = max.getUB();
-        for (int j : set.getUB()) {
+        iter = set.getUB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             int k = get(j);
             if (k > ub) {
                 set.remove(j, this);
@@ -144,13 +148,16 @@ public class PropMaxElement extends Propagator<Variable> {
         }
         int lb = max.getLB();
         int ub = max.getUB();
-        for (int j : set.getLB()) {
-            if (get(j) > ub) {
+        ISetIterator iter = set.getLB().iterator();
+        while (iter.hasNext()){
+            if (get(iter.nextInt()) > ub) {
                 return ESat.FALSE;
             }
         }
         int maxVal = Integer.MIN_VALUE;
-        for (int j : set.getUB()) {
+        iter = set.getUB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             if (maxVal < get(j)) {
                 maxVal = get(j);
             }

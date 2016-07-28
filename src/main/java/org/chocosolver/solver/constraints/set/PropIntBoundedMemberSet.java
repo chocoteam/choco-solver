@@ -105,13 +105,7 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
 				if(ub.contains(iv.getLB()) && ub.contains(iv.getUB())){
 					return;
 				}
-				int max = ub.iterator().next();
-				int min = max;
-				for (int j : ub) {
-					max = Math.max(max, j);
-					min = Math.min(min, j);
-				}
-				iv.updateBounds(min, max, this);
+				iv.updateBounds(ub.min(), ub.max(), this);
 				if (iv.isInstantiated()) {
 					set.force(iv.getValue(), this);
 					setPassive();
