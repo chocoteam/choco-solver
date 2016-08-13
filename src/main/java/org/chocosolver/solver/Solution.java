@@ -102,7 +102,7 @@ public class Solution implements ICause {
         empty = false;
         boolean warn = false;
         if (varsToStore.length == 0) {
-            varsToStore = model.getSolver().getSearch().getVariables();
+            varsToStore = model.getVars();
         }
         assert varsToStore.length > 0;
         if (intmap != null) {
@@ -210,7 +210,7 @@ public class Solution implements ICause {
         if (empty) {
             throw new SolverException("Cannot access value of "+v+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
-        if (intmap.containsKey(v.getId())) {
+        if (intmap != null && intmap.containsKey(v.getId())) {
             return intmap.get(v.getId());
         } else {
             if ((v.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
@@ -244,7 +244,7 @@ public class Solution implements ICause {
         if (empty) {
             throw new SolverException("Cannot access value of "+s+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
-        if (setmap.containsKey(s.getId())) {
+        if (setmap != null && setmap.containsKey(s.getId())) {
             return setmap.get(s.getId());
         } else if ((s.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
             return s.getValue().toArray();
@@ -276,7 +276,7 @@ public class Solution implements ICause {
         if (empty) {
             throw new SolverException("Cannot access value of "+r+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
-        if (realmap.containsKey(r.getId())) {
+        if (realmap != null && realmap.containsKey(r.getId())) {
             return realmap.get(r.getId());
         } else {
             if ((r.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
