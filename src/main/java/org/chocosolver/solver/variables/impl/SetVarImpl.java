@@ -192,6 +192,11 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	}
 	
 	@Override
+	public boolean hasCard() {
+            return cardinality != null;
+	}
+        
+	@Override
 	public void setCard(IntVar card) {
 		if(cardinality==null){
 			cardinality=card;
