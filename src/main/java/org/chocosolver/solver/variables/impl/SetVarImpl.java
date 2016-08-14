@@ -180,7 +180,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	
 	@Override
 	public IntVar getCard() {
-		if(cardinality==null){
+		if(!hasCard()){
 			int ubc =  ub.size(), lbc = lb.size();
 			if(ubc==lbc) cardinality = model.intVar(ubc);
 			else{
@@ -198,7 +198,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         
 	@Override
 	public void setCard(IntVar card) {
-		if(cardinality==null){
+		if(!hasCard()){
 			cardinality=card;
 			new Constraint("SetCard", new PropCardinality(this, card)).post();
 		} else {
