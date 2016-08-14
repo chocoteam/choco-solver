@@ -374,7 +374,7 @@ public class ExplanationTest {
         return data.toArray(new Object[data.size()][3]);
     }
 
-    @Test(groups="1s", timeOut=6000000, dataProvider = "params")
+    @Test(groups="1s", timeOut=60000, dataProvider = "params")
     public void testXP1(boolean views, int var, DecisionOperator dop) {
         Model model = new Model();
         model.set(new Settings() {

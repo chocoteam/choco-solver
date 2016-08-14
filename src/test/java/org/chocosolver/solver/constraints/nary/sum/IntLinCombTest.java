@@ -963,7 +963,7 @@ public class IntLinCombTest {
         };
     }
 
-    @Test(groups="1s", timeOut=6000000, dataProvider = "decomp")
+    @Test(groups="1s", timeOut=60000, dataProvider = "decomp")
     public void testDec1(boolean decomp, int size) {
         Model m = new Model();
         m.set(new Settings() {
@@ -979,7 +979,7 @@ public class IntLinCombTest {
         m.getSolver().printShortStatistics();
     }
 
-    @Test(groups="1s", timeOut=6000000, dataProvider = "decomp")
+    @Test(groups="1s", timeOut=60000, dataProvider = "decomp")
     public void testDec2(boolean decomp, int size) {
         Model m = new Model();
         m.set(new Settings() {
