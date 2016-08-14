@@ -80,6 +80,8 @@ public class Solution implements ICause {
      * Create an empty solution object
      * able to store the value of each variable in <code>varsToStore</code> when calling <code>record()</code>
      *
+     * Stores all variables by default, when <code>varsToStore</code> is empty
+     *
      * @param model model of the solution
      * @param varsToStore variables to store in this object
      */

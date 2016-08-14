@@ -420,7 +420,7 @@ public class ModelTest {
         Assert.assertEquals(m.getSolver().streamSolutions().count(), 2);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testFindOptimalSolution() {
         Model m = ProblemMaker.makeGolombRuler(10);
         Assert.assertNotNull(m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false));
