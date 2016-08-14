@@ -88,6 +88,11 @@ public interface SetVar extends Variable {
 	IntVar getCard();
 	
 	/**
+         * @return true if a variable is constrained to this set's cardinality, false otherwise
+         */
+        public boolean hasCard();
+        
+	/**
 	 * ensure a variable is equal to the cardinality of this set.
 	 * <ul>
 	 * 	<li>If not call has been already performed to this set cardinality, post a constraint on the number of variables</li>

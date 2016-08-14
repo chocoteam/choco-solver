@@ -407,12 +407,32 @@ public class ModelTest {
         Assert.assertNull(m.getSolver().findSolution());
     }
 
+	@Test(groups = "1s", timeOut = 60000)
+	public void testFindAfterReset(){
+		Model m = new Model();
+		IntVar i = m.intVar("i", 0, 5);
+		Solver s = m.getSolver();
+		s.findOptimalSolution(i, false);
+		s.reset();
+		Assert.assertNotNull(s.findSolution());
+	}
+
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutions() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
         m.getSolver().findAllSolutions();
         Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
     }
+
+	@Test(groups = "1s", timeOut = 60000)
+	public void testFindAllSolutionsAfterReset(){
+		Model m = new Model();
+		IntVar i = m.intVar("i", 0, 5);
+		Solver s = m.getSolver();
+		s.findOptimalSolution(i, false);
+		s.reset();
+		Assert.assertEquals(s.findAllSolutions().size(),6);
+	}
 
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutions2() {

@@ -63,7 +63,7 @@ import java.util.stream.StreamSupport;
 public interface IResolutionHelper extends ISelf<Solver> {
 
     /**
-     * Attempts to find a solution of the declared problem.
+     * Attempts to find a solution of the declared satisfaction problem.
      * <ul>
      * <li>If the method returns <tt>null</tt>:</li>
      * <ul>
@@ -99,11 +99,14 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * </pre>
      *
      * Note that all variables will be recorded
+	 *
+	 * Note that it clears the current objective function, if any
      *
-     * @param stop optional criterion to stop the search before finding all/best solution
+     * @param stop optional criterion to stop the search before finding a solution
      * @return a {@link Solution} if and only if a solution has been found, <tt>null</tt> otherwise.
      */
     default Solution findSolution(Criterion... stop) {
+    	_me().getModel().clearObjective();
         _me().addStopCriterion(stop);
         boolean found = _me().solve();
         _me().removeStopCriterion(stop);
@@ -115,7 +118,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
     }
 
     /**
-     * Attempts to find all solutions of the declared problem.
+     * Attempts to find all solutions of the declared satisfaction problem.
      * <ul>
      * <li>If the method returns an empty list: </li>
      * <ul>
@@ -145,11 +148,14 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * </pre>
      *
      * Note that all variables will be recorded
+	 *
+	 * Note that it clears the current objective function, if any
      *
-     * @param stop optional criterions to stop the search before finding all/best solution
+     * @param stop optional criterion to stop the search before finding all solutions
      * @return a list that contained the found solutions.
      */
     default List<Solution> findAllSolutions(Criterion... stop) {
+		_me().getModel().clearObjective();
         _me().addStopCriterion(stop);
         List<Solution> solutions = new ArrayList<>();
         while (_me().solve()) {
