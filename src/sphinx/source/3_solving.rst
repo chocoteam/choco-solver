@@ -207,7 +207,7 @@ It can be created as follows: ::
 
         Solution solution = new Solution(model());
 
-By default, a solution only records decision variables, that is, variables declared in the search heuristic.
+By default, a solution records the value of every variable, but you can specify a smaller scope in the ``Solution`` constructor.
 
 Let ``X`` be the set of decision variables and ``Y`` another variable set that you need to store.
 To record other variables (e.g. an objective variables) you have two options:
