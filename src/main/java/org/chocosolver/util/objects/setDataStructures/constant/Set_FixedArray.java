@@ -100,8 +100,9 @@ public class Set_FixedArray implements ISet {
 	@Override
 	public String toString() {
 		String st = "{";
-		for(int i:this){
-			st+=i+", ";
+                ISetIterator iter = newIterator();
+                while (iter.hasNext()) {
+			st+=iter.nextInt()+", ";
 		}
 		st+="}";
 		return st.replace(", }","}");
