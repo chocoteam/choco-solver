@@ -208,7 +208,7 @@ public class Solution implements ICause {
      */
     public int getIntVal(IntVar v) {
         if (empty) {
-            throw new SolverException("Cannot access value of "+v+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
+            throw new SolverException("Cannot access value of " + v + ": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
         if (intmap.containsKey(v.getId())) {
             return intmap.get(v.getId());
@@ -216,7 +216,7 @@ public class Solution implements ICause {
             if ((v.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
                 return v.getValue();
             } else {
-                throw new SolverException("Cannot access value of "+v+": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
+                throw new SolverException("Cannot access value of " + v + ": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
             }
         }
     }
@@ -228,6 +228,7 @@ public class Solution implements ICause {
      * @param val its value
      */
     public void setIntVal(IntVar var, int val) {
+        empty = false;
         if (intmap == null) {
             intmap = new TIntIntHashMap(16, .5f, Solution.NO_ENTRY, Solution.NO_ENTRY);
         }
@@ -242,14 +243,14 @@ public class Solution implements ICause {
      */
     public int[] getSetVal(SetVar s) {
         if (empty) {
-            throw new SolverException("Cannot access value of "+s+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
+            throw new SolverException("Cannot access value of " + s + ": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
         if (setmap.containsKey(s.getId())) {
             return setmap.get(s.getId());
         } else if ((s.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
             return s.getValue().toArray();
         } else {
-            throw new SolverException("Cannot access value of "+s+": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
+            throw new SolverException("Cannot access value of " + s + ": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
         }
     }
 
@@ -260,6 +261,7 @@ public class Solution implements ICause {
      * @param val its value
      */
     public void setSetVal(SetVar var, int[] val) {
+        empty = false;
         if (setmap == null) {
             setmap = new TIntObjectHashMap<>(16, 05f, Solution.NO_ENTRY);
         }
@@ -274,7 +276,7 @@ public class Solution implements ICause {
      */
     public double[] getRealBounds(RealVar r) {
         if (empty) {
-            throw new SolverException("Cannot access value of "+r+": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
+            throw new SolverException("Cannot access value of " + r + ": No solution has been recorded yet (empty solution). Make sure this.record() has been called.");
         }
         if (realmap.containsKey(r.getId())) {
             return realmap.get(r.getId());
@@ -282,7 +284,7 @@ public class Solution implements ICause {
             if ((r.getTypeAndKind() & Variable.TYPE) == Variable.CSTE) {
                 return new double[]{r.getLB(), r.getUB()};
             } else {
-                throw new SolverException("Cannot access value of "+r+": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
+                throw new SolverException("Cannot access value of " + r + ": This variable has not been declared to be recorded in the Solution object (see Solution constructor).");
             }
         }
     }
@@ -293,11 +295,12 @@ public class Solution implements ICause {
      * @param var RealVar
      * @param val its value
      */
-    public void setRealBounds(RealVar var, double[] val){
+    public void setRealBounds(RealVar var, double[] val) {
+        empty = false;
         if (realmap == null) {
             realmap = new TIntObjectHashMap<>(16, 05f, Solution.NO_ENTRY);
         }
-        if(val.length != 2){
+        if (val.length != 2) {
             throw new SolverException("wrong array size");
         }
         realmap.put(var.getId(), val);
