@@ -41,6 +41,7 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * Ensures that all sets are different
@@ -93,18 +94,22 @@ public class PropAllDiff extends Propagator<SetVar> {
                     if (ski >= s - 1 && sei <= s + 1) {
                         int nbSameInKer = 0;
                         int diff = -1;
-                        for (int j : vars[idx].getLB())
+                        ISetIterator iter = vars[idx].getLB().iterator();
+                        while (iter.hasNext()) {
+                            int j = iter.nextInt();
                             if (vars[i].getLB().contains(j)) {
                                 nbSameInKer++;
                             } else {
                                 diff = j;
                             }
+                        }
                         if (nbSameInKer == s) {
                             if (sei == s) { // check diff
                                 fails(); // TODO: could be more precise, for explanation purpose
                             } else if (sei == s + 1 && ski < sei) { // force other (if same elements in ker)
-                                for (int j: vars[i].getUB())
-                                    vars[i].force(j, this);
+                                iter = vars[i].getUB().iterator();
+                                while (iter.hasNext())
+                                    vars[i].force(iter.nextInt(), this);
                             }
                         } else if (sei == s && nbSameInKer == s - 1) { // remove other (if same elements in ker)
                             if (vars[i].getUB().contains(diff)) {
@@ -136,8 +141,9 @@ public class PropAllDiff extends Propagator<SetVar> {
         if (vars[i].getUB().size() < vars[i2].getLB().size()) return false;
         if (vars[i2].getUB().size() < vars[i].getLB().size()) return false;
         if (vars[i].isInstantiated() && vars[i2].isInstantiated()) {
-            for (int j : vars[i].getLB()) {
-                if (!vars[i2].getUB().contains(j)) {
+            ISetIterator iter = vars[i].getLB().iterator();
+            while (iter.hasNext()){
+                if (!vars[i2].getUB().contains(iter.nextInt())) {
                     return false;
                 }
             }

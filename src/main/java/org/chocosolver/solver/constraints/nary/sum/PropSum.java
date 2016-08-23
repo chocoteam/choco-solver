@@ -398,7 +398,7 @@ public class PropSum extends Propagator<IntVar> {
                 this.fails();
             }
         } else {
-            vars[w].removeValue(w < pos ? b - sum : b + sum, this);
+            vars[w].removeValue(w < pos ? b - sum : sum - b, this);
         }
     }
 

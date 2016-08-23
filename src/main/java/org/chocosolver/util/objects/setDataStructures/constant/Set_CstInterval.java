@@ -33,8 +33,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.util.Iterator;
-
 /**
  * Constant Interval set of the form [min, max]
  * BEWARE: Cannot add/remove elements
@@ -133,7 +131,7 @@ public class Set_CstInterval implements ISet {
 	//***********************************************************************************
 
 	@Override
-	public Iterator<Integer> iterator(){
+	public ISetIterator iterator(){
 		iter.reset();
 		return iter;
 	}
@@ -151,7 +149,7 @@ public class Set_CstInterval implements ISet {
 				return value <= ub;
 			}
 			@Override
-			public Integer next() {
+			public int nextInt() {
 				value++;
 				return value-1;
 			}

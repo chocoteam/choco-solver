@@ -34,6 +34,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.sort.ArraySort;
@@ -100,7 +101,9 @@ public class PropGraphCumulative extends PropCumulative {
                 filter(allTasks);
             }else {
                 int count = 0;
-                for (int i : toCompute) {
+                ISetIterator tcIt = toCompute.iterator();
+                while (tcIt.hasNext()){
+                    int i = tcIt.nextInt();
                     for (int j : g.getNeighOf(i)) {
                         if (disjoint(i, j)) {
                             g.removeEdge(i, j);
@@ -112,8 +115,9 @@ public class PropGraphCumulative extends PropCumulative {
                 if (count >= 2*n) {
                     filter(allTasks);
                 } else {
-                    for (int i : toCompute) {
-                        filterAround(i);
+                    ISetIterator iter = toCompute.iterator();
+                    while (iter.hasNext()){
+                        filterAround(iter.nextInt());
                     }
                 }
             }
@@ -133,8 +137,9 @@ public class PropGraphCumulative extends PropCumulative {
             int v = varIdx % n;
             if(h[v].getUB()==0 || d[v].getUB()==0){
                 allTasks.remove(v);
-                for(int j:g.getNeighOf(v)){
-                    g.removeEdge(v,j);
+                ISetIterator gIt = g.getNeighOf(v).iterator();
+                while (gIt.hasNext()){
+                    g.removeEdge(v,gIt.nextInt());
                 }
             }else if(s[v].getUB()<e[v].getLB() || !fast){
                 toCompute.add(v);
@@ -149,9 +154,9 @@ public class PropGraphCumulative extends PropCumulative {
     protected void filterAround(int taskIndex) throws ContradictionException {
         tasks.clear();
         tasks.add(taskIndex);
-        ISet env = g.getNeighOf(taskIndex);
-        for (int i : env) {
-            tasks.add(i);
+        ISetIterator env = g.getNeighOf(taskIndex).iterator();
+        while (env.hasNext()) {
+            tasks.add(env.nextInt());
         }
         filter(tasks);
     }

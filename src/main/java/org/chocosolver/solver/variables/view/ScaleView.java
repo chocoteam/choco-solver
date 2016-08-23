@@ -96,7 +96,7 @@ public final class ScaleView extends IntView {
 
     @Override
     protected boolean doRemoveValueFromVar(int value) throws ContradictionException {
-        return var.removeValue(value / cste, this);
+        return value % cste == 0 && var.removeValue(value / cste, this);
     }
 
     @Override

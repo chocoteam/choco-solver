@@ -33,6 +33,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.sort.ArraySort;
 import org.chocosolver.util.sort.IntComparator;
 
@@ -77,7 +78,9 @@ public class NRJCumulFilter extends CumulFilter{
 	@Override
 	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
 		int idx = 0;
-		for (int i : tasks) {
+		ISetIterator tIter = tasks.iterator();
+		while (tIter.hasNext()){
+			int i = tIter.nextInt();
 			if(d[i].getLB()>0){
 				slb[i] = s[i].getLB();
 				dlb[i] = d[i].getLB();

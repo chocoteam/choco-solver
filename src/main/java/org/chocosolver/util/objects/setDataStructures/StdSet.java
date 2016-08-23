@@ -33,8 +33,6 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.util.PoolManager;
 
-import java.util.Iterator;
-
 /**
  * Generic backtrable set for trailing
  *
@@ -76,7 +74,7 @@ public class StdSet implements ISet {
     }
 
 	@Override
-	public Iterator<Integer> iterator(){
+    public ISetIterator iterator(){
 		return set.iterator();
 	}
 
@@ -118,12 +116,13 @@ public class StdSet implements ISet {
 
     @Override
     public void clear() {
-        for (int i :set) {
+        ISetIterator iter = iterator();
+        while (iter.hasNext()) {
             ListOP op = operationPoolGC.getE();
             if (op == null) {
                 op = new ListOP();
             }
-            op.set(i, ADD);
+            op.set(iter.nextInt(), ADD);
         }
         set.clear();
     }

@@ -30,6 +30,7 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -59,6 +60,19 @@ public class ScaleViewTest {
         s.getSolver().setSearch(inputOrderLBSearch(vars));
         while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 2);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testDec1() {
+        Model m = new Model();
+        IntVar y = m.intVar("y", -3, 1);
+        IntVar z = m.intVar("z", new int[]{-4});
+        m.arithm(m.intScaleView(y, 3), "!=", z).post();
+        Solver s = m.getSolver();
+        while (s.solve()) {
+            System.out.println("3 * " + y.getValue() + " != " + z);
+        }
+        Assert.assertEquals(s.getSolutionCount(),5);
     }
 
 

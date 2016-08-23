@@ -45,6 +45,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * A propagator ensuring that |set| = card
@@ -95,14 +96,17 @@ public class PropCardinality extends Propagator<Variable> {
         if (card.isInstantiated()) {
             int c = card.getValue();
             if (c == k) {
-                for (int j : set.getUB()) {
+                ISetIterator iter = set.getUB().iterator();
+                while (iter.hasNext()){
+                    int j = iter.nextInt();
                     if (!set.getLB().contains(j)) {
                         set.remove(j, this);
                     }
                 }
             } else if (c == e) {
-                for (int j : set.getUB()) {
-                    set.force(j, this);
+                ISetIterator iter = set.getUB().iterator();
+                while (iter.hasNext()){
+                    set.force(iter.nextInt(), this);
                 }
             }
         }

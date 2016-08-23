@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -130,8 +131,12 @@ public class PropFastGCC extends Propagator<IntVar> {
             }
         }
         while (filter()) {
-            for (int i : valueToCompute) {
-                for (int var : possibles[i]) {
+            ISetIterator valIt = valueToCompute.iterator();
+            while (valIt.hasNext()){
+                int i = valIt.nextInt();
+                ISetIterator varIt = possibles[i].iterator();
+                while (varIt.hasNext()){
+                    int var = varIt.nextInt();
                     if (!vars[var].contains(values[i])) {
                         possibles[i].remove(var);
                     } else if (vars[var].isInstantiated()) {
@@ -152,15 +157,18 @@ public class PropFastGCC extends Propagator<IntVar> {
             again |= vars[n + i].updateUpperBound(mandatories[i].size() + possibles[i].size(), this);
             if (vars[n + i].isInstantiated()) {
                 if (possibles[i].size() + mandatories[i].size() == vars[n + i].getLB()) {
-                    for (int j : possibles[i]) {
+                    ISetIterator possIt = possibles[i].iterator();
+                    while (possIt.hasNext()){
+                        int j = possIt.nextInt();
                         mandatories[i].add(j);
                         again |= vars[j].instantiateTo(values[i], this);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
                 } else if (mandatories[i].size() == vars[n + i].getUB()) {
-                    for (int var : possibles[i]) {
-                        again |= vars[var].removeValue(values[i], this);
+                    ISetIterator possIt = possibles[i].iterator();
+                    while (possIt.hasNext()){
+                        again |= vars[possIt.nextInt()].removeValue(values[i], this);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed

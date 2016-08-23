@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -85,7 +86,9 @@ public class PropDiffN extends Propagator<IntVar> {
 	@Override
 	public void propagate(int varIdx, int mask) throws ContradictionException {
 		int v = varIdx % n;
-		for (int i : overlappingBoxes.getNeighOf(v)) {
+        ISetIterator iter = overlappingBoxes.getNeighOf(v).iterator();
+        while (iter.hasNext()) {
+            int i = iter.nextInt();
 			if (!mayOverlap(v, i)) {
 				overlappingBoxes.removeEdge(v, i);
 			}
@@ -117,8 +120,9 @@ public class PropDiffN extends Propagator<IntVar> {
                 boxesToCompute.add(i);
             }
         }
-        for (int i : boxesToCompute) {
-            filterFromBox(i);
+        ISetIterator iter = boxesToCompute.iterator();
+        while (iter.hasNext()) {
+            filterFromBox(iter.nextInt());
         }
         boxesToCompute.clear();
     }
@@ -140,7 +144,9 @@ public class PropDiffN extends Propagator<IntVar> {
         int ym = vars[i + n].getLB();
         int yM = vars[i + n].getUB() + vars[i + 3 * n].getUB();
         int am = vars[i + 2 * n].getLB() * vars[i + 3 * n].getLB();
-        for (int j : overlappingBoxes.getNeighOf(i)) {
+        ISetIterator iter = overlappingBoxes.getNeighOf(i).iterator();
+        while (iter.hasNext()) {
+            int j = iter.nextInt();
             xm = Math.min(xm, vars[j].getLB());
             xM = Math.max(xM, vars[j].getUB() + vars[j + 2 * n].getUB());
             ym = Math.min(ym, vars[j + n].getLB());
@@ -153,7 +159,9 @@ public class PropDiffN extends Propagator<IntVar> {
         // mandatory part based filtering
         boolean horizontal = true;
         boolean vertical = false;
-        for (int j : overlappingBoxes.getNeighOf(i)) {
+        iter = overlappingBoxes.getNeighOf(i).iterator(); // reset iteration
+        while (iter.hasNext()) {
+            int j = iter.nextInt();
             if (doOverlap(i, j, horizontal)) {
                 filter(i, j, vertical);
             }

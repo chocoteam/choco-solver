@@ -36,8 +36,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.util.Iterator;
-
 /**
  * BitSet implementation for a set of integers
  * Supports negative numbers if offset is set properly
@@ -134,8 +132,9 @@ public class Set_Std_BitSet implements ISet {
 	@Override
 	public String toString() {
 		String st = "{";
-		for(int i:this){
-			st+=i+", ";
+                ISetIterator iter = newIterator();
+                while (iter.hasNext()) {
+			st+=iter.nextInt()+", ";
 		}
 		st+="}";
 		return st.replace(", }","}");
@@ -146,7 +145,7 @@ public class Set_Std_BitSet implements ISet {
 	//***********************************************************************************
 
 	@Override
-	public Iterator<Integer> iterator(){
+	public ISetIterator iterator(){
 		iter.reset();
 		return iter;
 	}
@@ -164,7 +163,7 @@ public class Set_Std_BitSet implements ISet {
 				return values.nextSetBit(current+1) >= 0;
 			}
 			@Override
-			public Integer next() {
+			public int nextInt() {
 				current = values.nextSetBit(current + 1);
 				return current+offset;
 			}

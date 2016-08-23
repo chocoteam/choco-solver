@@ -32,6 +32,7 @@ package org.chocosolver.solver.constraints.nary.sum;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
@@ -962,7 +963,7 @@ public class IntLinCombTest {
         };
     }
 
-    @Test(groups="1s", timeOut=6000000, dataProvider = "decomp")
+    @Test(groups="1s", timeOut=60000, dataProvider = "decomp")
     public void testDec1(boolean decomp, int size) {
         Model m = new Model();
         m.set(new Settings() {
@@ -978,7 +979,7 @@ public class IntLinCombTest {
         m.getSolver().printShortStatistics();
     }
 
-    @Test(groups="1s", timeOut=6000000, dataProvider = "decomp")
+    @Test(groups="1s", timeOut=60000, dataProvider = "decomp")
     public void testDec2(boolean decomp, int size) {
         Model m = new Model();
         m.set(new Settings() {
@@ -993,5 +994,41 @@ public class IntLinCombTest {
         m.getSolver().setSearch(Search.inputOrderLBSearch(row), Search.inputOrderLBSearch(b));
         while(m.getSolver().solve());
         m.getSolver().printShortStatistics();
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJL082016() {
+        for (int repeat = 0; repeat < 100; repeat++) {
+            Model m1 = new Model();
+            int c1 = 0;
+            {
+                IntVar i = m1.intVar("i", -2, -1);
+                IntVar j = m1.intVar("j", new int[]{-4, -1, 0, 1, 4});
+                IntVar sum = m1.intVar("sum", new int[]{-4, 4});
+				m1.sum(new IntVar[]{i, j, m1.intVar(1)}, "!=", sum).post();
+                Solver s = m1.getSolver();
+                s.setSearch(Search.randomSearch(new IntVar[]{i, j, sum}, repeat));
+                while (s.solve()) {
+                    c1++;
+                }
+            }
+            Model m2 = new Model();
+            int c2 = 0;
+            {
+                IntVar i = m2.intVar("i", -2, -1);
+                IntVar j = m2.intVar("j", new int[]{-4, -1, 0, 1, 4});
+                IntVar sum = m2.intVar("sum", new int[]{-4, 4});
+                IntVar sumX = m2.intVar("sum", -40, 40);
+                m2.sum(new IntVar[]{i, j, m2.intVar(1)}, "=", sumX).post();
+                m2.arithm(sum, "!=", sumX).post();
+                Solver s = m2.getSolver();
+                s.setSearch(Search.randomSearch(new IntVar[]{i, j, sum}, repeat));
+                while (s.solve()) {
+                    c2++;
+                }
+			}
+			assertEquals(c1,c2);
+			assertEquals(c1,18);
+        }
     }
 }

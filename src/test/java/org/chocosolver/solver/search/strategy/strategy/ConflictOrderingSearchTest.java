@@ -184,7 +184,7 @@ public class ConflictOrderingSearchTest {
                         true
                 ))
         ));
-        model.getSolver().findAllSolutions();
+        model.getSolver().findSolution();
     }
 
 }

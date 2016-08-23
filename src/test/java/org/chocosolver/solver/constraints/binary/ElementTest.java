@@ -32,9 +32,11 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -134,6 +136,23 @@ public class ElementTest {
 		IntVar var = s.intVar(2);
 		Constraint c = s.element(var, values, index);
 		assertEquals(ESat.FALSE, c.isSatisfied());
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testMemberReasoning(){
+		Model model = new Model();
+		int[] table = new int[]{15, 50, 700};
+		IntVar indexVar = model.intVar("index", 0, 2000, false);
+		IntVar valueVar = model.intVar("value", 1, 2000, false); // enumerated
+		model.element(valueVar, table, indexVar).post();
+		System.out.println("before filtering : "+valueVar);
+		try {
+			model.getSolver().propagate();
+		} catch(ContradictionException e) {
+			e.printStackTrace();
+		}
+		System.out.println("after filtering : "+valueVar);
+		Assert.assertEquals(valueVar.getDomainSize(),3);
 	}
 
 	@Test(groups="1s", timeOut=60000)

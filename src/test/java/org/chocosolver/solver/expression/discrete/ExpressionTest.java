@@ -197,7 +197,7 @@ public class ExpressionTest {
         eval(model, x.pow(3).eq(y), p, 2);
     }
 
-    @Test(groups="1s", timeOut=6000000, dataProvider = "post")
+    @Test(groups="10s", timeOut=60000, dataProvider = "post")
     public void testLongExpression(int p){
         Model model  = new Model();
         IntVar[] XS = model.intVarArray("X", 10, 0, 4);

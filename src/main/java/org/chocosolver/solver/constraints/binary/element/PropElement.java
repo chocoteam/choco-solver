@@ -40,15 +40,17 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
- * VALUE = TABLE[INDEX-OFFSET], naive version, ensuring bound consistency on result and range consistency on index.
+ * VALUE = TABLE[INDEX-OFFSET], ensuring arc consistency on result and index.
  * <br/>
  *
  * @author Hadrien Cambazard
  * @author Fabien Hermenier
  * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  * @since 02/02/12
  */
 //2015OCT - cprudhom : simplify the code, without changing the consistency, no Sort anymore
+//2016AUG - jg : move filtering from bound/range to AC (add member reasoning)
 public class PropElement extends Propagator<IntVar> {
 
     /**
@@ -72,9 +74,9 @@ public class PropElement extends Propagator<IntVar> {
     private final IntVar result;
 
     /**
-     * Set of forbidden indices
+     * Set of forbidden indices and possible values
      */
-    private final IntIterableBitSet fidx;
+    private final IntIterableBitSet fidx, pVals;
 
     /**
      * Create a propagator which ensures that VALUE = TABLE[INDEX-OFFSET] holds.
@@ -91,42 +93,32 @@ public class PropElement extends Propagator<IntVar> {
         this.result = value;
         fidx = new IntIterableBitSet();
         fidx.setOffset(index.getLB());
+        pVals = new IntIterableBitSet();
+        pVals.setOffset(result.getLB());
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        index.updateBounds(offset, values.length - 1 + offset, this);
-        int min = result.getLB();
-        int max = result.getUB();
-        int nmin = max;
-        int nmax = min;
-        do {
-            fidx.clear();
-            int iub = index.getUB();
-            for (int i = index.getLB(); i <= iub; i = index.nextValue(i)) {
-                int value = values[i - offset];
-                if (!result.contains(value)/*value < min || value > max*/) {
-                    fidx.add(i);
-                } else {
-                    if (value < nmin) {
-                        nmin = value;
-                    }
-                    if (value > nmax) {
-                        nmax = value;
-                    }
-                }
-            }
-            result.updateBounds(nmin, nmax, this);
-            if (!fidx.isEmpty()) {
-                index.removeValues(fidx, this);
-            }
-            min = result.getLB();
-            max = result.getUB();
-        } while (result.hasEnumeratedDomain() && (nmin > min || max < nmax));
-        if (result.isInstantiated() && index.hasEnumeratedDomain() && !index.isInstantiated()) {
-            setPassive();
-        }
-    }
+		index.updateBounds(offset, values.length - 1 + offset, this);
+		fidx.clear();
+		pVals.clear();
+		int iub = index.getUB();
+		for (int i = index.getLB(); i <= iub; i = index.nextValue(i)) {
+			int value = values[i - offset];
+			if (result.contains(value)){
+				pVals.add(value);
+			}else{
+				fidx.add(i);
+			}
+		}
+		result.removeAllValuesBut(pVals,this);
+		if (!fidx.isEmpty()) {
+			index.removeValues(fidx, this);
+		}
+		if (result.isInstantiated() && index.hasEnumeratedDomain() && !index.isInstantiated()) {
+			setPassive();
+		}
+	}
 
     @Override
     public ESat isEntailed() {

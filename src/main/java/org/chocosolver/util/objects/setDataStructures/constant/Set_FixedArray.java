@@ -35,7 +35,6 @@ import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * Fixed array of integers (cannot add nor remove items)
@@ -101,8 +100,9 @@ public class Set_FixedArray implements ISet {
 	@Override
 	public String toString() {
 		String st = "{";
-		for(int i:this){
-			st+=i+", ";
+                ISetIterator iter = newIterator();
+                while (iter.hasNext()) {
+			st+=iter.nextInt()+", ";
 		}
 		st+="}";
 		return st.replace(", }","}");
@@ -130,7 +130,7 @@ public class Set_FixedArray implements ISet {
 	//***********************************************************************************
 
 	@Override
-	public Iterator<Integer> iterator(){
+	public ISetIterator iterator(){
 		iter.reset();
 		return iter;
 	}
@@ -148,7 +148,7 @@ public class Set_FixedArray implements ISet {
 				return idx < size;
 			}
 			@Override
-			public Integer next() {
+			public int nextInt() {
 				idx ++;
 				return values[idx-1];
 			}

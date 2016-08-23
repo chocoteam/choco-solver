@@ -45,6 +45,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * Retrieves the minimum element of the set
@@ -113,12 +114,15 @@ public class PropMinElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j : set.getLB()) {
-            min.updateUpperBound(get(j), this);
+        ISetIterator iter = set.getLB().iterator();
+        while (iter.hasNext()){
+            min.updateUpperBound(get(iter.nextInt()), this);
         }
         int minVal = Integer.MAX_VALUE;
         int lb = min.getLB();
-        for (int j : set.getUB()) {
+        iter = set.getUB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             int k = get(j);
             if (k < lb) {
                 set.remove(j, this);
@@ -144,13 +148,16 @@ public class PropMinElement extends Propagator<Variable> {
         }
         int lb = min.getLB();
         int ub = min.getUB();
-        for (int j : set.getLB()) {
-            if (get(j) < lb) {
+        ISetIterator iter = set.getLB().iterator();
+        while (iter.hasNext()){
+            if (get(iter.nextInt()) < lb) {
                 return ESat.FALSE;
             }
         }
         int minVal = Integer.MAX_VALUE;
-        for (int j : set.getUB()) {
+        iter = set.getUB().iterator();
+        while (iter.hasNext()){
+            int j = iter.nextInt();
             if (minVal > get(j)) {
                 minVal = get(j);
             }

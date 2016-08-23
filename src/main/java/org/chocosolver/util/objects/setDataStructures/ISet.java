@@ -29,9 +29,6 @@
  */
 package org.chocosolver.util.objects.setDataStructures;
 
-
-import java.util.Iterator;
-
 /**
  * Class representing a set of integers
  * Created by IntelliJ IDEA.
@@ -41,20 +38,28 @@ import java.util.Iterator;
 public interface ISet extends Iterable<Integer>{
 
 	/**
-	 * Use the following loop to iterate over this set.
-	 * for(int i:this){
-	 *     //
-	 * }
+	 * Use the following loop to iterate over this set without autoboxing.
+	 * <code>
+	 *
+	 *     // more readable but with autoboxing
+	 *     for(int value:set){
+	 *         ...
+	 *     }
+	 *
+	 *     // more verbose but without autoboxing
+	 *     ISetIterator iter = set.primitiveIterator();
+	 *     while(iter.hasNext()){
+	 *         int k = iter.next();
+	 *         ...
+	 *     }
+	 * </code>
 	 * Do not use this iterator to make nested loops over {@link ISet} (prefer {@link ISet#newIterator()})
 	 * @return the default iterator (singleton) of this set
 	 */
-	Iterator<Integer> iterator();
+	ISetIterator iterator();
 
 	/**
-	 * Use the following loop to iterate over this set.
-	 * for(int i:this){
-	 *     //
-	 * }
+	 * Creates a new iterator object, for nested loops only.
 	 * @return a new iterator for this set
 	 */
 	ISetIterator newIterator();
@@ -126,8 +131,9 @@ public interface ISet extends Iterable<Integer>{
 	default int[] toArray(){
 		int[] a = new int[size()];
 		int idx = 0;
-		for(int i:this){
-			a[idx++] = i;
+		ISetIterator iter = iterator();
+		while(iter.hasNext()){
+			a[idx++] = iter.nextInt();
 		}
 		return a;
 	}

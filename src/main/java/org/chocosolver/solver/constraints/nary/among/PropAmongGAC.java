@@ -40,6 +40,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -162,7 +163,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
     }
 
     private void backPropRemPoss() throws ContradictionException {
-        for (int i : poss) {
+        ISetIterator iter = poss.iterator();
+        while (iter.hasNext()) {
+            int i = iter.nextInt();
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int value : values) {
@@ -195,7 +198,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
     }
 
     private void backPropForcePoss() throws ContradictionException {
-        for (int i : poss) {
+        ISetIterator iter = poss.iterator();
+        while (iter.hasNext()) {
+            int i = iter.nextInt();
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int val = v.getLB(); val <= v.getUB(); val = v.nextValue(val)) {

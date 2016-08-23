@@ -37,6 +37,7 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 
 /**
@@ -78,8 +79,9 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		for(int v:sv.getLB()){
-			iv.removeValue(v, this);
+        ISetIterator iter = sv.getLB().iterator();
+        while (iter.hasNext()){
+			iv.removeValue(iter.nextInt(), this);
 		}
 		if(sv.isInstantiated()) setPassive();
 		sdm.unfreeze();

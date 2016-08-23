@@ -33,8 +33,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
-import java.util.Iterator;
-
 /**
  * LinkedList of m elements
  * add : O(1)
@@ -170,8 +168,9 @@ public class Set_LinkedList implements ISet {
 	@Override
 	public String toString() {
 		String st = "{";
-		for(int i:this){
-			st+=i+", ";
+                ISetIterator iter = newIterator();
+                while (iter.hasNext()) {
+			st+=iter.nextInt()+", ";
 		}
 		st+="}";
 		return st.replace(", }","}");
@@ -187,7 +186,7 @@ public class Set_LinkedList implements ISet {
 	//***********************************************************************************
 
 	@Override
-	public Iterator<Integer> iterator(){
+	public ISetIterator iterator(){
 		iter.reset();
 		return iter;
 	}
@@ -211,7 +210,7 @@ public class Set_LinkedList implements ISet {
 				return nextCell != null;
 			}
 			@Override
-			public Integer next() {
+			public int nextInt() {
 				int e = nextCell.element;
 				nextCell = nextCell.next;
 				return e;

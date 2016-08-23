@@ -30,7 +30,7 @@
 package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
 
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 /**
  * Intersection Graph
@@ -86,8 +86,9 @@ public class Gi extends G {
     }
 
     public void update(int i) {
-        ISet nei = getNeighOf(i);
-        for (int j : nei) {
+        ISetIterator nei = getNeighOf(i).iterator();
+        while (nei.hasNext()) {
+            int j = nei.nextInt();
             if (!intersect(i, j)) {
                 removeEdge(i, j);
             }

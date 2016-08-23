@@ -34,6 +34,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.sort.ArraySort;
 
 /**
@@ -65,7 +66,9 @@ public class DisjunctiveTaskIntervalFilter extends CumulFilter{
         capa.updateUpperBound(1,aCause);
         // remove tasks that do not consume any resource
         list.reset();//clear();
-        for(int t:tasks){
+        ISetIterator tIter = tasks.iterator();
+        while (tIter.hasNext()){
+            int t = tIter.nextInt();
             if(d[t].getLB()>0 && h[t].getLB()>0){
                 list.add(t);
             }

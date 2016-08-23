@@ -31,6 +31,7 @@ package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -151,9 +152,9 @@ public class UndirectedGraph implements IGraph {
     @Override
     public boolean removeNode(int x) {
         if (nodes.remove(x)) {
-            ISet nei = getNeighOf(x);
-            for (int j : nei) {
-                neighbors[j].remove(x);
+            ISetIterator nei = getNeighOf(x).iterator();
+            while (nei.hasNext()) {
+                neighbors[nei.nextInt()].remove(x);
             }
             neighbors[x].clear();
             return true;

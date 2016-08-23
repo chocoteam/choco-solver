@@ -46,6 +46,7 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -122,13 +123,16 @@ public class PropIntChannel extends Propagator<Variable> {
             }
         }
         for (int i = 0; i < nSets; i++) {
-            for (int j : sets[i].getUB()) {
+            ISetIterator iter = sets[i].getUB().iterator();
+            while (iter.hasNext()){
+                int j = iter.nextInt();
                 if (j < offSet2 || j > nInts - 1 + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     sets[i].remove(j, this);
                 }
             }
-            for (int j : sets[i].getLB()) {
-                ints[j - offSet2].instantiateTo(i + offSet1, this);
+            iter = sets[i].getLB().iterator();
+            while (iter.hasNext()){
+                ints[iter.nextInt() - offSet2].instantiateTo(i + offSet1, this);
             }
         }
         for (int i = 0; i < nSets; i++) {
@@ -171,7 +175,9 @@ public class PropIntChannel extends Propagator<Variable> {
             }
         }
         for (int i = 0; i < nSets; i++) {
-            for (int j : sets[i].getLB()) {
+            ISetIterator iter = sets[i].getLB().iterator();
+            while (iter.hasNext()){
+                int j = iter.nextInt();
                 if (j < offSet2 || j >= nInts + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     return ESat.FALSE;
                 }

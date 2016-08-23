@@ -37,6 +37,7 @@ import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 
 /**
@@ -124,7 +125,9 @@ public class PropAllDisjoint extends Propagator<SetVar> {
             if (!vars[i].isInstantiated()) {
                 allInstantiated = false;
             }
-            for (int j : vars[i].getLB()) {
+            ISetIterator iter = vars[i].getLB().iterator();
+            while (iter.hasNext()){
+                int j = iter.nextInt();
                 for (int i2 = 0; i2 < n; i2++) {
                     if (i2 != i && vars[i2].getLB().contains(j)) {
                         return ESat.FALSE;
