@@ -275,9 +275,9 @@ public class PropNogoods extends Propagator<IntVar> {
                         cnt++;
                     } else break;
                 } else {
-                    if (sign && ivar.getUB() <= ivalue(value)) {
+                    if (sign && ivar.getLB() > ivalue(value)) {
                         cnt++;
-                    } else if (!sign && ivar.getLB() > ivalue(value)) {
+                    } else if (!sign && ivar.getUB() <= ivalue(value)) {
                         cnt++;
                     } else break;
                 }
