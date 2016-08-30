@@ -92,12 +92,11 @@ public class PropIntersectionFilterSets extends Propagator<SetVar> {
             ISetIterator iter = vars[i].getLB().iterator();
             while (iter.hasNext()) {
                 int j = iter.nextInt();
-                if (!intersection.getUB().contains(j)) {
-                    if (count.adjustOrPutValue(j, 1, 1) >= k - 1) {
-                        // intersection does not contain j but k - 1 sets
-                        // contains j, hence the last set must not contain j.
-                        findSetThatDoesNotContainJInLB(j).remove(j, this);
-                    }
+                if (!intersection.getUB().contains(j) &&
+                    count.adjustOrPutValue(j, 1, 1) >= k - 1) {
+                    // intersection does not contain j but k - 1 sets contains
+                    // j, hence the last set must not contain j.
+                    findSetThatDoesNotContainJInLB(j).remove(j, this);
                 }
             }
         }
