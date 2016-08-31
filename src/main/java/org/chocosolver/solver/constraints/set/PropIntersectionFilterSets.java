@@ -38,6 +38,7 @@ import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -46,8 +47,9 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropIntersectionFilterSets extends Propagator<SetVar> {
 
-    private int k;
-    private ISetDeltaMonitor[] sdm;
+    private final int k;
+    private final ISetDeltaMonitor[] sdm;
+    private final IntProcedure onSetAddToKer, onIntersectionRemoveFromEnv;
 
     public PropIntersectionFilterSets(SetVar[] sets, SetVar intersection) {
         super(ArrayUtils.append(sets, new SetVar[]{intersection}), PropagatorPriority.QUADRATIC, true);
@@ -63,6 +65,20 @@ public class PropIntersectionFilterSets extends Propagator<SetVar> {
         for (int i = 0; i <= k; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
+        onSetAddToKer = j -> {
+            if (!vars[k].getUB().contains(j)) {
+                SetVar uniqueSet = findUniqueSetThatDoesNotContainJInLB(j);
+                if (uniqueSet != null) {
+                    uniqueSet.remove(j, this);
+                }
+            }
+        };
+        onIntersectionRemoveFromEnv = j -> {
+            SetVar uniqueSet = findUniqueSetThatDoesNotContainJInLB(j);
+            if (uniqueSet != null) {
+                uniqueSet.remove(j, this);
+            }
+        };
     }
 
     @Override
@@ -122,22 +138,9 @@ public class PropIntersectionFilterSets extends Propagator<SetVar> {
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         sdm[idxVarInProp].freeze();
         if (idxVarInProp < k) {
-            SetVar intersection = vars[k];
-            sdm[idxVarInProp].forEach(j -> {
-                if (!intersection.getUB().contains(j)) {
-                    SetVar uniqueSet = findUniqueSetThatDoesNotContainJInLB(j);
-                    if (uniqueSet != null) {
-                        uniqueSet.remove(j, this);
-                    }
-                }
-            }, SetEventType.ADD_TO_KER);
+            sdm[idxVarInProp].forEach(onSetAddToKer, SetEventType.ADD_TO_KER);
         } else {
-            sdm[idxVarInProp].forEach(j -> {
-                SetVar uniqueSet = findUniqueSetThatDoesNotContainJInLB(j);
-                if (uniqueSet != null) {
-                    uniqueSet.remove(j, this);
-                }
-            }, SetEventType.REMOVE_FROM_ENVELOPE);
+            sdm[idxVarInProp].forEach(onIntersectionRemoveFromEnv, SetEventType.REMOVE_FROM_ENVELOPE);
         }
         sdm[idxVarInProp].unfreeze();
     }
