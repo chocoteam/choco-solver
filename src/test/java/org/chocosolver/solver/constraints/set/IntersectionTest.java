@@ -38,11 +38,15 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
+import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -151,6 +155,12 @@ public class IntersectionTest {
         return model.setVar(name, lb.toArray(), ub.toArray());
     }
 
+    private SetStrategy randomSearch(SetVar... vars) {
+        return Search.setVarSearch(
+                new org.chocosolver.solver.search.strategy.selectors.variables.Random<>(rand.nextLong()),
+                new SetDomainMin(), rand.nextBoolean(), vars);
+    }
+
     @Test(groups = "1s", timeOut=60000)
     public void testFuzzIdempotent() {
         for (int repeat = 0; repeat < 100; repeat++) {
@@ -168,6 +178,7 @@ public class IntersectionTest {
             }
             SetVar intersection = randSet("interection", model);
             model.intersection(sets, intersection).post();
+            model.getSolver().setSearch(randomSearch(ArrayUtils.append(sets, new SetVar[]{intersection})));
             checkSolutions(model, sets, intersection);
         }
     }
@@ -190,6 +201,7 @@ public class IntersectionTest {
             SetVar intersection = randSet("intersection", model);
             model.intersection(sets, intersection, true).post();
             model.getSolver().plugMonitor(new BoundConsistent(model.getSolver()));
+            model.getSolver().setSearch(randomSearch(ArrayUtils.append(sets, new SetVar[]{intersection})));
             checkSolutions(model, sets, intersection);
         }
     }
