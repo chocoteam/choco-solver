@@ -64,15 +64,15 @@ public class MoveLNS implements Move {
     /**
      * Indicate a restart has been triggered
      */
-    private boolean freshRestart;
+    protected boolean freshRestart;
     /**
      * Restart counter
      */
-    private ICounter counter;
+    protected ICounter counter;
     /**
      * For restart strategy
      */
-    private long frequency;
+    protected long frequency;
 
     /**
      * Create a move which defines a Large Neighborhood Search.
@@ -265,7 +265,7 @@ public class MoveLNS implements Move {
      *
      * @param solver SearchLoop
      */
-    private void doRestart(Solver solver) {
+    protected void doRestart(Solver solver) {
         if (!freshRestart) {
             neighbor.restrictLess();
         }
