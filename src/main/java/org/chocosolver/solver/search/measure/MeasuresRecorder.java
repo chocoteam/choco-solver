@@ -30,7 +30,10 @@
 package org.chocosolver.solver.search.measure;
 
 
+import java.util.Objects;
+
 import org.chocosolver.solver.objective.BoundsManager;
+import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.SearchState;
 
 /**
@@ -59,11 +62,6 @@ public class MeasuresRecorder implements IMeasures, Cloneable {
      * Reference to the bound manager
      */
     protected BoundsManager<?> boundsManager;
-
-    /**
-     * Indicates if an objective is declared (<tt>false</tt> means satisfaction problem).
-     */
-    protected boolean hasObjective;
 
     /**
      * Indicates if the optimal value has been proven for the objective (set to <tt>true</tt>).
@@ -135,6 +133,7 @@ public class MeasuresRecorder implements IMeasures, Cloneable {
     public MeasuresRecorder(String modelName) {
         super();
         this.modelName = modelName;
+        this.boundsManager = ObjectiveManager.SAT();
     }
 
     //****************************************************************************************************************//
@@ -203,7 +202,7 @@ public class MeasuresRecorder implements IMeasures, Cloneable {
 
     @Override
     public boolean hasObjective() {
-        return hasObjective;
+        return boundsManager.isOptimization();
     }
 
     @Override
@@ -233,14 +232,6 @@ public class MeasuresRecorder implements IMeasures, Cloneable {
     @Override
     public long getSolutionCount() {
         return solutionCount;
-    }
-
-    /**
-     * indicates an objective variable
-     * @param ho set to <tt>true<tt/> to indicate that an objective is declared
-     */
-    public void declareObjective(boolean ho) {
-        hasObjective = ho;
     }
 
     /**
@@ -346,8 +337,8 @@ public class MeasuresRecorder implements IMeasures, Cloneable {
      * @param boundsManager new bound manager
      */
     public void setBoundsManager(BoundsManager<?> boundsManager){
-        this.boundsManager = boundsManager;
-        declareObjective(boundsManager.isOptimization());
+        Objects.requireNonNull(boundsManager);
+	this.boundsManager = boundsManager;
     }
 
     @Override
@@ -362,7 +353,6 @@ public class MeasuresRecorder implements IMeasures, Cloneable {
         ret.solutionCount = this.solutionCount;
         ret.depth = this.depth;
         ret.maxDepth = this.maxDepth;
-        ret.hasObjective = this.hasObjective;
         ret.objectiveOptimal = this.objectiveOptimal;
         ret.readingTimeCount = this.readingTimeCount;
         ret.startingTime = this.startingTime;
@@ -378,13 +368,12 @@ public class MeasuresRecorder implements IMeasures, Cloneable {
         solutionCount = measures.getSolutionCount();
         depth = measures.getCurrentDepth();
         maxDepth = measures.getMaxDepth();
-        hasObjective = measures.hasObjective();
         objectiveOptimal = measures.isObjectiveOptimal();
         readingTimeCount = (long) (measures.getReadingTimeCount() * MeasuresRecorder.IN_SEC);
     }
 
     @Override
-    public BoundsManager getBoundsManager() {
+    public BoundsManager<?> getBoundsManager() {
         return boundsManager;
     }
 
