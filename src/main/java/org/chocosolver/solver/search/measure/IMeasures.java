@@ -30,13 +30,15 @@
 package org.chocosolver.solver.search.measure;
 
 
+import java.text.DecimalFormat;
+
 import org.chocosolver.solver.objective.BoundsManager;
 import org.chocosolver.solver.search.SearchState;
 
 /**
  * Interface for providing resolution statistics
  *
- * @author Charles Prud'Homme, Jean-Guillaume Fages
+ * @author Charles Prud'Homme, Jean-Guillaume Fages, Arnaud Malapert
  */
 public interface IMeasures<N extends Number> {
 
@@ -143,6 +145,19 @@ public interface IMeasures<N extends Number> {
                 getFailCount(),
                 getRestartCount()));
         return st.toString();
+    }
+
+    default String toDimacsString() {
+	final StringBuilder st = new StringBuilder(256);
+	st.append("i ").append(getModelName()).append("\n");
+	st.append("s ").append(getSearchState()).append("\n");
+	if (hasObjective()) {
+	    final DecimalFormat df = new DecimalFormat("#.###");
+	    st.append("o ").append(df.format(getBoundsManager().getBestSolutionValue())).append("\n");
+	}
+	st.append(String.format("d NBSOLS %d\nd TIME %.3f\nd NODES %d\nd BACKTRACKS %d\nd FAILURES %d\nd RESTARTS %d",
+		getSolutionCount(), getTimeCount(), getNodeCount(), getBackTrackCount(), getFailCount(), getRestartCount()));
+	return st.toString();
     }
 
     /**
