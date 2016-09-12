@@ -40,7 +40,7 @@ import org.chocosolver.solver.search.SearchState;
  *
  * @author Charles Prud'Homme, Jean-Guillaume Fages, Arnaud Malapert
  */
-public interface IMeasures<N extends Number> {
+public interface IMeasures {
 
     /**
      * @return name of the model/solver observed
@@ -115,7 +115,7 @@ public interface IMeasures<N extends Number> {
     /**
      * @return the objective value of the best solution found (can be Integer or Double)
      */
-    N getBestSolutionValue();
+    Number getBestSolutionValue();
 
     /**
      * @return the search state
@@ -125,7 +125,7 @@ public interface IMeasures<N extends Number> {
     /**
      * @return current bound manager
      */
-    BoundsManager<N> getBoundsManager();
+    BoundsManager<?> getBoundsManager();
 
     /**
      * @return a summary of recorded statistics

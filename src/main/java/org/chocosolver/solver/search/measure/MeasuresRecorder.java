@@ -36,10 +36,10 @@ import org.chocosolver.solver.search.SearchState;
 /**
  * Object which stores resolution information to get statistics
  *
- * @author Charles Prud'Homme
+ * @author Charles Prud'Homme, Arnaud Malapert
  * @since 3.0.0
  */
-public class MeasuresRecorder<N extends Number> implements IMeasures<N>, Cloneable {
+public class MeasuresRecorder implements IMeasures, Cloneable {
 
     //***********************************************************************************
     // VARIABLE
@@ -58,7 +58,7 @@ public class MeasuresRecorder<N extends Number> implements IMeasures<N>, Cloneab
     /**
      * Reference to the bound manager
      */
-    protected BoundsManager<N> boundsManager;
+    protected BoundsManager<?> boundsManager;
 
     /**
      * Indicates if an objective is declared (<tt>false</tt> means satisfaction problem).
@@ -207,7 +207,7 @@ public class MeasuresRecorder<N extends Number> implements IMeasures<N>, Cloneab
     }
 
     @Override
-    public N getBestSolutionValue() {
+    public Number getBestSolutionValue() {
         return boundsManager.getBestSolutionValue();
     }
 
@@ -345,7 +345,7 @@ public class MeasuresRecorder<N extends Number> implements IMeasures<N>, Cloneab
      * Update the bounds managed
      * @param boundsManager new bound manager
      */
-    public void setBoundsManager(BoundsManager<N> boundsManager){
+    public void setBoundsManager(BoundsManager<?> boundsManager){
         this.boundsManager = boundsManager;
         declareObjective(boundsManager.isOptimization());
     }
