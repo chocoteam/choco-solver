@@ -39,19 +39,33 @@ import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.trace.IMessage;
 import org.chocosolver.solver.variables.Variable;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * A search monitor to send data to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
  * It enables to profile and to visualize Constraint Programming.
  * An installation is needed and is described <a href="https://github.com/cp-profiler/cp-profiler">here</a>.
  * This monitor relies on its <a href="https://github.com/cp-profiler/java-integration">java integration</a>.
+ *
+ * Note that CPProfiler is {@link Closeable} and can be used as follow:
+ *
+ * <pre> {@code
+ * Model model = ProblemMaker.makeCostasArrays(7);
+ *  try (CPProfiler profiler = new CPProfiler(model)) {
+ *      while (model.getSolver().solve()) ;
+ *      out.println(model.getSolver().getSolutionCount());
+ * }
+ * }</pre>
+ *
  * <p>
  * Created by cprudhom on 22/10/2015.
  * Project: choco.
  * @author Charles Prud'homme
  * @since 3.3.2
  */
-public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMonitorUpBranch,
-        IMonitorClose, IMonitorSolution, IMonitorContradiction, IMonitorRestart {
+public class CPProfiler implements IMonitorDownBranch, IMonitorUpBranch,
+        IMonitorSolution, IMonitorContradiction, IMonitorRestart, Closeable {
 
     /**
      * Set to true to activate trace for debugging
@@ -106,16 +120,13 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
     };
 
     /**
-     * Create a bridge to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
-     *
+     * Active connection to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
+     * This requires cp-profiler to be installed and launched before.
      * @param aModel model to observe resolution
      */
     public CPProfiler(Model aModel) {
         this.mModel = aModel;
-    }
-
-    @Override
-    public void afterInitialize() {
+        mModel.getSolver().plugMonitor(this);
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
                 mModel.getSolver().getRestartCount());
@@ -124,6 +135,16 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
         alt_stack.push(-1); // -1 is alt for the root node
         pid_stack.push(-1); // -1 is pid for the root node
         last_stack.push(-1);
+    }
+
+
+    /**
+     * Close connection to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
+     */
+    @Override
+    public void close() throws IOException {
+        connector.disconnect();
+        mModel.getSolver().unplugMonitor(this);
     }
 
     @Override
@@ -194,11 +215,6 @@ public class CPProfiler implements IMonitorInitialize, IMonitorDownBranch, IMoni
                 .setLabel(label)
                 .setInfo(info)
                 .send();
-    }
-
-    @Override
-    public void afterClose() {
-        connector.disconnect();
     }
 
     private static String pretty(Decision dec) {

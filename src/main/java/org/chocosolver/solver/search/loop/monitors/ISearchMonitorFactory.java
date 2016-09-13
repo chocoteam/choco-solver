@@ -67,17 +67,6 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Connect and send data to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
-     * This requires to have installed the library and to start it before launching the resolution.
-     */
-    @SuppressWarnings("unused")
-    default void connectocpprofiler(){
-        _me().plugMonitor(new CPProfiler(_me().getModel()));
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
      * Limit the exploration of the search space with the help of a <code>aStopCriterion</code>.
      * When the condition depicted in the criterion is met,
      * the search stops.
