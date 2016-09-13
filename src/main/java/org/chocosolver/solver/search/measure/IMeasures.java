@@ -43,6 +43,11 @@ import org.chocosolver.solver.search.SearchState;
 public interface IMeasures {
 
     /**
+     * To transform time from nanoseconds to seconds
+     */
+    static final float IN_SEC = 1000 * 1000 * 1000f;
+
+    /**
      * @return name of the model/solver observed
      */
     String getModelName();
@@ -55,7 +60,9 @@ public interface IMeasures {
     /**
      * @return the time count (in seconds), including initial propagation time count
      */
-    float getTimeCount();
+    default float getTimeCount() {
+	return getTimeCountInNanoSeconds() / IN_SEC;
+    }
 
     /**
      * @return the time count (in nano seconds), including initial propagation time count
@@ -65,7 +72,14 @@ public interface IMeasures {
     /**
      * @return the reading time count (in sec)
      */
-    float getReadingTimeCount();
+    default float getReadingTimeCount() {
+	return getReadingTimeCountInNanoSeconds() / IN_SEC;
+    }
+    
+    /**
+     * @return the reading time count (in nano seconds).
+     */
+    long getReadingTimeCountInNanoSeconds();
 
     /**
      * @return the node count
@@ -160,6 +174,54 @@ public interface IMeasures {
 	return st.toString();
     }
 
+    
+    default String toLogString() {
+        StringBuilder st = new StringBuilder(256);
+	//        st.append("- Search statistics\n");
+        final long solutionCount = getSolutionCount();
+        switch (getSearchState()){
+            case NEW:
+                st.append("- Search not started- ");
+                break;
+            case RUNNING:
+                st.append("- Running search - ");
+                break;
+            case TERMINATED:
+                st.append("- Complete search - ");
+                if (solutionCount == 0) {
+                    st.append("No solution.");
+                } else if (solutionCount == 1) {
+                    st.append("1 solution found.");
+                } else {
+                    st.append(String.format("%,d solution(s) found.", solutionCount));
+                }
+                st.append('\n');
+                break;
+            case STOPPED:
+                st.append("- Incomplete search - Limit reached.\n");
+                break;
+            case KILLED:
+                st.append("- Incomplete search - Unexpected interruption.\n");
+                break;
+        }
+        st.append("\tModel[").append(getModelName()).append("]\n");
+        st.append(String.format("\tSolutions: %,d\n", solutionCount));
+        if (hasObjective()) {
+            st.append("\t").append(getBoundsManager()).append(",\n");
+        }
+        st.append(String.format("\tBuilding time : %,.3fs" +
+                        "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+                        "Restarts: %,d",
+                getReadingTimeCount(),
+                getTimeCount(),
+                getNodeCount(),
+                getNodeCount() / getTimeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount()
+        ));
+        return st.toString();
+    }
     /**
      * @return statistic values only
      */
@@ -192,10 +254,4 @@ public interface IMeasures {
                 getRestartCount());
     }
 
-    /**
-     * copy the values
-     *
-     * @return a new IMeasures with same values.
-     */
-    IMeasures copyMeasures();
 }
