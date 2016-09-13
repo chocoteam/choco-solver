@@ -81,6 +81,9 @@ public final class ScaleView extends IntView {
 
     @Override
     protected boolean doInstantiateVar(int value) throws ContradictionException {
+        if (value % cste != 0) {
+            this.contradiction(this, MSG_INST);
+        }
         return var.instantiateTo(value / cste, this);
     }
 
