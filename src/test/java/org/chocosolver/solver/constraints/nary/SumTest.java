@@ -33,6 +33,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -190,6 +191,18 @@ public class SumTest {
         }
         assertTrue(nbSol > 0);
         return nbSol;
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJL01(){
+        Model m = new Model();
+        IntVar i = m.intVar("i", -1, 0);
+        IntVar j = m.intVar("j", 0, 1);
+        IntVar k = m.intVar("k", 0, 1);
+        m.sum(new IntVar[]{i, j, k}, "=", m.intVar(1)).post();
+        m.getSolver().showSolutions();
+        m.getSolver().findAllSolutions();
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 3);
     }
 
 
