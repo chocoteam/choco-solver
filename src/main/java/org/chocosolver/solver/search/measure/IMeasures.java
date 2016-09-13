@@ -203,6 +203,7 @@ public interface IMeasures {
             case KILLED:
                 st.append("- Incomplete search - Unexpected interruption.\n");
                 break;
+                default: throw new IllegalArgumentException("Illegal search state " + getSearchState());
         }
         st.append("\tModel[").append(getModelName()).append("]\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));

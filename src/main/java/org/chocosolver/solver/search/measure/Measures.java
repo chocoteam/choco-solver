@@ -30,8 +30,6 @@
 package org.chocosolver.solver.search.measure;
 
 
-import java.util.Objects;
-
 import org.chocosolver.solver.objective.BoundsManager;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.search.SearchState;
