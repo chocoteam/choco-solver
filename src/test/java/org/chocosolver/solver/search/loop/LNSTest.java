@@ -97,6 +97,10 @@ public class LNSTest {
                         new ExplainingCut(model, 200, 123456L),
                         new RandomNeighborhood(objects, 200, 123456L)));
                 break;
+            case 6:
+                r.setNoGoodRecordingFromRestarts();
+                r.setLNS(new RandomNeighborhood(objects, 200, 123456L));
+                break;
         }
         model.setObjective(Model.MAXIMIZE, power);
         int bw = 0, bp = 0;
@@ -110,7 +114,7 @@ public class LNSTest {
 
     @DataProvider(name = "lns")
     public Object[][] createData() {
-        return new Object[][] {{0},{1},{2},{3},{4},{5}};
+        return new Object[][] {{0},{1},{2},{3},{4},{5}, {6}};
     }
 
 

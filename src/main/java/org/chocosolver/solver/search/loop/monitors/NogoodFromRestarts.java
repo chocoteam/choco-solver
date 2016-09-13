@@ -97,7 +97,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
             if (decision instanceof IntDecision) {
                 IntDecision id = (IntDecision) decision;
                 if (id.getDecOp() == DecisionOperator.int_eq) {
-                    if (id.hasNext()) {
+                    if (id.hasNext() || id.getArity() == 1) {
                         lits[i++] = SatSolver.negated(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true));
                     } else {
                         if (i == 0) {
