@@ -105,7 +105,7 @@ Requirements:
 * JDK 8+
 * maven 3+
 
-Choco-solver is available on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.choco-solver),
+Choco-solver is available on [Maven Central Repository](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.choco-solver%22%20AND%20a%3A%22choco-solver%22),
 or directly from the [latest release](https://github.com/chocoteam/choco-solver/releases/latest).
 
 [Snapshot releases](https://oss.sonatype.org/content/repositories/snapshots/org/choco-solver/choco-solver/) are also available for curious.
