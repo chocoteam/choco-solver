@@ -73,7 +73,8 @@ public class PropMemberBound extends Propagator<IntVar> {
     public ESat isEntailed() {
         if (vars[0].getLB() >= lb && vars[0].getUB() <= ub) {
             return ESat.TRUE;
-        } else if (vars[0].getUB() < lb || vars[0].getLB() > ub) {
+        // Check if vars[0] contains no values between lb and ub inclusive.
+        } else if (vars[0].nextValue(lb - 1) > ub) {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
