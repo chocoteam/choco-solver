@@ -124,10 +124,10 @@ public class Measures implements IMeasures, Cloneable {
      * Create empty measures.
      */
     public Measures(String modelName) {
-	super();
-	this.modelName = modelName;
-	this.state = SearchState.NEW;
-	this.boundsManager = ObjectiveManager.SAT();
+        super();
+        this.modelName = modelName;
+        this.state = SearchState.NEW;
+        this.boundsManager = ObjectiveManager.SAT();
     }
 
     /**
@@ -135,18 +135,18 @@ public class Measures implements IMeasures, Cloneable {
      * @param measures to copy
      */
     public Measures(IMeasures measures) {
-	super();
-	boundsManager = new BoundsManager<>(measures.getBoundsManager());
-	objectiveOptimal = measures.isObjectiveOptimal();
-	solutionCount = measures.getSolutionCount();
-	timeCount = measures.getTimeCountInNanoSeconds();
-	readingTimeCount = (long) (measures.getReadingTimeCount() * Measures.IN_SEC);
-	nodeCount = measures.getNodeCount();
-	backtrackCount = measures.getBackTrackCount();
-	restartCount = measures.getRestartCount();
-	failCount = measures.getFailCount();
-	depth = measures.getCurrentDepth();
-	maxDepth = measures.getMaxDepth();
+        super();
+        boundsManager = new BoundsManager<>(measures.getBoundsManager());
+        objectiveOptimal = measures.isObjectiveOptimal();
+        solutionCount = measures.getSolutionCount();
+        timeCount = measures.getTimeCountInNanoSeconds();
+        readingTimeCount = (long) (measures.getReadingTimeCount() * Measures.IN_SEC);
+        nodeCount = measures.getNodeCount();
+        backtrackCount = measures.getBackTrackCount();
+        restartCount = measures.getRestartCount();
+        failCount = measures.getFailCount();
+        depth = measures.getCurrentDepth();
+        maxDepth = measures.getMaxDepth();
     }
 
     //****************************************************************************************************************//
@@ -156,89 +156,89 @@ public class Measures implements IMeasures, Cloneable {
 
     @Override
     public final long getBackTrackCount() {
-	return backtrackCount;
+        return backtrackCount;
     }
 
     @Override
     public final long getFailCount() {
-	return failCount;
+        return failCount;
     }
 
     @Override
     public final long getNodeCount() {
-	return nodeCount;
+        return nodeCount;
     }
 
- 
+
     @Override
     public long getTimeCountInNanoSeconds() {
-	return timeCount;
+        return timeCount;
     }
 
-    
+
     @Override
     public long getReadingTimeCountInNanoSeconds() {
-	return readingTimeCount;
+        return readingTimeCount;
     }
 
 
     @Override
     public final long getRestartCount() {
-	return restartCount;
+        return restartCount;
     }
 
     @Override
     public final long getMaxDepth() {
-	return maxDepth;
+        return maxDepth;
     }
 
     @Override
     public final long getCurrentDepth() {
-	return depth;
+        return depth;
     }
 
     @Override
     public final boolean isObjectiveOptimal() {
-	return objectiveOptimal;
+        return objectiveOptimal;
     }
 
     @Override
     public final boolean hasObjective() {
-	return boundsManager.isOptimization();
+        return boundsManager.isOptimization();
     }
 
     @Override
     public final Number getBestSolutionValue() {
-	return boundsManager.getBestSolutionValue();
+        return boundsManager.getBestSolutionValue();
     }
 
     @Override
     public final SearchState getSearchState() {
-	return state;
+        return state;
     }
 
     @Override
     public final String getModelName() {
-	return modelName;
+        return modelName;
     }
 
     @Override
     public long getTimestamp() {
-	return nodeCount + backtrackCount;
+        return nodeCount + backtrackCount;
     }
 
     @Override
     public final BoundsManager<?> getBoundsManager() {
-	return boundsManager;
+        return boundsManager;
     }
-    
+
     @Override
     public final long getSolutionCount() {
-	return solutionCount;
+        return solutionCount;
     }
 
     @Override
     public String toString() {
-	return toLogString();
+        return toMultiLineString();
     }
 }

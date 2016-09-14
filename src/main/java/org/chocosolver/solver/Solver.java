@@ -279,12 +279,12 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         boolean solution = false;
         mMeasures.setSearchState(SearchState.RUNNING);
         boolean left = true;
-        while(!stop){
+        while (!stop) {
             stop = isStopCriterionMet();
             if (stop || Thread.currentThread().isInterrupted()) {
-                if(stop){
+                if (stop) {
                     mMeasures.setSearchState(SearchState.STOPPED);
-                }else{
+                } else {
                     mMeasures.setSearchState(SearchState.KILLED);
                 }
             }
@@ -366,13 +366,13 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     private void initialize() {
         // for fast construction of "external" constraint, they are initialized once for all
-        if(mModel.minisat != null){
+        if (mModel.minisat != null) {
             mModel.minisat.getPropSat().initialize();
         }
-        if(mModel.nogoods != null){
+        if (mModel.nogoods != null) {
             mModel.nogoods.getPropNogoods().initialize();
         }
-        if(mModel.condis != null){
+        if (mModel.condis != null) {
             mModel.condis.getPropCondis().initialize();
         }
         // note jg : new (used to be in model)
@@ -384,7 +384,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         // end note
 
 
-        mMeasures.startTimer();
+        mMeasures.startStopwatch();
         rootWorldIndex = mModel.getEnvironment().getWorldIndex();
         mModel.getEnvironment().buildFakeHistoryOn(mModel.getSettings().getEnvironmentHistorySimulationCondition());
         // Indicates which decision was previously applied before selecting the move.
@@ -612,7 +612,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * @return the state of this search. This method is designed for use in monitoring of the system state, not for synchronization control.
      */
-    public SearchState getState(){
+    public SearchState getState() {
         return mMeasures.getSearchState();
     }
 
@@ -641,7 +641,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public MeasuresRecorder getMeasures() {
         //TODO Should the user have write-permission on the solver measures ?
-	return mMeasures;
+        return mMeasures;
     }
 
     /**
@@ -831,7 +831,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @see #removeAllStopCriteria()
      */
     public void addStopCriterion(Criterion... criterion) {
-        if(criterion!=null) {
+        if (criterion != null) {
             Collections.addAll(criteria, criterion);
         }
     }
@@ -841,7 +841,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @param criterion criterion to remove
      */
     public void removeStopCriterion(Criterion... criterion) {
-        if(criterion!=null) {
+        if (criterion != null) {
             for (Criterion c : criterion) {
                 criteria.remove(c);
             }
@@ -932,10 +932,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         return getMeasures().getTimeCountInNanoSeconds();
     }
 
-    
+
     @Override
     public long getReadingTimeCountInNanoSeconds() {
-	return getMeasures().getReadingTimeCountInNanoSeconds();
+        return getMeasures().getReadingTimeCountInNanoSeconds();
     }
 
     @Override
@@ -1003,7 +1003,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     @Override
     public BoundsManager getBoundsManager() {
-        assert getMeasures().getBoundsManager()== objectivemanager;
+        assert getMeasures().getBoundsManager() == objectivemanager;
         return getMeasures().getBoundsManager();
     }
 

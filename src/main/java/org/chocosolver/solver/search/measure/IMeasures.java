@@ -30,10 +30,10 @@
 package org.chocosolver.solver.search.measure;
 
 
-import java.text.DecimalFormat;
-
 import org.chocosolver.solver.objective.BoundsManager;
 import org.chocosolver.solver.search.SearchState;
+
+import java.text.DecimalFormat;
 
 /**
  * Interface for providing resolution statistics
@@ -45,7 +45,7 @@ public interface IMeasures {
     /**
      * To transform time from nanoseconds to seconds
      */
-    static final float IN_SEC = 1000 * 1000 * 1000f;
+    float IN_SEC = 1000 * 1000 * 1000f;
 
     /**
      * @return name of the model/solver observed
@@ -61,7 +61,7 @@ public interface IMeasures {
      * @return the time count (in seconds), including initial propagation time count
      */
     default float getTimeCount() {
-	return getTimeCountInNanoSeconds() / IN_SEC;
+        return getTimeCountInNanoSeconds() / IN_SEC;
     }
 
     /**
@@ -73,9 +73,9 @@ public interface IMeasures {
      * @return the reading time count (in sec)
      */
     default float getReadingTimeCount() {
-	return getReadingTimeCountInNanoSeconds() / IN_SEC;
+        return getReadingTimeCountInNanoSeconds() / IN_SEC;
     }
-    
+
     /**
      * @return the reading time count (in nano seconds).
      */
@@ -162,24 +162,24 @@ public interface IMeasures {
     }
 
     default String toDimacsString() {
-	final StringBuilder st = new StringBuilder(256);
-	st.append("i ").append(getModelName()).append("\n");
-	st.append("s ").append(getSearchState()).append("\n");
-	if (hasObjective()) {
-	    final DecimalFormat df = new DecimalFormat("#.###");
-	    st.append("o ").append(df.format(getBoundsManager().getBestSolutionValue())).append("\n");
-	}
-	st.append(String.format("d NBSOLS %d\nd TIME %.3f\nd NODES %d\nd BACKTRACKS %d\nd FAILURES %d\nd RESTARTS %d",
-		getSolutionCount(), getTimeCount(), getNodeCount(), getBackTrackCount(), getFailCount(), getRestartCount()));
-	return st.toString();
+        final StringBuilder st = new StringBuilder(256);
+        st.append("i ").append(getModelName()).append("\n");
+        st.append("s ").append(getSearchState()).append("\n");
+        if (hasObjective()) {
+            final DecimalFormat df = new DecimalFormat("#.###");
+            st.append("o ").append(df.format(getBoundsManager().getBestSolutionValue())).append("\n");
+        }
+        st.append(String.format("d NBSOLS %d\nd TIME %.3f\nd NODES %d\nd BACKTRACKS %d\nd FAILURES %d\nd RESTARTS %d",
+                getSolutionCount(), getTimeCount(), getNodeCount(), getBackTrackCount(), getFailCount(), getRestartCount()));
+        return st.toString();
     }
 
-    
-    default String toLogString() {
+
+    default String toMultiLineString() {
         StringBuilder st = new StringBuilder(256);
-	//        st.append("- Search statistics\n");
+        //        st.append("- Search statistics\n");
         final long solutionCount = getSolutionCount();
-        switch (getSearchState()){
+        switch (getSearchState()) {
             case NEW:
                 st.append("- Search not started- ");
                 break;
@@ -203,7 +203,8 @@ public interface IMeasures {
             case KILLED:
                 st.append("- Incomplete search - Unexpected interruption.\n");
                 break;
-                default: throw new IllegalArgumentException("Illegal search state " + getSearchState());
+            default:
+                throw new IllegalArgumentException("Illegal search state " + getSearchState());
         }
         st.append("\tModel[").append(getModelName()).append("]\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
@@ -223,6 +224,7 @@ public interface IMeasures {
         ));
         return st.toString();
     }
+
     /**
      * @return statistic values only
      */

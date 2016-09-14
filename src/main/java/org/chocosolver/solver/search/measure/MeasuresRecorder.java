@@ -29,11 +29,11 @@
  */
 package org.chocosolver.solver.search.measure;
 
-import java.util.Objects;
-import java.util.function.LongSupplier;
-
 import org.chocosolver.solver.objective.BoundsManager;
 import org.chocosolver.solver.search.SearchState;
+
+import java.util.Objects;
+import java.util.function.LongSupplier;
 
 /**
  * Object which stores resolution information to get statistics
@@ -49,46 +49,37 @@ public final class MeasuresRecorder extends Measures {
     private long startingTime;
 
     private LongSupplier currentNanoTime;
+
     /**
      * Create a measures recorder
      */
     public MeasuresRecorder(String modelName) {
         super(modelName);
-        stopTimer();
+        stopStopwatch();
     }
 
     @Override
     public long getTimeCountInNanoSeconds() {
-	timeCount = currentNanoTime.getAsLong();
-	return super.getTimeCountInNanoSeconds();
+        timeCount = currentNanoTime.getAsLong();
+        return super.getTimeCountInNanoSeconds();
     }
 
     /**
      * Start the stopwatch, to compute resolution time
-     * @deprecated
-     * 
-     * @see {@link MeasuresRecorder#startTimer()} and {@link MeasuresRecorder#stopTimer()} 
+     *
      */
-    @Deprecated
     public void startStopwatch() {
-        startTimer();
-    }
-    
-    /**
-     * Start the watch, to compute resolution time
-     */
-    public void startTimer() {
         startingTime = System.nanoTime();
-        currentNanoTime = () -> System.nanoTime()-startingTime;
+        currentNanoTime = () -> System.nanoTime() - startingTime;
     }
-    
+
     /**
-     * Stop the watch, the resolution time is fixed.
+     * Stop the stopwatch, the resolution time is fixed.
      */
-    public void stopTimer() {
+    public void stopStopwatch() {
         currentNanoTime = () -> timeCount;
     }
-    
+
     //****************************************************************************************************************//
     //**************************************** SETTERS ***************************************************************//
     //****************************************************************************************************************//
@@ -99,25 +90,25 @@ public final class MeasuresRecorder extends Measures {
      * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
      */
     public final void setObjectiveOptimal(boolean objectiveOptimal) {
-	this.objectiveOptimal = objectiveOptimal;
+        this.objectiveOptimal = objectiveOptimal;
     }
-    
+
     /**
      * Reset every measure to its default value (mostly 0)
      */
     public void reset() {
-	// TODO state = SearchState.NEW; // CPRU ?
-	objectiveOptimal = false;
-	solutionCount = 0;
-	timeCount = 0;
-	// TODO readingTimeCount = 0; //CPRU ?
-	// TODO stopWatch() //CPRU 
-	nodeCount = 0;
-	backtrackCount = 0;
-	failCount = 0;
-	restartCount = 0;
-	depth = 0;
-	maxDepth = 0;
+        // TODO state = SearchState.NEW; // CPRU ?
+        objectiveOptimal = false;
+        solutionCount = 0;
+        timeCount = 0;
+        // TODO readingTimeCount = 0; //CPRU ?
+        // TODO stopWatch() //CPRU
+        nodeCount = 0;
+        backtrackCount = 0;
+        failCount = 0;
+        restartCount = 0;
+        depth = 0;
+        maxDepth = 0;
     }
 
     //****************************************************************************************************************//
@@ -128,72 +119,72 @@ public final class MeasuresRecorder extends Measures {
      * increment node counter
      */
     public final void incNodeCount() {
-	nodeCount++;
-	if (depth > maxDepth) {
-	    maxDepth = depth;
-	}
+        nodeCount++;
+        if (depth > maxDepth) {
+            maxDepth = depth;
+        }
     }
 
     /**
      * increment backtrack counter
      */
     public final void incBackTrackCount() {
-	backtrackCount++;
+        backtrackCount++;
     }
 
     /**
      * increment fail counter
      */
     public final void incFailCount() {
-	failCount++;
+        failCount++;
     }
 
     /**
      * increment restart counter
      */
     public final void incRestartCount() {
-	restartCount++;
+        restartCount++;
     }
 
     /**
      * increment solution counter
      */
     public final void incSolutionCount() {
-	solutionCount++;
+        solutionCount++;
     }
 
     /**
      * Increments current depth
      */
     public final void incDepth() {
-	depth++;
+        depth++;
     }
 
     /**
      * Decrements current depth
      */
     public final void decDepth() {
-	depth--;
+        depth--;
     }
 
     /**
      * Update the current search state
      * @param state new search state
      */
-    public final void setSearchState(SearchState state){
-	Objects.requireNonNull(state);
-	this.state = state;
+    public final void setSearchState(SearchState state) {
+        Objects.requireNonNull(state);
+        this.state = state;
     }
 
     /**
      * Update the bounds managed
      * @param boundsManager new bound manager
      */
-    public final void setBoundsManager(BoundsManager<?> boundsManager){
-	Objects.requireNonNull(boundsManager);
-	this.boundsManager = boundsManager;
+    public final void setBoundsManager(BoundsManager<?> boundsManager) {
+        Objects.requireNonNull(boundsManager);
+        this.boundsManager = boundsManager;
     }
-    
+
     public final void setTimeCount(long timeCount) {
         this.timeCount = timeCount;
     }

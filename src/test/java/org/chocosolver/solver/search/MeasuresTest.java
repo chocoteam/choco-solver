@@ -41,67 +41,67 @@ import org.testng.annotations.Test;
  */
 public class MeasuresTest {
 
-    
+
     private void testMeasuresCreation(IMeasures meas) {
-	Assert.assertEquals(meas.getSearchState(), SearchState.NEW);
-	Assert.assertEquals(meas.getModelName(), "Test");
-	Assert.assertEquals(meas.getTimeCountInNanoSeconds(), 0);
-	Assert.assertEquals(meas.getTimeCount(), 0, 0.001);	
-	Assert.assertFalse(meas.hasObjective());
-	Assert.assertFalse(meas.isObjectiveOptimal());
+        Assert.assertEquals(meas.getSearchState(), SearchState.NEW);
+        Assert.assertEquals(meas.getModelName(), "Test");
+        Assert.assertEquals(meas.getTimeCountInNanoSeconds(), 0);
+        Assert.assertEquals(meas.getTimeCount(), 0, 0.001);
+        Assert.assertFalse(meas.hasObjective());
+        Assert.assertFalse(meas.isObjectiveOptimal());
     }
-    
+
     private void testMeasuresExport(IMeasures meas) {
-	Assert.assertNotNull(meas.toArray());
-	Assert.assertNotNull(meas.toCSV());
-	Assert.assertNotNull(meas.toDimacsString());
-	Assert.assertNotNull(meas.toLogString());
-	Assert.assertNotNull(meas.toOneLineString());
-	Assert.assertNotNull(meas.toString());
+        Assert.assertNotNull(meas.toArray());
+        Assert.assertNotNull(meas.toCSV());
+        Assert.assertNotNull(meas.toDimacsString());
+        Assert.assertNotNull(meas.toMultiLineString());
+        Assert.assertNotNull(meas.toOneLineString());
+        Assert.assertNotNull(meas.toString());
     }
-    
+
     @Test(groups = "1s", timeOut = 60000)
     public void measuresTest() {
-	Measures meas = new Measures("Test");
-	testMeasuresCreation(meas);
-	testMeasuresExport(meas);
+        Measures meas = new Measures("Test");
+        testMeasuresCreation(meas);
+        testMeasuresExport(meas);
     }
-    
+
     @Test(expectedExceptions = UnsupportedOperationException.class, groups = "1s", timeOut = 60000)
     public void measExceptionTest() {
-	Measures meas = new Measures("Test");
-	meas.getBestSolutionValue();
+        Measures meas = new Measures("Test");
+        meas.getBestSolutionValue();
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public void measRecTest() throws InterruptedException {
-	MeasuresRecorder meas = new MeasuresRecorder("Test");
-	testMeasuresCreation(meas);
-	meas.incBackTrackCount();
-	Assert.assertEquals(meas.getBackTrackCount(),1);
-	meas.incNodeCount();
-	meas.incNodeCount();
-	Assert.assertEquals(meas.getNodeCount(),2);	
-	// start watch
-	meas.startTimer();
-	Thread.sleep(200);
-	final int ms2ns = 1000*1000;
-	Assert.assertTrue(meas.getTimeCountInNanoSeconds() > 100*ms2ns);
-	//stop
-	meas.stopTimer();
-	long timeCount1 = meas.getTimeCountInNanoSeconds();
+        MeasuresRecorder meas = new MeasuresRecorder("Test");
+        testMeasuresCreation(meas);
+        meas.incBackTrackCount();
+        Assert.assertEquals(meas.getBackTrackCount(), 1);
+        meas.incNodeCount();
+        meas.incNodeCount();
+        Assert.assertEquals(meas.getNodeCount(), 2);
+        // start watch
+        meas.startStopwatch();
+        Thread.sleep(200);
+        final int ms2ns = 1000 * 1000;
+        Assert.assertTrue(meas.getTimeCountInNanoSeconds() > 100 * ms2ns);
+        //stop
+        meas.stopStopwatch();
+        long timeCount1 = meas.getTimeCountInNanoSeconds();
         Measures mSaved = new Measures(meas);
-	Thread.sleep(50);
-	Assert.assertEquals(meas.getTimeCountInNanoSeconds(), timeCount1);
-	// restart
-	meas.startTimer();
-	Assert.assertTrue(meas.getTimeCountInNanoSeconds() < 100 *ms2ns);
-	//stop
-	meas.stopTimer();
-	long timeCount2 = meas.getTimeCountInNanoSeconds();
-	Thread.sleep(50);
-	Assert.assertEquals(mSaved.getTimeCountInNanoSeconds(), timeCount1);
-	Assert.assertEquals(meas.getTimeCountInNanoSeconds(), timeCount2);
-	testMeasuresExport(meas);
+        Thread.sleep(50);
+        Assert.assertEquals(meas.getTimeCountInNanoSeconds(), timeCount1);
+        // restart
+        meas.startStopwatch();
+        Assert.assertTrue(meas.getTimeCountInNanoSeconds() < 100 * ms2ns);
+        //stop
+        meas.stopStopwatch();
+        long timeCount2 = meas.getTimeCountInNanoSeconds();
+        Thread.sleep(50);
+        Assert.assertEquals(mSaved.getTimeCountInNanoSeconds(), timeCount1);
+        Assert.assertEquals(meas.getTimeCountInNanoSeconds(), timeCount2);
+        testMeasuresExport(meas);
     }
 }
