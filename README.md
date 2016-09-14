@@ -1,4 +1,4 @@
-![logo](http://choco-solver.org/img/ChocoLogo-160x135.png)
+![logo](https://github.com/chocoteam/choco-solver/blob/master/src/resources/png/ChocoLogo-160x135.png)
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
