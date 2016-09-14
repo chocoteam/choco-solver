@@ -41,6 +41,7 @@ then
     sedInPlace "s%The name of the jar file terms the packaging: .*%The name of the jar file terms the packaging: \`choco\-solver\-$VERSION\-with\-dependencies\.jar\` or \`choco\-solver\-$VERSION.jar\`.%" README.md
     sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
     sedInPlace "s%Choco-solver is distributed.*.%Choco-solver is distributed under BSD 4-Clause License \(Copyright \(c\) 1999-$YEAR, Ecole des Mines de Nantes).%"  README.md
+    sedInPlace "s%[tarball].*%[tarball](https://github.com/chocoteam/choco-solver/releases/download/choco-$VERSION/choco-$VERSION.zip) which contains%" README.md
 
     ## The LICENSE
     sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, Ecole des Mines de Nantes%"  LICENSE
