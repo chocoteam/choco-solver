@@ -1,4 +1,4 @@
-![logo](http://choco-solver.org/sites/default/files/ChocoLogo-160x135.png)
+![logo](http://choco-solver.org/img/ChocoLogo-160x135.png)
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
@@ -52,10 +52,11 @@ model.getSolver().printStatistics();
 <a name="doc"></a>
 ## Documentation, Support and Issues
 
-The archive file downloaded from the [official website](http://choco-solver.org/?q=Download) contains
-both the user guide (pdf) and the apidocs (zip).
+The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to a 
+[tarball](https://github.com/chocoteam/choco-solver/releases/download/choco-4.0.0/choco-4.0.0.zip) which contains
+the binary, the source code, the user guide (pdf) and the apidocs (zip).
 
-You can get help on our [forum](http://choco-solver.org/?q=Forum).
+You can get help on our [google group](https://groups.google.com/forum/#!forum/choco-solver).
 Most support requests are answered very fast.
 
 Use the [issue tracker](https://github.com/chocoteam/choco-solver/issues) here on GitHub to report issues.
@@ -71,22 +72,22 @@ it lists the requirements and good practices to ease the contribution process.
 
 ##### Promoting is contributing !  
 
-[![Choco-solver](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
+[![Choco-solver](http://www.choco-solver.org/img/banner.svg)](http://www.choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
 
 Following are code snippets to add on your website to help us promoting Choco-solver.
 
 **html**:
 
 ```html
-<a href="http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge">
-<img border="0" alt="Choco-solver" src="http://choco-solver.org/sites/default/files/banner.svg" width="160" height="18">
+<a href="http://www.choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge">
+<img border="0" alt="Choco-solver" src="http://www.choco-solver.org/img/banner.svg" width="160" height="18">
 </a>
 ```
 
 **Markdown**:
 
 ```md
-[![Choco-solver](http://choco-solver.org/sites/default/files/banner.svg)](http://choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
+[![Choco-solver](http://www.choco-solver.org/img/banner.svg)](http://www.choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
 ```
 
 And thank you for giving back to choco-solver.
@@ -105,7 +106,7 @@ Requirements:
 * maven 3+
 
 Choco-solver is available on [Maven Central Repository](http://search.maven.org/#search%7Cga%7C1%7Corg.choco-solver),
-or directly from the [official website](http://choco-solver.org/?q=Download).
+or directly from the [latest release](https://github.com/chocoteam/choco-solver/releases/latest).
 
 [Snapshot releases](https://oss.sonatype.org/content/repositories/snapshots/org/choco-solver/choco-solver/) are also available for curious.
 
