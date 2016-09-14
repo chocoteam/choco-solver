@@ -186,10 +186,11 @@ public class PropElement extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         if (index.isInstantiated()) {
-            if (disjoint(set, array[index.getValue() - offSet]) || disjoint(array[index.getValue() - offSet], set)) {
+            int i = index.getValue() - offSet;
+            if (i < 0 || i >= array.length || disjoint(set, array[i]) || disjoint(array[i], set)) {
                 return ESat.FALSE;
             } else {
-                if (set.isInstantiated() && array[index.getValue() - offSet].isInstantiated()) {
+                if (set.isInstantiated() && array[i].isInstantiated()) {
                     return ESat.TRUE;
                 } else {
                     return ESat.UNDEFINED;
