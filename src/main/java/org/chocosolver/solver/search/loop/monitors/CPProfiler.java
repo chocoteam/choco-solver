@@ -106,6 +106,11 @@ public class CPProfiler implements IMonitorDownBranch, IMonitorUpBranch,
     private Connector connector = new Connector();
 
     /**
+     * Is connection on
+     */
+    private boolean connected = false;
+
+    /**
      * Format for solution output
      */
     private IMessage solutionMessage = new IMessage() {
@@ -126,15 +131,20 @@ public class CPProfiler implements IMonitorDownBranch, IMonitorUpBranch,
      */
     public CPProfiler(Model aModel) {
         this.mModel = aModel;
-        mModel.getSolver().plugMonitor(this);
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
                 mModel.getSolver().getRestartCount());
-        connector.connect(6565); // 6565 is the port used by cpprofiler by default
-        connector.restart(0); // starting a new tree (also used in case of a restart)
-        alt_stack.push(-1); // -1 is alt for the root node
-        pid_stack.push(-1); // -1 is pid for the root node
-        last_stack.push(-1);
+        try {
+            connector.connect(6565); // 6565 is the port used by cpprofiler by default
+            connector.restart(aModel.getName(), 0); // starting a new tree (also used in case of a restart)
+            mModel.getSolver().plugMonitor(this);
+            connected = true;
+            alt_stack.push(-1); // -1 is alt for the root node
+            pid_stack.push(-1); // -1 is pid for the root node
+            last_stack.push(-1);
+        } catch (IOException e) {
+            System.err.println("Unable to connect to CPProfiler, make sure it is started. No information will be sent.");
+        }
     }
 
 
@@ -143,8 +153,11 @@ public class CPProfiler implements IMonitorDownBranch, IMonitorUpBranch,
      */
     @Override
     public void close() throws IOException {
-        connector.disconnect();
-        mModel.getSolver().unplugMonitor(this);
+        if(connected){
+            connector.disconnect();
+            mModel.getSolver().unplugMonitor(this);
+        }
+        connected = false;
     }
 
     @Override
@@ -195,13 +208,20 @@ public class CPProfiler implements IMonitorDownBranch, IMonitorUpBranch,
         if (DEBUG) System.out.printf(
                 "connector.restart(%d);\n",
                 mModel.getSolver().getRestartCount());
-        connector.restart(++rid);
-        pid_stack.clear();
-        alt_stack.clear();
-        alt_stack.push(-1); // -1 is alt for the root node
-        pid_stack.push(-1); // -1 is pid for the root node
-        last_stack.push(-1);
-        nc = 0;
+        if(connected) {
+            try {
+                connector.restart(++rid);
+            } catch (IOException e) {
+                System.err.println("Lost connection with CPProfiler. No more information will be sent.");
+                connected = false;
+            }
+            pid_stack.clear();
+            alt_stack.clear();
+            alt_stack.push(-1); // -1 is alt for the root node
+            pid_stack.push(-1); // -1 is pid for the root node
+            last_stack.push(-1);
+            nc = 0;
+        }
     }
 
     private void send(int nc, int pid, int alt, int kid, int rid, Connector.NodeStatus status, String label, String info) {
@@ -210,11 +230,18 @@ public class CPProfiler implements IMonitorDownBranch, IMonitorUpBranch,
                     "connector.sendNode(%d, %d, %d, 0, %s, %d, \"%s\", \"%s\");\n",
                     nc, pid, alt, status.toString(), rid, label, info);
         }
-        connector.createNode(nc, pid, alt, kid, status)
-                .setRestartId(rid)
-                .setLabel(label)
-                .setInfo(info)
-                .send();
+        if(connected) {
+            try {
+                connector.createNode(nc, pid, alt, kid, status)
+                        .setRestartId(rid)
+                        .setLabel(label)
+                        .setInfo(info)
+                        .send();
+            } catch (IOException e) {
+                System.err.println("Lost connection with CPProfiler. No more information will be sent.");
+                connected = false;
+            }
+        }
     }
 
     private static String pretty(Decision dec) {
