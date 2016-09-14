@@ -29,6 +29,8 @@
  */
 package org.chocosolver.solver.search.measure;
 
+import java.util.Objects;
+import java.util.function.LongSupplier;
 
 import org.chocosolver.solver.objective.BoundsManager;
 import org.chocosolver.solver.search.SearchState;
@@ -36,406 +38,168 @@ import org.chocosolver.solver.search.SearchState;
 /**
  * Object which stores resolution information to get statistics
  *
- * @author Charles Prud'Homme
+ * @author Charles Prud'Homme, Arnaud Malapert
  * @since 3.0.0
  */
-public class MeasuresRecorder<N extends Number> implements IMeasures<N>, Cloneable {
-
-    //***********************************************************************************
-    // VARIABLE
-    //***********************************************************************************
-
-    /**
-     * To transform time from nanoseconds to seconds
-     */
-    protected static final float IN_SEC = 1000 * 1000 * 1000f;
-
-    /**
-     * Name of the model observed -- no reference to the model should be done in this class
-     */
-    protected String modelName;
-
-    /**
-     * Reference to the bound manager
-     */
-    protected BoundsManager<N> boundsManager;
-
-    /**
-     * Indicates if an objective is declared (<tt>false</tt> means satisfaction problem).
-     */
-    protected boolean hasObjective;
-
-    /**
-     * Indicates if the optimal value has been proven for the objective (set to <tt>true</tt>).
-     */
-    protected boolean objectiveOptimal;
-
-    /**
-     * Counts the number of solutions found so far.
-     */
-    protected long solutionCount;
-
-    /**
-     * Counts the time spent so far, starting from solver construction call.
-     */
-    protected long timeCount;
-
-    /**
-     * Counts the time spent into reading the model
-     */
-    protected long readingTimeCount;
-
-    /**
-     * Counts the number of nodes opened so far.
-     */
-    protected long nodeCount;
-
-    /**
-     * Counts the number of backtracks done so far.
-     */
-    protected long backtrackCount;
-
-    /**
-     * Counts the number of failures encountered so far.
-     */
-    protected long failCount;
-
-    /**
-     * Counts the number of restarts done so far.
-     */
-    protected long restartCount;
-
-    /**
-     * Stores the overall maximum depth
-     */
-    protected long maxDepth;
-
-    /**
-     * Stores the current depth
-     */
-    protected long depth;
+public final class MeasuresRecorder extends Measures {
 
     /**
      * When the clock watch starts
      */
-    protected long startingTime;
+    private long startingTime;
 
-    /**
-     * Search state
-     */
-    protected SearchState state;
-
-    //***********************************************************************************
-    // CONSTRUCTOR
-    //***********************************************************************************
-
+    private LongSupplier currentNanoTime;
     /**
      * Create a measures recorder
      */
     public MeasuresRecorder(String modelName) {
-        super();
-        this.modelName = modelName;
-    }
-
-    //****************************************************************************************************************//
-    //**************************************** GETTERS ***************************************************************//
-    //****************************************************************************************************************//
-
-    @Override
-    public long getBackTrackCount() {
-        return backtrackCount;
-    }
-
-    @Override
-    public long getFailCount() {
-        return failCount;
-    }
-
-    @Override
-    public long getNodeCount() {
-        return nodeCount;
-    }
-
-    @Override
-    public float getTimeCount() {
-        updateTime();
-        return timeCount / MeasuresRecorder.IN_SEC;
+        super(modelName);
+        stopTimer();
     }
 
     @Override
     public long getTimeCountInNanoSeconds() {
-        updateTime();
-        return timeCount;
-    }
-
-    @Override
-    public float getReadingTimeCount() {
-        return readingTimeCount / MeasuresRecorder.IN_SEC;
+	timeCount = currentNanoTime.getAsLong();
+	return super.getTimeCountInNanoSeconds();
     }
 
     /**
-     * set the reading time count
-     * @param time time needed to read the model
+     * Start the stopwatch, to compute resolution time
+     * @deprecated
+     * 
+     * @see {@link MeasuresRecorder#startTimer()} and {@link MeasuresRecorder#stopTimer()} 
      */
-    public void setReadingTimeCount(long time) {
-        readingTimeCount = time;
+    @Deprecated
+    public void startStopwatch() {
+        startTimer();
     }
-
-    @Override
-    public long getRestartCount() {
-        return restartCount;
+    
+    /**
+     * Start the watch, to compute resolution time
+     */
+    public void startTimer() {
+        startingTime = System.nanoTime();
+        currentNanoTime = () -> System.nanoTime()-startingTime;
     }
-
-    @Override
-    public long getMaxDepth() {
-        return maxDepth;
+    
+    /**
+     * Stop the watch, the resolution time is fixed.
+     */
+    public void stopTimer() {
+        currentNanoTime = () -> timeCount;
     }
-
-    @Override
-    public long getCurrentDepth() {
-        return depth;
-    }
-
-    @Override
-    public boolean isObjectiveOptimal() {
-        return objectiveOptimal;
-    }
-
-    @Override
-    public boolean hasObjective() {
-        return hasObjective;
-    }
-
-    @Override
-    public N getBestSolutionValue() {
-        return boundsManager.getBestSolutionValue();
-    }
-
-    @Override
-    public SearchState getSearchState() {
-        return state;
-    }
-
-    @Override
-    public String getModelName() {
-        return modelName;
-    }
-
-    @Override
-    public long getTimestamp() {
-        return nodeCount + backtrackCount;
-    }
-
+    
     //****************************************************************************************************************//
     //**************************************** SETTERS ***************************************************************//
     //****************************************************************************************************************//
 
-    @Override
-    public long getSolutionCount() {
-        return solutionCount;
-    }
-
-    /**
-     * indicates an objective variable
-     * @param ho set to <tt>true<tt/> to indicate that an objective is declared
-     */
-    public void declareObjective(boolean ho) {
-        hasObjective = ho;
-    }
 
     /**
      * indicates whether or not the optimum has been found and proved
      * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
      */
-    public void setObjectiveOptimal(boolean objectiveOptimal) {
-        this.objectiveOptimal = objectiveOptimal;
+    public final void setObjectiveOptimal(boolean objectiveOptimal) {
+	this.objectiveOptimal = objectiveOptimal;
     }
-
+    
     /**
      * Reset every measure to its default value (mostly 0)
      */
-    public final void reset() {
-        timeCount = 0;
-        nodeCount = 0;
-        backtrackCount = 0;
-        restartCount = 0;
-        failCount = 0;
-        solutionCount = 0;
-        depth = 0;
-        maxDepth = 0;
+    public void reset() {
+	// TODO state = SearchState.NEW; // CPRU ?
+	objectiveOptimal = false;
+	solutionCount = 0;
+	timeCount = 0;
+	// TODO readingTimeCount = 0; //CPRU ?
+	// TODO stopWatch() //CPRU 
+	nodeCount = 0;
+	backtrackCount = 0;
+	failCount = 0;
+	restartCount = 0;
+	depth = 0;
+	maxDepth = 0;
     }
 
     //****************************************************************************************************************//
     //**************************************** INCREMENTERS **********************************************************//
     //****************************************************************************************************************//
 
-    private void updateTime() {
-        timeCount = System.nanoTime() - startingTime;
-    }
-
     /**
      * increment node counter
      */
-    public void incNodeCount() {
-        nodeCount++;
-        if (depth > maxDepth) {
-            maxDepth = depth;
-        }
+    public final void incNodeCount() {
+	nodeCount++;
+	if (depth > maxDepth) {
+	    maxDepth = depth;
+	}
     }
 
     /**
      * increment backtrack counter
      */
-    public void incBackTrackCount() {
-        backtrackCount++;
+    public final void incBackTrackCount() {
+	backtrackCount++;
     }
 
     /**
      * increment fail counter
      */
-    public void incFailCount() {
-        failCount++;
+    public final void incFailCount() {
+	failCount++;
     }
 
     /**
      * increment restart counter
      */
-    public void incRestartCount() {
-        restartCount++;
+    public final void incRestartCount() {
+	restartCount++;
     }
 
     /**
      * increment solution counter
      */
-    public void incSolutionCount() {
-        solutionCount++;
-        updateTime();
+    public final void incSolutionCount() {
+	solutionCount++;
     }
 
     /**
      * Increments current depth
      */
-    public void incDepth() {
-        depth++;
+    public final void incDepth() {
+	depth++;
     }
 
     /**
      * Decrements current depth
      */
-    public void decDepth() {
-        depth--;
-    }
-
-    /**
-     * Start the stopwatch, to compute resolution time
-     */
-    public void startStopwatch() {
-        startingTime = System.nanoTime();
+    public final void decDepth() {
+	depth--;
     }
 
     /**
      * Update the current search state
      * @param state new search state
      */
-    public void setSearchState(SearchState state){
-        this.state = state;
+    public final void setSearchState(SearchState state){
+	Objects.requireNonNull(state);
+	this.state = state;
     }
 
     /**
      * Update the bounds managed
      * @param boundsManager new bound manager
      */
-    public void setBoundsManager(BoundsManager<N> boundsManager){
-        this.boundsManager = boundsManager;
-        declareObjective(boundsManager.isOptimization());
+    public final void setBoundsManager(BoundsManager<?> boundsManager){
+	Objects.requireNonNull(boundsManager);
+	this.boundsManager = boundsManager;
+    }
+    
+    public final void setTimeCount(long timeCount) {
+        this.timeCount = timeCount;
     }
 
-    @Override
-    public IMeasures copyMeasures() {
-        MeasuresRecorder ret = new MeasuresRecorder(modelName);
-        ret.boundsManager = new BoundsManager<>(boundsManager);
-        ret.timeCount = this.timeCount;
-        ret.nodeCount = this.nodeCount;
-        ret.backtrackCount = this.backtrackCount;
-        ret.restartCount = this.restartCount;
-        ret.failCount = this.failCount;
-        ret.solutionCount = this.solutionCount;
-        ret.depth = this.depth;
-        ret.maxDepth = this.maxDepth;
-        ret.hasObjective = this.hasObjective;
-        ret.objectiveOptimal = this.objectiveOptimal;
-        ret.readingTimeCount = this.readingTimeCount;
-        ret.startingTime = this.startingTime;
-        return ret;
+    public final void setReadingTimeCount(long readingTimeCount) {
+        this.readingTimeCount = readingTimeCount;
     }
 
-    protected void set(IMeasures measures) {
-        timeCount = (long) (measures.getTimeCount() * MeasuresRecorder.IN_SEC);
-        nodeCount = measures.getNodeCount();
-        backtrackCount = measures.getBackTrackCount();
-        restartCount = measures.getRestartCount();
-        failCount = measures.getFailCount();
-        solutionCount = measures.getSolutionCount();
-        depth = measures.getCurrentDepth();
-        maxDepth = measures.getMaxDepth();
-        hasObjective = measures.hasObjective();
-        objectiveOptimal = measures.isObjectiveOptimal();
-        readingTimeCount = (long) (measures.getReadingTimeCount() * MeasuresRecorder.IN_SEC);
-    }
-
-    @Override
-    public BoundsManager getBoundsManager() {
-        return boundsManager;
-    }
-
-    //****************************************************************************************************************//
-
-    @Override
-    public String toString() {
-        updateTime();
-        StringBuilder st = new StringBuilder(256);
-//        st.append("- Search statistics\n");
-        switch (state){
-            case NEW:
-                st.append("- Search not started- ");
-                break;
-            case RUNNING:
-                st.append("- Running search - ");
-                break;
-            case TERMINATED:
-                st.append("- Complete search - ");
-                if (solutionCount == 0) {
-                    st.append("No solution.");
-                } else if (solutionCount == 1) {
-                    st.append("1 solution found.");
-                } else {
-                    st.append(String.format("%,d solution(s) found.", solutionCount));
-                }
-                st.append('\n');
-                break;
-            case STOPPED:
-                st.append("- Incomplete search - Limit reached.\n");
-                break;
-            case KILLED:
-                st.append("- Incomplete search - Unexpected interruption.\n");
-                break;
-        }
-        st.append("\tModel[").append(modelName).append("]\n");
-        st.append(String.format("\tSolutions: %,d\n", solutionCount));
-        if (hasObjective()) {
-            st.append("\t").append(boundsManager).append(",\n");
-        }
-        st.append(String.format("\tBuilding time : %,.3fs" +
-                        "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                        "Restarts: %,d",
-                getReadingTimeCount(),
-                getTimeCount(),
-                getNodeCount(),
-                getNodeCount() / getTimeCount(),
-                getBackTrackCount(),
-                getFailCount(),
-                getRestartCount()
-        ));
-        return st.toString();
-    }
 }

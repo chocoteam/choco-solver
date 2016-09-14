@@ -384,7 +384,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         // end note
 
 
-        mMeasures.startStopwatch();
+        mMeasures.startTimer();
         rootWorldIndex = mModel.getEnvironment().getWorldIndex();
         mModel.getEnvironment().buildFakeHistoryOn(mModel.getSettings().getEnvironmentHistorySimulationCondition());
         // Indicates which decision was previously applied before selecting the move.
@@ -640,12 +640,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @return this model's measure recorder
      */
     public MeasuresRecorder getMeasures() {
-        return mMeasures;
-    }
-
-    @Override
-    public IMeasures copyMeasures() {
-        return mMeasures.copyMeasures();
+        //TODO Should the user have write-permission on the solver measures ?
+	return mMeasures;
     }
 
     /**
@@ -934,6 +930,12 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     @Override
     public long getTimeCountInNanoSeconds() {
         return getMeasures().getTimeCountInNanoSeconds();
+    }
+
+    
+    @Override
+    public long getReadingTimeCountInNanoSeconds() {
+	return getMeasures().getReadingTimeCountInNanoSeconds();
     }
 
     @Override

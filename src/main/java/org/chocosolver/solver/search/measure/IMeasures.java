@@ -30,15 +30,22 @@
 package org.chocosolver.solver.search.measure;
 
 
+import java.text.DecimalFormat;
+
 import org.chocosolver.solver.objective.BoundsManager;
 import org.chocosolver.solver.search.SearchState;
 
 /**
  * Interface for providing resolution statistics
  *
- * @author Charles Prud'Homme, Jean-Guillaume Fages
+ * @author Charles Prud'Homme, Jean-Guillaume Fages, Arnaud Malapert
  */
-public interface IMeasures<N extends Number> {
+public interface IMeasures {
+
+    /**
+     * To transform time from nanoseconds to seconds
+     */
+    static final float IN_SEC = 1000 * 1000 * 1000f;
 
     /**
      * @return name of the model/solver observed
@@ -53,7 +60,9 @@ public interface IMeasures<N extends Number> {
     /**
      * @return the time count (in seconds), including initial propagation time count
      */
-    float getTimeCount();
+    default float getTimeCount() {
+	return getTimeCountInNanoSeconds() / IN_SEC;
+    }
 
     /**
      * @return the time count (in nano seconds), including initial propagation time count
@@ -63,7 +72,14 @@ public interface IMeasures<N extends Number> {
     /**
      * @return the reading time count (in sec)
      */
-    float getReadingTimeCount();
+    default float getReadingTimeCount() {
+	return getReadingTimeCountInNanoSeconds() / IN_SEC;
+    }
+    
+    /**
+     * @return the reading time count (in nano seconds).
+     */
+    long getReadingTimeCountInNanoSeconds();
 
     /**
      * @return the node count
@@ -113,7 +129,7 @@ public interface IMeasures<N extends Number> {
     /**
      * @return the objective value of the best solution found (can be Integer or Double)
      */
-    N getBestSolutionValue();
+    Number getBestSolutionValue();
 
     /**
      * @return the search state
@@ -123,7 +139,7 @@ public interface IMeasures<N extends Number> {
     /**
      * @return current bound manager
      */
-    BoundsManager<N> getBoundsManager();
+    BoundsManager<?> getBoundsManager();
 
     /**
      * @return a summary of recorded statistics
@@ -145,6 +161,68 @@ public interface IMeasures<N extends Number> {
         return st.toString();
     }
 
+    default String toDimacsString() {
+	final StringBuilder st = new StringBuilder(256);
+	st.append("i ").append(getModelName()).append("\n");
+	st.append("s ").append(getSearchState()).append("\n");
+	if (hasObjective()) {
+	    final DecimalFormat df = new DecimalFormat("#.###");
+	    st.append("o ").append(df.format(getBoundsManager().getBestSolutionValue())).append("\n");
+	}
+	st.append(String.format("d NBSOLS %d\nd TIME %.3f\nd NODES %d\nd BACKTRACKS %d\nd FAILURES %d\nd RESTARTS %d",
+		getSolutionCount(), getTimeCount(), getNodeCount(), getBackTrackCount(), getFailCount(), getRestartCount()));
+	return st.toString();
+    }
+
+    
+    default String toLogString() {
+        StringBuilder st = new StringBuilder(256);
+	//        st.append("- Search statistics\n");
+        final long solutionCount = getSolutionCount();
+        switch (getSearchState()){
+            case NEW:
+                st.append("- Search not started- ");
+                break;
+            case RUNNING:
+                st.append("- Running search - ");
+                break;
+            case TERMINATED:
+                st.append("- Complete search - ");
+                if (solutionCount == 0) {
+                    st.append("No solution.");
+                } else if (solutionCount == 1) {
+                    st.append("1 solution found.");
+                } else {
+                    st.append(String.format("%,d solution(s) found.", solutionCount));
+                }
+                st.append('\n');
+                break;
+            case STOPPED:
+                st.append("- Incomplete search - Limit reached.\n");
+                break;
+            case KILLED:
+                st.append("- Incomplete search - Unexpected interruption.\n");
+                break;
+                default: throw new IllegalArgumentException("Illegal search state " + getSearchState());
+        }
+        st.append("\tModel[").append(getModelName()).append("]\n");
+        st.append(String.format("\tSolutions: %,d\n", solutionCount));
+        if (hasObjective()) {
+            st.append("\t").append(getBoundsManager()).append(",\n");
+        }
+        st.append(String.format("\tBuilding time : %,.3fs" +
+                        "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+                        "Restarts: %,d",
+                getReadingTimeCount(),
+                getTimeCount(),
+                getNodeCount(),
+                getNodeCount() / getTimeCount(),
+                getBackTrackCount(),
+                getFailCount(),
+                getRestartCount()
+        ));
+        return st.toString();
+    }
     /**
      * @return statistic values only
      */
@@ -177,10 +255,4 @@ public interface IMeasures<N extends Number> {
                 getRestartCount());
     }
 
-    /**
-     * copy the values
-     *
-     * @return a new IMeasures with same values.
-     */
-    IMeasures copyMeasures();
 }
