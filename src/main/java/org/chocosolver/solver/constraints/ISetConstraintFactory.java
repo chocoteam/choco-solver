@@ -83,7 +83,30 @@ public interface ISetConstraintFactory {
 	 * @return A constraint ensuring that the intersection of <i>sets</i> is equal to <i>intersectionSet</i>
 	 */
 	default Constraint intersection(SetVar[] sets, SetVar intersectionSet) {
-		return new Constraint("SetIntersection", new PropIntersection(sets, intersectionSet), new PropIntersection(sets, intersectionSet));
+		return intersection(sets, intersectionSet, false);
+	}
+
+	/**
+	 * Creates a constraint which ensures that the intersection of <i>sets</i> is equal to <i>intersectionSet</i>
+	 *
+	 * @param sets an array of set variables
+	 * @param intersectionSet a set variable representing the intersection of <i>sets</i>
+         * @param boundConsistent adds an additional propagator to guarantee BC
+	 * @return A constraint ensuring that the intersection of <i>sets</i> is equal to <i>intersectionSet</i>
+	 */
+	default Constraint intersection(SetVar[] sets, SetVar intersectionSet, boolean boundConsistent) {
+		if (sets.length == 0) {
+			throw new IllegalArgumentException("The intersection of zero sets is undefined.");
+		}
+		if (boundConsistent) {
+			return new Constraint("SetIntersection",
+				new PropIntersection(sets, intersectionSet),
+				sets.length == 1
+					? new PropAllEqual(new SetVar[]{sets[0], intersectionSet})
+					: new PropIntersectionFilterSets(sets, intersectionSet));
+		} else {
+			return new Constraint("SetIntersection", new PropIntersection(sets, intersectionSet));
+		}
 	}
 
 	/**

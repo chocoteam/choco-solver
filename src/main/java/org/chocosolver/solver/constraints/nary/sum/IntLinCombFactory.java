@@ -261,9 +261,8 @@ public class IntLinCombFactory {
                                 Model.intVar(RESULT), 0));
                     }
                 }
-                if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool()) {
+                if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool() && COEFFS[VARS.length - 1] == -1) {
                     // the large domain variable is on the last idx
-                    assert COEFFS[VARS.length - 1] == -1;
                     if (Model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
                         return new SumConstraint("BoolSum", new PropSumBoolIncr(Model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));

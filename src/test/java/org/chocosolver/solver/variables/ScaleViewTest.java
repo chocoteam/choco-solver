@@ -228,4 +228,15 @@ public class ScaleViewTest {
             }
         }
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJL01(){
+        Model m = new Model();
+        IntVar i = m.intVar("i", 0, 4);
+        m.arithm(m.intScaleView(i, 10), "=", 11).post();
+
+        Solver s = m.getSolver();
+        Assert.assertFalse(s.solve());
+
+    }
 }

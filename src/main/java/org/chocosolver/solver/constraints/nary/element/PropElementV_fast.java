@@ -80,33 +80,36 @@ public class PropElementV_fast extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        index.updateBounds(offset, vars.length + offset - 3, this);
-        int lb = index.getLB();
-        int ub = index.getUB();
-        int min = MAX_VALUE / 2;
-        int max = MIN_VALUE / 2;
-        // 1. bottom up loop
-        for (int i = lb; i <= ub; i = index.nextValue(i)) {
-            if (disjoint(var, vars[2 + i - offset])) {
-                index.removeValue(i, this);
+        boolean filter;
+        do {
+            filter = index.updateBounds(offset, vars.length + offset - 3, this);
+            int lb = index.getLB();
+            int ub = index.getUB();
+            int min = MAX_VALUE / 2;
+            int max = MIN_VALUE / 2;
+            // 1. bottom up loop
+            for (int i = lb; i <= ub; i = index.nextValue(i)) {
+                if (disjoint(var, vars[2 + i - offset])) {
+                    filter |= index.removeValue(i, this);
+                }
+                min = min(min, vars[2 + i - offset].getLB());
+                max = max(max, vars[2 + i - offset].getUB());
             }
-            min = min(min, vars[2 + i - offset].getLB());
-            max = max(max, vars[2 + i - offset].getUB());
-        }
-        // 2. top-down loop for bounded domains
-        if (!index.hasEnumeratedDomain()) {
-            if (index.getUB() < ub) {
-                for (int i = ub - 1; i >= lb; i = index.previousValue(i)) {
-                    if (disjoint(var, vars[2 + i - offset])) {
-                        index.removeValue(i, this);
-                    } else break;
+            // 2. top-down loop for bounded domains
+            if (!index.hasEnumeratedDomain()) {
+                if (index.getUB() < ub) {
+                    for (int i = ub - 1; i >= lb; i = index.previousValue(i)) {
+                        if (disjoint(var, vars[2 + i - offset])) {
+                            filter |= index.removeValue(i, this);
+                        } else break;
+                    }
                 }
             }
-        }
-        var.updateBounds(min, max, this);
-        if (index.isInstantiated()) {
-            propagateEquality(var, vars[2 + index.getValue() - offset]);
-        }
+            filter |= var.updateBounds(min, max, this);
+            if (index.isInstantiated()) {
+                filter |= propagateEquality(var, vars[2 + index.getValue() - offset]);
+            }
+        } while (filter);
         if (var.isInstantiated() && index.isInstantiated()) {
             IntVar v = vars[2 + index.getValue() - offset];
             if (v.isInstantiated() && v.getValue() == var.getValue()) {
@@ -115,33 +118,32 @@ public class PropElementV_fast extends Propagator<IntVar> {
         }
     }
 
-    private void propagateEquality(IntVar a, IntVar b) throws ContradictionException {
+    private boolean propagateEquality(IntVar a, IntVar b) throws ContradictionException {
         int s = a.getDomainSize() + b.getDomainSize();
-        a.updateBounds(b.getLB(), b.getUB(), this);
-        b.updateBounds(a.getLB(), a.getUB(), this);
+        boolean filter = a.updateBounds(b.getLB(), b.getUB(), this);
+        filter |= b.updateBounds(a.getLB(), a.getUB(), this);
         if (!fast) {
-            if (a.getDomainSize() != b.getDomainSize()) {
-                int lb = a.getLB();
-                int ub = a.getUB();
-                for (int i = lb; i <= ub; i = a.nextValue(i)) {
-                    if (!b.contains(i)) {
-                        a.removeValue(i, this);
-                    }
-                }
-            }
-            if (a.getDomainSize() != b.getDomainSize()) {
-                int lb = b.getLB();
-                int ub = b.getUB();
-                for (int i = lb; i <= ub; i = b.nextValue(i)) {
-                    if (!a.contains(i)) {
-                        b.removeValue(i, this);
-                    }
-                }
-            }
+            filterFrom(a, b);
+            filterFrom(b, a);
         }
         if (a.getDomainSize() + b.getDomainSize() != s) {
-            propagateEquality(a, b);
+            filter |= propagateEquality(a, b);
         }
+        return filter;
+    }
+
+    private boolean filterFrom(IntVar a, IntVar b) throws ContradictionException {
+        boolean filter = false;
+        if (a.getDomainSize() != b.getDomainSize()) {
+            int lb = a.getLB();
+            int ub = a.getUB();
+            for (int i = lb; i <= ub; i = a.nextValue(i)) {
+                if (!b.contains(i)) {
+                    filter |= a.removeValue(i, this);
+                }
+            }
+        }
+        return filter;
     }
 
     private boolean disjoint(IntVar a, IntVar b) {
