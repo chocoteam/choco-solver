@@ -173,7 +173,7 @@ public class CPProfiler implements IMonitorDownBranch, IMonitorUpBranch,
                 pid_stack.push(nc); // each child will have the same pid
             }
             nc++;
-            alt_stack.push(dec.triesLeft() - 2);
+            alt_stack.push(0);
             last_stack.push(nc-1);
         } else {
             nc++;
