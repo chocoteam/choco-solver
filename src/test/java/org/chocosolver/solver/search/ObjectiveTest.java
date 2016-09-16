@@ -30,10 +30,29 @@
 package org.chocosolver.solver.search;
 
 
+import static java.lang.Math.floorDiv;
+import static java.lang.System.nanoTime;
+import static org.chocosolver.solver.objective.ObjectiveManager.walkingIntVarCutComputer;
+import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
+import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
+
+import java.util.Random;
+
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
+import org.chocosolver.solver.objective.IObjectiveManager;
+import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
@@ -41,21 +60,10 @@ import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
-import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.Random;
-
-import static java.lang.Math.floorDiv;
-import static java.lang.System.nanoTime;
-import static org.chocosolver.solver.objective.ObjectiveManager.walkingIntVarCutComputer;
-import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.util.ESat.*;
-import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
-import static org.testng.Assert.assertEquals;
 
 /**
  * <br/>
@@ -98,8 +106,8 @@ public class ObjectiveTest {
         for (int i = 0; i < 2; i++) {
             model.getSolver().reset();
             model.getSolver().solve();
-            Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
-            Assert.assertEquals(model.getSolver().getNodeCount(), 2);
+            assertEquals(model.getSolver().getSolutionCount(), 1);
+            assertEquals(model.getSolver().getNodeCount(), 2);
         }
     }
 
@@ -250,7 +258,7 @@ public class ObjectiveTest {
         r.setSearch(new ObjectiveStrategy(a, OptimizationPolicy.TOP_DOWN), minDomLBSearch(a));
         r.setNoGoodRecordingFromSolutions(a);
         while (model.getSolver().solve()) ;
-        Assert.assertEquals(model.getSolver().isStopCriterionMet(), false);
+        assertEquals(model.getSolver().isStopCriterionMet(), false);
     }
 
     @Test(groups = "10s", timeOut = 60000)
@@ -311,5 +319,86 @@ public class ObjectiveTest {
         }
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 21);
+    }
+    
+    
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMaxIntObj() {
+	Model model = new Model();
+	IntVar iv = model.intVar(0, 10);
+	IObjectiveManager<IntVar> objman = ObjectiveFactory.makeObjectiveManager(iv, ResolutionPolicy.MAXIMIZE);
+	assertEquals(-1, objman.getBestLB());
+	assertEquals(11, objman.getBestUB());
+	assertEquals(-1, objman.getBestSolutionValue());
+	objman.updateBestSolution(5);
+	assertEquals(5, objman.getBestSolutionValue());
+
+	IObjectiveManager<IntVar> objman2 = ObjectiveFactory.copy(objman);
+	assertEquals(5, objman2.getBestLB());
+	assertEquals(11, objman2.getBestUB());
+	assertEquals(5, objman2.getBestSolutionValue());
+    }
+    
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMaxRealObj() {
+	Model model = new Model();
+	final double p = model.getPrecision();
+	RealVar rv = model.realVar(0, 10, p);
+	IObjectiveManager<RealVar> objman = ObjectiveFactory.makeObjectiveManager(rv, ResolutionPolicy.MAXIMIZE, p);
+	assertEquals(0, objman.getBestLB().doubleValue(), p);
+	assertEquals(10, objman.getBestUB().doubleValue(), p);
+	assertEquals(0, objman.getBestSolutionValue().doubleValue(), p);
+	objman.updateBestSolution(5);
+	assertEquals(5, objman.getBestSolutionValue().doubleValue(), p);
+
+	IObjectiveManager<RealVar> objman2 = ObjectiveFactory.copy(objman);
+	assertEquals(5, objman2.getBestLB().doubleValue(), p);
+	assertEquals(10, objman2.getBestUB().doubleValue(), p);
+	assertEquals(5, objman2.getBestSolutionValue().doubleValue(), p);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMinIntObjCopy() {
+	Model model = new Model();
+	IntVar iv = model.intVar(0, 10);
+	IObjectiveManager<IntVar> objman = ObjectiveFactory.makeObjectiveManager(iv, ResolutionPolicy.MINIMIZE);
+	assertEquals(-1, objman.getBestLB());
+	assertEquals(11, objman.getBestUB());
+	assertEquals(11, objman.getBestSolutionValue());
+	objman.updateBestSolution(5);
+	assertEquals(5, objman.getBestSolutionValue());
+
+	IObjectiveManager<IntVar> objman2 = ObjectiveFactory.copy(objman);
+	assertEquals(-1, objman2.getBestLB());
+	assertEquals(5, objman2.getBestUB());
+	assertEquals(5, objman2.getBestSolutionValue());
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMinRealObj() {
+	Model model = new Model();
+	final double p = model.getPrecision();
+	RealVar rv = model.realVar(0, 10, p);
+	IObjectiveManager<RealVar> objman = ObjectiveFactory.makeObjectiveManager(rv, ResolutionPolicy.MINIMIZE, p);
+	assertEquals(0, objman.getBestLB().doubleValue(), p);
+	assertEquals(10, objman.getBestUB().doubleValue(), p);
+	assertEquals(10, objman.getBestSolutionValue().doubleValue(), p);
+	objman.updateBestSolution(5);
+	assertEquals(5, objman.getBestSolutionValue().doubleValue(), p);
+
+	IObjectiveManager<RealVar> objman2 = ObjectiveFactory.copy(objman);
+	assertEquals(0, objman2.getBestLB().doubleValue(), p);
+	assertEquals(5, objman2.getBestUB().doubleValue(), p);
+	assertEquals(5, objman2.getBestSolutionValue().doubleValue(), p);
+    }
+    
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSatObj() {
+	IObjectiveManager<Variable> objman = ObjectiveFactory.SAT();
+	assertFalse(objman.isOptimization());
+	assertNull(objman.getBestLB());
+	assertNull(objman.getBestUB());
+	assertNull(objman.getBestSolutionValue());
     }
 }

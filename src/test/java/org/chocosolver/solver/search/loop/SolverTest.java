@@ -69,7 +69,7 @@ public class SolverTest {
 
         // enumerate optima does not work because of previous cut
         m.getSolver().reset();
-        m.getSolver().getObjectiveManager().setCutComputer(number -> number);
+        m.getSolver().getObjectiveManager().setCutComputer((Number number) -> number);
         while (m.getSolver().solve());
    		assertEquals(m.getSolver().getSolutionCount(),7);
 
