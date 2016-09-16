@@ -29,21 +29,21 @@
  */
 package org.chocosolver.solver.search.loop.move;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.PriorityQueue;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.PriorityQueue;
 
 /**
  * A move dedicated to run an Hybrid Best-First Search[1] (HBFS) with binary decisions.
@@ -96,7 +96,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * The current objective manager, to deal with best bounds.
      */
-    private ObjectiveManager<IntVar, Integer> objectiveManager;
+    private IObjectiveManager<IntVar> objectiveManager;
 
     /**
      * Indicates if the current resolution policy is minimization.
@@ -287,8 +287,8 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
      */
     private boolean isValid(int bound) {
         return isMinimization ?
-                bound < objectiveManager.getBestUB() :
-                bound > objectiveManager.getBestLB();
+                bound < objectiveManager.getBestUB().intValue() :
+                bound > objectiveManager.getBestLB().intValue();
     }
 
     /**

@@ -29,6 +29,20 @@
  */
 package org.chocosolver.solver;
 
+import static org.chocosolver.solver.Solver.Action.extend;
+import static org.chocosolver.solver.Solver.Action.initialize;
+import static org.chocosolver.solver.Solver.Action.propagate;
+import static org.chocosolver.solver.Solver.Action.repair;
+import static org.chocosolver.solver.Solver.Action.validate;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -36,8 +50,9 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.IExplanationEngine;
 import org.chocosolver.solver.explanations.NoExplanationEngine;
-import org.chocosolver.solver.objective.BoundsManager;
-import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.objective.IBoundsManager;
+import org.chocosolver.solver.objective.IObjectiveManager;
+import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationEngineFactory;
@@ -58,20 +73,9 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.IOutputFactory;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.chocosolver.solver.Solver.Action.*;
-import static org.chocosolver.solver.objective.ObjectiveManager.SAT;
-import static org.chocosolver.util.ESat.*;
 
 /**
  * This class is inspired from :
@@ -151,7 +155,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     private Model mModel;
 
     /** The objective manager declare */
-    private ObjectiveManager objectivemanager;
+    private IObjectiveManager objectivemanager;
 
     /** The next action to execute in the search <u>loop</u> */
     private Action action;
@@ -222,7 +226,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         mModel = aModel;
         engine = NoPropagationEngine.SINGLETON;
         explainer = NoExplanationEngine.SINGLETON;
-        objectivemanager = SAT();
+        objectivemanager = ObjectiveFactory.SAT();
         dpath = new DecisionPath(aModel.getEnvironment());
         action = initialize;
         mMeasures = new MeasuresRecorder(mModel.getName());
@@ -339,7 +343,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                     }
                     feasible = TRUE;
                     mMeasures.incSolutionCount();
-                    objectivemanager.update();
+                    objectivemanager.updateBestSolution();
                     searchMonitors.onSolution();
                     jumpTo = 1;
                     action = repair;
@@ -577,12 +581,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /**
      * @param <V> type of the objective variable
-     * @param <N> if {@link #objectivemanager} deals with {@link IntVar}, set to {@link Integer},
-     *           if {@link #objectivemanager} deals with {@link RealVar}, set to {@link Double},
      * @return the currently used objective manager
      */
     @SuppressWarnings("unchecked")
-    public <V extends Variable, N extends Number> ObjectiveManager<V, N> getObjectiveManager() {
+    public <V extends Variable> IObjectiveManager<V> getObjectiveManager() {
         return objectivemanager;
     }
 
@@ -753,7 +755,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * Declares an objective manager to use.
      * @param om the objective manager to use instead of the declared one (if any).
      */
-    public void setObjectiveManager(ObjectiveManager om) {
+    public void setObjectiveManager(IObjectiveManager om) {
         this.objectivemanager = om;
         mMeasures.setBoundsManager(om);
     }
@@ -1002,7 +1004,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @return the currently used objective manager
      */
     @Override
-    public BoundsManager getBoundsManager() {
+    public IBoundsManager getBoundsManager() {
         assert getMeasures().getBoundsManager() == objectivemanager;
         return getMeasures().getBoundsManager();
     }

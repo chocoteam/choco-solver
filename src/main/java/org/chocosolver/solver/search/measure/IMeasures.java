@@ -30,10 +30,10 @@
 package org.chocosolver.solver.search.measure;
 
 
-import org.chocosolver.solver.objective.BoundsManager;
-import org.chocosolver.solver.search.SearchState;
-
 import java.text.DecimalFormat;
+
+import org.chocosolver.solver.objective.IBoundsManager;
+import org.chocosolver.solver.search.SearchState;
 
 /**
  * Interface for providing resolution statistics
@@ -139,7 +139,7 @@ public interface IMeasures {
     /**
      * @return current bound manager
      */
-    BoundsManager<?> getBoundsManager();
+    IBoundsManager getBoundsManager();
 
     /**
      * @return a summary of recorded statistics
