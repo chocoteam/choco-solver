@@ -396,7 +396,7 @@ public class ObjectiveTest {
     }
     
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void testSatObj() {
 	IObjectiveManager<Variable> objman = ObjectiveFactory.SAT();
 	assertFalse(objman.isOptimization());

@@ -30,7 +30,6 @@
 package org.chocosolver.solver.objective;
 
 import java.util.function.Function;
-import java.util.function.IntUnaryOperator;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
