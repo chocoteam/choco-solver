@@ -101,26 +101,4 @@ public class StringUtils {
         return b.toString();
 
     }
-
-    private static long next;
-
-    /**
-     * Return a generated short, random string
-     *
-     * @return String
-     */
-    public static String randomName() {
-        return "TMP_" + next++;
-    }
-
-    /**
-     * Return a generated short, random string
-     *
-     * @param prefix the prefix name
-     * @return String
-     */
-    public static String randomName(String prefix) {
-        return prefix + "_" + next++;
-    }
-
 }

@@ -33,7 +33,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.MathUtils;
-import org.chocosolver.util.tools.StringUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Map;
@@ -100,44 +99,44 @@ public class BiArExpression implements ArExpression {
             switch (op) {
                 case ADD:
                     bounds = VariableUtils.boundsForAddition(v1, v2);
-                    me = model.intVar(StringUtils.randomName("sum_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("sum_exp_"), bounds[0], bounds[1]);
                     model.arithm(v1, "+", v2, "=", me).post();
                     break;
                 case SUB:
                     bounds = VariableUtils.boundsForSubstraction(v1, v2);
-                    me = model.intVar(StringUtils.randomName("sub_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("sub_exp_"), bounds[0], bounds[1]);
                     model.arithm(v1, "-", v2, "=", me).post();
                     break;
                 case MUL:
                     bounds = VariableUtils.boundsForMultiplication(v1, v2);
-                    me = model.intVar(StringUtils.randomName("mul_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("mul_exp_"), bounds[0], bounds[1]);
                     model.times(v1, v2, me).post();
                     break;
                 case DIV:
                     bounds = VariableUtils.boundsForDivision(v1, v2);
-                    me = model.intVar(StringUtils.randomName("div_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("div_exp_"), bounds[0], bounds[1]);
                     model.div(v1, v2, me).post();
                     break;
                 case MOD:
                     bounds = VariableUtils.boundsForModulo(v1, v2);
-                    me = model.intVar(StringUtils.randomName("mod_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("mod_exp_"), bounds[0], bounds[1]);
                     model.mod(v1, v2, me).post();
                     break;
                 case POW: // todo as intension constraint
                     bounds = VariableUtils.boundsForPow(v1, v2);
-                    me = model.intVar(StringUtils.randomName("pow_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("pow_exp_"), bounds[0], bounds[1]);
                     model.table(new IntVar[]{v1, v2, me},
                             TuplesFactory.generateTuples(vs -> vs[2] == MathUtils.pow(vs[0], vs[1]),
                             true, v1, v2, me)).post();
                     break;
                 case MIN:
                     bounds = VariableUtils.boundsForMinimum(v1, v2);
-                    me = model.intVar(StringUtils.randomName("min_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("min_exp_"), bounds[0], bounds[1]);
                     model.min(me, v1, v2).post();
                     break;
                 case MAX:
                     bounds = VariableUtils.boundsForMaximum(v1, v2);
-                    me = model.intVar(StringUtils.randomName("max_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("max_exp_"), bounds[0], bounds[1]);
                     model.max(me, v1, v2).post();
                     break;
                 default:

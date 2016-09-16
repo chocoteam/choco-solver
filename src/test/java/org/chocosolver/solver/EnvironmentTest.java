@@ -46,7 +46,6 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
-import static org.chocosolver.util.tools.StringUtils.randomName;
 
 public class EnvironmentTest {
 
@@ -70,7 +69,7 @@ public class EnvironmentTest {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (i != j) {
-					IntVar k = model.intVar(randomName(), -20000, 20000, true);
+					IntVar k = model.intVar(model.generateName(), -20000, 20000, true);
 					model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
 					// just to create many variables
 					model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reify();

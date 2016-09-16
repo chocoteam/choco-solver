@@ -38,8 +38,6 @@ import org.chocosolver.util.ESat;
 
 import java.util.*;
 
-import static org.chocosolver.util.tools.StringUtils.randomName;
-
 /**
  * A Constraint is basically a set of <code>Propagator</code>.
  * It can either be posted or reified
@@ -223,8 +221,8 @@ public class Constraint {
      */
     public final BoolVar reify() {
         if (boolReif == null) {
-            Model s = propagators[0].getModel();
-            reifyWith(s.boolVar(randomName()));
+            Model model = propagators[0].getModel();
+            reifyWith(model.boolVar(model.generateName("REIF_")));
         }
         return boolReif;
     }

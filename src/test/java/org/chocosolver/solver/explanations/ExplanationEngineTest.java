@@ -54,7 +54,6 @@ import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
-import static org.chocosolver.util.tools.StringUtils.randomName;
 import static org.testng.Assert.*;
 
 /**
@@ -430,7 +429,7 @@ public class ExplanationEngineTest {
         int idx = 0;
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
-                IntVar k = model.intVar(randomName(), -n, n, false);
+                IntVar k = model.intVar(model.generateName(), -n, n, false);
                 model.arithm(k, "!=", 0).post();
                 model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
                 vectors[idx] = model.intOffsetView(k, 2 * n * (j - i));

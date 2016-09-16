@@ -116,6 +116,9 @@ public class Model implements IModel {
     /** Counter used to set ids to variables and propagators */
     private int id = 1;
 
+    /** Counter used to name variables created internally */
+    private int nameId = 1;
+
     /** A MiniSat instance, useful to deal with clauses*/
     protected SatConstraint minisat;
 
@@ -576,12 +579,21 @@ public class Model implements IModel {
     }
 
     /**
-     * Get a free id to idendity unically a new variable.
+     * Get a free single-use id to identify a new variable.
      * Should not be called by the user.
      * @return a free id to use
      */
     public int nextId() {
         return id++;
+    }
+
+    /**
+     * Get a free single-use name id to identify a variable created internally.
+     * Should not be called by the user.
+     * @return a free id to use
+     */
+    public int nextNameId() {
+        return nameId++;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -268,4 +268,12 @@ public interface Settings  {
         return false;
     }
 
+    /**
+     * Define the prefix of internally created variables (through a call to {@link Model#generateName()}
+     * @return the prefix of all internally created variables
+     */
+    default String defaultPrefix(){
+        return "TMP_";
+    }
+
 }

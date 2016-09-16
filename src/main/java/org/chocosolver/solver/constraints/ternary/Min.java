@@ -35,7 +35,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
 
 import static java.lang.Math.min;
-import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * X = MIN(Y,Z)
@@ -57,7 +56,7 @@ public class Min extends Constraint {
             return b;
         } else {
             Model model = a.getModel();
-            IntVar z = new IntervalIntVarImpl(randomName(),
+            IntVar z = new IntervalIntVarImpl(model.generateName("MIN_"),
                     min(a.getLB(), b.getLB()), min(a.getUB(), b.getUB()), model);
             model.min(z, a, b).post();
             return z;
