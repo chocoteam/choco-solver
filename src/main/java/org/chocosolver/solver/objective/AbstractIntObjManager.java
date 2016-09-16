@@ -42,107 +42,103 @@ import org.chocosolver.solver.variables.events.IEventType;
 abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
 
     public AbstractIntObjManager(AbstractObjManager<IntVar> objman) {
-	super(objman);
+        super(objman);
     }
 
     public AbstractIntObjManager(IntVar objective, ResolutionPolicy policy, Number precision) {
-	super(objective, policy, precision);
-	bestProvedLB = Integer.valueOf(objective.getLB() - 1);
-	bestProvedUB = Integer.valueOf(objective.getUB() + 1);
+        super(objective, policy, precision);
+        bestProvedLB = objective.getLB() - 1;
+        bestProvedUB = objective.getUB() + 1;
     }
 
     @Override
     public synchronized void updateBestLB(Number lb) {
-	//TODO CPRU how is it possible ? the variable is initialized in the ctor ?
-	//	if (bestProvedLB == null) {
-	//            // this may happen with multi-thread resolution
-	//            // when one thread find a model before one other is being launched
-	//            bestProvedLB = lb;
-	//        }
-	if (bestProvedLB.intValue() < lb.intValue()) {
-	    bestProvedLB = lb;
-	}
+        if (bestProvedLB.intValue() < lb.intValue()) {
+            bestProvedLB = lb;
+        }
     }
 
     @Override
     public synchronized void updateBestUB(Number ub) {
-	if (bestProvedUB.intValue() > ub.intValue()) {
-	    bestProvedUB = ub;
-	}
+        if (bestProvedUB.intValue() > ub.intValue()) {
+            bestProvedUB = ub;
+        }
     }
 
     @Override
     public void updateBestSolution() {
-	assert objective.isInstantiated();
-	updateBestSolution(objective.getValue());
+        assert objective.isInstantiated();
+        updateBestSolution(objective.getValue());
     }
 
     @Override
     public void setStrictDynamicCut() {
-	cutComputer = (Number n) -> Integer.valueOf(n.intValue() + precision.intValue());
+        cutComputer = (Number n) -> n.intValue() + precision.intValue();
     }
-    
+
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        return isOptimization() && ruleStore.addBoundsRule((IntVar) objective);
+        return isOptimization() && ruleStore.addBoundsRule(objective);
     }
-    
+
     @Override
     public String toString() {
-	return String.format("%s %s = %d", policy, objective == null ? "?" : this.objective.getName(), getBestSolutionValue().intValue());
+        return String.format("%s %s = %d", policy, objective == null ? "?" : this.objective.getName(), getBestSolutionValue().intValue());
     }
 
 }
 
 class MinIntObjManager extends AbstractIntObjManager {
 
+    @SuppressWarnings("unused") // use for copy by introspection
     public MinIntObjManager(AbstractObjManager<IntVar> objman) {
-	super(objman);
+        super(objman);
     }
 
     public MinIntObjManager(IntVar objective) {
-	super(objective, ResolutionPolicy.MINIMIZE, -1);
+        super(objective, ResolutionPolicy.MINIMIZE, -1);
     }
 
     @Override
     public void updateBestSolution(Number n) {
-	updateBestUB(n);
+        updateBestUB(n);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-	objective.updateBounds(bestProvedLB.intValue(), cutComputer.apply(bestProvedUB).intValue(), this);
+        objective.updateBounds(bestProvedLB.intValue(), cutComputer.apply(bestProvedUB).intValue(), this);
     }
 
     @Override
     public Number getBestSolutionValue() {
-	return bestProvedUB;
+        return bestProvedUB;
     }
 
 }
 
 class MaxIntObjManager extends AbstractIntObjManager {
 
+    @SuppressWarnings("unused") // use for copy by introspection
     public MaxIntObjManager(AbstractObjManager<IntVar> objman) {
-	super(objman);
+        super(objman);
     }
 
     public MaxIntObjManager(IntVar objective) {
-	super(objective, ResolutionPolicy.MAXIMIZE, 1);
+        super(objective, ResolutionPolicy.MAXIMIZE, 1);
     }
 
     @Override
     public void updateBestSolution(Number n) {
-	updateBestLB(n);
+        updateBestLB(n);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-	objective.updateBounds(cutComputer.apply(bestProvedLB).intValue(), bestProvedUB.intValue(), this);
+        objective.updateBounds(cutComputer.apply(bestProvedLB).intValue(), bestProvedUB.intValue(), this);
     }
 
     @Override
     public Number getBestSolutionValue() {
-	return bestProvedLB;
+        return bestProvedLB;
     }
 }

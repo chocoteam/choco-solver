@@ -33,9 +33,8 @@ import org.chocosolver.solver.ResolutionPolicy;
 
 /**
  * interface to monitor bounds.
- * 
- * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  *
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  */
 public interface IBoundsManager {
 
@@ -48,7 +47,7 @@ public interface IBoundsManager {
      * @return true iff the problem is an optimization problem
      */
     default boolean isOptimization() {
-	return true;
+        return true;
     }
 
     /**
@@ -65,7 +64,7 @@ public interface IBoundsManager {
      * States that lb is a global lower bound on the problem
      *
      * @param lb lower bound
-     */   
+     */
     void updateBestLB(Number lb);
 
     /**
@@ -78,5 +77,5 @@ public interface IBoundsManager {
     /**
      * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
      */
-    Number getBestSolutionValue();   
+    Number getBestSolutionValue();
 }

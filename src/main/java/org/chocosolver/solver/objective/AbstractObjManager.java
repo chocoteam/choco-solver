@@ -29,14 +29,14 @@
  */
 package org.chocosolver.solver.objective;
 
-import java.util.Objects;
-import java.util.function.Function;
-
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.variables.Variable;
 
+import java.util.Objects;
+import java.util.function.Function;
+
 /**
- * 
+ * This class defines common methods to COP based on maximization or minimization of integer or real variable
  * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  *
  */
@@ -44,7 +44,7 @@ abstract class AbstractObjManager<V extends Variable> implements IObjectiveManag
 
     /** The variable to optimize **/
     protected final V objective;
-    
+
     /** Define how should the objective be optimize */
     protected final ResolutionPolicy policy;
 
@@ -59,30 +59,30 @@ abstract class AbstractObjManager<V extends Variable> implements IObjectiveManag
 
     /** Define how the cut should be update when posting the cut **/
     protected Function<Number, Number> cutComputer = n -> n; // walking cut by default
-    
+
     public AbstractObjManager(AbstractObjManager<V> objman) {
-	objective = objman.objective;
-	policy = objman.policy;
-	precision = objman.precision;
-	bestProvedLB = objman.bestProvedLB;
-	bestProvedUB = objman.bestProvedUB;
-	cutComputer = objman.cutComputer;
+        objective = objman.objective;
+        policy = objman.policy;
+        precision = objman.precision;
+        bestProvedLB = objman.bestProvedLB;
+        bestProvedUB = objman.bestProvedUB;
+        cutComputer = objman.cutComputer;
     }
 
-    
+
     public AbstractObjManager(V objective, ResolutionPolicy policy, Number precision) {
-	super();
-	Objects.nonNull(objective);
-	this.objective = objective;
-	Objects.nonNull(policy);
-	this.policy = policy;
-	Objects.nonNull(precision);	
-	this.precision = precision;
-  }
+        super();
+        Objects.nonNull(objective);
+        this.objective = objective;
+        Objects.nonNull(policy);
+        this.policy = policy;
+        Objects.nonNull(precision);
+        this.precision = precision;
+    }
 
     @Override
     public final V getObjective() {
-	return objective;
+        return objective;
     }
 
     @Override
@@ -92,23 +92,23 @@ abstract class AbstractObjManager<V extends Variable> implements IObjectiveManag
 
     @Override
     public final Number getBestLB() {
-	return bestProvedLB;
+        return bestProvedLB;
     }
 
     @Override
     public final Number getBestUB() {
-	return bestProvedUB;
+        return bestProvedUB;
     }
 
     @Override
     public final void setCutComputer(Function<Number, Number> cutComputer) {
-	this.cutComputer = cutComputer;
+        this.cutComputer = cutComputer;
     }
 
     @Override
     public final void setWalkingDynamicCut() {
-	cutComputer = (obj) -> obj;
+        cutComputer = (obj) -> obj;
     }
 
-   
+
 }

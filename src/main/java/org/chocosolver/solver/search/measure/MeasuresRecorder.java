@@ -1,21 +1,21 @@
 /**
  * Copyright (c) 2016, Ecole des Mines de Nantes
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the <organization>.
+ * must display the following acknowledgement:
+ * This product includes software developed by the <organization>.
  * 4. Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,11 +29,11 @@
  */
 package org.chocosolver.solver.search.measure;
 
-import java.util.Objects;
-import java.util.function.LongSupplier;
-
 import org.chocosolver.solver.objective.IBoundsManager;
 import org.chocosolver.solver.search.SearchState;
+
+import java.util.Objects;
+import java.util.function.LongSupplier;
 
 /**
  * Object which stores resolution information to get statistics
@@ -97,12 +97,11 @@ public final class MeasuresRecorder extends Measures {
      * Reset every measure to its default value (mostly 0)
      */
     public void reset() {
-        // TODO state = SearchState.NEW; // CPRU ?
+        state = SearchState.NEW;
         objectiveOptimal = false;
         solutionCount = 0;
         timeCount = 0;
-        // TODO readingTimeCount = 0; //CPRU ?
-        // TODO stopWatch() //CPRU
+        stopStopwatch();
         nodeCount = 0;
         backtrackCount = 0;
         failCount = 0;

@@ -29,17 +29,17 @@
  */
 package org.chocosolver.solver.objective;
 
-import java.util.function.Function;
-
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
+
+import java.util.function.Function;
+
 /**
  * interface to monitor the bounds of the objective variable.
- * 
- * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
- * 
+ *
  * @param <V> type of objective variable
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  */
 public interface IObjectiveManager<V extends Variable> extends IBoundsManager, ICause {
 
@@ -52,14 +52,14 @@ public interface IObjectiveManager<V extends Variable> extends IBoundsManager, I
      * Informs the manager that a new solution has been found
      */
     void updateBestSolution(Number n);
-    
+
     /**
      * Informs the manager that a new solution has been found
      */
     void updateBestSolution();
-    
+
     /**
-     * Set a user-defined cut computer to avoid "worse" solutions 
+     * Set a user-defined cut computer to avoid "worse" solutions
      */
     void setCutComputer(Function<Number, Number> cutComputer);
 
@@ -68,13 +68,13 @@ public interface IObjectiveManager<V extends Variable> extends IBoundsManager, I
      * the best solution found so far when maximizing (resp. minimizing) a problem.
      */
     void setStrictDynamicCut();
-    
+
     /**
      * Define a <i>walking</i> cut computer where in the next solution to find should be greater than (resp. less than)
      * or equal to the best solution found so far when maximizing (resp. minimizing) a problem.
      */
     void setWalkingDynamicCut();
-    
+
     /**
      * Prevent the model from computing worse quality solutions
      *

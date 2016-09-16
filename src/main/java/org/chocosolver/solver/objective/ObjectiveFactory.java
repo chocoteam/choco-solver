@@ -29,22 +29,20 @@
  */
 package org.chocosolver.solver.objective;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.function.Function;
-
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.Function;
+
 /**
- * 
  * Factory to create (mono-)objective managers.
- *  
- * @author Arnaud Malapert
  *
+ * @author Arnaud Malapert
  */
 public final class ObjectiveFactory {
 
@@ -55,9 +53,8 @@ public final class ObjectiveFactory {
 
     /**
      * Define a manager for satisfaction problems.
-     * 
+     *
      * @return a singleton object
-     * 
      */
     public static IObjectiveManager<Variable> SAT() {
         return SATManager.SINGLETON;
@@ -66,20 +63,23 @@ public final class ObjectiveFactory {
     /**
      * Define the variable to optimize (maximize or minimize)
      * By default, the manager uses {@link IObjectiveManager#setStrictDynamicCut()} to avoid exploring worse solutions.
-     * 
+     *
      * @param objective variable to optimize
-     * @param policy {{@link ResolutionPolicy#MINIMIZE}/{@link ResolutionPolicy#MAXIMIZE}
+     * @param policy    {{@link ResolutionPolicy#MINIMIZE}/{@link ResolutionPolicy#MAXIMIZE}
      * @return the objective manager
-     * 
-     * @throws IllegalArgumentException if the policy is {@link ResolutionPolicy#SAT}.
+     * @throws IllegalArgumentException if the policy is {@link ResolutionPolicy#SATISFACTION}.
      */
     public static IObjectiveManager<IntVar> makeObjectiveManager(IntVar objective, ResolutionPolicy policy) {
         IObjectiveManager<IntVar> objman;
         switch (policy) {
-        case MINIMIZE: objman = new MinIntObjManager(objective);break;
-        case MAXIMIZE: objman = new MaxIntObjManager(objective);break;
-        default:
-            throw new IllegalArgumentException("cant build integer objective manager :" + policy);
+            case MINIMIZE:
+                objman = new MinIntObjManager(objective);
+                break;
+            case MAXIMIZE:
+                objman = new MaxIntObjManager(objective);
+                break;
+            default:
+                throw new IllegalArgumentException("cant build integer objective manager :" + policy);
         }
         objman.setStrictDynamicCut();
         return objman;
@@ -88,20 +88,23 @@ public final class ObjectiveFactory {
     /**
      * Define the variable to optimize (maximize or minimize)
      * By default, the manager uses {@link IObjectiveManager#setStrictDynamicCut()} to avoid exploring worse solutions.
-     * 
+     *
      * @param objective variable to optimize
-     * @param policy {{@link ResolutionPolicy#MINIMIZE}/{@link ResolutionPolicy#MAXIMIZE}
+     * @param policy    {{@link ResolutionPolicy#MINIMIZE}/{@link ResolutionPolicy#MAXIMIZE}
      * @return the objective manager
-     * 
-     * @throws IllegalArgumentException if the policy is {@link ResolutionPolicy#SAT}.
+     * @throws IllegalArgumentException if the policy is {@link ResolutionPolicy#SATISFACTION}.
      */
     public static IObjectiveManager<RealVar> makeObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision) {
         IObjectiveManager<RealVar> objman;
         switch (policy) {
-        case MINIMIZE: objman = new MinRealObjManager(objective, precision);break;
-        case MAXIMIZE: objman = new MaxRealObjManager(objective, precision);break;
-        default:
-            throw new IllegalArgumentException("cant build real objective manager :" + policy);
+            case MINIMIZE:
+                objman = new MinRealObjManager(objective, precision);
+                break;
+            case MAXIMIZE:
+                objman = new MaxRealObjManager(objective, precision);
+                break;
+            default:
+                throw new IllegalArgumentException("cant build real objective manager :" + policy);
         }
         objman.setStrictDynamicCut();
         return objman;
@@ -111,7 +114,8 @@ public final class ObjectiveFactory {
      * @param object to copy
      * @return copy built by a copy constructor if one exists, otherwise the parameter.
      */
-    public static <V>  V copy(V object) {
+    @SuppressWarnings("unchecked")
+    public static <V> V copy(V object) {
         try {
             Class c = object.getClass();
             // Use the "copy constructor":
@@ -124,6 +128,9 @@ public final class ObjectiveFactory {
     }
 }
 
+/**
+ * A class for CSP (in opposition to COP) which matches {@link IObjectiveManager} requisites.
+ */
 final class SATManager implements IObjectiveManager<Variable> {
 
     public final static SATManager SINGLETON = new SATManager();
@@ -144,12 +151,12 @@ final class SATManager implements IObjectiveManager<Variable> {
 
     @Override
     public Number getBestLB() {
-        return null;
+        throw new UnsupportedOperationException("There is no objective bounds in satisfaction problems");
     }
 
     @Override
     public Number getBestUB() {
-        return null;
+        throw new UnsupportedOperationException("There is no objective bounds in satisfaction problems");
     }
 
     @Override
@@ -206,6 +213,6 @@ final class SATManager implements IObjectiveManager<Variable> {
     @Override
     public String toString() {
         return "SAT";
-    }  
+    }
 
 }

@@ -35,47 +35,45 @@ import org.chocosolver.solver.variables.RealVar;
 
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
- * 
- * @param <V> type of objective variable
  */
 abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
-    
+
     public AbstractRealObjManager(AbstractObjManager<RealVar> objman) {
-	super(objman);
+        super(objman);
     }
 
     public AbstractRealObjManager(RealVar objective, ResolutionPolicy policy, Number precision) {
-	super(objective, policy, precision);
-	double prec = Math.abs(precision.doubleValue());
-	bestProvedLB = Double.valueOf(objective.getLB() - prec);
-	bestProvedUB = Double.valueOf(objective.getUB() + prec);
+        super(objective, policy, precision);
+        double prec = Math.abs(precision.doubleValue());
+        bestProvedLB = objective.getLB() - prec;
+        bestProvedUB = objective.getUB() + prec;
     }
 
     @Override
     public synchronized void updateBestLB(Number lb) {
-	if (bestProvedLB.doubleValue() < lb.doubleValue()) {
-	    bestProvedLB = lb;
-	}
+        if (bestProvedLB.doubleValue() < lb.doubleValue()) {
+            bestProvedLB = lb;
+        }
     }
 
     @Override
     public synchronized void updateBestUB(Number ub) {
-	if (bestProvedUB.doubleValue() > ub.doubleValue()) {
-	    bestProvedUB = ub;
-	}
+        if (bestProvedUB.doubleValue() > ub.doubleValue()) {
+            bestProvedUB = ub;
+        }
     }
 
     @Override
     public void updateBestSolution() {
-	assert objective.isInstantiated();
-	updateBestSolution(objective.getUB());
+        assert objective.isInstantiated();
+        updateBestSolution(objective.getUB());
     }
 
     @Override
     public void setStrictDynamicCut() {
-	cutComputer = (Number n) -> Double.valueOf(n.doubleValue() + precision.doubleValue());
+        cutComputer = (Number n) -> n.doubleValue() + precision.doubleValue();
     }
-    
+
     private final int getNbDecimals() {
         int dec = 0;
         double p = precision.doubleValue();
@@ -85,62 +83,64 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
         }
         return dec;
     }
-    
+
     @Override
     public String toString() {
-	return String.format("%s %s = %."+getNbDecimals()+"f", policy, objective == null ? "?" : this.objective.getName(), getBestSolutionValue().doubleValue());
+        return String.format("%s %s = %." + getNbDecimals() + "f", policy, objective == null ? "?" : this.objective.getName(), getBestSolutionValue().doubleValue());
     }
 }
 
 class MinRealObjManager extends AbstractRealObjManager {
 
+    @SuppressWarnings("unused") // use for copy by introspection
     public MinRealObjManager(AbstractObjManager<RealVar> objman) {
-	super(objman);
+        super(objman);
     }
 
     public MinRealObjManager(RealVar objective, double precision) {
-	super(objective, ResolutionPolicy.MINIMIZE, -precision);
+        super(objective, ResolutionPolicy.MINIMIZE, -precision);
     }
 
     @Override
     public void updateBestSolution(Number n) {
-	updateBestUB(n);
+        updateBestUB(n);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-	objective.updateBounds(bestProvedLB.doubleValue(), cutComputer.apply(bestProvedUB).doubleValue(), this);
+        objective.updateBounds(bestProvedLB.doubleValue(), cutComputer.apply(bestProvedUB).doubleValue(), this);
     }
 
     @Override
     public Number getBestSolutionValue() {
-	return bestProvedUB;
+        return bestProvedUB;
     }
 
 }
 
 class MaxRealObjManager extends AbstractRealObjManager {
 
+    @SuppressWarnings("unused") // use for copy by introspection
     public MaxRealObjManager(AbstractObjManager<RealVar> objman) {
-	super(objman);
+        super(objman);
     }
 
     public MaxRealObjManager(RealVar objective, double precision) {
-	super(objective, ResolutionPolicy.MAXIMIZE, precision);
+        super(objective, ResolutionPolicy.MAXIMIZE, precision);
     }
 
     @Override
     public void updateBestSolution(Number n) {
-	updateBestLB(n);
+        updateBestLB(n);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-	objective.updateBounds(cutComputer.apply(bestProvedLB).doubleValue(), bestProvedUB.doubleValue(), this);
+        objective.updateBounds(cutComputer.apply(bestProvedLB).doubleValue(), bestProvedUB.doubleValue(), this);
     }
 
     @Override
     public Number getBestSolutionValue() {
-	return bestProvedLB;
+        return bestProvedLB;
     }
 }

@@ -29,20 +29,6 @@
  */
 package org.chocosolver.solver;
 
-import static org.chocosolver.solver.Solver.Action.extend;
-import static org.chocosolver.solver.Solver.Action.initialize;
-import static org.chocosolver.solver.Solver.Action.propagate;
-import static org.chocosolver.solver.Solver.Action.repair;
-import static org.chocosolver.solver.Solver.Action.validate;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -76,6 +62,14 @@ import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.chocosolver.solver.Solver.Action.*;
+import static org.chocosolver.util.ESat.*;
 
 /**
  * This class is inspired from :
@@ -429,11 +423,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             getMeasures().incFailCount();
             stop = true;
         }
-        for (Criterion c : criteria) {
-            if (c instanceof ICounter) {
-                ((ICounter) c).init();
-            }
-        }
+        criteria.stream().filter(c -> c instanceof ICounter).forEach(c -> ((ICounter) c).init());
     }
 
     /**
@@ -607,6 +597,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * @return <tt>true</tt> if the search loops ends unexpectedly (externally killed, for instance).
      */
+    @SuppressWarnings("unused")
     public boolean hasEndedUnexpectedly() {
         return mMeasures.getSearchState() == SearchState.KILLED;
     }

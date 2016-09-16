@@ -140,7 +140,7 @@ public class Measures implements IMeasures, Cloneable {
         objectiveOptimal = measures.isObjectiveOptimal();
         solutionCount = measures.getSolutionCount();
         timeCount = measures.getTimeCountInNanoSeconds();
-        readingTimeCount = (long) (measures.getReadingTimeCount() * Measures.IN_SEC);
+        readingTimeCount = (long) (measures.getReadingTimeCount() * IN_SEC);
         nodeCount = measures.getNodeCount();
         backtrackCount = measures.getBackTrackCount();
         restartCount = measures.getRestartCount();
