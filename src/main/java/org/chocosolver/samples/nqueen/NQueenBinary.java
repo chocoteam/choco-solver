@@ -58,15 +58,14 @@ public class NQueenBinary extends AbstractNQueen {
                     vars[i].ne(vars[j].add(j - i)).post();
                 })
         );
-        model.getSolver().solve();
     }
 
 
 
     @Override
     public void configureSearch() {
-        model.getSolver().setSearch(minDomLBSearch(vars));
-//        SearchMonitorFactory.log(solver, true, false);
+    	model.getSolver().setSearch(minDomLBSearch(vars));
+        // model.getSolver().showSolutions();
     }
 
     public static void main(String[] args) {
