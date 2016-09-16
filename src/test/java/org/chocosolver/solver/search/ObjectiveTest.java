@@ -32,7 +32,6 @@ package org.chocosolver.solver.search;
 
 import static java.lang.Math.floorDiv;
 import static java.lang.System.nanoTime;
-import static org.chocosolver.solver.objective.ObjectiveManager.walkingIntVarCutComputer;
 import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
@@ -42,6 +41,7 @@ import static org.chocosolver.util.ESat.UNDEFINED;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.util.Random;
@@ -53,7 +53,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
-import org.chocosolver.solver.objective.ObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
@@ -236,7 +235,7 @@ public class ObjectiveTest {
 //        System.out.println(b1 + " " + b2);
         int bestvalue = b1.getValue();
         r.reset();
-        r.setObjectiveManager(ObjectiveManager.SAT());
+        r.setObjectiveManager(ObjectiveFactory.SAT());
         model.arithm(b1, "=", bestvalue).post();
         r.setSearch(inputOrderLBSearch(new BoolVar[]{b1, b2}));
         int count = 0;
@@ -267,8 +266,8 @@ public class ObjectiveTest {
         IntVar objective = (IntVar) model.getHook("objective");
         final int[] ends = {5, 2, 1};
         model.setObjective(Model.MINIMIZE, objective);
-        ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
-        oman.setCutComputer(n -> n - 10);
+        IObjectiveManager<IntVar> oman = model.getSolver().getObjectiveManager();
+        oman.setCutComputer(n -> n.intValue() - 10);
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.getSolver().solve()) {
@@ -276,7 +275,7 @@ public class ObjectiveTest {
             }
             model.getSolver().reset();
             final int finalI = i;
-            oman.setCutComputer(n -> n - ends[finalI]);
+            oman.setCutComputer(n -> n.intValue() - ends[finalI]);
             oman.updateBestUB(best);
         }
         assertEquals(best, 34);
@@ -289,8 +288,8 @@ public class ObjectiveTest {
         IntVar objective = (IntVar) model.getHook("objective");
         final int[] ends = {10};
         model.setObjective(Model.MINIMIZE, objective);
-        ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
-        oman.setCutComputer(n -> n - ends[0]);
+        IObjectiveManager<IntVar> oman = model.getSolver().getObjectiveManager();
+        oman.setCutComputer(n -> n.intValue() - ends[0]);
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.getSolver().solve()) {
@@ -309,8 +308,8 @@ public class ObjectiveTest {
         Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
         model.setObjective(Model.MINIMIZE, objective);
-        ObjectiveManager<IntVar, Integer> oman = model.getSolver().getObjectiveManager();
-        oman.setCutComputer(walkingIntVarCutComputer());
+        IObjectiveManager<IntVar> oman = model.getSolver().getObjectiveManager();
+        oman.setWalkingDynamicCut();
         int best = objective.getUB();
         for (int i = 0; i < 4; i++) {
             while (model.getSolver().solve()) {
@@ -327,16 +326,18 @@ public class ObjectiveTest {
 	Model model = new Model();
 	IntVar iv = model.intVar(0, 10);
 	IObjectiveManager<IntVar> objman = ObjectiveFactory.makeObjectiveManager(iv, ResolutionPolicy.MAXIMIZE);
-	assertEquals(-1, objman.getBestLB());
-	assertEquals(11, objman.getBestUB());
-	assertEquals(-1, objman.getBestSolutionValue());
+	assertEquals(objman.getBestLB(), -1);
+	assertEquals(objman.getBestUB(), 11);
+	assertEquals(objman.getBestSolutionValue(), -1);
 	objman.updateBestSolution(5);
-	assertEquals(5, objman.getBestSolutionValue());
-
+	assertEquals(objman.getBestSolutionValue(), 5);
+	assertNotNull(objman.toString());
+	
 	IObjectiveManager<IntVar> objman2 = ObjectiveFactory.copy(objman);
-	assertEquals(5, objman2.getBestLB());
-	assertEquals(11, objman2.getBestUB());
-	assertEquals(5, objman2.getBestSolutionValue());
+	assertEquals(objman2.getBestLB(), 5);
+	assertEquals(objman2.getBestUB(), 11);
+	assertEquals(objman2.getBestSolutionValue(), 5);
+	
     }
     
     @Test(groups = "1s", timeOut = 60000)
@@ -345,16 +346,18 @@ public class ObjectiveTest {
 	final double p = model.getPrecision();
 	RealVar rv = model.realVar(0, 10, p);
 	IObjectiveManager<RealVar> objman = ObjectiveFactory.makeObjectiveManager(rv, ResolutionPolicy.MAXIMIZE, p);
-	assertEquals(0, objman.getBestLB().doubleValue(), p);
-	assertEquals(10, objman.getBestUB().doubleValue(), p);
-	assertEquals(0, objman.getBestSolutionValue().doubleValue(), p);
+	assertEquals(objman.getBestLB().doubleValue(), 0, p);
+	assertEquals(objman.getBestUB().doubleValue(), 10,  p);
+	assertEquals(objman.getBestSolutionValue().doubleValue(), 0, p);
 	objman.updateBestSolution(5);
-	assertEquals(5, objman.getBestSolutionValue().doubleValue(), p);
-
+	assertEquals(objman.getBestSolutionValue().doubleValue(), 5, p);
+	assertNotNull(objman.toString());
+	
 	IObjectiveManager<RealVar> objman2 = ObjectiveFactory.copy(objman);
-	assertEquals(5, objman2.getBestLB().doubleValue(), p);
-	assertEquals(10, objman2.getBestUB().doubleValue(), p);
-	assertEquals(5, objman2.getBestSolutionValue().doubleValue(), p);
+	assertEquals(objman2.getBestLB().doubleValue(), 5, p);
+	assertEquals(objman2.getBestUB().doubleValue(), 10, p);
+	assertEquals(objman2.getBestSolutionValue().doubleValue(), 5, p);
+	
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -362,16 +365,16 @@ public class ObjectiveTest {
 	Model model = new Model();
 	IntVar iv = model.intVar(0, 10);
 	IObjectiveManager<IntVar> objman = ObjectiveFactory.makeObjectiveManager(iv, ResolutionPolicy.MINIMIZE);
-	assertEquals(-1, objman.getBestLB());
-	assertEquals(11, objman.getBestUB());
-	assertEquals(11, objman.getBestSolutionValue());
+	assertEquals(objman.getBestLB(), -1);
+	assertEquals(objman.getBestUB(), 11);
+	assertEquals(objman.getBestSolutionValue(), 11);
 	objman.updateBestSolution(5);
-	assertEquals(5, objman.getBestSolutionValue());
+	assertEquals(objman.getBestSolutionValue(), 5);
 
 	IObjectiveManager<IntVar> objman2 = ObjectiveFactory.copy(objman);
-	assertEquals(-1, objman2.getBestLB());
-	assertEquals(5, objman2.getBestUB());
-	assertEquals(5, objman2.getBestSolutionValue());
+	assertEquals(objman2.getBestLB(), -1);
+	assertEquals(objman2.getBestUB(), 5);
+	assertEquals(objman2.getBestSolutionValue(), 5);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -380,16 +383,16 @@ public class ObjectiveTest {
 	final double p = model.getPrecision();
 	RealVar rv = model.realVar(0, 10, p);
 	IObjectiveManager<RealVar> objman = ObjectiveFactory.makeObjectiveManager(rv, ResolutionPolicy.MINIMIZE, p);
-	assertEquals(0, objman.getBestLB().doubleValue(), p);
-	assertEquals(10, objman.getBestUB().doubleValue(), p);
-	assertEquals(10, objman.getBestSolutionValue().doubleValue(), p);
+	assertEquals(objman.getBestLB().doubleValue(), 0, p);
+	assertEquals(objman.getBestUB().doubleValue(), 10, p);
+	assertEquals(objman.getBestSolutionValue().doubleValue(), 10, p);
 	objman.updateBestSolution(5);
-	assertEquals(5, objman.getBestSolutionValue().doubleValue(), p);
+	assertEquals(objman.getBestSolutionValue().doubleValue(), 5, p);
 
 	IObjectiveManager<RealVar> objman2 = ObjectiveFactory.copy(objman);
-	assertEquals(0, objman2.getBestLB().doubleValue(), p);
-	assertEquals(5, objman2.getBestUB().doubleValue(), p);
-	assertEquals(5, objman2.getBestSolutionValue().doubleValue(), p);
+	assertEquals(objman2.getBestLB().doubleValue(), 0, p);
+	assertEquals(objman2.getBestUB().doubleValue(), 5, p);
+	assertEquals(objman2.getBestSolutionValue().doubleValue(), 5, p);
     }
     
 
@@ -400,5 +403,6 @@ public class ObjectiveTest {
 	assertNull(objman.getBestLB());
 	assertNull(objman.getBestUB());
 	assertNull(objman.getBestSolutionValue());
+	assertNotNull(objman.toString());
     }
 }

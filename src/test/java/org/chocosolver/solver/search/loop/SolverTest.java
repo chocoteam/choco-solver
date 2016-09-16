@@ -176,6 +176,7 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setDFS();
         r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
+        r.showSolutions();
         while (model.getSolver().solve()) ;
         model.getSolver().printShortStatistics();
         assertEquals(model.getSolver().getSolutionCount(), 3);

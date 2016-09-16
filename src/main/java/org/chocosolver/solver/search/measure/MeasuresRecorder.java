@@ -29,11 +29,11 @@
  */
 package org.chocosolver.solver.search.measure;
 
-import org.chocosolver.solver.objective.BoundsManager;
-import org.chocosolver.solver.search.SearchState;
-
 import java.util.Objects;
 import java.util.function.LongSupplier;
+
+import org.chocosolver.solver.objective.IBoundsManager;
+import org.chocosolver.solver.search.SearchState;
 
 /**
  * Object which stores resolution information to get statistics
@@ -180,7 +180,7 @@ public final class MeasuresRecorder extends Measures {
      * Update the bounds managed
      * @param boundsManager new bound manager
      */
-    public final void setBoundsManager(BoundsManager<?> boundsManager) {
+    public final void setBoundsManager(IBoundsManager boundsManager) {
         Objects.requireNonNull(boundsManager);
         this.boundsManager = boundsManager;
     }

@@ -35,6 +35,11 @@ import java.util.function.Function;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.variables.Variable;
 
+/**
+ * 
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
+ *
+ */
 abstract class AbstractObjManager<V extends Variable> implements IObjectiveManager<V> {
 
     /** The variable to optimize **/

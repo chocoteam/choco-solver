@@ -38,9 +38,9 @@ import org.chocosolver.solver.variables.Variable;
 /**
  * interface to monitor the bounds of the objective variable.
  * 
- * @author Arnaud Malapert
- *
- * @param <V>
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
+ * 
+ * @param <V> type of objective variable
  */
 public interface IObjectiveManager<V extends Variable> extends IBoundsManager, ICause {
 

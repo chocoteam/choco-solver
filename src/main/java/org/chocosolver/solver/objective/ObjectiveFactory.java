@@ -42,6 +42,7 @@ import org.chocosolver.solver.variables.Variable;
 /**
  * 
  * Factory to create (mono-)objective managers.
+ *  
  * @author Arnaud Malapert
  *
  */
@@ -49,124 +50,162 @@ public final class ObjectiveFactory {
 
 
     private ObjectiveFactory() {
-	super();
-    }
-
-    public static IObjectiveManager<Variable> SAT() {
-	return SATManager.SINGLETON;
-    }
-
-    public static IObjectiveManager<IntVar> makeObjectiveManager(IntVar objective, ResolutionPolicy policy) {
-	switch (policy) {
-	case MINIMIZE: return new MinIntObjManager(objective);
-	case MAXIMIZE: return new MaxIntObjManager(objective);
-	default:
-	    throw new IllegalArgumentException("cant build integer objective manager :" + policy);
-	}
-    }
-
-    public static IObjectiveManager<RealVar> makeObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision) {
-	switch (policy) {
-	case MINIMIZE: return new MinRealObjManager(objective, precision);
-	case MAXIMIZE: return new MaxRealObjManager(objective, precision);
-	default:
-	    throw new IllegalArgumentException("cant build real objective manager :" + policy);
-	}
+        super();
     }
 
     /**
-     * @param objman to copy
+     * Define a manager for satisfaction problems.
+     * 
+     * @return a singleton object
+     * 
+     */
+    public static IObjectiveManager<Variable> SAT() {
+        return SATManager.SINGLETON;
+    }
+
+    /**
+     * Define the variable to optimize (maximize or minimize)
+     * By default, the manager uses {@link IObjectiveManager#setStrictDynamicCut()} to avoid exploring worse solutions.
+     * 
+     * @param objective variable to optimize
+     * @param policy {{@link ResolutionPolicy#MINIMIZE}/{@link ResolutionPolicy#MAXIMIZE}
+     * @return the objective manager
+     * 
+     * @throws IllegalArgumentException if the policy is {@link ResolutionPolicy#SAT}.
+     */
+    public static IObjectiveManager<IntVar> makeObjectiveManager(IntVar objective, ResolutionPolicy policy) {
+        IObjectiveManager<IntVar> objman;
+        switch (policy) {
+        case MINIMIZE: objman = new MinIntObjManager(objective);break;
+        case MAXIMIZE: objman = new MaxIntObjManager(objective);break;
+        default:
+            throw new IllegalArgumentException("cant build integer objective manager :" + policy);
+        }
+        objman.setStrictDynamicCut();
+        return objman;
+    }
+
+    /**
+     * Define the variable to optimize (maximize or minimize)
+     * By default, the manager uses {@link IObjectiveManager#setStrictDynamicCut()} to avoid exploring worse solutions.
+     * 
+     * @param objective variable to optimize
+     * @param policy {{@link ResolutionPolicy#MINIMIZE}/{@link ResolutionPolicy#MAXIMIZE}
+     * @return the objective manager
+     * 
+     * @throws IllegalArgumentException if the policy is {@link ResolutionPolicy#SAT}.
+     */
+    public static IObjectiveManager<RealVar> makeObjectiveManager(RealVar objective, ResolutionPolicy policy, double precision) {
+        IObjectiveManager<RealVar> objman;
+        switch (policy) {
+        case MINIMIZE: objman = new MinRealObjManager(objective, precision);break;
+        case MAXIMIZE: objman = new MaxRealObjManager(objective, precision);break;
+        default:
+            throw new IllegalArgumentException("cant build real objective manager :" + policy);
+        }
+        objman.setStrictDynamicCut();
+        return objman;
+    }
+
+    /**
+     * @param object to copy
      * @return copy built by a copy constructor if one exists, otherwise the parameter.
      */
-    public static <V extends Variable> IObjectiveManager<V> copy(IObjectiveManager<V> objman) {
-	try {
-	    Class c = objman.getClass();
-	    // Use the "copy constructor":
-	    Constructor ct = c.getConstructor(c);
-	    return (IObjectiveManager<V>) ct.newInstance(objman);
-	} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-	    // fails silently
-	}
-	return objman;
+    public static <V>  V copy(V object) {
+        try {
+            Class c = object.getClass();
+            // Use the "copy constructor":
+            Constructor ct = c.getConstructor(c);
+            return (V) ct.newInstance(object);
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            // fails silently
+        }
+        return object;
+    }
+}
+
+final class SATManager implements IObjectiveManager<Variable> {
+
+    public final static SATManager SINGLETON = new SATManager();
+
+    private SATManager() {
+        super();
     }
 
-    private static final class SATManager implements IObjectiveManager<Variable> {
-
-	public final static SATManager SINGLETON = new SATManager();
-
-	private SATManager() {
-	    super();
-	}
-
-	@Override
-	public ResolutionPolicy getPolicy() {
-	    return ResolutionPolicy.SATISFACTION;
-	}
-
-	@Override
-	public boolean isOptimization() {
-	    return false;
-	}
-
-	@Override
-	public Number getBestLB() {
-	    return null;
-	}
-
-	@Override
-	public Number getBestUB() {
-	    return null;
-	}
-
-	@Override
-	public void updateBestLB(Number lb) {
-	    throw new UnsupportedOperationException("not a mono-objective optimization problem");
-	}
-
-	@Override
-	public void updateBestUB(Number ub) {
-	    throw new UnsupportedOperationException("not a mono-objective optimization problem");
-	}
-
-	@Override
-	public Number getBestSolutionValue() {
-	    return null;
-	}
-
-	@Override
-	public Variable getObjective() {
-	    return null;
-	}
-
-	@Override
-	public void updateBestSolution(Number n) {
-	    throw new UnsupportedOperationException("not a mono-objective optimization problem");
-	}
-
-	@Override
-	public void updateBestSolution() {
-	    // nothing to do
-	}
-
-	@Override
-	public void setWalkingDynamicCut() {
-	    // nothing to do
-	}
-
-	@Override
-	public void setStrictDynamicCut() {
-	    // nothing to do
-	}
-
-	@Override
-	public void setCutComputer(Function<Number, Number> cutComputer) {
-	    // nothing to do
-	    
-	}
-
-	@Override
-	public void postDynamicCut() throws ContradictionException {
-	    // nothing to do
-	}  
+    @Override
+    public ResolutionPolicy getPolicy() {
+        return ResolutionPolicy.SATISFACTION;
     }
+
+    @Override
+    public boolean isOptimization() {
+        return false;
+    }
+
+    @Override
+    public Number getBestLB() {
+        return null;
+    }
+
+    @Override
+    public Number getBestUB() {
+        return null;
+    }
+
+    @Override
+    public void updateBestLB(Number lb) {
+        throw new UnsupportedOperationException("There is no objective bounds in satisfaction problems");
+    }
+
+    @Override
+    public void updateBestUB(Number ub) {
+        throw new UnsupportedOperationException("There is no objective bounds in satisfaction problems");
+    }
+
+    @Override
+    public Number getBestSolutionValue() {
+        throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
+    }
+
+    @Override
+    public Variable getObjective() {
+        return null;
+    }
+
+    @Override
+    public void updateBestSolution(Number n) {
+        throw new UnsupportedOperationException("not a mono-objective optimization problem");
+    }
+
+    @Override
+    public void updateBestSolution() {
+        // nothing to do
+    }
+
+    @Override
+    public void setWalkingDynamicCut() {
+        // nothing to do
+    }
+
+    @Override
+    public void setStrictDynamicCut() {
+        // nothing to do
+    }
+
+    @Override
+    public void setCutComputer(Function<Number, Number> cutComputer) {
+        // nothing to do
+
+    }
+
+    @Override
+    public void postDynamicCut() throws ContradictionException {
+        // nothing to do
+    }
+
+    @Override
+    public String toString() {
+        return "SAT";
+    }  
+
 }

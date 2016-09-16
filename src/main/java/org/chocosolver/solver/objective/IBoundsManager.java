@@ -34,7 +34,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 /**
  * interface to monitor bounds.
  * 
- * @author Arnaud Malapert
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  *
  */
 public interface IBoundsManager {

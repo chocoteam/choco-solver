@@ -29,7 +29,11 @@
  */
 package org.chocosolver.solver;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
@@ -42,16 +46,17 @@ import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.constraints.reification.ConDisConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * The <code>Model</code> is the header component of Constraint Programming.
@@ -63,6 +68,7 @@ import java.util.function.Function;
  * @author Xavier Lorca
  * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
+ * @author Arnaud Malapert
  * @version 0.01, june 2010
  * @see org.chocosolver.solver.variables.Variable
  * @see org.chocosolver.solver.constraints.Constraint
@@ -468,18 +474,24 @@ public class Model implements IModel {
      * @param objective variable to optimize
      */
     @SuppressWarnings("unchecked")
-    public <V extends Variable> void setObjective(boolean maximize, V objective) {
+    public void setObjective(boolean maximize, Variable objective) {
         if(objective == null){
             throw new SolverException("Cannot set objective to null");
         }else {
-			this.policy = maximize? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE;
+            this.policy = maximize? ResolutionPolicy.MAXIMIZE : ResolutionPolicy.MINIMIZE;
             this.objective = objective;
             if ((objective.getTypeAndKind() & Variable.KIND) == Variable.REAL) {
-                getSolver().setObjectiveManager(new ObjectiveManager<RealVar, Double>((RealVar) objective, policy, 0.00d,
-                        ObjectiveManager.strictRealVarCutComputer(policy, precision)));
+                getSolver().setObjectiveManager(
+                        ObjectiveFactory.makeObjectiveManager((RealVar) objective, policy, precision)
+                        );
+                //        	getSolver().setObjectiveManager(new ObjectiveManager<RealVar, Double>((RealVar) objective, policy, 0.00d,
+                //                        ObjectiveManager.strictRealVarCutComputer(policy, precision)));
             } else {
-                getSolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>((IntVar) objective, policy,
-                        ObjectiveManager.strictIntVarCutComputer(policy)));
+                getSolver().setObjectiveManager(
+                        ObjectiveFactory.makeObjectiveManager((IntVar) objective, policy)
+                        );
+                //		getSolver().setObjectiveManager(new ObjectiveManager<IntVar, Integer>((IntVar) objective, policy,
+                //			ObjectiveManager.strictIntVarCutComputer(policy)));
             }
         }
     }
@@ -490,7 +502,7 @@ public class Model implements IModel {
     public void clearObjective() {
         this.objective = null;
         this.policy = ResolutionPolicy.SATISFACTION;
-        getSolver().setObjectiveManager(ObjectiveManager.SAT());
+        getSolver().setObjectiveManager(ObjectiveFactory.SAT());
     }
 
     /**

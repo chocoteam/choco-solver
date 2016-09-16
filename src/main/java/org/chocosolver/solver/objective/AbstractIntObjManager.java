@@ -31,8 +31,14 @@ package org.chocosolver.solver.objective;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
 
+/**
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
+ *
+ */
 abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
 
     public AbstractIntObjManager(AbstractObjManager<IntVar> objman) {
@@ -46,7 +52,7 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
     }
 
     @Override
-    public void updateBestLB(Number lb) {
+    public synchronized void updateBestLB(Number lb) {
 	//TODO CPRU how is it possible ? the variable is initialized in the ctor ?
 	//	if (bestProvedLB == null) {
 	//            // this may happen with multi-thread resolution
@@ -59,7 +65,7 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
     }
 
     @Override
-    public void updateBestUB(Number ub) {
+    public synchronized void updateBestUB(Number ub) {
 	if (bestProvedUB.intValue() > ub.intValue()) {
 	    bestProvedUB = ub;
 	}
@@ -74,6 +80,16 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
     @Override
     public void setStrictDynamicCut() {
 	cutComputer = (Number n) -> Integer.valueOf(n.intValue() + precision.intValue());
+    }
+    
+    @Override
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        return isOptimization() && ruleStore.addBoundsRule((IntVar) objective);
+    }
+    
+    @Override
+    public String toString() {
+	return String.format("%s %s = %d", policy, objective == null ? "?" : this.objective.getName(), getBestSolutionValue().intValue());
     }
 
 }

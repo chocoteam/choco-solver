@@ -33,6 +33,11 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.RealVar;
 
+/**
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
+ * 
+ * @param <V> type of objective variable
+ */
 abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
     
     public AbstractRealObjManager(AbstractObjManager<RealVar> objman) {
@@ -47,14 +52,14 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
     }
 
     @Override
-    public void updateBestLB(Number lb) {
+    public synchronized void updateBestLB(Number lb) {
 	if (bestProvedLB.doubleValue() < lb.doubleValue()) {
 	    bestProvedLB = lb;
 	}
     }
 
     @Override
-    public void updateBestUB(Number ub) {
+    public synchronized void updateBestUB(Number ub) {
 	if (bestProvedUB.doubleValue() > ub.doubleValue()) {
 	    bestProvedUB = ub;
 	}
@@ -70,7 +75,21 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
     public void setStrictDynamicCut() {
 	cutComputer = (Number n) -> Double.valueOf(n.doubleValue() + precision.doubleValue());
     }
-
+    
+    private final int getNbDecimals() {
+        int dec = 0;
+        double p = precision.doubleValue();
+        while ((int) p <= 0 && dec <= 12) {
+            dec++;
+            p *= 10;
+        }
+        return dec;
+    }
+    
+    @Override
+    public String toString() {
+	return String.format("%s %s = %."+getNbDecimals()+"f", policy, objective == null ? "?" : this.objective.getName(), getBestSolutionValue().doubleValue());
+    }
 }
 
 class MinRealObjManager extends AbstractRealObjManager {
