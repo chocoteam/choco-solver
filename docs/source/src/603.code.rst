@@ -62,7 +62,7 @@ So there is a need of an initial state from which (through an outgoing  transiti
 And at least one final state to which (through an ingoing transition) the last character of the word will be provided.
 
 We note :math:`s_i` the initial state.
-The first character can either be a `0` or a `1`, there will be two transitions outgoing from :math:`s_i`.
+The first character can either be a 0 or a 1, there will be two transitions outgoing from :math:`s_i`.
 Then, transition from :math:`s_i` producing `0` will go to :math:`i_0` (first transition).
 And transition from :math:`s_i` producing `1` will go to :math:`i_1` (second transition).
 :math:`i_0` points to itself providing `0`s (third transition).
@@ -182,9 +182,6 @@ The entire code
             System.out.printf("\n");
         }
     }
-
-
-As
 
 Things to remember
 ==================

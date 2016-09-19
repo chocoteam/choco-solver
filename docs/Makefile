@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = build
-HTMLBUILDDIR  = /Volumes/htdocs/tuto
+HTMLBUILDDIR  = ../../gh-pages/tutos/
 #HTMLBUILDDIR  = $(BUILDDIR)/html
 
 # User-friendly check for sphinx-build
