@@ -37,12 +37,10 @@ import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -212,9 +210,7 @@ public class Datas {
             solution = new Solution(model, allOutPutVars());
         }
         solution.record();
-        if (printAll) {
-            printSolution();
-        }
+        printSolution();
         if (printStat) {
             // TODO used to use the toOneShortLineString that has been removed
             System.out.printf("%% %s \n", model.getSolver().getMeasures().toOneLineString());
@@ -237,13 +233,12 @@ public class Datas {
         // TODO there used to be "isComplete" (e.g. in case LNS stops)
         boolean complete = !solver.isStopCriterionMet() && !solver.hasEndedUnexpectedly();
         if(nbSolution>0){
-            if(!printAll)//already printed
-                printSolution();
-            if(complete){
+            if(complete && (printAll || solver.getObjectiveManager().isOptimization())) {
                 System.out.printf("==========\n");
-            }else if (solver.getObjectiveManager().isOptimization()) {
-                System.out.printf("=====UNBOUNDED=====\n");
             }
+//            if (solver.getObjectiveManager().isOptimization()&& !complete) {
+//                System.out.printf("=====UNBOUNDED=====\n");
+//            }
         }else{
             if(complete){
                 System.out.printf("=====UNSATISFIABLE=====\n");
