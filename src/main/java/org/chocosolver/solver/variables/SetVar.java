@@ -88,9 +88,9 @@ public interface SetVar extends Variable {
 	IntVar getCard();
 	
 	/**
-         * @return true if a variable is constrained to this set's cardinality, false otherwise
-         */
-        public boolean hasCard();
+	 * @return true if a variable is constrained to this set's cardinality, false otherwise
+	 */
+	boolean hasCard();
         
 	/**
 	 * ensure a variable is equal to the cardinality of this set.

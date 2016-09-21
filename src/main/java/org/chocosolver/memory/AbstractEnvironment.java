@@ -94,7 +94,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
         }
     }
 
-    public final void createSharedBipartiteSet(int size) {
+    private void createSharedBipartiteSet(int size) {
         booleanSet = new BasicIndexedBipartiteSet(this, size);
     }
 

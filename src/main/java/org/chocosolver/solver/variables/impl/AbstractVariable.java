@@ -60,37 +60,37 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Message associated with last value removals exception.
      */
-    public static final String MSG_REMOVE = "remove last value";
+    protected static final String MSG_REMOVE = "remove last value";
 
     /**
      * Message associated with domain wipe out exception.
      */
-    public static final String MSG_EMPTY = "empty domain";
+    protected static final String MSG_EMPTY = "empty domain";
 
     /**
      * Message associated with double instantiation exception.
      */
-    public static final String MSG_INST = "already instantiated";
+    protected static final String MSG_INST = "already instantiated";
 
     /**
      * Default exception message.
      */
-    public static final String MSG_UNKNOWN = "unknown value";
+    protected static final String MSG_UNKNOWN = "unknown value";
 
     /**
      * Message associated with wrong upper bound exception.
      */
-    public static final String MSG_UPP = "new lower bound is greater than upper bound";
+    protected static final String MSG_UPP = "new lower bound is greater than upper bound";
 
     /**
      * Message associated with wrong lower bound exception.
      */
-    public static final String MSG_LOW = "new upper bound is lesser than lower bound";
+    protected static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
     /**
      * Message associated with wrong bounds exception.
      */
-    public static final String MSG_BOUND = "new bounds are incorrect";
+    protected static final String MSG_BOUND = "new bounds are incorrect";
 
     /**
      * Unique ID of this variable.

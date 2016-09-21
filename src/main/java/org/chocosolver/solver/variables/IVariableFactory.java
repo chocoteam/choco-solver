@@ -473,8 +473,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant RealVar of domain [<i>value</i>,<i>value</i>]
      */
     default RealVar realVar(String name, double value) {
-        RealVar cste = new FixedRealVarImpl(name, value, _me());
-        return cste;
+        return new FixedRealVarImpl(name, value, _me());
     }
 
     /**

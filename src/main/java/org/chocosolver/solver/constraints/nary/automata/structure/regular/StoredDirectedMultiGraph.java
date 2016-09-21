@@ -151,7 +151,7 @@ public class StoredDirectedMultiGraph {
 		return sup != null && !sup.isEmpty();
 	}
 
-	public void clearSupports(int idxVar, int val, Propagator p) throws ContradictionException {
+	public void clearSupports(int idxVar, int val, Propagator<IntVar> p) throws ContradictionException {
 		clearSupports(getSupport(idxVar, val), p);
 	}
 
@@ -226,7 +226,7 @@ public class StoredDirectedMultiGraph {
 		}
 	}
 
-	private void clearSupports(StoredIndexedBipartiteSet supports, Propagator p) throws ContradictionException {
+	private void clearSupports(StoredIndexedBipartiteSet supports, Propagator<IntVar> p) throws ContradictionException {
 		if (supports != null) {
 			DisposableIntIterator it = supports.getIterator();
 			while (it.hasNext()) {
