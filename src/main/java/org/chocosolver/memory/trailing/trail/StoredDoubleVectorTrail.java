@@ -45,6 +45,10 @@ public class StoredDoubleVectorTrail implements IStorage {
 
     private final EnvironmentTrailing environment;
 
+    /**
+     * Load factor
+     */
+    private final double loadfactor;
 
     /**
      * All the stored search vectors.
@@ -86,26 +90,24 @@ public class StoredDoubleVectorTrail implements IStorage {
 
     private int[] worldStartLevels;
 
-    /**
-     * capacity of the trailing stack (in terms of number of updates that can be stored)
-     */
-    private int maxUpdates = 0;
-
 
     /**
      * Constructs a trail for the specified environment with the
      * specified numbers of updates and worlds.
+     * @param nUpdates maximal number of updates that will be stored
+     * @param nWorlds  maximal number of worlds that will be stored
+     * @param loadfactor load factor for structures
      */
 
-    public StoredDoubleVectorTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
+    public StoredDoubleVectorTrail(EnvironmentTrailing env, int nUpdates, int nWorlds, double loadfactor) {
         this.environment = env;
         this.currentLevel = 0;
-        maxUpdates = nUpdates;
         this.vectorStack = new StoredDoubleVector[nUpdates];
         this.indexStack = new int[nUpdates];
         this.valueStack = new double[nUpdates];
         this.stampStack = new int[nUpdates];
         this.worldStartLevels = new int[nWorlds];
+        this.loadfactor = loadfactor;
     }
 
 
@@ -119,13 +121,13 @@ public class StoredDoubleVectorTrail implements IStorage {
         this.stampStack[currentLevel] = oldStamp;
         this.valueStack[currentLevel] = oldValue;
         currentLevel++;
-        if (currentLevel == maxUpdates) {
+        if (currentLevel == vectorStack.length) {
             resizeUpdateCapacity();
         }
     }
 
     private void resizeUpdateCapacity() {
-        final int newCapacity = ((maxUpdates * 3) / 2);
+        final int newCapacity = (int) (vectorStack.length * loadfactor);
         // first, copy the stack of variables
         final StoredDoubleVector[] tmp1 = new StoredDoubleVector[newCapacity];
         System.arraycopy(vectorStack, 0, tmp1, 0, vectorStack.length);
@@ -142,9 +144,6 @@ public class StoredDoubleVectorTrail implements IStorage {
         final int[] tmp4 = new int[newCapacity];
         System.arraycopy(indexStack, 0, tmp4, 0, indexStack.length);
         indexStack = tmp4;
-
-        // last update the capacity
-        maxUpdates = newCapacity;
     }
 
     public void resizeWorldCapacity(int newWorldCapacity) {
@@ -161,6 +160,9 @@ public class StoredDoubleVectorTrail implements IStorage {
 
     public void worldPush(int worldIndex) {
         this.worldStartLevels[worldIndex] = currentLevel;
+        if (worldIndex == worldStartLevels.length - 1) {
+            resizeWorldCapacity((int) (worldStartLevels.length * loadfactor));
+        }
     }
 
 

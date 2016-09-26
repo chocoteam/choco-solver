@@ -96,4 +96,20 @@ public class EnvironmentTest {
 		Assert.assertTrue(eb.getDoubleTrail() instanceof StoredDoubleTrail);
 //
 	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testJL01() {
+		Model m = new Model();
+		m.boolVarArray("b", 200);
+		m.getEnvironment().makeIntVector(100, 0);
+		System.out.println(m.getSolver().solve());
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testJL02() {
+		Model m = new Model();
+		m.boolVarArray("b", 200);
+		m.getEnvironment().makeDoubleVector(100, 0.0);
+		System.out.println(m.getSolver().solve());
+	}
 }
