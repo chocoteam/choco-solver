@@ -10,9 +10,9 @@ Variables
     + :math:`\forall i \in [1,m], \text{tick}_i = [\![0,9999]\!]`
 
 
-- An integer variable :math:`\text{diff}_{ij}` per couple of marks *i,j* (:math:`i<j`) indicates distance between the two marks.
+- An integer variable :math:`\text{diff}_{i,j}` per couple of marks *i,j* (:math:`i<j`) indicates distance between the two marks.
 
-    + :math:`\forall i,j \in [1,m], i < j, \text{diff}_{ij} = [\![0,9999]\!]`
+    + :math:`\forall i,j \in [1,m], i < j, \text{diff}_{i,j} = [\![0,9999]\!]`
 
 
 Constraints
@@ -25,11 +25,11 @@ Constraints
 
 - Distance between two distinct marks :
 
-    + :math:`\forall i,j \in [1,m], i < j, \text{diff}_{ij} = \text{tick}_j - \text{tick}_i`
+    + :math:`\forall i,j \in [1,m], i < j, \text{diff}_{i,j} = \text{tick}_j - \text{tick}_i`
 
 - No two pairs of marks are the same distance apart
 
-    + :math:`\forall i,j \in [1,m], i \ne j, \text{diff}_{i} \ne \text{diff}_{j}`
+    + :math:`\forall i,j \in [1,m], i \ne j, \text{tick}_{i} \ne \text{tick}_{j}`
 
   We saw this type of constraint before, it is an *alldifferent* constraint.
 
@@ -47,13 +47,29 @@ Redundant constraints
 These types of constraints are not required to find solutions, they are implied by the other constraints of the model.
 Thus, their role is to bring more filtering and to possibly detect infeasible combinations earlier in the search.
 
-- Because all distances must be different, we can estimate the minimal sum of distances as a sum of *j-i* different positive numbers.
+The following reasoning is based on the fact that:
 
-    + :math:`\forall i,j \in [1,m], i < j, \text{diff}_{ij} \geq \frac{(j-i)*(j-i+1)}{2}`
+:math:`\forall i,j \in [1,m], i < j, \text{diff}_{i,j} = \text{diff}_{i,i+1} \ldots \text{diff}_{j-1,j}`
 
-- All distances must be different so we can estimate the minimal sum of distances. There are *m-1-j+i* different numbers so the upper for :math:`\text{diff}_{ij}` can be defined as:
+Because all distances must be different, we can estimate the minimal sum of distances as a sum of *j-i* different positive numbers.
 
-    + :math:`\forall i,j \in [1,m], i < j, \text{diff}_{ij} \leq \text{tick}_m - \frac{(m - 1 - j + i) * (m - j + i)}{2}`
++ :math:`\forall i,j \in [1,m], i < j, \text{diff}_{i,j} \geq \frac{(j-i)*(j-i+1)}{2}`
+
+Moreover, remember that
+
+:math:`\text{diff}_{1,m} = \text{tick}_{m} - \text{tick}_1`
+
+and
+
+:math:`\text{diff}_{1,m} = \text{diff}_{1,2} \ldots \text{diff}_{i,j} \ldots\text{diff}_{m-1,m}`
+
+Thus, since :math:`\text{tick}_1` is equal to `0`, we deduce that:
+
+:math:`\text{tick}_{m} = \text{diff}_{1,2} \ldots \text{diff}_{i,j} \ldots\text{diff}_{m-1,m}`
+
+There are *m-1-j+i* different numbers so the upper for :math:`\text{diff}_{i,j}` can be defined as:
+
++ :math:`\forall i,j \in [1,m], i < j, \text{diff}_{i,j} \leq \text{tick}_m - \frac{(m - 1 - j + i) * (m - j + i)}{2}`
 
 
 To go into details, please read `Barták, "Effective modeling with constraints" <https://www.researchgate.net/publication/221644589_Effective_Modeling_with_Constraints>`_.

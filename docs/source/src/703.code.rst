@@ -17,7 +17,7 @@ A model
     // set of marks that should be put on the ruler
     IntVar[] ticks = ticks = model.intVarArray("a", m, 0, 9999, true);
     // set of distances between two distinct marks
-    IntVar[] diffs = = model.intVarArray("d", (m * (m - 1)) / 2, 0, 9999, true);
+    IntVar[] diffs = model.intVarArray("d", (m * (m - 1)) / 2, 0, 9999, true);
 
     // CONSTRAINTS
     // the first mark is set to 0
@@ -35,7 +35,7 @@ A model
         }
     }
     // all distances must be distinct
-    model.allDifferent(diffs, "AC").post();
+    model.allDifferent(diffs, "BC").post();
     //symmetry-breaking constraints
     model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
 
@@ -53,7 +53,7 @@ A simple but efficient strategy to guide the search is to select the mark variab
     :linenos:
 
     Solver solver = model.getSolver();
-    solver.setSearch(inputOrderLBSearch(ticks));
+    solver.setSearch(Search.inputOrderLBSearch(ticks));
 
 
 
@@ -84,7 +84,7 @@ The entire code
     // set of marks that should be put on the ruler
     IntVar[] ticks = ticks = model.intVarArray("a", m, 0, 9999, true);
     // set of distances between two distinct marks
-    IntVar[] diffs = = model.intVarArray("d", (m * (m - 1)) / 2, 0, 9999, true);
+    IntVar[] diffs = model.intVarArray("d", (m * (m - 1)) / 2, 0, 9999, true);
 
     // CONSTRAINTS
     // the first mark is set to 0
@@ -102,12 +102,12 @@ The entire code
         }
     }
     // all distances must be distinct
-    model.allDifferent(diffs, "AC").post();
+    model.allDifferent(diffs, "BC").post();
     //symmetry-breaking constraints
     model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
 
     Solver solver = model.getSolver();
-    solver.setSearch(inputOrderLBSearch(ticks));
+    solver.setSearch(Search.inputOrderLBSearch(ticks));
     // show resolution statistics
     solver.showShortStatistics();
     // Find a solution that minimizes the last mark
