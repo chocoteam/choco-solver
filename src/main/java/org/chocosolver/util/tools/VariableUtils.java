@@ -194,10 +194,10 @@ public class VariableUtils {
             int yu = y.getUB();
             if (yl == 0) yl = 1;
             if (yu == 0) yu = 1;
-            vals[0] = x.getLB() % yl;
-            vals[1] = x.getLB() % yu;
-            vals[2] = x.getUB() % yl;
-            vals[3] = x.getUB() % yu;
+            vals[0] = 0;
+            vals[1] = 0;
+            vals[2] = Math.abs(yl);
+            vals[3] = Math.abs(yu);
         }
         return bound(vals);
     }
