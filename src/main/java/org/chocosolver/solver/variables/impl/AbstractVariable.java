@@ -310,8 +310,8 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
-        notifyMonitors(event);
         model.getSolver().getEngine().onVariableUpdate(this, event, cause);
+        notifyMonitors(event);
         notifyViews(event, cause);
     }
 
