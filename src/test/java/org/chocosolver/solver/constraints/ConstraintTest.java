@@ -32,10 +32,12 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -253,6 +255,46 @@ public class ConstraintTest {
         c1.post();
         while(m.getSolver().solve());
         Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 6);
+    }
+
+    @DataProvider(name="unpost")
+    public Object[][] providUP(){
+        return new Object[][]{
+                {"="}, {"!="},{"<"},{">"}};
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "unpost")
+    public void testUnpost(String op) {
+        Model m = new Model();
+        {
+            IntVar[] M = m.intVarArray("M", 3, 0, 2, false);
+            BoolVar[][] choice = m.boolVarMatrix("choice", 3, 3);
+            for (int i = 0; i < 3; i++) {
+                m.boolsIntChanneling(choice[i], M[i], 0).post();
+            }
+            m.arithm(M[0], "=", 0).post();
+            m.arithm(M[1], "=", 0).post();
+            m.getSolver().setSearch(Search.inputOrderLBSearch(M));
+            m.getSolver().findAllSolutions();
+        }
+        Model m2 = new Model();
+        {
+            IntVar[] M = m2.intVarArray("M", 3, 0, 2, false);
+            BoolVar[][] choice = m2.boolVarMatrix("choice", 3, 3);
+            for (int i = 0; i < 3; i++) {
+                m2.boolsIntChanneling(choice[i], M[i], 0).post();
+            }
+            m2.arithm(M[0], "=", 0).post();
+            m2.arithm(M[1], "=", 0).post();
+            // begin diff
+            Constraint c2 = m2.arithm(M[2], op, M[1]);
+            c2.post();
+            m2.unpost(c2);
+            // end diff
+            m2.getSolver().setSearch(Search.inputOrderLBSearch(M));
+            m2.getSolver().findAllSolutions();
+        }
+        assertEquals(m.getSolver().getSolutionCount(), m2.getSolver().getSolutionCount());
     }
 
 }

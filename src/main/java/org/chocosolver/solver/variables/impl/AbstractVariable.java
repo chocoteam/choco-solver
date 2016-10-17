@@ -245,13 +245,14 @@ public abstract class AbstractVariable implements Variable {
 
     private void cancel(int pp, int i) {
         propagators[pp] = propagators[dindices[i + 1] - 1];
+        pindices[pp] = pindices[dindices[i + 1] - 1];
         for (int k = i + 1; k < 5; k++) {
             propagators[dindices[k] - 1] = propagators[dindices[k + 1] - 1];
             pindices[dindices[k] - 1] = pindices[dindices[k + 1] - 1];
             dindices[k] = dindices[k] - 1;
         }
         propagators[nbPropagators - 1] = null;
-        pindices[nbPropagators - 1] = -1;
+        pindices[nbPropagators - 1] = 0;
         dindices[5] = dindices[5] - 1;
     }
 
