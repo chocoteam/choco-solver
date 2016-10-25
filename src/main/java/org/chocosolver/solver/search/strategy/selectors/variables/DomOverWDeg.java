@@ -136,7 +136,9 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
 
     private int weight(IntVar v) {
         int w = 1;
-        for (Propagator prop : v.getPropagators()) {
+        int nbp =v.getNbProps();
+        for (int i = 0; i < nbp; i++) {
+            Propagator prop = v.getPropagator(i);
             int pid = prop.getId();
             // if the propagator has been already evaluated
             if (pid2arity.get(pid) > -1) {

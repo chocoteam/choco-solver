@@ -265,9 +265,6 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public Propagator[] getPropagators() {
-        if (propagators.length > nbPropagators) {
-            adaptSize();
-        }
         return propagators;
     }
 
@@ -283,16 +280,7 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public int[] getPIndices() {
-        if (pindices.length > nbPropagators) {
-            adaptSize();
-        }
         return pindices;
-    }
-
-    private void adaptSize(){
-        assert pindices.length == propagators.length;
-        propagators = Arrays.copyOf(propagators, nbPropagators);
-        pindices = Arrays.copyOf(pindices, nbPropagators);
     }
 
     @Override
