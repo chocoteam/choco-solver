@@ -66,16 +66,6 @@ public class AbstractVariableTest {
 
 
     @Test(groups = "1s")
-    public void testLink() throws Exception {
-
-    }
-
-    @Test(groups = "1s")
-    public void testUnlink() throws Exception {
-
-    }
-
-    @Test(groups = "1s")
     public void testSubscribe1() throws Exception {
         props[0].setVIndices(0,v.subscribe(props[0], 0, 4));
         Assert.assertEquals(v.propagators[0], props[0]);
