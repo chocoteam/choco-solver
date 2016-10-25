@@ -108,10 +108,6 @@ public abstract class AbstractVariable implements Variable {
     protected final String name;
 
     /**
-     * Number of propagators of this variable.
-     */
-    private int nbPropagators;
-    /**
      * List of propagators of this variable.
      */
     protected Propagator[] propagators;
@@ -198,14 +194,14 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public int link(Propagator propagator, int idxInProp) {
         // 1. ensure capacity
-        if (nbPropagators == propagators.length) {
+        if (dindices[5] == propagators.length) {
             Propagator[] tmp = propagators;
             propagators = new Propagator[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, propagators, 0, nbPropagators);
+            System.arraycopy(tmp, 0, propagators, 0, dindices[5]);
 
             int[] itmp = pindices;
             pindices = new int[itmp.length * 3 / 2 + 1];
-            System.arraycopy(itmp, 0, pindices, 0, nbPropagators);
+            System.arraycopy(itmp, 0, pindices, 0, dindices[5]);
             if(pindices.length != propagators.length){
                 throw new UnsupportedOperationException("error: pindices.length != propagators.length in "+this);
             }
@@ -230,13 +226,13 @@ public abstract class AbstractVariable implements Variable {
     }
 
     int subscribe(Propagator p, int ip, int i) {
-        for (int j = 4; j >= i; j--) {
+        int j = 4;
+        for (; j >= i; j--) {
             move(dindices[j], dindices[j + 1]);
-            dindices[j + 1] = dindices[j + 1] + 1;
+            dindices[j + 1]++;
         }
         propagators[dindices[i]] = p;
         pindices[dindices[i]] = ip;
-        nbPropagators++;
         return dindices[i];
     }
 
@@ -251,14 +247,11 @@ public abstract class AbstractVariable implements Variable {
     void cancel(int pp, int i) {
         // start moving the other ones
         move(dindices[i + 1] - 1, pp);
-        for (int k = i + 1; k < 5; k++) {
-            move(dindices[k + 1] - 1, dindices[k] - 1);
-            dindices[k] = dindices[k] - 1;
+        for (int j = i + 1; j < 5; j++) {
+            move(dindices[j + 1] - 1, dindices[j] - 1);
+            dindices[j]--;
         }
-        nbPropagators--;
-        propagators[nbPropagators] = null;
-        pindices[nbPropagators] = 0;
-        dindices[5] = dindices[5] - 1;
+        dindices[5]--;
     }
 
     @Override
@@ -273,7 +266,7 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public int getNbProps() {
-        return nbPropagators;
+        return dindices[5];
     }
 
     @Override

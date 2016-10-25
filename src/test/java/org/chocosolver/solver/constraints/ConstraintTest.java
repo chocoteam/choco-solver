@@ -309,14 +309,14 @@ public class ConstraintTest {
         );
         Propagator[] propagators = vars[0].getPropagators();
 
-        Assert.assertEquals(vars[0].getPIndices(), new int[]{0,1,0,0});
+        Assert.assertEquals(vars[0].getPIndices(), new int[]{0,1,0,0,0,0,0,0});
         Assert.assertEquals(vars[0].getPropagators(), propagators);
 
-        Assert.assertEquals(vars[1].getPIndices(), new int[]{1,0});
-        Assert.assertEquals(vars[1].getPropagators(), new Propagator[]{propagators[0], propagators[1]});
+        Assert.assertEquals(vars[1].getPIndices(), new int[]{1,0,0,0,0,0,0,0});
+        Assert.assertEquals(vars[1].getPropagators(), new Propagator[]{propagators[0], propagators[1], null, null, null, null, null, null});
 
-        Assert.assertEquals(vars[2].getPIndices(), new int[]{2});
-        Assert.assertEquals(vars[2].getPropagators(), new Propagator[]{propagators[0]});
+        Assert.assertEquals(vars[2].getPIndices(), new int[]{2,0,0,0,0,0,0,0});
+        Assert.assertEquals(vars[2].getPropagators(), new Propagator[]{propagators[0], null, null, null, null, null, null, null});
 
         Assert.assertEquals(propagators[0].getVIndices(), new int[]{0,0,0});
         Assert.assertEquals(propagators[1].getVIndices(), new int[]{1,1});
