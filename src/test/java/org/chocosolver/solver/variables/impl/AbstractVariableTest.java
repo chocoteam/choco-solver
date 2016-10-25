@@ -51,7 +51,7 @@ public class AbstractVariableTest {
     Propagator[] props;
 
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void setup(){
         model = new Model();
         IntVar[] is =  model.intVarArray(5, 0,6);
