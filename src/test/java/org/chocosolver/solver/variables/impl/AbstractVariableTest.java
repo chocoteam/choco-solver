@@ -218,7 +218,7 @@ public class AbstractVariableTest {
         Assert.assertEquals(props[3].getVIndices(), new int[]{0, 0, 0, 4});
         Assert.assertEquals(props[4].getVIndices(), new int[]{0, 0, 0, 0, 0});
 
-        v.cancel(0, 4, 4);
+        v.cancel(0, 4);
         Assert.assertEquals(v.propagators[0], props[3]);
         Assert.assertEquals(v.pindices[0], 3);
         Assert.assertEquals(v.propagators[1], props[0]);
@@ -232,7 +232,7 @@ public class AbstractVariableTest {
         Assert.assertEquals(props[2].getVIndices(), new int[]{0, 0, 3});
         Assert.assertEquals(props[3].getVIndices(), new int[]{0, 0, 0, 0});
 
-        v.cancel(0, 3, 4);
+        v.cancel(0, 4);
         Assert.assertEquals(v.propagators[0], props[2]);
         Assert.assertEquals(v.pindices[0], 2);
         Assert.assertEquals(v.propagators[1], props[0]);
@@ -243,7 +243,7 @@ public class AbstractVariableTest {
         Assert.assertEquals(props[1].getVIndices(), new int[]{0, 2});
         Assert.assertEquals(props[2].getVIndices(), new int[]{0, 0, 0});
 
-        v.cancel(0, 2, 4);
+        v.cancel(0, 4);
         Assert.assertEquals(v.propagators[0], props[1]);
         Assert.assertEquals(v.pindices[0], 1);
         Assert.assertEquals(v.propagators[1], props[0]);
@@ -251,7 +251,7 @@ public class AbstractVariableTest {
         Assert.assertEquals(props[0].getVIndices(), new int[]{1});
         Assert.assertEquals(props[1].getVIndices(), new int[]{0, 0});
 
-        v.cancel(0, 1, 4);
+        v.cancel(0, 4);
         Assert.assertEquals(v.propagators[0], props[0]);
         Assert.assertEquals(v.pindices[0], 0);
         Assert.assertEquals(props[0].getVIndices(), new int[]{0});

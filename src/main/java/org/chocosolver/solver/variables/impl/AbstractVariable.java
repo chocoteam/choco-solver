@@ -220,18 +220,18 @@ public abstract class AbstractVariable implements Variable {
         return pos;
     }
 
-    private void move(Propagator _pp, int _pi, int to){
-        if (_pp != null) {
-            propagators[to] = _pp;
-            pindices[to] = _pi;
-            _pp.setVIndices(_pi, to);
+    private void move(int from, int to){
+        if (propagators[from] != null) {
+            propagators[to] = propagators[from];
+            pindices[to] = pindices[from];
+            propagators[to].setVIndices(pindices[from], to);
+            propagators[from] = null;
         }
     }
 
     int subscribe(Propagator p, int ip, int i) {
         for (int j = 4; j >= i; j--) {
-            move(propagators[dindices[j]], pindices[dindices[j]], dindices[j + 1]);
-            propagators[dindices[j]] = null; // to prevent unexpected operations
+            move(dindices[j], dindices[j + 1]);
             dindices[j + 1] = dindices[j + 1] + 1;
         }
         propagators[dindices[i]] = p;
@@ -243,18 +243,16 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public void unlink(Propagator propagator, int idxInProp) {
         int i = propagator.getVIndice(idxInProp); // todo deal with -1
-        assert propagators[i] == propagator;
+        assert propagators[i] == propagator:"Try to unlink :\n"+propagator+"\nfrom "+this.getName()+" but found:\n"+propagators[i];
         // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-        cancel(i, idxInProp, scheduler.select(propagator.getPropagationConditions(pindices[i])));
+        cancel(i, scheduler.select(propagator.getPropagationConditions(pindices[i])));
     }
 
-    void cancel(int pp, int ip, int i) {
-        // 1. update propagator to remove
-        propagators[pp].setVIndices(ip, -1);
+    void cancel(int pp, int i) {
         // start moving the other ones
-        move(propagators[dindices[i + 1] - 1], pindices[dindices[i + 1] - 1], pp);
+        move(dindices[i + 1] - 1, pp);
         for (int k = i + 1; k < 5; k++) {
-            move(propagators[dindices[k + 1] - 1], pindices[dindices[k + 1] - 1], dindices[k] - 1);
+            move(dindices[k + 1] - 1, dindices[k] - 1);
             dindices[k] = dindices[k] - 1;
         }
         nbPropagators--;
@@ -281,6 +279,11 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public int[] getPIndices() {
         return pindices;
+    }
+
+    @Override
+    public void setPIndice(int pos, int val) {
+        pindices[pos] = val;
     }
 
     @Override
