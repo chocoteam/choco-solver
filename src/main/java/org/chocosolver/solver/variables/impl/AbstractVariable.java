@@ -114,12 +114,12 @@ public abstract class AbstractVariable implements Variable {
     /**
      * List of propagators of this variable.
      */
-    private Propagator[] propagators;
+    protected Propagator[] propagators;
 
     /**
      * Store the index of this variable in each of its propagators.
      */
-    private int[] pindices;
+    protected int[] pindices;
 
     /**
      * Dependency indices, for efficient scheduling purpose.
@@ -213,46 +213,53 @@ public abstract class AbstractVariable implements Variable {
         }
         // 2. put it in the right place
         int pc = propagator.getPropagationConditions(idxInProp);
+        int pos = -1;
         if(pc > 0) { // deal with VOID, when the propagator should not be aware of this variable's modifications
-            subscribe(propagator, idxInProp, scheduler.select(pc));
+            pos = subscribe(propagator, idxInProp, scheduler.select(pc));
         }
-        return nbPropagators++;
+        return pos;
     }
 
+    private void move(Propagator _pp, int _pi, int to){
+        if (_pp != null) {
+            propagators[to] = _pp;
+            pindices[to] = _pi;
+            _pp.setVIndices(_pi, to);
+        }
+    }
 
-    private void subscribe(Propagator p, int ip, int i) {
+    int subscribe(Propagator p, int ip, int i) {
         for (int j = 4; j >= i; j--) {
-            propagators[dindices[j + 1]] = propagators[dindices[j]];
-            pindices[dindices[j + 1]] = pindices[dindices[j]];
+            move(propagators[dindices[j]], pindices[dindices[j]], dindices[j + 1]);
+            propagators[dindices[j]] = null; // to prevent unexpected operations
             dindices[j + 1] = dindices[j + 1] + 1;
         }
         propagators[dindices[i]] = p;
         pindices[dindices[i]] = ip;
+        nbPropagators++;
+        return dindices[i];
     }
 
     @Override
-    public void unlink(Propagator propagator) {
-        int i = 0;
-        while (i < nbPropagators && propagators[i] != propagator) {
-            i++;
-        }
+    public void unlink(Propagator propagator, int idxInProp) {
+        int i = propagator.getVIndice(idxInProp); // todo deal with -1
+        assert propagators[i] == propagator;
         // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-        if (i < nbPropagators) {
-            cancel(i, scheduler.select(propagator.getPropagationConditions(pindices[i])));
-            nbPropagators--;
-        }
+        cancel(i, idxInProp, scheduler.select(propagator.getPropagationConditions(pindices[i])));
     }
 
-    private void cancel(int pp, int i) {
-        propagators[pp] = propagators[dindices[i + 1] - 1];
-        pindices[pp] = pindices[dindices[i + 1] - 1];
+    void cancel(int pp, int ip, int i) {
+        // 1. update propagator to remove
+        propagators[pp].setVIndices(ip, -1);
+        // start moving the other ones
+        move(propagators[dindices[i + 1] - 1], pindices[dindices[i + 1] - 1], pp);
         for (int k = i + 1; k < 5; k++) {
-            propagators[dindices[k] - 1] = propagators[dindices[k + 1] - 1];
-            pindices[dindices[k] - 1] = pindices[dindices[k + 1] - 1];
+            move(propagators[dindices[k + 1] - 1], pindices[dindices[k + 1] - 1], dindices[k] - 1);
             dindices[k] = dindices[k] - 1;
         }
-        propagators[nbPropagators - 1] = null;
-        pindices[nbPropagators - 1] = 0;
+        nbPropagators--;
+        propagators[nbPropagators] = null;
+        pindices[nbPropagators] = 0;
         dindices[5] = dindices[5] - 1;
     }
 

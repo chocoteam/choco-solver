@@ -203,10 +203,11 @@ public interface Variable extends Identity, Comparable<Variable> {
      * Remove a propagator from the list of propagator of <code>this</code>.
      * SHOULD BE CONTAINED IN THIS.
      *
+     * @param idxInProp  index of the variable in the propagator
      * @param propagator the propagator to remove
      *
      */
-    void unlink(Propagator propagator);
+    void unlink(Propagator propagator, int idxInProp);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>

@@ -207,7 +207,7 @@ public class ConstraintTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPostRemove2() {
         Model m = new Model();
         IntVar v = m.intVar(0, 2);
@@ -216,7 +216,7 @@ public class ConstraintTest {
         m.unpost(c);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPostRemove3() {
         Model m = new Model();
         IntVar v = m.intVar(0, 2);
@@ -227,7 +227,7 @@ public class ConstraintTest {
         m.unpost(c1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPostRemove4() {
         Model m = new Model();
         IntVar v = m.intVar(0, 2);
@@ -238,32 +238,32 @@ public class ConstraintTest {
         m.unpost(c2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPostUnpostPost1() {
         Model m = new Model();
         IntVar v = m.intVar(1, 3);
         IntVar w = m.intVar(0, 2);
         Constraint c1 = m.arithm(v, ">", w);
         c1.post();
-        while(m.getSolver().solve());
+        while (m.getSolver().solve()) ;
         Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 6);
         m.getSolver().reset();
         m.unpost(c1);
-        while(m.getSolver().solve());
+        while (m.getSolver().solve()) ;
         Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 9);
         m.getSolver().reset();
         c1.post();
-        while(m.getSolver().solve());
+        while (m.getSolver().solve()) ;
         Assert.assertEquals(m.getSolver().getMeasures().getSolutionCount(), 6);
     }
 
-    @DataProvider(name="unpost")
-    public Object[][] providUP(){
+    @DataProvider(name = "unpost")
+    public Object[][] providUP() {
         return new Object[][]{
-                {"="}, {"!="},{"<"},{">"}};
+                {"="}, {"!="}, {"<"}, {">"}};
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "unpost")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "unpost")
     public void testUnpost(String op) {
         Model m = new Model();
         {
@@ -295,6 +295,34 @@ public class ConstraintTest {
             m2.getSolver().findAllSolutions();
         }
         assertEquals(m.getSolver().getSolutionCount(), m2.getSolver().getSolutionCount());
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testUnlink1() {
+        Model model = new Model("unlink");
+        IntVar[] vars = model.intVarArray("X", 3, 0, 4);
+        vars[0].eq(1).post();
+        vars[0].ne(0).post();
+        model.post(
+                model.sum(new IntVar[]{vars[0], vars[1]}, ">", 1),
+                model.sum(new IntVar[]{vars[0], vars[1], vars[2]}, ">", 2)
+        );
+        Propagator[] propagators = vars[0].getPropagators();
+
+        Assert.assertEquals(vars[0].getPIndices(), new int[]{0,1,0,0});
+        Assert.assertEquals(vars[0].getPropagators(), propagators);
+
+        Assert.assertEquals(vars[1].getPIndices(), new int[]{1,0});
+        Assert.assertEquals(vars[1].getPropagators(), new Propagator[]{propagators[0], propagators[1]});
+
+        Assert.assertEquals(vars[2].getPIndices(), new int[]{2});
+        Assert.assertEquals(vars[2].getPropagators(), new Propagator[]{propagators[0]});
+
+        Assert.assertEquals(propagators[0].getVIndices(), new int[]{0,0,0});
+        Assert.assertEquals(propagators[1].getVIndices(), new int[]{1,1});
+        Assert.assertEquals(propagators[2].getVIndices(), new int[]{2});
+        Assert.assertEquals(propagators[3].getVIndices(), new int[]{3});
+
     }
 
 }
