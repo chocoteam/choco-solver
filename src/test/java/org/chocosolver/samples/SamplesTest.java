@@ -45,7 +45,6 @@ public class SamplesTest {
             new AllIntervalSeries(),
             new AirPlaneLanding(),
             new CarSequencing(),
-            new GolombRuler(),
             new Grocery(),
             new Knapsack(),
             new Langford(),
