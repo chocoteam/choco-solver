@@ -60,6 +60,8 @@ git commit -m "Prepare the code for the next version" -a ||quit "Unable to commi
 ##Push changes on develop, with the tag
 git push origin master ||quit "Unable to push to develop"
 
+git branch -d release
+
 git checkout $TAG
 mvn clean install -DskipTests
 git checkout master
