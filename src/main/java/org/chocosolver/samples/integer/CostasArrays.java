@@ -34,7 +34,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * Costas Arrays
@@ -65,7 +64,7 @@ public class CostasArrays extends AbstractProblem {
 		vectors = new IntVar[(n * (n - 1)) / 2];
 		for (int i = 0, k = 0; i < n; i++) {
 			for (int j = i + 1; j < n; j++, k++) {
-				IntVar d = model.intVar(randomName(), -n, n, false);
+				IntVar d = model.intVar(model.generateName(), -n, n, false);
 				model.arithm(d, "!=", 0).post();
 				model.sum(new IntVar[]{vars[i], d}, "=", vars[j]).post();
 				vectors[k] = model.intOffsetView(d, 2 * n * (j - i));

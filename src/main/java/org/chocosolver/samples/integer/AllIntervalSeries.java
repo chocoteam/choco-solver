@@ -35,8 +35,6 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 
-import static org.chocosolver.util.tools.StringUtils.randomName;
-
 /**
  * CSPLib prob007:<br/>
  * "Given n in N, find a vector s = (s_1, ..., s_n), such that
@@ -75,7 +73,7 @@ public class AllIntervalSeries extends AbstractProblem {
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
-                IntVar k = model.intVar(randomName(), -20000, 20000, true);
+                IntVar k = model.intVar(model.generateName(), -20000, 20000, true);
                 model.sum(new IntVar[]{vars[i], k}, "=", vars[i + 1]).post();
                 dist[i] = model.intAbsView(k);
                 model.member(dist[i], 1, m - 1).post();
