@@ -389,9 +389,9 @@ public enum FConstraint {
                             x = a;
                             c = b.getValue();
                         }
-                        new Constraint("reif(a=cste,r)", new PropXeqCReif(x, c, r)).post();
+                        model.reifyXequaltoC(x, c, r);
                     } else {
-                        new Constraint("reif(a=b,r)", new PropXeqYReif(a, b, r)).post();
+                        model.reifyXequaltoY(a, b, r);
                     }
                 } else {
                     model.arithm(a, "=", b).reifyWith(r);
@@ -431,16 +431,16 @@ public enum FConstraint {
                         if (a.isInstantiated()) {
                             var = b;
                             cste = a.getValue();
-                            new Constraint("reif(cste <= b,r)", new PropXgeCReif(var, cste, r)).post();
+                            model.reifyXlessthanC(var, cste - 1, r);
 //                            model.arithm(a, "<=", b).reifyWith(r);
                         } else {
                             var = a;
                             cste = b.getValue();
-                            new Constraint("reif(a <= cste,r)", new PropXleCReif(var, cste, r)).post();
+                            model.reifyXlessthanC(var, cste - 1, r);
 //                            model.arithm(a, "<=", b).reifyWith(r);
                         }
                     } else {
-                        new Constraint("reif(a<=b,r)", new PropXleYReif(a, b, r)).post();
+                        model.reifyXlessthanYplusC(a, b, -1, r);
                     }
                 } else {
                     model.arithm(a, "<=", b).reifyWith(r);
@@ -482,9 +482,9 @@ public enum FConstraint {
                                 x = bs[0];
                                 t = c.getValue();
                             }
-                            new Constraint("reif(a=cste,r)", new PropXeqCReif(x, t, r)).post();
+                            model.reifyXequaltoC(x, t, r);
                         } else {
-                            new Constraint("reif(a=b,r)", new PropXeqYReif(bs[0], c, r)).post();
+                            model.reifyXequaltoY(bs[0], c, r);
                         }
                         return;
                     } else {
@@ -544,7 +544,7 @@ public enum FConstraint {
                             bbs[i] = (BoolVar) bs[i];
                         }
                         bbs[bs.length] = r;
-                        new Constraint("BoolSumLeq0Reif", new PropBoolSumLe0Reif(bbs)).post();
+                        new Constraint("BoolSumEq0Reif", new PropBoolSumEq0Reif(bbs)).post();
                         return;
                     }
                 } else if (c.isInstantiated()) {
@@ -564,7 +564,7 @@ public enum FConstraint {
                             return;
                         }
                         if (as[0] == 1 && as[1] == -1) {
-                            new Constraint("X <= Y + c", new PropXleYCReif(bs[0], bs[1], c.getValue(), r)).post();
+                            model.reifyXlessthanYplusC(bs[0], bs[1], c.getValue() -1, r);
 //                            model.arithm(bs[0], "<=", bs[1], "+", c.getValue()).reifyWith(r);
                             return;
                         }
@@ -631,14 +631,14 @@ public enum FConstraint {
                     if (a.isInstantiated()) {
                         var = b;
                         cste = a.getValue();
-                        new Constraint("reif(b>cste,r)", new PropXgtCReif(var, cste, r)).post();
+                        model.reifyXgreaterthanC(var, cste, r);
                     } else {
                         var = a;
                         cste = b.getValue();
-                        new Constraint("reif(a<cste,r)", new PropXltCReif(var, cste, r)).post();
+                        model.reifyXlessthanC(var, cste, r);
                     }
                 } else {
-                    new Constraint("reif(a<b,r)", new PropXltYReif(a, b, r)).post();
+                    model.reifyXlessthanY(a, b, r);
                 }
             } else {
                 model.arithm(a, "<", b).reifyWith(r);
@@ -717,9 +717,9 @@ public enum FConstraint {
                         }
                         final IntVar var = x;
                         final int cste = c;
-                        new Constraint("reif(a!=cste,r)", new PropXneCReif(var, cste, r)).post();
+                        model.reifyXnotequaltoC(var, cste, r);
                     } else {
-                        new Constraint("reif(a!=b,r)", new PropXneYReif(a, b, r)).post();
+                        model.reifyXnotequaltoY(a, b, r);
                     }
                 } else {
                     model.arithm(a, "!=", b).reifyWith(r);
