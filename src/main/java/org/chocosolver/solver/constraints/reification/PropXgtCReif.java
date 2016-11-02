@@ -27,66 +27,84 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.constraints.unary;
+package org.chocosolver.solver.constraints.reification;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
- * <br/>
+ * A propagator dedicated to express in a compact way: (x > c) &hArr; b
  *
  * @author Charles Prud'homme
- * @since 26 nov. 2010
+ * @since 03/05/2016.
  */
-public class PropMemberBound extends Propagator<IntVar> {
+public class PropXgtCReif extends Propagator<IntVar> {
 
-    private final int lb, ub;
+    IntVar var;
+    int cste;
+    BoolVar r;
 
-    public PropMemberBound(IntVar var, int lb, int ub) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
-        this.lb = lb;
-        this.ub = ub;
+    public PropXgtCReif(IntVar x, int c, BoolVar r) {
+        super(new IntVar[]{x, r}, PropagatorPriority.BINARY, false);
+        this.cste = c;
+        this.var = x;
+        this.r = r;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        // with views such as abs(...), the prop can be not entailed after initial propagation
-        vars[0].updateBounds(lb, ub, this);
-        if (lb <= vars[0].getLB() && ub >= vars[0].getUB()) {
-            this.setPassive();
+        if (r.getLB() == 1) {
+            setPassive();
+            var.updateLowerBound(cste + 1, this);
+        } else if (r.getUB() == 0) {
+            setPassive();
+            var.updateUpperBound(cste, this);
+        } else {
+            if (var.getLB() > cste) {
+                setPassive();
+                r.setToTrue(this);
+            } else if (var.getUB() <= cste) {
+                setPassive();
+                r.setToFalse(this);
+            }
         }
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return IntEventType.boundAndInst();
-    }
-
-
-    @Override
     public ESat isEntailed() {
-        if (vars[0].getLB() >= lb && vars[0].getUB() <= ub) {
-            return ESat.TRUE;
-        // Check if vars[0] contains no values between lb and ub inclusive.
-        } else if (vars[0].nextValue(lb - 1) > ub) {
-            return ESat.FALSE;
+        if(isCompletelyInstantiated()){
+            if(r.isInstantiatedTo(1)){
+                return ESat.eval(var.getLB() > cste);
+            }else{
+                return ESat.eval(var.getUB() <= cste);
+            }
         }
         return ESat.UNDEFINED;
     }
 
     @Override
-    public String toString() {
-        return vars[0].getName() + " in [" + lb + "," + ub + "]";
+    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
+        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+        if (var == vars[1]) { // r
+            if (vars[1].isInstantiatedTo(1)) {
+                nrules |= ruleStore.addLowerBoundRule(vars[0]);
+            } else {
+                nrules |= ruleStore.addUpperBoundRule(vars[0]);
+            }
+        } else { //
+            nrules |= ruleStore.addFullDomainRule(vars[1]);
+        }
+        return nrules;
     }
 
     @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        return ruleStore.addPropagatorActivationRule(this);
+    public String toString() {
+        return "(" + var.getName() +" > " + cste + ") <=> "+r.getName();
     }
 }
