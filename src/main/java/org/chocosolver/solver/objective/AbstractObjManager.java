@@ -42,8 +42,10 @@ import java.util.function.Function;
  */
 abstract class AbstractObjManager<V extends Variable> implements IObjectiveManager<V> {
 
+    private static final long serialVersionUID = 4330218142281861652L;
+
     /** The variable to optimize **/
-    protected final V objective;
+    transient protected final V objective;
 
     /** Define how should the objective be optimize */
     protected final ResolutionPolicy policy;
@@ -58,7 +60,7 @@ abstract class AbstractObjManager<V extends Variable> implements IObjectiveManag
     protected Number bestProvedUB;
 
     /** Define how the cut should be update when posting the cut **/
-    protected Function<Number, Number> cutComputer = n -> n; // walking cut by default
+    transient protected Function<Number, Number> cutComputer = n -> n; // walking cut by default
 
     public AbstractObjManager(AbstractObjManager<V> objman) {
         objective = objman.objective;

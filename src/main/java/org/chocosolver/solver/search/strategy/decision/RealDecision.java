@@ -42,6 +42,7 @@ import org.chocosolver.util.PoolManager;
  */
 public class RealDecision extends Decision<RealVar> {
 
+    private static final long serialVersionUID = -4723411613242027280L;
     /**
      * The decision value
      */
@@ -49,7 +50,7 @@ public class RealDecision extends Decision<RealVar> {
     /**
      * Decision pool manager, to recycle decisions
      */
-    private final PoolManager<RealDecision> poolManager;
+    transient private final PoolManager<RealDecision> poolManager;
 
     /**
      * Create an decision based on an {@link RealVar}

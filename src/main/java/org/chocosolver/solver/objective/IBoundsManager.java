@@ -29,6 +29,8 @@
  */
 package org.chocosolver.solver.objective;
 
+import java.io.Serializable;
+
 import org.chocosolver.solver.ResolutionPolicy;
 
 /**
@@ -36,7 +38,7 @@ import org.chocosolver.solver.ResolutionPolicy;
  *
  * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  */
-public interface IBoundsManager {
+public interface IBoundsManager extends Serializable {
 
     /**
      * @return the ResolutionPolicy of the problem
@@ -73,6 +75,18 @@ public interface IBoundsManager {
      * @param ub upper bound
      */
     void updateBestUB(Number ub);
+
+    /**
+     * States that b is global bounds on the problem
+     *
+     * @param b lower and upper bounds
+     */
+    default void updateBestBounds(IBoundsManager b) {
+        if(isOptimization()) {
+            updateBestLB(b.getBestLB());
+            updateBestUB(b.getBestUB());
+        }
+    }
 
     /**
      * @return the best solution value found so far (returns the initial bound if no solution has been found yet)

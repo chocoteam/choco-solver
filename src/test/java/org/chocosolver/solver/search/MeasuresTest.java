@@ -29,9 +29,14 @@
  */
 package org.chocosolver.solver.search;
 
+import java.io.IOException;
+
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.Measures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.DecisionMakerTest;
+import org.chocosolver.solver.variables.Variable;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -72,6 +77,7 @@ public class MeasuresTest {
         Measures meas = new Measures("Test");
         meas.getBestSolutionValue();
     }
+    
 
     @Test(groups = "1s", timeOut = 60000)
     public void measRecTest() throws InterruptedException {
@@ -103,5 +109,45 @@ public class MeasuresTest {
         Assert.assertEquals(mSaved.getTimeCountInNanoSeconds(), timeCount1);
         Assert.assertEquals(meas.getTimeCountInNanoSeconds(), timeCount2);
         testMeasuresExport(meas);
+    }
+    
+    private static void assertEqualMeasures(IMeasures actual, IMeasures expected) {
+        Assert.assertEquals(actual.getBackTrackCount(), expected.getBackTrackCount());
+        Assert.assertEquals(actual.getCurrentDepth(),expected.getCurrentDepth());
+        Assert.assertEquals(actual.getFailCount(), expected.getFailCount());
+        Assert.assertEquals(actual.getMaxDepth(), expected.getMaxDepth());
+        Assert.assertEquals(actual.getModelName(), expected.getModelName());
+        Assert.assertEquals(actual.getNodeCount(), expected.getNodeCount());
+        Assert.assertEquals(actual.getReadingTimeCount(), expected.getReadingTimeCount());
+        Assert.assertEquals(actual.getRestartCount(), expected.getRestartCount());
+        Assert.assertEquals(actual.getSolutionCount(), expected.getSolutionCount());
+        Assert.assertEquals(actual.getTimeCountInNanoSeconds(), expected.getTimeCountInNanoSeconds());
+        Assert.assertEquals(actual.getSearchState(), expected.getSearchState());
+        if(expected.hasObjective()) {
+            Assert.assertEquals(actual.getBestSolutionValue(), expected.getBestSolutionValue());
+            Assert.assertEquals(actual.isObjectiveOptimal(), expected.isObjectiveOptimal());
+        } else {
+            Assert.assertEquals(actual.getBoundsManager(), expected.getBoundsManager());
+        }
+        
+    }
+    
+    @Test(groups = "1s", timeOut = 60000)
+    public void measSerializeTest() throws ClassNotFoundException, IOException, InterruptedException {
+        MeasuresRecorder mr1 = new MeasuresRecorder("Test");
+        mr1.startStopwatch();
+        Thread.sleep(10);
+        mr1.incBackTrackCount();
+        mr1.incDepth();
+        mr1.incFailCount();
+        mr1.incNodeCount();
+        mr1.incSolutionCount();
+        mr1.incSolutionCount();
+        mr1.stopStopwatch();
+        MeasuresRecorder mr2 = (MeasuresRecorder) DecisionMakerTest.doSerialize(mr1);
+        assertEqualMeasures(mr2, mr1);
+        Measures m1= new Measures(mr1);
+        Measures m2 = (Measures) DecisionMakerTest.doSerialize(m1);
+        assertEqualMeasures(m2, m1);        
     }
 }

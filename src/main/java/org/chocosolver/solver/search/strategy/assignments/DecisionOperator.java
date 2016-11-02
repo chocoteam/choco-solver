@@ -29,6 +29,8 @@
  */
 package org.chocosolver.solver.search.strategy.assignments;
 
+import java.io.Serializable;
+
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -43,13 +45,13 @@ import org.chocosolver.solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 03/02/11
  */
-public interface DecisionOperator<V extends Variable>  {
+public interface DecisionOperator<V extends Variable> extends Serializable {
 
     void apply(V var, int value, ICause cause) throws ContradictionException;
 
     void unapply(V var, int value, ICause cause) throws ContradictionException;
 
-    DecisionOperator opposite();
+    DecisionOperator<V> opposite();
 
     String toString();
 
@@ -63,175 +65,14 @@ public interface DecisionOperator<V extends Variable>  {
      */
     boolean isValid(V var, int value);
 
+    //TODO use factory instead of static final fields ?
     // INTEGERS
-    DecisionOperator<IntVar> int_eq = new DecisionOperator<IntVar>() {
-
-        @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause);
-        }
-
-        @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.removeValue(value, cause);
-        }
-
-        @Override
-        public String toString() {
-            return " == ";
-        }
-
-        @Override
-        public boolean isValid(IntVar var, int value) {
-            return var.contains(value);
-        }
-
-        @Override
-        public DecisionOperator opposite() {
-            return int_neq;
-        }
-    };
-
-    DecisionOperator<IntVar> int_neq = new DecisionOperator<IntVar>() {
-
-        @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.removeValue(value, cause);
-        }
-
-        @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause);
-        }
-
-        @Override
-        public String toString() {
-            return " != ";
-        }
-
-        @Override
-        public boolean isValid(IntVar var, int value) {
-            return var.contains(value);
-        }
-
-        @Override
-        public DecisionOperator opposite() {
-            return int_eq;
-        }
-    };
-
-    DecisionOperator<IntVar> int_split = new DecisionOperator<IntVar>() {
-
-        @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value, cause);
-        }
-
-        @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value + 1, cause);
-        }
-
-        @Override
-        public String toString() {
-            return " <= ";
-        }
-
-        @Override
-        public boolean isValid(IntVar var, int value) {
-            return var.getUB() >= value;
-        }
-
-        @Override
-        public DecisionOperator opposite() {
-            return int_reverse_split;
-        }
-
-    };
-
-    DecisionOperator<IntVar> int_reverse_split = new DecisionOperator<IntVar>() {
-
-        @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value, cause);
-        }
-
-        @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value - 1, cause);
-        }
-
-        @Override
-        public String toString() {
-            return " >= ";
-        }
-
-        @Override
-        public boolean isValid(IntVar var, int value) {
-            return var.getLB() <= value;
-        }
-
-        @Override
-        public DecisionOperator opposite() {
-            return int_split;
-        }
-    };
-
+    DecisionOperator<IntVar> int_eq = DecisionOperatorFactory.makeIntEq();
+    DecisionOperator<IntVar> int_neq = DecisionOperatorFactory.makeIntNeq();
+    DecisionOperator<IntVar> int_split = DecisionOperatorFactory.makeIntSplit();
+    DecisionOperator<IntVar> int_reverse_split = DecisionOperatorFactory.makeIntReverseSplit();
 
     // SETS
-    DecisionOperator<SetVar> set_force = new DecisionOperator<SetVar>() {
-
-        @Override
-        public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.force(element, cause);
-        }
-
-        @Override
-        public void unapply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.remove(element, cause);
-        }
-
-        @Override
-        public String toString() {
-            return " contains ";
-        }
-
-        @Override
-        public boolean isValid(SetVar var, int element) {
-            return var.getUB().contains(element) && !var.getLB().contains(element);
-        }
-
-        @Override
-        public DecisionOperator opposite() {
-            return set_remove;
-        }
-    };
-
-    DecisionOperator<SetVar> set_remove = new DecisionOperator<SetVar>() {
-
-        @Override
-        public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.remove(element, cause);
-        }
-
-        @Override
-        public void unapply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.force(element, cause);
-        }
-
-        @Override
-        public String toString() {
-            return " !contains ";
-        }
-
-        @Override
-        public boolean isValid(SetVar var, int element) {
-			return var.getUB().contains(element) && !var.getLB().contains(element);
-        }
-
-        @Override
-        public DecisionOperator opposite() {
-            return set_force;
-        }
-    };
+    DecisionOperator<SetVar> set_force = DecisionOperatorFactory.makeSetForce();
+    DecisionOperator<SetVar> set_remove = DecisionOperatorFactory.makeSetRemove();
 }

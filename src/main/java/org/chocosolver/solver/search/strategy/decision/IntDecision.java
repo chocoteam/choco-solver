@@ -45,6 +45,8 @@ import org.chocosolver.util.PoolManager;
  */
 public class IntDecision extends Decision<IntVar> {
 
+    private static final long serialVersionUID = 4319290465131546449L;
+ 
     /**
      * The decision value
      */
@@ -56,7 +58,7 @@ public class IntDecision extends Decision<IntVar> {
     /**
      * Decision pool manager, to recycle decisions
      */
-    private final PoolManager<IntDecision> poolManager;
+    transient private final PoolManager<IntDecision> poolManager;
 
     /**
      * Create an decision based on an {@link IntVar}

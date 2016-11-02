@@ -41,6 +41,8 @@ import org.chocosolver.solver.search.SearchState;
  */
 public class Measures implements IMeasures, Cloneable {
 
+    private static final long serialVersionUID = -474763044797821410L;
+
     //***********************************************************************************
     // VARIABLE
     //***********************************************************************************

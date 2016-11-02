@@ -29,8 +29,18 @@
  */
 package org.chocosolver.solver.search.strategy.decision;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.variables.Variable;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -75,5 +85,41 @@ public class DecisionMakerTest {
         d.free();
         d = dm.makeSetDecision(model.setVar(new int[]{3,4, 5}), DecisionOperator.set_remove, 4);
         d.free();
+    }
+
+
+    public final static Object doSerialize(Serializable obj) throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+        ObjectOutputStream oos =  new ObjectOutputStream(bos);
+        oos.writeObject(obj);
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray()); 
+        bos.close();
+        oos.close();
+        ObjectInputStream ois =  new ObjectInputStream(bis);
+        return ois.readObject();
+
+    }
+    private <V extends Variable> void assertEqualDecisions(Decision<V> d1, Decision<V> d) {
+        Assert.assertEquals(d1.getArity(), d.getArity());
+        Assert.assertEquals(d1.getPosition(), d.getPosition());
+        Assert.assertEquals(d1.getDecisionValue(), d.getDecisionValue());
+        Assert.assertEquals(d1.branch, d.branch);
+        Assert.assertNull(d1.getDecisionVariable());
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testSerializeIntDecision() throws Exception {
+        IntDecision d = dm.makeIntDecision(model.boolVar(), DecisionOperatorFactory.makeIntEq(), 0);
+        IntDecision d1 = (IntDecision) doSerialize(d);
+        assertEqualDecisions(d1, d);
+        Assert.assertEquals(d1.getDecOp(), d.getDecOp());              
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testSerializeSetDecision() throws Exception {
+        SetDecision d = dm.makeSetDecision(model.setVar(0, 1,2,3), DecisionOperatorFactory.makeSetForce(), 0);
+        SetDecision d1 = (SetDecision) doSerialize(d);
+        assertEqualDecisions(d1, d);
+        // Assert.assertEquals(d1.getDecOp(), d.getDecOp());  // method not implemented  
     }
 }

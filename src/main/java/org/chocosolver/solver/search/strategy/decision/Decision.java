@@ -29,6 +29,8 @@
  */
 package org.chocosolver.solver.search.strategy.decision;
 
+import java.io.Serializable;
+
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
@@ -41,12 +43,12 @@ import org.chocosolver.solver.variables.Variable;
  * @since 2 juil. 2010
  * @param <E> type of variable handle by this decision
  */
-public abstract class Decision<E extends Variable> implements ICause {
+public abstract class Decision<E extends Variable> implements ICause, Serializable {
 
     /**
      * Variable of this decision
      */
-    protected E var;
+    transient protected E var;
 
     /**
      * Number of time a decision can be applied.

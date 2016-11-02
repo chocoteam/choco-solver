@@ -39,9 +39,10 @@ import org.chocosolver.solver.exception.ContradictionException;
  * @since 01/06/12
  */
 public class RootDecision extends Decision {
-    public static RootDecision ROOT = new RootDecision();
+    private static final long serialVersionUID = -5266363788310578598L;
+    public static final RootDecision ROOT = new RootDecision();
 
-    public RootDecision() {
+    private RootDecision() {
         super(1);
     }
 
