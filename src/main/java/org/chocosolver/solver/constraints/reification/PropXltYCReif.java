@@ -45,11 +45,11 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 03/05/2016.
  */
-public class PropXleYCReif extends Propagator<IntVar> {
+public class PropXltYCReif extends Propagator<IntVar> {
 
     int cste;
 
-    public PropXleYCReif(IntVar x, IntVar y, int c, BoolVar r) {
+    public PropXltYCReif(IntVar x, IntVar y, int c, BoolVar r) {
         super(new IntVar[]{x, y, r}, PropagatorPriority.TERNARY, false);
         this.cste = c;
     }
@@ -57,26 +57,24 @@ public class PropXleYCReif extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (vars[2].getLB() == 1) {
-            vars[0].updateUpperBound(vars[1].getUB() + cste, this);
-            vars[1].updateLowerBound(vars[0].getLB() - cste, this);
+            vars[0].updateUpperBound(vars[1].getUB() + cste - 1, this);
+            vars[1].updateLowerBound(vars[0].getLB() - cste + 1, this);
             if (vars[0].getUB() <= vars[1].getLB() + cste) {
                 this.setPassive();
             }
+        } else if (vars[2].getUB() == 0) {
+            vars[0].updateLowerBound(vars[1].getLB() + cste, this);
+            vars[1].updateUpperBound(vars[0].getUB() - cste, this);
+            if (vars[0].getLB() > vars[1].getUB() + cste) {
+                setPassive();
+            }
         } else {
-            if (vars[2].getUB() == 0) {
-                vars[0].updateLowerBound(vars[1].getLB()  + cste + 1, this);
-                vars[1].updateUpperBound(vars[0].getUB() - cste - 1, this);
-                if (vars[0].getLB() > vars[1].getUB() + cste) {
-                    setPassive();
-                }
-            } else {
-                if (vars[0].getUB() <= vars[1].getLB() + cste) {
-                    setPassive();
-                    vars[2].instantiateTo(1, this);
-                } else if (vars[0].getLB() > vars[1].getUB() + cste) {
-                    setPassive();
-                    vars[2].instantiateTo(0, this);
-                }
+            if (vars[0].getUB() < vars[1].getLB() + cste) {
+                setPassive();
+                vars[2].instantiateTo(1, this);
+            } else if (vars[0].getLB() >= vars[1].getUB() + cste) {
+                setPassive();
+                vars[2].instantiateTo(0, this);
             }
         }
     }
