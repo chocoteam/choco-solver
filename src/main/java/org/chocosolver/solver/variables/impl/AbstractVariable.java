@@ -60,37 +60,37 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Message associated with last value removals exception.
      */
-    public static final String MSG_REMOVE = "remove last value";
+    protected static final String MSG_REMOVE = "remove last value";
 
     /**
      * Message associated with domain wipe out exception.
      */
-    public static final String MSG_EMPTY = "empty domain";
+    protected static final String MSG_EMPTY = "empty domain";
 
     /**
      * Message associated with double instantiation exception.
      */
-    public static final String MSG_INST = "already instantiated";
+    protected static final String MSG_INST = "already instantiated";
 
     /**
      * Default exception message.
      */
-    public static final String MSG_UNKNOWN = "unknown value";
+    protected static final String MSG_UNKNOWN = "unknown value";
 
     /**
      * Message associated with wrong upper bound exception.
      */
-    public static final String MSG_UPP = "new lower bound is greater than upper bound";
+    protected static final String MSG_UPP = "new lower bound is greater than upper bound";
 
     /**
      * Message associated with wrong lower bound exception.
      */
-    public static final String MSG_LOW = "new upper bound is lesser than lower bound";
+    protected static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
     /**
      * Message associated with wrong bounds exception.
      */
-    public static final String MSG_BOUND = "new bounds are incorrect";
+    protected static final String MSG_BOUND = "new bounds are incorrect";
 
     /**
      * Unique ID of this variable.
@@ -108,18 +108,14 @@ public abstract class AbstractVariable implements Variable {
     protected final String name;
 
     /**
-     * Number of propagators of this variable.
-     */
-    private int nbPropagators;
-    /**
      * List of propagators of this variable.
      */
-    private Propagator[] propagators;
+    protected Propagator[] propagators;
 
     /**
      * Store the index of this variable in each of its propagators.
      */
-    private int[] pindices;
+    protected int[] pindices;
 
     /**
      * Dependency indices, for efficient scheduling purpose.
@@ -198,14 +194,14 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public int link(Propagator propagator, int idxInProp) {
         // 1. ensure capacity
-        if (nbPropagators == propagators.length) {
+        if (dindices[5] == propagators.length) {
             Propagator[] tmp = propagators;
             propagators = new Propagator[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, propagators, 0, nbPropagators);
+            System.arraycopy(tmp, 0, propagators, 0, dindices[5]);
 
             int[] itmp = pindices;
             pindices = new int[itmp.length * 3 / 2 + 1];
-            System.arraycopy(itmp, 0, pindices, 0, nbPropagators);
+            System.arraycopy(itmp, 0, pindices, 0, dindices[5]);
             if(pindices.length != propagators.length){
                 throw new UnsupportedOperationException("error: pindices.length != propagators.length in "+this);
             }
@@ -213,53 +209,53 @@ public abstract class AbstractVariable implements Variable {
         }
         // 2. put it in the right place
         int pc = propagator.getPropagationConditions(idxInProp);
+        int pos = -1;
         if(pc > 0) { // deal with VOID, when the propagator should not be aware of this variable's modifications
-            subscribe(propagator, idxInProp, scheduler.select(pc));
+            pos = subscribe(propagator, idxInProp, scheduler.select(pc));
         }
-        return nbPropagators++;
+        return pos;
     }
 
+    private void move(int from, int to){
+        if (propagators[from] != null) {
+            propagators[to] = propagators[from];
+            pindices[to] = pindices[from];
+            propagators[to].setVIndices(pindices[from], to);
+            propagators[from] = null;
+        }
+    }
 
-    private void subscribe(Propagator p, int ip, int i) {
-        for (int j = 4; j >= i; j--) {
-            propagators[dindices[j + 1]] = propagators[dindices[j]];
-            pindices[dindices[j + 1]] = pindices[dindices[j]];
-            dindices[j + 1] = dindices[j + 1] + 1;
+    int subscribe(Propagator p, int ip, int i) {
+        int j = 4;
+        for (; j >= i; j--) {
+            move(dindices[j], dindices[j + 1]);
+            dindices[j + 1]++;
         }
         propagators[dindices[i]] = p;
         pindices[dindices[i]] = ip;
+        return dindices[i];
     }
 
     @Override
-    public void unlink(Propagator propagator) {
-        int i = 0;
-        while (i < nbPropagators && propagators[i] != propagator) {
-            i++;
-        }
+    public void unlink(Propagator propagator, int idxInProp) {
+        int i = propagator.getVIndice(idxInProp); // todo deal with -1
+        assert propagators[i] == propagator:"Try to unlink :\n"+propagator+"\nfrom "+this.getName()+" but found:\n"+propagators[i];
         // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-        if (i < nbPropagators) {
-            cancel(i, scheduler.select(propagator.getPropagationConditions(pindices[i])));
-            nbPropagators--;
-        }
+        cancel(i, scheduler.select(propagator.getPropagationConditions(pindices[i])));
     }
 
-    private void cancel(int pp, int i) {
-        propagators[pp] = propagators[dindices[i + 1] - 1];
-        for (int k = i + 1; k < 5; k++) {
-            propagators[dindices[k] - 1] = propagators[dindices[k + 1] - 1];
-            pindices[dindices[k] - 1] = pindices[dindices[k + 1] - 1];
-            dindices[k] = dindices[k] - 1;
+    void cancel(int pp, int i) {
+        // start moving the other ones
+        move(dindices[i + 1] - 1, pp);
+        for (int j = i + 1; j < 5; j++) {
+            move(dindices[j + 1] - 1, dindices[j] - 1);
+            dindices[j]--;
         }
-        propagators[nbPropagators - 1] = null;
-        pindices[nbPropagators - 1] = -1;
-        dindices[5] = dindices[5] - 1;
+        dindices[5]--;
     }
 
     @Override
     public Propagator[] getPropagators() {
-        if (propagators.length > nbPropagators) {
-            adaptSize();
-        }
         return propagators;
     }
 
@@ -270,21 +266,17 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public int getNbProps() {
-        return nbPropagators;
+        return dindices[5];
     }
 
     @Override
     public int[] getPIndices() {
-        if (pindices.length > nbPropagators) {
-            adaptSize();
-        }
         return pindices;
     }
 
-    private void adaptSize(){
-        assert pindices.length == propagators.length;
-        propagators = Arrays.copyOf(propagators, nbPropagators);
-        pindices = Arrays.copyOf(pindices, nbPropagators);
+    @Override
+    public void setPIndice(int pos, int val) {
+        pindices[pos] = val;
     }
 
     @Override
@@ -309,8 +301,8 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
-        notifyMonitors(event);
         model.getSolver().getEngine().onVariableUpdate(this, event, cause);
+        notifyMonitors(event);
         notifyViews(event, cause);
     }
 

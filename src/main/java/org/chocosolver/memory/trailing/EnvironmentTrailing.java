@@ -292,7 +292,7 @@ public class EnvironmentTrailing extends AbstractEnvironment {
     public StoredIntVectorTrail getIntVectorTrail() {
         if (intVectorTrail == null) {
             increaseTrail();
-            trails[trailSize++] = intVectorTrail = new StoredIntVectorTrail(this, NBUPATES, NBWORLDS);
+            trails[trailSize++] = intVectorTrail = new StoredIntVectorTrail(this, NBUPATES, NBWORLDS, LOADFACTOR);
         }
         return intVectorTrail;
     }
@@ -300,7 +300,7 @@ public class EnvironmentTrailing extends AbstractEnvironment {
     public StoredDoubleVectorTrail getDoubleVectorTrail() {
         if (doubleVectorTrail == null) {
             increaseTrail();
-            trails[trailSize++] = doubleVectorTrail = new StoredDoubleVectorTrail(this, NBUPATES, NBWORLDS);
+            trails[trailSize++] = doubleVectorTrail = new StoredDoubleVectorTrail(this, NBUPATES, NBWORLDS, LOADFACTOR);
         }
         return doubleVectorTrail;
     }

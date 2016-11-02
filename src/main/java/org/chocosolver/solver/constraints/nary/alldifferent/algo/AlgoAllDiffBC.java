@@ -50,7 +50,7 @@ public class AlgoAllDiffBC {
     private Propagator aCause;
     private IntVar[] vars;
 
-    private ArraySort sorter;
+    private ArraySort<Interval> sorter;
 
     public AlgoAllDiffBC(Propagator cause) {
         this.aCause = cause;
@@ -70,7 +70,7 @@ public class AlgoAllDiffBC {
             for (int i = 0; i < n; i++) {
                 intervals[i] = new Interval();
             }
-            sorter = new ArraySort(n, true, false);
+            sorter = new ArraySort<>(n, true, false);
         }
         for (int i = 0; i < n; i++) {
             Interval interval = intervals[i];

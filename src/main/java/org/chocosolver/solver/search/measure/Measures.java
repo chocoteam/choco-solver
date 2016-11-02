@@ -30,8 +30,8 @@
 package org.chocosolver.solver.search.measure;
 
 
-import org.chocosolver.solver.objective.BoundsManager;
-import org.chocosolver.solver.objective.ObjectiveManager;
+import org.chocosolver.solver.objective.IBoundsManager;
+import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.search.SearchState;
 
 /**
@@ -63,7 +63,7 @@ public class Measures implements IMeasures, Cloneable {
     /**
      * Reference to the bound manager
      */
-    protected BoundsManager<?> boundsManager;
+    protected IBoundsManager boundsManager;
 
     /**
      * Indicates if the optimal value has been proven for the objective (set to <tt>true</tt>).
@@ -127,7 +127,7 @@ public class Measures implements IMeasures, Cloneable {
         super();
         this.modelName = modelName;
         this.state = SearchState.NEW;
-        this.boundsManager = ObjectiveManager.SAT();
+        this.boundsManager = ObjectiveFactory.SAT();
     }
 
     /**
@@ -136,11 +136,11 @@ public class Measures implements IMeasures, Cloneable {
      */
     public Measures(IMeasures measures) {
         super();
-        boundsManager = new BoundsManager<>(measures.getBoundsManager());
+        boundsManager = ObjectiveFactory.copy(measures.getBoundsManager());
         objectiveOptimal = measures.isObjectiveOptimal();
         solutionCount = measures.getSolutionCount();
         timeCount = measures.getTimeCountInNanoSeconds();
-        readingTimeCount = (long) (measures.getReadingTimeCount() * Measures.IN_SEC);
+        readingTimeCount = (long) (measures.getReadingTimeCount() * IN_SEC);
         nodeCount = measures.getNodeCount();
         backtrackCount = measures.getBackTrackCount();
         restartCount = measures.getRestartCount();
@@ -228,7 +228,7 @@ public class Measures implements IMeasures, Cloneable {
     }
 
     @Override
-    public final BoundsManager<?> getBoundsManager() {
+    public final IBoundsManager getBoundsManager() {
         return boundsManager;
     }
 

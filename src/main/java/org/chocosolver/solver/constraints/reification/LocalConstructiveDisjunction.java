@@ -56,7 +56,7 @@ public class LocalConstructiveDisjunction extends Constraint {
     }
 
     private static Propagator[] createProps(Constraint... constraints) {
-        Propagator[][] propagators = new Propagator[constraints.length][];
+        Propagator<IntVar>[][] propagators = new Propagator[constraints.length][];
         TIntObjectHashMap<IntVar> map1 = new TIntObjectHashMap<>();
         for (int i = 0; i < constraints.length; i++) {
             propagators[i] = constraints[i].getPropagators().clone();

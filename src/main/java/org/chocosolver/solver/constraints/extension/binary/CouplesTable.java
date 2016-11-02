@@ -47,17 +47,14 @@ class CouplesTable extends BinRelation {
     private final int offset1, offset2;
 
 
-    /**
-     * size of the initial domain of x and y
-     */
-    private final int range1, range2;
+    private final int range2;
 
     private final boolean feasible;
 
     public CouplesTable(Tuples tuples, IntVar var1, IntVar var2) {
         offset1 = var1.getLB();
         offset2 = var2.getLB();
-        range1 = var1.getUB() - offset1 + 1;
+        int range1 = var1.getUB() - offset1 + 1;
         range2 = var2.getUB() - offset2 + 1;
         table = new BitSet(range1 * range2);
         feasible = tuples.isFeasible();

@@ -30,7 +30,9 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.reification.*;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
 /**
@@ -174,4 +176,112 @@ public interface IReificationFactory {
 			cstr.reifyWith(var);
 		}
 	}
+
+	/**
+	 * Posts one constraint that expresses : (x = c) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X a integer variable
+	 * @param C an int
+     * @param B a boolean variable
+     */
+	default void reifyXequaltoC(IntVar X, int C, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X = C)<=>B", new PropXeqCReif(X, C, B)));
+	}
+
+	/**
+	 * Posts one constraint that expresses : (x = y) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X an integer variable
+	 * @param Y an integer variable
+	 * @param B a boolean variable
+	 */
+	default void reifyXequaltoY(IntVar X, IntVar Y, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X = Y)<=>B", new PropXeqYReif(X, Y, B)));
+	}
+
+	/**
+	 * Posts one constraint that expresses : (x &ne; c) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X a integer variable
+	 * @param C an int
+	 * @param B a boolean variable
+	 */
+	default void reifyXnotequaltoC(IntVar X, int C, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X != C)<=>B", new PropXneCReif(X, C, B)));
+	}
+
+	/**
+	 * Posts one constraint that expresses : (x &ne; y) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X an integer variable
+	 * @param Y an integer variable
+	 * @param B a boolean variable
+	 */
+	default void reifyXnotequaltoY(IntVar X, IntVar Y, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X = Y)<=>B", new PropXneYReif(X, Y, B)));
+	}
+
+	/**
+	 * Posts one constraint that expresses : (x < c) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X a integer variable
+	 * @param C an int
+	 * @param B a boolean variable
+	 */
+	default void reifyXlessthanC(IntVar X, int C, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X < C)<=>B", new PropXltCReif(X, C, B)));
+	}
+
+	/**
+	 * Posts one constraint that expresses : (x < y) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X an integer variable
+	 * @param Y an integer variable
+	 * @param B a boolean variable
+	 */
+	default void reifyXlessthanY(IntVar X, IntVar Y, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X < Y)<=>B", new PropXltYReif(X, Y, B)));
+	}
+
+	/**
+	 * Posts one constraint that expresses : (x < y + c) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X an integer variable
+	 * @param Y an integer variable
+	 * @param C an int
+	 * @param B a boolean variable
+	 */
+	default void reifyXlessthanYplusC(IntVar X, IntVar Y, int C, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X < Y + C)<=>B", new PropXltYCReif(X, Y, C, B)));
+	}
+
+	/**
+	 * Posts one constraint that expresses : (x > c) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X a integer variable
+	 * @param C an int
+	 * @param B a boolean variable
+	 */
+	default void reifyXgreaterthanC(IntVar X, int C, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X > C)<=>B", new PropXgtCReif(X, C, B)));
+	}
+
+
+
 }

@@ -31,11 +31,11 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.impl.*;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.util.tools.StringUtils;
 
 /**
  * Interface to make variables (BoolVar, IntVar, RealVar and SetVar)
@@ -90,7 +90,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a BoolVar of domain {0, 1}
      */
     default BoolVar boolVar() {
-        return boolVar(StringUtils.randomName());
+        return boolVar(generateName("BV_"));
     }
 
     /**
@@ -110,7 +110,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an array of <i>size</i> BoolVar of domain {0, 1}
      */
     default BoolVar[] boolVarArray(int size) {
-        return boolVarArray(StringUtils.randomName(),size);
+        return boolVarArray(generateName("BV_"),size);
     }
 
     /**
@@ -136,7 +136,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a matrix of <i>dim1*dim2</i> BoolVar of domain {0, 1}
      */
     default BoolVar[][] boolVarMatrix(int dim1, int dim2) {
-        return boolVarMatrix(StringUtils.randomName(),dim1,dim2);
+        return boolVarMatrix(generateName("BV_"),dim1,dim2);
     }
 
     /**
@@ -176,7 +176,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an IntVar of domain <i>values</i>
      */
     default IntVar intVar(int[] values) {
-        return intVar(StringUtils.randomName(),values);
+        return intVar(generateName("IV_"),values);
     }
 
     /**
@@ -187,7 +187,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(int lb, int ub) {
-        return intVar(StringUtils.randomName(),lb, ub);
+        return intVar(generateName("IV_"),lb, ub);
     }
 
     /**
@@ -198,7 +198,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(int lb, int ub, boolean boundedDomain) {
-        return intVar(StringUtils.randomName(), lb, ub, boundedDomain);
+        return intVar(generateName("IV_"), lb, ub, boundedDomain);
     }
 
     /**
@@ -289,7 +289,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an array of <i>size</i> IntVar of domain <i>values</i>
      */
     default IntVar[] intVarArray(int size, int[] values) {
-        return intVarArray(StringUtils.randomName(), size, values);
+        return intVarArray(generateName("IV_"), size, values);
     }
 
     /**
@@ -300,7 +300,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar[] intVarArray(int size, int lb, int ub) {
-        return intVarArray(StringUtils.randomName(), size, lb, ub);
+        return intVarArray(generateName("IV_"), size, lb, ub);
     }
 
     /**
@@ -312,7 +312,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar[] intVarArray(int size, int lb, int ub, boolean boundedDomain) {
-        return intVarArray(StringUtils.randomName(), size, lb, ub, boundedDomain);
+        return intVarArray(generateName("IV_"), size, lb, ub, boundedDomain);
     }
 
     /**
@@ -373,7 +373,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain <i>values</i>
      */
     default IntVar[][] intVarMatrix(int dim1, int dim2, int[] values) {
-        return intVarMatrix(StringUtils.randomName(), dim1, dim2, values);
+        return intVarMatrix(generateName("IV_"), dim1, dim2, values);
     }
 
     /**
@@ -385,7 +385,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar[][] intVarMatrix(int dim1, int dim2, int lb, int ub) {
-        return intVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub);
+        return intVarMatrix(generateName("IV_"), dim1, dim2, lb, ub);
     }
 
     /**
@@ -398,7 +398,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar[][] intVarMatrix(int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
-        return intVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub, boundedDomain);
+        return intVarMatrix(generateName("IV_"), dim1, dim2, lb, ub, boundedDomain);
     }
 
     /**
@@ -473,8 +473,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant RealVar of domain [<i>value</i>,<i>value</i>]
      */
     default RealVar realVar(String name, double value) {
-        RealVar cste = new FixedRealVarImpl(name, value, _me());
-        return cste;
+        return new FixedRealVarImpl(name, value, _me());
     }
 
     /**
@@ -495,7 +494,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default RealVar realVar(double lb, double ub, double precision) {
-        return realVar(StringUtils.randomName(), lb, ub, precision);
+        return realVar(generateName("RV_"), lb, ub, precision);
     }
 
     /**
@@ -522,7 +521,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an array of <i>size</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default RealVar[] realVarArray(int size, double lb, double ub, double precision) {
-        return realVarArray(StringUtils.randomName(), size, lb, ub, precision);
+        return realVarArray(generateName("RV_"), size, lb, ub, precision);
     }
 
     /**
@@ -554,7 +553,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a matrix of <i>dim1*dim2</i> RealVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default RealVar[][] realVarMatrix(int dim1, int dim2, double lb, double ub, double precision) {
-        return realVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub, precision);
+        return realVarMatrix(generateName("RV_"), dim1, dim2, lb, ub, precision);
     }
 
     /**
@@ -587,7 +586,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default SetVar setVar(int[] lb, int[] ub) {
-        return setVar(StringUtils.randomName(), lb, ub);
+        return setVar(generateName("RV_"), lb, ub);
     }
 
     /**
@@ -636,7 +635,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an array of <i>size</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default SetVar[] setVarArray(int size, int[] lb, int[] ub) {
-        return setVarArray(StringUtils.randomName(), size, lb, ub);
+        return setVarArray(generateName("SV_"), size, lb, ub);
     }
 
     /**
@@ -666,7 +665,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a matrix of <i>dim1*dim2</i> SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default SetVar[][] setVarMatrix(int dim1, int dim2, int[] lb, int[] ub) {
-        return setVarMatrix(StringUtils.randomName(), dim1, dim2, lb, ub);
+        return setVarMatrix(generateName("SV_"), dim1, dim2, lb, ub);
     }
 
     /**
@@ -742,4 +741,25 @@ public interface IVariableFactory extends ISelf<Model> {
         }
         return bvars;
     }
+
+    /**
+     * Return a generated short string, prefixed with {@link Settings#defaultPrefix()}
+     * and followed with a single-use number.
+     * @return generated String to name internally created variables
+     */
+    default String generateName() {
+        return "TMP_" + _me().nextNameId();
+    }
+
+    /**
+     * Return a generated short string prefixed with <i>prefix</i>
+     * and followed with a single-use number.
+     *
+     * @param prefix the prefix name
+     * @return String
+     */
+    default String generateName(String prefix) {
+        return prefix + _me().nextNameId();
+    }
+
 }

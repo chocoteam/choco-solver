@@ -84,7 +84,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
      * A propagator to deal with constructive disjunction
      * @param propagators matrix of propagators, columns are in disjunction
      */
-    public PropLocalConDis(IntVar[] vars, Propagator[][] propagators) {
+    public PropLocalConDis(IntVar[] vars, Propagator<IntVar>[][] propagators) {
         super(vars, PropagatorPriority.VERY_SLOW, false);
         this.propagators = propagators;
         cardinalities = new int[vars.length];

@@ -96,7 +96,6 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 import static java.lang.Math.abs;
-import static org.chocosolver.util.tools.StringUtils.randomName;
 
 /**
  * Interface to make constraints over BoolVar and IntVar
@@ -469,8 +468,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		int xu = abs(X.getUB());
 		int b = Math.max(xl, xu);
 		Model model = X.getModel();
-		IntVar t1 = model.intVar(randomName(), -b, b, true);
-		IntVar t2 = model.intVar(randomName(), -b, b, true);
+		IntVar t1 = model.intVar(model.generateName("T1_"), -b, b, true);
+		IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
 		div(X, Y, t1).post();
 		times(t1, Y, t2).post();
 		return sum(new IntVar[]{Z, t2}, "=", X);
@@ -880,7 +879,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		} else if (value.hasEnumeratedDomain()) {
 			return new Constraint("Count", new PropCountVar(vars, value, limit));
 		} else {
-			IntVar Evalue = value.getModel().intVar(randomName(), value.getLB(), value.getUB(), false);
+			Model model = value.getModel();
+			IntVar Evalue = model.intVar(model.generateName("COUNT_"), value.getLB(), value.getUB(), false);
 			return new Constraint("Count",
 					new PropEqualX_Y(Evalue, value),
 					new PropCountVar(vars, Evalue, limit));
@@ -991,8 +991,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 			int miny = Integer.MAX_VALUE / 2;
 			int maxy = Integer.MIN_VALUE / 2;
 			for (int i = 0; i < X.length; i++) {
-				EX[i] = model.intVar(randomName("diffN"), X[i].getLB() + width[i].getLB(), X[i].getUB() + width[i].getUB(), true);
-				EY[i] = model.intVar(randomName("diffN"), Y[i].getLB() + height[i].getLB(), Y[i].getUB() + height[i].getUB(), true);
+				EX[i] = model.intVar(model.generateName("diffN_"), X[i].getLB() + width[i].getLB(), X[i].getUB() + width[i].getUB(), true);
+				EY[i] = model.intVar(model.generateName("diffN_"), Y[i].getLB() + height[i].getLB(), Y[i].getUB() + height[i].getUB(), true);
 				TX[i] = new Task(X[i], width[i], EX[i]);
 				TY[i] = new Task(Y[i], height[i], EY[i]);
 				minx = Math.min(minx, X[i].getLB());
@@ -1000,12 +1000,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				maxx = Math.max(maxx, X[i].getUB() + width[i].getUB());
 				maxy = Math.max(maxy, Y[i].getUB() + height[i].getUB());
 			}
-			IntVar maxX = model.intVar(randomName("diffN"), minx, maxx, true);
-			IntVar minX = model.intVar(randomName("diffN"), minx, maxx, true);
-			IntVar diffX = model.intVar(randomName("diffN"), 0, maxx - minx, true);
-			IntVar maxY = model.intVar(randomName("diffN"), miny, maxy, true);
-			IntVar minY = model.intVar(randomName("diffN"), miny, maxy, true);
-			IntVar diffY = model.intVar(randomName("diffN"), 0, maxy - miny, true);
+			IntVar maxX = model.intVar(model.generateName("diffN_"), minx, maxx, true);
+			IntVar minX = model.intVar(model.generateName("diffN_"), minx, maxx, true);
+			IntVar diffX = model.intVar(model.generateName("diffN_"), 0, maxx - minx, true);
+			IntVar maxY = model.intVar(model.generateName("diffN_"), miny, maxy, true);
+			IntVar minY = model.intVar(model.generateName("diffN_"), miny, maxy, true);
+			IntVar diffY = model.intVar(model.generateName("diffN_"), 0, maxy - miny, true);
 			return Constraint.merge("DiffNWithCumulative",
 					diffNCons,
 					min(minX, X), max(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
@@ -1662,7 +1662,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint sum(BoolVar[] vars, String operator, IntVar sum) {
 		if(sum.getModel().getSettings().enableDecompositionOfBooleanSum()){
 			int[] bounds = VariableUtils.boundsForAddition(vars);
-			IntVar p = sum.getModel().intVar(randomName(), bounds[0], bounds[1], true);
+			IntVar p = sum.getModel().intVar(sum.getModel().generateName("RSLT_"), bounds[0], bounds[1], true);
 			IntLinCombFactory.reduce(vars, Operator.EQ, p).post();
 			return arithm(p, operator, sum);
 		}else {

@@ -157,6 +157,15 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     }
 
     /**
+     * Return the position of the first decision of the last level.
+     * Except for LNS first meta-decision, this should return the position of the last decision
+     * @return the position of the first decision of the last level.
+     */
+    public int indexPreviousLevelLastLevel() {
+        return levels[mLevel.get()];
+    }
+
+    /**
      * Return the number of decision in this decision path.
      * Recall that this decisions path contains at least one decision: {@link RootDecision#ROOT}.
      *
@@ -210,7 +219,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
                 decision = decisions.get(i);
                 st.append(" /\\ ").append(decision.toString());
             }
-        } else if(f < t){
+        } else if (f < t) {
             decision = decisions.get(f);
             st.append(String.format("[%d/%d] %s",
                     decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision.toString())

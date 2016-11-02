@@ -35,8 +35,6 @@ import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 
-import static org.chocosolver.util.tools.StringUtils.randomName;
-
 /**
  * A factory dedicated to problems creation.
  * Created by cprudhom on 20/11/2015.
@@ -112,7 +110,7 @@ public class ProblemMaker {
         int idx = 0;
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
-                IntVar k = model.intVar(randomName(), -n, n, false);
+                IntVar k = model.intVar(model.generateName(), -n, n, false);
                 model.arithm(k, "!=", 0).post();
                 model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
                 vectors[idx] = model.intOffsetView(k, 2 * n * (j - i));

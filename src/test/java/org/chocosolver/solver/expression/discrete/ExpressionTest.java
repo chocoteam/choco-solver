@@ -150,6 +150,15 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test112(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 7);
+        IntVar y = model.intVar(0, 7);
+        IntVar z = model.intVar(0, 9);
+        eval(model, x.add(y).mod(10).eq(z), p, 64);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
     public void test12(int p) {
         Model model = new Model();
         IntVar x = model.intVar(0, 5);

@@ -32,7 +32,6 @@ package org.chocosolver.solver.expression.discrete.arithmetic;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.util.tools.StringUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
@@ -93,28 +92,28 @@ public class NaArExpression implements ArExpression {
             switch (op) {
                 case ADD:
                     bounds = VariableUtils.boundsForAddition(vs);
-                    me = model.intVar(StringUtils.randomName("sum_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("sum_exp_"), bounds[0], bounds[1]);
                     model.sum(vs, "=", me).post();
                     break;
                 case MUL:
                     bounds = VariableUtils.boundsForMultiplication(vs[0], vs[1]);
-                    me = model.intVar(StringUtils.randomName("mul_exp_0_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("mul_exp_0_"), bounds[0], bounds[1]);
                     model.times(vs[0], vs[1], me).post();
                     for (int i = 2; i < vs.length; i++) {
                         IntVar pre = me;
                         bounds = VariableUtils.boundsForMultiplication(pre, vs[i]);
-                        me = model.intVar(StringUtils.randomName("mul_exp_0_"), bounds[0], bounds[1]);
+                        me = model.intVar(model.generateName("mul_exp_0_"), bounds[0], bounds[1]);
                         model.times(pre, vs[i], me).post();
                     }
                     break;
                 case MIN:
                     bounds = VariableUtils.boundsForMinimum(vs);
-                    me = model.intVar(StringUtils.randomName("min_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("min_exp_"), bounds[0], bounds[1]);
                     model.min(me, vs).post();
                     break;
                 case MAX:
                     bounds = VariableUtils.boundsForMaximum(vs);
-                    me = model.intVar(StringUtils.randomName("max_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("max_exp_"), bounds[0], bounds[1]);
                     model.max(me, vs).post();
                     break;
                 default:

@@ -27,54 +27,55 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.objective;
 
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ProblemMaker;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-
-import static java.lang.System.out;
+import org.chocosolver.solver.ResolutionPolicy;
 
 /**
- * <p>
- * Project: choco-solver.
+ * interface to monitor bounds.
  *
- * @author Charles Prud'homme
- * @since 13/09/2016.
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  */
-public class CPProfilerTest {
+public interface IBoundsManager {
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test1() throws IOException {
-        Model s1 = ProblemMaker.makeCostasArrays(7);
-        try (CPProfiler profiler = new CPProfiler(s1, true)) {
-            while (s1.getSolver().solve()) ;
-            out.println(s1.getSolver().getSolutionCount());
-        }
+    /**
+     * @return the ResolutionPolicy of the problem
+     */
+    ResolutionPolicy getPolicy();
+
+    /**
+     * @return true iff the problem is an optimization problem
+     */
+    default boolean isOptimization() {
+        return true;
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test2() throws IOException {
-        Model s1 = ProblemMaker.makeCostasArrays(7);
-        CPProfiler profiler = new CPProfiler(s1, true);
-        while (s1.getSolver().solve()) ;
-        out.println(s1.getSolver().getSolutionCount());
-        profiler.close();
-    }
+    /**
+     * @return the best lower bound computed so far
+     */
+    Number getBestLB();
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test3() throws IOException {
-        Model s1 = ProblemMaker.makeGolombRuler(11);
-        s1.getSolver().setLNS(new RandomNeighborhood((IntVar[]) s1.getHook("ticks"), 10, 0));
-        CPProfiler profiler = new CPProfiler(s1, true);
-        s1.getSolver().limitSolution(10);
-        while (s1.getSolver().solve()) ;
-        out.println(s1.getSolver().getSolutionCount());
-        profiler.close();
-    }
+    /**
+     * @return the best upper bound computed so far
+     */
+    Number getBestUB();
 
+    /**
+     * States that lb is a global lower bound on the problem
+     *
+     * @param lb lower bound
+     */
+    void updateBestLB(Number lb);
+
+    /**
+     * States that ub is a global upper bound on the problem
+     *
+     * @param ub upper bound
+     */
+    void updateBestUB(Number ub);
+
+    /**
+     * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
+     */
+    Number getBestSolutionValue();
 }

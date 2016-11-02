@@ -27,54 +27,58 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.objective;
 
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ProblemMaker;
-import org.testng.annotations.Test;
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.Variable;
 
-import java.io.IOException;
-
-import static java.lang.System.out;
+import java.util.function.Function;
 
 /**
- * <p>
- * Project: choco-solver.
+ * interface to monitor the bounds of the objective variable.
  *
- * @author Charles Prud'homme
- * @since 13/09/2016.
+ * @param <V> type of objective variable
+ * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  */
-public class CPProfilerTest {
+public interface IObjectiveManager<V extends Variable> extends IBoundsManager, ICause {
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test1() throws IOException {
-        Model s1 = ProblemMaker.makeCostasArrays(7);
-        try (CPProfiler profiler = new CPProfiler(s1, true)) {
-            while (s1.getSolver().solve()) ;
-            out.println(s1.getSolver().getSolutionCount());
-        }
-    }
+    /**
+     * @return the objective variable
+     */
+    V getObjective();
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test2() throws IOException {
-        Model s1 = ProblemMaker.makeCostasArrays(7);
-        CPProfiler profiler = new CPProfiler(s1, true);
-        while (s1.getSolver().solve()) ;
-        out.println(s1.getSolver().getSolutionCount());
-        profiler.close();
-    }
+    /**
+     * Informs the manager that a new solution has been found
+     */
+    void updateBestSolution(Number n);
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test3() throws IOException {
-        Model s1 = ProblemMaker.makeGolombRuler(11);
-        s1.getSolver().setLNS(new RandomNeighborhood((IntVar[]) s1.getHook("ticks"), 10, 0));
-        CPProfiler profiler = new CPProfiler(s1, true);
-        s1.getSolver().limitSolution(10);
-        while (s1.getSolver().solve()) ;
-        out.println(s1.getSolver().getSolutionCount());
-        profiler.close();
-    }
+    /**
+     * Informs the manager that a new solution has been found
+     */
+    void updateBestSolution();
 
+    /**
+     * Set a user-defined cut computer to avoid "worse" solutions
+     */
+    void setCutComputer(Function<Number, Number> cutComputer);
+
+    /**
+     * Define a strict cut computer where in the next solution to find should be strictly greater (resp. lesser) than
+     * the best solution found so far when maximizing (resp. minimizing) a problem.
+     */
+    void setStrictDynamicCut();
+
+    /**
+     * Define a <i>walking</i> cut computer where in the next solution to find should be greater than (resp. less than)
+     * or equal to the best solution found so far when maximizing (resp. minimizing) a problem.
+     */
+    void setWalkingDynamicCut();
+
+    /**
+     * Prevent the model from computing worse quality solutions
+     *
+     * @throws org.chocosolver.solver.exception.ContradictionException if posting this cut fails
+     */
+    void postDynamicCut() throws ContradictionException;
 }

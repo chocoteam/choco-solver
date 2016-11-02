@@ -139,6 +139,13 @@ public interface Variable extends Identity, Comparable<Variable> {
     int[] getPIndices();
 
     /**
+     * Update the position of the variable in the propagator at position in {@link #getPropagators()}.
+     * @param pos position of the propagator
+     * @param val position of this variable in the propagator
+     */
+    void setPIndice(int pos, int val);
+
+    /**
      * This variable's propagators are stored in specific way which ease iteration based on propagation conditions.
      * Any event indicates, through the <i>dependency list</i> which propagators should be executed.
      * Thus, an event indicates a list of <code>i</code>s, passed as parameter, which help returning the right propagators.
@@ -203,10 +210,11 @@ public interface Variable extends Identity, Comparable<Variable> {
      * Remove a propagator from the list of propagator of <code>this</code>.
      * SHOULD BE CONTAINED IN THIS.
      *
+     * @param idxInProp  index of the variable in the propagator
      * @param propagator the propagator to remove
      *
      */
-    void unlink(Propagator propagator);
+    void unlink(Propagator propagator, int idxInProp);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>

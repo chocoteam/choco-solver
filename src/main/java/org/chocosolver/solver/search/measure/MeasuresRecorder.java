@@ -29,7 +29,7 @@
  */
 package org.chocosolver.solver.search.measure;
 
-import org.chocosolver.solver.objective.BoundsManager;
+import org.chocosolver.solver.objective.IBoundsManager;
 import org.chocosolver.solver.search.SearchState;
 
 import java.util.Objects;
@@ -97,12 +97,11 @@ public final class MeasuresRecorder extends Measures {
      * Reset every measure to its default value (mostly 0)
      */
     public void reset() {
-        // TODO state = SearchState.NEW; // CPRU ?
+        state = SearchState.NEW;
         objectiveOptimal = false;
         solutionCount = 0;
         timeCount = 0;
-        // TODO readingTimeCount = 0; //CPRU ?
-        // TODO stopWatch() //CPRU
+        stopStopwatch();
         nodeCount = 0;
         backtrackCount = 0;
         failCount = 0;
@@ -180,7 +179,7 @@ public final class MeasuresRecorder extends Measures {
      * Update the bounds managed
      * @param boundsManager new bound manager
      */
-    public final void setBoundsManager(BoundsManager<?> boundsManager) {
+    public final void setBoundsManager(IBoundsManager boundsManager) {
         Objects.requireNonNull(boundsManager);
         this.boundsManager = boundsManager;
     }

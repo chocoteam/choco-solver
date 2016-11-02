@@ -31,7 +31,6 @@ package org.chocosolver.solver.expression.discrete.arithmetic;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.StringUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Map;
@@ -101,7 +100,7 @@ public class UnArExpression implements ArExpression {
                     break;
                 case SQR:
                     int[] bounds = VariableUtils.boundsForMultiplication(v, v);
-                    me = model.intVar(StringUtils.randomName("sqr_exp_"), bounds[0], bounds[1]);
+                    me = model.intVar(model.generateName("sqr_exp_"), bounds[0], bounds[1]);
                     model.times(v, v, me).post();
                     break;
                 default:

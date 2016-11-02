@@ -31,6 +31,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.Except_0;
 import org.chocosolver.memory.ICondition;
+import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -265,6 +266,22 @@ public interface Settings  {
      * @return <tt>true<tt/> if AC is enabled to filter ternary sums.
      */
     default boolean enableACOnTernarySum(){
+        return false;
+    }
+
+    /**
+     * Define the prefix of internally created variables (through a call to {@link Model#generateName()}
+     * @return the prefix of all internally created variables
+     */
+    default String defaultPrefix(){
+        return "TMP_";
+    }
+
+    /**
+     * @return <i>true</i> when an underlying SAT solver is used to manage clauses declared through {@link ISatFactory},
+     *         <i>false</i> when clauses are managed with CSP constraints only.
+     */
+    default boolean enableSAT(){
         return false;
     }
 

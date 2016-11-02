@@ -560,6 +560,14 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     /**
+     * @return the index of the propagator within its idx^th variable
+     */
+    @SuppressWarnings("unused")
+    public int getVIndice(int idx) {
+        return vindices[idx];
+    }
+
+    /**
      * Changes the index of a variable in this propagator.
      * This method should not be called by the user.
      *

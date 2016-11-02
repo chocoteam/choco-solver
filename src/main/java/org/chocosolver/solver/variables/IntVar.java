@@ -418,7 +418,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @param propagator the cause that requires to monitor delta
      * @return a delta monitor
      */
-    <DM extends IIntDeltaMonitor> DM monitorDelta(ICause propagator);
+    IIntDeltaMonitor monitorDelta(ICause propagator);
 
 
     /**
