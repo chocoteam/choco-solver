@@ -72,7 +72,7 @@ public class ParetoFront {
 		Assert.assertEquals(3, paretoFront.size());
 		for(Solution s:paretoFront){
 			System.out.println("a = "+s.getIntVal(a)+" and b = "+s.getIntVal(b));
-			Assert.assertEquals(2,(int)s.getIntVal(c));
+			Assert.assertEquals(2, s.getIntVal(c));
 		}
 	}
 }
