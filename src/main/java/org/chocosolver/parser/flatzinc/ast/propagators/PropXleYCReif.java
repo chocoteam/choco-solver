@@ -36,65 +36,84 @@ import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
+ * (X <= Y + C) <=> r
  * <p>
  * Project: choco-parsers.
  *
  * @author Charles Prud'homme
  * @since 03/05/2016.
  */
-public class PropXneCReif extends Propagator<IntVar> {
+public class PropXleYCReif extends Propagator<IntVar> {
 
-    IntVar var;
     int cste;
-    BoolVar r;
 
-    public PropXneCReif(IntVar x, int c, BoolVar r) {
-        super(new IntVar[]{x, r}, PropagatorPriority.BINARY, false);
+    public PropXleYCReif(IntVar x, IntVar y, int c, BoolVar r) {
+        super(new IntVar[]{x, y, r}, PropagatorPriority.TERNARY, false);
         this.cste = c;
-        this.var = x;
-        this.r = r;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (r.getLB() == 1) {
-            if (var.removeValue(cste, this)) {
-                setPassive();
+        if (vars[2].getLB() == 1) {
+            vars[0].updateUpperBound(vars[1].getUB() + cste, this);
+            vars[1].updateLowerBound(vars[0].getLB() - cste, this);
+            if (vars[0].getUB() <= vars[1].getLB() + cste) {
+                this.setPassive();
             }
-        } else if (r.getUB() == 0) {
-            setPassive();
-            var.instantiateTo(cste, this);
         } else {
-            if (!var.contains(cste)) {
-                setPassive();
-                r.setToTrue(this);
-            } else if (var.isInstantiatedTo(cste)) {
-                setPassive();
-                r.setToFalse(this);
+            if (vars[2].getUB() == 0) {
+                vars[0].updateLowerBound(vars[1].getLB()  + cste + 1, this);
+                vars[1].updateUpperBound(vars[0].getUB() - cste - 1, this);
+                if (vars[0].getLB() > vars[1].getUB() + cste) {
+                    setPassive();
+                }
+            } else {
+                if (vars[0].getUB() <= vars[1].getLB() + cste) {
+                    setPassive();
+                    vars[2].instantiateTo(1, this);
+                } else if (vars[0].getLB() > vars[1].getUB() + cste) {
+                    setPassive();
+                    vars[2].instantiateTo(0, this);
+                }
             }
         }
     }
 
     @Override
     public ESat isEntailed() {
-        return ESat.TRUE;
-        //throw new UnsupportedOperationException("isEntailed not implemented ");
+        throw new UnsupportedOperationException("isEntailed not implemented ");
     }
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean nrules = ruleStore.addPropagatorActivationRule(this);
-        if (var == vars[1]) {
-            if (vars[1].isInstantiatedTo(1)) {
-                nrules |= ruleStore.addRemovalRule(vars[0], cste);
+        if (var == vars[2]) {
+            if (vars[2].isInstantiatedTo(1)) {
+                nrules |= ruleStore.addUpperBoundRule(vars[0]);
+                nrules |= ruleStore.addLowerBoundRule(vars[1]);
             } else {
-                nrules |= ruleStore.addFullDomainRule(vars[0]);
+                nrules |= ruleStore.addLowerBoundRule(vars[0]);
+                nrules |= ruleStore.addUpperBoundRule(vars[1]);
             }
         } else {
-            nrules |= ruleStore.addFullDomainRule(vars[1]);
+            if (var == vars[0]) {
+                if (evt == IntEventType.DECUPP) {
+                    nrules |= ruleStore.addUpperBoundRule(vars[1]);
+                } else {
+                    nrules |= ruleStore.addLowerBoundRule(vars[1]);
+                }
+            } else if (var == vars[1]) {
+                if (evt == IntEventType.DECUPP) {
+                    nrules |= ruleStore.addUpperBoundRule(vars[0]);
+                } else {
+                    nrules |= ruleStore.addLowerBoundRule(vars[0]);
+                }
+            }
+            nrules |= ruleStore.addFullDomainRule(vars[2]);
         }
         return nrules;
     }

@@ -3,7 +3,7 @@ __author__ = 'kyzrsoze'
 from extractFromLog import read
 import argparse
 import os
-from pylatex import Document, Section, Subsection, Table, TikZ, Axis, \
+from pylatex import Document, Section, Subsection, Table, Tabular, TikZ, Axis, \
     Plot, Package, Subsubsection
 
 
@@ -11,19 +11,24 @@ parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of flatzinc files to pretty.',
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2015.txt'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2012.txt'
 )
 parser.add_argument(
     "-d", "--directory",
     help="Log files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2015/20151113'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2012/20160630'
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'C2015','SNA322'
+        'C4PAR',
+        'C4DFS',
+        'C4DFS+LC',
+        'C4DFS+COS',
+        'C4LDS+COS',
+        'C4CBJ+LC',
         ]
 )
 parser.add_argument(
@@ -31,7 +36,7 @@ parser.add_argument(
     help='Output format type: true is when version < 3.3.2, false otherwise, \'name:options\'',
     nargs='+',
     default=[
-        True,False
+        False,False,False,False,False,False
         ]
 )
 

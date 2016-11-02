@@ -86,7 +86,7 @@ parser.add_argument(
     default='.:'
     # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
     # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160624/choco-parsers.jar',
-    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160627/choco-parsers.jar',
+    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160711/choco-parsers.jar',
 )
 
 parser.add_argument(
@@ -114,26 +114,14 @@ parser.add_argument(
     "-p", "--process",
     help='Number of processes to run in parallel',
     type=int,
-    default=8
+    default=1
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'C4DFS:-stat',
-        'C4LDS:-stat -tree 1',
-        'C4DDS:-stat -tree 2',
-        'C4CBJ:-stat -tree 3',
-        'C4DFS+LC:-stat -f',
-        'C4LDS+LC:-stat -f -tree 1',
-        'C4DDS+LC:-stat -f -tree 2',
-        'C4CBJ+LC:-stat -f -tree 3',
-        'C4DFS+COS:-stat -f -cos',
-        'C4LDS+COS:-stat -f -cos -tree 1',
-        'C4DDS+COS:-stat -f -cos -tree 2',
-        'C4CBJ+COS:-stat -f -cos -tree 3',
-        # 'SADAC:-stat'
+        'C4PAR:-stat -p 6',
     ]
 )
 parser.add_argument(

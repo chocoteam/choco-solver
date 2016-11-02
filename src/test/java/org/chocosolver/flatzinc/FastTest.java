@@ -1,31 +1,31 @@
 /**
- * Copyright (c) 2016, Ecole des Mines de Nantes
+ * Copyright (c) 2014, chocoteam
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- * must display the following acknowledgement:
- * This product includes software developed by the <organization>.
- * 4. Neither the name of the <organization> nor the
- * names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
- * <p>
- * THIS SOFTWARE IS PROVIDED BY <COPYRIGHT HOLDER> ''AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the {organization} nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.chocosolver.flatzinc;
 
@@ -73,6 +73,16 @@ public class FastTest {
         execute(pre2012 + "filters+filter+ar_1_2.fzn", 4, 18, 67400, true, true);
     }
 
+    @Test(groups = "2013,close<1m,mzn,cbj", timeOut = 1200000)
+    public void failSolutionTest() throws Exception {
+        execute(pre2013 + "league+league+model30-8-4.fzn", 4, 18, 67400, true, false);
+    }
+
+    @Test(groups = "2013,close<1m,mzn,cbj", timeOut = 1200000)
+    public void failException() throws Exception {
+        execute(pre2013 + "celar+celar+CELAR6-SUB2.fzn", 4, 18, 67400, true, false);
+    }
+
     private void execute(String name, int nbsol, int bval, int nbnod, boolean complet, boolean exp) throws Exception {
         ClassLoader cl = this.getClass().getClassLoader();
         String file = cl.getResource(name).getFile();
@@ -114,6 +124,7 @@ public class FastTest {
     }
 
     public static final String pre2012 = "flatzinc" + File.separator + "2012" + File.separator;
+    public static final String pre2013 = "flatzinc" + File.separator + "2013" + File.separator;
 
     /**
      * @return Tests closed in less than 1m
@@ -150,12 +161,12 @@ public class FastTest {
                 {pre2012 + "solbat+sb+sb_12_12_5_1.fzn", 1, 0, 1315, true},
                 {pre2012 + "solbat+sb+sb_13_13_5_4.fzn", 1, 0, 75419, true},
                 {pre2012 + "solbat+sb+sb_14_14_6_0.fzn", 1, 0, 383, true},
-                {pre2012 + "still-life-wastage+still-life+09.fzn", 5, 43, 138590, true},
-                {pre2012 + "still-life-wastage+still-life+10.fzn", 7, 54, 217194, true},
+                {pre2012 + "still-life-wastage+still-life+09.fzn", 5, 43, 109471, true},
+                {pre2012 + "still-life-wastage+still-life+10.fzn", 7, 54, 164574, true},
                 {pre2012 + "tpp+tpp+tpp_3_5_20_1.fzn", 74, 127, 3751495, true},
-                {pre2012 + "tpp+tpp+tpp_5_3_20_1.fzn", 68, 141, 3526579, true},
+                {pre2012 + "tpp+tpp+tpp_5_3_20_1.fzn", 68, 141, 3526578, true},
                 {pre2012 + "tpp+tpp+tpp_5_5_20_1.fzn", 54, 115, 3215964, true},
-                {pre2012 + "tpp+tpp+tpp_7_5_20_1.fzn", 76, 105, 5869335, true},
+                {pre2012 + "tpp+tpp+tpp_7_5_20_1.fzn", 76, 105, 5869333, true},
         };
     }
 

@@ -1,30 +1,32 @@
-/*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 2014, chocoteam
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the {organization} nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.set.hash.TIntHashSet;
@@ -430,11 +432,13 @@ public enum FConstraint {
                         if (a.isInstantiated()) {
                             var = b;
                             cste = a.getValue();
-                            new Constraint("reif(a>=cste,r)", new PropXleCReif(var, cste, r)).post();
+                            new Constraint("reif(cste <= b,r)", new PropXgeCReif(var, cste, r)).post();
+//                            model.arithm(a, "<=", b).reifyWith(r);
                         } else {
                             var = a;
                             cste = b.getValue();
-                            new Constraint("reif(a>=cste,r)", new PropXgeCReif(var, cste, r)).post();
+                            new Constraint("reif(a <= cste,r)", new PropXleCReif(var, cste, r)).post();
+//                            model.arithm(a, "<=", b).reifyWith(r);
                         }
                     } else {
                         new Constraint("reif(a<=b,r)", new PropXleYReif(a, b, r)).post();
@@ -468,21 +472,39 @@ public enum FConstraint {
 
             if (bs.length > 0) {
                 if (((FznSettings) model.getSettings()).adhocReification()) {
-                    // detect boolSumEq bool reified
-                    int n = bs.length;
-                    boolean boolSum = c.isBool();
-                    for (int i = 0; i < n; i++) {
-                        boolSum &= bs[i].isBool();
-                        boolSum &= as[i] == 1;
-                    }
-                    if (boolSum && c.isInstantiatedTo(0)) {
-                        BoolVar[] bbs = new BoolVar[n + 1];
-                        for (int i = 0; i < n; i++) {
-                            bbs[i] = (BoolVar) bs[i];
+                    if(bs.length == 1){
+                        if (bs[0].isInstantiated() || c.isInstantiated()) {
+                            IntVar x;
+                            int t;
+                            if (bs[0].isInstantiated()) {
+                                x = c;
+                                t = bs[0].getValue();
+                            } else {
+                                x = bs[0];
+                                t = c.getValue();
+                            }
+                            new Constraint("reif(a=cste,r)", new PropXeqCReif(x, t, r)).post();
+                        } else {
+                            new Constraint("reif(a=b,r)", new PropXeqYReif(bs[0], c, r)).post();
                         }
-                        bbs[bs.length] = r;
-                        new Constraint("BoolSumLeq0Reif", new PropBoolSumEq0Reif(bbs)).post();
                         return;
+                    } else {
+                        // detect boolSumEq bool reified
+                        int n = bs.length;
+                        boolean boolSum = c.isBool();
+                        for (int i = 0; i < n; i++) {
+                            boolSum &= bs[i].isBool();
+                            boolSum &= as[i] == 1;
+                        }
+                        if (boolSum && c.isInstantiatedTo(0)) {
+                            BoolVar[] bbs = new BoolVar[n + 1];
+                            for (int i = 0; i < n; i++) {
+                                bbs[i] = (BoolVar) bs[i];
+                            }
+                            bbs[bs.length] = r;
+                            new Constraint("BoolSumLeq0Reif", new PropBoolSumEq0Reif(bbs)).post();
+                            return;
+                        }
                     }
                 }
                 model.scalar(bs, as, "=", c).reifyWith(r);
@@ -543,7 +565,8 @@ public enum FConstraint {
                             return;
                         }
                         if (as[0] == 1 && as[1] == -1) {
-                            model.arithm(bs[0], "<=", bs[1], "+", c.getValue()).reifyWith(r);
+                            new Constraint("X <= Y + c", new PropXleYCReif(bs[0], bs[1], c.getValue(), r)).post();
+//                            model.arithm(bs[0], "<=", bs[1], "+", c.getValue()).reifyWith(r);
                             return;
                         }
                     }

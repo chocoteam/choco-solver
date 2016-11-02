@@ -118,7 +118,7 @@ then
     ARGS=$ARGS" -f"
 fi
 
-CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS}"
+CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS} -stat"
 
 echo "% $CMD"
 eval ${CMD}
