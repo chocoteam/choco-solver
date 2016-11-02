@@ -31,7 +31,6 @@ package org.chocosolver.parser.flatzinc.ast.expression;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.util.tools.StringUtils;
 
 /*
 * User : CPRUDHOM
@@ -58,7 +57,7 @@ public abstract class ESet extends Expression {
     @Override
     public final SetVar setVarValue(Model model) {
         int[] values = enumVal();
-        return model.setVar(StringUtils.randomName("set_const"), values);
+        return model.setVar(model.generateName("set_const"), values);
     }
 
     //

@@ -52,7 +52,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.util.tools.StringUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
@@ -134,7 +133,7 @@ public enum FConstraint {
             for (int i = 0, j = 1; i < values.length; i++, j += 2) {
                 values[i] = j;
             }
-            IntVar res = model.intVar(StringUtils.randomName(), values);
+            IntVar res = model.intVar(model.generateName(), values);
             model.sum(as, "=", res).post();
 
         }
@@ -1207,7 +1206,7 @@ public enum FConstraint {
 
             IntVar[] x = exps.get(0).toIntVarArray(model);
             IntVar y = exps.get(1).intVarValue(model);
-            model.element(y, x, model.intVar(StringUtils.randomName(), 0, x.length - 1, false), 0).post();
+            model.element(y, x, model.intVar(model.generateName(), 0, x.length - 1, false), 0).post();
 
         }
     },
@@ -1364,11 +1363,11 @@ public enum FConstraint {
             BoolVar b = exps.get(3).boolVarValue(model);
             Constraint cstr;
             if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(StringUtils.randomName(), 0, decVars.length, true);
+                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
                 cstr = model.count(valVar.getValue(), decVars, nbOcc);
                 model.arithm(nbOcc, "=", countVar).reifyWith(b);
             } else {
-                IntVar value = model.intVar(StringUtils.randomName(), valVar.getLB(), valVar.getUB());
+                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
                 cstr = model.count(value, decVars, countVar);
                 model.arithm(value, "=", valVar).reifyWith(b);
             }
@@ -1475,8 +1474,8 @@ public enum FConstraint {
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
 
-            SetVar ab = model.setVar(StringUtils.randomName(), a.getLB().toArray(), a.getUB().toArray());
-            SetVar ba = model.setVar(StringUtils.randomName(), b.getLB().toArray(), b.getUB().toArray());
+            SetVar ab = model.setVar(model.generateName(), a.getLB().toArray(), a.getUB().toArray());
+            SetVar ba = model.setVar(model.generateName(), b.getLB().toArray(), b.getUB().toArray());
 
             TIntHashSet values = new TIntHashSet();
             for (int i : a.getUB()) {
@@ -1487,8 +1486,8 @@ public enum FConstraint {
             }
             int[] env = values.toArray();
             Arrays.sort(env);
-            SetVar c = model.setVar(StringUtils.randomName(), new int[]{}, env);
-            IntVar min = model.intVar(StringUtils.randomName(), env[0], env[env.length - 1]);
+            SetVar c = model.setVar(model.generateName(), new int[]{}, env);
+            IntVar min = model.intVar(model.generateName(), env[0], env[env.length - 1]);
 
             BoolVar _b1 = model.subsetEq(a, b).reify();
 
@@ -1510,8 +1509,8 @@ public enum FConstraint {
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
 
-            SetVar ab = model.setVar(StringUtils.randomName(), a.getLB().toArray(), a.getUB().toArray());
-            SetVar ba = model.setVar(StringUtils.randomName(), b.getLB().toArray(), b.getUB().toArray());
+            SetVar ab = model.setVar(model.generateName(), a.getLB().toArray(), a.getUB().toArray());
+            SetVar ba = model.setVar(model.generateName(), b.getLB().toArray(), b.getUB().toArray());
 
             TIntHashSet values = new TIntHashSet();
             for (int i : a.getUB()) {
@@ -1522,8 +1521,8 @@ public enum FConstraint {
             }
             int[] env = values.toArray();
             Arrays.sort(env);
-            SetVar c = model.setVar(StringUtils.randomName(), new int[]{}, env);
-            IntVar min = model.intVar(StringUtils.randomName(), env[0], env[env.length - 1]);
+            SetVar c = model.setVar(model.generateName(), new int[]{}, env);
+            IntVar min = model.intVar(model.generateName(), env[0], env[env.length - 1]);
 
             BoolVar _b1 = model.subsetEq(a, b).reify();
             BoolVar _b2 = model.allDifferent(a, b).reify();
@@ -1587,8 +1586,8 @@ public enum FConstraint {
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
             SetVar c = exps.get(2).setVarValue(model);
-            SetVar ab = model.setVar(StringUtils.randomName(), a.getLB().toArray(), a.getUB().toArray());
-            SetVar ba = model.setVar(StringUtils.randomName(), b.getLB().toArray(), b.getUB().toArray());
+            SetVar ab = model.setVar(model.generateName(), a.getLB().toArray(), a.getUB().toArray());
+            SetVar ba = model.setVar(model.generateName(), b.getLB().toArray(), b.getUB().toArray());
             model.partition(new SetVar[]{ab, b}, a).post();
             model.partition(new SetVar[]{ba, a}, b).post();
             model.union(new SetVar[]{ab, ba}, c).post();
