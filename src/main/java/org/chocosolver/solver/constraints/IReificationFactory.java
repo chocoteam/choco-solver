@@ -276,7 +276,7 @@ public interface IReificationFactory {
 	 * @param C an int
 	 * @param B a boolean variable
 	 */
-	default void reifyXgreaterhanC(IntVar X, int C, BoolVar B){
+	default void reifyXgreaterthanC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X > C)<=>B", new PropXgtCReif(X, C, B)));
