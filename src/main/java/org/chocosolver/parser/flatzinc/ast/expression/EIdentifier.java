@@ -1,35 +1,36 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+ * Copyright (c) 2014, chocoteam
+ * All rights reserved.
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the {organization} nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.chocosolver.parser.flatzinc.ast.expression;
 
 import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -125,9 +126,9 @@ public final class EIdentifier extends Expression {
     @Override
     public BoolVar boolVarValue(Model model) {
         if (Integer.class.isInstance(object)) {
-            return ((Integer) object == 1) ? model.ONE() : model.ZERO();
+            return ((Integer) object == 1) ? model.boolVar(true) : model.boolVar(false);
         } else if (Boolean.class.isInstance(object)) {
-            return ((Boolean) object) ? model.ONE() : model.ZERO();
+            return ((Boolean) object) ? model.boolVar(true) : model.boolVar(false);
         }
         return (BoolVar) object;
     }
@@ -140,14 +141,14 @@ public final class EIdentifier extends Expression {
                 int[] values = (int[]) object;
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Integer) object == 1) ? model.ONE() : model.ZERO();
+                    vars[i] = ((Integer) object == 1) ? model.boolVar(true) : model.boolVar(false);
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = ((Boolean) object) ? model.ONE() : model.ZERO();
+                    vars[i] = ((Boolean) object) ? model.boolVar(true) : model.boolVar(false);
                 }
                 return vars;
             }

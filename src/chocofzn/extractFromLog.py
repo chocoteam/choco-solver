@@ -48,28 +48,36 @@ def read(dir, fname, opt, old):
     if len(parts) > 0:
         if len(sndparts) > 0 and parts[1] == sndparts[1]:
             parts = sndparts
-        solution = [parts[1]]
+        if old is True:
+            solution = [parts[1]]
+        else:
+            solution = [parts[2]]
         if re.search(ropt, last):
             # extract values
             if old is True:
                 solution.append(float(parts[8][:-1].replace(',', '.')))  # time
                 solution.append(parts[9])  # nodes
+                if parts[3] == 'Minimize':
+                    solution.append('MIN')
+                else:
+                    solution.append('MAX')
+                solution.append(int(parts[6].replace(',', '')))  # obj
             else:
-                solution.append(float(parts[9][:-1].replace(',', '.')))  # time
-                solution.append(parts[10])  # nodes
-            if parts[3] == 'Minimize':
-                solution.append('MIN')
-            else:
-                solution.append('MAX')
-            solution.append(int(parts[6].replace(',', '')))  # obj
+                solution.append(float(parts[10][:-1].replace(',', '.')))  # time
+                solution.append(parts[11])  # nodes
+                if parts[4] == 'Minimize':
+                    solution.append('MIN')
+                else:
+                    solution.append('MAX')
+                solution.append(int(parts[7].replace(',', '')))  # obj
         else:
             # extract values
             if old is True:
                 solution.append(float(parts[4][:-1].replace(',', '.')))  # time
                 solution.append(parts[5])  # nodes
             else:
-                solution.append(float(parts[5][:-1].replace(',', '.')))  # time
-                solution.append(parts[6])  # nodes
+                solution.append(float(parts[6][:-1].replace(',', '.')))  # time
+                solution.append(parts[7])  # nodes
             solution.append('SAT')
             solution.append(int(0))  # obj
         solution.append('unknown')

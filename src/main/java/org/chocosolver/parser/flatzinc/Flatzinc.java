@@ -1,28 +1,31 @@
 /**
- * Copyright (c) 1999-2014, Ecole des Mines de Nantes
+ * Copyright (c) 2014, chocoteam
  * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
- * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- * * Neither the name of the Ecole des Mines de Nantes nor the
- * names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
- * <p>
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of the {organization} nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.chocosolver.parser.flatzinc;
 
@@ -32,23 +35,14 @@ import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Variable;
 import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.nio.file.Paths;
 import java.util.List;
-
-import static org.chocosolver.solver.search.strategy.SearchStrategyFactory.*;
 
 /**
  * A Flatzinc to Choco parser.
@@ -66,29 +60,15 @@ public class Flatzinc extends RegParser {
     @Argument(required = true, metaVar = "file", usage = "Flatzinc file to parse.")
     public String instance;
 
-    @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).", required = false)
-    protected boolean all = false;
-
-    @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ", required = false)
-    protected boolean free = false;
-
-    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).", required = false)
-    protected int nb_cores = 1;
-
     // Contains mapping with variables and output prints
     public Datas[] datas;
-
-    protected ParallelPortfolio portfolio = new ParallelPortfolio();
-
-    boolean userinterruption = true;
-    final Thread statOnKill;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
     public Flatzinc() {
-        this(false,false,1,-1);
+        this(false, false, 1, -1);
     }
 
     public Flatzinc(boolean all, boolean free, int nb_cores, long tl) {
@@ -98,7 +78,11 @@ public class Flatzinc extends RegParser {
         this.nb_cores = nb_cores;
         this.tl_ = tl;
         this.defaultSettings = new FznSettings();
-        statOnKill = new Thread() {
+    }
+
+    @Override
+    public Thread actionOnKill() {
+        return new Thread() {
             public void run() {
                 if (userinterruption) {
                     datas[bestModelID()].doFinalOutPut(userinterruption);
@@ -106,7 +90,6 @@ public class Flatzinc extends RegParser {
                 }
             }
         };
-        Runtime.getRuntime().addShutdownHook(statOnKill);
     }
 
     //***********************************************************************************
@@ -116,27 +99,28 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
-        assert nb_cores>0;
-        if(nb_cores>1) {
-            System.out.printf("%% "+ nb_cores+" solvers in parallel\n");
-        }else{
+        assert nb_cores > 0;
+        if (nb_cores > 1) {
+            System.out.printf("%% " + nb_cores + " solvers in parallel\n");
+        } else {
             System.out.printf("%% simple solver\n");
         }
         datas = new Datas[nb_cores];
+        String iname = Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(instance + "_" + (i+1));
+            Model threadModel = new Model(iname + "_" + (i + 1));
             threadModel.set(defaultSettings);
             portfolio.addModel(threadModel);
-            datas[i] = new Datas(threadModel,all,stat);
+            datas[i] = new Datas(threadModel, all, stat);
         }
         listeners.forEach(ParserListener::afterSolverCreation);
     }
 
     @Override
-    public void parseInputFile() throws FileNotFoundException {
+    public void parseInputFile() throws Exception {
         listeners.forEach(ParserListener::beforeParsingFile);
         List<Model> models = portfolio.getModels();
-        for (int i=0;i<models.size();i++) {
+        for (int i = 0; i < models.size(); i++) {
             parse(models.get(i), datas[i], new FileInputStream(new File(instance)));
         }
         listeners.forEach(ParserListener::afterParsingFile);
@@ -152,144 +136,34 @@ public class Flatzinc extends RegParser {
         parser.setBuildParseTree(false);
         parser.setTrimParseTree(false);
         parser.flatzinc_model(target, data, all, free);
-        // make complementary search
-        makeComplementarySearch(target);
-    }
-
-
-    @Override
-    public void configureSearch() {
-        listeners.forEach(ParserListener::beforeConfiguringSearch);
-        for (int i = 0; i < nb_cores; i++) {
-            configureModel(i);
-        }
-        listeners.forEach(ParserListener::afterConfiguringSearch);
     }
 
     @Override
     public void solve() {
         listeners.forEach(ParserListener::beforeSolving);
-
-        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy()!=ResolutionPolicy.SATISFACTION || all;
+        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         if (enumerate) {
-            while (portfolio.solve()){
+            while (portfolio.solve()) {
                 datas[bestModelID()].onSolution();
             }
-        }else{
-            if(portfolio.solve()){
+        } else {
+            if (portfolio.solve()) {
                 datas[bestModelID()].onSolution();
             }
         }
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
         datas[bestModelID()].doFinalOutPut(userinterruption);
-
         listeners.forEach(ParserListener::afterSolving);
     }
 
-    @Override
-    public Model getModel() {
-        Model m = portfolio.getBestModel();
-        if (m==null){
-            m = portfolio.getModels().get(0);
-        }
-        return m;
-    }
-
-    private int bestModelID(){
+    private int bestModelID() {
         Model best = getModel();
-        for(int i=0;i<nb_cores;i++){
-            if(best == portfolio.getModels().get(i)) {
+        for (int i = 0; i < nb_cores; i++) {
+            if (best == portfolio.getModels().get(i)) {
                 return i;
             }
         }
         return -1;
-    }
-
-    private void configureModel(int workerID) {
-
-        Model worker = portfolio.getModels().get(workerID);
-        Solver solver = worker.getSolver();
-        if (tl_ > -1) {
-            solver.limitTime(tl);
-        }
-        ResolutionPolicy policy = worker.getResolutionPolicy();
-
-        // compute decision variables
-        Variable[] varsX;
-        if (solver.getStrategy() != null && solver.getStrategy().getVariables().length > 0) {
-            varsX = solver.getStrategy().getVariables();
-        }else{
-            varsX = worker.getVars();
-        }
-        IntVar[] dvars = new IntVar[varsX.length];
-        int k = 0;
-        for (int j = 0; j < varsX.length; j++) {
-            if ((varsX[j].getTypeAndKind() & Variable.INT) > 0) {
-                dvars[k++] = (IntVar) varsX[j];
-            }
-        }
-        IntVar[] vars = Arrays.copyOf(dvars, k);
-
-        // set heuristic
-        switch (workerID) {
-            case 0:
-                // MZN Search + LC (if free)
-                if(free)solver.set(lastConflict(solver.getStrategy()));
-                break;
-            case 1:
-                // MZN Search + LC (if first thread is not free)
-                if(!free)solver.set(lastConflict(solver.getStrategy()));
-                break;
-            case 2:
-                // Choco default search
-                solver.set(intVarSearch(vars));
-                break;
-            case 3:
-                // Choco default search with restars and pglns
-                solver.set(intVarSearch(vars));
-                solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
-                // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
-                break;
-            case 4:
-                solver.set(lastConflict(activityBasedSearch(vars)));
-                solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
-                solver.setNoGoodRecordingFromRestarts();
-                break;
-            case 5:
-                solver.set(lastConflict(solver.getStrategy()));
-                solver.setCBJLearning(false,false);
-                break;
-            case 6:
-                switch (policy) {
-                    case SATISFACTION: {
-                        solver.set(lastConflict(activityBasedSearch(vars)));
-                        solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
-                        solver.setNoGoodRecordingFromRestarts();
-                    }
-                    break;
-                    default: {
-                        solver.set(lastConflict(solver.getStrategy()));
-                        // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
-                    }
-                    break;
-                }
-                break;
-            case 7:
-                switch (policy) {
-                    case SATISFACTION: {
-                        solver.set(lastConflict(activityBasedSearch(vars)));
-                        solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(solver.getModel(), 0), 1000);
-                        solver.setNoGoodRecordingFromRestarts();
-                    }
-                    break;
-                    default: {
-                        solver.set(lastConflict(solver.getStrategy()));
-                        // TODO LNSFactory.pglns(solver, vars, 30, 10, 200, w, new FailCounter(solver, 100));
-                    }
-                    break;
-                }
-                break;
-        }
     }
 }

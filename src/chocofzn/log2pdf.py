@@ -3,7 +3,7 @@ __author__ = 'kyzrsoze'
 from extractFromLog import read
 import argparse
 import os
-from pylatex import Document, Section, Subsection, Table, TikZ, Axis, \
+from pylatex import Document, Section, Subsection, Table, Tabular, TikZ, Axis, \
     Plot, Package, Subsubsection
 
 
@@ -11,19 +11,24 @@ parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of flatzinc files to pretty.',
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2015.txt'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2012.txt'
 )
 parser.add_argument(
     "-d", "--directory",
     help="Log files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2015/20151113'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2012/20160630'
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'C2015','SNA322'
+        'C4PAR',
+        'C4DFS',
+        'C4DFS+LC',
+        'C4DFS+COS',
+        'C4LDS+COS',
+        'C4CBJ+LC',
         ]
 )
 parser.add_argument(
@@ -31,7 +36,7 @@ parser.add_argument(
     help='Output format type: true is when version < 3.3.2, false otherwise, \'name:options\'',
     nargs='+',
     default=[
-        True,False
+        False,False,False,False,False,False
         ]
 )
 
@@ -114,8 +119,83 @@ with doc.create(TikZ()):
 coords = {}
 for o in options:
     coords[o] = []
+
+# Second summary
+section = Section('Summary : %d problems, %d configurations.' % (len(fnames), len(options)))
+doc.append(section)
+table = Tabular('l|l|l|l')
+table.add_hline()
+table.add_row(("Param.", 'Proofs', "Found best", "Times best (< %.1f)" % maxtime))
+table.add_hline()
+for opt in options:
+    proof = 0
+    fbest = 0
+    tbest = 0
+    for fname in fnames:
+        print(opt + '->' + fname)
+        solutions = optPerSol[fname]
+        gbest = solutions[0][4]
+        mybest = gbest
+        gtime = solutions[0][1]
+        mytime = gtime
+        b = 0
+        for i in range(0, len(solutions)):
+            if solutions[i][6] == opt:
+                if solutions[i][5] == 'proof':
+                    proof += 1
+                    b +=1
+                elif solutions[i][5] != 'unknown':
+                    b += 1
+                mybest = solutions[i][4]
+                mytime = solutions[i][1]
+            gtime = min(gtime, solutions[i][1])
+            if solutions[0][3] == 'MIN':
+                gbest = min(gbest, solutions[i][4])
+            else:
+                gbest = max(gbest, solutions[i][4])
+
+        if gbest == mybest and b > 0:
+            fbest += 1
+        if gtime == mytime and mytime < maxtime:
+            tbest += 1
+    table.add_row((opt, proof, fbest, tbest))
+# now VBS
+proof = 0
+fbest = 0
+tbest = 0
+for fname in fnames:
+    solutions = optPerSol[fname]
+    gbest = solutions[0][4]
+    gtime = solutions[0][1]
+    p = 0
+    b = 0
+    for i in range(0, len(solutions)):
+        if solutions[i][5] == 'proof':
+            p += 1
+            b += 1
+        elif solutions[i][5] != 'unknown':
+            b += 1
+        gtime = min(gtime, solutions[i][1])
+        if solutions[0][3] == 'MIN':
+            gbest = min(gbest, solutions[i][4])
+        else:
+            gbest = max(gbest, solutions[i][4])
+
+    if p > 0:
+        proof += 1
+    if b > 0:
+        fbest += 1
+    if gtime < maxtime:
+        tbest += 1
+table.add_hline()
+table.add_row(('VBS', proof, fbest, tbest))
+
+table.add_hline()
+section.append(table)
+
+
+# Third problem per problem
 k = 0
-# Second problem per problem
 for fname in fnames:
     parts = fname.split("+")
     solutions = optPerSol[fname]

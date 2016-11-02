@@ -56,12 +56,12 @@ parser.add_argument(
 parser.add_argument(
     "-d", "--directory",
     help="MiniZinc files directory.",
-    default="/Users/cprudhom/Sources/MiniZinc/Challenges/mzn/2015"
+    default="/Users/cprudhom/Sources/MiniZinc/Challenges/mzn/2016"
 )
 parser.add_argument(
     "-o", "--outputdirectory",
     help="Output files directory.",
-    default="/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/2015"
+    default="/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/2016"
 )
 parser.add_argument(
     "-p", "--process",

@@ -1,0 +1,17 @@
+<instance format="XCSP3" type="CSP">
+  <variables>
+    <array id="x" note="x[i] is the ith value of the series" size="[5]"> 0..4 </array>
+    <array id="y" note="y[i] is the distance between x[i] and x[i+1]" size="[4]"> 1..4 </array>
+  </variables>
+  <constraints>
+    <allDifferent> x[] </allDifferent>
+    <allDifferent> y[] </allDifferent>
+    <group class="channeling">
+      <intension> eq(%0,dist(%1,%2)) </intension>
+      <args> y[0] x[0] x[1] </args>
+      <args> y[1] x[1] x[2] </args>
+      <args> y[2] x[2] x[3] </args>
+      <args> y[3] x[3] x[4] </args>
+    </group>
+  </constraints>
+</instance>

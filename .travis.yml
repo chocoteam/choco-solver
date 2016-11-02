@@ -1,0 +1,17 @@
+language: java
+sudo: false
+os:
+- linux
+jdk:
+- oraclejdk8
+branches:
+  only:
+  - develop
+  - master
+notifications:
+  email:
+    recipients:
+    - choco@emn.fr
+    on_success: always
+    on_failure: always
+script: mvn clean install -DtestFailureIgnore=true

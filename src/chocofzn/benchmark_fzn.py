@@ -5,6 +5,7 @@ import multiprocessing
 import argparse
 import os
 import time
+import ctypes 
 
 
 def call(*popenargs, timeout=None, **kwargs):
@@ -83,10 +84,9 @@ parser.add_argument(
     "-cp", "--classpath",
     help='Classpath for Choco (choco-parsers and choco-solver)',
     default='.:'
-    # '/Users/cprudhom/.m2/repository/org/choco-solver/choco-parsers/3.3.2-SNAPSHOT/choco-parsers-3.3.2-SNAPSHOT-with-dependencies.jar',
-    #         '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
-    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20151110/choco-parsers.jar',
-    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/SNAPSHOT/snap-alldiffD.jar',
+    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
+    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160624/choco-parsers.jar',
+    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160711/choco-parsers.jar',
 )
 
 parser.add_argument(
@@ -114,15 +114,14 @@ parser.add_argument(
     "-p", "--process",
     help='Number of processes to run in parallel',
     type=int,
-    default=8
+    default=1
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'SNA322:-stat'
-        # 'SADAC:-stat'
+        'C4PAR:-stat -p 6',
     ]
 )
 parser.add_argument(
