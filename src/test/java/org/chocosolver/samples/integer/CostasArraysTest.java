@@ -55,7 +55,7 @@ public class CostasArraysTest {
 		CostasArrays ca = new CostasArrays();
 		ca.execute();
 		Assert.assertEquals(1,ca.getModel().getSolver().getSolutionCount());
-		Assert.assertEquals(3914, ca.getModel().getSolver().getNodeCount());
+		Assert.assertEquals(6790, ca.getModel().getSolver().getNodeCount());
 	}
 
 	@Test(groups = "10s", timeOut = 60000)
