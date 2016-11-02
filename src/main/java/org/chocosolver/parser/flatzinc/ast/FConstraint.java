@@ -431,16 +431,16 @@ public enum FConstraint {
                         if (a.isInstantiated()) {
                             var = b;
                             cste = a.getValue();
-                            model.reifyXlessthanC(var, cste - 1, r);
+                            model.reifyXgreaterthanC(var, cste - 1, r);
 //                            model.arithm(a, "<=", b).reifyWith(r);
                         } else {
                             var = a;
                             cste = b.getValue();
-                            model.reifyXlessthanC(var, cste - 1, r);
+                            model.reifyXlessthanC(var, cste + 1, r);
 //                            model.arithm(a, "<=", b).reifyWith(r);
                         }
                     } else {
-                        model.reifyXlessthanYplusC(a, b, -1, r);
+                        model.reifyXlessthanYplusC(a, b,  + 1, r);
                     }
                 } else {
                     model.arithm(a, "<=", b).reifyWith(r);
@@ -564,7 +564,7 @@ public enum FConstraint {
                             return;
                         }
                         if (as[0] == 1 && as[1] == -1) {
-                            model.reifyXlessthanYplusC(bs[0], bs[1], c.getValue() -1, r);
+                            model.reifyXlessthanYplusC(bs[0], bs[1], c.getValue() + 1, r);
 //                            model.arithm(bs[0], "<=", bs[1], "+", c.getValue()).reifyWith(r);
                             return;
                         }
