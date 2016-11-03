@@ -65,9 +65,9 @@ public class DecisionMakerTest {
 
     @Test(groups = "1s", timeOut=60000)
     public void testMakeIntDecision() throws Exception {
-        IntDecision d = dm.makeIntDecision(model.boolVar(), DecisionOperator.int_eq, 0);
+        IntDecision d = dm.makeIntDecision(model.boolVar(), DecisionOperatorFactory.makeIntEq(), 0);
         d.free();
-        d = dm.makeIntDecision(model.boolVar(), DecisionOperator.int_eq, 1);
+        d = dm.makeIntDecision(model.boolVar(), DecisionOperatorFactory.makeIntEq(), 1);
         d.free();
     }
 
@@ -81,9 +81,9 @@ public class DecisionMakerTest {
 
     @Test(groups = "1s", timeOut=60000)
     public void testMakeSetDecision() throws Exception {
-        SetDecision d = dm.makeSetDecision(model.setVar(new int[]{2,3,4}), DecisionOperator.set_force, 3);
+        SetDecision d = dm.makeSetDecision(model.setVar(new int[]{2,3,4}), DecisionOperatorFactory.makeSetForce(), 3);
         d.free();
-        d = dm.makeSetDecision(model.setVar(new int[]{3,4, 5}), DecisionOperator.set_remove, 4);
+        d = dm.makeSetDecision(model.setVar(new int[]{3,4, 5}), DecisionOperatorFactory.makeSetRemove(), 4);
         d.free();
     }
 

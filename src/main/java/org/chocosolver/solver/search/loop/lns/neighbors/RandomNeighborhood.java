@@ -32,6 +32,7 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
@@ -154,7 +155,7 @@ public class RandomNeighborhood implements INeighbor {
      * @param decisionPath the current decision path
      */
     protected void impose(int id, DecisionPath decisionPath) {
-        IntDecision decision = decisionPath.makeIntDecision(vars[id], DecisionOperator.int_eq, bestSolution[id]);
+        IntDecision decision = decisionPath.makeIntDecision(vars[id], DecisionOperatorFactory.makeIntEq(), bestSolution[id]);
         decision.setRefutable(false);
         decisionPath.pushDecision(decision);
     }

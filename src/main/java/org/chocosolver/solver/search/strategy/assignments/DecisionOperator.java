@@ -64,15 +64,5 @@ public interface DecisionOperator<V extends Variable> extends Serializable {
      * @return true if this has an effect on var
      */
     boolean isValid(V var, int value);
-
-    //TODO use factory instead of static final fields ?
-    // INTEGERS
-    DecisionOperator<IntVar> int_eq = DecisionOperatorFactory.makeIntEq();
-    DecisionOperator<IntVar> int_neq = DecisionOperatorFactory.makeIntNeq();
-    DecisionOperator<IntVar> int_split = DecisionOperatorFactory.makeIntSplit();
-    DecisionOperator<IntVar> int_reverse_split = DecisionOperatorFactory.makeIntReverseSplit();
-
-    // SETS
-    DecisionOperator<SetVar> set_force = DecisionOperatorFactory.makeSetForce();
-    DecisionOperator<SetVar> set_remove = DecisionOperatorFactory.makeSetRemove();
+   
 }

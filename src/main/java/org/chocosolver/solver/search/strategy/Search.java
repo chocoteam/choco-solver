@@ -33,6 +33,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
@@ -176,7 +177,7 @@ public class Search {
     public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
                                      IntValueSelector valSelector,
                                      IntVar... vars) {
-        return intVarSearch(varSelector, valSelector, DecisionOperator.int_eq, vars);
+        return intVarSearch(varSelector, valSelector, DecisionOperatorFactory.makeIntEq(), vars);
     }
 
     /**

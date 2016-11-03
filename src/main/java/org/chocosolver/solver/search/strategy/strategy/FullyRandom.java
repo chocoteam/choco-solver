@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
@@ -45,8 +46,8 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class FullyRandom extends IntStrategy {
 
-    private DecisionOperator[] dops = new DecisionOperator[]{DecisionOperator.int_eq,
-            DecisionOperator.int_neq, DecisionOperator.int_split, DecisionOperator.int_reverse_split};
+    private DecisionOperator[] dops = new DecisionOperator[]{DecisionOperatorFactory.makeIntEq(),
+            DecisionOperatorFactory.makeIntNeq(), DecisionOperatorFactory.makeIntSplit(), DecisionOperatorFactory.makeIntReverseSplit()};
     /**
      * Random
      */

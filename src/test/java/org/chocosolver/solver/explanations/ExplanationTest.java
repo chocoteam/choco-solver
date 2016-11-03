@@ -36,6 +36,7 @@ import org.chocosolver.solver.search.loop.learn.LearnCBJ;
 import org.chocosolver.solver.search.loop.learn.LearnExplained;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.BoolVar;
@@ -340,10 +341,10 @@ public class ExplanationTest {
         boolean[] views = {true, false};
         int[] inds = {0,1,2,3,4};
         DecisionOperator[] dops = {
-            DecisionOperator.int_eq,
-            DecisionOperator.int_neq,
-            DecisionOperator.int_reverse_split,
-            DecisionOperator.int_split
+            DecisionOperatorFactory.makeIntEq(),
+            DecisionOperatorFactory.makeIntNeq(),
+            DecisionOperatorFactory.makeIntReverseSplit(),
+            DecisionOperatorFactory.makeIntSplit()
         };
         List<Object[]> data = new ArrayList<>();
         int[][] doms = new int[][]{{0,1},{0,1,2,3,4},{0,1,2,3}};
@@ -392,7 +393,7 @@ public class ExplanationTest {
         model.arithm(vs[0], "+", vs[4],"=", 0).post();
         model.getSolver().setSearch(Search.intVarSearch(
                 new InputOrder<>(model),
-                new IntDomainMiddle(dop != DecisionOperator.int_reverse_split),
+                new IntDomainMiddle(dop != DecisionOperatorFactory.makeIntReverseSplit()),
                 dop,
                 vs[var])
         );

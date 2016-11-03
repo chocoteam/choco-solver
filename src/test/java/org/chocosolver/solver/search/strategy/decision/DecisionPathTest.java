@@ -29,15 +29,15 @@
  */
 package org.chocosolver.solver.search.strategy.decision;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>
@@ -65,13 +65,13 @@ public class DecisionPathTest {
     public void testPushDecision() throws Exception {
         Assert.assertEquals(dp.size(), 1);
         Assert.assertEquals(dp.mLevel.get(), 0);
-        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperator.int_eq, 4);
+        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d1);
         Assert.assertEquals(d1.getPosition(), 1);
         Assert.assertEquals(dp.size(), 2);
         Assert.assertEquals(dp.mLevel.get(), 0);
 
-        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperator.int_eq, 4);
+        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
         Assert.assertEquals(d2.getArity(), 2);
         dp.pushDecision(d2);
         Assert.assertEquals(d2.getPosition(), 2);
@@ -83,7 +83,7 @@ public class DecisionPathTest {
     public void testApply() throws Exception {
         m.getEnvironment().worldPush();
         dp.apply();
-        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperator.int_eq, 4);
+        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
         d1.setRefutable(true);
 
         Assert.assertEquals(d1.hasNext(), true);
@@ -103,9 +103,9 @@ public class DecisionPathTest {
         Assert.assertEquals(dp.levels[1], 2);
         Assert.assertEquals(dp.levels[2], 0);
 
-        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperator.int_eq, 4);
+        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
         d1.setRefutable(true);
-        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperator.int_eq, 4);
+        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperatorFactory.makeIntEq(), 4);
         d1.setRefutable(true);
         dp.pushDecision(d2);
         Assert.assertEquals(d2.hasNext(), true);
@@ -141,12 +141,12 @@ public class DecisionPathTest {
     public void testRemoveLast() throws Exception {
         m.getEnvironment().worldPush();
         dp.apply();
-        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperator.int_eq, 4);
+        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d1);
         m.getEnvironment().worldPush();
         dp.apply();
-        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperator.int_eq, 4);
-        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperator.int_eq, 4);
+        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
+        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d2);
         dp.pushDecision(d3);
         m.getEnvironment().worldPush();
@@ -195,24 +195,24 @@ public class DecisionPathTest {
 
         Assert.assertEquals(dp.getLastDecision(), RootDecision.ROOT);
 
-        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperator.int_eq, 4);
+        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d1);
         Assert.assertEquals(dp.getLastDecision(), d1);
 
-        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperator.int_eq, 4);
+        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d2);
         Assert.assertEquals(dp.getLastDecision(), d2);
 
-        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperator.int_eq, 4);
+        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d3);
         Assert.assertEquals(dp.getLastDecision(), d3);
     }
 
     @Test(groups = "1s", timeOut=60000)
     public void testSize() throws Exception {
-        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperator.int_eq, 4);
-        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperator.int_eq, 4);
-        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperator.int_eq, 4);
+        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
+        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
+        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d1);
         dp.pushDecision(d2);
         dp.pushDecision(d3);
@@ -221,9 +221,9 @@ public class DecisionPathTest {
 
     @Test(groups = "1s", timeOut=60000)
     public void testGetDecision1() throws Exception {
-        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperator.int_eq, 4);
-        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperator.int_eq, 4);
-        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperator.int_eq, 4);
+        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
+        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
+        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d1);
         dp.pushDecision(d2);
         dp.pushDecision(d3);
@@ -245,9 +245,9 @@ public class DecisionPathTest {
 
     @Test(groups = "1s", timeOut=60000)
     public void testTransferInto() throws Exception {
-        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperator.int_eq, 4);
-        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperator.int_eq, 4);
-        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperator.int_eq, 4);
+        IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
+        IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
+        IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d1);
         dp.pushDecision(d2);
         dp.pushDecision(d3);

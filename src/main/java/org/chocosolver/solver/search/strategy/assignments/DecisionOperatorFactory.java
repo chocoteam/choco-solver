@@ -296,7 +296,7 @@ public final class DecisionOperatorFactory {
 
         @Override
         public DecisionOperator<SetVar> opposite() {
-            return set_remove;
+            return DecisionOperatorFactory.makeSetRemove();
         }
     };
 
@@ -343,7 +343,7 @@ public final class DecisionOperatorFactory {
 
         @Override
         public DecisionOperator<SetVar> opposite() {
-            return set_force;
+            return DecisionOperatorFactory.makeSetForce();
         }
     };
 

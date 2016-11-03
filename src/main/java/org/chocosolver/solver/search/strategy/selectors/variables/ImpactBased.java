@@ -36,6 +36,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -146,7 +147,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             int ub = variable.getUB();
             currentVal = random.nextBoolean() ? lb : ub;
         }
-        return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperator.int_eq, currentVal);
+        return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), currentVal);
     }
 
     @Override

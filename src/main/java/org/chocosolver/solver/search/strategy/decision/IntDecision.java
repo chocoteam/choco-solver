@@ -32,6 +32,7 @@ package org.chocosolver.solver.search.strategy.decision;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.PoolManager;
@@ -147,10 +148,10 @@ public class IntDecision extends Decision<IntVar> {
             d = new IntDecision(poolManager);
         }
         int val = value;
-        if(assignment == DecisionOperator.int_split){
+        if(assignment == DecisionOperatorFactory.makeIntSplit()){
             val++;
         }
-        else if(assignment == DecisionOperator.int_reverse_split){
+        else if(assignment == DecisionOperatorFactory.makeIntReverseSplit()){
             val--;
         }
         d.set(var, val, assignment.opposite());
@@ -159,23 +160,23 @@ public class IntDecision extends Decision<IntVar> {
 
     @Override
     public String toString() {
-        if (assignment.equals(DecisionOperator.int_eq)) {
+        if (assignment.equals(DecisionOperatorFactory.makeIntNeq())) {
             return String.format("%s %s {%d}",
                     var.getName(),
                     branch < 1 ? "=" : '\\',
                     value);
-        } else if (assignment.equals(DecisionOperator.int_neq)) {
+        } else if (assignment.equals(DecisionOperatorFactory.makeIntNeq())) {
             return String.format("%s %s {%d}",
                     var.getName(),
                     branch < 1 ? '\\' : "=",
                     value);
-        } else if (assignment.equals(DecisionOperator.int_split)) {
+        } else if (assignment.equals(DecisionOperatorFactory.makeIntSplit())) {
             return String.format("%s in %s%d,%d]",
                     var.getName(),
                     branch < 1 ? '[' : ']',
                     branch < 1 ? var.getLB() : value,
                     branch < 1 ? value : var.getUB());
-        } else if (assignment.equals(DecisionOperator.int_reverse_split)) {
+        } else if (assignment.equals(DecisionOperatorFactory.makeIntReverseSplit())) {
             return String.format("%s in [%d,%d%s",
                     var.getName(),
                     branch < 1 ? value : var.getLB(),
