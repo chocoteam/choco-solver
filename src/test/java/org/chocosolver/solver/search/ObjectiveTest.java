@@ -44,6 +44,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.Random;
 
 import org.chocosolver.solver.Model;
@@ -57,6 +58,7 @@ import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.decision.DecisionMakerTest;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -404,5 +406,21 @@ public class ObjectiveTest {
 	assertNull(objman.getBestUB());
 	assertNull(objman.getBestSolutionValue());
 	assertNotNull(objman.toString());
+    }
+    
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSerializeObjMan() throws ClassNotFoundException, IOException {
+        assertEquals(DecisionMakerTest.doSerialize(ObjectiveFactory.SAT()), ObjectiveFactory.SAT());
+        
+        Model model = new Model();
+        IntVar iv = model.intVar(0, 10);
+        IObjectiveManager<IntVar> om1 = ObjectiveFactory.makeObjectiveManager(iv, ResolutionPolicy.MAXIMIZE);        
+        IObjectiveManager<IntVar> om2 = (IObjectiveManager<IntVar>) DecisionMakerTest.doSerialize(om1);
+        assertEquals(om2.isOptimization(), om1.isOptimization());
+        assertEquals(om2.getBestLB(), om1.getBestLB());
+        assertEquals(om2.getBestUB(), om1.getBestUB());
+        assertEquals(om2.getBestSolutionValue(), om1.getBestSolutionValue());
+        assertNotNull(om2.toString());
+        assertNull(om2.getObjective());
     }
 }

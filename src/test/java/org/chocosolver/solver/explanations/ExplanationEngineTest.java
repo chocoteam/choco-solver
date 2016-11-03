@@ -29,12 +29,32 @@
  */
 package org.chocosolver.solver.explanations;
 
+import static java.lang.System.out;
+import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.fill;
+import static org.chocosolver.solver.search.strategy.Search.greedySearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
+import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomUBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.learn.LearnCBJ;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
@@ -45,16 +65,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.lang.System.out;
-import static java.util.Arrays.copyOfRange;
-import static java.util.Arrays.fill;
-import static org.chocosolver.solver.search.strategy.Search.*;
-import static org.chocosolver.solver.search.strategy.assignments.DecisionOperator.int_split;
-import static org.testng.Assert.*;
 
 /**
  * Created by cprudhom on 09/12/14.
@@ -932,13 +942,13 @@ public class ExplanationEngineTest {
         assertEquals(y.getUB(), 2);
         assertEquals(z.getUB(), 0);
         model.getEnvironment().worldPush();
-        IntDecision d1 = model.getSolver().getDecisionPath().makeIntDecision(x, int_split, 2);
+        IntDecision d1 = model.getSolver().getDecisionPath().makeIntDecision(x, DecisionOperatorFactory.makeIntSplit(), 2);
         d1.buildNext();
         d1.apply();
         model.getSolver().propagate();
         assertEquals(z.getUB(), -1);
         model.getEnvironment().worldPush();
-        IntDecision d2 = model.getSolver().getDecisionPath().makeIntDecision(x, int_split, 1);
+        IntDecision d2 = model.getSolver().getDecisionPath().makeIntDecision(x, DecisionOperatorFactory.makeIntSplit(), 1);
         d2.buildNext();
         d2.apply();
         ContradictionException c = null;

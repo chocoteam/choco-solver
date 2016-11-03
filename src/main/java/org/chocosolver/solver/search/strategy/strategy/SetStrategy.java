@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
@@ -76,7 +77,7 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
         super(scope);
         varSelector = varS;
         valSelector = valS;
-        operator = enforceFirst ? DecisionOperator.set_force : DecisionOperator.set_remove;
+        operator = enforceFirst ? DecisionOperatorFactory.makeSetForce(): DecisionOperatorFactory.makeSetRemove();
     }
 
     //***********************************************************************************

@@ -29,11 +29,14 @@
  */
 package org.chocosolver.solver.search.measure;
 
-import org.chocosolver.solver.objective.IBoundsManager;
-import org.chocosolver.solver.search.SearchState;
-
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Objects;
 import java.util.function.LongSupplier;
+
+import org.chocosolver.solver.objective.IBoundsManager;
+import org.chocosolver.solver.search.SearchState;
 
 /**
  * Object which stores resolution information to get statistics
@@ -43,19 +46,33 @@ import java.util.function.LongSupplier;
  */
 public final class MeasuresRecorder extends Measures {
 
+    private static final long serialVersionUID = -2027525308178413040L;
+
     /**
      * When the clock watch starts
      */
     private long startingTime;
 
-    private LongSupplier currentNanoTime;
+    transient private LongSupplier currentNanoTime;
 
     /**
      * Create a measures recorder
      */
     public MeasuresRecorder(String modelName) {
         super(modelName);
-        stopStopwatch();
+        currentNanoTime = () -> timeCount;
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        getTimeCountInNanoSeconds();
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // our "pseudo-constructor"
+        in.defaultReadObject();
+        // now we are a "live" object again, so let's run rebuild and start
+        currentNanoTime = () -> timeCount;
     }
 
     @Override
@@ -77,6 +94,7 @@ public final class MeasuresRecorder extends Measures {
      * Stop the stopwatch, the resolution time is fixed.
      */
     public void stopStopwatch() {
+        timeCount = currentNanoTime.getAsLong();
         currentNanoTime = () -> timeCount;
     }
 

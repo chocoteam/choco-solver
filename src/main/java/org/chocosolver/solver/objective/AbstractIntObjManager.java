@@ -41,6 +41,8 @@ import org.chocosolver.solver.variables.events.IEventType;
  */
 abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
 
+    private static final long serialVersionUID = 5529060355541720104L;
+
     public AbstractIntObjManager(AbstractObjManager<IntVar> objman) {
         super(objman);
     }
@@ -90,6 +92,8 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
 
 class MinIntObjManager extends AbstractIntObjManager {
 
+    private static final long serialVersionUID = 6963161492115613388L;
+
     @SuppressWarnings("unused") // use for copy by introspection
     public MinIntObjManager(AbstractObjManager<IntVar> objman) {
         super(objman);
@@ -117,6 +121,8 @@ class MinIntObjManager extends AbstractIntObjManager {
 }
 
 class MaxIntObjManager extends AbstractIntObjManager {
+
+    private static final long serialVersionUID = -245398442954059838L;
 
     @SuppressWarnings("unused") // use for copy by introspection
     public MaxIntObjManager(AbstractObjManager<IntVar> objman) {

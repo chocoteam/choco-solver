@@ -33,6 +33,7 @@ import org.chocosolver.sat.PropNogoods;
 import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
@@ -96,7 +97,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
             decision = decisions.pollFirst();
             if (decision instanceof IntDecision) {
                 IntDecision id = (IntDecision) decision;
-                if (id.getDecOp() == DecisionOperator.int_eq) {
+                if (id.getDecOp() == DecisionOperatorFactory.makeIntEq()) {
                     if (id.hasNext() || id.getArity() == 1) {
                         lits[i++] = SatSolver.negated(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true));
                     } else {
@@ -108,7 +109,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
                             png.addLearnt(Arrays.copyOf(lits, i + 1));
                         }
                     }
-                } else if (id.getDecOp() == DecisionOperator.int_neq) {
+                } else if (id.getDecOp() == DecisionOperatorFactory.makeIntNeq()) {
                     if (id.hasNext()) {
                         lits[i++] = png.Literal(id.getDecisionVariable(), id.getDecisionValue(), true);
                     } else {

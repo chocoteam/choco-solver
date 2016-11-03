@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
@@ -70,7 +71,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
 	 * @param valSelector	defines how to select the value involved in the branching decision
 	 */
     public IntStrategy(IntVar[] scope, VariableSelector<IntVar> varSelector, IntValueSelector valSelector) {
-        this(scope, varSelector, valSelector,DecisionOperator.int_eq);
+        this(scope, varSelector, valSelector,DecisionOperatorFactory.makeIntEq());
     }
 
 	/**

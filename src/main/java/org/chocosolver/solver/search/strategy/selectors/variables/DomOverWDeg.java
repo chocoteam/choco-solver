@@ -35,6 +35,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -101,7 +102,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
             return null;
         }
         int currentVal = valueSelector.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperator.int_eq, currentVal);
+        return variable.getModel().getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), currentVal);
     }
 
     @Override

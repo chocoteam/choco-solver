@@ -43,6 +43,7 @@ import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveRestart;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IVariableMonitor;
@@ -268,7 +269,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                         lb : ub;
             }
         }
-        return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperator.int_eq, currentVal);
+        return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), currentVal);
     }
 
     @Override

@@ -30,6 +30,7 @@
 package org.chocosolver.solver.search.measure;
 
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 
 import org.chocosolver.solver.objective.IBoundsManager;
@@ -40,7 +41,7 @@ import org.chocosolver.solver.search.SearchState;
  *
  * @author Charles Prud'Homme, Jean-Guillaume Fages, Arnaud Malapert
  */
-public interface IMeasures {
+public interface IMeasures extends Serializable {
 
     /**
      * To transform time from nanoseconds to seconds

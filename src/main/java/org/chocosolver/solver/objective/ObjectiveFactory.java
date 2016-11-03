@@ -57,7 +57,7 @@ public final class ObjectiveFactory {
      * @return a singleton object
      */
     public static IObjectiveManager<Variable> SAT() {
-        return SATManager.SINGLETON;
+        return SATManager.getInstance();
     }
 
     /**
@@ -133,10 +133,22 @@ public final class ObjectiveFactory {
  */
 final class SATManager implements IObjectiveManager<Variable> {
 
-    public final static SATManager SINGLETON = new SATManager();
+    private static final long serialVersionUID = 2115489336441115889L;
+    private final static SATManager INSTANCE = new SATManager();
 
-    private SATManager() {
-        super();
+    public final static SATManager getInstance() {
+        return INSTANCE;
+    }
+
+    private SATManager() {}
+        
+    /**
+     * readResolve method to preserve singleton property
+     */
+    private Object readResolve() {
+        // Return the one true INSTANCE and let the garbage collector
+        // take care of the INSTANCE impersonator.
+        return INSTANCE;
     }
 
     @Override
@@ -202,7 +214,6 @@ final class SATManager implements IObjectiveManager<Variable> {
     @Override
     public void setCutComputer(Function<Number, Number> cutComputer) {
         // nothing to do
-
     }
 
     @Override

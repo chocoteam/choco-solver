@@ -38,6 +38,8 @@ import org.chocosolver.solver.variables.RealVar;
  */
 abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
 
+    private static final long serialVersionUID = 8038511375883592639L;
+
     public AbstractRealObjManager(AbstractObjManager<RealVar> objman) {
         super(objman);
     }
@@ -92,6 +94,8 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
 
 class MinRealObjManager extends AbstractRealObjManager {
 
+    private static final long serialVersionUID = 2409478704121834610L;
+
     @SuppressWarnings("unused") // use for copy by introspection
     public MinRealObjManager(AbstractObjManager<RealVar> objman) {
         super(objman);
@@ -119,6 +123,8 @@ class MinRealObjManager extends AbstractRealObjManager {
 }
 
 class MaxRealObjManager extends AbstractRealObjManager {
+
+    private static final long serialVersionUID = 3584094931280638616L;
 
     @SuppressWarnings("unused") // use for copy by introspection
     public MaxRealObjManager(AbstractObjManager<RealVar> objman) {
