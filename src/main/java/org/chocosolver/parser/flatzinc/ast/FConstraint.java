@@ -177,7 +177,7 @@ public enum FConstraint {
 
             BoolVar bVar = exps.get(0).boolVarValue(model);
             IntVar iVar = exps.get(1).intVarValue(model);
-            if (iVar.isBool() && ((FznSettings) model.getSettings()).enableClause()) {
+            if (iVar.isBool()) {
                 model.addClausesBoolEq(bVar, (BoolVar) iVar);
                 return;
             }
@@ -212,12 +212,7 @@ public enum FConstraint {
 
             BoolVar a = exps.get(0).boolVarValue(model);
             BoolVar b = exps.get(1).boolVarValue(model);
-            if (((FznSettings) model.getSettings()).enableClause()) {
-                model.addClausesBoolEq(a, b);
-            } else {
-                model.arithm(a, "=", b).post();
-            }
-
+            model.addClausesBoolEq(a, b);
         }
     },
     bool_eq_reif {
@@ -237,12 +232,7 @@ public enum FConstraint {
 
             BoolVar a = exps.get(0).boolVarValue(model);
             BoolVar b = exps.get(1).boolVarValue(model);
-            if (((FznSettings) model.getSettings()).enableClause()) {
-                model.addClausesBoolLe(a, b);
-            } else {
-                model.arithm(a, "<=", b).post();
-            }
-
+            model.addClausesBoolLe(a, b);
         }
     },
     bool_le_reif {
@@ -374,8 +364,7 @@ public enum FConstraint {
             IntVar b = exps.get(1).intVarValue(model);
             final BoolVar r = exps.get(2).boolVarValue(model);
             // this constraint is not poster, hence not returned, because it is reified
-            if (((FznSettings) model.getSettings()).enableClause()
-                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+            if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolIsEqVar((BoolVar) a, (BoolVar) b, r);
             } else {
                 if (((FznSettings) model.getSettings()).adhocReification()) {
@@ -420,8 +409,7 @@ public enum FConstraint {
             IntVar b = exps.get(1).intVarValue(model);
             final BoolVar r = exps.get(2).boolVarValue(model);
             // this constraint is not poster, hence not returned, because it is reified
-            if (((FznSettings) model.getSettings()).enableClause()
-                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+            if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolIsLeVar((BoolVar) a, (BoolVar) b, r);
             } else {
                 if (((FznSettings) model.getSettings()).adhocReification()) {
@@ -684,13 +672,11 @@ public enum FConstraint {
 
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
-            if (((FznSettings) model.getSettings()).enableClause()
-                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+            if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolNot((BoolVar) a, (BoolVar) b);
             } else {
                 model.arithm(a, "!=", b).post();
             }
-
         }
     },
     int_ne_reif {
@@ -700,8 +686,7 @@ public enum FConstraint {
             IntVar b = exps.get(1).intVarValue(model);
             final BoolVar r = exps.get(2).boolVarValue(model);
             // this constraint is not poster, hence not returned, because it is reified
-            if (((FznSettings) model.getSettings()).enableClause()
-                    && ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL) && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
+            if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolIsNeqVar((BoolVar) a, (BoolVar) b, r);
             } else {
                 if (((FznSettings) model.getSettings()).adhocReification()) {
