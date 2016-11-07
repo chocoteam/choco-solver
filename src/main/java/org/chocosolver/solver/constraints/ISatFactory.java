@@ -371,7 +371,7 @@ public interface ISatFactory extends ISelf<Model> {
             sat.afterAddingClauses();
             return add;
         }else{
-            _me().arithm(LEFT, "=", RIGHT).reifyWith(TARGET);
+            _me().reifyXeqY(LEFT, RIGHT, TARGET);
             return true;
         }
     }
@@ -392,7 +392,7 @@ public interface ISatFactory extends ISelf<Model> {
             sat.afterAddingClauses();
             return add;
         }else{
-            _me().arithm(LEFT, "!=", RIGHT).reifyWith(TARGET);
+            _me().reifyXneY(LEFT, RIGHT, TARGET);
             return true;
         }
     }
@@ -413,7 +413,7 @@ public interface ISatFactory extends ISelf<Model> {
             sat.afterAddingClauses();
             return add;
         }else{
-            _me().arithm(LEFT, "<=", RIGHT).reifyWith(TARGET);
+            _me().reifyXltYC(LEFT, RIGHT, -1, TARGET);
             return true;
         }
     }
@@ -434,7 +434,7 @@ public interface ISatFactory extends ISelf<Model> {
             sat.afterAddingClauses();
             return add;
         }else{
-            _me().arithm(LEFT, "<", RIGHT).reifyWith(TARGET);
+            _me().reifyXltY(LEFT, RIGHT, TARGET);
             return true;
         }
     }

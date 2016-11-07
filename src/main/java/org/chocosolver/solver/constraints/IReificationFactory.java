@@ -184,7 +184,7 @@ public interface IReificationFactory {
 	 * @param C an int
      * @param B a boolean variable
      */
-	default void reifyXequaltoC(IntVar X, int C, BoolVar B){
+	default void reifyXeqC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X = C)<=>B", new PropXeqCReif(X, C, B)));
@@ -197,7 +197,7 @@ public interface IReificationFactory {
 	 * @param Y an integer variable
 	 * @param B a boolean variable
 	 */
-	default void reifyXequaltoY(IntVar X, IntVar Y, BoolVar B){
+	default void reifyXeqY(IntVar X, IntVar Y, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X = Y)<=>B", new PropXeqYReif(X, Y, B)));
@@ -210,7 +210,7 @@ public interface IReificationFactory {
 	 * @param C an int
 	 * @param B a boolean variable
 	 */
-	default void reifyXnotequaltoC(IntVar X, int C, BoolVar B){
+	default void reifyXneC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X != C)<=>B", new PropXneCReif(X, C, B)));
@@ -223,7 +223,7 @@ public interface IReificationFactory {
 	 * @param Y an integer variable
 	 * @param B a boolean variable
 	 */
-	default void reifyXnotequaltoY(IntVar X, IntVar Y, BoolVar B){
+	default void reifyXneY(IntVar X, IntVar Y, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X = Y)<=>B", new PropXneYReif(X, Y, B)));
@@ -236,7 +236,7 @@ public interface IReificationFactory {
 	 * @param C an int
 	 * @param B a boolean variable
 	 */
-	default void reifyXlessthanC(IntVar X, int C, BoolVar B){
+	default void reifyXltC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X < C)<=>B", new PropXltCReif(X, C, B)));
@@ -249,7 +249,7 @@ public interface IReificationFactory {
 	 * @param Y an integer variable
 	 * @param B a boolean variable
 	 */
-	default void reifyXlessthanY(IntVar X, IntVar Y, BoolVar B){
+	default void reifyXltY(IntVar X, IntVar Y, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X < Y)<=>B", new PropXltYReif(X, Y, B)));
@@ -263,7 +263,7 @@ public interface IReificationFactory {
 	 * @param C an int
 	 * @param B a boolean variable
 	 */
-	default void reifyXlessthanYplusC(IntVar X, IntVar Y, int C, BoolVar B){
+	default void reifyXltYC(IntVar X, IntVar Y, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X < Y + C)<=>B", new PropXltYCReif(X, Y, C, B)));
@@ -276,7 +276,7 @@ public interface IReificationFactory {
 	 * @param C an int
 	 * @param B a boolean variable
 	 */
-	default void reifyXgreaterthanC(IntVar X, int C, BoolVar B){
+	default void reifyXgtC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
 		model.post(new Constraint("(X > C)<=>B", new PropXgtCReif(X, C, B)));
