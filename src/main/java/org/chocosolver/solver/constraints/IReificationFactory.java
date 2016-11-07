@@ -256,6 +256,19 @@ public interface IReificationFactory {
 	}
 
 	/**
+	 * Posts one constraint that expresses : (x &ge; y) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X an integer variable
+	 * @param Y an integer variable
+	 * @param B a boolean variable
+	 */
+	default void reifyXleY(IntVar X, IntVar Y, BoolVar B){
+		Model model = X.getModel();
+		// no check to allow addition during resolution
+		model.post(new Constraint("(X <= Y)<=>B", new PropXltYCReif(X, Y, 1, B)));
+	}
+
+	/**
 	 * Posts one constraint that expresses : (x < y + c) &hArr; b.
 	 * Bypasses the reification system.
 	 * @param X an integer variable

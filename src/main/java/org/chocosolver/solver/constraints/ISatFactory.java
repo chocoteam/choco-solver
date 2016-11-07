@@ -413,7 +413,7 @@ public interface ISatFactory extends ISelf<Model> {
             sat.afterAddingClauses();
             return add;
         }else{
-            _me().reifyXltYC(LEFT, RIGHT, -1, TARGET);
+            _me().reifyXleY(LEFT, RIGHT, TARGET);
             return true;
         }
     }
