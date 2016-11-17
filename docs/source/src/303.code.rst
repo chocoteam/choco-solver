@@ -120,8 +120,8 @@ To do so, we can precise the *decision variables* and how to branch on it:
 .. code-block:: java
     :linenos:
 
-    solver.set(
-        SearchStrategyFactory.inputOrderLBSearch(S, E, N, D, M, O, R, Y));
+    solver.setSearch(
+              Search.inputOrderLBSearch(S, E, N, D, M, O, R, Y));
 
 Here, we consider the variables in the input order (S is selected first, then E, then N, ...)
 and each of them are, in turn, assigned to their current lower bound.

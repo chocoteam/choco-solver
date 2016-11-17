@@ -72,12 +72,12 @@ Then, the value in the middle of the domain of the selected variable is assigned
     :linenos:
 
     Solver solver = model.getSolver();
-    solver.set(SearchStrategyFactory.intVarSearch(
-            new VariableSelectorWithTies<>(
-                    new FirstFail(model),
-                    new Smallest()),
-            ValSelectorFactory.midIntVal(false),
-            ArrayUtils.append(supplier, cost, open))
+    solver.setSearch(Search.intVarSearch(
+        new VariableSelectorWithTies<>(
+            new FirstFail(model),
+            new Smallest()),
+        new IntDomainMiddle(false),
+        ArrayUtils.append(supplier, cost, open))
     );
 
 
@@ -109,7 +109,7 @@ Alternatively, the search loop can be unfold
 .. code-block:: java
     :linenos:
 
-    model.setObjective(ResolutionPolicy.MINIMIZE, tot_cost);
+    model.setObjective(false, tot_cost);
     while(solver.solve()){
         // do something on solution
     }
@@ -122,7 +122,7 @@ When the unfold search process is used, one can modify the way the cut is handle
 
     // Walking cut: allow same value solutions
     solver.getObjectiveManager().<Integer>setCutComputer(obj -> obj);
-    model.setObjective(ResolutionPolicy.MINIMIZE, tot_cost);
+    model.setObjective(false, tot_cost);
     while(solver.solve()){
         // do something on solution
     }
@@ -240,12 +240,12 @@ The entire code
 
     model.setObjective(ResolutionPolicy.MINIMIZE, tot_cost);
     Solver solver = model.getSolver();
-    solver.set(SearchStrategyFactory.intVarSearch(
-            new VariableSelectorWithTies<>(
-                    new FirstFail(model),
-                    new Smallest()),
-            ValSelectorFactory.midIntVal(false),
-            ArrayUtils.append(supplier, cost, open))
+    solver.setSearch(Search.intVarSearch(
+        new VariableSelectorWithTies<>(
+            new FirstFail(model),
+            new Smallest()),
+        new IntDomainMiddle(false),
+        ArrayUtils.append(supplier, cost, open))
     );
     solver.showShortStatistics();
     while(solver.solve()){

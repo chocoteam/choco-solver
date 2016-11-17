@@ -124,14 +124,11 @@ Finally, the search strategy is defined:
 .. code-block:: java
     :linenos:
 
-    solver.set(SearchStrategyFactory.intVarSearch(
-        variables -> {
-            Optional<IntVar> selected =
-                    Arrays.stream(variables)
-                            .filter(v -> !v.isInstantiated())
-                            .min((v1, v2) -> closest(v2, map) - closest(v1, map))
-                            .orElse(null);
-        },
+    solver.setSearch(Search.intVarSearch(
+        variables -> Arrays.stream(variables)
+              .filter(v -> !v.isInstantiated())
+              .min((v1, v2) -> closest(v2, map) - closest(v1, map))
+              .orElse(null),
         var -> closest(var, map),
         DecisionOperator.int_eq,
         planes
@@ -283,17 +280,14 @@ The entire code
             .range(0, N)
             .boxed()
             .collect(Collectors.toMap(i -> planes[i], i -> LT[i][1]));
-    solver.set(SearchStrategyFactory.intVarSearch(
-            variables -> {
-                Optional<IntVar> selected =
-                        Arrays.stream(variables)
-                                .filter(v -> !v.isInstantiated())
-                                .min((v1, v2) -> closest(v2, map) - closest(v1, map))
-                                .orElse(null);
-            },
-            var -> closest(var, map),
-            DecisionOperator.int_eq,
-            planes
+    solver.setSearch(Search.intVarSearch(
+        variables -> Arrays.stream(variables)
+              .filter(v -> !v.isInstantiated())
+              .min((v1, v2) -> closest(v2, map) - closest(v1, map))
+              .orElse(null),
+        var -> closest(var, map),
+        DecisionOperator.int_eq,
+        planes
     ));
     solver.showShortStatistics();
     solver.findOptimalSolution(tot_dev, false);

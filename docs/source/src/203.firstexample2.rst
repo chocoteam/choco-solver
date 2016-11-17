@@ -144,7 +144,7 @@ or define a search strategy, like:
 
 .. code-block:: java
 
-    solver.set(SearchStrategyFactory.domOverWDegSearch(vars));
+    solver.setSearch(Search.domOverWDegSearch(vars));
 
 Updated code
 ============
@@ -164,7 +164,7 @@ Updated code
     );
     Solver solver = model.getSolver();
     solver.showStatistics();
-    solver.set(SearchStrategyFactory.domOverWDegSearch(vars));
+    solver.setSearch(Search.domOverWDegSearch(vars));
     Solution solution = solver.findSolution();
     if (solution != null) {
         System.out.println(solution.toString());
