@@ -14,6 +14,7 @@ Introduction
    :maxdepth: 2
 
    src/001.introduction
+   src/101.shortintroduction
    src/002.history
    src/003.installation
 
