@@ -38,7 +38,7 @@ import java.util.*;
  * This class contains various methods for manipulating arrays.
  * <br/>
  *
- * @author Charles Prud'homme, Jean-Guillaume Fages
+ * @author Charles Prud'homme, Jean-Guillaume Fages, Rene Helmke
  * @since 17 sept. 2010
  */
 public enum ArrayUtils {
@@ -269,11 +269,11 @@ public enum ArrayUtils {
      */
     public static <T> void reverse(T[] tab) {
         T tmp;
-        final int n = tab.length - 1;
+        final int n = tab.length;
         for (int i = 0; i < n / 2; i++) {
             tmp = tab[i];
-            tab[i] = tab[n - i];
-            tab[n - i] = tmp;
+            tab[i] = tab[n - i - 1];
+            tab[n - i - 1] = tmp;
         }
     }
 

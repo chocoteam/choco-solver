@@ -38,7 +38,7 @@ import org.testng.annotations.Test;
  * <p>
  * Project: choco.
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Rene Helmke
  * @since 15/12/2015.
  */
 public class ArrayUtilsTest {
@@ -187,12 +187,13 @@ public class ArrayUtilsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testReverse1() throws Exception {
-        Number[] n1 = new Number[3];
+        Number[] n1 = new Number[4];
         n1[0] = 0.D;
         n1[1] = 1.D;
         n1[2] = 2.D;
+        n1[3] = 3.D;
         ArrayUtils.reverse(n1);
-        Assert.assertEquals(n1, new Number[]{2.D,1.D,0.D});
+        Assert.assertEquals(n1, new Number[]{3.D,2.D,1.D,0.D});
     }
 
     @Test(groups="1s", timeOut=60000)
