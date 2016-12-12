@@ -91,7 +91,7 @@ public class MoveBinaryDFS implements Move {
     @Override
     public boolean repair(Solver solver) {
         solver.getMeasures().incBackTrackCount();
-        solver.getMeasures().incDepth();
+        solver.getMeasures().decDepth();
         solver.getEnvironment().worldPop();
         return rewind(solver);
     }
