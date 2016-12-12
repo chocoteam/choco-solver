@@ -240,6 +240,11 @@ public class Measures implements IMeasures, Cloneable {
     }
 
     @Override
+    public long getDecisionCount() {
+        return nodeCount - solutionCount;
+    }
+
+    @Override
     public String toString() {
         return toMultiLineString();
     }

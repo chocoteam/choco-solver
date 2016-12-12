@@ -30,11 +30,11 @@
 package org.chocosolver.solver.search.measure;
 
 
-import java.io.Serializable;
-import java.text.DecimalFormat;
-
 import org.chocosolver.solver.objective.IBoundsManager;
 import org.chocosolver.solver.search.SearchState;
+
+import java.io.Serializable;
+import java.text.DecimalFormat;
 
 /**
  * Interface for providing resolution statistics
@@ -106,6 +106,11 @@ public interface IMeasures extends Serializable {
      * @return the solution count of the measure
      */
     long getSolutionCount();
+
+    /**
+     * @return the decision count
+     */
+    long getDecisionCount();
 
     /**
      * @return the maximum depth of the search tree
