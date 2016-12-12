@@ -210,11 +210,6 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         @Override
-        public boolean isValid(IntVar var, int value) {
-            return var.getUB() > value;
-        }
-
-        @Override
         public DecisionOperator opposite() {
             return incLB;
         }
@@ -237,11 +232,6 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         @Override
         public String toString() {
             return " objective split(" + coefLB + "," + coefUB + "), increases the lower bound first";
-        }
-
-        @Override
-        public boolean isValid(IntVar var, int value) {
-            return var.getLB() < value;
         }
 
         @Override

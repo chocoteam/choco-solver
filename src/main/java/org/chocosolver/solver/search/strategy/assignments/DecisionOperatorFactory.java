@@ -106,11 +106,6 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public boolean isValid(IntVar var, int value) {
-            return var.contains(value);
-        }
-
-        @Override
         public DecisionOperator<IntVar> opposite() {
             return makeIntNeq();
         }
@@ -150,11 +145,6 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public boolean isValid(IntVar var, int value) {
-            return var.contains(value);
-        }
-
-        @Override
         public DecisionOperator<IntVar> opposite() {
             return makeIntEq();
         }
@@ -186,13 +176,6 @@ public final class DecisionOperatorFactory {
         @Override
         public String toString() {
             return " <= ";
-        }
-
-        @Override
-        public boolean isValid(IntVar var, int value) {
-            //FIXME If equal => no pruning !? CPRU
-            //FIXME If < LB  => fail CPRU
-            return var.getUB() >= value;
         }
 
         @Override
@@ -236,13 +219,6 @@ public final class DecisionOperatorFactory {
         @Override
         public String toString() {
             return " >= ";
-        }
-
-        @Override
-        public boolean isValid(IntVar var, int value) {
-            //FIXME If equal => no pruning !? CPRU
-            //FIXME If > UB  => fail CPRU
-            return var.getLB() <= value;
         }
 
         @Override
@@ -290,11 +266,6 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public boolean isValid(SetVar var, int element) {
-            return var.getUB().contains(element) && !var.getLB().contains(element);
-        }
-
-        @Override
         public DecisionOperator<SetVar> opposite() {
             return DecisionOperatorFactory.makeSetRemove();
         }
@@ -334,11 +305,6 @@ public final class DecisionOperatorFactory {
         @Override
         public String toString() {
             return " !contains ";
-        }
-
-        @Override
-        public boolean isValid(SetVar var, int element) {
-            return var.getUB().contains(element) && !var.getLB().contains(element);
         }
 
         @Override

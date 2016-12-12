@@ -29,13 +29,11 @@
  */
 package org.chocosolver.solver.search.strategy.assignments;
 
-import java.io.Serializable;
-
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
+
+import java.io.Serializable;
 
 
 
@@ -55,14 +53,4 @@ public interface DecisionOperator<V extends Variable> extends Serializable {
 
     String toString();
 
-    /**
-     * Evaluate the possible effect of the decision and return a boolean indicating whether or not
-     * the decision can reduce the domain of var.
-     *
-     * @param var   a variable
-     * @param value a value
-     * @return true if this has an effect on var
-     */
-    boolean isValid(V var, int value);
-   
 }
