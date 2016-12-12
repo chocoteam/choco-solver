@@ -441,9 +441,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * Creates a minimum constraint:  min = min(var1, var2)
 	 * (Bound Consistency)
 	 *
-	 * @param min  result
-	 * @param var1 result
-	 * @param var2 first variable
+	 * @param min  a variable
+	 * @param var1 a variable
+	 * @param var2 a variable
 	 */
 	default Constraint min(IntVar min, IntVar var1, IntVar var2) {
 		return new Constraint("Min", new PropMinBC(min, var1, var2));
