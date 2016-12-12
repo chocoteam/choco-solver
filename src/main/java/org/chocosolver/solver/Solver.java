@@ -307,10 +307,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                 case extend:
                     left = true;
                     searchMonitors.beforeOpenNode();
+                    mMeasures.incNodeCount();
                     if (!M.extend(this)) {
                         action = validate;
                     } else {
-                        mMeasures.incNodeCount();
                         action = propagate;
                     }
                     searchMonitors.afterOpenNode();
