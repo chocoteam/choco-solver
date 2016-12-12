@@ -248,6 +248,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @return if at least one new solution has been found.
      */
     public boolean solve() {
+        mMeasures.setSearchState(SearchState.RUNNING);
         // prepare
         boolean satPb = getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION;
         if (getModel().getObjective() == null && !satPb) {
@@ -275,7 +276,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     private boolean searchLoop() {
         boolean solution = false;
-        mMeasures.setSearchState(SearchState.RUNNING);
         boolean left = true;
         while (!stop) {
             stop = isStopCriterionMet();
@@ -432,7 +432,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * - update statistics
      */
     private void closeSearch() {
-        mMeasures.setSearchState(SearchState.TERMINATED);
+        if(mMeasures.getSearchState() == SearchState.RUNNING){
+            mMeasures.setSearchState(SearchState.TERMINATED);
+        }
         feasible = FALSE;
         if (mMeasures.getSolutionCount() > 0) {
             feasible = TRUE;
