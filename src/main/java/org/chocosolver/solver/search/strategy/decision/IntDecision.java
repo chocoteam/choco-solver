@@ -160,7 +160,7 @@ public class IntDecision extends Decision<IntVar> {
 
     @Override
     public String toString() {
-        if (assignment.equals(DecisionOperatorFactory.makeIntNeq())) {
+        if (assignment.equals(DecisionOperatorFactory.makeIntEq())) {
             return String.format("%s %s {%d}",
                     var.getName(),
                     branch < 1 ? "=" : '\\',
