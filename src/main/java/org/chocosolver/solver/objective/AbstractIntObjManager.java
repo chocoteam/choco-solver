@@ -41,7 +41,7 @@ import org.chocosolver.solver.variables.events.IEventType;
  */
 abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
 
-    private static final long serialVersionUID = 5529060355541720104L;
+    private static final long serialVersionUID = 5539060355541720114L;
 
     public AbstractIntObjManager(AbstractObjManager<IntVar> objman) {
         super(objman);
@@ -76,6 +76,12 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
     @Override
     public void setStrictDynamicCut() {
         cutComputer = (Number n) -> n.intValue() + precision.intValue();
+    }
+
+    @Override
+    public void resetBestBounds() {
+        bestProvedLB = objective.getLB() - 1;
+        bestProvedUB = objective.getUB() + 1;
     }
 
     @Override

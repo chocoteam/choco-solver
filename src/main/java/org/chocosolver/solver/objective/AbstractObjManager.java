@@ -74,11 +74,11 @@ abstract class AbstractObjManager<V extends Variable> implements IObjectiveManag
 
     public AbstractObjManager(V objective, ResolutionPolicy policy, Number precision) {
         super();
-        Objects.nonNull(objective);
+        assert Objects.nonNull(objective);
         this.objective = objective;
-        Objects.nonNull(policy);
+        assert Objects.nonNull(policy);
         this.policy = policy;
-        Objects.nonNull(precision);
+        assert Objects.nonNull(precision);
         this.precision = precision;
     }
 

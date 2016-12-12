@@ -87,6 +87,13 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
     }
 
     @Override
+    public void resetBestBounds() {
+        double prec = Math.abs(precision.doubleValue());
+        bestProvedLB = objective.getLB() - prec;
+        bestProvedUB = objective.getUB() + prec;
+    }
+
+    @Override
     public String toString() {
         return String.format("%s %s = %." + getNbDecimals() + "f", policy, objective == null ? "?" : this.objective.getName(), getBestSolutionValue().doubleValue());
     }

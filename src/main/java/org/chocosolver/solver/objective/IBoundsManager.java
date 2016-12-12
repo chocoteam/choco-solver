@@ -29,9 +29,9 @@
  */
 package org.chocosolver.solver.objective;
 
-import java.io.Serializable;
-
 import org.chocosolver.solver.ResolutionPolicy;
+
+import java.io.Serializable;
 
 /**
  * interface to monitor bounds.
@@ -92,4 +92,9 @@ public interface IBoundsManager extends Serializable {
      * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
      */
     Number getBestSolutionValue();
+
+    /**
+     * Reset best bounds to the initial domain of the objective variables
+     */
+    default void resetBestBounds(){}
 }
