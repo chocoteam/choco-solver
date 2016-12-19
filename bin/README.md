@@ -27,7 +27,7 @@ And run license check:
 
     $ make latexpdf
 
-4. Check that ALL issues are reported in CHANGES.md files
+4. Check that ALL issues are reported in **CHANGES.md** files
 
     $ ltag=`git describe --abbrev=0 --tags`;git log ${ltag}..develop | grep "#[0-9]"
 
