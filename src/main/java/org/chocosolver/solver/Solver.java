@@ -451,7 +451,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * This method enables to reset the search loop, for instance, to solve a problem twice.
      * <ul>
      * <li>It backtracks up to the root node of the search tree,</li>
-     * <li>it sets the objective manager to STATISFACTION,</li>
+     * <li>it resets bounds of the objective manager (if no satisfaction),</li>
      * <li>it resets the measures,</li>
      * <li>and sets the propagation engine to NoPropagationEngine,</li>
      * </ul>
