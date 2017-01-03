@@ -606,10 +606,12 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * @return the state of this search. This method is designed for use in monitoring of the system state, not for synchronization control.
+     * @deprecated since 4.0.2. Can be removed anytime after this version.
+     * @see #getSearchState()
      */
+    @Deprecated
     public SearchState getState() {
-        return mMeasures.getSearchState();
+        return getSearchState();
     }
 
     /**
