@@ -136,7 +136,7 @@ public class Model implements IModel {
     private String name;
 
     /**
-     * Stores this model's creation time
+     * Stores this model's creation time -- in nanoseconds
      */
     private long creationTime;
 
@@ -198,7 +198,7 @@ public class Model implements IModel {
         this.cstrs = new Constraint[32];
         this.cIdx = 0;
         this.environment = environment;
-        this.creationTime = System.currentTimeMillis();
+        this.creationTime = System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objective = null;
         this.hooks = new HashMap<>();

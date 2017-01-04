@@ -10,8 +10,9 @@ NEXT MILESTONE
     
 * Deprecated API:
     - Solver.getState() (#485)
+    - Measures.IN_SEC (related to #486)
 
-* Closed issues:
+* Closed issues: #468, #486, 
 
 4.0.1 - 16 Dec 2016
 -------------------

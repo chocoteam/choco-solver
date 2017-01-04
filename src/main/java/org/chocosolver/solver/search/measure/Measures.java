@@ -49,7 +49,9 @@ public class Measures implements IMeasures, Cloneable {
 
     /**
      * To transform time from nanoseconds to seconds
+     * @deprecated will be removed in next release
      */
+    @Deprecated
     protected static final float IN_SEC = 1000 * 1000 * 1000f;
 
     /**
@@ -142,7 +144,7 @@ public class Measures implements IMeasures, Cloneable {
         objectiveOptimal = measures.isObjectiveOptimal();
         solutionCount = measures.getSolutionCount();
         timeCount = measures.getTimeCountInNanoSeconds();
-        readingTimeCount = (long) (measures.getReadingTimeCount() * IN_SEC);
+        readingTimeCount = measures.getReadingTimeCountInNanoSeconds();
         nodeCount = measures.getNodeCount();
         backtrackCount = measures.getBackTrackCount();
         restartCount = measures.getRestartCount();

@@ -378,7 +378,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             this.setEngine(PropagationEngineFactory.DEFAULT.make(mModel));
         }
         engine.initialize();
-        getMeasures().setReadingTimeCount(System.currentTimeMillis() - mModel.getCreationTime());
+        getMeasures().setReadingTimeCount(System.nanoTime() - mModel.getCreationTime());
         // end note
 
 

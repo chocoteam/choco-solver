@@ -29,16 +29,16 @@
  */
 package org.chocosolver.solver.search;
 
-import java.io.IOException;
-
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.Measures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
-import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionMakerTest;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
 
 /**
  *
@@ -149,5 +149,22 @@ public class MeasuresTest {
         Measures m1= new Measures(mr1);
         Measures m2 = (Measures) DecisionMakerTest.doSerialize(m1);
         assertEqualMeasures(m2, m1);        
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testReading(){
+        Model model = new Model();
+        int n = 100_000;
+        IntVar[] vars= model.intVarArray(n, 0, 10);
+        model.arithm(vars[0], "=", 5).post();
+        model.arithm(vars[0], "!=", 5).post();
+        for(int i = 0 ; i < n; i++){
+            model.arithm(vars[i], "<", 5).post();
+        }
+        model.getSolver().limitNode(0);
+        model.getSolver().solve();
+        model.getSolver().printStatistics();
+        Assert.assertTrue(model.getSolver().getReadingTimeCountInNanoSeconds() > 0);
+        Assert.assertTrue(model.getSolver().getReadingTimeCount() > 0.0);
     }
 }
