@@ -33,6 +33,8 @@ import org.chocosolver.solver.Model;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.pf4cs.IProblem;
+import org.pf4cs.SetUpException;
 
 import static java.lang.Runtime.getRuntime;
 
@@ -42,7 +44,7 @@ import static java.lang.Runtime.getRuntime;
  * @author Charles Prud'homme
  * @since 31/03/11
  */
-public abstract class AbstractProblem implements IUpDown {
+public abstract class AbstractProblem implements IProblem {
 
     /**
      * A seed for random purpose
@@ -85,7 +87,7 @@ public abstract class AbstractProblem implements IUpDown {
     public abstract void solve();
 
     @Override
-    public void setUp(String... args) throws SetUpException {
+    public void setUp(String... args) throws SetUpException{
 	CmdLineParser parser = new CmdLineParser(this);
 	try {
 	    parser.parseArgument(args);

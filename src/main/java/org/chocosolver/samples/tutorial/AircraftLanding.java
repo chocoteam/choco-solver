@@ -34,7 +34,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -153,7 +153,7 @@ public class AircraftLanding {
                         .min((v1, v2) -> closest(v2, map) - closest(v1, map))
                         .orElse(null),
                 var -> closest(var, map),
-                DecisionOperator.int_eq,
+                DecisionOperatorFactory.makeIntEq(),
                 planes
         ));
         solver.showShortStatistics();

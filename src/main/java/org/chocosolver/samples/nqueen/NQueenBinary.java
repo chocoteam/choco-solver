@@ -35,7 +35,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import java.util.HashSet;
 import java.util.stream.IntStream;
 
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 
 /**
  * <br/>
@@ -53,9 +53,9 @@ public class NQueenBinary extends AbstractNQueen {
         vars = model.intVarArray("Q", n, 1, n);
         IntStream.range(0, n-1).forEach(i ->
                 IntStream.range(i+1, n).forEach(j ->{
-                    vars[i].ne(vars[j]).post();
-                    vars[i].ne(vars[j].sub(j - i)).post();
-                    vars[i].ne(vars[j].add(j - i)).post();
+                    model.arithm(vars[i], "!=", vars[j]).post();
+                    model.arithm(vars[i], "!=", vars[j], "-", j - i).post();
+                    model.arithm(vars[i], "!=", vars[j], "+", j - i).post();
                 })
         );
     }
@@ -64,8 +64,14 @@ public class NQueenBinary extends AbstractNQueen {
 
     @Override
     public void configureSearch() {
-    	model.getSolver().setSearch(minDomLBSearch(vars));
+    	model.getSolver().setSearch(inputOrderLBSearch(vars));
         // model.getSolver().showSolutions();
+    }
+
+    @Override
+    public void solve() {
+        model.getSolver().findAllSolutions();
+        model.getSolver().printShortStatistics();
     }
 
     public static void main(String[] args) {

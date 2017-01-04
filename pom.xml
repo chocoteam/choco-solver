@@ -80,8 +80,14 @@
     <dependencies>
         <dependency>
             <groupId>org.choco-solver</groupId>
+            <artifactId>pf4cs</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.choco-solver</groupId>
             <artifactId>choco-solver</artifactId>
-            <version>4.0.1-SNAPSHOT</version>
+            <version>4.0.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
