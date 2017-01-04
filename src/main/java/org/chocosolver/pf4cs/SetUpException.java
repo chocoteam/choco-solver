@@ -29,27 +29,22 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.pf4cs;
+package org.chocosolver.pf4cs;
 
 /**
- * An interface that allows pre-process (with {@link #setUp(String...)})
- * and pos-process (with {@link #tearDown()}) actions.
+ * Defines an exception to catch invalid arguments.
  * <p>
  * Project: choco-solver.
  * @author Charles Prud'homme
  * @since 03/01/2017
  */
-public interface IUpDown {
+public class SetUpException extends Exception {
 
-    /**
-     * Set up the concrete class with the arugments defined by <i>args</i>.
-     * @param args arguments to set up the concrete class.
-     * @throws SetUpException if one or more argument is not valid.
-     */
-    default void setUp(String... args) throws SetUpException{}
+    public SetUpException(String message) {
+        super(message);
+    }
 
-    /**
-     * Action to run on exit.
-     */
-    default void tearDown(){}
+    public SetUpException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

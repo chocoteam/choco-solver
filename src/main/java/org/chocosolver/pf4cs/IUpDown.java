@@ -29,53 +29,27 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.pf4cs;
-
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
+package org.chocosolver.pf4cs;
 
 /**
- * A class that provides a pattern to declare a model and solve it. <br/>
- * The methods are considered to be called in the following order:
- * <pre> {@code this.setUp(args); // read program arguments
- * this.buildModel(); // build the model (variables and constraints)
- * this.configureSearch(); // configure the search strategy
- * this.solve(); // launch the resolution process
- * this.tearDown(); // run actions on exit}</pre>
- *
- * By default, {@link #setUp(String...)} is based on <a href="http://args4j.kohsuke.org/">args4j</a>.
- *
+ * An interface that allows pre-process (with {@link #setUp(String...)})
+ * and pos-process (with {@link #tearDown()}) actions.
+ * <p>
+ * Project: choco-solver.
  * @author Charles Prud'homme
  * @since 03/01/2017
  */
-public interface IProblem extends IUpDown {
-
-    @Override
-    default void setUp(String... args) throws SetUpException{
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            throw new SetUpException("Invalid problem options");
-        }
-    }
+public interface IUpDown {
 
     /**
-     * Call the model creation
+     * Set up the concrete class with the arugments defined by <i>args</i>.
+     * @param args arguments to set up the concrete class.
+     * @throws SetUpException if one or more argument is not valid.
      */
-	void buildModel();
+    default void setUp(String... args) throws SetUpException{}
 
     /**
-     * Call search configuration
+     * Action to run on exit.
      */
-	void configureSearch();
-
-	/**
-     * Call problem resolution
-     */
-	void solve();
+    default void tearDown(){}
 }

@@ -29,22 +29,53 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.pf4cs;
+package org.chocosolver.pf4cs;
+
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
 
 /**
- * Defines an exception to catch invalid arguments.
- * <p>
- * Project: choco-solver.
+ * A class that provides a pattern to declare a model and solve it. <br/>
+ * The methods are considered to be called in the following order:
+ * <pre> {@code this.setUp(args); // read program arguments
+ * this.buildModel(); // build the model (variables and constraints)
+ * this.configureSearch(); // configure the search strategy
+ * this.solve(); // launch the resolution process
+ * this.tearDown(); // run actions on exit}</pre>
+ *
+ * By default, {@link #setUp(String...)} is based on <a href="http://args4j.kohsuke.org/">args4j</a>.
+ *
  * @author Charles Prud'homme
  * @since 03/01/2017
  */
-public class SetUpException extends Exception {
+public interface IProblem extends IUpDown {
 
-    public SetUpException(String message) {
-        super(message);
+    @Override
+    default void setUp(String... args) throws SetUpException{
+        CmdLineParser parser = new CmdLineParser(this);
+        try {
+            parser.parseArgument(args);
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            System.err.println("java " + this.getClass() + " [options...]");
+            parser.printUsage(System.err);
+            System.err.println();
+            throw new SetUpException("Invalid problem options");
+        }
     }
 
-    public SetUpException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    /**
+     * Call the model creation
+     */
+	void buildModel();
+
+    /**
+     * Call search configuration
+     */
+	void configureSearch();
+
+	/**
+     * Call problem resolution
+     */
+	void solve();
 }
