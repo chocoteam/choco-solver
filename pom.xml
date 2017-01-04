@@ -38,7 +38,7 @@
     <groupId>org.choco-solver</groupId>
     <artifactId>pf4cs</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <name>Problem facade for constraint solvers</name>
     <licenses>
         <license>
