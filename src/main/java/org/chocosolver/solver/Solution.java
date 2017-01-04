@@ -203,10 +203,12 @@ public class Solution implements ICause {
     }
 
     /**
-     * Get the value of variable v in this solution
+     * Get the value of variable v in this solution.
+     * If <i>v</i> was not instantiated during solution recording, calling this method will throw an exception.
      *
      * @param v IntVar (or BoolVar)
      * @return the value of variable v in this solution, or null if the variable is not instantiated in the solution
+     * @exception SolverException if <i>v</i> was not instantiated during solution recording.
      */
     public int getIntVal(IntVar v) {
         if (empty) {
@@ -224,7 +226,7 @@ public class Solution implements ICause {
     }
 
     /**
-     * Set the value of variable v in this solution
+     * Set the value of variable v in this solution.
      *
      * @param var IntVar (or BoolVar)
      * @param val its value
@@ -238,10 +240,12 @@ public class Solution implements ICause {
     }
 
     /**
-     * Get the value of variable s in this solution
+     * Get the value of variable s in this solution.
+     * If <i>v</i> was not instantiated during solution recording, calling this method will throw an exception.
      *
      * @param s SetVar
-     * @return the value of variable s in this solution, or null if the variable is not instantiated in the solution
+     * @return the value of variable s in this solution, or null if the variable is not instantiated in the solution.
+     * @exception SolverException if <i>v</i> was not instantiated during solution recording.
      */
     public int[] getSetVal(SetVar s) {
         if (empty) {
@@ -271,10 +275,12 @@ public class Solution implements ICause {
     }
 
     /**
-     * Get the bounds of r in this solution
+     * Get the bounds of r in this solution.
+     * If <i>v</i> was not instantiated during solution recording, calling this method will throw an exception.
      *
      * @param r RealVar
      * @return the bounds of r in this solution, or null if the variable is not instantiated in the solution
+     * @exception SolverException if <i>v</i> was not instantiated during solution recording.
      */
     public double[] getRealBounds(RealVar r) {
         if (empty) {
