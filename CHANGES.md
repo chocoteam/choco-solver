@@ -12,7 +12,7 @@ NEXT MILESTONE
     - Solver.getState() (#485)
     - Measures.IN_SEC (related to #486)
 
-* Closed issues: #468, #486, #487.
+* Closed issues: #468, #486, #487, #488.
 
 4.0.1 - 16 Dec 2016
 -------------------
