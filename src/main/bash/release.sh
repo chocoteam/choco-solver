@@ -5,12 +5,25 @@ function getVersionToRelease() {
     echo ${CURRENT_VERSION%%-SNAPSHOT}
 }
 
+function getChocoVersion() {
+    echo `mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=choco.version | grep -v "\[INFO\]"`
+}
+
 function guess() {
     v=$1
     echo "${v%.*}.$((${v##*.}+1))-SNAPSHOT"
 }
 
+function sedInPlace() {
+	if [ $(uname) = "Darwin" ]; then
+		sed -i '' "$1" $2
+	else
+		sed -i'' "$1" $2
+	fi
+}
+
 VERSION=$(getVersionToRelease)
+CHOCO_VERSION=$(getChocoVersion)
 NEXT=$(guess $VERSION)
 TAG="samples-${VERSION}"
 
@@ -22,6 +35,10 @@ mvn -q dependency:purge-local-repository
 echo "New version is ${VERSION}"
 YEAR=`LANG=en_US.utf8 date +"%Y"`
 sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
+sedInPlace "s%1. Download.*.%1. Download the source code of [samples](https://github.com/chocoteam/samples/releases/tag/samples-${VERSION})%"  README.md
+sedInPlace "s%2. Download.*.%2. Download [choco-solver-${CHOCO_VERSION}.zip](https://github.com/chocoteam/choco-solver/releases/tag/${CHOCO_VERSION}) and unzip it%"  README.md
+sedInPlace "s%choco-solver-.*-with-dependencies.jar%choco-solver-${CHOCO_VERSION}-with-dependencies.jar%"  README.md
+
 #Update the poms:wq
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
 mvn license:format
@@ -51,10 +68,6 @@ git merge --no-ff -m "Merge tag '${TAG}' into master" ${COMMIT} ||quit "Unable t
 git tag ${TAG} ||quit "Unable to tag with ${TAG}"
 git push --tags ||quit "Unable to push the tag ${TAG}"
 git push origin master ||quit "Unable to push master"
-
-#    #Deploy the artifacts
-#echo "** Deploying the artifacts **"
-mvn -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to deploy"
 
 mvn versions:set -DnewVersion=${NEXT} -DgenerateBackupPoms=false
 git commit -m "Prepare the code for the next version" -a ||quit "Unable to commit to master"
