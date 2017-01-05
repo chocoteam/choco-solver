@@ -44,7 +44,7 @@ then
     sedInPlace "s%\[tarball\].*%[tarball](https://github.com/chocoteam/choco-solver/releases/download/choco-$VERSION/choco-$VERSION.zip) which contains%" README.md
 
     ## The LICENSE
-    sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, Ecole des Mines de Nantes%"  LICENSE
+    sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 
     ## The configuration file
     sedInPlace "s%.*Constraint Programming Solver, Copyleft.*%        return \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR\";%"  ./src/main/java/org/chocosolver/solver/Settings.java
