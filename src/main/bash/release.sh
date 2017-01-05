@@ -10,6 +10,14 @@ function guess() {
     echo "${v%.*}.$((${v##*.}+1))-SNAPSHOT"
 }
 
+function sedInPlace() {
+	if [ $(uname) = "Darwin" ]; then
+		sed -i '' "$1" $2
+	else
+		sed -i'' "$1" $2
+	fi
+}
+
 VERSION=$(getVersionToRelease)
 NEXT=$(guess $VERSION)
 TAG="pf4cs-${VERSION}"
