@@ -33,8 +33,8 @@ import org.chocosolver.solver.Model;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.pf4cs.IProblem;
-import org.pf4cs.SetUpException;
+import org.chocosolver.pf4cs.IProblem;
+import org.chocosolver.pf4cs.SetUpException;
 
 import static java.lang.Runtime.getRuntime;
 
