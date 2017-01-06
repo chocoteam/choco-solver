@@ -26,6 +26,7 @@ branches:
   - /^develop.*$/
   - master
   - /^feature.*$/
+  - coverity_scan
 notifications:
   email:
     recipients:
