@@ -46,11 +46,10 @@ public class VariableUtils {
      */
     public static int[] boundsForScalar(IntVar[] vars, int[] coeffs) {
         long[] bounds = new long[2];
-        IntStream.range(0, vars.length).forEach(i -> {
-                    bounds[0] += vars[i].getLB() * coeffs[i];
-                    bounds[1] += vars[i].getUB() * coeffs[i];
-                }
-        );
+        for(int i = 0; i < vars.length; i++){
+            bounds[0] += vars[i].getLB() * coeffs[i];
+            bounds[1] += vars[i].getUB() * coeffs[i];
+        }
         return new int[]{MathUtils.safeCast(bounds[0]), MathUtils.safeCast(bounds[1])};
     }
 
@@ -60,11 +59,10 @@ public class VariableUtils {
      */
     public static double[] boundsForAddition(RealVar... vars) {
         double[] bounds = new double[2];
-        IntStream.range(0, vars.length).forEach(i -> {
-                    bounds[0] += vars[i].getLB();
-                    bounds[1] += vars[i].getUB();
-                }
-        );
+        for(int i = 0; i < vars.length; i++){
+            bounds[0] += vars[i].getLB();
+            bounds[1] += vars[i].getUB();
+        }
         return bounds;
     }
 
@@ -229,11 +227,10 @@ public class VariableUtils {
      */
     public static int[] boundsForMinimum(IntVar... vars) {
         int[] bounds = new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE};
-        IntStream.range(0, vars.length).forEach(i -> {
-                    bounds[0] = Math.min(bounds[0], vars[i].getLB());
-                    bounds[1] = Math.min(bounds[1], vars[i].getUB());
-                }
-        );
+        for(int i = 0; i < vars.length; i++){
+            bounds[0] = Math.min(bounds[0], vars[i].getLB());
+            bounds[1] = Math.min(bounds[1], vars[i].getUB());
+        }
         return bounds;
     }
 
@@ -244,11 +241,10 @@ public class VariableUtils {
      */
     public static double[] boundsForMinimum(RealVar... vars) {
         double[] bounds = new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
-        IntStream.range(0, vars.length).forEach(i -> {
-                    bounds[0] = Math.min(bounds[0], vars[i].getLB());
-                    bounds[1] = Math.min(bounds[1], vars[i].getUB());
-                }
-        );
+        for(int i = 0; i < vars.length; i++){
+            bounds[0] = Math.min(bounds[0], vars[i].getLB());
+            bounds[1] = Math.min(bounds[1], vars[i].getUB());
+        }
         return bounds;
     }
 
@@ -258,11 +254,10 @@ public class VariableUtils {
      */
     public static int[] boundsForMaximum(IntVar... vars) {
         int[] bounds = new int[]{Integer.MIN_VALUE, Integer.MIN_VALUE};
-        IntStream.range(0, vars.length).forEach(i -> {
-                    bounds[0] = Math.max(bounds[0], vars[i].getLB());
-                    bounds[1] = Math.max(bounds[1], vars[i].getUB());
-                }
-        );
+        for(int i = 0; i < vars.length; i++){
+            bounds[0] = Math.max(bounds[0], vars[i].getLB());
+            bounds[1] = Math.max(bounds[1], vars[i].getUB());
+        }
         return bounds;
     }
 
@@ -272,11 +267,10 @@ public class VariableUtils {
      */
     public static double[] boundsForMaximum(RealVar... vars) {
         double[] bounds = new double[]{Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
-        IntStream.range(0, vars.length).forEach(i -> {
-                    bounds[0] = Math.max(bounds[0], vars[i].getLB());
-                    bounds[1] = Math.max(bounds[1], vars[i].getUB());
-                }
-        );
+        for(int i = 0; i < vars.length; i++){
+            bounds[0] = Math.max(bounds[0], vars[i].getLB());
+            bounds[1] = Math.max(bounds[1], vars[i].getUB());
+        }
         return bounds;
     }
 
