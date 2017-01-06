@@ -58,7 +58,7 @@ public abstract class ChunckedTrail<W extends World> implements IStorage{
         int n = 0;
         for (World w : worlds) {
             if (w != null) {
-//                n += w.allocated();
+                n += w.allocated();
             }
         }
         return n;

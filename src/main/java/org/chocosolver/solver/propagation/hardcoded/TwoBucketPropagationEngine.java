@@ -315,7 +315,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                 int v = evtset.pollFirst();
                 assert lastProp.isActive() : "propagator is not active:" + lastProp;
                 if (DEBUG) {
-                    IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp, COLOR);
+                    IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
                 }
                 // clear event
                 int mask = eventmasks[aid][v];
@@ -326,7 +326,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         } else if (lastProp.isActive()) { // need to be checked due to views
             //assert lastProp.isActive() : "propagator is not active:" + lastProp;
             if (DEBUG) {
-                IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
+                IPropagationEngine.Trace.printPropagation(null, lastProp);
             }
             lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         }
@@ -342,7 +342,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         event_c[aid] = PropagatorEventType.VOID;
         assert lastProp.isActive() : "propagator is not active:" + lastProp;
         if (DEBUG) {
-            IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
+            IPropagationEngine.Trace.printPropagation(null, lastProp);
         }
         lastProp.propagate(evt.getMask());
     }
@@ -390,7 +390,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
         if (DEBUG) {
-            IPropagationEngine.Trace.printModification(variable, type, cause, COLOR);
+            IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         Propagator[] vpropagators = variable.getPropagators();
         int[] vindices = variable.getPIndices();
@@ -412,7 +412,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                         if (needSched) {
                             //assert !event_f[aid].get(pindice);
                             if (DEBUG) {
-                                IPropagationEngine.Trace.printFineSchedule(prop, COLOR);
+                                IPropagationEngine.Trace.printFineSchedule(prop);
                             }
                             event_f[aid].addLast(pindice);
                         }
@@ -424,7 +424,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                         schedule_f[aid] = true;
                         notEmpty = notEmpty | (1 << q);
                         if (DEBUG) {
-                            IPropagationEngine.Trace.printCoarseSchedule(prop, COLOR);
+                            IPropagationEngine.Trace.printCoarseSchedule(prop);
                         }
                     }
                 }

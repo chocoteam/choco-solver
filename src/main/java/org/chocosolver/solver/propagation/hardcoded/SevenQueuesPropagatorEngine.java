@@ -212,7 +212,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         int v = evtset.pollFirst();
                         assert lastProp.isActive() : "propagator is not active:" + lastProp;
                         if (DEBUG) {
-                            IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp, COLOR);
+                            IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
                         }
                         // clear event
                         mask = eventmasks[aid][v];
@@ -225,14 +225,14 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     // now we can check whether a delayed propagation has been scheduled
                     if (delayedPropagationType > 0) {
                         if (DEBUG) {
-                            IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
+                            IPropagationEngine.Trace.printPropagation(null, lastProp);
                         }
                         lastProp.propagate(delayedPropagationType);
                     }
                 } else if (lastProp.isActive()) { // need to be checked due to views
                     //assert lastProp.isActive() : "propagator is not active:" + lastProp;
                     if (DEBUG) {
-                        IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
+                        IPropagationEngine.Trace.printPropagation(null, lastProp);
                     }
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
@@ -284,7 +284,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
         if (DEBUG) {
-            IPropagationEngine.Trace.printModification(variable, type, cause, COLOR);
+            IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         Propagator[] vpropagators = variable.getPropagators();
         int[] vindices = variable.getPIndices();
@@ -306,7 +306,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         eventmasks[aid][pindice] |= type.getMask();
                         if (needSched) {
                             if (DEBUG) {
-                                IPropagationEngine.Trace.printFineSchedule(prop, COLOR);
+                                IPropagationEngine.Trace.printFineSchedule(prop);
                             }
                             assert (pendingEvt[aid] >= 0) : "number of enqueued records is < 0 " + this;
                             pendingEvt[aid]++;
@@ -320,7 +320,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 //                    notEmpty.set(prio);
                         notEmpty = notEmpty | (1 << prio);
                         if (DEBUG) {
-                            IPropagationEngine.Trace.printCoarseSchedule(prop, COLOR);
+                            IPropagationEngine.Trace.printCoarseSchedule(prop);
                         }
                     }
                 }

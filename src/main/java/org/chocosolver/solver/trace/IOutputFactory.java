@@ -30,23 +30,33 @@ public interface IOutputFactory extends ISelf<Solver> {
     // http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
     /**
      * ANSI code for white
+     * @deprecated will be removed in next release
      */
+    @Deprecated
     String ANSI_RESET = "\u001B[0m";
     /**
      * ANSI code for blue
+     * @deprecated will be removed in next release
      */
+    @Deprecated
     String ANSI_BLUE = "\u001B[34m";
     /**
      * ANSI code for purple
+     * @deprecated will be removed in next release
      */
+    @Deprecated
     String ANSI_PURPLE = "\u001B[35m";
     /**
      * ANSI code for green
+     * @deprecated will be removed in next release
      */
+    @Deprecated
     String ANSI_GREEN = "\u001B[32m";
     /**
      * ANSI code for gray
+     * @deprecated will be removed in next release
      */
+    @Deprecated
     String ANSI_GRAY = "\u001B[37m";
 
     /**
@@ -195,8 +205,7 @@ public interface IOutputFactory extends ISelf<Solver> {
             public void beforeDownBranch(boolean left) {
                 getOut().printf("%s %s ", StringUtils.pad("", _me().getEnvironment().getWorldIndex(), "."),
                         _me().getDecisionPath().lastDecisionToString());
-                getOut().printf("%s // %s %s\n", _me().getModel().getSettings().outputWithANSIColors()?ANSI_GRAY:"",
-                        message.print(), _me().getModel().getSettings().outputWithANSIColors()?ANSI_RESET:"");
+                getOut().printf(" // %s \n", message.print());
             }
         });
     }
@@ -253,12 +262,10 @@ public interface IOutputFactory extends ISelf<Solver> {
 
         @Override
         public String print() {
-            return String.format("%s- Solution #%s found. %s \n\t%s.%s",
-                    solver.getModel().getSettings().outputWithANSIColors()?ANSI_GREEN:"",
+            return String.format("- Solution #%s found. %s \n\t%s.",
                     solver.getSolutionCount(),
                     solver.getMeasures().toOneLineString(),
-                    print(solver.getSearch().getVariables()),
-                    solver.getModel().getSettings().outputWithANSIColors()?ANSI_RESET:""
+                    print(solver.getSearch().getVariables())
             );
         }
 

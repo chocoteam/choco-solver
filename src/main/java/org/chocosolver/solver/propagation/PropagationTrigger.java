@@ -125,7 +125,7 @@ public class PropagationTrigger  {
         if (sta_propagators.size() > 0) {
             for (int p = 0; p < sta_propagators.size(); p++) {
                 if (DEBUG) {
-                    IPropagationEngine.Trace.printFirstPropagation(sta_propagators.get(p), COLOR);
+                    IPropagationEngine.Trace.printFirstPropagation(sta_propagators.get(p));
                 }
                 execute(sta_propagators.get(p), engine);
             }

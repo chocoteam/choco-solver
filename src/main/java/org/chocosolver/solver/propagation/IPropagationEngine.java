@@ -12,7 +12,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -30,58 +29,29 @@ public interface IPropagationEngine  {
 
     enum Trace {;
 
-        public static void printFirstPropagation(Propagator p, boolean COLOR) {
-            p.getModel().getSolver().getOut().printf("[A] %s%s%s\n",
-                    COLOR? IOutputFactory.ANSI_PURPLE:"",
-                    p,
-                    COLOR? IOutputFactory.ANSI_RESET:""
-            );
+        public static void printFirstPropagation(Propagator p) {
+            p.getModel().getSolver().getOut().printf("[A] %s\n", p);
         }
 
-        public static void printPropagation(Variable v, Propagator p, boolean COLOR) {
+        public static void printPropagation(Variable v, Propagator p) {
             if (v == null) {
-                p.getModel().getSolver().getOut().printf("[P] %s%s%s\n",
-                        COLOR? IOutputFactory.ANSI_PURPLE:"",
-                        p,
-                        COLOR? IOutputFactory.ANSI_RESET:""
-                );
+                p.getModel().getSolver().getOut().printf("[P] %s\n", p);
             } else {
-                p.getModel().getSolver().getOut().printf("[P] %s%s%s on %s%s%s\n",
-                        COLOR? IOutputFactory.ANSI_BLUE:"",
-                        v,
-                        COLOR? IOutputFactory.ANSI_RESET:"",
-                        COLOR? IOutputFactory.ANSI_PURPLE:"",
-                        p,
-                        COLOR? IOutputFactory.ANSI_RESET:""
-                );
+                p.getModel().getSolver().getOut().printf("[P] %s on %s\n", v, p);
             }
         }
 
-        public static void printModification(Variable v, IEventType e, ICause c, boolean COLOR) {
-            v.getModel().getSolver().getOut().printf("\t[M] %s%s%s %s b/c %s%s%s\n",
-                    COLOR? IOutputFactory.ANSI_BLUE:"",
-                    v,
-                    COLOR? IOutputFactory.ANSI_RESET:"",
-                    e,
-                    COLOR? IOutputFactory.ANSI_PURPLE:"",
-                    c,
-                    COLOR? IOutputFactory.ANSI_RESET:""
-            );
+        public static void printModification(Variable v, IEventType e, ICause c) {
+            v.getModel().getSolver().getOut().printf("\t[M] %s %s b/c %s\n", v, e, c );
         }
 
 
-        public static void printFineSchedule(Propagator p, boolean COLOR) {
-            p.getModel().getSolver().getOut().printf("\t\t[FS] %s%s%s\n",
-                    COLOR? IOutputFactory.ANSI_PURPLE:"",
-                    p,
-                    COLOR? IOutputFactory.ANSI_RESET:"");
+        public static void printFineSchedule(Propagator p) {
+            p.getModel().getSolver().getOut().printf("\t\t[FS] %s\n", p);
         }
 
-        public static void printCoarseSchedule(Propagator p, boolean COLOR) {
-            p.getModel().getSolver().getOut().printf("\t\t[CS] %s%s%s\n",
-                    COLOR? IOutputFactory.ANSI_PURPLE:"",
-                    p,
-                    COLOR? IOutputFactory.ANSI_RESET:"");
+        public static void printCoarseSchedule(Propagator p) {
+            p.getModel().getSolver().getOut().printf("\t\t[CS] %s\n", p);
         }
     }
 

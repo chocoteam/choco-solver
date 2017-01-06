@@ -723,7 +723,7 @@ public class Model implements IModel {
             }
             for (Propagator propagator : c.getPropagators()) {
                 if (settings.debugPropagation()) {
-                    IPropagationEngine.Trace.printFirstPropagation(propagator, settings.outputWithANSIColors());
+                    IPropagationEngine.Trace.printFirstPropagation(propagator);
                 }
                 PropagationTrigger.execute(propagator, getSolver().getEngine());
             }

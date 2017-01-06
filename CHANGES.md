@@ -11,8 +11,9 @@ NEXT MILESTONE
     - remove global constructive disjunction, only local constructive disjunction is allow 
     
 * Deprecated API:
-    - Solver.getState() (#485)
-    - Measures.IN_SEC (related to #486)
+    - `Solver.getState()` (#485)
+    - `Measures.IN_SEC` (related to #486)
+    - `Settings.outputWithANSIColors`, `IOutputFactory.ANSI_*`
 
 * Closed issues: #468, #486, #487, #488.
 

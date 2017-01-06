@@ -219,7 +219,9 @@ public interface Settings  {
     /**
      * If your terminal support ANSI colors (Windows terminals don't), you can set this to true.
      * @return enable output with colors
+     * @deprecated will be removed in next releases
      */
+    @Deprecated
     default boolean outputWithANSIColors(){
         return false;
     }
