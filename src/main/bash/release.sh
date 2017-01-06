@@ -10,6 +10,14 @@ function guess() {
     echo "${v%.*}.$((${v##*.}+1))-SNAPSHOT"
 }
 
+function sedInPlace() {
+	if [ $(uname) = "Darwin" ]; then
+		sed -i '' "$1" $2
+	else
+		sed -i'' "$1" $2
+	fi
+}
+
 VERSION=$(getVersionToRelease)
 NEXT=$(guess $VERSION)
 TAG="choco-parsers-${VERSION}"
@@ -20,9 +28,11 @@ git checkout -b release || exit 1
 mvn -q dependency:purge-local-repository
 
 echo "New version is ${VERSION}"
+YEAR=`LANG=en_US.utf8 date +"%Y"`
+sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 #Update the poms:wq
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
-git commit -m "initiate release ${VERSION}" -a
+mvn license:format
 
 echo "Start release"
 #Extract the version
