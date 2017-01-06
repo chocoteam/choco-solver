@@ -49,6 +49,7 @@ addons:
     build_command_prepend: "mvn clean"
     build_command:   "mvn -DskipTests=true compile"
     branch_pattern: coverity_scan
+    condition: $GROUP = 1s
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 - travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
