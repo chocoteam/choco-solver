@@ -39,6 +39,22 @@ public class Search {
    		return lastConflict(formerSearch, 1);
    	}
 
+	/**
+	 * Search heuristic combined with a constraint performing strong consistency on the next decision variable
+	 * and branching on the value with the best objective bound (for optimization) and branches on the lower bound for SAT problems.
+	 *
+	 * BEWARE: ONLY FOR INTEGERS (lets the former search work for other variable types)
+	 *
+	 * @param formerSearch default search to branch on variables (defines the variable selector and the value selector when this does not hold)
+	 * @return best bound strategy
+	 */
+   	public static AbstractStrategy<IntVar> bestBound(AbstractStrategy formerSearch){
+   		if(formerSearch == null) {
+   			throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
+		}
+   		return new BoundSearch(formerSearch);
+	}
+
     /**
      * Use the last conflict heuristic as a pluggin to improve a former search heuristic
      * Should be set after specifying a search strategy.
@@ -46,6 +62,9 @@ public class Search {
      * @return last conflict strategy
      */
     public static AbstractStrategy lastConflict(AbstractStrategy formerSearch, int k) {
+		if(formerSearch == null) {
+			throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
+		}
         return new LastConflict(formerSearch.getVariables()[0].getModel(), formerSearch, k);
     }
 

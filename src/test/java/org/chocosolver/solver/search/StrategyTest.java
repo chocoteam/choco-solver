@@ -38,6 +38,7 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.LastConflict;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -362,5 +363,24 @@ public class StrategyTest {
         model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testBound() {
+    	for(int i=5;i<9;i++){
+			Model model = ProblemMaker.makeGolombRuler(8);
+			{
+				Solver s = model.getSolver();
+				s.setSearch(Search.defaultSearch(model));
+				while (s.solve()) ;
+			}
+			Model modelBound = ProblemMaker.makeGolombRuler(8);
+			{
+				Solver s = modelBound.getSolver();
+				s.setSearch(Search.bestBound(Search.defaultSearch(modelBound)));
+				while (s.solve()) ;
+			}
+			assertEquals(modelBound.getSolver().getBestSolutionValue().intValue(),model.getSolver().getBestSolutionValue().intValue());
+		}
     }
 }

@@ -9,164 +9,122 @@
 package org.chocosolver.solver.search.strategy;
 
 import gnu.trove.map.hash.TIntIntHashMap;
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.propagation.IPropagationEngine;
-import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
+import org.chocosolver.solver.search.strategy.decision.DecisionPath;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ESat;
+
+import java.util.Random;
 
 /**
- * BEWARE : SHOULD BE UNIQUE!
+ * BEWARE: ONLY FOR INTEGERS (lets the default search work for other variable types)
  *
- * FOR OPTIMIZATION ONLY
- * Search heuristic combined with a constraint performing strong consistency on the decision variable
- * and branching on the value with the best objective bound
+ * Search heuristic combined with a constraint performing strong consistency on the next decision variable
+ * and branching on the value with the best objective bound (for optimization) and branches on the lower bound for SAT problems.
  *
  * @author Jean-Guillaume FAGES
  */
-public class BoundSearch extends AbstractStrategy<IntVar>{
+public class BoundSearch extends AbstractStrategy{
 
-	private PropBound pb;
-	private IntStrategy definedSearch;
-	private static boolean active; // TODO find a better solution than static (hooks?)
+	private final Model model;
+	private final DecisionPath decisionPath;
+	private AbstractStrategy definedSearch; // int search into which this is plugged
+	private TIntIntHashMap vb = new TIntIntHashMap(); // value-bound map
+	private IntVar variable; // current variable, on which this branches
+	private Random rd = new Random(0); // only to alternate between LB and UB for bounded domain filtering
+	public int MAX_DOM_SIZE = 100; // maximum size of an enumerated domain to apply strong consistency on it
 
-	public BoundSearch(IntStrategy mainSearch, IntVar... vars){
-		super(vars);
-		Model m = vars[0].getModel();
-		this.definedSearch = mainSearch;
-		pb = new PropBound(vars, definedSearch.getVarSelector());
-		new Constraint("BoundSearch",pb).post();
+	public BoundSearch(AbstractStrategy mainSearch){
+		super(mainSearch.getVariables());
+		model = vars[0].getModel();
+		definedSearch = mainSearch;
+		decisionPath = model.getSolver().getDecisionPath();
 	}
 
 	@Override
-	public Decision<IntVar> getDecision() {
-		IntVar var = pb.getVar();
-		if(var == null) return null;
-		if(pb.hold()) {
-			return pb.getModel().getSolver().getDecisionPath().makeIntDecision(var, DecisionOperatorFactory.makeIntEq(), pb.getBestVal());
-		}else {
-			return definedSearch.computeDecision(var);
+	public Decision getDecision() {
+		if(variable == null || variable.isInstantiated()) {
+			Decision d = definedSearch.getDecision();
+			vb.clear();
+			if(d == null) return null;
+			if((d.getDecisionVariable().getTypeAndKind() & IntVar.INT) != 0) variable = (IntVar) d.getDecisionVariable();
+			else {
+				return d;
+			}
+		}
+		if (variable.getDomainSize() < MAX_DOM_SIZE) {
+			if(variable.hasEnumeratedDomain()) {
+				vb.clear();
+				for (int v = variable.getLB(); v <= variable.getUB(); v = variable.nextValue(v)) {
+					int bound = bound(v);
+					if(bound == Integer.MAX_VALUE){
+						return removeVal(v);
+						// stops at first infeasible value because there is no meta-decision objects
+						// could be improved (remove all infeasible values) by using a move instead of a search heuristic
+					}else{
+						vb.put(v, bound);
+					}
+				}
+				return decisionPath.makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), getBestVal());
+			}else{
+				vb.clear();
+				int lbB = bound(variable.getLB());
+				int ubB = bound(variable.getUB());
+				if(lbB == Integer.MAX_VALUE && ubB == Integer.MAX_VALUE) {
+					return removeVal(rd.nextBoolean()? variable.getLB():variable.getUB());
+				}else {
+					return decisionPath.makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), Math.min(lbB,ubB));
+				}
+			}
+		}else{
+			vb.clear();
+			return definedSearch.getDecision();
 		}
 	}
 
-	private class PropBound extends Propagator<IntVar> {
+	private IntDecision removeVal(int val){
+		IntDecision d = decisionPath.makeIntDecision(variable, DecisionOperatorFactory.makeIntNeq(), val);
+		d.setRefutable(false);
+		return d;
+	}
 
-		private IPropagationEngine internalEngine, masterEngine;
-		private VariableSelector<IntVar> varsel;
-		private TIntIntHashMap vb = new TIntIntHashMap();
-		private int LIMIT = 100;
-		private IntVar variable;
-		private boolean hold;
-
-		public PropBound(IntVar[] variables, VariableSelector<IntVar> varsel) {
-			super(variables, PropagatorPriority.VERY_SLOW,false);
-			this.varsel = varsel;
+	private int bound(int val){
+		int cost;
+		model.getEnvironment().worldPush();
+		try {
+			variable.instantiateTo(val, Cause.Null);
+			model.getSolver().getEngine().propagate();
+			IntVar obj = (IntVar) model.getObjective();
+			cost = model.getSolver().getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE?-obj.getUB():obj.getLB();
+		} catch (ContradictionException cex) {
+			cost = Integer.MAX_VALUE;
 		}
+		model.getSolver().getEngine().flush();
+		model.getEnvironment().worldPop();
+		return cost;
+	}
 
-		@Override
-		public void propagate(int evtmask) throws ContradictionException {
-			if(active)return;
-			if(internalEngine == null) {
-				init();
-			}
-			if(variable == null || variable.isInstantiated()) {
-				hold = false;
-				variable = varsel.getVariable(vars);
-				if (variable != null && variable.getDomainSize() < LIMIT) {
-					hold = true;
-					if(variable.hasEnumeratedDomain()) {
-						vb.clear();
-						model.getSolver().setEngine(internalEngine);
-						for (int v = variable.getLB(); v <= variable.getUB(); v = variable.nextValue(v)) {
-							vb.put(v, bound(v));
-						}
-						model.getSolver().setEngine(masterEngine);
-						for (int v = variable.getLB(); v <= variable.getUB(); v = variable.nextValue(v)) {
-							if (vb.get(v) == Integer.MAX_VALUE) {
-								variable.removeValue(v, this);
-							}
-						}
-						if(variable.isInstantiated())propagate(0);
-					}
+	public int getBestVal(){
+		int coef = 1;
+		if(variable.hasEnumeratedDomain()){
+			int bestCost = Integer.MAX_VALUE;
+			int bestV = variable.getUB();
+			for (int v = variable.getLB(); v <= variable.getUB(); v = variable.nextValue(v)) {
+				int c = vb.get(v);
+				if (c < bestCost * coef) {
+					bestCost = c;
+					bestV = v;
 				}
 			}
-		}
-
-		private int bound(int val){
-			int cost;
-			active = true;
-			model.getEnvironment().worldPush();
-			try {
-				variable.instantiateTo(val, this);
-				internalEngine.propagate();
-				IntVar obj = (IntVar) model.getObjective();
-				cost = model.getSolver().getObjectiveManager().getPolicy()== ResolutionPolicy.MINIMIZE?obj.getLB():-obj.getUB();
-			} catch (ContradictionException cex) {
-				cost = Integer.MAX_VALUE;
-			}
-			internalEngine.flush();
-			model.getEnvironment().worldPop();
-			active = false;
-			return cost;
-		}
-
-		public int getBestVal(){
-			int coef = model.getSolver().getSolutionCount()==0?1:1;
-			if(variable.hasEnumeratedDomain()){
-				int bestCost = Integer.MAX_VALUE;
-				int bestV = variable.getUB();
-				for (int v = variable.getLB(); v <= variable.getUB(); v = variable.nextValue(v)) {
-					int c = vb.get(v);
-					if (c < bestCost * coef) {
-						bestCost = c;
-						bestV = v;
-					}
-				}
-				return bestV;
-			}else {
-				return bound(variable.getLB())<bound(variable.getUB())*coef?variable.getLB():variable.getUB();
-			}
-		}
-
-		private void init() throws ContradictionException {
-			masterEngine = model.getSolver().getEngine();
-			internalEngine = new TwoBucketPropagationEngine(model);
-			internalEngine.initialize();
-			model.getSolver().setEngine(internalEngine);
-			active = true;
-			boolean fail = false;
-			try {
-				// FAILS on isJ9.czn (also assertion error on mspsp_h1.fzn)
-				internalEngine.propagate();
-			}catch (ContradictionException e){
-				fail = true;
-			}
-			active = false;
-			model.getSolver().setEngine(masterEngine);
-			if(fail)fails();
-		}
-
-		public boolean hold() {
-			return hold;
-		}
-
-		public IntVar getVar(){
-			return hold?variable:varsel.getVariable(vars);
-		}
-
-		@Override
-		public ESat isEntailed() {
-			return ESat.TRUE;
+			return bestV;
+		}else {
+			return bound(variable.getLB())<bound(variable.getUB())*coef?variable.getLB():variable.getUB();
 		}
 	}
 }
