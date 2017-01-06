@@ -31,8 +31,23 @@ package org.chocosolver.parser.flatzinc.ast.searches;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
-import org.chocosolver.solver.search.strategy.selectors.values.*;
-import org.chocosolver.solver.search.strategy.selectors.variables.*;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMedian;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.ActivityBased;
+import org.chocosolver.solver.search.strategy.selectors.variables.AntiFirstFail;
+import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.selectors.variables.Largest;
+import org.chocosolver.solver.search.strategy.selectors.variables.MaxRegret;
+import org.chocosolver.solver.search.strategy.selectors.variables.Occurrence;
+import org.chocosolver.solver.search.strategy.selectors.variables.Smallest;
+import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelectorWithTies;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -86,7 +101,7 @@ public class IntSearch {
     private static IntStrategy valueSelector(IntVar[] scope, VariableSelector<IntVar> variableSelector,
                                                                             Assignment assignmennt) {
         IntValueSelector valSelector;
-        DecisionOperator<IntVar> assgnt = DecisionOperator.int_eq;
+        DecisionOperator<IntVar> assgnt = DecisionOperatorFactory.makeIntEq();
         switch (assignmennt) {
             case indomain:
             case indomain_min:
@@ -107,11 +122,11 @@ public class IntSearch {
             case indomain_split:
             case indomain_interval:
                 valSelector = new IntDomainMiddle(IntDomainMiddle.FLOOR);
-                assgnt = DecisionOperator.int_split;
+                assgnt = DecisionOperatorFactory.makeIntSplit();
                 break;
             case indomain_reverse_split:
                 valSelector = new IntDomainMiddle(!IntDomainMiddle.FLOOR);
-                assgnt = DecisionOperator.int_reverse_split;
+                assgnt = DecisionOperatorFactory.makeIntReverseSplit();
                 break;
             default:
                 System.err.println("% No implementation for " + assignmennt.name() + ". Set default.");

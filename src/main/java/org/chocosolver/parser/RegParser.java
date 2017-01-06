@@ -185,11 +185,9 @@ public abstract class RegParser implements IParser {
                 solver.setSearch(lastConflict(solver.getSearch()));
             }
         }
-        if (tl_ > -1) {
-            for (int i = 0; i < nb_cores; i++) {
-                portfolio.getModels().get(i).getSolver().limitTime(tl);
-                makeComplementarySearch(portfolio.getModels().get(i));
-            }
+        for (int i = 0; i < nb_cores; i++) {
+            if (tl_ > -1)portfolio.getModels().get(i).getSolver().limitTime(tl);
+            makeComplementarySearch(portfolio.getModels().get(i));
         }
         listeners.forEach(ParserListener::afterConfiguringSearch);
     }

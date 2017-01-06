@@ -30,11 +30,12 @@
 package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.set.hash.TIntHashSet;
+
 import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
-import org.chocosolver.parser.flatzinc.ast.propagators.*;
+import org.chocosolver.parser.flatzinc.ast.propagators.PropBoolSumEq0Reif;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
@@ -49,7 +50,11 @@ import org.chocosolver.solver.constraints.nary.geost.externalConstraints.NonOver
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.GeostObject;
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.ShiftedBox;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
@@ -378,9 +383,9 @@ public enum FConstraint {
                             x = a;
                             c = b.getValue();
                         }
-                        model.reifyXequaltoC(x, c, r);
+                        model.reifyXeqC(x, c, r);
                     } else {
-                        model.reifyXequaltoY(a, b, r);
+                        model.reifyXeqY(a, b, r);
                     }
                 } else {
                     model.arithm(a, "=", b).reifyWith(r);
@@ -419,16 +424,16 @@ public enum FConstraint {
                         if (a.isInstantiated()) {
                             var = b;
                             cste = a.getValue();
-                            model.reifyXgreaterthanC(var, cste - 1, r);
+                            model.reifyXgtC(var, cste - 1, r);
 //                            model.arithm(a, "<=", b).reifyWith(r);
                         } else {
                             var = a;
                             cste = b.getValue();
-                            model.reifyXlessthanC(var, cste + 1, r);
+                            model.reifyXltC(var, cste + 1, r);
 //                            model.arithm(a, "<=", b).reifyWith(r);
                         }
                     } else {
-                        model.reifyXlessthanYplusC(a, b,  + 1, r);
+                        model.reifyXltYC(a, b,  + 1, r);
                     }
                 } else {
                     model.arithm(a, "<=", b).reifyWith(r);
@@ -470,9 +475,9 @@ public enum FConstraint {
                                 x = bs[0];
                                 t = c.getValue();
                             }
-                            model.reifyXequaltoC(x, t, r);
+                            model.reifyXeqC(x, t, r);
                         } else {
-                            model.reifyXequaltoY(bs[0], c, r);
+                            model.reifyXeqY(bs[0], c, r);
                         }
                         return;
                     } else {
@@ -552,7 +557,7 @@ public enum FConstraint {
                             return;
                         }
                         if (as[0] == 1 && as[1] == -1) {
-                            model.reifyXlessthanYplusC(bs[0], bs[1], c.getValue() + 1, r);
+                            model.reifyXltYC(bs[0], bs[1], c.getValue() + 1, r);
 //                            model.arithm(bs[0], "<=", bs[1], "+", c.getValue()).reifyWith(r);
                             return;
                         }
@@ -619,14 +624,14 @@ public enum FConstraint {
                     if (a.isInstantiated()) {
                         var = b;
                         cste = a.getValue();
-                        model.reifyXgreaterthanC(var, cste, r);
+                        model.reifyXgtC(var, cste, r);
                     } else {
                         var = a;
                         cste = b.getValue();
-                        model.reifyXlessthanC(var, cste, r);
+                        model.reifyXltC(var, cste, r);
                     }
                 } else {
-                    model.reifyXlessthanY(a, b, r);
+                    model.reifyXltY(a, b, r);
                 }
             } else {
                 model.arithm(a, "<", b).reifyWith(r);
@@ -702,9 +707,9 @@ public enum FConstraint {
                         }
                         final IntVar var = x;
                         final int cste = c;
-                        model.reifyXnotequaltoC(var, cste, r);
+                        model.reifyXneC(var, cste, r);
                     } else {
-                        model.reifyXnotequaltoY(a, b, r);
+                        model.reifyXneY(a, b, r);
                     }
                 } else {
                     model.arithm(a, "!=", b).reifyWith(r);

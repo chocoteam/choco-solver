@@ -45,16 +45,14 @@ public class FznSettings implements Settings {
         return false;
     }
 
-    /**
-     * Set to true to enable clause detection (for boolean variables only)
-     */
-    public boolean enableClause() {
+    @Override
+    public boolean enableTableSubstitution() {
         return true;
     }
 
     @Override
-    public boolean enableTableSubstitution() {
-        return true;
+    public boolean enableSAT() {
+        return false;
     }
 
     /**
