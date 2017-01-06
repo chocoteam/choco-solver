@@ -62,6 +62,7 @@ best = {}  # store the best know values
 with open(args.filelist, 'r') as f:
     for fname in f:
         fname = fname.replace('\n', '')
+        fname = os.path.basename(fname)
         fnames.append(fname)
         optPerSol[fname] = []
         best[fname] = 999999999

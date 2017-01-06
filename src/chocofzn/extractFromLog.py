@@ -5,7 +5,7 @@ __author__ = 'cprudhom'
 import re
 
 rsol = '%.*Solutions,.*'
-ropt = '%.*(Minimize|Maximize).*'
+ropt = '%.*(MINIMIZE|MAXIMIZE).*'
 status = '=====.*'
 comp = '==========\n'
 unsa = '=====UNSATISFIABLE=====\n'
@@ -57,7 +57,7 @@ def read(dir, fname, opt, old):
             if old is True:
                 solution.append(float(parts[8][:-1].replace(',', '.')))  # time
                 solution.append(parts[9])  # nodes
-                if parts[3] == 'Minimize':
+                if parts[3] == 'MINIMIZE':
                     solution.append('MIN')
                 else:
                     solution.append('MAX')
@@ -65,7 +65,7 @@ def read(dir, fname, opt, old):
             else:
                 solution.append(float(parts[10][:-1].replace(',', '.')))  # time
                 solution.append(parts[11])  # nodes
-                if parts[4] == 'Minimize':
+                if parts[4] == 'MINIMIZE':
                     solution.append('MIN')
                 else:
                     solution.append('MAX')
