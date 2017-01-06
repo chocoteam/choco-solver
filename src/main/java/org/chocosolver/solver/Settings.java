@@ -30,7 +30,9 @@ public interface Settings  {
 
     /**
      * List possible reaction to lack of propagator's idempotency.
+     * @deprecated not available, idempotency should be checked outside common propagation system.
      */
+    @Deprecated
     enum Idem {
         /**
          * Does nothing.
@@ -54,14 +56,9 @@ public interface Settings  {
     }
 
     /**
-     * Define how to react when a propagator is not ensured to be idempotent ({@link org.chocosolver.solver.Settings.Idem}).
-     * <ul>
-     * <li>disabled : does not anything</li>
-     * <li>error: print an error message when a propagator is not guaranteed to be idempotent -- for debugging purpose only</li>
-     * <li>force : extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available</li>
-     * </ul>
-     * @return the idempotency strategy
+     * @deprecated not available, idempotency should be checked outside common propagation system.
      */
+    @Deprecated
     default Idem getIdempotencyStrategy() {
         return Idem.disabled;
     }

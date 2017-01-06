@@ -10,7 +10,6 @@ package org.chocosolver.solver.propagation.hardcoded;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -164,13 +163,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
      * A specfic propagation engine which only deals with first propagation of propagators.
      */
     private final PropagationTrigger trigger; // an object that starts the propagation
-
-    /**
-     * For debugging purpose only.
-     * Indicates what to do when a propagator is suspected to not be idempotent, nothing by default.
-     */
-    private final Settings.Idem idemStrat;
-
     /**
      * Creates a two-bucket propagation engine.
      * It propagates all fine events first, wrt their increasing priority, before propagating the smallest priority coarse and propagates all fine events again.
@@ -181,7 +173,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     public TwoBucketPropagationEngine(Model model) {
         this.exception = new ContradictionException();
         this.trigger = new PropagationTrigger(this, model);
-        this.idemStrat = model.getSettings().getIdempotencyStrategy();
         this.model = model;
 
         match_f = model.getSettings().getFineEventPriority();
@@ -338,10 +329,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
                 IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
             }
             lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-        }
-        // This part is for debugging only!!
-        if (Settings.Idem.disabled != idemStrat) {
-            FakeEngine.checkIdempotency(lastProp);
         }
     }
 

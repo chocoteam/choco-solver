@@ -17,6 +17,8 @@ env:
   matrix:
   - GROUP=1s
   - GROUP=10s
+before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 install:
 - npm install travis-ping
 branches:

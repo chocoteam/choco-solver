@@ -10,9 +10,8 @@ package org.chocosolver.solver.constraints.set;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.Random;
+
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
@@ -28,7 +27,11 @@ import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import java.util.Random;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Alexandre LEBRUN
@@ -144,13 +147,6 @@ public class IntersectionTest {
     public void testFuzzIdempotent() {
         for (int repeat = 0; repeat < 100; repeat++) {
             Model model = new Model();
-            model.set(new Settings() {
-
-                @Override
-                public Settings.Idem getIdempotencyStrategy() {
-                    return Settings.Idem.error;
-                }
-            });
             SetVar[] sets = new SetVar[rand.nextInt(5) + 1];
             for (int i = 0; i < sets.length; i++) {
                 sets[i] = randSet("set#" + i, model);
@@ -166,13 +162,6 @@ public class IntersectionTest {
     public void testFuzzIdempotentAndBoundConsistent() {
         for (int repeat = 0; repeat < 100; repeat++) {
             Model model = new Model();
-            model.set(new Settings() {
-
-                @Override
-                public Settings.Idem getIdempotencyStrategy() {
-                    return Settings.Idem.error;
-                }
-            });
             SetVar[] sets = new SetVar[rand.nextInt(5) + 1];
             for (int i = 0; i < sets.length; i++) {
                 sets[i] = randSet("set#" + i, model);

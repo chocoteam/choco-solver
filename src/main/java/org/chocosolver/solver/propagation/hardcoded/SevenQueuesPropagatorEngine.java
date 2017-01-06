@@ -10,7 +10,6 @@ package org.chocosolver.solver.propagation.hardcoded;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -52,11 +51,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      * For debugging purpose: set to <tt>true</tt> to use color on console when debugging
      */
     private final boolean COLOR;
-    /**
-     * The strategy to use for idempotency (for debugging purpose)
-     */
-    private final Settings.Idem idemStrat;
-
     /**
      * Internal unique contradiction exception, used on propagation failures
      */
@@ -128,7 +122,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     public SevenQueuesPropagatorEngine(Model model) {
         this.exception = new ContradictionException();
         this.trigger = new PropagationTrigger(this, model);
-        this.idemStrat = model.getSettings().getIdempotencyStrategy();
         this.model = model;
         //noinspection unchecked
         this.pro_queue = new CircularQueue[8];
@@ -242,10 +235,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         IPropagationEngine.Trace.printPropagation(null, lastProp, COLOR);
                     }
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-                }
-                // This part is for debugging only!!
-                if (Settings.Idem.disabled != idemStrat) {
-                    FakeEngine.checkIdempotency(lastProp);
                 }
             }
             notEmpty = notEmpty & ~(1 << i);
