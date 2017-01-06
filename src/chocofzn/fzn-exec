@@ -41,10 +41,10 @@ OPTIONS:
 EXAMPLES:
 	
 	Basic command to solve a fzn model with choco:
-	$> fzn_choco.sh ./choco.jar ./alpha.fzn
+	$> sh fzn_exec -jar /path/to/choco-parsers-with-dep.jar ./alpha.fzn
 
 	Additionnal arguments:
-	$> fzn_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.fzn
+	$> sh fzn_exec --jargs \"-Xmx128m\" -tl 100 -jar /path/to/choco-parsers-with-dep.jar ./alpha.fzn
 
 "
 

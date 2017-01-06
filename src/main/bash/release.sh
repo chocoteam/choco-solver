@@ -30,6 +30,7 @@ mvn -q dependency:purge-local-repository
 echo "New version is ${VERSION}"
 YEAR=`LANG=en_US.utf8 date +"%Y"`
 sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
+sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  README.md
 #Update the poms:wq
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
 mvn license:format
