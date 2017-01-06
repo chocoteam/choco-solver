@@ -9,6 +9,7 @@
 package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
@@ -18,7 +19,6 @@ import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
-import org.chocosolver.solver.constraints.reification.ConDisConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.IObjectiveManager;
@@ -26,7 +26,11 @@ import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -138,11 +142,6 @@ public class Model implements IModel {
      * A MiniSat instance adapted to nogood management
      */
     protected NogoodConstraint nogoods;
-
-    /**
-     * A CondisConstraint instance adapted to constructive disjunction management
-     */
-    protected ConDisConstraint condis;
 
     /**
      * An Ibex (continuous constraint model) instance
@@ -479,17 +478,11 @@ public class Model implements IModel {
     }
 
     /**
-     * Return a constraint embedding a constructive disjunction store.
-     * A call to this method will create and post the constraint if it does not exist already.
-     *
-     * @return the constructive disjunction constraint
+     * @deprecated use {@link #addConstructiveDisjunction(Constraint...)} instead
      */
-    public ConDisConstraint getConDisStore() {
-        if (condis == null) {
-            condis = new ConDisConstraint(this);
-            condis.post();
-        }
-        return condis;
+    @Deprecated
+    public Constraint getConDisStore() {
+        return null;
     }
 
     /**

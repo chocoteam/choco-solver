@@ -349,9 +349,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         if (mModel.nogoods != null) {
             mModel.nogoods.getPropNogoods().initialize();
         }
-        if (mModel.condis != null) {
-            mModel.condis.getPropCondis().initialize();
-        }
         // note jg : new (used to be in model)
         if (engine == NoPropagationEngine.SINGLETON) {
             this.setEngine(PropagationEngineFactory.DEFAULT.make(mModel));
@@ -768,11 +765,29 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /**
      * Attaches a propagation engine {@code this}.
-     * It overrides the previously defined one, if any.
+     * It overrides the previously defined one, only
+     * if no propagation was done yet.
+     * Indeed, some incremental propagators may have set up their internal structure,
+     * which cannot be set up twice safely.
+     *
+     * If propagation was done calling {@link #solve()},
+     * calling {@link #reset()} enables to set the propagation engine anew.
+     *
+     * If propagation was done "manually" (calling {@link #propagate()}, then nothing can be done.
+     *
      * @param propagationEngine a propagation strategy
+     * @exception SolverException if the current propagation is not {@link NoPropagationEngine#SINGLETON}
+     * and is already initialized.
      */
     public void setEngine(IPropagationEngine propagationEngine) {
-        this.engine = propagationEngine;
+        if (engine == NoPropagationEngine.SINGLETON
+                || !engine.isInitialized()
+                || getEnvironment().getWorldIndex() == rootWorldIndex
+                || propagationEngine == NoPropagationEngine.SINGLETON) {
+            this.engine = propagationEngine;
+        }else{
+            throw new SolverException("Illegal propagation engine modification.");
+        }
     }
 
     /**

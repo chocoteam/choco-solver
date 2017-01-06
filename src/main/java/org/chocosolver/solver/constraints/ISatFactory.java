@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+
 import org.chocosolver.sat.PropSat;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
@@ -17,7 +18,6 @@ import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
 import org.chocosolver.solver.constraints.reification.LocalConstructiveDisjunction;
-import org.chocosolver.solver.constraints.reification.PropConDis;
 import org.chocosolver.solver.variables.BoolVar;
 
 /**
@@ -576,24 +576,20 @@ public interface ISatFactory extends ISelf<Model> {
     }
 
     /**
-     * Make an constructive disjunction constraint
+     * @deprecated use instead {@link #addConstructiveDisjunction(Constraint...)}
+     */
+    default boolean addConstructiveDisjunction(boolean global, Constraint... cstrs) {
+        return addConstructiveDisjunction(false, cstrs);
+    }
+
+    /**
+     * Make a constructive disjunction constraint
      *
-     * @param global set to <tt>true</tt> to enable constructive disjunction over all the constraint network of the CSP
-     *               (presumably filters more values, but slower),
-     *               set to <tt>false</tt> to restrict propagation to variables directly involved in <i>cstrs</i>.
-     *               In the latter, make sure at least one variable is shared by all constraints otherwise no filtering
-     *               will happen.
      * @param cstrs constraint in disjunction
      * @return <tt>true</tt> if the disjunction has been added to the constructive disjunction store.
      */
-    default boolean addConstructiveDisjunction(boolean global, Constraint... cstrs) {
-        Model model = cstrs[0].propagators[0].getModel();
-        if (global) {
-            PropConDis condis = model.getConDisStore().getPropCondis();
-            condis.addDisjunction(cstrs);
-        } else {
-            new LocalConstructiveDisjunction(cstrs).post();
-        }
+    default boolean addConstructiveDisjunction(Constraint... cstrs) {
+        new LocalConstructiveDisjunction(cstrs).post();
         return true;
     }
 

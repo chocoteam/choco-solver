@@ -7,6 +7,8 @@ NEXT MILESTONE
 -------------------
 
 * Major features:
+    - restrict calls to `Solver.setEngine(...)` when propagation started. See javadoc for details.
+    - remove global constructive disjunction, only local constructive disjunction is allow 
     
 * Deprecated API:
     - Solver.getState() (#485)

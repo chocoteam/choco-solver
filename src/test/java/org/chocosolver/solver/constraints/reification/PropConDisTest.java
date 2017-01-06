@@ -16,7 +16,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Random;
@@ -37,19 +36,13 @@ import static org.testng.Assert.assertTrue;
  */
 public class PropConDisTest {
 
-    @DataProvider(name="localornot")
-    public Object[][] provider(){
-        return new Object[][]{{true}, {false}};
-    }
-
-    @Test(groups="1s", timeOut=60000, dataProvider = "localornot")
-    public void testCD1(boolean local) throws ContradictionException {
+    @Test(groups="1s", timeOut=60000)
+    public void testCD1() throws ContradictionException {
         Model m = new Model();
         IntVar a = m.intVar("A", 0, 10, false);
         Constraint c1 = m.arithm(a, "=", 9);
         Constraint c2 = m.arithm(a, "=", 10);
-        m.addConstructiveDisjunction(local, c1, c2);
-        m.getConDisStore().getPropCondis().initialize();
+        m.addConstructiveDisjunction(c1, c2);
         m.getSolver().propagate();
         Assert.assertEquals(a.getDomainSize(), 2);
         Assert.assertEquals(a.getLB(), 9);
@@ -58,16 +51,15 @@ public class PropConDisTest {
         Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "localornot")
-    public void testCD2(boolean local) throws ContradictionException {
+    @Test(groups="1s", timeOut=60000)
+    public void testCD2() throws ContradictionException {
         Model m = new Model();
         IntVar X = m.intVar("X", 0, 10, false);
         IntVar Y = m.intVar("Y", 0, 10, false);
         Constraint c1 = m.arithm(X, "-", Y, "<=", -9);
         Constraint c2 = m.arithm(Y, "-", X, "<=", -9);
 
-        m.addConstructiveDisjunction(local, c1,c2);
-        m.getConDisStore().getPropCondis().initialize();
+        m.addConstructiveDisjunction(c1,c2);
         m.getSolver().propagate();
         Assert.assertEquals(X.getDomainSize(), 4);
         Assert.assertEquals(Y.getDomainSize(), 4);
@@ -84,13 +76,13 @@ public class PropConDisTest {
     }
 
 
-    @Test(groups="5m", timeOut=300000, dataProvider = "localornot")
-    public void test3(boolean local) {
+    @Test(groups="5m", timeOut=300000)
+    public void test3() {
         Random rnd = new Random();
         for (int n = 1; n < 20; n += 1) {
             out.printf("Size: %d\n", n);
-            Model or = modelPb(n, n, rnd, false, true, local);
-            Model cd = modelPb(n, n, rnd, true, true, local);
+            Model or = modelPb(n, n, rnd, false, true);
+            Model cd = modelPb(n, n, rnd, true, true);
             or.getSolver().setSearch(inputOrderLBSearch(ArrayUtils.append((IntVar[]) or.getHook("decvars"),new IntVar[]{(IntVar) or.getObjective()})));
             cd.getSolver().setSearch(inputOrderLBSearch(ArrayUtils.append((IntVar[]) cd.getHook("decvars"),new IntVar[]{(IntVar) cd.getObjective()})));
             Solution sor = new Solution(or);
@@ -108,17 +100,17 @@ public class PropConDisTest {
         }
     }
 
-    @Test(groups="5m", timeOut=3000000, dataProvider = "localornot")
-    public void test4(boolean local) {
+    @Test(groups="5m", timeOut=3000000)
+    public void test4() {
         Random rnd = new Random();
         for (int n = 1; n < 4; n += 1) {
             System.out.printf("Size: %d\n", n);
             for (int seed = 0; seed < 5; seed += 1) {
                 out.printf("Size: %d (%d)\n", n, seed);
-                Model or = modelPb(n, seed, rnd, false, false, local);
+                Model or = modelPb(n, seed, rnd, false, false);
                 or.getSolver().setSearch(randomSearch((IntVar[]) or.getHook("decvars"), 0));
                 while (or.getSolver().solve()) ;
-                Model cd = modelPb(n, seed, rnd, true, false, local);
+                Model cd = modelPb(n, seed, rnd, true, false);
                 cd.getSolver().setSearch(randomSearch((IntVar[]) cd.getHook("decvars"), 0));
                 while (cd.getSolver().solve()) ;
                 assertEquals(cd.getSolver().getSolutionCount(), or.getSolver().getSolutionCount(), "wrong nb of solutions");
@@ -127,7 +119,7 @@ public class PropConDisTest {
         }
     }
 
-    private Model modelPb(int size, long seed, Random rnd, boolean cd, boolean optimize, boolean local) {
+    private Model modelPb(int size, long seed, Random rnd, boolean cd, boolean optimize) {
         rnd.setSeed(seed);
         int[] os = new int[size * 2];
         int[] ls = new int[size * 2];
@@ -152,7 +144,7 @@ public class PropConDisTest {
                 );
             }
             if (cd) {
-                model.addConstructiveDisjunction(local, disjunction);
+                model.addConstructiveDisjunction(disjunction);
             } else {
                 BoolVar[] bvars = new BoolVar[os.length];
                 for(int j = 0 ; j < os.length; j++){

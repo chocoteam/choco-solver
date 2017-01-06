@@ -75,6 +75,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         IPropagationEngine eng = model.getSolver().getEngine();
+        boolean change = false;
         try {
             do {
                 // a fix point needs to be reached
@@ -86,6 +87,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
                 }
                 toUnion.clear();
                 model.getSolver().setEngine(NoPropagationEngine.SINGLETON);
+                change = false;
                 for (int i = idx.get(); i >= 0; i--) {
                     if (propagate(propagators[i], i)) {
                         int last = idx.add(-1) + 1;
@@ -99,9 +101,10 @@ public class PropLocalConDis extends Propagator<IntVar> {
                     }
                 }
                 model.getSolver().setEngine(eng);
+                change = true;
             } while (applyDeductions());
         } finally {
-            model.getSolver().setEngine(eng);
+            if(!change)model.getSolver().setEngine(eng);
         }
     }
 
