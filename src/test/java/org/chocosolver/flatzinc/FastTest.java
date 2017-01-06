@@ -52,16 +52,6 @@ public class FastTest {
         execute(pre2012 + "filters+filter+ar_1_2.fzn", 4, 18, 67400, true, true);
     }
 
-    @Test(groups = "2013,close<1m,mzn,cbj", timeOut = 1200000)
-    public void failSolutionTest() throws Exception {
-        execute(pre2013 + "league+league+model30-8-4.fzn", 4, 18, 67400, true, false);
-    }
-
-    @Test(groups = "2013,close<1m,mzn,cbj", timeOut = 1200000)
-    public void failException() throws Exception {
-        execute(pre2013 + "celar+celar+CELAR6-SUB2.fzn", 4, 18, 67400, true, false);
-    }
-
     private void execute(String name, int nbsol, int bval, int nbnod, boolean complet, boolean exp) throws Exception {
         ClassLoader cl = this.getClass().getClassLoader();
         String file = cl.getResource(name).getFile();
