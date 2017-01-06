@@ -4,6 +4,11 @@ os:
 - linux
 jdk:
 - oraclejdk8
+env:
+  matrix:
+  - GROUP=1s
+  - GROUP=mzn
+  - GROUP=xcsp
 branches:
   only:
   - develop
@@ -14,4 +19,6 @@ notifications:
     - choco@emn.fr
     on_success: always
     on_failure: always
-script: mvn clean install -DtestFailureIgnore=true
+script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
+after_success:
+- bash <(curl -s https://codecov.io/bash)

@@ -41,7 +41,7 @@ public class FastTest {
         String file = cl.getResource(name).getFile();
         String[] args = new String[]{
                 file,
-                "-tl", "90s",
+                "-tl", "110s",
                 "-stat",
                 "-p", "1"
         };
