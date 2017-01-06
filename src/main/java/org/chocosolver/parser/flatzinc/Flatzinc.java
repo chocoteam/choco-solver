@@ -85,7 +85,7 @@ public class Flatzinc extends RegParser {
             System.out.printf("%% simple solver\n");
         }
         datas = new Datas[nb_cores];
-        String iname = Paths.get(instance).getFileName().toString();
+        String iname = instance == null?"":Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
             Model threadModel = new Model(iname + "_" + (i + 1));
             threadModel.set(defaultSettings);
