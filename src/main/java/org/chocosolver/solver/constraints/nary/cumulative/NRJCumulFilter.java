@@ -70,8 +70,8 @@ public class NRJCumulFilter extends CumulFilter{
 			}
 		}
 		sorter.sort(sor_array,idx,comparator);
-		double xMin = Integer.MAX_VALUE / 2;
-		double xMax = Integer.MIN_VALUE / 2;
+		double xMin = Integer.MAX_VALUE / 2d;
+		double xMax = Integer.MIN_VALUE / 2d;
 		double surface = 0;
 		double camax = capa.getUB();
 		for(int k=0; k<idx; k++){

@@ -170,7 +170,6 @@ public class PropClauseChanneling extends Propagator<IntVar> {
                 }
             }
             switch (act) {
-                default:
                 case 0: // instantiation
                     iv.instantiateTo(vidx + OFFSET, this);
                     _inst(vidx);

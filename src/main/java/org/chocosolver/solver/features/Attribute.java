@@ -68,7 +68,7 @@ public enum Attribute implements IAttribute{
             for (Constraint c : model.getCstrs()) {
                 p += c.getPropagators().length;
             }
-            return m / p;
+            return p == 0 ? 0.0 : m / p;
         }
 
         @Override

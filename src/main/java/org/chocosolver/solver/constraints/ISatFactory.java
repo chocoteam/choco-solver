@@ -558,7 +558,7 @@ public interface ISatFactory extends ISelf<Model> {
         if(_me().getSettings().enableSAT()) {
             PropSat sat = _me().getMinisat().getPropSat();
             sat.beforeAddingClauses();
-            boolean add;
+            boolean add = false;
             if (BOOLVARS.length == 1) {
                 add = addClausesBoolLe(BOOLVARS[0], TARGET);
             }
@@ -566,7 +566,7 @@ public interface ISatFactory extends ISelf<Model> {
             for (int i = 0; i < BOOLVARS.length; i++) {
                 vars[i] = sat.makeVar(BOOLVARS[i]);
             }
-            add = sat.getSatSolver().addSumBoolArrayLessEqVar(vars, sat.makeVar(TARGET));
+            add |= sat.getSatSolver().addSumBoolArrayLessEqVar(vars, sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
         }else{
