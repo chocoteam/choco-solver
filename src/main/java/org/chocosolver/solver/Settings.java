@@ -216,7 +216,7 @@ public interface Settings  {
      * @return <tt>true</tt>
      */
     default boolean enableIncrementalityOnBoolSum(int nbvars) {
-        return nbvars > 1;
+        return nbvars > 10;
     }
 
     /**
