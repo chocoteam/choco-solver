@@ -9,7 +9,9 @@
 package org.chocosolver.solver.constraints.real;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
@@ -17,6 +19,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static java.lang.System.out;
@@ -24,7 +27,7 @@ import static org.chocosolver.solver.constraints.real.Ibex.HC4;
 import static org.testng.Assert.assertEquals;
 
 /**
- * -Djava.library.path=/Users/cprudhom/Sources/Ibex/ibex-2.1.12/__build__/src/
+ * -Djava.library.path=-Djava.library.path=/Users/cprudhom/Sources/Ibex/ibex-2.3.1/__build__/plugins/java
  * <br/>
  *
  * @author Charles Prud'homme
@@ -217,6 +220,40 @@ public class RealTest {
         }
         out.printf("%s\n", model.toString());
         model.getSolver().printStatistics();
+        model.getIbex().release();
+    }
+
+    @DataProvider(name="coeffs")
+    public Object[][] provideCoeffs(){
+        return new String[][]{
+                {"{0}*0.5) = {1}"},
+                {"{0}/2) = {1}"},
+        };
+    }
+
+    @Test(groups="ignored", timeOut=600000, dataProvider = "coeffs")
+    public void testHM1(String coeffs) {
+        Model model = new Model("Test model");
+        double precision = 1.e-6;
+        double MAX_VALUE = 10000;
+        double MIN_VALUE = -10000;
+        RealVar weldingCurrent = model.realVar("weldingCurrent", 120, 250, precision);
+        RealVar MTBF_WS = model.realVar("MTBF_WS", MIN_VALUE, MAX_VALUE, precision);
+        RealVar MTBF_MT = model.realVar("MTBF_MT", MIN_VALUE, MAX_VALUE, precision);
+        RealVar global_min = model.realVar("global_min", MIN_VALUE, MAX_VALUE, precision);
+        Solver solver = model.getSolver();
+        model.realIbexGenericConstraint("("+coeffs+";{0}+100={2};min({1},{2}) ={3}", weldingCurrent, MTBF_WS, MTBF_MT, global_min).post();
+        model.setPrecision(precision);
+        model.setObjective(false, global_min);
+        model.getSolver().plugMonitor((IMonitorSolution) () -> {
+            out.println("*******************");
+            System.out.println("weldingCurrent LB=" + weldingCurrent.getLB() + " UB=" + weldingCurrent.getUB());
+            System.out.println("MTBF_WS LB=" + MTBF_WS.getLB() + " UB=" + MTBF_WS.getUB());
+            System.out.println("MTBF_MT LB=" + MTBF_MT.getLB() + " UB=" + MTBF_MT.getUB());
+            System.out.println("global_min LB=" + global_min.getLB() + " UB=" + global_min.getUB());
+        });
+        solver.showDecisions();
+        while (solver.solve()) ;
         model.getIbex().release();
     }
 }

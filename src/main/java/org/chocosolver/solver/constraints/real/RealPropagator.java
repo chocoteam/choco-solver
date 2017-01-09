@@ -111,19 +111,15 @@ public class RealPropagator extends Propagator<RealVar> {
         if (result == Ibex.FAIL) {
             return ESat.FALSE;
         }
-        if (result == Ibex.ENTAILED || isCompletelyInstantiated()) {
-            for (int i = 0; i < vars.length; i++) {
-                if (vars[i].getLB() < domains[2 * i] || vars[i].getUB() > domains[2 * i + 1]) {
-                    if (domains[2 * i + 1] - domains[2 * i] >= vars[i].getPrecision()) {
-                        return ESat.UNDEFINED;
-                    } else {
-                        return ESat.FALSE;
-                    }
+        for (int i = 0; i < vars.length; i++) {
+            // if current domain is larger than domain after contraction
+            if (vars[i].getLB() < domains[2 * i] || vars[i].getUB() > domains[2 * i + 1]) {
+                if (!vars[i].isInstantiated() && domains[2 * i + 1] - domains[2 * i] >= vars[i].getPrecision()) {
+                    return ESat.UNDEFINED;
                 }
             }
-            return ESat.TRUE;
         }
-        return ESat.UNDEFINED;
+        return ESat.TRUE;
     }
 
     @Override
