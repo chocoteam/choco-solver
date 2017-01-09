@@ -432,6 +432,16 @@ public class ModelTest {
         Solution s = m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false);
         Assert.assertNotNull(s);
         Assert.assertTrue(s.getIntVal((IntVar) m.getHook("objective"))==25);
+        m.getEnvironment().worldPush();
+        try {
+            s.restore();
+        }catch (ContradictionException c){
+            Assert.fail();
+        }
+        Assert.assertTrue(((IntVar) m.getHook("objective")).isInstantiatedTo(25));
+        Assert.assertTrue(m.getSettings().checkModel(m.getSolver()));
+        m.getEnvironment().worldPop();
+        Assert.assertFalse(((IntVar) m.getHook("objective")).isInstantiated());
     }
 
     @Test(groups = "1s", timeOut = 60000)

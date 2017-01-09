@@ -12,7 +12,6 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.IExplanationEngine;
 import org.chocosolver.solver.explanations.NoExplanationEngine;
 import org.chocosolver.solver.objective.IBoundsManager;
@@ -47,8 +46,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.chocosolver.solver.Solver.Action.*;
-import static org.chocosolver.util.ESat.*;
+import static org.chocosolver.solver.Solver.Action.extend;
+import static org.chocosolver.solver.Solver.Action.initialize;
+import static org.chocosolver.solver.Solver.Action.propagate;
+import static org.chocosolver.solver.Solver.Action.repair;
+import static org.chocosolver.solver.Solver.Action.validate;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
 
 /**
  * This class is inspired from :
@@ -759,7 +764,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * Overrides the explanation engine.
      * @param explainer the explanation to use
      */
-    public void setExplainer(ExplanationEngine explainer) {
+    public void setExplainer(IExplanationEngine explainer) {
         this.explainer = explainer;
     }
 

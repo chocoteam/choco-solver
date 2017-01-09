@@ -10,7 +10,11 @@ package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -291,5 +295,78 @@ public class Solution implements ICause {
             throw new SolverException("wrong array size");
         }
         realmap.put(var.getId(), val);
+    }
+
+    /**
+     * Restore the solution in {@link #model}.
+     * Restoring a solution in a model consists in iterating over model's variables and
+     * forcing each of them to be instantiated to the value recorded in this solution.
+     * <p>
+     * If a variable was not instantiated while this solution was recorded,
+     * then a {@link SolverException} will be thrown (indeed, forcing this instantiation will call
+     * {@link #getIntVal(IntVar)}, {@link #getSetVal(SetVar)} and/or {@link #getRealBounds(RealVar)}.
+     * </p>
+     * <p>
+     * When instantiating all variables to their value in the solution,
+     * a propagation loop will be achieved to ensure that the correctness and completeness of the model.
+     * If the propagation detects a failure, a {@link ContradictionException} will be thrown.
+     * If so, the propagation engine is not flushed automatically,
+     * and a call to {@link IPropagationEngine#flush()} may be needed.
+     *
+     * However, the satisfaction of the solution status is not check
+     * (see {@link Settings#checkModel(Solver)} to check satisfaction).
+     * </p>
+     * <p>
+     * Restoring a solution is permanent except if a backtrack occurs.
+     * Note that, for a backtrack to be feasible, it needs to be anticipated, by calling
+     * {@link IEnvironment#worldPush()}:
+     *
+     * <pre>
+     *     {@code
+     *     // optional: for assertion only
+     *     int wi = model.getEnvironment().getWorldIndex();
+     *     // prepare future backtrack, in order to forget solution
+     *     model.getEnvironment().worldPush();
+     *     // restore the solution in `model`
+     *     solution.restore();
+     *     // ... do something
+     *     // backtrack to before solution restoration
+     *     model.getEnvironment().worldPop();
+     *     // optional: for assertion only
+     *     assert wi == model.getEnvironment().getWorldIndex();
+     *     }
+     * </pre>
+     * </p>
+     *
+     *  @exception SolverException if a variable was not instantiated during solution recording.
+     *  @exception ContradictionException if restoring the solution leads to failure
+     */
+    public void restore() throws ContradictionException{
+        for (Variable var : varsToStore) {
+            if ((var.getTypeAndKind() & Variable.TYPE) != Variable.CSTE) {
+                int kind = var.getTypeAndKind() & Variable.KIND;
+                switch (kind) {
+                    case Variable.INT:
+                    case Variable.BOOL:
+                        IntVar v = (IntVar) var;
+                        v.instantiateTo(intmap.get(v.getId()), this);
+                        break;
+                    case Variable.REAL:
+                        RealVar r = (RealVar) var;
+                        double[] bounds = realmap.get(r.getId());
+                        r.updateBounds(bounds[0], bounds[1], this);
+                        break;
+                    case Variable.SET:
+                        SetVar s = (SetVar) var;
+                        s.instantiateTo(setmap.get(s.getId()), this);
+                        break;
+                    default:
+                        // do not throw exception to allow extending the solver with other variable kinds (e.g. graph)
+                        // that should then be stored externally to this object
+                        break;
+                }
+            }
+        }
+        model.getSolver().propagate();
     }
 }
