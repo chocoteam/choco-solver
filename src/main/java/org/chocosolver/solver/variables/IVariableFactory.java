@@ -431,6 +431,74 @@ public interface IVariableFactory extends ISelf<Model> {
         return vars;
     }
 
+    //*************************************************************************************
+    // TASK VARIABLES
+    //*************************************************************************************
+
+    /**
+     * Creates a task variable, made of a starting time <i>s</i>,
+     * a processing time <i>p</i> and an ending time <i>e</i> such that: s + p = e.
+     *
+     * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
+     * this will not be done automatically.
+     *
+     * @param s integer variable, starting time
+     * @param p integer variable, processing time
+     * @param e integer variable, ending time
+     * @return a task variable.
+     */
+    default Task taskVar(IntVar s, IntVar p, IntVar e){
+        return new Task(s, p, e);
+    }
+
+    /**
+     * Creates an array of <i>s.length</i> task variables,
+     * where task <i>i</i> is made of a starting time <i>s_i</i>,
+     * a processing time <i>p_i</i> and an ending time <i>e_i</i> such that: s_i + p_i = e_i.
+     *
+     * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
+     * this will not be done automatically.
+     *
+     * @param s integer variables, starting times
+     * @param p integer variables, processing times
+     * @param e integer variables, ending times
+     * @return an array of task variables.
+     */
+    default Task[] taskVarArray(IntVar[] s, IntVar[] p, IntVar[] e){
+        if(s.length != p.length || s.length != e.length){
+            throw new SolverException("Wrong arrays size");
+        }
+        Task[] tasks = new Task[s.length];
+        for(int i = 0; i < s.length; i++){
+            tasks[i] = taskVar(s[i], p[i], e[i]);
+        }
+        return tasks;
+    }
+
+    /**
+     * Creates a matrix of <i>s.length * s_0.length</i> task variables,
+     * where task <i>i,j</i> is made of a starting time <i>s_(i,j)</i>,
+     * a processing time <i>p_(i,j)</i> and an ending time <i>e_(i,j)</i> such that:
+     * s_(i,j) + p_(i,j) = e_(i,j).
+     *
+     * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
+     * this will not be done automatically.
+     *
+     * @param s integer variables, starting times
+     * @param p integer variables, processing times
+     * @param e integer variables, ending times
+     * @return a matrix task variable.
+     */
+    default Task[][] taskVarMatrix(IntVar[][] s, IntVar[][] p, IntVar[][] e){
+        if(s.length != p.length || s.length != e.length){
+            throw new SolverException("Wrong arrays size");
+        }
+        Task[][] tasks = new Task[s.length][];
+        for(int i = 0; i < s.length; i++){
+            tasks[i] = taskVarArray(s[i], p[i], e[i]);
+        }
+        return tasks;
+    }
 
     //*************************************************************************************
     // REAL VARIABLES

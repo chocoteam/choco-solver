@@ -15,7 +15,7 @@ NEXT MILESTONE
     - `Measures.IN_SEC` (related to #486)
     - `Settings.outputWithANSIColors`, `IOutputFactory.ANSI_*`
 
-* Closed issues: #468, #486, #487, #488.
+* Closed issues: #468, #481, #486, #487, #488.
 
 4.0.1 - 16 Dec 2016
 -------------------
