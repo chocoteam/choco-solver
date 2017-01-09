@@ -10,8 +10,14 @@ package org.chocosolver.util.tools;
 
 import gnu.trove.list.array.TIntArrayList;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import static java.lang.reflect.Array.newInstance;
 
 /**
  * This class contains various methods for manipulating arrays.
@@ -92,7 +98,7 @@ public enum ArrayUtils {
                 && c >= 0 && array[0].length > c) {
             T[] res = ((Object) newType == (Object) Object[].class)
                     ? (T[]) new Object[array.length]
-                    : (T[]) Array.newInstance(newType.getComponentType(), array.length);
+                    : (T[]) newInstance(newType.getComponentType(), array.length);
             for (int i = 0; i < array.length; i++) {
                 res[i] = (T) array[i][c];
             }
@@ -180,7 +186,7 @@ public enum ArrayUtils {
     @SuppressWarnings("unchecked")
     public static <T> T[] append(T[]... toAppend) {
         int total = length(toAppend);
-        T[] ret = (T[]) java.lang.reflect.Array.newInstance(toAppend.getClass().getComponentType().getComponentType(), total);
+        T[] ret = (T[]) newInstance(toAppend.getClass().getComponentType().getComponentType(), total);
         int pos = 0;
         for (T[] tab : toAppend) {
             if (tab != null) {
@@ -291,7 +297,7 @@ public enum ArrayUtils {
     public static <T> T[] toArray(Class c, List<T> list) {
         //        T[] array = (T[])Array.newInstance(c, list.size());
         //        return list.toArray(array);
-        return list.toArray((T[]) java.lang.reflect.Array.newInstance(c, list.size()));
+        return list.toArray((T[]) newInstance(c, list.size()));
     }
 
     /**
@@ -323,9 +329,9 @@ public enum ArrayUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> T[][] transpose(T[][] matrix) {
-        T[][] ret = (T[][]) java.lang.reflect.Array.newInstance(matrix.getClass().getComponentType(), matrix[0].length);
+        T[][] ret = (T[][]) newInstance(matrix.getClass().getComponentType(), matrix[0].length);
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = (T[]) java.lang.reflect.Array.newInstance(matrix[0].getClass().getComponentType(), matrix.length);
+            ret[i] = (T[]) newInstance(matrix[0].getClass().getComponentType(), matrix.length);
         }
 
         for (int i = 0; i < matrix.length; i++)
@@ -342,9 +348,9 @@ public enum ArrayUtils {
      * @return a matrix
      */
     public static int[][] transpose(int[][] matrix) {
-        int[][] ret = (int[][]) java.lang.reflect.Array.newInstance(matrix.getClass().getComponentType(), matrix[0].length);
+        int[][] ret = (int[][]) newInstance(matrix.getClass().getComponentType(), matrix[0].length);
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = (int[]) java.lang.reflect.Array.newInstance(matrix[0].getClass().getComponentType(), matrix.length);
+            ret[i] = (int[]) newInstance(matrix[0].getClass().getComponentType(), matrix.length);
         }
 
         for (int i = 0; i < matrix.length; i++)
@@ -365,7 +371,7 @@ public enum ArrayUtils {
     public static <T> T[] flatten(T[][] matrix) {
         int sz = 0;
         for (T[] t : matrix) sz += t.length;
-        T[] ret = (T[]) java.lang.reflect.Array.newInstance(matrix[0].getClass().getComponentType(), sz);
+        T[] ret = (T[]) newInstance(matrix[0].getClass().getComponentType(), sz);
         int k = 0;
         for (T[] ta : matrix) {
             for (T t : ta)
@@ -388,13 +394,13 @@ public enum ArrayUtils {
                 elt.addAll(Arrays.asList(tt));
             }
         }
-        T[] ret = (T[]) java.lang.reflect.Array.newInstance(matrix[0][0].getClass().getComponentType(), elt.size());
+        T[] ret = (T[]) newInstance(matrix[0][0].getClass().getComponentType(), elt.size());
         return elt.toArray(ret);
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T[] flattenSubMatrix(int iMin, int iLength, int jMin, int jLength, T[][] matrix) {
-        T[] ret = (T[]) java.lang.reflect.Array.newInstance(matrix[0].getClass().getComponentType(), iLength * jLength);
+        T[] ret = (T[]) newInstance(matrix[0].getClass().getComponentType(), iLength * jLength);
         for (int i = 0, k = 0; i < iLength; i++, k += jLength)
             System.arraycopy(matrix[iMin + i], jMin, ret, k, jLength);
         return ret;
@@ -446,7 +452,7 @@ public enum ArrayUtils {
         if (tmpl.isEmpty()) {
             return null;
         } else {
-            T[] tmpa = (T[]) java.lang.reflect.Array.newInstance(tmpl.getFirst().getClass(), tmpl.size());
+            T[] tmpa = (T[]) newInstance(tmpl.getFirst().getClass(), tmpl.size());
             tmpl.toArray(tmpa);
             Arrays.sort(tmpa);
             return tmpa;
