@@ -17,7 +17,7 @@ There are two ways to parse and solve a fzn file with Choco:
 
 * ###### Java front-end
 
-  ```java -cp .:/path/to/choco-parsers-4.0.1-with-dependencies.jar ChocoFZN [<options>] [<file>]```
+  ```java -jar /path/to/choco-parsers-4.0.1-with-dependencies.jar [<options>] [<file>]```
   
   
 * ###### In a terminal (shell for Linux based OS)
