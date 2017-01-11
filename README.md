@@ -6,10 +6,14 @@ It provides a parser for the FlatZinc language, a low-level solver input languag
 
 Instructions
 ------------
-The `src/choco-fzn/mzn-lib` directory lists the supported global constraints for Choco3 (See MiniZinc documentation for more details on how to convert mzn files into fzn files).
+The `src/choco-fzn/mzn-lib` directory lists the supported global constraints for Choco (See MiniZinc documentation for more details on how to convert mzn files into fzn files).
 
 
-There are two ways to parse and solve a fzn file with Choco3:
+## Download
+
+Visit [release page](https://github.com/chocoteam/choco-parsers/releases/latest) first.
+
+There are two ways to parse and solve a fzn file with Choco:
 
 * ###### Java front-end
 
