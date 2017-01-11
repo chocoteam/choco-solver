@@ -68,7 +68,7 @@ mvn -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to
 #Set the next development version
 #echo "** Prepare develop for the next version **"
 mvn versions:set -DnewVersion=${NEXT} -DgenerateBackupPoms=false
-git commit -m "Prepare the code for the next version" -a ||quit "Unable to commit to master"
+git commit -m "Prepare the code for ${VERSION}" -a ||quit "Unable to commit to master"
 #
 ##Push changes on develop, with the tag
 git push origin master ||quit "Unable to push to master"
