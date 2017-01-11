@@ -19,7 +19,7 @@ And update README.md with the correct versions of dependencies
 
 And run license check:
 
-    $ mvn license:format -Dyear=2016
+    $ mvn license:format
 
 3. Generate PDF documentation
 

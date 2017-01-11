@@ -1,9 +1,6 @@
 #!/bin/bash
 
-function quit() {
-    echo "ERROR: $*"
-    exit 1
-}
+source bin/commons.sh
 
 function getVersionToRelease() {
     CURRENT_VERSION=`mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"`
@@ -38,3 +35,4 @@ git commit -m "Prepare the code for the next version" -a ||quit "Unable to commi
 git push origin master ||quit "Unable to push to master"
 
 # git checkout -
+./bin/package.sh ${VERSION}

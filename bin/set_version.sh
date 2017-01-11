@@ -1,21 +1,6 @@
 #!/bin/bash
+source bin/commons.sh
 #Script to notify the website about a release
-function guess() {
-    v=$1
-    if [[ $v == *-SNAPSHOT ]]; then
-        echo "${v%%-SNAPSHOT}"
-    else
-        echo "${v%.*}.$((${v##*.}+1))-SNAPSHOT"
-    fi
-}
-
-function sedInPlace() {
-	if [ $(uname) = "Darwin" ]; then
-		sed -i '' "$1" $2
-	else
-		sed -i'' "$1" $2
-	fi
-}
 
 if [ $1 == "--next" ]; then
     VERSION=$(guess $2)
@@ -63,11 +48,11 @@ then
     NEXT MILESTONE\
     -------------------\
     \
-    * Major features:\
+    ### Major features:\
     \
-    * Deprecated API:\
+    ### Deprecated API:\
     \
-    * Closed issues:\
+    ### Closed issues:\
     \
     ' CHANGES.md
 
