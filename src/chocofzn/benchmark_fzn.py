@@ -81,10 +81,10 @@ parser = argparse.ArgumentParser(description='Solve flatzinc files.')
 parser.add_argument(
     "-cp", "--classpath",
     help='Classpath for Choco (choco-parsers and choco-solver)',
-    default='.:'
+    default=#'.:'
     # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
     # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160624/choco-parsers.jar',
-    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160711/choco-parsers.jar',
+    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170111/choco-parsers.jar',
 )
 
 parser.add_argument(
@@ -122,7 +122,7 @@ parser.add_argument(
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'C4PAR:-stat -p 6',
+        'CMP:-stat -p 1',
     ]
 )
 parser.add_argument(
@@ -142,7 +142,7 @@ parser.add_argument(
     default=False
 )
 
-cmd = 'java %s -cp %s org.chocosolver.parser.flatzinc.ChocoFZN -tl %s %s %s'
+cmd = 'java %s -jar %s -tl %s %s %s'
 
 # start here
 args = parser.parse_args()

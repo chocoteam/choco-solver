@@ -67,18 +67,11 @@ mvn -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to
 
 #Set the next development version
 #echo "** Prepare develop for the next version **"
-git checkout develop ||quit "Unable to checkout develop"
-git pull origin develop ||quit "Unable to pull develop"
-git merge --no-ff -m "Merge tag '${TAG}' into develop"  ${TAG} ||quit "Unable to integrate to develop"
 mvn versions:set -DnewVersion=${NEXT} -DgenerateBackupPoms=false
-git commit -m "Prepare the code for the next version" -a ||quit "Unable to commit to develop"
+git commit -m "Prepare the code for the next version" -a ||quit "Unable to commit to master"
 #
 ##Push changes on develop, with the tag
-git push origin develop ||quit "Unable to push to develop"
+git push origin master ||quit "Unable to push to master"
 
 #Clean
 git branch --delete release ||quit "Unable to delete release"
-
-git checkout $TAG
-mvn clean install -DskipTests
-git checkout develop
