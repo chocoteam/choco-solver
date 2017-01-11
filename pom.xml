@@ -61,7 +61,13 @@
         <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>choco-solver</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.2-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>pf4cs</artifactId>
+            <version>1.0.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

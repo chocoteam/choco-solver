@@ -9,6 +9,8 @@
 package org.chocosolver.parser;
 
 import gnu.trove.set.hash.THashSet;
+
+import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
@@ -25,7 +27,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.chocosolver.solver.search.strategy.Search.*;
+import static org.chocosolver.solver.search.strategy.Search.greedySearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
 /**
  * A regular parser with default and common services
@@ -105,11 +109,10 @@ public abstract class RegParser implements IParser {
     }
 
     @Override
-    public final void parseParameters(String[] args) {
+    public void setUp(String... args) throws SetUpException {
         listeners.forEach(ParserListener::beforeParsingParameters);
         System.out.printf("%% %s\n", Arrays.toString(args));
         CmdLineParser cmdparser = new CmdLineParser(this);
-        cmdparser.setUsageWidth(160);
         try {
             cmdparser.parseArgument(args);
         } catch (CmdLineException e) {

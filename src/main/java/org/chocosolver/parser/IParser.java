@@ -8,6 +8,7 @@
  */
 package org.chocosolver.parser;
 
+import org.chocosolver.pf4cs.IProblem;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 
@@ -19,7 +20,7 @@ import org.chocosolver.solver.Settings;
  * @version choco-parsers
  * @since 21/10/2014
  */
-public interface IParser {
+public interface IParser extends IProblem{
 
     /**
      * Add a parser listener
@@ -36,14 +37,6 @@ public interface IParser {
     void removeListener(ParserListener listener);
 
     /**
-     * Parse the program arguments
-     *
-     * @param args program arguments
-     */
-    void parseParameters(String[] args);
-
-
-    /**
      * Declare the settings to use
      *
      * @param defaultSettings settings to consider
@@ -54,21 +47,6 @@ public interface IParser {
      * Create the solver
      */
     void createSolver();
-
-    /**
-     * Parse the file
-     */
-    void parseInputFile() throws Exception;
-
-    /**
-     * Configure the search strategy
-     */
-    void configureSearch();
-
-    /**
-     * Run the resolution of the given solver
-     */
-    void solve();
 
     /**
      * @return a thread to execute on unexpected exit

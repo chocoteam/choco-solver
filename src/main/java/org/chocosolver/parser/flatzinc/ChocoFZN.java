@@ -21,10 +21,10 @@ public class ChocoFZN {
     public static void main(String[] args) throws Exception {
         Flatzinc fzn = new Flatzinc();
         fzn.addListener(new BaseFlatzincListener(fzn));
-        fzn.parseParameters(args);
+        fzn.setUp(args);
         fzn.defineSettings(new FznSettings());
         fzn.createSolver();
-        fzn.parseInputFile();
+        fzn.buildModel();
         fzn.configureSearch();
         fzn.solve();
     }

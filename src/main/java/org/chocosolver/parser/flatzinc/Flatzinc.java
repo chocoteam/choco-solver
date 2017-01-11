@@ -19,6 +19,7 @@ import org.kohsuke.args4j.Argument;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.List;
@@ -96,11 +97,15 @@ public class Flatzinc extends RegParser {
     }
 
     @Override
-    public void parseInputFile() throws Exception {
+    public void buildModel() {
         listeners.forEach(ParserListener::beforeParsingFile);
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
-            parse(models.get(i), datas[i], new FileInputStream(new File(instance)));
+            try {
+                parse(models.get(i), datas[i], new FileInputStream(new File(instance)));
+            } catch (FileNotFoundException e) {
+                throw new Error(e.getMessage());
+            }
         }
         listeners.forEach(ParserListener::afterParsingFile);
     }

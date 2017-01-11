@@ -47,10 +47,10 @@ public class FastTest {
         };
 
         XCSP xscp = new XCSP();
-        xscp.parseParameters(args);
+        xscp.setUp(args);
         xscp.defineSettings(new FznSettings());
         xscp.createSolver();
-        xscp.parseInputFile();
+        xscp.buildModel();
         xscp.configureSearch();
         if(exp) {
             xscp.getModel().getSolver().setCBJLearning(false, false);

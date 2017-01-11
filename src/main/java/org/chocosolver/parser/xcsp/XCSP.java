@@ -57,11 +57,15 @@ public class XCSP extends RegParser {
     }
 
     @Override
-    public void parseInputFile() throws Exception {
+    public void buildModel() {
         listeners.forEach(ParserListener::beforeParsingFile);
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
-            parse(models.get(i));
+            try {
+                parse(models.get(i));
+            } catch (Exception e) {
+                throw new Error(e.getMessage());
+            }
         }
         listeners.forEach(ParserListener::afterParsingFile);
     }

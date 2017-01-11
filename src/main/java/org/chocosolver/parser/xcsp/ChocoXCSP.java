@@ -19,10 +19,10 @@ public class ChocoXCSP {
     public static void main(String[] args) throws Exception {
         XCSP xscp = new XCSP();
 //        fzn.addListener(new BaseFlatzincListener(fzn));
-        xscp.parseParameters(args);
+        xscp.setUp(args);
         xscp.defineSettings(new FznSettings());
         xscp.createSolver();
-        xscp.parseInputFile();
+        xscp.buildModel();
         xscp.configureSearch();
         xscp.solve();
     }
