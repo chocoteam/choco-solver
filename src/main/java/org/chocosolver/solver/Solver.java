@@ -445,6 +445,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      *     <li>replace {@link #P} by {@link PropagateBasic}</li>
      *     <li>replace {@link #L} by {@link LearnNothing}</li>
      *     <li>set {@link #explainer} to {@link NoExplanationEngine#SINGLETON}</li>
+     *     <li>call {@link Model#removeMinisat()}</li>
+     *     <li>call {@link Model#removeNogoodStore()}</li>
      * </ul>
      */
     public void reset() {
@@ -469,6 +471,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         jumpTo = 0;
         stop = false;
         canBeRepaired = true;
+        mModel.removeMinisat();
+        mModel.removeNogoodStore();
     }
 
     /**

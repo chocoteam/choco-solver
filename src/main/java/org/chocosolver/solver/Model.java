@@ -464,6 +464,16 @@ public class Model implements IModel {
     }
 
     /**
+     * Unpost minisat constraint from model, if any.
+     */
+    public void removeMinisat(){
+        if(minisat != null){
+            unpost(minisat);
+            minisat = null;
+        }
+    }
+
+    /**
      * Return a constraint embedding a nogood store (based on a sat model).
      * A call to this method will create and post the constraint if it does not exist already.
      *
@@ -475,6 +485,16 @@ public class Model implements IModel {
             nogoods.post();
         }
         return nogoods;
+    }
+
+    /**
+     * Unpost nogood store constraint from model, if any.
+     */
+    public void removeNogoodStore(){
+        if(nogoods != null){
+            unpost(nogoods);
+            nogoods = null;
+        }
     }
 
     /**
