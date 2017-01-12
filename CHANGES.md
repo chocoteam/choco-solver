@@ -12,6 +12,7 @@ NEXT MILESTONE
   - restrict calls to `Solver.setEngine(...)` when propagation started. See javadoc for details.
   - remove global constructive disjunction, only local constructive disjunction is allowed.
   - add `Solution.restore()` to restore a solution (#354).
+  - deep reset of `Solver` (#490)
     
 ### Deprecated API:
   - `Solver.getState()` (#485)

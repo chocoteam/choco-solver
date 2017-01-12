@@ -24,6 +24,7 @@ import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.Learn;
+import org.chocosolver.solver.search.loop.learn.LearnNothing;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
 import org.chocosolver.solver.search.loop.move.Move;
@@ -429,26 +430,45 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * This method enables to reset the search loop, for instance, to solve a problem twice.
+     * Resetting a solver to its creation state.
      * <ul>
-     * <li>It backtracks up to the root node of the search tree,</li>
-     * <li>it resets bounds of the objective manager (if no satisfaction),</li>
-     * <li>it resets the measures,</li>
-     * <li>and sets the propagation engine to NoPropagationEngine,</li>
+     *     <li>backtrack to {@link #rootWorldIndex}</li>
+     *     <li>set {@link #searchWorldIndex} to 0</li>
+     *     <li>set {@link #action} to {@link Action#initialize}</li>
+     *     <li>reset bounds of {@link #objectivemanager} (calling {@link IObjectiveManager#resetBestBounds()}</li>
+     *     <li>reset {@link #mMeasures}</li>
+     *     <li>synchronize {@link #dpath} to erase out-dated decisions, presumably all of them</li>
+     *     <li>flush {@link #engine}</li>
+     *     <li>clear {@link #criteria}, that forget any declared limit</li>
+     *     <li>clear {@link #searchMonitors}, that forget any declared one</li>
+     *     <li>replace {@link #M} by {@link MoveBinaryDFS}</li>
+     *     <li>replace {@link #P} by {@link PropagateBasic}</li>
+     *     <li>replace {@link #L} by {@link LearnNothing}</li>
+     *     <li>set {@link #explainer} to {@link NoExplanationEngine#SINGLETON}</li>
      * </ul>
      */
     public void reset() {
-        // if a resolution has already been done
-        if (rootWorldIndex > -1) {
+        if(rootWorldIndex > -1){
             mModel.getEnvironment().worldPopUntil(rootWorldIndex);
-            engine.flush();
-            objectivemanager.resetBestBounds();
-            dpath.synchronize();
-            feasible = ESat.UNDEFINED;
-            action = initialize;
-            mMeasures.reset();
-            canBeRepaired = true; // resetting force to reconsider possible reparation
         }
+        searchWorldIndex = 0;
+        action = initialize;
+        mMeasures.reset();
+        engine.flush();
+        dpath.synchronize();
+        setMove(new MoveBinaryDFS());
+        setPropagate(new PropagateBasic());
+        setNoLearning();
+        explainer = NoExplanationEngine.SINGLETON;
+        objectivemanager.resetBestBounds();
+        searchMonitors.reset();
+        criteria.clear();
+        defaultSearch = false;
+        completeSearch = false;
+        feasible = ESat.UNDEFINED;
+        jumpTo = 0;
+        stop = false;
+        canBeRepaired = true;
     }
 
     /**
