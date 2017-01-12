@@ -9,23 +9,6 @@
 package org.chocosolver.solver.search;
 
 
-import static java.lang.Math.floorDiv;
-import static java.lang.System.nanoTime;
-import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
-import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-
-import java.io.IOException;
-import java.util.Random;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
@@ -44,6 +27,23 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.Random;
+
+import static java.lang.Math.floorDiv;
+import static java.lang.System.nanoTime;
+import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
+import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
  * <br/>
@@ -117,7 +117,7 @@ public class ObjectiveTest {
             model.setObjective(Model.MAXIMIZE, iv);
             while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getBestSolutionValue(), 10);
-            assertEquals(model.getSolver().getNodeCount(), 21);
+            assertEquals(model.getSolver().getNodeCount(), 2);
         }
     }
 

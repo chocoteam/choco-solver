@@ -276,6 +276,7 @@ public class ModelTest {
         // unplug
         model.getSolver().unplugMonitor(sm1);
         model.getSolver().reset();
+        model.getSolver().plugMonitor(sm2);
         while (model.getSolver().solve()) ;
         assertEquals(2, c[0]);
         assertEquals(4, d[0]);
@@ -300,6 +301,7 @@ public class ModelTest {
         // unplug
         model.getSolver().removeStopCriterion(c1);
         model.getSolver().reset();
+        model.getSolver().addStopCriterion(c2);
         while (model.getSolver().solve()) ;
         assertEquals(1, model.getSolver().getSolutionCount());
         // plug
