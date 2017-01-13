@@ -10,6 +10,7 @@ package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.explanations.NoExplanationEngine;
 
 /**
  * Interface to define how to learn during the solving process (e.g. CBJ, DBT...)
@@ -22,6 +23,7 @@ public interface ILearnFactory extends ISelf<Solver> {
      */
     default void setNoLearning(){
         _me().setLearner(new LearnNothing());
+        _me().setExplainer(NoExplanationEngine.SINGLETON);
     }
 
     /**

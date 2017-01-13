@@ -276,7 +276,6 @@ public class ModelTest {
         // unplug
         model.getSolver().unplugMonitor(sm1);
         model.getSolver().reset();
-        model.getSolver().plugMonitor(sm2);
         while (model.getSolver().solve()) ;
         assertEquals(2, c[0]);
         assertEquals(4, d[0]);

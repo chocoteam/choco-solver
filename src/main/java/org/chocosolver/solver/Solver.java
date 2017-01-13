@@ -24,7 +24,6 @@ import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.Learn;
-import org.chocosolver.solver.search.loop.learn.LearnNothing;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
 import org.chocosolver.solver.search.loop.move.Move;
@@ -189,7 +188,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     /** Set to <tt>true</tt> to stop the search loop **/
     private boolean stop;
 
-    /** Set to <tt>true</tt> when no more reparation can be achinved, ie entire search tree explored. */
+    /** Set to <tt>true</tt> when no more reparation can be achieved, ie entire search tree explored. */
     private boolean canBeRepaired = true;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -430,24 +429,27 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * Resetting a solver to its creation state.
+     * <p>
+     * Resetting a solver to the state just before running the last resolution instruction.
+     * That is, {@link Propagate}, {@link Learn}, {@link Move} and {@link Search} are kept as declared.
+     * {@link ISearchMonitor} are also kept plugged to the search loop.
+     * </p>
+     * <p>
+     * For hard reset, see {@link #hardReset()}.
+     * </p>
+     * In details, calling this method will:
      * <ul>
      *     <li>backtrack to {@link #rootWorldIndex}</li>
      *     <li>set {@link #searchWorldIndex} to 0</li>
      *     <li>set {@link #action} to {@link Action#initialize}</li>
-     *     <li>reset bounds of {@link #objectivemanager} (calling {@link IObjectiveManager#resetBestBounds()}</li>
      *     <li>reset {@link #mMeasures}</li>
-     *     <li>synchronize {@link #dpath} to erase out-dated decisions, presumably all of them</li>
      *     <li>flush {@link #engine}</li>
-     *     <li>clear {@link #criteria}, that forget any declared limit</li>
-     *     <li>clear {@link #searchMonitors}, that forget any declared one</li>
-     *     <li>replace {@link #M} by {@link MoveBinaryDFS}</li>
-     *     <li>replace {@link #P} by {@link PropagateBasic}</li>
-     *     <li>replace {@link #L} by {@link LearnNothing}</li>
-     *     <li>set {@link #explainer} to {@link NoExplanationEngine#SINGLETON}</li>
-     *     <li>call {@link Model#removeMinisat()}</li>
-     *     <li>call {@link Model#removeNogoodStore()}</li>
+     *     <li>synchronize {@link #dpath} to erase out-dated decisions, presumably all of them</li>
+     *     <li>reset bounds of {@link #objectivemanager} (calling {@link IObjectiveManager#resetBestBounds()}</li>
+     *     <li>remove all stop criteria {@link #removeAllStopCriteria()}</li>
+     *     <li>set {@link #feasible} to {@link ESat#UNDEFINED}</li>
      * </ul>
+     * @see #hardReset()
      */
     public void reset() {
         if(rootWorldIndex > -1){
@@ -458,19 +460,43 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         mMeasures.reset();
         engine.flush();
         dpath.synchronize();
-        setMove(new MoveBinaryDFS());
-        setPropagate(new PropagateBasic());
-        setNoLearning();
-        explainer = NoExplanationEngine.SINGLETON;
         objectivemanager.resetBestBounds();
-        searchMonitors.reset();
-        criteria.clear();
-        defaultSearch = false;
-        completeSearch = false;
+        removeAllStopCriteria();
         feasible = ESat.UNDEFINED;
         jumpTo = 0;
         stop = false;
         canBeRepaired = true;
+    }
+
+    /**
+     * <p>
+     *  Resetting a solver to its creation state.
+     * </p>
+     *
+     * <p>
+     *  For soft reset, see {@link #reset()}.
+     * </p>
+     * <p>
+     *     In details, calling this method will, first call {@link #reset()} and then:
+     * <ul>
+     *     <li>replace {@link #M} by {@link MoveBinaryDFS}</li>
+     *     <li>replace {@link #P} by {@link PropagateBasic}</li>
+     *     <li>call {@link Solver#setNoLearning()}</li>
+     *     <li>clear {@link #searchMonitors}, that forget any declared one</li>
+     *     <li>call {@link Model#removeMinisat()}</li>
+     *     <li>call {@link Model#removeNogoodStore()}</li>
+     * </ul>
+     * </p>
+     * @see #reset()
+     */
+    public void hardReset() {
+        reset();
+        setMove(new MoveBinaryDFS());
+        setPropagate(new PropagateBasic());
+        setNoLearning();
+        searchMonitors.reset();
+        defaultSearch = false;
+        completeSearch = false;
         mModel.removeMinisat();
         mModel.removeNogoodStore();
     }
