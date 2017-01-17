@@ -100,8 +100,14 @@ public class BoundSearch extends AbstractStrategy{
 		try {
 			variable.instantiateTo(val, Cause.Null);
 			model.getSolver().getEngine().propagate();
-			IntVar obj = (IntVar) model.getObjective();
-			cost = model.getSolver().getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE?-obj.getUB():obj.getLB();
+			ResolutionPolicy rp = model.getSolver().getObjectiveManager().getPolicy();
+			if(rp == ResolutionPolicy.SATISFACTION){
+				cost = 1;
+			}else if(rp == ResolutionPolicy.MINIMIZE){
+				cost = ((IntVar) model.getObjective()).getLB();
+			}else {
+				cost = -((IntVar) model.getObjective()).getUB();
+			}
 		} catch (ContradictionException cex) {
 			cost = Integer.MAX_VALUE;
 		}
