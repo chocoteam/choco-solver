@@ -231,7 +231,7 @@ public class RealTest {
         };
     }
 
-    @Test(groups="ignored", timeOut=600000, dataProvider = "coeffs")
+    @Test(groups="ignored", timeOut=60000, dataProvider = "coeffs")
     public void testHM1(String coeffs) {
         Model model = new Model("Test model");
         double precision = 1.e-6;
@@ -254,6 +254,28 @@ public class RealTest {
         });
         solver.showDecisions();
         while (solver.solve()) ;
+        model.getIbex().release();
+    }
+
+    @Test(groups="ignored", timeOut=600000)
+    public void testHM2() {
+        Model model = new Model("Default model");
+        double precision = 1.e-1;
+        RealVar current = model.realVar("current", 121, 248, precision);
+        RealVar MTBF = model.realVar("MTBF", 0, 300, precision);
+        RealVar MTBF_MT = model.realVar("MTBF_MT", 0, 200, precision);
+        Solver solver = model.getSolver();
+        model.realIbexGenericConstraint("932.6-(8.664*{0})+(0.02678*({0}^2))-(0.000028*({0}^3)) = {1}", current, MTBF_MT).post();
+        model.realIbexGenericConstraint("min(20,{0}) = {1}", MTBF_MT, MTBF).post();//MTBF;
+        model.setPrecision(precision);
+        model.setObjective(false, MTBF);
+        solver.showDecisions();
+        solver.plugMonitor((IMonitorSolution) () -> {
+            out.println("*******************");
+            System.out.println("weldingCurrent LB=" + current.getLB() + " UB=" + current.getUB());
+            System.out.println("MTBF_MT LB=" + MTBF_MT.getLB() + " UB=" + MTBF_MT.getUB());
+        });
+        solver.solve();
         model.getIbex().release();
     }
 }
