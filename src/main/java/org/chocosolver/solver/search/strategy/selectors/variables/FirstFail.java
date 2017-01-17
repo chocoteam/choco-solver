@@ -22,7 +22,7 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class FirstFail implements VariableSelector<IntVar>, VariableEvaluator<IntVar> {
 
-    private IStateInt lastIdx; // index of the last non-instantiated variable
+    private final IStateInt lastIdx; // index of the last non-instantiated variable
 
     /**
      * <b>First fail</b> variable selector.
@@ -46,15 +46,13 @@ public class FirstFail implements VariableSelector<IntVar>, VariableEvaluator<In
         //search for the leftmost variable with smallest domain
         while(idx < variables.length) {
             final int dsize = variables[idx].getDomainSize();
-            if (dsize < smallDSize) {
+            if (dsize < smallDSize && dsize > 1) {
              // the variable is candidate for having the smallest domain
-                if( dsize > 1 ) {
-                    // the variable is not instantiated 
-                    smallVar = variables[idx];
-                    smallDSize = dsize;
-                    // cannot be smaller than a boolean domain 
-                    if(dsize == 2) {break;}
-                }
+             //and  the variable is not instantiated 
+                smallVar = variables[idx];
+                smallDSize = dsize;
+                // cannot be smaller than a boolean domain 
+                if(dsize == 2) {break;}
             }
             idx++;
         }
