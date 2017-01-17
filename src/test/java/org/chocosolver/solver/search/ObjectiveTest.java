@@ -117,7 +117,7 @@ public class ObjectiveTest {
             model.setObjective(Model.MAXIMIZE, iv);
             while (model.getSolver().solve()) ;
             assertEquals(model.getSolver().getBestSolutionValue(), 10);
-            assertEquals(model.getSolver().getNodeCount(), 2);
+            assertEquals(model.getSolver().getNodeCount(), 21);
         }
     }
 
