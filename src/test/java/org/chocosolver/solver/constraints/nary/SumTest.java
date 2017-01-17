@@ -10,8 +10,11 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -182,6 +185,17 @@ public class SumTest {
         m.getSolver().showSolutions();
         m.getSolver().findAllSolutions();
         Assert.assertEquals(m.getSolver().getSolutionCount(), 3);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testFH01(){
+        Model m = new Model();
+        IntVar[] i = m.intVarArray("i", 3, 0, 2);
+        IntVar o = m.intVar("o", 0, 6);
+        m.getSolver().setSearch(Search.inputOrderLBSearch(ArrayUtils.append(i, new IntVar[]{o})));
+        m.getSolver().plugMonitor((IMonitorSolution) () -> m.sum(i, "=", o).post());
+        m.getSolver().findOptimalSolution(o, true);
+        Assert.assertEquals(m.getSolver().getBestSolutionValue(), 6);
     }
 
 

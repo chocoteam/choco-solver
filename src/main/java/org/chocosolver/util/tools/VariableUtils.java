@@ -11,6 +11,7 @@ package org.chocosolver.util.tools;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.Variable;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -311,6 +312,24 @@ public class VariableUtils {
      */
     public static IntVar[] toIntVar(Model model, int... values){
         return Arrays.stream(values).mapToObj(i -> model.intVar(i)).toArray(IntVar[]::new);
+    }
+
+    /**
+     * @param var a variable
+     * @return <i>true</i> if the variable is a constant, based on its type,
+     * <i>false</i> otherwise
+     */
+    public static boolean isConstant(Variable var){
+        return (var.getTypeAndKind() & Variable.CSTE) !=0;
+    }
+
+    /**
+     * @param var a variable
+     * @return <i>true</i> if the variable is a view, based on its type,
+     * <i>false</i> otherwise
+     */
+    public static boolean isView(Variable var){
+        return (var.getTypeAndKind() & Variable.VIEW) !=0;
     }
 
 }

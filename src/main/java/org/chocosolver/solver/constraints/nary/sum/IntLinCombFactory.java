@@ -15,6 +15,7 @@ import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
 
@@ -67,7 +68,7 @@ public class IntLinCombFactory {
         IntVar[] NVARS;
         int[] NCOEFFS;
         int RESULT = 0;
-        if (SCALAR.isInstantiated()) {
+        if (VariableUtils.isConstant(SCALAR)) {
             RESULT = SCALAR.getValue();
             NVARS = VARS.clone();
             NCOEFFS = COEFFS.clone();
@@ -86,7 +87,7 @@ public class IntLinCombFactory {
         // 1. reduce coefficients and variables
         // a. quadratic iteration in order to detect multiple occurrences of a variable
         for (int i = 0; i < NVARS.length; i++) {
-            if (NVARS[i].isInstantiated()) {
+            if (VariableUtils.isConstant(NVARS[i])) {
                 RESULT -= NVARS[i].getValue() * NCOEFFS[i];
                 NCOEFFS[i] = 0;
             } else if (NCOEFFS[i] != 0) {
