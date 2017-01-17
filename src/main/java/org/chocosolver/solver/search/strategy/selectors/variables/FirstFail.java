@@ -14,15 +14,15 @@ import org.chocosolver.solver.variables.IntVar;
 
 /**
  * <b>First fail</b> variable selector.
- * It chooses the variable with the smallest domain (instantiated variables are ignored).
+ * It chooses the leftmost variable with the smallest domain (instantiated variables are ignored).
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Arnaud Malapert
  * @since 2 juil. 2010
  */
 public class FirstFail implements VariableSelector<IntVar>, VariableEvaluator<IntVar> {
 
-    private IStateInt lastIdx; // index of the last non-instantiated variable
+    private final IStateInt lastIdx; // index of the last non-instantiated variable
 
     /**
      * <b>First fail</b> variable selector.
@@ -31,33 +31,34 @@ public class FirstFail implements VariableSelector<IntVar>, VariableEvaluator<In
     public FirstFail(Model model){
         lastIdx = model.getEnvironment().makeInt(0);
     }
-
+    
+    
     @Override
     public IntVar getVariable(IntVar[] variables) {
-        int small_idx = -1;
-        int small_dsize = Integer.MAX_VALUE;
-        boolean got = false;
-        for (int idx = lastIdx.get(); idx < variables.length; idx++) {
-            int dsize = variables[idx].getDomainSize();
-
-            if (!got && !variables[idx].isInstantiated()) {
-                //got is just to call 'set' at most once
-                lastIdx.set(idx);
-                got = true;
-            }
-
-            if (dsize > 1 && dsize < small_dsize) {
-                small_dsize = dsize;
-                small_idx = idx;
-            }
-
-            if (small_dsize == 2) {
-                break;
-            }
+        IntVar smallVar = null;
+        int smallDSize = Integer.MAX_VALUE;
+        // get and update the index of the first uninstantiated variable
+        int idx = lastIdx.get();
+        while(idx < variables.length && variables[idx].isInstantiated()) {
+            idx++;
         }
-        return small_idx > -1 ? variables[small_idx] : null;
+        lastIdx.set(idx);
+        //search for the leftmost variable with smallest domain
+        while(idx < variables.length) {
+            final int dsize = variables[idx].getDomainSize();
+            if (dsize < smallDSize && dsize > 1) {
+             // the variable is candidate for having the smallest domain
+             //and  the variable is not instantiated 
+                smallVar = variables[idx];
+                smallDSize = dsize;
+                // cannot be smaller than a boolean domain 
+                if(dsize == 2) {break;}
+            }
+            idx++;
+        }
+        return smallVar;
     }
-
+    
     @Override
     public double evaluate(IntVar variable) {
         return variable.getDomainSize();
