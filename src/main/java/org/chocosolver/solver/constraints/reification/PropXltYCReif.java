@@ -38,13 +38,13 @@ public class PropXltYCReif extends Propagator<IntVar> {
         if (vars[2].getLB() == 1) {
             vars[0].updateUpperBound(vars[1].getUB() + cste - 1, this);
             vars[1].updateLowerBound(vars[0].getLB() - cste + 1, this);
-            if (vars[0].getUB() <= vars[1].getLB() + cste) {
+            if (vars[0].getUB() < vars[1].getLB() + cste) {
                 this.setPassive();
             }
         } else if (vars[2].getUB() == 0) {
             vars[0].updateLowerBound(vars[1].getLB() + cste, this);
             vars[1].updateUpperBound(vars[0].getUB() - cste, this);
-            if (vars[0].getLB() > vars[1].getUB() + cste) {
+            if (vars[0].getLB() >= vars[1].getUB() + cste) {
                 setPassive();
             }
         } else {

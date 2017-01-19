@@ -235,7 +235,7 @@ public interface IReificationFactory {
 	}
 
 	/**
-	 * Posts one constraint that expresses : (x &ge; y) &hArr; b.
+	 * Posts one constraint that expresses : (x &le; y) &hArr; b.
 	 * Bypasses the reification system.
 	 * @param X an integer variable
 	 * @param Y an integer variable
