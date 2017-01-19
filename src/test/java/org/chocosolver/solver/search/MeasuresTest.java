@@ -91,24 +91,23 @@ public class MeasuresTest {
     }
     
     private static void assertEqualMeasures(IMeasures actual, IMeasures expected) {
-        Assert.assertEquals(actual.getBackTrackCount(), expected.getBackTrackCount());
+        Assert.assertEquals(actual.getModelName(), expected.getModelName());
+        Assert.assertEquals(actual.getSearchState(), expected.getSearchState());
+       Assert.assertEquals(actual.getBackTrackCount(), expected.getBackTrackCount());
         Assert.assertEquals(actual.getCurrentDepth(),expected.getCurrentDepth());
         Assert.assertEquals(actual.getFailCount(), expected.getFailCount());
         Assert.assertEquals(actual.getMaxDepth(), expected.getMaxDepth());
-        Assert.assertEquals(actual.getModelName(), expected.getModelName());
         Assert.assertEquals(actual.getNodeCount(), expected.getNodeCount());
         Assert.assertEquals(actual.getReadingTimeCount(), expected.getReadingTimeCount());
         Assert.assertEquals(actual.getRestartCount(), expected.getRestartCount());
         Assert.assertEquals(actual.getSolutionCount(), expected.getSolutionCount());
         Assert.assertEquals(actual.getTimeCountInNanoSeconds(), expected.getTimeCountInNanoSeconds());
-        Assert.assertEquals(actual.getSearchState(), expected.getSearchState());
         if(expected.hasObjective()) {
             Assert.assertEquals(actual.getBestSolutionValue(), expected.getBestSolutionValue());
             Assert.assertEquals(actual.isObjectiveOptimal(), expected.isObjectiveOptimal());
         } else {
             Assert.assertEquals(actual.getBoundsManager(), expected.getBoundsManager());
-        }
-        
+        }  
     }
     
     @Test(groups = "1s", timeOut = 60000)
@@ -123,6 +122,7 @@ public class MeasuresTest {
         mr1.incSolutionCount();
         mr1.incSolutionCount();
         mr1.stopStopwatch();
+        mr1.setSearchState(SearchState.TERMINATED);
         MeasuresRecorder mr2 = (MeasuresRecorder) DecisionMakerTest.doSerialize(mr1);
         assertEqualMeasures(mr2, mr1);
         Measures m1= new Measures(mr1);

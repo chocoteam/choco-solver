@@ -42,6 +42,7 @@ import static org.chocosolver.util.ESat.UNDEFINED;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -315,6 +316,7 @@ public class ObjectiveTest {
 	assertNotNull(objman.toString());
 	
 	IObjectiveManager<IntVar> objman2 = ObjectiveFactory.copy(objman);
+	assertNotEquals(objman2, objman);
 	assertEquals(objman2.getBestLB(), 5);
 	assertEquals(objman2.getBestUB(), 11);
 	assertEquals(objman2.getBestSolutionValue(), 5);
@@ -335,6 +337,7 @@ public class ObjectiveTest {
 	assertNotNull(objman.toString());
 	
 	IObjectiveManager<RealVar> objman2 = ObjectiveFactory.copy(objman);
+	assertNotEquals(objman2, objman);
 	assertEquals(objman2.getBestLB().doubleValue(), 5, p);
 	assertEquals(objman2.getBestUB().doubleValue(), 10, p);
 	assertEquals(objman2.getBestSolutionValue().doubleValue(), 5, p);
@@ -353,6 +356,7 @@ public class ObjectiveTest {
 	assertEquals(objman.getBestSolutionValue(), 5);
 
 	IObjectiveManager<IntVar> objman2 = ObjectiveFactory.copy(objman);
+	assertNotEquals(objman2, objman);
 	assertEquals(objman2.getBestLB(), -1);
 	assertEquals(objman2.getBestUB(), 5);
 	assertEquals(objman2.getBestSolutionValue(), 5);
@@ -371,6 +375,7 @@ public class ObjectiveTest {
 	assertEquals(objman.getBestSolutionValue().doubleValue(), 5, p);
 
 	IObjectiveManager<RealVar> objman2 = ObjectiveFactory.copy(objman);
+	assertNotEquals(objman2, objman);
 	assertEquals(objman2.getBestLB().doubleValue(), 0, p);
 	assertEquals(objman2.getBestUB().doubleValue(), 5, p);
 	assertEquals(objman2.getBestSolutionValue().doubleValue(), 5, p);
@@ -385,6 +390,10 @@ public class ObjectiveTest {
 	assertNull(objman.getBestUB());
 	assertNull(objman.getBestSolutionValue());
 	assertNotNull(objman.toString());
+	
+	IObjectiveManager<Variable> objman2 = ObjectiveFactory.copy(objman);
+	assertEquals(objman2, objman);
+        
     }
     
     @Test(groups = "1s", timeOut = 60000)

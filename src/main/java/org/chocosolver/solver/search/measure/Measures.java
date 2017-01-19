@@ -115,11 +115,14 @@ public class Measures implements IMeasures, Cloneable {
 
     /**
      * Copy constructor
+     * with shallow copy of the bounds manager.
      * @param measures to copy
      */
     public Measures(IMeasures measures) {
         super();
-        boundsManager = ObjectiveFactory.copy(measures.getBoundsManager());
+        modelName = measures.getModelName();
+        state = measures.getSearchState();
+        boundsManager = measures.getBoundsManager();
         objectiveOptimal = measures.isObjectiveOptimal();
         solutionCount = measures.getSolutionCount();
         timeCount = measures.getTimeCountInNanoSeconds();

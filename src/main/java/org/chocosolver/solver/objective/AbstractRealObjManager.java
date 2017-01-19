@@ -83,7 +83,7 @@ class MinRealObjManager extends AbstractRealObjManager {
     private static final long serialVersionUID = 2409478704121834610L;
 
     @SuppressWarnings("unused") // use for copy by introspection
-    public MinRealObjManager(AbstractObjManager<RealVar> objman) {
+    public MinRealObjManager(MinRealObjManager objman) {
         super(objman);
     }
 
@@ -113,7 +113,7 @@ class MaxRealObjManager extends AbstractRealObjManager {
     private static final long serialVersionUID = 3584094931280638616L;
 
     @SuppressWarnings("unused") // use for copy by introspection
-    public MaxRealObjManager(AbstractObjManager<RealVar> objman) {
+    public MaxRealObjManager(MaxRealObjManager objman) {
         super(objman);
     }
 
