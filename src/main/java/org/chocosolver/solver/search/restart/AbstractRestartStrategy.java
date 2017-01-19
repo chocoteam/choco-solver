@@ -8,48 +8,25 @@
  */
 package org.chocosolver.solver.search.restart;
 
+import org.chocosolver.cutoffseq.AbstractCutoffStrategy;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme, , Arnaud Malapert
  * @since 13/05/11
  */
-public abstract class AbstractRestartStrategy implements IRestartStrategy {
-
-    protected int scaleFactor = 1;
-
-    protected double geometricalFactor = 1d;
+public abstract class AbstractRestartStrategy extends AbstractCutoffStrategy {
 
     protected AbstractRestartStrategy(int scaleFactor, double geometricalFactor) {
-        setScaleFactor(scaleFactor);
-        setGeometricalFactor(geometricalFactor);
+        super(scaleFactor);
     }
 
-    @Override
-    public int getFirstCutOff() {
-        return scaleFactor;
-    }
-
-    protected static void checkPositiveValue(double value) {
-        if (value <= 0) {
-            throw new IllegalArgumentException("arguments should be strictly positive.");
-        }
-    }
-
-    protected void setGeometricalFactor(double geometricalFactor) {
-        checkPositiveValue(geometricalFactor);
-        this.geometricalFactor = geometricalFactor;
-    }
-
-    protected final void setScaleFactor(int scaleFactor) {
-        checkPositiveValue(scaleFactor);
-        this.scaleFactor = scaleFactor;
-    }
-
+    @Deprecated
     public int[] getSequenceExample(int length) {
         int[] res = new int[length];
         for (int i = 0; i < res.length; i++) {
-            res[i] = getNextCutoff(i);
+            res[i] = getNextCutoff();
         }
         return res;
     }

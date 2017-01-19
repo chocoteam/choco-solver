@@ -9,17 +9,15 @@
 package org.chocosolver.solver.search.restart;
 
 
+import org.chocosolver.cutoffseq.ICutoffStrategy;
 
 /**
- * Interface defining services for restart strategy
- * <br/>
- *
- * @author Charles Prud'homme, Arnaud Malapert
- * @since 13/05/11
+ * @deprecated will be removed in the next release
+ * @see ICutoffStrategy
  */
-public interface IRestartStrategy  {
+@Deprecated
+public interface IRestartStrategy extends ICutoffStrategy{
 
-    int getFirstCutOff();
-
+    @Deprecated
     int getNextCutoff(int nbRestarts);
 }

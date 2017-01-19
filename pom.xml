@@ -64,6 +64,11 @@
             <version>1.0.2</version>
         </dependency>
         <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>cutoffseq</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.10</version>

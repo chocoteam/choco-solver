@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
+import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -15,12 +16,13 @@ import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveBinaryLDS;
-import org.chocosolver.solver.search.restart.LubyRestartStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.Search.*;
+import static org.chocosolver.solver.search.strategy.Search.greedySearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithOneAlldifferent;
 import static org.testng.Assert.assertEquals;
@@ -168,7 +170,7 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setDFS();
         r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
-        model.getSolver().setRestarts(limit -> model.getSolver().getNodeCount() >= limit, new LubyRestartStrategy(2, 2), 2);
+        model.getSolver().setRestarts(limit -> model.getSolver().getNodeCount() >= limit, new LubyCutoffStrategy(2), 2);
         while (model.getSolver().solve()) ;
         model.getSolver().printShortStatistics();
         assertEquals(model.getSolver().getRestartCount(), 2);

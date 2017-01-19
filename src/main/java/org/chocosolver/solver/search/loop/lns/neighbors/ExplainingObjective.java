@@ -8,6 +8,12 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+
+import org.chocosolver.cutoffseq.GeometricalCutoffStrategy;
+import org.chocosolver.cutoffseq.ICutoffStrategy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
@@ -17,14 +23,8 @@ import org.chocosolver.solver.explanations.ExplanationEngine;
 import org.chocosolver.solver.explanations.NoExplanationEngine;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.objective.IObjectiveManager;
-import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
-import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
-
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * a specific neighborhood for LNS based on the explanation of the objective variable.
@@ -61,7 +61,7 @@ class ExplainingObjective extends ExplainingCut{
     /**
      * Strategy to build clusters, based on geometrical evolution
      */
-    private final IRestartStrategy geo4cluster;
+    private ICutoffStrategy geo4cluster;
     /**
      * current cluster used in the fragment
      */
@@ -90,7 +90,7 @@ class ExplainingObjective extends ExplainingCut{
         // TEMPORARY DATA STRUCTURES
         tmpDeductions = new TIntArrayList();
         tmpValueDeductions = new TIntHashSet(16);
-        geo4cluster = new GeometricalRestartStrategy(1, 1.2);
+        geo4cluster = new GeometricalCutoffStrategy(1, 1.2);
         //TODO: check plug monitor
     }
 
@@ -351,7 +351,8 @@ class ExplainingObjective extends ExplainingCut{
             clusters.clear();
             clusters.add(0);
             clusters.add(one);
-            for (int j = 0, i = one + 1; i < tmpDeductions.size(); j++, i += geo4cluster.getNextCutoff(j)) {
+            geo4cluster = new GeometricalCutoffStrategy(1, 1.2);
+            for (int j = 0, i = one + 1; i < tmpDeductions.size(); j++, i += geo4cluster.getNextCutoff()) {
                 clusters.add(i);
             }
             if (clusters.get(clusters.size() - 1) != tmpDeductions.size() - 1) {

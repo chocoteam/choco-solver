@@ -8,15 +8,16 @@
  */
 package org.chocosolver.solver.search.loop.move;
 
+import org.chocosolver.cutoffseq.GeometricalCutoffStrategy;
+import org.chocosolver.cutoffseq.ICutoffStrategy;
+import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
-import org.chocosolver.solver.search.restart.GeometricalRestartStrategy;
 import org.chocosolver.solver.search.restart.IRestartStrategy;
-import org.chocosolver.solver.search.restart.LubyRestartStrategy;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.util.criteria.LongCriterion;
 
@@ -74,6 +75,15 @@ public interface IMoveFactory extends ISelf<Solver> {
         _me().setMove(new MoveBinaryHBFS(_me().getModel(), _me().getSearch(), a, b, N));
     }
 
+
+    /**
+     * @deprecated will be removed in next release
+     * @see #setRestarts(LongCriterion, ICutoffStrategy, int)
+     */
+    @Deprecated
+    default void setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
+        setRestarts(restartCriterion, (ICutoffStrategy) restartStrategy, restartsLimit);
+    }
     /**
      * Creates a Move object that encapsulates the current move within a restart move.
      * Every time the <code>restartCriterion</code> is met, a restart is done, the new restart limit is updated
@@ -84,20 +94,28 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param restartStrategy  the way restart limit (evaluated in <code>restartCriterion</code>) is updated, that is, computes the next limit
      * @param restartsLimit    number of allowed restarts
      */
-    default void setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
+    default void setRestarts(LongCriterion restartCriterion, ICutoffStrategy restartStrategy, int restartsLimit) {
         _me().setMove(new MoveRestart(_me().getMove(), restartStrategy, restartCriterion, restartsLimit));
+    }
+
+    /**
+     * @deprecated
+     * @see #setLubyRestart(int, ICounter, int)
+     */
+    @Deprecated
+    default void setLubyRestart(int scaleFactor, int geometricalFactor, ICounter restartStrategyLimit, int restartLimit) {
+        setLubyRestart(scaleFactor, restartStrategyLimit, restartLimit);
     }
 
     /**
      * Branch a luby restart strategy to the model
      *
      * @param scaleFactor          scale factor
-     * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
      */
-    default void setLubyRestart(int scaleFactor, int geometricalFactor, ICounter restartStrategyLimit, int restartLimit) {
-        _me().setRestarts(restartStrategyLimit, new LubyRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
+    default void setLubyRestart(int scaleFactor, ICounter restartStrategyLimit, int restartLimit) {
+        _me().setRestarts(restartStrategyLimit, new LubyCutoffStrategy(scaleFactor), restartLimit);
     }
 
     /**
@@ -110,7 +128,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      */
     default void setGeometricalRestart(int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        _me().setRestarts(restartStrategyLimit, new GeometricalRestartStrategy(scaleFactor, geometricalFactor), restartLimit);
+        _me().setRestarts(restartStrategyLimit, new GeometricalCutoffStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**

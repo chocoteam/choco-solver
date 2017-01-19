@@ -8,6 +8,8 @@
  */
 package org.chocosolver.solver.search.restart;
 
+import org.chocosolver.cutoffseq.ICutoffStrategy;
+
 /**
  * Restart strategy to restart every <tt>gap</tt> restarts
  * <p/>
@@ -16,7 +18,7 @@ package org.chocosolver.solver.search.restart;
  * @author Charles Prud'homme, Arnaud Malapert
  * @since 13/05/11
  */
-public class MonotonicRestartStrategy implements IRestartStrategy{
+public class MonotonicRestartStrategy implements ICutoffStrategy{
 
     private final int gap;
 
@@ -25,12 +27,7 @@ public class MonotonicRestartStrategy implements IRestartStrategy{
     }
 
     @Override
-    public int getFirstCutOff() {
+    public int getNextCutoff() {
         return gap;
-    }
-
-    @Override
-    public int getNextCutoff(int nbRestarts) {
-        return getFirstCutOff();
     }
 }

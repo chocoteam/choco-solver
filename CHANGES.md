@@ -18,10 +18,11 @@ NEXT MILESTONE
   - `Solver.getState()` (#485)
   - `Measures.IN_SEC` (related to #486)
   - `Settings.outputWithANSIColors`, `IOutputFactory.ANSI_*`
+  - `IMoveFactory.setLubyRestart(int, int, ICounter, int)`
 
 ### Closed issues: 
 
-\#468, #481, #486, #487, #488, #492, #494.
+\#468, #481, #486, #487, #488, #492, #494, #495.
 
 4.0.1 - 16 Dec 2016
 -------------------

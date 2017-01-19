@@ -13,7 +13,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
@@ -84,22 +83,6 @@ public class RestartTest {
     };
 
     public final static int[] GEOMETRIC_1_3 = {1, 2, 2, 3, 3, 4, 5, 7, 9, 11, 14, 18, 24, 31, 40};
-
-    private void checkRestart(AbstractRestartStrategy r, double factor, int[] expected) {
-        r.setGeometricalFactor(factor);
-        int[] computed = r.getSequenceExample(expected.length);
-        Assert.assertEquals(computed, expected);
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testRestartStrategy() {
-        AbstractRestartStrategy r = new LubyRestartStrategy(1, 2);
-        checkRestart(r, 2, LUBY_2);
-        checkRestart(r, 3, LUBY_3);
-        checkRestart(r, 4, LUBY_4);
-        r = new GeometricalRestartStrategy(1, 1.3);
-        checkRestart(r, 1.3, GEOMETRIC_1_3);
-    }
 
     @Test(groups="10s", timeOut=60000)
     public void test1() {

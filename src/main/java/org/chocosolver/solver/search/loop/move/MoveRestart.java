@@ -8,8 +8,8 @@
  */
 package org.chocosolver.solver.search.loop.move;
 
+import org.chocosolver.cutoffseq.ICutoffStrategy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.criteria.LongCriterion;
@@ -36,7 +36,7 @@ public class MoveRestart implements Move {
     /**
      * How often the restart should occur
      */
-    private IRestartStrategy restartStrategy;
+    private ICutoffStrategy restartStrategy;
     /**
      * How to trigger a restart
      */
@@ -60,7 +60,7 @@ public class MoveRestart implements Move {
      * @param criterion       defines how to trigger a restart
      * @param restartLimit    restrict the total number of restart
      */
-    public MoveRestart(Move move, IRestartStrategy restartStrategy, LongCriterion criterion, int restartLimit) {
+    public MoveRestart(Move move, ICutoffStrategy restartStrategy, LongCriterion criterion, int restartLimit) {
         this.move = move;
         this.restartStrategy = restartStrategy;
         this.criterion = criterion;
@@ -70,7 +70,7 @@ public class MoveRestart implements Move {
     @Override
     public boolean init() {
         restartFromStrategyCount = 0;
-        limit = restartStrategy.getFirstCutOff();
+        limit = restartStrategy.getNextCutoff();
         return move.init();
     }
 
@@ -123,7 +123,7 @@ public class MoveRestart implements Move {
         if (restartFromStrategyCount >= restartLimit) {
             limit = Long.MAX_VALUE;
         } else if(criterion.isMet(limit)){
-            limit += restartStrategy.getNextCutoff(restartFromStrategyCount);
+            limit += restartStrategy.getNextCutoff();
         }
         // then do the restart
         solver.restart();
