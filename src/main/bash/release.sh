@@ -33,6 +33,8 @@ sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 #Update the poms:wq
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
 mvn license:format
+git commit -m "initiate release ${VERSION}" -a
+
 
 echo "Start release"
 #Extract the version
