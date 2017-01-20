@@ -80,7 +80,7 @@ import static org.chocosolver.util.ESat.UNDEFINED;
  * @author Charles Prud'homme
  * @since 01/09/15.
  */
-public final class Solver implements ISolver, IMeasures, IOutputFactory {
+public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /** Define the possible actions of SearchLoop */
     protected enum Action {
