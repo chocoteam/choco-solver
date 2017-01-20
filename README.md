@@ -2,6 +2,8 @@
 Choco-solver in practice
 ========================
 
+[![Build Status](https://travis-ci.org/chocoteam/samples.svg?branch=master)](https://travis-ci.org/chocoteam/samples)
+
 
 This project hosts samples based on choco-solver.
 
